@@ -1,0 +1,31 @@
+[BINARY]
+
+comment=Amber pdb converter
+
+## binary
+bin=ambpdb
+
+## working directory
+cwd=
+
+## wrap process in shell
+shell=0
+
+## use non-default shell
+shellexe=
+
+## communicate with process via STDIN and STDOUT
+pipes=0
+
+## Use new environment containing only variables given below
+replaceEnv=0
+
+##
+## run time environment settings
+## Empty entries mark variables that have to be specified from outside
+##
+[ENVIRONMENT]
+
+## root of amber installation
+AMBERHOME=
+
