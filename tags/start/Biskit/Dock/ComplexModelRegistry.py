@@ -1,0 +1,248 @@
+##
+## Biskit, a toolkit for the manipulation of macromolecular structures
+## Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner; All rights reserved
+##
+## $Revision$
+## last $Date$
+## last $Author$
+
+from Complex import Complex
+from Biskit import BiskitError
+from Biskit import LocalPath
+
+import Numeric as N
+
+class RegistryError( BiskitError ):
+    pass
+
+class ComplexModelRegistry:
+    """
+    This is a helper class for ComplexList.
+    
+    Keep unique copies of the rec and lig models from many Complexes.
+    Make sure that 2 Complexes with the same rec_model (same by file
+    name and unchanged) always point to the same PDBModel instance.
+    """
+
+    def __init__( self ):
+
+        self.rec_f2model = {}
+        self.lig_f2model = {}
+
+        self.rec_f2com = {}
+        self.lig_f2com = {}
+
+        self.initVersion = self.version()
+        
+    def version( self ):
+        return 'ComplexModelRegistry $Revision$'
+
+
+    def addComplex( self, com ):
+        """
+        Register Complex with the registry.
+        com - Complex
+        """
+        com.rec_model,fr = self.__sync_model( com.rec_model, self.rec_f2model )
+        com.lig_model,fl = self.__sync_model( com.lig_model, self.lig_f2model )
+            
+        ## optimized for speed, that's why a bit awkward
+        if fr != None:
+            coms = self.rec_f2com.get( fr, None )
+            if coms == None:
+                self.rec_f2com[ fr ] = [ com ]
+            else:
+                coms.append( com )
+            
+        if fl != None:
+            coms = self.lig_f2com.get( fl, None )
+            if coms == None:
+                self.lig_f2com[ fl ] = [ com ]
+            else:
+                coms.append( com )
+
+
+    def removeComplex( self, com ):
+        self.__removeModel(com.rec_model,com, self.rec_f2model, self.rec_f2com)
+        self.__removeModel(com.lig_model,com, self.lig_f2model, self.lig_f2com)
+
+
+    def __removeModel( self, model, com, f2model, f2com ):
+        ## optimized for speed
+        f = model.source
+        coms = f2com[ f ]
+        coms.remove( com )
+
+        if len( coms ) == 0:
+            del f2com[ f ]
+            del f2model[ f ]
+
+
+##     def update( self, otherReg ):
+##         """
+##         Add content of another registry to this one, make all
+##         Complex.rec_model / lig_model to point to this Registry.
+##         """
+##         ## currently not used
+##         for k,v in otherReg.rec_f2model:
+
+##             if not k in self.rec_f2model:
+##                 self.rec_f2model[ k ] = v
+##             else:
+
+##                 m = self.rec_f2model[ k ]
+
+##                 if otherReg.rec_f2model != m:
+##                     for c in otherReg.rec_f2com[ k ]:
+##                         c.rec_model = m
+
+##                 for c in otherReg.rec_f2com[ k ]:
+##                     if not c in self.rec_f2com[ k ]:
+##                         self.rec_f2com[ k ] + [c]
+        
+##         for k,v in otherReg.lig_f2model:
+
+##             if not k in self.lig_f2model:
+##                 self.lig_f2model[ k ] = v
+
+##             else:
+##                 m = self.lig_f2model[ k ]
+
+##                 if otherReg.lig_f2model != m:
+##                     for c in otherReg.lig_f2com[ k ]:
+##                         c.lig_model = m
+
+##                 for c in otherReg.lig_f2com[ k ]:
+##                     if not c in self.lig_f2com[ k ]:
+##                         self.lig_f2com[ k ] + [c]
+        
+
+    def getRecModel( self, source ):
+        return self.rec_f2model[source]
+
+    def getLigModel( self, source ):
+        return self.lig_f2model[source]
+
+    def getModel( self, source):
+        if source in self.rec_f2model:
+            return self.rec_f2model[ source ]
+
+        return self.lig_f2model[ source ]
+
+    def recModels( self ):
+        return self.rec_f2model.values()
+
+    def ligModels( self ):
+        return self.lig_f2model.values()
+
+##     def getSubRegistry( self, cl ):
+##         """
+##         Get fraction of this Registry that is used by given list of
+##         complexes.
+##         cl - [ Complex ], all complexes must be part of the registry
+##         -> ComplexModelRegistry
+##         """
+##         if isinstance( cl, ComplexList ):
+##             return cl.models
+
+##         r = self.__class__()
+
+##         for c in cl:
+##             r.addComplex( c )
+
+##         return r
+        
+
+    def getRecComplexes( self, model ):
+        """
+        model - LocalPath or PDBModel
+        -> [ Complex ]
+        """
+        return self.__getComplexes( self.rec_f2com )
+
+    def getLigComplexes( self, model ):
+        """
+        model - LocalPath or PDBModel
+        -> [ Complex ]
+        """
+        return self.__getComplexes( self.lig_f2com )
+
+    def __getComplexes( self, model, f2com ):
+
+        if isinstance( model, LocalPath):
+            f = model
+
+        try:
+            if isinstance( model, PDBModel ):
+                f = model.source
+        except:
+            raise RegistryError( 'Model has no source file.' )
+
+        return f2com[ f ]
+
+
+    def __sync_model( self, m, f2model ):
+        """
+        Get a shared model instance that is equal to m. If there is no such
+        instance in the registry, m is returned and m is added to the regis-
+        try - but only if it has been pickled to disc and hasn't changed since.
+        m       - PDBModel
+        f2model - { str:PDBModel }
+        -> model from dic equivalent to m, otherwise add m to dic and return m
+        -> file_name or None for stray model
+        """
+        ## The problem here is to minimize the calls to PDBModel.validSource()
+        ## because 60.000 calls to os.path.exists() would take a lot of time
+
+        if isinstance( m.source, LocalPath ):
+            f = m.source
+        else:
+            f = None
+
+        if f != None: ## don't use "if f" because that would call f.__len__
+            if m.xyzChanged or m.atomsChanged:
+                ## don't add it to registry, it will remain a stray model
+                return m, f
+            
+            found = f2model.get( f, None )
+            if found != None:
+                ## the source has already been checked, we can skip the usual..
+                ## .. exists()
+                return found, f
+
+            ## potentially new entry, check also whether the file exists
+            if m.source.exists():
+                f2model[ f ] = m
+
+        return m, f
+
+    def __str__( self ):
+        s = "Receptor models:"
+        for f in self.rec_f2model:
+            s += "\n%s: %i complexes" % \
+                 (f.formatted(), len( self.rec_f2com[ f ] ) )
+
+        s += "\nLigand models:"
+        for f in self.lig_f2model:
+            s += "\n%s: %i complexes" % \
+                 (f.formatted(), len( self.lig_f2com[ f ] ) )
+
+        return s
+
+    def __repr__( self ):
+        return "ComplexModelRegistry\n" + self.__str__()
+
+## TEST ##
+
+if __name__ == '__main__':
+    from Biskit.tools import *
+    import profile
+    import pstats
+    
+    cl = Load( absfile('~/data/tb/interfaces/c23/dock_multi_0919/bound/hex_lig_vs_all/complexes.cl') )
+    cl = cl.toList()
+    r = ComplexModelRegistry()
+
+    profile.run('for c in cl[:500]: r.addComplex( c )', 'report.out' )
+    p = pstats.Stats('report.out')
+    print p.sort_stats('cumulative').print_stats()

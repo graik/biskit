@@ -1,0 +1,57 @@
+{*** change some atom names and residue names ***}
+{*** so that they conform to Hex standard     ***}
+
+vector do (resname="CYS") (resname "CYX") { rename all residues in disulfide bonds }
+
+vector do (name="H1")  (name "HT1")	  { rename N-terminal protons }
+vector do (name="H2")  (name "HT2")
+vector do (name="H3")  (name "HT3")
+vector do (name="O")   (name "OT1")	  { rename C-terminal oxygens}
+vector do (name="OXT") (name "OT2")
+	
+vector do (name="HD11")(name "HD1" and resname "ILE")   { fix ILE atom names }   
+vector do (name="HD12")(name "HD2" and resname "ILE")
+vector do (name="HD13")(name "HD3" and resname "ILE")
+!vector do (name="CD1") (name "CD"  and resname "ILE")  { the ILE CD is renamed earlier }
+vector do (name="HG")  (name "HG1" and resname "SER")	{ fix SER atom names }
+vector do (name="HG")  (name "HG1" and resname "CYS")	{ fix CYS atom names }
+
+{ rename all protons to conform to pdb-style names }
+vector do (name="1HH1")(name "HH11" and resname "ARG")
+vector do (name="2HH1")(name "HH12" and resname "ARG")
+vector do (name="1HH2")(name "HH21" and resname "ARG")
+vector do (name="2HH2")(name "HH22" and resname "ARG")
+
+vector do (name="1HD2")(name "HD21" and resname "ASN")
+vector do (name="2HD2")(name "HD22" and resname "ASN")
+
+vector do (name="1HE2")(name "HE21" and resname "GLN")
+vector do (name="2HE2")(name "HE22" and resname "GLN")
+
+vector do (name="1HG2")(name "HG21" and resname "ILE")
+vector do (name="2HG2")(name "HG22" and resname "ILE")
+vector do (name="3HG2")(name "HG23" and resname "ILE")
+vector do (name="1HG1")(name "HG11" and resname "ILE")
+vector do (name="2HG1")(name "HG12" and resname "ILE")
+vector do (name="1HD1")(name "HD1" and resname "ILE")  ! IN XPLOR CD (NOT CD1)
+vector do (name="2HD1")(name "HD2" and resname "ILE")
+vector do (name="3HD1")(name "HD3" and resname "ILE")
+
+vector do (name="1HD1")(name "HD11" and resname "LEU")
+vector do (name="2HD1")(name "HD12" and resname "LEU")
+vector do (name="3HD1")(name "HD13" and resname "LEU")
+vector do (name="1HD2")(name "HD21" and resname "LEU")
+vector do (name="2HD2")(name "HD22" and resname "LEU")
+vector do (name="3HD2")(name "HD23" and resname "LEU")
+
+vector do (name="1HG2")(name "HG21" and resname "THR")
+vector do (name="2HG2")(name "HG22" and resname "THR")
+vector do (name="3HG2")(name "HG23" and resname "THR")
+
+vector do (name="1HG1")(name "HG11" and resname "VAL")
+vector do (name="2HG1")(name "HG12" and resname "VAL")
+vector do (name="3HG1")(name "HG13" and resname "VAL")
+vector do (name="1HG2")(name "HG21" and resname "VAL")
+vector do (name="2HG2")(name "HG22" and resname "VAL")
+vector do (name="3HG2")(name "HG23" and resname "VAL")
+  

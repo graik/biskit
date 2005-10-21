@@ -1,0 +1,50 @@
+Biskit -- Summary
+-----------------
+
+Biskit is a modular, object-oriented python library that provides
+intuitive classes for many typical tasks of structural bioinformatics
+research. It fascilitates the manipulation and analysis of
+macromolecular structures, protein complexes, and molecular dynamics
+trajectories. At the same time, Biskit offers a software platform for
+the rapid integration of external programs and new algorithms into
+complex structural bioinformatics workflows. Calculations are thus
+often delegated to established programs like Xplor, Amber, Hex, Prosa,
+and Hmmer; interfaces to further software can be added easily.
+Moreover, Biskit simplifies the parallelisation of calculations via
+PVM (Parallel Virtual Machine).
+
+The library is complemented by two application packages: one automates
+the homology modelling of protein structures and is centered around
+Blast, T-Coffee, and Modeller. The second package implements a
+strategy for flexible protein-protein docking and is (among other
+programs) relying on Hex and XPlor. Additional applications automate
+or fascilitate more specific tasks like, for example, the setup of
+molecular dynamics simulations or the calculation of conformational
+entropies.
+
+Biskit has been jointly developped by Raik Gruenberg (Institut
+Pasteur) and Johan Leckner (Chalmers University, Goeteborg, Sweden)
+with important contributions from Michael Habeck (Max-Planck-Institut
+für Entwicklungsbiologie, Tuebingen, Germany), Michael Nilges
+(Institut Pasteur), Wolfgang Rieping (Institut Pasteur) and others.
+
+Licensing and publication
+-------------------------
+
+The Biskit library relies on several external software libraries
+(Numeric, Scientific Python, BioPython, and others) that are subject
+to the GNU General Public License (GPL). For this reason, we are
+legally obliged to publish Biskit under the same (or a compatible)
+open source software license which prohibits a direct commercialisation of
+this software. The publication will be crucial to fascilitate ongoing
+collaborations and to ensure the continuing development of this software
+project. We do not see any commercial potential in Biskit (1) because
+of the legal requirement to publish it as open source (or to not
+publish it at all) and (2) because other python libraries with similar
+functionalities exist and are freely available (see
+http://biopython.org/scriptcentral/). 
+
+We therefore kindly ask the Pasteur Institute to waive potential
+exploitation rights and to authorize the publication of Biskit under
+the GNU General Public License
+(http://www.gnu.org/copyleft/gpl.html).
