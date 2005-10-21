@@ -36,8 +36,11 @@
 #  Michael Pique, Scripps Clinic
 #
 # $Log$
-# Revision 1.1  2005/10/21 14:27:38  graik
-# Initial revision
+# Revision 2.0  2005/10/21 18:14:58  graik
+# shift to revision 2.0
+#
+# Revision 1.1.1.1  2005/10/21 14:27:38  graik
+# Tool kit for structural bioinformatics; Re-created from private cvs project biskit
 #
 # Revision 1.1.1.1  2003/10/24 11:18:22  raik
 # structure modelling, homology modelling, docking tool kit
