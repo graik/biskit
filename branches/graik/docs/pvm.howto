@@ -1,0 +1,84 @@
+Setting up pvm for python
+=========================
+
+1) make sure you can log into all nodes without password
+-> see end of this document
+
+2) prepare environment:
+ 
+export PVM_ROOT=/usr/share/pvm3
+export PVM_RSH=/usr/bin/ssh
+
+4) start pvm demon: 
+	pvm
+   exit demon
+	pvm> (^D) or quit
+   -> demon stays in background
+
+5) in Master.py:
+	call pvmInit(hosts) with list of hosts
+
+6) run Master.py (example code in ExampleMaster.__main__)
+
+7) (optional) stop pvm daemon:
+	pvm
+	pvm> halt
+
+PVM commands
+============
+
+add host_name    ## manually add a host
+remove host_name ## remove it
+reset            ## kill all your running pvm processes
+halt             ## stop pvm altogether
+exit / ^D        ## exit the PVM shell without quitting the PVM demon
+
+
+TroubleShouting:
+================
+
+Slave can not be spawned
+-> kill any pvm process left over on that node
+-> delete old pvm* files in /tmp on that node
+-> try again
+
+Cleanup:
+scripts/Biskit/killpp.py kills processes on many nodes
+scripts/Biskit/rm_pvm.py removes your pvm* from /tmp of all nodes
+
+PVM doesn't use (for calculations) the node were the master is running:
+-> add this node with the full name e.g. otto.bis.pasteur.fr instead of otto
+
+
+Enabling password-less login from A to B
+========================================
+
+3 steps:
+1) generate a identity file on A
+2) copy it over to B
+3) add this file to the list of authorized login
+
+The following works for ssh2:
+
+1) on A
+> ssh-keygen -t rsa
+-> hit return on each question (3)
+
+> ssh-keygen -t dsa
+-> hit return on each question (3)
+
+2) copy *pub files from A to B
+> cd ~/.ssh
+> scp id_dsa.pub "B:.ssh/id_dsa.pub-Bis"
+> scp id_rsa.pub "B:.ssh/id_rsa.pub-Bis"
+
+3) on B "authorize" login from A
+
+> ssh B
+> cd $HOME/.ssh (you might need to create it )
+
+cat id_rsa.pub-Bis  id_dsa.pub-Bis  >> authorized_keys2
+
+That's it. Test!
+
+

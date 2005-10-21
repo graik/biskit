@@ -1,0 +1,17 @@
+
+Profiling python code
+---------------------
+
+import profile
+profile.run( 'myMethod()', 'report.out' )
+
+## Analyzing
+import pstats
+p = pstats.Stats('report.out')
+
+## long steps and methods calling them
+p.sort_stats('cumulative').print_stats(20)
+p.print_callers(0.1)
+
+## time consuming methods 
+p.sort_stats('time').print_stats(10)
