@@ -1,0 +1,38 @@
+For publication
+===============
+
+1) Test system
+   - Mod    .. OK
+	    generate_test.py
+   - Dock   .. rec/lig/com, docking_solutions
+	    generate_test.py
+   - Biskit .. pdb_ref, pdb_ens, traj
+	    generate_test.py
+
+2) doc-strings cleanup, API docu
+   - happydoc
+   - check out docutils
+
+3) Latex manual
+   - Intro / Scope
+   - Installation	- Biskit
+			- 3d party
+   - Overview
+   - Basics	- Numeric take, compress, mask
+		- finding documentation
+   - handling structures	- PDBModel
+				- PDBDope
+   - handling trajectories	- Trajectory, EnsembleTraj
+   - handling complexes		- Complex
+				- ComplexList
+   - extending Biskit
+   - Applications	- structure sampling
+			- entropy calculations
+			- homology modelling
+			- docking
+   - FAQ
+   - References
+   - Index
+
+4) separate non-published stuff into bisnew
+   - CVS server in Göteborg ?

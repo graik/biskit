@@ -1,0 +1,51 @@
+installing, testing local blast environment
+-------------------------------------------
+
+1) update data bases 
+ftp ftp.ncbi.nlm.nih.gov
+        cd blast/db/FASTA
+        get pdbaa.gz
+	bye
+gzip -d pdbaa.gz
+formatdb -i pdbaa -p T -o
+
+2) make sure data bases are formatted with -o option (formatdb -o ...)
+
+3) create ~/.ncbirc:
+[NCBI]
+DATA=/Bis/shared/rh73/ncbi/data
+
+[NET_SERV]
+SRV_CONN_MODE=FIREWALL
+SRV_HTTP_PROXY_HOST=cache.pasteur.fr
+SRV_HTTP_PROXY_PORT=8080
+
+4) provide environment varibles:
+export BLASTDB=/Bis/db/blastdb
+## export BLASTMA=/home/Bis/raik/bin/blast ## not needed with .ncbirc
+
+5) $BLASTDB must contain links to all data base and index files
+ ( nr.*, pdbaa.*, (swiss.*))
+
+6) test blast environment:
+       cd ~/biskit/test/Mod
+       
+       # retrieve sequence
+       fastacmd -d pdbaa -s 3TGI >! test.fasta
+
+       # search against PDB
+       blastall -p blastp -d pdbaa < test.fasta
+
+       # search against all
+       blastall -p blastp -d nr < test.fasta > nr.out
+
+       # cluster sequences
+       blastclust -i test_blastclust.fasta
+       -> should yield:
+       [blastclust] WARNING: Could not find taxdb.bti
+       Apr 19, 2004  1:30 PM Start clustering of 12 queries
+       a b c d e g h i j l
+       f
+       k
+       m
+

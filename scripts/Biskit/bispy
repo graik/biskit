@@ -1,0 +1,8 @@
+#!/usr/bin/python -i
+
+from Biskit.tools import *
+from Biskit import *
+
+## activate tab-completion
+import rlcompleter, readline
+readline.parse_and_bind('tab: complete')
