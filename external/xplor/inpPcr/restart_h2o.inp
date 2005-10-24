@@ -1,9 +1,28 @@
 REMARK heat ensemble for 0.1 ps at 25 K and write out ensemble trajectory
-REMARK Michael Nilges, IP, 05-APR-2002
-REMARK adapted to be used with runPCR.py (Raik Grünberg)
-REMARK contains place holder %(nstep)s for number of steps
-REMARK contains place holder %(xbin)s for xplor binary
-REMARK contains place holder %(parm)s for toppar folder with param19*
+!! Copyright (C) 2002-2005 Michael Nilges
+!!
+!! This program is free software; you can redistribute it and/or
+!! modify it under the terms of the GNU General Public License as
+!! published by the Free Software Foundation; either version 2 of the
+!! License, or any later version.
+!!
+!! This program is distributed in the hope that it will be useful,
+!! but WITHOUT ANY WARRANTY; without even the implied warranty of
+!! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+!! General Public License for more details.
+!!
+!! You find a copy of the GNU General Public License in the file
+!! license.txt along with this program; if not, write to the Free
+!! Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+!!
+!! $Revision$
+!! last $Author$
+!! last $Date$
+!! adapted to be used with runPCR.py (Raik Gruenberg)
+
+!! contains place holder %(nstep)s for number of steps
+!! contains place holder %(xbin)s for xplor binary
+!! contains place holder %(parm)s for toppar folder with param19*
 
 evaluate ($inicount = @@tempcount )
 if ($inicount ge 50) then stop end if
