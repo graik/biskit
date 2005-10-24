@@ -36,6 +36,9 @@ Syntax:		-i  complexes_cont.cl
                 -if     1||0 create plot of key vs. interface rmsd
                 -if_bb  1||0 create plot of key vs. interface backbone rmsd
 
+Abbreviations: fnac  - Fraction of Native Atom Contacts
+               fnrc  - Fraction of Native Residue Contacts
+               fnarc - fnac with Reduced atom models
 """
     default = defOptions()
     for k in default:
@@ -47,7 +50,7 @@ Syntax:		-i  complexes_cont.cl
 def defOptions():
     return {'o':'.',
             'i':'complexes_cont.cl',
-            'v':['fnac_4.5', 'fnac_7.5', 'fnac_10', 'fnrc_4.5'],
+            'v':['fnac_4.5', 'fnarc_10', 'fnac_10', 'fnrc_4.5'],
             'if': 1,
             'if_bb':1 }  
 
@@ -75,7 +78,7 @@ def subPlot( data, data_keys, x_key, y_key  ):
     ## data
     x_dat = data[ keys.index( x_key ) ]
     y_dat = data[ keys.index( y_key ) ]
-
+    print x_key, y_key, keys.index( x_key ), keys.index( y_key )
     ## outline data
     y_val = []
     for v in y_dat:
@@ -109,10 +112,10 @@ def subPlot( data, data_keys, x_key, y_key  ):
 
 def test():
     options = defOptions()
-    dir = '/home/Bis/raik/data/tb/interfaces/c23/dock_multi_0919/hex1008/'
+    dir = T.testRoot() + '/dock/hex/'
     options['i'] = dir + 'complexes_cont.cl'
     options['o'] = dir
-    options['v'] = ['fnac_4.5', 'fnac_7.5', 'fnac_10', 'fnrc_4.5']
+    options['v'] = ['fnac_4.5', 'fnarc_10', 'fnac_10', 'fnrc_4.5']
     return options
 
 
@@ -130,8 +133,8 @@ if __name__ == '__main__':
     
     ## Load complex dictionary
     c_lst = T.Load( options['i'] )
-
-    keys = T.toList(options['v']) + [ 'soln', 'rms', 'rms_if', 'rms_if_bb' ]
+    pkeys = T.toList( options['v'] )
+    keys =  [ 'soln', 'rms', 'rms_if', 'rms_if_bb' ] + pkeys
               
     ## get complex data
     data = [ transpose(c_lst.valuesOf('soln')) ]
@@ -154,22 +157,21 @@ if __name__ == '__main__':
         ap.uniform_limits = 1
 
         ## labels
-        ap.ylabel = 'fraction of contacts'
+        ap.ylabel = 'fraction of native contacts'
         ap.xlabel = 'interface rmsd'
 
-        plot_keys = T.toList( options['v'] )
         x_key = 'rms_if'
 
-        for plot in subPlot( data, keys, x_key, 'fnac_4.5' ):
+        for plot in subPlot( data, keys, x_key, pkeys[0] ):
             ap[0,0].add( plot )
 
-        for plot in subPlot( data, keys, x_key, 'fnac_7.5' ):
+        for plot in subPlot( data, keys, x_key, pkeys[1] ):
             ap[0,1].add( plot )
 
-        for plot in subPlot( data, keys, x_key, 'fnac_10' ):
+        for plot in subPlot( data, keys, x_key, pkeys[2] ):
             ap[1,0].add( plot )
 
-        for plot in subPlot( data, keys, x_key, 'fnrc_4.5' ):
+        for plot in subPlot( data, keys, x_key, pkeys[3] ):
             ap[1,1].add( plot )
 
         ap.show()
@@ -183,22 +185,21 @@ if __name__ == '__main__':
         ap2.uniform_limits = 1
 
         ## labels
-        ap2.ylabel = 'fraction of contacts'
+        ap2.ylabel = 'fraction of native contacts'
         ap2.xlabel = 'interface bb rmsd'
-
-        plot_keys = [ 'fnac_10_7.5', 'fnac_7.5', 'fnac_10', 'fnrc_4.5' ]
+ 
         x_key = 'rms_if_bb'
 
-        for plot in subPlot( data, keys, x_key, 'fnac_4.5' ):
+        for plot in subPlot( data, keys, x_key, pkeys[0] ):
             ap2[0,0].add( plot )
 
-        for plot in subPlot( data, keys, x_key, 'fnac_7.5' ):
+        for plot in subPlot( data, keys, x_key, pkeys[1] ):
             ap2[0,1].add( plot )
 
-        for plot in subPlot( data, keys, x_key, 'fnac_10' ):
+        for plot in subPlot( data, keys, x_key, pkeys[2] ):
             ap2[1,0].add( plot )
 
-        for plot in subPlot( data, keys, x_key, 'fnrc_4.5' ):
+        for plot in subPlot( data, keys, x_key, pkeys[3] ):
             ap2[1,1].add( plot )
 
         ap2.show()
