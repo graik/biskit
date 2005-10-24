@@ -7,8 +7,9 @@ CFLAGS = -Wall -w1 -O3 -tpp7 -vec_report0
 ##CFLAGS = -Wall -O3 
 
 ## SuSE puts libgpvm3.a into a folder that is not searched for libraries.. added to -L
-LFLAGS = -L. -L$(PVM_ROOT)/lib/LINUX -L$(PVM_ROOT)/pvmgs/$(PVM_ARCH)\
-	 -lm -lpvm3 -lgpvm3
+LFLAGS = -L. -L$(PVM_ROOT)/lib/$(PVM_ARCH) \
+	-L$(PVM_ROOT)/pvmgs/$(PVM_ARCH) \
+	-lm -lpvm3 -lgpvm3
 
 IFLAGS = -I$(PYTHON)/local/include/python$(VERSION) \
 	 -I./include -I$(PVM_ROOT)/include 
