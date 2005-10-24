@@ -50,18 +50,15 @@ try:
     from PCRModel import PCRModel
     from PDBModel import PDBModel, PDBProfiles, PDBError
 
-    from PatchGenerator import PatchGenerator
     from ProfileCollection import ProfileCollection, ProfileError
     from Prosa import ProsaII
     from Pymoler import Pymoler
-    from ReduceCoordinates import ReduceCoordinates
-##     from TextFile import TextFile
+
     from TrajCluster import TrajCluster
     from Trajectory import Trajectory, TrajError, TrajProfiles
     from XplorInput import XplorInput, XplorInputError
     from Xplorer import Xplorer, XplorerError, RunError
     from MatrixPlot import MatrixPlot
-    from XEnergyDecomposer import XEnergyDecomposer, XEnergyDecomposerError
 
     from Hmmer import Hmmer
     from Fold_X import Fold_X, Fold_XError
