@@ -1,30 +1,55 @@
 ##
 ## Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
 ## Distributed under the terms of the GNU General public license. See
-## license.txt for details!
+## biskit/license.txt for details!
 ## 
 ## Contributions: Olvier Perin (first draft), Raik Gruenberg (adapted)
 ## last $Author$
 ## $Date$
 ## $Revision$
 
-Homology modelling Quickstart
-=============================
+Contents:	- What is Biskit/Mod?
+		- Quickstart -- short instructions
+		- Results
+		- Detailed Step-by-step instructions
+		- Contributions (The Making of)
+
+
+What is Biskit/Mod?
+===================
+
+Biskit/Mod is a python module for fully automatic or semi/automatic
+homology modelling.
+
+This module is available at two levels in BISKIT:
+
+biskit/scripts/Mod/: interactive scripts for all steps of homology modelling
+biskit/Biskit/Mod/ : python library 
+
+Biskit/Mod implements homology modeling in 4 steps:
+
+	1) search of homologous sequences and 3D structures (Blast)
+	2) multiple alignments (T-Coffee v1.37)
+	3) building of the models (Modeller v8.0)
+	4) cross validation by re-building the available templates
+
+
+Quickstart -- short instructions
+================================
 
 1) Preparing the project directory
 
-Create one directory for each project of homology
-modeling. The following example assumes you are using
-biskit/test/Mod/project/ (the test example included in biskit).
+Create one directory for each project of homology modeling. The
+following example assumes you are using biskit/test/Mod/project/ (the
+test example included in biskit).
 
-Starting point (and only input) is a fasta file with the primary sequence
-of the target protein (60 characters per line). The default name for
-this file is target.fasta. If using default file names and default
-parameters, you can run the following scripts without any options --
-as long as you are in the project folder.  Refer to the full
-documentation for any non-standard options, file names, etc.
-Advanced options of each script are available with:
-|script.py| -help
+Starting point (and only input) is a fasta file with the primary
+sequence of the target protein (60 characters per line). The default
+name for this file is target.fasta. If using default file names and
+default parameters, you can run the following scripts without any
+options -- as long as you are in the project folder.  Refer to the
+full documentation for any non-standard options, file names, etc.
+Advanced options of each script are available with: |script.py| -help
 
 2) Search homologous sequences
 > search_sequences.py
@@ -68,8 +93,8 @@ B)
 > analyse.py -d |list of folders|
 Example: analyse.py -d  ~/biskit/test/Mod/project/
 
-Final Results:
-==============
+Results
+=======
         
 project/analyse/global_results.out:
 contains for each template, their PDB code, the all atom rmsd
@@ -91,3 +116,401 @@ PDBs files with the rmsd score from cross-validation put into the
 B-factor column. The user could visualize easily the result with a
 classic software as VMD or Pymol using a gradient of color for this
 score.
+
+
+Detailed Step-by-step instructions
+==================================
+
+A) Prepare a project folder for an homology modeling
+---------------------------
+-> Put a file with the target sequence into an empty directory.
+
+B) Search for homolgous sequences: search_sequences.py 
+---------------------------
+
+Syntax:  
+	search_sequences.py [-q |target.fasta| -o |outFolder| -log |logFile|
+           	-db |database| -e |e-value-cutoff| -aln |n_alignments|
+           	-psi
+           	-... additional options for blastall (see SequenceSearcher.py)]
+Options:
+    	-q	fasta file with query sequence (default: ./target.fasta)
+    	-o	output folder for results (default: .)
+    	-log 	log file (default: STDOUT)
+    	-db     sequence data base
+    	-e      E-value cutoff for sequence search
+    	-aln    number of alignments to be returned
+    	-simcut similarity threshold for blastclust (score < 3 or % identity)
+    	-simlen length threshold for clustering
+    	-ncpu   number of CPUs for clustering
+    	-psi    use PSI Blast instead, experimental!!
+
+Result:
+
+A folder "sequences" in the project folder containing two files:
+* sequences/all.fasta: the list of all the homologous sequences found
+* sequences/nr.fasta : a list of non redundant homologous sequences (1/cluster)
+
+You can edit the search result by removing (or adding) sequences from
+nr.fasta.
+
+
+C) Search of homolgous 3D structures (Templates): search_templates.py
+---------------------------
+
+Syntax: 
+	search_templates.py [-q |target.fasta| -o |outFolder| -log |logFile|
+          	-db |database| -e |e-value-cutoff| -aln |n_alignments|
+          	-psi
+         	-... additional options for blastall (see SequenceSearcher.py)]
+
+Options:
+    	-q	fasta file with query sequence (default: ./target.fasta)
+    	-o      output folder for results (default: .)
+    	-log    log file (default: STDOUT)
+    	-db     sequence data base
+    	-e      E-value cutoff for sequence search
+    	-aln    number of alignments to be returned
+    	-simcut similarity threshold for blastclust (score < 3 or % identity)
+    	-simlen length threshold for clustering
+    	-ncpu   number of CPUs for clustering
+    	-psi    use PSI Blast instead, experimental (currently not working)!!
+
+Result: 
+
+A folder "templates" in the project folder containing:
+	
+* templates/all/:      directory with all homologous structures (PDB format).
+* templates/all.fasta: the sequences of all template structures
+* templates/blast.out: the blast alignment
+
+* templates/cluster_result.out: clustering of all template sequences
+* templates/nr.fasta:           non-redundant template sequences (1/cluster)
+
+* templates/templates.fasta: non-redundant template sequences taken
+			     directly from the PDB-files
+
+* templates/nr/: directory with the non-redundant template PDBs.
+* templates/nr/chain_index.txt: the PDBs (plus chain IDs) which will be
+  cleaned for modeller and T-Coffee in the next step.
+
+Edit chain_index.txt and templates.fasta to remove or add templates or
+force using different chains. If adding templates, make sure the new
+entry in chain_index.txt points to an existing file (best put into
+templates/nr/).
+
+
+D) Cleaning of the PDB files: clean_templates.py 
+---------------------------
+
+Needs two input files (see Search of homologous structures):
+	
+	templates/nr/*.pdb
+       	templates/nr/chain_index.txt
+
+This step prepares the PDB files in the directory templates/nr for the
+multiple alignement step (T-Coffee) and the building of the models
+(Modeller).
+
+The script changes non standard residues to standard ones, removes hydrogen
+atoms, removes atoms with multiple configurations etc...
+
+Syntax: 
+	clean_templates.py [-o |output_folder| -i |chainIndex| -log |logFile|]
+
+Options:
+	-o       output folder for results (default: .)
+    	-i       chain index file for templates
+        -log	 log file (default: STDOUT)
+
+Result:
+
+A folder "t_coffee" in the folder /templates containing:
+
+* templates/t_coffee/*.alpha: CA input files for the structure alignment
+* templates/modeller/*.pdb:  input PDBs for Modeller
+
+
+E) Setting up the cross-validation: setup_validation.py
+---------------------------
+
+This step creates a new homology modelling project for each template
+structure. The aim is to re-model all known template structures
+(pretending we don't know their structure). setup_validation.py links
+in the cleaned structures from the previous steps.
+
+Syntax: 
+	setup_validation.py [ -o |project folder(s)| ]
+
+Options:
+	-o	one or several project folders (default: current)
+                
+Result:
+
+A folder "validation" containing:
+
+* validation/|code|_pdb: a sub-folder for each template structure
+
+Each sub-folder will contain (taking 1EX7 as example):
+
+* validation/1EX7/reference.pdb: known structure of 1EX7.
+* validation/1EX7/target.fasta:  the primary sequence of 1EX7
+
+* validation/1EX7/t_coffee_template_files: the PDB files used as
+  templates for re-building 1EX7
+
+* validation/1EX7/sequences:                 link to the sequences directory
+* validation/1EX7/templates/modeller:	     see C
+* validation/1EX7/templates/templates.fasta: see D
+
+
+F) Multiple alignment with or without parallelisation: align.py et
+   align_parallel.py
+---------------------------
+
+Build multiple alignments with T-Coffee. (1) one-by-one with by
+running align.py in the project folder and in each single
+cross-validation sub-folder. OR (2) parallised by running
+align_parallel.py in the project folder.
+
+//align.py
+
+Syntax: 
+	align.py [ -o |outFolder| -log |logFile| -h |host_computer| ]
+
+Options:
+   	-o      output folder for results (default: .)
+   	-log    log file (default: STDOUT)
+    	-h      different computer for calculation  (default: local computer)
+             	-> must be accessible w/o password via ssh, check!
+
+Troubleshooting:
+
+If there are more than approximately 50 sequences t_coffe will eat up all
+the memory and the job will not finish. (This is taken care of by
+Aligner.py)
+
+If there is only one template structure, step 2 of T-coffee will not
+work. Skipp the structural alignment if only one template structure is
+provided!
+
+In quite some cases the sequence retrieved from the nr PDB sequence
+database is different from the sequence extracted from the coordinates
+in the pdb-file. This will sometimes cause t-coffee to terminate with
+an error (2 sequences with the same name but with different
+sequences). Temporary solution: Choose another structure from the same
+cluster as the troublemaker.
+
+[Comment Raik: I thought we had fixed that??]
+
+Results:
+
+A folder "t_coffee" containing:
+
+* t_coffee/final.phylip :    Phylip format.
+* t_coffee/final.pir_aln:    Alignment in pir format.
+* t_coffee/final.score_html: alignment score per residue (HTML format)
+
+* t_coffee/t_coffee.inp: the exact T-Coffee commands
+
+* t_coffee/t_coffee_log1-4: the T-Coffee log files of the 4 alignment steps
+
+For more details, see the T-Coffee documentation.
+
+You can edit final.pir_aln before running the model-building step.
+
+//align_parallel.py
+
+Works in the same way but executes simultaneously several mutliple
+alignments from different project folders. This script needs PVM
+running.
+
+Syntax: 
+	
+	align_parallel.py [ -d |list of folders| -h |host| -pdb |pdbFolder| 
+			-ft |fastaTemplates| -fs |fastaSequences| 
+			-fta |fastaTarget| -fe |ferror|]
+Options:
+   	-d    	[str], list of project directories [/validation/*]
+    	-h    	int, number of hosts to be used [10]
+    	-a    	first add hosts to pvm [yes]
+    	-pdb 	str, pdbFolder for the pdb *.alpha
+    	-ft   	str, path to 'templates.fasta'
+    	-fs   	str, path to 'nr.fasta'
+    	-fta  	str, path to 'target.fasta'
+    	-fe   	str, path to the error file 
+
+Results: 
+
+see Results of align.py
+
+
+G) Building the models: model.py and model_parellel.py
+---------------------------
+
+As before, the Modeller step can be run in two different ways:
+Either one-by-one non-parallel (model.py) or parallelised (model_parallel.py).
+
+//model.py
+
+Syntax: 
+	model.py [ -o |outFolder| -log |logFile| -h |host_computer| ]
+
+Options:
+    	-o	project folder (default: .)
+    	-log	log file (default: STDOUT)
+    	-h	host computer for calculation  (default: local computer)
+             	-> must be accessible w/o password via ssh, check!
+        
+Result:
+
+A directory "modeller" containing:
+
+* modeller/modeller.top: topology file for Modeller 8v0
+* modeller/target.B999900**.pdb: raw output PDB files, 10 models by default. 
+* modeller/modeller.log: modeller log file
+(For more details, see the Modeller 8v0 documentation.)
+
+* modeller/Modeller_Score.out: all the modeller scores (Objective
+  Function) for each model (in increasing order).
+
+* modeller/model_**.pdb: output PDB files (10 by default) ordered by
+  their modeller score.
+
+* modeller/PDBModels.list: pickled python object (ModelList) with same
+  PDBs as PDBModel objects (in same order).
+
+* identities_cov.out: percent identity of sequences between target
+  and the different templates.
+
+// model_parallel.py
+
+Works in the same way but executes simultaneously several building
+step from different project folders. This script needs PVM running.
+
+Syntax: 
+	model_parallel.py -d |list of folders| -h |host| 
+			  [-fta |fastaTarget| -pir |f_pir|
+                       	   -tf |template_folder| -sm |starting_model|
+			   -em |ending_model| -fe |ferror|]
+
+Options:
+        	-d	[str], list of project directory (full path)
+        	-h	int, number of hosts to be used
+        	-fta  	str, path to find 'target.fasta'
+        	-pir  	str, alignment filename
+        	-tf	str, directories for input atom files
+        	-sm   	int, index of the first model
+        	-em   	int, index of the last model
+        	-fe   	str, filename to output errors from the Slave
+
+Results:
+see model.py
+
+
+[ Note the following two scripts are not yet checked in ]
+[ ToDo: clean up description and check in benchmark.py ]
+
+
+H) Evaluation step by cross validation: benchmark.py
+---------------------------
+
+The first evaluation is to see how well we can reproduce the
+templates. The 3D structures of each templates are available so we can
+compare them with the 3D structure produced by
+Biskit/Mod. benchmark.py should be executed in each sub-directory of
+the validation folder.
+
+Syntax: 
+benchmark.py -d |list of folders|
+
+Options:
+        	-d	[str], list of project directory
+                                         
+                       
+Result: 
+
+A folder "validation/benchmark" containing:
+
+* validation/*/benchmark/Fitted_**.pdb: for each
+template, each re-model from the module is superimposed to its known
+structure. The fitted structure is called fitted_00.pdb in the case of
+the re-model number 00. Currently, we use the iterative superimposition
+implemented in biskit/Biskit/rmsFit.py (max. 10 iterations).
+
+* validation/*/benchmark/rmsd_aa.out: gives the all-atom rmsd of the
+different re-models. (1) without iterative fitting, (2) with
+iterative fitting and (3) the percentage of atoms that has been
+removed during the iterative fitting.
+
+* validation/*/benchmark/rmsd_ca.out: same as above, only for C-alpha
+  atoms
+
+* validation/*/benchmark/rmsd_res_**: gives the rmsd per residues
+(c-alpha only) for each re-model.
+
+* validation/*/benchmark/PDBModels.list: pickled PYTHON list of
+PDBModels. Same as modeller/PDBModels.list but now each model contains
+the benchmark information in atom and residue profiles:
+'rmsd_aa', 'rmsd_ca', 'rmsd_res'. See PDBModel.profile()!
+
+
+[ ToDo: clean up description and check in analyse.py ]
+
+I) analyse.py
+---------------------------
+
+Here, the aim is to give an accurate way to evaluate the models from
+the module. Three sorts of results is given. The first, global, the
+second local, and the last one is a simple visualisation of the result
+directly on the 3D structure of the model (score RMSD).
+
+Syntax: 
+analyse.py -d |list of folders|
+
+Options:
+        -d          [str], list of project directories
+                                         
+                       
+Result: 
+
+A folder "analyse" containing:
+        
+* analyse/global_results.out: for each template,
+PDB code, the rmsd all atoms (rmsd_aa) without iterative fitting, the
+c-alpha rmsd (rmsd_ca) without iterative fitting, the rmsd_aa
+with the percentage of outliers during the iterative fit,
+and the same for rmsd_ca. Moreover, the
+percentage of identities (mean) of the target with its templates and
+finally the number of templates which served to remodel each template.
+
+* analyse/local_results.out: contains for each residue
+of the target the rmsd profile given by each template using the
+multiple alignment. Then, a score, which is the mean rmsd. This score
+will served as final evaluation for the models of our target.
+
+* modeller/final.pdb: the "best" model is updated by replacing the
+B-factor (Temperature factor) by the score rmsd for visualisation,
+e.g., in VMD or Pymol.
+
+
+Contributions (The Making of)
+=============================
+
+Michael Nilges worked out the alignment and modelling strategy
+(including T-Coffee parameters, Modeller input scripts etc).
+
+R.G. & J.L. translated this strategy into the Biskit/Mod package and
+tested/bugfixed it all to full automation (well, more or less).
+
+David Giganti bravely used Biskit/Mod for the first real-world
+application and had the idea of re-modelling the template structures
+for cross-validation.
+
+Olivier Perin spent his very productive internship on implementing the
+cross-validation in Biskit/Mod and parallelising some of the steps
+(supervised by R.G.).
+
+The parallelisation method used throughout Biskit
+(TrackingJobMaster/Slave) is based on code from Wolfgang Rieping. The
+iterative RMSD-fitting (rmsFit.py) was implemented by Michael Habeck.
