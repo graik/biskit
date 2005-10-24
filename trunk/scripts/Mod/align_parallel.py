@@ -23,22 +23,25 @@
 ## $Revision$
 
 from Biskit.Mod.AlignerMaster import AlignerMaster
+from Biskit.Mod.ValidationSetup import ValidationSetup
 import Biskit.tools as T
 import Biskit.hosts as hosts
-import sys
+import sys, os
+import os.path as osp
+import glob
 
 def _use( o ):
 
     print """
-Syntax: align_parallel.py -d |list of folders| -h |host|
+Built multiple alignment for each project given directory (parallelised)
+        
+Syntax: align_parallel.py -d |list of folders| -h |hosts|
                        [-pdb |pdbFolder| -ft |fastaTemplates|
                        -fs |fastaSequences| -fta |fastaTarget|
                        -fe |ferror|]
 
     pvm must be running on the local machine!
 
-Result: Parallel alignment for each project directory given
-        
 Options:
     -d    [str], list of project directory (full path)
     -h    int, number of hosts to be used
@@ -48,6 +51,8 @@ Options:
     -fs   str, path to 'nr.fasta'
     -fta  str, path to 'target.fasta'
     -fe   str, path to the error file for the AlignerMaster
+
+Default options:\
 """
     for key, value in o.items():
         print "\t-",key, "\t",value
@@ -57,9 +62,15 @@ Options:
 
 if __name__ == '__main__':
 
-    options = T.cmdDict()
+    ## look for default cross-validation projects
+    f = os.getcwd() + ValidationSetup.F_RESULT_FOLDER
+    d = []
+    if osp.exists( f ):
+        d = glob.glob( f+'/*' )
+    
+    options = T.cmdDict({'h':10, 'd':d})
 
-    if len( sys.argv ) < 4:
+    if (options['d'] is None) or ('help' in options or '?' in options):
         _use( options )
 
                        

@@ -23,9 +23,12 @@
 ## $Revision$
 
 from Biskit.Mod.ModelMaster import ModelMaster
+from Biskit.Mod.ValidationSetup import ValidationSetup
 import Biskit.tools as T
 import Biskit.hosts as hosts
-import sys
+import sys, os
+import os.path as osp
+import glob
 
 def _use( o ):
 
@@ -40,14 +43,16 @@ Syntax: model_parallel.py -d |list of folders| -h |host|
 Result: Parallel modelling for each project directory given
         
 Options:
-        -d    [str], list of project directory (full path)
-        -h    int, number of hosts to be used
+        -d    [str], project directories  (default: ./validation/*)
+        -h    int, number of hosts to be used  (default: 10)
         -fta  str, path to find 'target.fasta'
         -pir  str, alignment filename
         -tf   str, directories for input atom files
         -sm   int, index of the first model
         -em   int, index of the last model
         -fe   str, filename to output errors from the Slave
+
+Default options:\
 """
     for key, value in o.items():
         print "\t-",key, "\t",value
@@ -57,11 +62,16 @@ Options:
 
 if __name__ == '__main__':
 
-    options = T.cmdDict()
+    ## look for default cross-validation projects
+    f = os.getcwd() + ValidationSetup.F_RESULT_FOLDER
+    d = []
+    if osp.exists( f ):
+        d = glob.glob( f+'/*' )
+    
+    options = T.cmdDict({'h':10, 'd':d})
 
-    if len( sys.argv ) < 4:
+    if (options['d'] is None) or ('help' in options or '?' in options):
         _use( options )
-
                        
     folders = T.toList(options['d'])
     hostNumber = int(options['h'])

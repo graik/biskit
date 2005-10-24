@@ -24,18 +24,21 @@
 
 from Biskit.Mod.ValidationSetup import ValidationSetup as VS
 import Biskit.tools as T
-import sys
+import sys, os
 
 
 def _use( o ):
 
     print """
+Setup the cross-validation folder for one or several projects
+        
 Syntax: setup_validation.py -d |list of folders| 
                        
-Result: Setup the validation folder for each project directory given
-        
 Options:
-        -d    [str], list of project directories
+    -d          .. list of project directories (default: current)
+    -? or -help .. this help screen
+
+Default options:
 """
     
     for key, value in o.items():
@@ -46,18 +49,17 @@ Options:
 
 if __name__ == '__main__':
 
-    options = T.cmdDict()
+    options = T.cmdDict({'d':[ os.getcwd() ]})
 
-    if len( sys.argv ) < 2:
+    if '?' in options or 'help' in options:
         _use( options )
-
                        
     folders = T.toList(options['d'])
 
-    print "Initialize Job queue..\n"
+    print "Creating folders...",
   
     for f in folders:
         sv = VS(outFolder=f)
         sv.go(f)
 
-    print "Now it's done..\n"
+    print "done\n"
