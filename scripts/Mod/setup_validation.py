@@ -32,10 +32,10 @@ def _use( o ):
     print """
 Setup the cross-validation folder for one or several projects
         
-Syntax: setup_validation.py -d |list of folders| 
+Syntax: setup_validation.py [ -o |project folder(s)| ]
                        
 Options:
-    -d          .. list of project directories (default: current)
+    -o          .. one or several project folders (default: current)
     -? or -help .. this help screen
 
 Default options:
@@ -49,12 +49,12 @@ Default options:
 
 if __name__ == '__main__':
 
-    options = T.cmdDict({'d':[ os.getcwd() ]})
+    options = T.cmdDict({'o':[ os.getcwd() ]})
 
     if '?' in options or 'help' in options:
         _use( options )
                        
-    folders = T.toList(options['d'])
+    folders = T.toList(options['o'])
 
     print "Creating folders...",
   
