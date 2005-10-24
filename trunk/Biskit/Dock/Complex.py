@@ -17,17 +17,15 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## class Complex:
-## collect and manage information about a docking result
-##
 ## $Revision$
 ## last $Author$
 ## last $Date$
+"""collect and manage information about a docking result"""
 
 from Biskit import PCRModel, PDBModel, PDBDope, molUtils, mathUtils
 ## from Biskit import ProsaII
 from Biskit.Prosa2003 import Prosa2003
-from Biskit.Dock.XplorComplexEnergy import XplorComplexEnergy
+## from Biskit.Dock.XplorComplexEnergy import XplorComplexEnergy
 
 import Biskit.tools as t
 
@@ -40,10 +38,6 @@ from multiarray import arraytype
 
 from difflib import SequenceMatcher
         
-        
-# what if prosaII was not where ...
-## prosaBin = settings.prosaII_bin
-
 class ComplexError(Exception):
     pass
 
@@ -876,20 +870,20 @@ class Complex:
         return r
 
 
-    def xplorComplexEnergy( self, scale=None, restraints=None,
-                            debug=0, verbose=0):
-        """
-        Calculate Xplor energies for a complex using the given
-        restraintsfiles and coresponding scaling factors.
-        restraints - list, of paths to restraints files
-        scale      - list, of scaling factors (floats)
-        -> energy dictionary
-        """
-        x = XplorComplexEnergy( self, restraints=restraints,
-                                scale=scale, debug=debug, verbose=verbose )
-        e = x.run()
+##     def xplorComplexEnergy( self, scale=None, restraints=None,
+##                             debug=0, verbose=0):
+##         """
+##         Calculate Xplor energies for a complex using the given
+##         restraintsfiles and coresponding scaling factors.
+##         restraints - list, of paths to restraints files
+##         scale      - list, of scaling factors (floats)
+##         -> energy dictionary
+##         """
+##         x = XplorComplexEnergy( self, restraints=restraints,
+##                                 scale=scale, debug=debug, verbose=verbose )
+##         e = x.run()
 
-        return e
+##         return e
 
         
     def conservationScore( self, cons_type='cons_ent', ranNr=150 ):
@@ -1041,11 +1035,11 @@ class Complex:
 ## Testing
 
 if __name__ == '__main__':
-    lig = PCRModel( t.testRoot() + "/com_wet/1BGS.psf",
-                    t.testRoot() + "/com_wet/lig.model")
+    lig = PCRModel( t.testRoot() + "/com/1BGS.psf",
+                    t.testRoot() + "/com/lig.model")
 
-    rec = PCRModel( t.testRoot() + "/com_wet/1BGS.psf",
-                    t.testRoot() + "/com_wet/rec.model")
+    rec = PCRModel( t.testRoot() + "/com/1BGS.psf",
+                    t.testRoot() + "/com/rec.model")
     
 ##     lig = PCRModel( "~/interfaces/c17/com_wet/1WQ1.psf",
 ##                     "~/interfaces/c17/com_wet/lig.model")
