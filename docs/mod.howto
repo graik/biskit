@@ -1,0 +1,93 @@
+##
+## Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
+## Distributed under the terms of the GNU General public license. See
+## license.txt for details!
+## 
+## Contributions: Olvier Perin (first draft), Raik Gruenberg (adapted)
+## last $Author$
+## $Date$
+## $Revision$
+
+Homology modelling Quickstart
+=============================
+
+1) Preparing the project directory
+
+Create one directory for each project of homology
+modeling. The following example assumes you are using
+biskit/test/Mod/project/ (the test example included in biskit).
+
+Starting point (and only input) is a fasta file with the primary sequence
+of the target protein (60 characters per line). The default name for
+this file is target.fasta. If using default file names and default
+parameters, you can run the following scripts without any options --
+as long as you are in the project folder.  Refer to the full
+documentation for any non-standard options, file names, etc.
+Advanced options of each script are available with:
+|script.py| -help
+
+2) Search homologous sequences
+> search_sequences.py
+
+3) Search homologous 3D structures (Templates)
+> search_templates.py 
+
+4) Clean template PDB files
+> clean_templates.py 
+
+5) Set up cross-validation
+> setup_validation.py
+
+6) Built multiple alignment (for main project, non-parallel)
+> align.py
+
+   Note: the parallel versions of align.py and model.py are not yet
+   tested.
+
+7) Built multiple alignment for cross-validation projects, parallelised
+> pvm  ## start pvm if it is not running
+> align_parallel.py
+Example: align_parallel.py -d ./validation/* -h 22
+
+8) Build models for main project (non-parallel)
+> model.py
+
+9) Build models for cross-validation projects (parallelised)
+> pvm  ## start pvm if it is not running
+> model_parallel.py
+
+   Note: the following two scripts haven't yet moved to the public
+   Biskit version:
+
+10) Evaluation of cross validation
+A)
+> benchmark.py -d |list of folders|
+Example: benchmark.py -d  ~/biskit/test/Mod/project/validation/*
+
+B)
+> analyse.py -d |list of folders|
+Example: analyse.py -d  ~/biskit/test/Mod/project/
+
+Final Results:
+==============
+        
+project/analyse/global_results.out:
+contains for each template, their PDB code, the all atom rmsd
+(rmsd_aa) without iterative fitting, the c-alpha only rmsd (rmsd_ca)
+without iterative fitting, the rmsd_aa with the percentage of outliers
+during the iterative superposition, the rmsd_ca with the percentage of
+outliers also. Following the percentage of identities (mean) of the
+target with its templates and finally the number of templates which
+served to remodel each template.
+
+project/analyse/local_results.out:
+contains for each residue of the target the rmsd profile given by each
+template using the multiple alignment. Then, a score, which is the
+mean rmsd. This score serves as final evaluation for the models of our
+target.
+
+project/modeller/final_**.pdb: 
+PDBs files with the rmsd score from cross-validation put into the
+B-factor column. The user could visualize easily the result with a
+classic software as VMD or Pymol using a gradient of color for this
+score.
