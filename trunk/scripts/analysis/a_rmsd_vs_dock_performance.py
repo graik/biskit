@@ -20,10 +20,21 @@ from Biskit.mathUtils import *
 
 def _use():
     print """
-             cl - complexList, has to contain info dictionary data for key
-             ref - reference complex
-             key - info dictionary key to plot (high values are considered good)
-             inv - 1||0 inverse data associated with key (i.e. for rmds plots)
+Collect, calculate and save to disc (both as text files and pickled
+dictionaries) various data about a complex list. This script is written
+to collect data from multidocking runs and assums that the first
+ligand and receptor model is the free xray structure.
+
+Syntax:   a_rmsd_vs_dock_performance.py -cl |complexList.cl|
+                         -ref |ref.complex| [-key |str| -inv [int|]
+
+          cl - complexList, has to contain info dictionary data for key
+          ref - reference complex
+          key - info dictionary key to plot (high values are considered good)
+          inv - 1||0 inverse data associated with key (i.e. for rmds plots)
+
+Output:   An output directory 'model_vs_rmsd' is created and various text
+          files and corresponding dictionaries are written to it.
 
 Default values:
     """
@@ -55,6 +66,9 @@ def nameFromPath( path ):
                 name += re.findall( '^dock_[0-9,a-z,_]{4}.+', p )[0]
             except:
                 name += re.findall( '^dock_[0-9,a-z,_]{4}', p )[0]
+    # if all fails
+    if name=='':
+        name='hex'
             
     return name
 
@@ -145,31 +159,34 @@ def get_models( clst , ref_com ):
     lig_model_f_ref = lig_models[1]
 
     ref_com.rec_model.remove( ref_com.rec_model.maskH() )
-    rec_model_b_ref = rec_models[1]#ref_com.rec_model
+    rec_model_b_ref = ref_com.rec_model
     ref_com.lig_model.remove( ref_com.lig_model.maskH() )
-    lig_model_b_ref = lig_models[1]#ref_com.lig_model
+    lig_model_b_ref = ref_com.lig_model
 
     ## make sure ref and models have same atoms and atom order
-    ## this should always be the true
-    rec_m_ind, rec_f_ind = rec_models[2].compareAtoms( rec_model_f_ref )
-    lig_m_ind, lig_f_ind = lig_models[2].compareAtoms( lig_model_f_ref )
+    ## this should always be the true, if not multidocking - skipp
+    if len(rec_models)>1:
+        rec_m_ind, rec_f_ind = rec_models[2].compareAtoms( rec_model_f_ref )
 
-    if rec_m_ind != rec_f_ind:
-        print 'WARNING! Free receptor reference (xray) and'
-        print 'receptor models have different atom order!!'
-        rec_model_f_ref = rec_model_f_ref.take( rec_f_ind )
+        if rec_m_ind != rec_f_ind:
+            print 'WARNING! Free receptor reference (xray) and'
+            print 'receptor models have different atom order!!'
+            rec_model_f_ref = rec_model_f_ref.take( rec_f_ind )
 
-        for k in rec_models.keys()[1:]:
-            rec_models[k] = rec_models[k].take( rec_m_ind )
+            for k in rec_models.keys()[1:]:
+                rec_models[k] = rec_models[k].take( rec_m_ind )
             lig_models[k] = lig_models[k].take( lig_m_ind )
             
-    if lig_m_ind != lig_f_ind:
-        print 'Free ligand reference (xray) and '
-        print 'ligand models have different atom order!!'
-        lig_model_f_ref = lig_model_f_ref.take( lig_f_ind )
+    if len(lig_models)>1:
+        lig_m_ind, lig_f_ind = lig_models[2].compareAtoms( lig_model_f_ref )
+            
+        if lig_m_ind != lig_f_ind:
+            print 'Free ligand reference (xray) and '
+            print 'ligand models have different atom order!!'
+            lig_model_f_ref = lig_model_f_ref.take( lig_f_ind )
 
-        for k in rec_models.keys()[1:]:
-            rec_models[k] = rec_models[k].take( rec_m_ind )
+            for k in rec_models.keys()[1:]:
+                rec_models[k] = rec_models[k].take( rec_m_ind )
             lig_models[k] = lig_models[k].take( lig_m_ind )
 
     ## make sure models and bound have same atoms and atom order
@@ -365,16 +382,20 @@ flushPrint('Loading complex list \n')
 cList = Load( options['cl'] )
 ref_com = Load( options['ref'] )
 
+## get models
+rec_models, lig_models, rec_b_ref, lig_b_ref = get_models( cList, ref_com )
+nr_rec = len(rec_models)
+nr_lig = len(lig_models)
+
+## guess number of solutions per single docking
+single_soln = len(cList) / (nr_rec*nr_lig)
 
 ## extract data from dictionary
 flushPrint('Extracting %s data  \n'%options['key'])
 inverse_data = int( options['inv'])
 dta = data3DList( cList, key=options['key'], inverse=inverse_data,
-                   rm=range(1,12), lm=range(1,12), soln=512 )
-#dta = sort( dta, 2 )
-
-## get models
-rec_models, lig_models, rec_b_ref, lig_b_ref = get_models( cList, ref_com )
+                  rm=range(1,nr_rec+1), lm=range(1,nr_lig+1),
+                  soln=single_soln )
 
 ## contacts
 ref_com_b_cast = ProteinComplex( rec_b_ref, lig_b_ref )
