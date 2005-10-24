@@ -1,8 +1,9 @@
+## $Revision$
+## $Date$
+## last $Author$
+##
 ## Build Amber topology from cleaned PDB file
 ## to be used with AmberParmBuilder.py
-## $ Revision: $
-## $ Date: $
-## last $ Author: $
 
 logFile %(leap_out)s
 
