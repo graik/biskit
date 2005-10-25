@@ -19,19 +19,19 @@ echo " - SurfaceRacer"
 echo " - Fold-X\n"
 
 echo "RUNNING CALCULATIONS (will take approximately 60-80 minutes)\n"
+echo "REMINDER: Check that pvm is running.\n"
 
 date
 
 echo " ============= Run a short ligand MD on the localhost ============= " 
 # geting test root path
 root=`echoTestRoot.py | egrep "^/.*"`
-echo $root
 
 mkdir lig_pcr_00
 runPcr.py -t lig -r lig_pcr_00 -h localhost -nstep 10
 while [[ `ps aux | egrep  "$root/lig_pcr_00/pcr_00" | wc -l` -ge 2 ]]; do
 	sleep 100
-
+done
 echo "MD DONE\n"
 
 echo " ============= Convert snapshots to models ============= " 
@@ -41,7 +41,8 @@ pdb2model.py -i pcr_00/*.pdb -a -wat -o model/
 echo "DONE\n"
 
 echo " ============= Create a trajectory from models ============= " 
-pdb2traj.py -i model/*.model -r ../lig/1A19_dry.model -f
+pdb2traj.py -i model/*.model -r ../lig/1A19.pdb -wat -f
+thinTraj.py -i traj.dat
 echo "DONE\n"
 
 cd ..
@@ -71,4 +72,3 @@ echo "DONE docking\n"
 
 cd hex*
 contacter.py -i complexes.cl -a -ref ../../com/ref.complex
-

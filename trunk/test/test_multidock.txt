@@ -1,9 +1,16 @@
 MULTIDOCK TEST 
 ==============
+This text file describes how to perform a docking run where more than
+one receptor model is docked to more than ome ligand model, here referenced
+to as multidocking (see Grunberg, Leckner, Nilges (2004) Structure 
+Dec;12(12):2095-6). The starting point for a multidocking is the
+free receptor and ligand structures and optionally the bound complex
+for reference. This example is the most somple multidocking possible - 
+a single receptor model is docked against two ligand models.
 
 Preparation:
 -----------
-First you will net to run the regular docking test (test_dicking.zsh). 
+First you will need to run the regular docking test (test_docking.zsh). 
 This will then have created the following directories with various
 files in them in your test root directory:
 
@@ -44,11 +51,15 @@ pdb2model.py -i lig_pcr_00/*.pdb -a -wat -o model/
   Parallellized script that converts all the pdb snapshots into 
   PDBModels. The script reads the pdb files from the lig_pcr_00
   folder, strips of any water molecules abd writes PDBModels into
-  the model folder. 
+  the model folder. Got an error? Make sure that pvm is running.
 
-pdb2traj.py -i model/*.model -r ../lig/1A19_dry.model -f
+pdb2traj.py -i model/*.model -r ../lig/1A19.pdb -wat -f
   Collects the PDBModels and fits them all to the provided reference
-  structure. Writes a trajectory output file: traj.dat
+  structure, deletes the waters and writes a trajectory output file: traj.dat
+  
+thinTraj.py -i traj.dat
+  To speed up the subsequent calculations in this example we delete
+  only keep every 5th frame of the trajectory.
 
 cd ..
 mkdir multidock
@@ -82,3 +93,6 @@ multidock.py -rdic rec/1A2P_model.dic -ldic lig/1A19_models.dic -com com/1BGS_he
 
 cd hex*
 contacter.py -i complexes.cl -a -ref ../../com/ref.complex
+
+a_rmsd_vs_dock_performance.py -cl complexes_cont.cl -ref ../../com/ref.complex -key fnac_10
+

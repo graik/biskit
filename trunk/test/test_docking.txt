@@ -1,6 +1,9 @@
 DOCKING TEST
 ============
-
+This text file describes a docking run starting from free receptor
+and ligand pdb files and ends up in a complex list. During the 
+docking the known structure of the bound complex is used for scoring.
+The use of a bound reference complex is of coures optional.
 
 Preparation:
 -----------
@@ -68,6 +71,7 @@ pdb2xplor.py -i 1BGS_edited.pdb
  configuration of chains (A-B, C-D and E-F would have been cleaned though).
  Therefor the pdb file had to be edited manually (deleting chains B,C,E and F). 
 xplor-nih < 1BGS_edited_generate.inp  > 1BGS_edited_generate.log
+
 pdb2complex.py -c 1BGS.pdb  -r 0 -l 1
   Note: Here we also create a reference complex object, that we will need later.
 
@@ -140,7 +144,10 @@ contacter.py -i complexes.cl -a -ref ../../com/ref.complex
 inspectComplexList.py complexes.cl
   To check that everything got calculated.  
 
-
-
-
-
+a_compare_rms_vs_fnc.py -i complexes_cont.cl
+  This is a simple analysis script that compares different methods of measuring
+  how close the docking solutions are to the native complex. The result of
+  this script are 4 plots that highlights the differences brtween interface rmsd 
+  and our favorite measure fraction of native atom contacts (fnac). There are 
+  more scripts in ~biskit/scripts/anaysis/ that can serve as examples to how 
+  biskit can be used. 

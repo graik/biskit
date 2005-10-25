@@ -57,11 +57,15 @@ PCR2hex.py -psf ../../lig/1A19.psf -pdb ../../lig/1A19.pdb
 dope.py -s ../../lig/1A19.pdb  -so ../../lig/1A19_dry.model -i 1A19.model  -dic 1A19_model.dic
 echo "DONE\n"
 
-echo " ============= Writing reference complex to be used for docking ============= "
+echo " ============= Writing reference complex pdb file ============= "
 mkdir ../com
 cd ../com
 PCR2hex.py -psf ../../com/1BGS.psf -pdb ../../com/1BGS.pdb
 dope.py -s ../../com/1BGS.pdb  -so ../../com/1BGS_dry.model -i 1BGS.model  -dic 1BGS_model.dic
+echo "DONE\n"
+
+echo " ============= Creating reference complex to be used for docking ============= "
+pdb2complex.py -c 1BGS.pdb  -r 0 -l 1
 echo "DONE\n"
 
 echo " ============= Writing HEX docking macro file ============= "
@@ -91,4 +95,5 @@ echo "DONE\n"
 echo " ============= Calculateing fractions of native contacts ============= "
 contacter.py -i complexes.cl -ref ../../com/ref.complex -a
 inspectComplexList.py complexes.cl
+a_compare_rms_vs_fnc.py -i complexes_cont.cl
 echo "DONE\n"
