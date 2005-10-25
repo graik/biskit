@@ -34,12 +34,18 @@ Default options:
 
     sys.exit(0)
 
+def __valuesOf( l, k ):
+    x = l.valuesOf( k, None )
+    x = [ sum(i) for i in x ]
+    return x
 
 def check( l ):
     print '%-20s  %6s' % ('infokey', 'invalid')
     print 30*'-'
-    for k in l[0].keys():
-        x = l.valuesOf( k, None )
+    keyList = l[0].keys()
+    keyList.sort()
+    for k in keyList:
+        x = __valuesOf( l, k )
         try:
             print '%-20s: %6i' % (k, sum( equal( x, None ) ) )
         except:
