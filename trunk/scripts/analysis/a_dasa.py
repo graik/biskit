@@ -53,8 +53,8 @@ com = Load(o['c'])
 diff_ASA = area( rec ) + area( lig ) - area( com )
 diff_MS  = MS( rec ) + MS( lig ) - MS( com )
 
-gamma_ASA = 46 ## cal/mol/A²; Sharp et al 1991, Noskov & Lim 2001
-gamma_MS  = 69 ## cal/mol/A²; Jackson & Sternberg 1995
+gamma_ASA = 46 ## cal/mol/A2; Sharp et al 1991, Noskov & Lim 2001
+gamma_MS  = 69 ## cal/mol/A2; Jackson & Sternberg 1995
 gamma_MS  = 45
 T = 298        ## K
 
