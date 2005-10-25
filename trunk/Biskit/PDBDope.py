@@ -206,16 +206,27 @@ class PDBDope:
         self.m.setAtomProfile( name_curv, fs_dic['curvature'], mask, 0,
                                comment='Average curvature',
                                version= T.dateString() + ' ' + self.version(),
-                               **fs_info ) 
+                               **fs_info )
 
+        if probe == 1.4:
+            self.m.setAtomProfile( 'relAS', fs_dic['relAS'], mask, 0,
+                                   comment='Relative solvent accessible surf.',
+                                   version= T.dateString()+' ' +self.version(),
+                                   **fs_info )
+        
+            self.m.setAtomProfile( 'relMS', fs_dic['relMS'], mask, 0,
+                                   comment='Relative molecular surf.',
+                                   version= T.dateString()+' '+self.version(),
+                                   **fs_info )
+        
 if __name__ == '__main__':
 
     from Biskit import PDBModel
     import glob
 
     print "Loading PDB..."
-    f = glob.glob( T.testRoot()+'/rec_pc2_00/pdb/*_1_*pdb.gz' )[1]
-    f = T.testRoot()+"/com_wet/1BGS.pdb"
+    f = glob.glob( T.testRoot()+'/lig_pcr_00/pcr_00/*_1_*pdb' )[1]
+    f = T.testRoot()+"/com/1BGS.pdb"
     m = PDBModel(f)
     m = m.compress( m.maskProtein() )
 
@@ -264,10 +275,9 @@ if __name__ == '__main__':
 
     ## display in Pymol
     print "Starting PyMol..."
-    from Pymoler import Pymoler
+    from Biskit.Pymoler import Pymoler
 
-    r = m.profile2mask('relASA',1 )
     pm = Pymoler()
     pm.addPdb( m, 'm' )
-    pm.colorAtoms( 'm', m.profile('curvature') )
+    pm.colorAtoms( 'm', N.clip(m.profile('relAS'), 0.0, 100.0) )
     pm.show()
