@@ -24,7 +24,7 @@
 ## $Revision$
 
 from Biskit.tools import *
-from Biskit import EnsembleTraj
+from Biskit.EnsembleTraj import traj2ensemble
 
 import os.path
 
@@ -62,6 +62,7 @@ o = cmdDict( o )
 
 print "Loading trajectory .. "
 traj = Load( absfile(o['i']) )
+traj = traj2ensemble( traj )
 
 print "Removing frames ..."
 thin_traj = traj.thin( step=int(o['step']) )
