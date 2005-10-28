@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
@@ -32,19 +33,23 @@ from Biskit.PDBDope import PDBDope
 from Biskit.PDBModel import PDBModel
 import time, sys
 import glob
+import subprocess
 
-def _use():
+
+def _use( options ):
     print """
-  averageASA.py - a script that collects the average (of 500 structures)
+ averageASA.py - a script that collects the average (of 500 structures)
                   molecular surface (MS) and solvent accessible surface
                   (AS) for all 20 amino acids in a GLY-XXX-GLY tripeptide.
 
- Syntax:  AverageASA.py -i |template.pdb| -r |path| [ -l |str| ]
+ Syntax:  AverageASA.py -i |template.pdb| -r |path|
+                           [ -l |str| -mask |resmask|]
 
  Options: -i     file, pdb tripeptide template file
           -r     path, calculation root folder (many directories with be
                     created in this folder)
-          -c     str, label for the three result dictionaries
+          -l     str, label for the three result dictionaries
+          -mask  residue mask to delete padding residues (i.e GLY)
            
  Result:  4 dictionaries AS, AS_sd, MS and MS_sd, written to root folder
 
@@ -68,19 +73,12 @@ END
 
 Default options:
 """
-    o = defaultOptions()
-    for key, value in o.items():
+    for key, value in options.items():
         print "\t-",key, "\t",value
-        
+    
     sys.exit(0)
 
-
-def defaultOptions():
-    return {'i':'1gxg_input.pdb',
-            'r':'~/GLY_pep/',
-            'l':''}
-
-            
+                
 def randomPeptides(template, base_folder):
     """
     genarates 500 peptide orientations of each amino acid
@@ -90,16 +88,17 @@ def randomPeptides(template, base_folder):
 
         ## create derectory and copy generic template
         os.makedirs(base_folder + dir)
-        os.system('cp %s %s/.'%(base_folder + template, base_folder + dir) )
+        os.system('cp %s %s/.'%( template, base_folder + dir) )
+        pdb_file = os.path.split( template )[1]
 
         ## enter directort and greate template
         os.chdir( base_folder + dir )
         pattern = 's/XXX/%s/g'%(k)
-        os.system( 'perl -i.bak -p -e %s %s'%(pattern, template) )
+        os.system( 'perl -i.bak -p -e %s %s'%(pattern, pdb_file ) )
 
         ## generate xplor script then build model
-        os.system( 'pdb2xplor.py -i %s'%template )
-        os.system( 'xplor < %s_input_generate.inp'%template[:4] )
+        os.system( 'pdb2xplor.py -i %s'%pdb_file )
+        os.system( 'xplor < %s_input_generate.inp'%pdb_file[:4] )
 
         ## create a run pcr folder
         pcrFolder = base_folder + dir + '_pcr'
@@ -109,16 +108,20 @@ def randomPeptides(template, base_folder):
         os.chdir( base_folder )
         os.system('runPcr.py -t %s -r %s_pcr -h localhost'%(dir, dir) )
 
-
         ## don't run too many calculations at once
-        time.sleep(100) # let previous calculation start
-        nr_calc = os.system("ps awx | egrep '%sGLY-.*GLY_pcr/pcr_00' | wc -l"\
-                            %base_folder )
-        while nr_calc >= 2:
-            time.sleep(15)
+        nr_calc = 6
+        while nr_calc >= 4:
+            time.sleep(100) # let previous calculation start
+            p1 = subprocess.Popen(['ps', 'awx'], stdout=subprocess.PIPE)
+            p2 = subprocess.Popen(['egrep', '%sGLY-.*GLY_pcr/pcr_00'\
+                                   %base_folder],
+                                  stdin=p1.stdout, stdout=subprocess.PIPE)
+            p3 = subprocess.Popen(['wc', '-l'],
+                                  stdin=p2.stdout, stdout=subprocess.PIPE)
+            nr_calc = int( p3.communicate()[0] )
 
 
-def randomSurfaces( base_folder, label ):
+def randomSurfaces( base_folder, label, mask ):
     """
     calculate surfaces for all peptides and return the
     average and SD
@@ -129,18 +132,20 @@ def randomSurfaces( base_folder, label ):
 
     ## loop over peptide directories
     for k in MOU.aaAtoms.keys():
-        dir = 'GLY-%s-GLY_pcr/pcr_00'%(k)
+        dir = base_folder + 'GLY-%s-GLY_pcr/pcr_00'%(k)
         fLst = glob.glob( dir + '/*.pdb')
-
+        
         msLst = []
         asLst = []
-
+        
         ## loop over pdb files for each peptide
+        T.flushPrint( '\nNow collecting data in %s'%dir )
         for f in fLst:
 
             ## load peptide and remove waters and hydrogens
-            m = PDBModel( base_folder + f )
+            m = PDBModel( f )
             m = m.compress( m.maskProtein() * m.maskHeavy() )
+            T.flushPrint( '.')
 
             ## add surface data
             try:
@@ -148,8 +153,8 @@ def randomSurfaces( base_folder, label ):
                 d.addSurfaceRacer( probe=1.4 )
 
                 ## remove tailing GLY
-                m = m.compress( m.res2atomMask([0,1,0]) )
-
+                m = m.compress( m.res2atomMask(mask) )
+                
                 ## collect surface data for each peptide
                 msLst += [ m.profile('MS') ]
                 asLst += [ m.profile('AS') ]
@@ -158,8 +163,8 @@ def randomSurfaces( base_folder, label ):
                 print 'Failed calculating exposure for GLY-%s-GLY'%(k)
                 print '\t and file %s'%f
                 
-
         ## get result dictionary for peptide
+        T.flushPrint('\nCollecting data ...\n')
         msDic = {}
         asDic = {}
         msDic_sd = {}
@@ -185,25 +190,33 @@ def randomSurfaces( base_folder, label ):
 # MAIN
 ###########################
 
-if len(sys.argv) < 3:
-    _use()
+default = {'i':'1gxg_input.pdb',
+           'r':'~/GLY_pep/',
+           'l':'',
+           'mask':[0,1,0]}
 
-options = T.cmdDict( defaultOptions() )
+if len (sys.argv) < 2:
+    _use( default )
+
+options = T.cmdDict( default )
 
 ## where to run the calculation
 base_folder = T.absfile( options['r'] )+'/'
 
 ## template gly-xxx-gly
-template = options['i']
+template = os.path.abspath( options['i'] )
 
 ## label the result dictionaty files
 label = '_' + options['l']
 
+## mask to used to delete glycines
+mask = [ int(i) for i in T.toList( options['mask'] )]
+
 ## create random prptides from template
-randomPeptides( template, base_folder )
+#randomPeptides( template, base_folder )
 
 ## collect average surfaces
-MS, AS, MS_sd, AS_sd = randomSurfaces( base_folder, label )
+MS, AS, MS_sd, AS_sd = randomSurfaces( base_folder, label, mask )
 
 ## save dictionary with all 20 amino acids
 T.Dump( MS, base_folder + 'MS%s.dic'%label)
