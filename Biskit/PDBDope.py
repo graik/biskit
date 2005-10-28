@@ -208,16 +208,16 @@ class PDBDope:
                                version= T.dateString() + ' ' + self.version(),
                                **fs_info )
 
-##         if probe == 1.4:
-##             self.m.setAtomProfile( 'relAS', fs_dic['relAS'], mask, 0,
-##                                    comment='Relative solvent accessible surf.',
-##                                    version= T.dateString()+' ' +self.version(),
-##                                    **fs_info )
+        if probe == 1.4:
+            self.m.setAtomProfile( 'relAS', fs_dic['relAS'], mask, 0,
+                                   comment='Relative solvent accessible surf.',
+                                   version= T.dateString()+' ' +self.version(),
+                                   **fs_info )
         
-##             self.m.setAtomProfile( 'relMS', fs_dic['relMS'], mask, 0,
-##                                    comment='Relative molecular surf.',
-##                                    version= T.dateString()+' '+self.version(),
-##                                    **fs_info )
+            self.m.setAtomProfile( 'relMS', fs_dic['relMS'], mask, 0,
+                                   comment='Relative molecular surf.',
+                                   version= T.dateString()+' '+self.version(),
+                                   **fs_info )
         
 if __name__ == '__main__':
 
