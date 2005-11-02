@@ -38,6 +38,7 @@ class Aligner:
     """
     Take template CA traces and template sequences plus non-template
     sequences.
+                                 
     -> T-Coffee script or T-Coffee alignment
     """
 
@@ -68,14 +69,16 @@ class Aligner:
         ## recognize file types for adding t_coffee type code
         self.ex_inp_types = { 'P' : re.compile('.+\.[Pp][Dd][Bb]$|'+
                                                '.+\.[Aa][Ll][Pp][Hh][Aa]$'),
-                              'L' : re.compile('.+\.[Ll][Ii][Bb]$') }
+                              'L' : re.compile('.+\.[Ll][Ii][Bb]$'),
+                              'S' : re.compile('.*\.[Ff][Aa][Ss][Tt][Aa]$')
+                            }
 
         self.commands = []  ## list of t_coffee commands to run
 
         fn = self.outFolder + self.F_RESULT_FOLDER
         if not os.path.exists( fn ):
-            self.logWrite( 'Creating new output folder '+ fn)
-            os.mkdir( fn)
+            self.logWrite( 'Creating new output folder '+ fn )
+            os.mkdir( fn )
 
 
     def logWrite( self, msg, force=1 ):
@@ -165,10 +168,146 @@ class Aligner:
                                 f_fast_tree=None, f_sequence_tree=None ):
         """
         Prepare alignment commands for homology modelling.
+        
         If verbose==1, the commands are mirrored to t_coffee.inp .
         pdbFiles  - [ str ], template PDBs [from templates/nr/chain_index.txt ]
         fasta_templates  - str, template sequences [templates/templates.fasta ]
         fasta_sequences  - str, more sequences           [ sequences/nr.fasta ]
+
+
+        T-COFFEE COMMANDS:
+        =================
+        
+        Input identifyers:
+        ------------------
+        T-Coffee input flags: A - alignment
+                              S - sequence(s)
+                              M - method
+                              P - pdb file
+                              R - profile
+                              L - library
+
+        Methods:
+        -------
+        fast_pair  Makes a global fasta style pairwise alignment. For
+                   proteins, matrix=blosum62mt, gep=-1, gop=-10, ktup=2.
+                   For DNA, matrix=idmat (id=10), gep=-1, gop=-20, ktup=5.
+                   Each pair of residue is given a score function of the
+                   weighting mode defined by -weight.
+
+        slow_pair  Identical to fast pair, but does a full dynamic
+                   programming, using the myers and miller algorithm. This
+                   method is recommended if your sequences are distantly
+                   related.
+
+        sap_pair  Uses sap to align two structures. Each pair of residue is
+                  given a score function defined by sap. You must have sap
+                  installed on your system to use this method.
+
+        lalign_id_pair  Same as lalign_rs_pir, but using the level of
+                        identity as a weight.
+
+        Flags:
+        ------
+        -out_lib  Usage:  -out_lib=<name of the library,default,no>
+                  Default:-out_lib=default
+                  Sets the name of the library output. Default implies
+                  <run_name>.tc_lib
+
+        -output   Usage:  -output=<format1,format2,...>
+                  Default:-output=clustalw
+                  Indicates the format used for outputting the -outfile.
+                  Supported formats are:
+                     clustalw_aln, clustal : ClustalW format.
+                     gcg, msf_aln          : MSF alignment.
+                     pir_aln               : pir alignment.              
+                     fasta_aln             : fasta alignment. 
+                     phylip                : Phylip format.
+                     pir_seq               : pir sequences (no gap).
+                     fasta_seq             : fasta sequences (no gap).
+                  As well as:
+                     score_ascii : causes the output of a reliability flag
+                     score_html  : causes the output to be a reliability
+                                   plot in HTML
+                     score_pdf   : idem in PDF (if ps2pdf is installed on
+                                   your system).
+                     score_ps    : idem in postscript.
+                  More than one format can be indicated:
+                     t_coffee sample_seq1.fasta -output=clustalw,gcg,
+                              score_html [**]
+
+        -outfile   Usage:  -outfile=<out_aln file,default,no>
+                   Default:-outfile=default
+                   Indicates the name of the alignment output by t_coffee.
+                   If the default is used, the alignment is named
+                   <your sequences>.aln
+
+        -convert   Usage: -convert
+                   Default: turned off
+                   Toggles on the conversion mode and causes T-Coffee to
+                   convert the sequences, alignments, libraries or structures
+                   provided via the -infile and -in flags. The output format
+                   must be set via the -output flag. This flag can also be
+                   used if you simply want to compute a library (i.e. you
+                   have an alignment and you want to turn it into a library).
+                   This flag is ClustalW compliant.
+
+        -newtree   Usage:   -newtree=<tree file>
+                   Default: No file specified
+                   Indicates the name of the file into which the guide
+                   tree will be written. The default will be
+                   <sequence_name>.dnd, or <run_name.dnd>. The tree is
+                   written in the parenthesis format known as newick
+                   or New Hampshire and used by Phylips (see the
+                   format section).
+
+        -quiet     Usage:  -quiet=<stderr,stdout,file name OR nothing>.
+                   Default:-quiet=stderr
+                   Redirects the standard output to either a file. -quiet on
+                   its own redirect the output to /dev/null. 
+
+        -weight    Usage:  -weight=<winsimN, sim or sim_<matrix_name
+                            or matrix_file> or <integer value>
+                   Default: -weight=sim
+                   Weight defines the way alignments are weighted when turned
+                   into a library.
+
+        METHOD:
+        ======
+        Step 1:
+          Makes a global fasta style pairwise alignment of all the sequences
+          : templates.fasta, target.fasta and nr.fasta. For proteins,
+          matrix=blosum62mt, gep=-1, gop=-10, ktup=2
+          -> fast_pair.lib
+             t_coffee.log_1
+             
+        Step 2:
+          Makes a local  optimized pairwise alignment using LALIGN.
+          -> lalign_id_pair.lib
+             t_coffee.log_2
+             
+        Step 3:
+          Uses SAP to do paiwise structural alignments.
+          -> sap_pair.lib
+             t_coffee.log_3
+             fast_tree.dnd
+             sequence.dnd
+             
+        Step 4:
+          Fix some chain identifier problems in the libraries.
+          -> sap_pair.lib
+             sap_pair.lib_original
+             struct.aln
+             struct.aln_original
+             
+        Step 5:
+          Combine the three libraries into a sequence/structure alignment
+          -> final.aln
+             final.phylip
+             final.pir_aln
+             final.score_ascii
+             final.score_html
+             t_coffee.log_4
         """
         ## Fetch default files where needed
         d = self.__default_input_files( pdbFiles, fasta_templates,
@@ -228,7 +367,8 @@ class Aligner:
                                        quiet=f_coffee_log+'_4')
                 ]
             
-        ## Normal alignment run with structural alignment (more than one template)
+        ## Normal alignment run with structural alignment
+        ## (more than one template)
         else:
             r = [
                 ## fast global pair-wise alignment
@@ -245,7 +385,6 @@ class Aligner:
                                        quiet=f_coffee_log+'_2', convert='' ),
 
                 ## uses SAP to do pairwise structural alignments
-                ## TODO: skip this step if there is only one template sequence
                 self.coffee_align_inp( pdbFiles, newtree=f_sequence_tree,
                                        method='sap_pair',
                                        weight=1000,
