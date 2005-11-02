@@ -35,6 +35,7 @@ from time import localtime
 import Numeric
 import types
 import glob
+import subprocess
 
 class ToolsError( Exception ):
     pass
@@ -214,6 +215,17 @@ def stripFilename( filename ):
         pass  ## just in case there is no ending to start with...
 
     return name
+
+
+def fileLength( file ):
+        """
+        Count number of lines in file
+        -> int, number of lines
+        """
+        p1 = subprocess.Popen( ['cat',file], stdout=subprocess.PIPE )
+        p2 = subprocess.Popen( ["wc", "-l"], stdin=p1.stdout,
+                               stdout=subprocess.PIPE )
+        return int(p2.communicate()[0])
     
 
 def tempDir():
