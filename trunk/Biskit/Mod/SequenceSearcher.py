@@ -196,8 +196,12 @@ class SequenceSearcher:
         """
         self.outFolder = tools.absfile( outFolder )
 
-        self.ex_gi    = re.compile( '^>gi\|([0-9]+)\|' )
-        self.ex_swiss = re.compile( '^>([A-Z0-9_]+) ' )
+        ##
+        ## NOTE: If you get errors of the type "Couldn't find ID in"
+        ##       check these regexps (see getSequenceIDs function)!
+        ##
+        self.ex_gi    = re.compile( '^>ref|gb|ngb|emb|dbj|prf\|{1,2}([A-Z_0-9.]+)\|' )
+        self.ex_swiss = re.compile(  '^>sp\|([A-Z0-9_]{5,7})\|' )
         self.ex_pdb   = re.compile( '^>pdb\|([A-Z0-9]{4})\|' )
 
         self.verbose = verbose
@@ -266,7 +270,7 @@ class SequenceSearcher:
         fasta = Fasta.Iterator( open(seqFile) )
         query = fasta.next()
         
-        blast_result = NCBIWWW.blast( method, db, query, expect=e, **kw)
+        blast_result = NCBIWWW.qblast( method, db, query, expect=e, **kw)
 
         p = NCBIWWW.BlastParser()
         parsed = p.parse( blast_result )
@@ -316,7 +320,7 @@ class SequenceSearcher:
             results, err = NCBIStandalone.blastall( settings.blast_bin,
                                                     method, db, seqFile,
                                                     expectation=e, **kw)
-
+                                                                
             p = NCBIStandalone.BlastParser()
 
             parsed = p.parse( results )
@@ -462,6 +466,9 @@ class SequenceSearcher:
         !! BlastError
         """
         fastaIn = fastaIn or self.outFolder + self.F_FASTA_ALL
+
+        if tools.fileLength( fastaIn ) < 1:
+            raise IOError( "File %s empty. Nothing to cluster"%fastaIn )
         
         self.log.add( "\nClustering sequences\n"+20*"-")
         self.log.add( "sequences: \n%s\n ..." % fastaIn ) 
@@ -615,7 +622,8 @@ if __name__ == '__main__':
 ##    rl, el = searcher.localPSIBlast( options['q'], 'pdbaa',
 ##                                     'blastpgp', npasses=2)
 
-    db = 'sprot.dat'
+    db = 'swissprot'
+    db = 'nr'
     f_target = searcher.outFolder + searcher.F_FASTA_TARGET
     searcher.localBlast( f_target, db, 'blastp', alignments=500, e=0.01 )
 
@@ -627,3 +635,6 @@ if __name__ == '__main__':
 # fastacmd -d pdbaa -s 2098544
 # blast db has to be built with -o potion
 #    cat db1.dat db2.dat | formatdb -i stdin -o T -n indexed_db
+
+
+
