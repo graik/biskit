@@ -31,6 +31,9 @@ import Numeric
 
 import urllib
 import string
+import gzip
+import subprocess
+import types
 from Bio import File
 
 class TemplateSearcher( SequenceSearcher ):
@@ -138,11 +141,23 @@ class TemplateSearcher( SequenceSearcher ):
         """
         id = string.lower( id )
         filenames = ['%s.pdb' % id,
-                    db_path + '/pdb%s.ent' % id ]
+                     db_path + '/pdb%s.ent' % id,
+                     db_path + '/%s/pdb%s.ent.Z' %( id[1:3], id ) ]
 
         for f in filenames:
             if os.path.exists( f ):
-                return open(f)
+                ## gzipped pdb file
+                if f[-3:]=='.gz':
+                    return gzip.open(f)
+                ## the gzip module doesn't handle .Z files
+                ## doesn't return open file handle 
+                if f[-2:]=='.Z':
+                    p = subprocess.Popen( [ 'gunzip', '-c', f ],
+                                          stdout=subprocess.PIPE )
+                    return p.communicate()[0]
+                ## uncompressed
+                else:
+                    return open(f)
 
         raise BlastError( "Couldn't find PDB file.")
 
@@ -166,13 +181,19 @@ class TemplateSearcher( SequenceSearcher ):
     def __extractPDBInfos( self, handle ):
         """
         Extract extra infos from PDB file line. NMR files get resolution 3.5.
-        handle - open file handle
+        handle - open file handle OR string
         infos  - dict getting additional infos, if any
         -> [ str ], { 'resolution':float }
         """
         infos = {}
+        if type( handle ) == types.FileType:
+            lines = handle.readlines()
+        if type( handle ) == types.StringType and len(handle) > 5000:
+            lines = handle.splitlines( True )
+            #lines = [ i+'\n' for i in lines ]
+        else:
+            raise BlastError( "Couldn't extract PDB Info." )
         
-        lines = handle.readlines()
         for l in lines:
             found = self.ex_resolution.findall( l )
 
@@ -181,7 +202,6 @@ class TemplateSearcher( SequenceSearcher ):
                     infos['resolution'] = self.NMR_RESOLUTION
                 else:
                     infos['resolution'] = float( found[0] )
-
         return lines, infos
 
 
@@ -222,7 +242,11 @@ class TemplateSearcher( SequenceSearcher ):
                 if c in self.record_dic:
                     self.record_dic[ c ].__dict__.update( infos )
 
-                h.close()
+                ## close if it is a handle
+                try:
+                    h.close()
+                except:
+                    pass
 
                 if not os.path.exists( fname ):
                     f = open( fname, 'w', 1 )
