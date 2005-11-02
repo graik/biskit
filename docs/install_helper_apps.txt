@@ -1,15 +1,15 @@
 installing, testing local blast environment
 -------------------------------------------
 
-1) update data bases 
+1) update data bases - swissprot, nr and pdbaa recommended
 ftp ftp.ncbi.nlm.nih.gov
         cd blast/db/FASTA
-        get pdbaa.gz
+        get database.gz
 	bye
-gzip -d pdbaa.gz
-formatdb -i pdbaa -p T -o
+gzip -d database.gz
 
 2) make sure data bases are formatted with -o option (formatdb -o ...)
+formatdb -i database -p T -o T
 
 3) create ~/.ncbirc:
 [NCBI]
@@ -49,3 +49,55 @@ export BLASTDB=/Bis/db/blastdb
        k
        m
 
+Install Pfam database for HMMER:
+--------------------------------
+1) Download database by anonymous ftp and unpack
+ftp ftp.sanger.ac.uk
+     cd pub/databases/Pfam/current_release
+     get Pfam_ls.gz
+     bye
+gzip -d Pfam_ls.gz
+
+2) Add the path to the database to ~/.biskit/settings.dat
+Assign the path of the Pfam database to the 'hmm_db' variable. 
+example: hmm_db = /shared/db/Pfam_ls'
+
+
+Install local PDB database:
+---------------------------
+If you plan on heavily use the homology modelling modules you might 
+want to consider installing a local copy of the PDB database. If you
+don't have a local copy the pdb files will be automatically downloaded
+but this can be quite time consuming.
+
+(A) To mirror the full pdb ftp (approx. 20 GB):
+- download a mirroring script at http://www.rcsb.org/pdb/software-list.html
+You'll find them under the headline "FTP Archive Resources". We are using 
+rsyncPDB.sh.
+- use the documentation provided with the script to install a local database.
+- in ~/.biskit/settings.dat set the variable "pdb_path" to the directory
+ftp_download/data/structures/divided/pdb
+
+(B) To mirror only the pdb flat files needed by Biskit (approx. 5 GB): 
+- same as above but in step 2 edit the script like this:
+${RSYNC} -rlpt -v -z --delete --port=$PORT 
+         $SERVER::ftp_data/structures/divided/pdb/ 
+	 $MIRRORDIR > $LOGFILE 2>/dev/null
+
+
+T-Cofee, ClustalW and SAP:
+--------------------------
+Download and install CLUSTALW
+ftp://ftp.ebi.ac.uk/pub/software/unix/clustalw/
+setenv CLUSTALW_4_TCOFFEE /path/to/clustalw
+
+Download and install SAP
+http://igs-server.cnrs-mrs.fr/~cnotred/Projects_home_page/3dcoffee_home_page.html
+setenv SAP_4_TCOFFEE /path/to/sap
+
+Download and install TCOFFEE
+http://igs-server.cnrs-mrs.fr/~cnotred/Projects_home_page/t_coffee_home_page.html
+(or http://igs-server.cnrs-mrs.fr/~cnotred/Packages)
+
+Set the t_coffee_bin variable in ~/.biskit/settings.dat:
+t_coffee_bin = /shared_bin/T-Coffee/t_coffee
