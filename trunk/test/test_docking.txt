@@ -83,6 +83,7 @@ PCR2hex.py -psf ../../rec/1A2P.psf -pdb ../../rec/1A2P.pdb
   running a multidocking project (docking more than one ligand against 
   more than one receptor) this script will read multiple pdb files and
   write the anme number of models and Hex compatible pdb files.
+
 dope.py -s ../../rec/1A2P.pdb -so ../../rec/1A2P_dry.model -i 1A2P.model -dic 1A2P_model.dic
   Adds various profiles and data to the earliest possible source, to the original source (so)
   data that doesn't change with the coordinates is added.
@@ -141,7 +142,7 @@ contacter.py -i complexes.cl -a -ref ../../com/ref.complex
   The contacted complex list is saved as complexes_cont.cl and any errors are reported in 
   contacting_errors.txt
   
-inspectComplexList.py complexes.cl
+inspectComplexList.py complexes_cont.cl
   To check that everything got calculated.  
 
 a_compare_rms_vs_fnc.py -i complexes_cont.cl
