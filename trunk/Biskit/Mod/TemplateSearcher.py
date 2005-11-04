@@ -68,7 +68,7 @@ class TemplateSearcher( SequenceSearcher ):
     F_CHAIN_INDEX = '/chain_index.txt'
     
 
-    def __init__( self, outFolder='.', verbose=1 ):
+    def __init__( self, outFolder='.', verbose=1, log=None ):
         """
         outFolder - str, project folder (results are put into subfolder) ['.']
         """
@@ -80,7 +80,8 @@ class TemplateSearcher( SequenceSearcher ):
              'REMARK   2 RESOLUTION\. *([0-9\.]+|NOT APPLICABLE)' )
 
         self.prepareFolders()
-
+        
+        self.log = log or StdLog()
 
     def prepareFolders( self ):
         """
@@ -151,7 +152,7 @@ class TemplateSearcher( SequenceSearcher ):
                     return gzip.open(f)
                 ## the gzip module doesn't handle .Z files
                 ## doesn't return open file handle 
-                if f[-2:]=='.Z':
+                elif f[-2:]=='.Z':
                     p = subprocess.Popen( [ 'gunzip', '-c', f ],
                                           stdout=subprocess.PIPE )
                     return p.communicate()[0]
@@ -188,9 +189,8 @@ class TemplateSearcher( SequenceSearcher ):
         infos = {}
         if type( handle ) == types.FileType:
             lines = handle.readlines()
-        if type( handle ) == types.StringType and len(handle) > 5000:
+        elif type( handle ) == types.StringType and len(handle) > 5000:
             lines = handle.splitlines( True )
-            #lines = [ i+'\n' for i in lines ]
         else:
             raise BlastError( "Couldn't extract PDB Info." )
         
@@ -227,6 +227,7 @@ class TemplateSearcher( SequenceSearcher ):
                 tools.flushPrint('#')
 
             fname = '%s/%s.pdb' % (outFolder, c)
+            
             try:
                 if os.path.exists( fname ):
                     h = open( fname, 'r' )
