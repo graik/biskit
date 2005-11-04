@@ -29,7 +29,7 @@ biskit/Biskit/Mod/ : python library
 Biskit/Mod implements homology modeling in 4 steps:
 
 	1) search of homologous sequences and 3D structures (Blast)
-	2) multiple alignments (T-Coffee v1.37)
+	2) multiple alignments (T-Coffee v1.37 or v3.32)
 	3) building of the models (Modeller v8.0)
 	4) cross validation by re-building the available templates
 
