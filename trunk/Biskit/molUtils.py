@@ -1,4 +1,3 @@
-## Utilities for handling structures and sequences
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
@@ -17,11 +16,14 @@
 ## license.txt along with this program; if not, write to the Free
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
-##
 
+##
+## Utilities for handling structures and sequences
+##
 ## last $Author$
 ## last $Date$
 ## $revision: $
+
 import ErrorHandler
 from Biskit import EHandler
 import tools as t
@@ -102,37 +104,41 @@ nonStandardAA={ 'UNK':'ALA', 'ABA':'ALA', 'B2A':'ALA',
 
 ## heavy atoms of amino acids in standard order
 aaAtoms={'GLY':['N','CA','C','O', 'OXT' ],
-        'ALA':['N','CA','C','O', 'CB', 'OXT'],
-        'VAL':['N','CA','C','O','CB','CG1','CG2', 'OXT'],
-        'LEU':['N','CA','C','O','CB','CG','CD1','CD2', 'OXT'],
-        'ILE':['N','CA','C','O','CB','CG1','CG2','CD1', 'OXT'],
-        'MET':['N','CA','C','O','CB','CG','SD','CE', 'OXT'],
-        'PRO':['N','CA','C','O','CB','CG','CD', 'OXT'],
-        'PHE':['N','CA','C','O','CB','CG','CD1','CD2','CE1','CE2','CZ', 'OXT'],
-        'TRP':['N','CA','C','O','CB','CG','CD1','CD2','NE1','CE2','CE3',
-               'CZ2','CZ3','CH2', 'OXT'],
-        'SER':['N','CA','C','O','CB','OG', 'OXT'],
-        'THR':['N','CA','C','O','CB','OG1','CG2', 'OXT'],
-        'ASN':['N','CA','C','O','CB','CG','OD1','ND2', 'OXT'],
-        'GLN':['N','CA','C','O','CB','CG','CD','OE1','NE2', 'OXT'],
-        'TYR':['N','CA','C','O','CB','CG','CD1','CD2','CE1','CE2','CZ','OH',
-               'OXT'],
-        'CYS':['N','CA','C','O','CB','SG', 'OXT'],
-        'LYS':['N','CA','C','O','CB','CG','CD','CE','NZ', 'OXT'],
-        'ARG':['N','CA','C','O','CB','CG','CD','NE','CZ','NH1','NH2', 'OXT'],
-        'HIS':['N','CA','C','O','CB','CG','ND1','CD2','CE1','NE2', 'OXT'],
-        'ASP':['N','CA','C','O','CB','CG','OD1','OD2', 'OXT'],
-        'GLU':['N','CA','C','O','CB','CG','CD','OE1','OE2', 'OXT']}
+         'ALA':['N','CA','C','O', 'CB', 'OXT'],
+         'VAL':['N','CA','C','O','CB','CG1','CG2', 'OXT'],
+         'LEU':['N','CA','C','O','CB','CG','CD1','CD2', 'OXT'],
+         'ILE':['N','CA','C','O','CB','CG1','CG2','CD1', 'OXT'],
+         'MET':['N','CA','C','O','CB','CG','SD','CE', 'OXT'],
+         'PRO':['N','CA','C','O','CB','CG','CD', 'OXT'],
+         'PHE':['N','CA','C','O','CB','CG','CD1','CD2','CE1','CE2','CZ',
+                'OXT'],
+         'TRP':['N','CA','C','O','CB','CG','CD1','CD2','NE1','CE2','CE3',
+                'CZ2','CZ3','CH2', 'OXT'],
+         'SER':['N','CA','C','O','CB','OG', 'OXT'],
+         'THR':['N','CA','C','O','CB','OG1','CG2', 'OXT'],
+         'ASN':['N','CA','C','O','CB','CG','OD1','ND2', 'OXT'],
+         'GLN':['N','CA','C','O','CB','CG','CD','OE1','NE2', 'OXT'],
+         'TYR':['N','CA','C','O','CB','CG','CD1','CD2','CE1','CE2','CZ','OH',
+                'OXT'],
+         'CYS':['N','CA','C','O','CB','SG', 'OXT'],
+         'LYS':['N','CA','C','O','CB','CG','CD','CE','NZ', 'OXT'],
+         'ARG':['N','CA','C','O','CB','CG','CD','NE','CZ','NH1','NH2', 'OXT'],
+         'HIS':['N','CA','C','O','CB','CG','ND1','CD2','CE1','NE2', 'OXT'],
+         'ASP':['N','CA','C','O','CB','CG','OD1','OD2', 'OXT'],
+         'GLU':['N','CA','C','O','CB','CG','CD','OE1','OE2', 'OXT']}
 
 ## dictionary of elements
 elements = { 'carbon':['C', 'CD2', 'CZ2', 'CB', 'CA', 'CG', 'CE', 'CD', 'CZ',
                        'CH2', 'CE3', 'CD1', 'CE1', 'CZ3', 'CG1', 'CG2', 'CE2'],
-             'nitrogen':['NZ', 'ND2', 'NH1', 'NH2', 'ND1', 'NE1', 'NE2', 'NE', 'N'],
-             'oxygen':['OG', 'OE2', 'OXT', 'OD1', 'OE1', 'OH', 'OG1', 'OD2', 'O'],
+             'nitrogen':['NZ', 'ND2', 'NH1', 'NH2', 'ND1', 'NE1', 'NE2',
+                         'NE', 'N'],
+             'oxygen':['OG', 'OE2', 'OXT', 'OD1', 'OE1', 'OH', 'OG1', 'OD2',
+                       'O'],
              'suplphur':['SG', 'SD'],
              'clustering_BDZ':['C','CB','CD','CD1','CD2','CZ','CZ2','CZ3',
                                'ND1','ND2','NZ','OD1','OD2','SD' ],
-             'clustering_ABDZ':['C','CA','CB','CD','CD1','CD2','CZ','CZ2','CZ3',
+             'clustering_ABDZ':['C','CA','CB','CD','CD1','CD2','CZ','CZ2',
+                                'CZ3',
                                'ND1','ND2','NZ','OD1','OD2','SD' ],
              'clustering_G':['C','CG','CG1','OG','OG1','SG' ],
              'clustering_B':['C','CB'],
