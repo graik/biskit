@@ -1,5 +1,8 @@
 installing, testing local blast environment
 -------------------------------------------
+0) Get the NCBI toolkit by anonymous ftp from ftp.ncbi.nih.gov
+   and install it.
+   (ftp://ftp.ncbi.nlm.nih.gov/toolbox/ncbi_tools/CURRENT/)
 
 1) update data bases - swissprot, nr and pdbaa recommended
 ftp ftp.ncbi.nlm.nih.gov
@@ -48,6 +51,7 @@ export BLASTDB=/Bis/db/blastdb
        f
        k
        m
+
 
 Install Pfam database for HMMER:
 --------------------------------
