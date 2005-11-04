@@ -192,7 +192,7 @@ Required programs: Biskit
 
 all optional: 
 - xplor, gbxplor (compiled for generalized Born)
-- blastall
+- NCBI toolkit
 - HMMER
 - whatif
 - prosa2003
@@ -203,7 +203,7 @@ Required programs: Biskit/Mod
 -----------------------------
 (see install_helper_apps.txt for more info)
 
-- blastall, fastacmd, blastclust (= NCBI blast programs)
+- blastall, fastacmd, blastclust (= NCBI toolkit programs)
 - local sequence data bases nr, pdbaa, sprot (formatted with -o)
 - local PDB structure data base (folder with *.ent files)
 - t_coffee
