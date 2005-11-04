@@ -86,9 +86,9 @@ def prepareSource( inFile, outFile ):
     doper = PDBDope( source )
 
     doper.addASA()
+    doper.addSurfaceRacer( probe=1.4 )
     doper.addSurfaceMask()
     doper.addFoldX()
-    doper.addSurfaceRacer( probe=1.4 )
     doper.addDensity()
     
     try:
