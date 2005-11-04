@@ -279,6 +279,7 @@ class Aligner:
           : templates.fasta, target.fasta and nr.fasta. For proteins,
           matrix=blosum62mt, gep=-1, gop=-10, ktup=2
           -> fast_pair.lib
+             nr.aln
              t_coffee.log_1
              
         Step 2:
@@ -289,9 +290,9 @@ class Aligner:
         Step 3:
           Uses SAP to do paiwise structural alignments.
           -> sap_pair.lib
-             t_coffee.log_3
-             fast_tree.dnd
+             struct.aln
              sequence.dnd
+             t_coffee.log_3
              
         Step 4:
           Fix some chain identifier problems in the libraries.
@@ -307,6 +308,7 @@ class Aligner:
              final.pir_aln
              final.score_ascii
              final.score_html
+             fast_tree.dnd
              t_coffee.log_4
         """
         ## Fetch default files where needed
@@ -423,12 +425,14 @@ class Aligner:
         Dirty hack..
         """
         ex_sapfix = re.compile('_[A-Z]{0,1}_[A-Z]')
+        ex_alpha = re.compile('.alpha') ## new from T-Coffe ver. 3.32
         bak_fname = fname+'_original'
 
         os.rename( fname,  bak_fname)
 
         fout = open( fname, 'w' )
         for l in open( bak_fname ):
+            l = re.sub( ex_alpha, '', l )
             fout.write( re.sub( ex_sapfix, '_', l ) )
 
         fout.close()
