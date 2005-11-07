@@ -64,11 +64,6 @@ s = 'biskit_bin' ## current section (for .biskit/settings.dat)
 
 ssh_bin          = '/usr/bin/ssh', s, 'Path to ssh executable'
 nice_bin         = '/bin/nice', s
-whatif_bin       = 'whatif', s, 'WhatIF: http://swift.cmbi.kun.nl/whatif'
-prosa2003_bin    = 'prosa2003', s,\
-                   'http://www.proceryon.com/solutions/prosa.html'
-fold_x_bin 	 = __root + '/external/fold_x_linux', s,\
-                    'FoldX: http://foldx.embl.de'
 
 bl2seq_bin       = 'bl2seq', s,\
                    'part of NCBI-Blast; http://www.ncbi.nlm.nih.gov/BLAST/'
@@ -78,12 +73,6 @@ hmmpfam_bin      = 'hmmpfam', s,  'Part of HMMER; http://hmmer.wustl.edu'
 hmmalign_bin     = 'hmmalign', s, 'Part of HMMER; http://hmmer.wustl.edu'
 hmmindex_bin     = 'hmmindex', s, 'Part of HMMER; http://hmmer.wustl.edu'
 
-msms_bin 	 = 'msms', s, 'http://www.scripps.edu/~sanner/python/'
-pdb_to_xyzrn_bin = __root + '/external/msms/gpdb_to_xyzrn', s,\
-                    'part of the the MSMS package'
-
-fastsurf_bin      = 'fastsurf7_2', s,\
-                    'http://monte.biochem.wisc.edu/~tsodikov/surface.html'
 xplor_bin 	  = 'ifcxplor', s, 'X-Plor with PCR-restraint capabilities'
 gbxplor_bin       = 'gbxplor', s, 'X-Plor with Generalized Born implementation'
 
@@ -94,10 +83,7 @@ pymol_bin 	  = 'pymol.com', s, 'http://pymol.sourceforge.net/'
 ## AMBER
 s = 'amber'
 
-ptraj_bin         = 'ptraj', s,  'part of Amber package'
-tleap_bin         = 'tleap', s,  'part of Amber package'
 sander_bin        = 'sander', s, 'part of Amber package'
-ambpdb_bin        = 'ambpdb', s, 'part of Amber package'
 leaprc            = __os.getenv('AMBERHOME','')+'/dat/leap/cmd/leaprc.ff99',s,\
                     'default force field for Amber tleap'
 

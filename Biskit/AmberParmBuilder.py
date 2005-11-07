@@ -86,7 +86,6 @@ class AmberParmBuilder:
     def __init__( self, model,
                   leap_template=F_leap_in,
                   leaprc=s.leaprc,
-                  leap_bin=s.tleap_bin,
                   leap_out=None, leap_in=None,
                   leap_pdb=None,
                   log=None,
@@ -106,7 +105,6 @@ class AmberParmBuilder:
         self.m = PDBModel( model )
 
         self.leap_template = t.absfile( leap_template )
-        self.leap_bin= leap_bin
         self.leaprc  = leaprc
 
         self.leap_in = leap_in or tempfile.mktemp( '_leap_in' )
