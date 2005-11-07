@@ -40,7 +40,7 @@ def getHosts( section, option ):
             if len(host) != 0:
                 hosts += [ S.strip(host) ] 
 	return hosts
-    return None
+    return []
 
 
 def getDict( section, option ):
