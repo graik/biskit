@@ -73,7 +73,7 @@ class AlignerSlave(JobSlave):
 
 
     def prepareT_coffee(self, input_file):
-
+        
         alpha_index = open(T.absfile('%s'%input_file,'a+'))
 
         string_lines = alpha_index.readlines()
