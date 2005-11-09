@@ -19,6 +19,7 @@
 ##
 ## last $Author$
 ## last $Date$
+## $Revision$
 """
 Search one or more sequence databases (SwissProt, Tremble) with a sequence
 using the method of choice (Blast , FastA)
@@ -26,6 +27,7 @@ using the method of choice (Blast , FastA)
 
 import Bio.SwissProt.SProt
 from Bio.Blast import NCBIWWW
+from Bio.Blast import NCBIXML
 from Bio.Blast import NCBIStandalone
 from Bio import Fasta
 
@@ -131,42 +133,19 @@ class SequenceSearcher:
 
 
     ==================== remoteBlast, remotePSIBlast =========================
+    NCBIWWW.qblast
 
-    NCBIWWW.blast(program, database, query[, query_from][, query_to]
-        [, entrez_query][, filter][, expect]
-        [, word_size][, other_advanced][, cdd_search]
-        [, composition_based_statistics][, matrix_name][, run_psiblast]
-        [, i_thresh][, genetic_code][, show_overview][, ncbi_gi]
-        [, format_object][, format_type][, descriptions][, alignments]
-        [, alignment_view][, auto_format][, cgi][, timeout]) -> handle
-
-    Blast against the NCBI Blast web page.  This uses the NCBI web
-    page cgi script to BLAST, and returns a handle to the
-    results. See:
-    
-    http://www.ncbi.nlm.nih.gov/blast/html/blastcgihelp.html
-    
-    for more descriptions about the options.
-
-    Required Inputs:
-      program  - The name of the blast program to run (ie. blastn, blastx...)
-      database - The database to search against (ie. nr, dbest...)
-      query    - The input type for the search, which NCBI tries to guess.
-                 Ideally, this would be a sequence in FASTA format.
-
-    General Options:
-      filter, expect, word_size, other_advanced
-
-    Formatting Options:
-      show_overview, ncbi_gi, format_object, format_type, descriptions,
-      alignments, alignment_view, auto_format
-
-    Protein specific options:
-      cdd_search, composition_based_statistics, matrix_name, run_psiblast,
-      i_thresh
-
-    Translated specific options:
-      genetic code
+    Do a BLAST search using the QBLAST server at NCBI.
+      program        BLASTP, BLASTN, BLASTX, TBLASTN, or TBLASTX.
+      database       Which database to search against.
+      sequence       The sequence to search.
+      ncbi_gi        TRUE/FALSE whether to give 'gi' identifier.  Def FALSE.
+      descriptions   Number of descriptions to show.  Def 500.
+      alignments     Number of alignments to show.  Def 500.
+      expect         An expect value cutoff.  Def 10.0.
+      matrix         Specify an alt. matrix (PAM30, PAM70, BLOSUM80, BLOSUM45).
+      filter         'none' turns off filtering.  Default uses 'seg' or 'dust'.
+      format_type    'HTML', 'Text', 'ASN.1', or 'XML'.  Def. 'HTML'
 
     """
 
@@ -201,8 +180,19 @@ class SequenceSearcher:
         ##       check these regexps (see getSequenceIDs function)!
         ##
         self.ex_gi    = re.compile( '^>ref|gb|ngb|emb|dbj|prf\|{1,2}([A-Z_0-9.]+)\|' )
-        self.ex_swiss = re.compile(  '^>sp\|([A-Z0-9_]{5,7})\|' )
+        self.ex_swiss = re.compile( '^>sp\|([A-Z0-9_]{5,7})\|' )
         self.ex_pdb   = re.compile( '^>pdb\|([A-Z0-9]{4})\|' )
+
+        ##
+        ## RegExp for the remoteBlast searches. Somehow the NCBI GI
+        ## identifier is written before the identifyer we want
+        ## (even though this is explicitly turned off in
+        ##  SequenceSearcher.remoteBlast).
+        ##
+        gi = '^gi\|[0-9]+\|'
+        self.ex_Rgi = re.compile( gi+'ref|gb|ngb|emb|dbj|prf\|([A-Z_0-9.]+)\|' )
+        self.ex_Rswiss = re.compile( gi+'sp\|([A-Z0-9_]{5,7})\|' )
+        self.ex_Rpdb   = re.compile( gi+'pdb\|([A-Z0-9]{4})\|' )
 
         self.verbose = verbose
         self.log = log or StdLog()
@@ -265,38 +255,49 @@ class SequenceSearcher:
         db     - list of str, e.g. ['swissprot', 'pdb']
         method - str, e.g. 'blastp', 'fasta'
         e      - float, expectation value cutoff
+        ncbi_gi- TRUE/FALSE whether to give 'gi' identifier.  Def FALSE.
         **kw   - blast options
+
+        NOTE: Using the remoteBlast is asking for trouble, as
+              every change in the output file might kill the
+              parser. If you still want to use remoteBlast we
+              strongly recomend that you install BioPython
+              from CVS. Information on how to do this you
+              will find on the BioPython homepage.
         """
         fasta = Fasta.Iterator( open(seqFile) )
         query = fasta.next()
         
-        blast_result = NCBIWWW.qblast( method, db, query, expect=e, **kw)
+        blast_result = NCBIWWW.qblast( program=method, database=db,
+                                       sequence=query, expect=e,
+                                       ncbi_gi='FALSE', **kw)
 
-        p = NCBIWWW.BlastParser()
+        p = NCBIXML.BlastParser()
+
         parsed = p.parse( blast_result )
 
         self.__blast2dict( parsed, db )
 
 
-    def remotePSIBlast( self, seqFile, db, method, e=0.01, **kw ):
-        """
-        seqFile- str, file name with search sequence as FASTA
-        db     - list of str, e.g. ['swissprot', 'pdb']
-        method - str, e.g. 'blastp', 'fasta'
-        e      - float, expectation value cutoff
-        **kw   - blast options
-        """
-        fasta = Fasta.Iterator( open(seqFile) )
-        query = fasta.next()
+##     def remotePSIBlast( self, seqFile, db, method, e=0.01, **kw ):
+##         """
+##         seqFile- str, file name with search sequence as FASTA
+##         db     - list of str, e.g. ['swissprot', 'pdb']
+##         method - str, e.g. 'blastp', 'fasta'
+##         e      - float, expectation value cutoff
+##         **kw   - blast options
+##         """
+##         fasta = Fasta.Iterator( open(seqFile) )
+##         query = fasta.next()
         
-        blast_result = NCBIWWW.blast( method, db, query, run_psiblast=1,
-                                      expect=e, **kw)
+##         blast_result = NCBIWWW.blast( method, db, query, run_psiblast=1,
+##                                       expect=e, **kw)
 
-        ## DOES THAT WORK???
-        p = NCBIWWW.BlastParser()
-        parsed = p.parse( blast_result )
+##         ## DOES THAT WORK???
+##         p = NCBIWWW.BlastParser()
+##         parsed = p.parse( blast_result )
 
-        self.__blast2dict( parsed, db )
+##         self.__blast2dict( parsed, db )
     
 
     def localBlast( self, seqFile, db, method='blastp',
@@ -370,8 +371,8 @@ class SequenceSearcher:
         result = []
         ids = []
         for a in blast_records.alignments:
-
-            for pattern in [self.ex_gi, self.ex_swiss, self.ex_pdb]:
+            for pattern in [self.ex_gi,  self.ex_swiss,  self.ex_pdb,
+                            self.ex_Rgi, self.ex_Rswiss, self.ex_Rpdb]:
                 ids = pattern.findall( a.title )
                 if ids:
                     break
@@ -508,6 +509,10 @@ class SequenceSearcher:
         """
         Run cluterFasta iteratively, with tighter clustering settings, until
         the number of clusters are less than self.clusterLimit.
+
+        Older versions of T-Coffee can't handle more that approx.
+        50 sequences (out of memory). This problem is taken care of
+        in versions > 3.2 of T-Coffee.
         """
         iter = 1
         while self.clustersCurrent > self.clusterLimit \
