@@ -19,10 +19,12 @@
 ##
 ## last $Author$
 ## last $Date$
+## $Revision$
 
 from SequenceSearcher import SequenceSearcher, BlastError
 import settings
 import Biskit.tools as tools
+from Biskit import StdLog, EHandler
 
 from Bio import Fasta
 import re
