@@ -64,7 +64,7 @@ gzip -d Pfam_ls.gz
 
 2) Add the path to the database to ~/.biskit/settings.dat
 Assign the path of the Pfam database to the 'hmm_db' variable. 
-example: hmm_db = /shared/db/Pfam_ls'
+example: hmm_db = /shared/db/Pfam_ls
 
 
 Install local PDB database:
@@ -88,6 +88,11 @@ ${RSYNC} -rlpt -v -z --delete --port=$PORT
          $SERVER::ftp_data/structures/divided/pdb/ 
 	 $MIRRORDIR > $LOGFILE 2>/dev/null
 
+(C) Add the path to the database to ~/.biskit/settings.dat
+Assign the path of the pdb database to the 'pdb_path' variable. 
+example: pdb_path = /shared_bin/db/pdb
+
+
 
 T-Cofee, ClustalW and SAP:
 --------------------------
@@ -105,3 +110,12 @@ http://igs-server.cnrs-mrs.fr/~cnotred/Projects_home_page/t_coffee_home_page.htm
 
 Set the t_coffee_bin variable in ~/.biskit/settings.dat:
 t_coffee_bin = /shared_bin/T-Coffee/t_coffee
+
+Optional settings:
+- force T-Coffee not to validate filenames of structures against the RCSB.
+  The validation is quite time consuming, therefore this setting is recommended.
+  setenv NO_REMOTE_PDB_DIR 1
+- If you have a local database installed installed this can be used for the
+  validation.  
+  setenv PDB_DIR /path/to/your/pdb/database
+
