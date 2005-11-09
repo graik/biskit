@@ -24,7 +24,7 @@
 
 from Biskit.Mod.ValidationSetup import ValidationSetup as VS
 import Biskit.tools as T
-import sys, os
+import sys, os, os.path
 
 
 def _use( o ):
@@ -54,12 +54,16 @@ if __name__ == '__main__':
     if '?' in options or 'help' in options:
         _use( options )
                        
-    folders = T.toList(options['o'])
+    folders = T.toList( options['o'] )
 
-    print "Creating folders...",
+    if not os.path.exists( folders[0] +'/templates'):
+        print 'Current directory is not a valid modeling folder.' 
+        _use( options )
+
+    T.flushPrint( "Creating folders and links..." )
   
     for f in folders:
         sv = VS(outFolder=f)
         sv.go(f)
 
-    print "done\n"
+    T.flushPrint( "done\n" )

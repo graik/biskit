@@ -63,8 +63,12 @@ host = options['h']
 
 log = None
 if options['log']:
-    log = LogFile( outFolder + '/' + options['log'], 'a' ) 
-
+    log = LogFile( outFolder + '/' + options['log'], 'a' )
+    
+if not (os.path.exists( outFolder +'/templates' ) ):
+    print 'Current directory is not a valid modeling folder.' 
+    _use( defaultOptions() )
+          
 if '?' in options or 'help' in options:
     _use( defaultOptions() )
 
@@ -77,7 +81,7 @@ if '?' in options or 'help' in options:
 ## input: sequences/nr.fasta
 ##        templates/templates.fasta
 ##        templates/t_cofee/*.alpha
-##!
+##
 ## output: t_coffee/fast_pair.lib
 ##                 /final.score_html
 ##                 /struct.aln
@@ -93,18 +97,24 @@ if '?' in options or 'help' in options:
 
 ## note 1: If there are more than approximately 50 sequences overall
 ##         t_coffe will eat all the memory and the job will not finish
-
-## (note 2:) Now this is taken care of by Aligner.py
-##         If there is only one template structure step 2 of T-coffee
+##         This should be fixed in more recent versions of T-Coffee
+##         (v > 3.2) where T-Coffee, according to the manual "switches
+##         to a heuristic mode, named DPA, where DPA stands for Double
+##         Progressive Alignment."
+    
+## note 2: If there is only one template structure step 2 of T-coffee
 ##         will not work. Solution, skipp the structural alignment if
-##         only one teemplate structure is provided.
+##         only one template structure is provided.
 
 ## note 3: In quite som cases the sequence retrieved from the nrpdb
 ##         sequence database is different from the sequence extracted
-##         from the coordinates in the pdb-file. This will sometimes cause
-##         t-coffee to terminate with an error (2 sequences with the same name
-##         but with different sequences). Temporary solution: Choose another
-##         structure from the same cluster as the troublemaker.
+##         from the coordinates in the pdb-file. This will sometimes
+##         cause t-coffee to terminate with an error (two sequences
+##         with the same name but with different sequences). Temporary
+##         solution: Choose another  structure from the same cluster
+##         as the troublemaker.
+
+
 try:
     a = Aligner( outFolder, log )
 

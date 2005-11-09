@@ -56,7 +56,7 @@ Default options:
 
 def defaultOptions():
     return {'o':'.',
-            'log': None,
+            'log': None
             }
 
 ### MAIN ###
