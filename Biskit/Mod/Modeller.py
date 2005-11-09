@@ -191,6 +191,9 @@ CALL ROUTINE = 'model'             # do homology modelling
 
         self.logWrite('Warning: target sequence ID extracted without check'+
                       ' against alignment file. Use prepare_alignment first.')
+        
+        title.close()
+        
         return id_fasta
     
 
@@ -309,10 +312,10 @@ CALL ROUTINE = 'model'             # do homology modelling
         OF = r1.findall(line_of_interest)
 
        
-        file = open(model.validSource(),'a+')
+        file = open(model.validSource(),'r')
         string = file.readlines()[:2]
         model.info["headlines"] = string
-
+        file.close()
 
         return  float(OF[0])
 
@@ -322,12 +325,12 @@ CALL ROUTINE = 'model'             # do homology modelling
         pdb_list - ModelList
         model_folder - str, ouput folder
         """
-        file_output = open(self.outFolder+self.F_SCORE_OUT,'a+')
-        file_output.write("The models from modeller with their Score:\n\n\n")
+        file_output = open(self.outFolder+self.F_SCORE_OUT,'w')
+        file_output.write("The models from modeller with their Score:\n")
 
         for model in pdb_list:
         
-            file_output.write('%s\t%f\n'%(tools.stripFilename(
+            file_output.write('%s\t%6.2f\n'%(tools.stripFilename(
                 model.validSource()), model.info["mod_score"]))
     
         file_output.close()

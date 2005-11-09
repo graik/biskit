@@ -19,6 +19,7 @@
 ##
 ## last $Author$
 ## last $Date$
+## $Revision$
 
 import re, os
 import commands

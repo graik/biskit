@@ -116,7 +116,7 @@ class AlignerMaster(TrackingJobMaster):
         print "Cleaning up..."
 
     def done( self ):
-        print "Now we are done."
+        print "Done aligning."
     
 
 if __name__ == '__main__':
