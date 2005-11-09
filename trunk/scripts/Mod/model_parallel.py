@@ -23,7 +23,9 @@
 ## $Revision$
 
 from Biskit.Mod.ModelMaster import ModelMaster
-from Biskit.Mod.ValidationSetup import ValidationSetup
+from Biskit.Mod.ValidationSetup import ValidationSetup as VS
+from Biskit.Mod.TemplateSearcher import TemplateSearcher as TS
+from Biskit.Mod.Modeller import Modeller as M
 import Biskit.tools as T
 import Biskit.hosts as hosts
 import sys, os
@@ -63,11 +65,33 @@ Default options:\
 if __name__ == '__main__':
 
     ## look for default cross-validation projects
-    f = os.getcwd() + ValidationSetup.F_RESULT_FOLDER
     d = []
-    if osp.exists( f ):
-        d = glob.glob( f+'/*' )
-    
+    f = os.getcwd()
+    if osp.exists( f + VS.F_RESULT_FOLDER ):
+        d = glob.glob( f + VS.F_RESULT_FOLDER + '/*' )
+    ## does current look like a main project folder?
+    if osp.exists( f + TS.F_RESULT_FOLDER ):
+        d += [f]
+
+    ## check if a modeller folders alredy exist
+    r = []  
+    for i in d:
+        if osp.exists( i + M.F_RESULT_FOLDER ):
+            print 'Modeller output folder alredy exists in %s'%i
+            s = raw_input('Overwrite folder? (y/N)')
+            if not s: s='N'
+            if not ( s[0] =='y' or s[0]=='Y' ):
+                r += [i]
+    ## have too remove objects backvards not to change indexes
+    r.reverse()
+    for j in r:
+        d.remove(j)
+        
+    if len(d)==0:
+        print 'Nothing to model. Exiting.'
+        sys.exit(0)
+
+
     options = T.cmdDict({'h':10, 'd':d})
 
     if (options['d'] is None) or ('help' in options or '?' in options):
@@ -75,25 +99,23 @@ if __name__ == '__main__':
                        
     folders = T.toList(options['d'])
     hostNumber = int(options['h'])
-
- 
     fastaTarget = options.get('fta', None)
-    
     f_pir = options.get('pir', None)
-   
     template_folder = options.get('tf', None)
-
     starting_model = options.get('sm', None)
-  
     ending_model = options.get('em', None)
-
     ferror = options.get('fe', None)
-
 
     print "Initialize Job queue.."
 
-    master = ModelMaster(hosts=hosts.cpus_all[ : hostNumber ], folders=folders,
-                           fastaTarget=fastaTarget, f_pir=f_pir, template_folder=template_folder,
-                           starting_model=starting_model, ending_model=ending_model, ferror=ferror)
+    master = ModelMaster(hosts=hosts.cpus_all[ : hostNumber ],
+                         folders=folders,
+                         fastaTarget=fastaTarget,
+                         f_pir=f_pir,
+                         template_folder=template_folder,
+                         starting_model=starting_model,
+                         ending_model=ending_model,
+                         ferror=ferror)
+    
     master.calculateResult()
 

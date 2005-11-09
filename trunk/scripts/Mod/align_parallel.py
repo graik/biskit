@@ -23,7 +23,9 @@
 ## $Revision$
 
 from Biskit.Mod.AlignerMaster import AlignerMaster
-from Biskit.Mod.ValidationSetup import ValidationSetup
+from Biskit.Mod.ValidationSetup import ValidationSetup as VS
+from Biskit.Mod.TemplateSearcher import TemplateSearcher as TS
+from Biskit.Mod.Aligner import Aligner as A
 import Biskit.tools as T
 import Biskit.hosts as hosts
 import sys, os
@@ -33,14 +35,17 @@ import glob
 def _use( o ):
 
     print """
-Built multiple alignment for each project given directory (parallelised)
+Built multiple alignment for each project given directory (parallelised).
+If run from within a standardized modeling/validation folder structure,
+i.e from the project root where the folders templates, sequences, and
+validation reside all options will be set by the script.
         
 Syntax: align_parallel.py -d |list of folders| -h |hosts|
-                       [-pdb |pdbFolder| -ft |fastaTemplates|
-                       -fs |fastaSequences| -fta |fastaTarget|
-                       -fe |ferror|]
+                         [-pdb |pdbFolder| -ft |fastaTemplates|
+                          -fs |fastaSequences| -fta |fastaTarget|
+                          -fe |ferror|]
 
-    pvm must be running on the local machine!
+Note:  pvm must be running on the local machine!
 
 Options:
     -d    [str], list of project directory (full path)
@@ -58,38 +63,50 @@ Default options:\
         print "\t-",key, "\t",value
 
     sys.exit(0)
-
+    
 
 if __name__ == '__main__':
 
     ## look for default cross-validation projects
-    f = os.getcwd() + ValidationSetup.F_RESULT_FOLDER
     d = []
-    if osp.exists( f ):
-        d = glob.glob( f+'/*' )
-    
+    f = os.getcwd()
+    if osp.exists( f + VS.F_RESULT_FOLDER ):
+        d = glob.glob( f + VS.F_RESULT_FOLDER + '/*' )
+    ## does current folder look like a main project folder?
+    if osp.exists( f + TS.F_RESULT_FOLDER ):
+        d += [f]
+
+    ## check if t_coffee folders alredy exist
+    r = []
+    for i in d:
+        if osp.exists( i + A.F_RESULT_FOLDER ):
+            print 'T-Coffee output folder alredy exists in %s'%i
+            s = raw_input('Overwrite folder? (y/N)')
+            if not s: s='N'
+            if not ( s[0] =='y' or s[0]=='Y' ):
+                r += [i]
+    ## have too remove objects backvards not to change indexes
+    r.reverse()
+    for j in r:
+        d.remove(j)
+        
+    if len(d)==0:
+        print 'Nothing to align. Exiting.'
+        sys.exit(0)
+        
     options = T.cmdDict({'h':10, 'd':d})
 
     if (options['d'] is None) or ('help' in options or '?' in options):
         _use( options )
 
-                       
     folders = T.toList(options['d'])
     hostNumber = int(options['h'])
-
-   
     pdbFolder = options.get('pdb', None)
-
     fastaTemplates = options.get('ft', None)
-
     fastaSequences = options.get('fs', None)
-
     fastaTarget = options.get('fta', None)
-
     ferror = options.get('fe',None)
-
     show_output = 'w' in options
-
 
     print "Initialize Job queue.."
 
@@ -102,5 +119,5 @@ if __name__ == '__main__':
                            ferror=ferror,
                            show_output=show_output)
     
-    print "Start jobs .."
-    master.calculateResult()
+    print "Starting alignment jobs .."
+    master.calculateResult( )
