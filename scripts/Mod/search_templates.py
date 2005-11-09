@@ -28,8 +28,9 @@ from Biskit.Mod import *
 import Biskit.tools as tools
 from Biskit import EHandler
 from Biskit import LogFile
+import Biskit.Mod.settings as settings
 
-import sys, os.path
+import sys, os.path, os
 
 def _use( o ):
     print """
@@ -127,9 +128,15 @@ ext_options = blastOptions( options )
 ##         templates/nr/chain_index.txt    (input for TemplateCleaner)
 ##                     /*.pdb              (  "    "         "       )
 
-searcher = TemplateSearcher( outFolder, verbose=1)
+searcher = TemplateSearcher( outFolder, verbose=1, log=None )
 
-searcher.localBlast(f_target, tmp_db, 'blastp', alignments=aln, e=e)
+## if it looks like local Blast is installed
+if os.environ.has_key('BLASTDB') and not settings.blast_bin:
+    searcher.localBlast( f_target, tmp_db, 'blastp', alignments=aln, e=e )
+## try remote Blast   
+else:
+    searcher.remoteBlast( f_target, tmp_db, 'blastp', alignments=aln, e=e )
+    
 
 searcher.retrievePDBs()
 

@@ -28,8 +28,9 @@ from Biskit.Mod import *
 import Biskit.tools as tools
 from Biskit import EHandler
 from Biskit import LogFile
+import Biskit.Mod.settings as settings
 
-import sys, os.path
+import sys, os.path, os
 
 def _use( o ):
     print """
@@ -63,7 +64,7 @@ Default options:
 def defaultOptions():
     return {'q':None,
             'o':'.',
-            'db' : 'sprot.dat',
+            'db' : 'swissprot',
             'log': None,
             'e':0.01,
             'aln':500,
@@ -131,9 +132,15 @@ if 'psi' in options:
     searcher.localPSIBlast( f_target, seq_db, e=e, alignments=aln,
                             **ext_options )
 else:
-    ## local Blast
-    searcher.localBlast( f_target, seq_db, 'blastp', alignments=aln, e=e,
-                         **ext_options )
+    ## if it looks like local Blast is installed
+    if os.environ.has_key('BLASTDB') and not settings.blast_bin:
+        searcher.localBlast( f_target, seq_db, 'blastp', alignments=aln,
+                             e=e, **ext_options )
+    ## try remote Blast   
+    else:
+        searcher.remoteBlast( f_target, seq_db, 'blastp', alignments=aln, 
+                              e=e, **ext_options )
+    
 
 ## cluster blast results. Defaults: simCut=1.75, lenCut=0.9, ncpu=1
 ## expects all.fasta
