@@ -139,6 +139,7 @@ try:
 
     ## cluster blast results. Defaults: simCut=1.75, lenCut=0.9, ncpu=1
     ## expects all.fasta
+#    searcher.clusterFastaIterative( )
     searcher.clusterFasta() 
 
     searcher.writeFastaClustered()
@@ -242,7 +243,12 @@ except:
 
 ## note 1: If there are more than approximately 50 sequences overall
 ##         t_coffe will eat all the memory and the job will not finish
-
+##         This should be fixed in more recent versions of T-Coffee
+##         (v > 3.2) where T-Coffee, according to the manual "switches
+##         to a heuristic mode, named DPA, where DPA stands for Double
+##         Progressive Alignment."
+##         Remedy: Use clusterFastaIterative() when searching for sequences
+    
 ## note 2: If there is only one template structure step 2 of T-coffee
 ##         will not work. Solution, skipp the structural alignment if
 ##         only one template structure is provided.
