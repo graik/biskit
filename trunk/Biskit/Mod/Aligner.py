@@ -413,7 +413,7 @@ class Aligner:
         self.commands += r
 
         if self.verbose:
-            f = open( self.outFolder + self.F_COFFEE_INP, 'a' )
+            f = open( self.outFolder + self.F_COFFEE_INP, 'w' )
             for cmd in r:
                 f.write( str(cmd) + '\n\n' )
             f.close()

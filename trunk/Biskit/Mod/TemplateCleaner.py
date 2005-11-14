@@ -63,6 +63,7 @@ class TemplateCleaner:
 
     def prepareFolders( self ):
         """
+        Create folders needed by this class.
         """
         if not os.path.exists( self.outFolder + self.F_CLEANED ):
             os.mkdir( self.outFolder + self.F_CLEANED )
