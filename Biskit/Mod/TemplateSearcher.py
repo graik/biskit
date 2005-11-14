@@ -70,7 +70,7 @@ class TemplateSearcher( SequenceSearcher ):
     F_CHAIN_INDEX = '/chain_index.txt'
     
 
-    def __init__( self, outFolder='.', verbose=1, log=None ):
+    def __init__( self, outFolder='.', clusterLimit=20,  verbose=1, log=None ):
         """
         outFolder - str, project folder (results are put into subfolder) ['.']
         """
@@ -84,9 +84,14 @@ class TemplateSearcher( SequenceSearcher ):
         self.prepareFolders()
         
         self.log = log or StdLog()
+        
+        ## the maximal number of clusters to return
+        self.clusterLimit = clusterLimit
+        
 
     def prepareFolders( self ):
         """
+        Create folders needed by this class.
         """
         SequenceSearcher.prepareFolders( self )
         
