@@ -28,6 +28,8 @@ import re
 import glob
 import copy
 
+import modUtils as MU
+
 from TemplateSearcher import TemplateSearcher
 from SequenceSearcher import SequenceSearcher
 from TemplateCleaner import TemplateCleaner
@@ -207,7 +209,7 @@ class ValidationSetup:
             for i in range(len(PDBModels_list)):
                 templatesfasta.write(">%s\n"%pdb_name[i])
                 sequence = PDBModels_list[i].sequence()
-                sequence = self.write_fasta(seq = sequence)
+                sequence = MU.format_fasta(seq = sequence)
                 templatesfasta.write("%s\n"%sequence)
 
             templatesfasta.close()
@@ -255,7 +257,7 @@ class ValidationSetup:
 
                 model = PDBModel('%s'%pdb)
                 sequence = model.sequence()
-                sequence = self.write_fasta(seq = sequence)
+                sequence = MU.format_fasta(seq = sequence)
                 target.write("%s"%sequence)
                     
         target.close()
@@ -275,25 +277,6 @@ class ValidationSetup:
                   
         os.system('ln -s %s %s'%(sequences_folder , output_folder))
         
-
-    def write_fasta(self, seq, width=60):
-        """
-        Transform a given sequence in fasta format
-        seq -str, sequence
-        -> str, string sequence in fasta format
-        """
-        fasta_sequence = ""
-        
-        for i in xrange(0,len(seq),width):            
-            fasta_sequence += seq[i:i+width]
-
-            if(i+width>=len(seq)):
-                pass
-            else:
-                fasta_sequence += "\n"
-
-        return fasta_sequence
-
 
     def link_reference_pdb(self, cluster, input_folder = None,
                            output_file = None):
