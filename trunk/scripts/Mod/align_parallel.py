@@ -121,3 +121,13 @@ if __name__ == '__main__':
     
     print "Starting alignment jobs .."
     master.calculateResult( )
+
+    ## check for completed jobs
+    j=0
+    for i in d:
+        if osp.exists( i + A.F_FINAL +'.aln' ):
+            j+=1
+        else:
+            print 'ERROR:Alignment error in %s see Aligner.log for more info'%i
+        if j == len(d):
+            print '\nAll %i alignments completed sucessfully.'%j
