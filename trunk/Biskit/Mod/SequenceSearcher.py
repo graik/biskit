@@ -38,6 +38,7 @@ from Biskit import StdLog, EHandler
 from Biskit.Mod import settings
 
 import re, os
+import string
 import commands
 import copy
 from sys import *
@@ -91,10 +92,9 @@ class SequenceSearcher:
 
     ============================== localPSIBlast =============================
     
-    localPSIBlast(seqFile, db, method='blastpgp', resultOut=None, e=0.01, **kw)
+    localPSIBlast(seqFile, db, resultOut=None, e=0.01, **kw)
         seqFile   - str, file name with search sequence as FASTA
         db        - list of str, e.g. ['swissprot', 'pdb']
-        method    - str, e.g. 'blastp', 'fasta'
         e         - float, expectation value cutoff
         resultOut - str, save blast output to this new file
 
@@ -179,18 +179,18 @@ class SequenceSearcher:
         ## NOTE: If you get errors of the type "Couldn't find ID in"
         ##       check these regexps (see getSequenceIDs function)!
         ##
-        self.ex_gi    = re.compile( '^>ref|gb|ngb|emb|dbj|prf\|{1,2}([A-Z_0-9.]+)\|' )
+        self.ex_gi    = re.compile( '^>ref|gb|ngb|emb|dbj|prf\|{1,2}([A-Z_0-9.]{4,9})\|' )
         self.ex_swiss = re.compile( '^>sp\|([A-Z0-9_]{5,7})\|' )
         self.ex_pdb   = re.compile( '^>pdb\|([A-Z0-9]{4})\|' )
 
         ##
-        ## RegExp for the remoteBlast searches. Somehow the NCBI GI
-        ## identifier is written before the identifyer we want
-        ## (even though this is explicitly turned off in
-        ##  SequenceSearcher.remoteBlast).
+        ##      RegExp for the remoteBlast searches. Somehow the
+        ##      NCBI GI identifier is written before the identifier
+        ##      we want (even though this is explicitly turned off in
+        ##      SequenceSearcher.remoteBlast).
         ##
         gi = '^gi\|[0-9]+\|'
-        self.ex_Rgi = re.compile( gi+'ref|gb|ngb|emb|dbj|prf\|([A-Z_0-9.]+)\|' )
+        self.ex_Rgi = re.compile( gi+'ref|gb|ngb|emb|dbj|prf\|([A-Z_0-9.]+)\|')
         self.ex_Rswiss = re.compile( gi+'sp\|([A-Z0-9_]{5,7})\|' )
         self.ex_Rpdb   = re.compile( gi+'pdb\|([A-Z0-9]{4})\|' )
 
@@ -201,7 +201,9 @@ class SequenceSearcher:
         self.clusters = None ## list of lists of ids
         self.bestOfCluster = None ## list of non-redundant ids
 
-        self.clusterLimit = 50 ## the maximal number of clusters to return
+        ## the maximal number of clusters to return
+        self.clusterLimit =  clusterLimit
+        
         self.clustersCurrent = None ## current number of clusters
 
         self.prepareFolders()
@@ -279,26 +281,6 @@ class SequenceSearcher:
         self.__blast2dict( parsed, db )
 
 
-##     def remotePSIBlast( self, seqFile, db, method, e=0.01, **kw ):
-##         """
-##         seqFile- str, file name with search sequence as FASTA
-##         db     - list of str, e.g. ['swissprot', 'pdb']
-##         method - str, e.g. 'blastp', 'fasta'
-##         e      - float, expectation value cutoff
-##         **kw   - blast options
-##         """
-##         fasta = Fasta.Iterator( open(seqFile) )
-##         query = fasta.next()
-        
-##         blast_result = NCBIWWW.blast( method, db, query, run_psiblast=1,
-##                                       expect=e, **kw)
-
-##         ## DOES THAT WORK???
-##         p = NCBIWWW.BlastParser()
-##         parsed = p.parse( blast_result )
-
-##         self.__blast2dict( parsed, db )
-    
 
     def localBlast( self, seqFile, db, method='blastp',
                     resultOut=None, e=0.01, **kw ):
@@ -338,29 +320,38 @@ class SequenceSearcher:
                               str( self.error ) ) 
 
 
-    def localPSIBlast( self, seqFile, db, method='blastpgp',
-                       resultOut=None, e=0.01, **kw ):
+    def localPSIBlast( self, seqFile, db, rounds=3, resultOut=None,
+                       e=0.01, **kw ):
         """
         seqFile- str, file name with search sequence as FASTA
         db     - list of str, e.g. ['swissprot', 'pdb']
-        method - str, e.g. 'blastp', 'fasta'
-        e - float, expectation value cutoff
+        e - float, expectation value cutoff, def 0.001
         resultOut - str, save blast output to this new file
+
+        e_init - float, threshold for the initial BLAST search, def. 10
         """
+        results = err = p = None
         try:
             results, err = NCBIStandalone.blastpgp( settings.psi_blast_bin,
-                                                        method, db, seqFile,
-                                                        expectation=e, **kw)
-
+                                                    db, seqFile,
+                                                    npasses=rounds,
+                                                    expectation=e, **kw)
+            
             p = NCBIStandalone.PSIBlastParser()
+
             parsed = p.parse( results )
 
-            self.__blast2dict( parsed, db )
-            
+            self.__blast2dict( parsed.rounds[-1], db )
+
         except Exception, why:
-           self.error = { 'results':results,'err':err, 'parser':p }
-           tools.errWriteln( "BlastError " + tools.lastErrorTrace() )
-           raise BlastError( why ) 
+            self.error = { 'results':results,'err':err.read(), 'parser':p,
+                           'blast_bin':settings.blast_bin, 'seqFile':seqFile,
+                           'db':db,'kw':kw,'exception':str(why) }
+            tools.errWriteln( "BlastError " + tools.lastErrorTrace() )
+            print tools.lastErrorTrace()
+            raise BlastError( str(why) + "\n" +
+                              str( self.error ) ) 
+
 
 
     def getSequenceIDs( self, blast_records ):
@@ -374,12 +365,12 @@ class SequenceSearcher:
             for pattern in [self.ex_gi,  self.ex_swiss,  self.ex_pdb,
                             self.ex_Rgi, self.ex_Rswiss, self.ex_Rpdb]:
                 ids = pattern.findall( a.title )
-                if ids:
+                if ids and ids[0]!='':
                     break
 
             if not ids:
                 raise BlastError( "Couldn't find ID in " + a.title)
-            
+                
             result += [ ids[0] ]
 
         return result
@@ -424,7 +415,7 @@ class SequenceSearcher:
                 r = self.fastaRecordFromId( db, i )
                 result[i] = r
             except BlastError, why:
-                tools.errWriteln("ERROR (ignored): couldn't fetch "+ str(i) )
+                tools.errWriteln("ERROR (ignored): couldn't fetch %s"%str(i) )
 
         return result
 
@@ -471,15 +462,13 @@ class SequenceSearcher:
         if tools.fileLength( fastaIn ) < 1:
             raise IOError( "File %s empty. Nothing to cluster"%fastaIn )
         
-        self.log.add( "\nClustering sequences\n"+20*"-")
-        self.log.add( "sequences: \n%s\n ..." % fastaIn ) 
+        self.log.add( "\nClustering sequences:\n%s"%('-'*20) )
 
         cmd = settings.blastclust_bin + ' -i %s -S %f -L %f -a %i' %\
               (fastaIn, simCut, lenCut, ncpu)
 
         if self.verbose:
-            self.log.add("\nclustering command:")
-            self.log.add(cmd)
+            self.log.add("- Command: %s"%cmd)
 
         ## bugfix: at all cost prevent blastclust from using shared temp folder
         tmp = os.environ.get( 'TMPDIR', None )
@@ -497,8 +486,6 @@ class SequenceSearcher:
         self.clusters = [ l.split() for l in lines ]
 
         self.reportClustering( raw=o )
-
-        self.log.add( "returning %i clusters.\n" % ( len( self.clusters)))
 
         self.bestOfCluster = [ self.selectFasta( ids )
                                 for ids in self.clusters ]
@@ -521,7 +508,7 @@ class SequenceSearcher:
             self.clusterFasta( fastaIn, simCut, lenCut, ncpu )
             self.clustersCurrent = len( self.clusters )
         
-            self.log.add( "\nClustering iteration %i produced %i clusters." \
+            self.log.add( "- Clustering iteration %i produced %i clusters." \
                           %( iter, len( self.clusters) ))
             self.log.add( "\tusing a simCut of %.2f and a lenCut of %.3f.\n" \
                           %( simCut, lenCut ) )
@@ -566,6 +553,7 @@ class SequenceSearcher:
         fastaOut - str, [ 'sequences/nr.fasta' ]
         """
         fastaOut = fastaOut or self.outFolder + self.F_FASTA_NR
+
         self.writeFasta( self.getClusteredRecords(), fastaOut )
 
 
@@ -578,17 +566,15 @@ class SequenceSearcher:
         """
         f = open( tools.absfile( outFile ), 'w' )
 
-        for (description, alignment) in \
-                zip(parsed_blast.descriptions,parsed_blast.alignments):
-
+        for alignment in parsed_blast.alignments:                    
             for hsp in alignment.hsps:
-                f.write('\n****Alignment****\n')
-                f.write('sequence:' + alignment.title + '\n' )
+                f.write('\nsequence:' + \
+                        string.replace(alignment.title, '\n','  ') + '\n' )
                 f.write('length:' + str(alignment.length) )
                 f.write('\te value: '+str(hsp.expect) + '\n')
-                f.write( hsp.query[0:75] + '...\n' )
-                f.write( hsp.match[0:75] + '...\n' )
-                f.write( hsp.sbjct[0:75] + '...\n' )
+                f.write( hsp.query + '\n' )
+                f.write( hsp.match + '\n' )
+                f.write( hsp.sbjct + '\n' )
 
         f.close()
 
@@ -628,7 +614,6 @@ if __name__ == '__main__':
 ##                                     'blastpgp', npasses=2)
 
     db = 'swissprot'
-    db = 'nr'
     f_target = searcher.outFolder + searcher.F_FASTA_TARGET
     searcher.localBlast( f_target, db, 'blastp', alignments=500, e=0.01 )
 
