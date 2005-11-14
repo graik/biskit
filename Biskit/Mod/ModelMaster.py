@@ -108,7 +108,7 @@ class ModelMaster(TrackingJobMaster):
         print "Cleaning up..."
 
     def done( self ):
-        print "Now we are done."
+        print "Done modeling."
     
 
 if __name__ == '__main__':
