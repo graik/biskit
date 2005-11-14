@@ -35,8 +35,8 @@ import sys, os.path, os
 def _use( o ):
     print """
 Syntax: search_sequences.py [-q |target.fasta| -o |outFolder| -log |logFile|
-               -db |database| -e |e-value-cutoff| -aln |n_alignments|
-               -psi
+               -db |database| -limit |max_clusters| -e |e-value-cutoff|
+               -aln |n_alignments| -psi |psi-blast rounds|
                -... additional options for blastall (see SequenceSearcher.py) ]
 
 Result: folder 'sequences' with blast result, all found sequences in all.fasta,
@@ -47,12 +47,13 @@ Options:
     -o       output folder for results      (default: .)
     -log     log file                       (default: STDOUT)
     -db      sequence data base
+    -limit   Largest number of clusters allowed
     -e       E-value cutoff for sequence search
     -aln     number of alignments to be returned
     -simcut  similarity threshold for blastclust (score < 3 or % identity)
     -simlen  length threshold for clustering
     -ncpu    number of CPUs for clustering
-    -psi     use PSI Blast instead, experimental!!
+    -psi     int, use PSI Blast with specified number of iterations
 
 Default options:
 """
@@ -66,6 +67,7 @@ def defaultOptions():
             'o':'.',
             'db' : 'swissprot',
             'log': None,
+            'limit':50,
             'e':0.01,
             'aln':500,
             'simcut':1.75,
@@ -86,6 +88,7 @@ def blastOptions( options ):
 
     return result
 
+
 ### MAIN ###
 
 options   = tools.cmdDict( defaultOptions() )
@@ -102,6 +105,7 @@ if '?' in options or 'help' in options:
 seq_db = options['db']
 e = float( options['e'] )
 aln = int( options['aln'])
+clustLim = int( options['limit'])
 simCut = float( options['simcut'] )
 simLen = float( options['simlen'] )
 nCpu = int( options['ncpu'] )
@@ -125,25 +129,30 @@ ext_options = blastOptions( options )
 ##                  /cluster_result.out
 ##                  /nr.fasta                 (input for Aligner)
 
-searcher = SequenceSearcher( outFolder=outFolder, verbose=1, log=log )
+searcher = SequenceSearcher( outFolder=outFolder, clusterLimit=clustLim,
+                             verbose=1, log=log )
 
 if 'psi' in options:
     ## local PSIBlast - not fully implemented!!
-    searcher.localPSIBlast( f_target, seq_db, e=e, alignments=aln,
-                            **ext_options )
+    tools.flushPrint('Performing local PSI blast search\n')
+    rounds = int( options['psi'] )
+    searcher.localPSIBlast( f_target, seq_db, e=e, rounds=rounds,
+                            alignments=aln, **ext_options )
 else:
     ## if it looks like local Blast is installed
-    if os.environ.has_key('BLASTDB') and not settings.blast_bin:
+    tools.flushPrint('Performing local blast search\n')
+    if os.environ.has_key('BLASTDB') and settings.blast_bin:
         searcher.localBlast( f_target, seq_db, 'blastp', alignments=aln,
                              e=e, **ext_options )
     ## try remote Blast   
     else:
+        tools.flushPrint('Performing remote blast search\n')
         searcher.remoteBlast( f_target, seq_db, 'blastp', alignments=aln, 
                               e=e, **ext_options )
     
 
 ## cluster blast results. Defaults: simCut=1.75, lenCut=0.9, ncpu=1
 ## expects all.fasta
-#searcher.clusterFasta( simCut=simCut, lenCut=simLen, ncpu=nCpu )
+
 searcher.clusterFastaIterative( simCut=simCut, lenCut=simLen, ncpu=nCpu )
 searcher.writeFastaClustered()
