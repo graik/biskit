@@ -22,6 +22,9 @@
 ## $Revision$
 """utility funtions for Mod package"""
 
+import os.path
+import types
+import Biskit.molUtils as MU
 
 def parse_tabbed_file( fname ):
     """
@@ -45,3 +48,54 @@ def parse_tabbed_file( fname ):
     f.close()
 
     return result
+
+
+def format_fasta(self, seq, width=60):
+    """
+    Transform a given sequence to fasta format
+    seq -str, sequence
+    -> str, string sequence in fasta format
+    """
+    fasta_sequence = ""
+
+    for i in xrange(0,len(seq),width):            
+        fasta_sequence += seq[i:i+width]
+
+        if(i+width>=len(seq)):
+            pass
+        else:
+            fasta_sequence += "\n"
+
+    return fasta_sequence
+
+
+def verify_fasta( target ):
+    """
+    Verify that a given file or string is in Fasta format.
+    The definition used for a fasta file here is that:
+    - first line starts with '>'
+    - the following sequence lines are not longer that 80 characters
+    - the characters has to belong to the standard amino acid codes
+    -> True/False
+    """
+    if not type(target) == types.ListType:
+        if os.path.exists( target ):
+            f = open( target, 'r' )
+            target = f.readlines()
+
+    if not target[0][0] == '>':
+        print 'Fasta format does not contain description line.'
+        return False
+
+    for i in range( 1, len(target) ):
+        if len( target[i] ) >= 80:
+            print 'Fasta sequence lines longer that 80 characters'
+            return False
+        
+        for j in target[i]:
+            aa_codes = MU.aaDicStandard.values() + [ '\n' ]
+            if not j.upper() in aa_codes:
+                print 'Invalid amino acid code: %s'%j.upper()
+                return False
+            
+    return True
