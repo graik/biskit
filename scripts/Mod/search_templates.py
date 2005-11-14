@@ -35,8 +35,8 @@ import sys, os.path, os
 def _use( o ):
     print """
 Syntax: search_templates.py [-q |target.fasta| -o |outFolder| -log |logFile|
-               -db |database| -e |e-value-cutoff| -aln |n_alignments|
-               -psi
+               -db |database| -e |e-value-cutoff|  -limit |max_clusters|
+               -aln |n_alignments| -psi
                -... additional options for blastall (see SequenceSearcher.py) ]
 
 Result: 
@@ -46,6 +46,7 @@ Options:
     -o       output folder for results      (default: .)
     -log     log file                       (default: STDOUT)
     -db      sequence data base
+    -limit   Largest number of clusters allowed
     -e       E-value cutoff for sequence search
     -aln     number of alignments to be returned
     -simcut  similarity threshold for blastclust (score < 3 or % identity)
@@ -66,6 +67,7 @@ def defaultOptions():
             'db' : 'pdbaa',
             'log': None,
             'e':0.001,
+            'limit':20,
             'aln':200,
             'simcut':1.75,
             'simlen':0.9,
@@ -100,6 +102,7 @@ if '?' in options or 'help' in options:
 
 tmp_db = options['db']
 e = float( options['e'] )
+clustLim = int( options['limit'])
 aln = int( options['aln'])
 simCut = float( options['simcut'] )
 simLen = float( options['simlen'] )
@@ -128,20 +131,23 @@ ext_options = blastOptions( options )
 ##         templates/nr/chain_index.txt    (input for TemplateCleaner)
 ##                     /*.pdb              (  "    "         "       )
 
-searcher = TemplateSearcher( outFolder, verbose=1, log=None )
+searcher = TemplateSearcher( outFolder, verbose=1,
+                             clusterLimit=clustLim, log=None )
 
 ## if it looks like local Blast is installed
-if os.environ.has_key('BLASTDB') and not settings.blast_bin:
+if os.environ.has_key('BLASTDB') and settings.blast_bin:
+    tools.flushPrint('Performing local blast search\n')
     searcher.localBlast( f_target, tmp_db, 'blastp', alignments=aln, e=e )
 ## try remote Blast   
 else:
+    tools.flushPrint('Performing remote blast search\n')
     searcher.remoteBlast( f_target, tmp_db, 'blastp', alignments=aln, e=e )
     
 
 searcher.retrievePDBs()
 
 ## expects all.fasta
-#searcher.clusterFasta( simCut=simCut, lenCut=simLen, ncpu=nCpu )
+
 searcher.clusterFastaIterative( simCut=simCut, lenCut=simLen, ncpu=nCpu )
 
 searcher.writeFastaClustered()
