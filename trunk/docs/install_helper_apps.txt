@@ -1,18 +1,25 @@
 installing, testing local blast environment
--------------------------------------------
-0) Get the NCBI toolkit by anonymous ftp from ftp.ncbi.nih.gov
+===========================================
+1) Get the NCBI toolkit by anonymous ftp from ftp.ncbi.nih.gov
    and install it.
    (ftp://ftp.ncbi.nlm.nih.gov/toolbox/ncbi_tools/CURRENT/)
 
-1) update data bases - swissprot, nr and pdbaa recommended
-ftp ftp.ncbi.nlm.nih.gov
-        cd blast/db/FASTA
-        get database.gz
-	bye
-gzip -d database.gz
+2) Install data bases (option 2b recommended) 
+a) FASTA formated databases:
+   - Download the databases via anonymous ftp (in binary mode) from 
+     ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA 
+     The minimum requirement is swissprot and pdbaa.
+   - uncompress the databases 
+   - Format the databases with -o option (formatdb -o ...)
+     Example: formatdb -i database -p T -o T
 
-2) make sure data bases are formatted with -o option (formatdb -o ...)
-formatdb -i database -p T -o T
+b) Preformated databases (needs less space and are preformated)
+   - Download the databases via anonymous ftp (in binary mode) from 
+     ftp://ftp.ncbi.nlm.nih.gov/blast/db OR download the script 
+     update_blastdb.pl and use it to download/update your databases.
+     (http://www.ncbi.nlm.nih.gov/blast/docs/update_blastdb.pl)
+   - The minimum requirement is nr (parent of the other databases), 
+     swissprot and pdbaa needed.   
 
 3) create ~/.ncbirc:
 [NCBI]
@@ -54,7 +61,7 @@ export BLASTDB=/Bis/db/blastdb
 
 
 Install Pfam database for HMMER:
---------------------------------
+================================
 1) Download database by anonymous ftp and unpack
 ftp ftp.sanger.ac.uk
      cd pub/databases/Pfam/current_release
@@ -68,7 +75,7 @@ example: hmm_db = /shared/db/Pfam_ls
 
 
 Install local PDB database:
----------------------------
+===========================
 If you plan on heavily use the homology modelling modules you might 
 want to consider installing a local copy of the PDB database. If you
 don't have a local copy the pdb files will be automatically downloaded
@@ -88,14 +95,17 @@ ${RSYNC} -rlpt -v -z --delete --port=$PORT
          $SERVER::ftp_data/structures/divided/pdb/ 
 	 $MIRRORDIR > $LOGFILE 2>/dev/null
 
-(C) Add the path to the database to ~/.biskit/settings.dat
-Assign the path of the pdb database to the 'pdb_path' variable. 
-example: pdb_path = /shared_bin/db/pdb
+(C) Assign the path of the pdb database to the 'pdb_path' variable. 
+The path shoud point to the folder within which the pdb files in 
+regular pdb-format are found. If you are using a divided database
+(see B) the path should point towards the folder with containing 
+the divided folders.
+example: pdb_path = /shared/db/divided/pdb
 
 
 
 T-Cofee, ClustalW and SAP:
---------------------------
+==========================
 Download and install CLUSTALW
 ftp://ftp.ebi.ac.uk/pub/software/unix/clustalw/
 setenv CLUSTALW_4_TCOFFEE /path/to/clustalw
@@ -118,4 +128,5 @@ Optional settings:
 - If you have a local database installed installed this can be used for the
   validation.  
   setenv PDB_DIR /path/to/your/pdb/database
+
 
