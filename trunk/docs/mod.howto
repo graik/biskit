@@ -87,9 +87,6 @@ cross-validation (parallelised)
 > pvm  ## start pvm if it is not running
 > model_parallel.py
 
-   Note: the following two scripts haven't yet moved to the public
-   Biskit version:
-
 8) Evaluation of cross validation
 A)
 > benchmark.py -d |list of folders|
@@ -298,8 +295,6 @@ Troubleshooting:
   sequences). Temporary solution: Choose another structure from the same
   cluster as the troublemaker.
 
-[Comment Raik: I thought we had fixed that??]
-
 Results:  A folder "t_coffee" containing:
 
 * t_coffee/final.phylip :    Phylip format.
@@ -396,9 +391,6 @@ Options:   -d	 [str], list of project directory (full path)
 Results: see model.py
 
 
-[ Note the following two scripts are not yet checked in ]
-[ ToDo: clean up description and check in benchmark.py ]
-
 
 H) Evaluation step by cross validation:  benchmark.py
 =======================================
@@ -440,8 +432,6 @@ To run all at once: benchmark.py -d validation/
   the benchmark information in the atom and residue profiles:
   'rmsd_aa', 'rmsd_ca', 'rmsd_res'. See PDBModel.profile()!
 
-
-[ ToDo: clean up description and check in analyse.py ]
 
 I) Evaluate the dummy models: analyse.py
 ============================
