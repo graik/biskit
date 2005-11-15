@@ -38,7 +38,7 @@ from Biskit import StdLog, EHandler
 from Biskit.Mod import settings
 
 import re, os
-import string
+import string, copy
 import commands
 import copy
 from sys import *
@@ -444,8 +444,12 @@ class SequenceSearcher:
 
                 ## write blast records of centers to disc
                 centers = [ c[0] for c in self.clusters ]
-                self.__writeClusteredBlastResult( centers )
+                
+                self.writeClusteredBlastResult( \
+                    self.outFolder + self.F_BLAST_OUT,
+                    self.outFolder + self.F_CLUSTER_BLAST_OUT, centers )
 
+        
                 self.copyClusterOut( raw=raw )
                 
         except IOError, why:
@@ -488,9 +492,12 @@ class SequenceSearcher:
         if tmp:
             os.environ['TMPDIR'] = tmp
 
-        lines = o.split('\n')[2:]
-        self.clusters = [ l.split() for l in lines ]
-
+        ## blastclust might write errors to file, if so the errors
+        ## occur before the dateline
+        lines = [ l.split() for l in o.split('\n') ]
+        dateline = [ l[-1] for l in lines ].index('queries')
+        self.clusters = lines[dateline+1:]
+        
         self.reportClustering( raw=o )
 
         self.bestOfCluster = [ self.selectFasta( ids )
@@ -574,43 +581,59 @@ class SequenceSearcher:
         i=1
         for alignment in parsed_blast.alignments:
             for hsp in alignment.hsps:
-                f.write('\n\nSequence %i: %s'%(i,
-                                string.replace(alignment.title,'\n',' ')))
-                f.write('\nLength: %i \tScore: %3.1f \tE-value: %2.1e'\
+                s = string.replace(alignment.title,'\n',' ')
+                s = string.replace(s, 'pdb|',  '\npdb|')
+                f.write('Sequence %i: %s\n'%(i,s))                
+                f.write('Length: %i \tScore: %3.1f \tE-value: %2.1e\n'\
                         %(hsp.identities[1], hsp.score, hsp.expect))
-                f.write( '\nIdentities: %i \tPositives: %i \tGaps: %i'\
+                f.write( 'Identities: %i \tPositives: %i \tGaps: %i\n'\
                          %(hsp.identities[0], hsp.positives[0],
                            hsp.gaps[0] or 0 ))
 
-                f.write( '\n%s'%hsp.query  )
-                f.write( '\n%s'%hsp.match )
-                f.write( '\n%s'%hsp.sbjct )
+                f.write( '%s\n'%hsp.query  )
+                f.write( '%s\n'%hsp.match )
+                f.write( '%s\n\n'%hsp.sbjct )
                 i += 1
         f.close()
 
 
-    def __writeClusteredBlastResult( self, selection ):
+    def writeClusteredBlastResult( self, allFile, clustFile, selection ):
         """
         Reads the blast.out file and keeps only centers.
+        allFile   - file, all blast results
+        clustFile - str, output file name
         selection - list, write only sequences in list
         """
-        f = open( self.outFolder + self.F_CLUSTER_BLAST_OUT, 'w' )
+        f = open( clustFile, 'w' )
 
-        b  = open( self.outFolder + self.F_BLAST_OUT, 'r' )
+        b  = open( allFile, 'r' )
         line = b.readlines()
-        j=1
-        for i in range( len(line) ):
-            ## get sequence ID from alignment
-            if len( line[i])> 1:
-                for s in selection:
-                    if re.search( s, line[i][:30]):
-                        f.write( '\nCluster center %i:\n'%j )
-                        f.writelines( line[i:i+6] )
 
+        j=0
+        sel = copy.copy(selection)
+        for l in line:
+            for s in sel:
+                ## search for center ID, remove from search list if found
+                if re.search( s, l[:30]):
+                    sel.remove(s)
+                    f.write( '\nCluster center %i:\n'%(selection.index(s)+1) )
+                    f.writelines( l )
+
+                    ## add following lines containing alignment info
+                    while j < len(line)-1:
                         j+=1
-            
+                        ## break if empty line
+                        if len( line[j] )<4:
+                            break
+                        ## skipp if additional pdb identifier
+                        if line[j][:4] == 'pdb|':
+                            pass
+                        else:
+                            f.writelines( line[j] )  
+                
         f.close()        
         b.close()
+
             
 def test():
     options = {}

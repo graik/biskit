@@ -57,11 +57,13 @@ class TemplateSearcher( SequenceSearcher ):
     F_FASTA_NR =  F_RESULT_FOLDER + '/nr.fasta'
 
     ## clusters
+    F_CLUSTER_RAW = F_RESULT_FOLDER + '/cluster_raw.out'
     F_CLUSTER_LOG = F_RESULT_FOLDER + '/cluster_result.out'
 
     ## pseudo blast output
     F_BLAST_OUT = F_RESULT_FOLDER + '/blast.out'
-
+    F_CLUSTER_BLAST_OUT = F_RESULT_FOLDER + '/cluster_blast.out'
+    
     ## folders for PDB files
     F_ALL       = F_RESULT_FOLDER + '/all'## all PDB homologues
     F_NR        = F_RESULT_FOLDER + '/nr' ## best PDB homologue of each cluster
@@ -298,7 +300,14 @@ class TemplateSearcher( SequenceSearcher ):
                     f.write( "\n")
 
                 f.close()
-
+                
+                ## write blast records of centers to disc
+                centers = [ c[0] for c in self.clusters ]
+     
+                self.writeClusteredBlastResult( \
+                    self.outFolder + self.F_BLAST_OUT,
+                    self.outFolder + self.F_CLUSTER_BLAST_OUT, centers )
+                
                 self.copyClusterOut( raw=raw )
                 
         except IOError, why:
