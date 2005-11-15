@@ -161,9 +161,10 @@ class SequenceSearcher:
     F_CLUSTER_RAW = F_RESULT_FOLDER + '/cluster_raw.out'
     F_CLUSTER_LOG = F_RESULT_FOLDER + '/cluster_result.out'
 
-    ## pseudo blast output
+    ## blast alignments
     F_BLAST_OUT = F_RESULT_FOLDER + '/blast.out'
-
+    F_CLUSTER_BLAST_OUT = F_RESULT_FOLDER + '/cluster_blast.out'
+    
     ## default location of existing fasta file with target sequence
     F_FASTA_TARGET = '/target.fasta'
 
@@ -428,7 +429,7 @@ class SequenceSearcher:
             f.close()
 
 
-    def reportClustering( self, raw=None ):
+    def reportClustering( self, raw=None,  ):
         """
         """
         try:
@@ -436,9 +437,14 @@ class SequenceSearcher:
                 f = open( self.outFolder + self.F_CLUSTER_LOG, 'w', 1)
 
                 for cluster in self.clusters:
+
                     f.write( "%i\t%s\n" % ( len( cluster ), str( cluster )))
 
                 f.close()
+
+                ## write blast records of centers to disc
+                centers = [ c[0] for c in self.clusters ]
+                self.__writeClusteredBlastResult( centers )
 
                 self.copyClusterOut( raw=raw )
                 
@@ -557,28 +563,55 @@ class SequenceSearcher:
         self.writeFasta( self.getClusteredRecords(), fastaOut )
 
 
-    def __writeBlastResult( self, parsed_blast, outFile ):
+    def __writeBlastResult( self, parsed_blast, outFile):
         """
         writeBlastResult( parsed_blast, outFile )
-        Simulate blast output from parsed Blast result.
         parsed_blast -  Bio.Blast.Record.Blast
         outFile  - str
         """
         f = open( tools.absfile( outFile ), 'w' )
 
-        for alignment in parsed_blast.alignments:                    
+        i=1
+        for alignment in parsed_blast.alignments:
             for hsp in alignment.hsps:
-                f.write('\nsequence:' + \
-                        string.replace(alignment.title, '\n','  ') + '\n' )
-                f.write('length:' + str(alignment.length) )
-                f.write('\te value: '+str(hsp.expect) + '\n')
-                f.write( hsp.query + '\n' )
-                f.write( hsp.match + '\n' )
-                f.write( hsp.sbjct + '\n' )
+                f.write('\n\nSequence %i: %s'%(i,
+                                string.replace(alignment.title,'\n',' ')))
+                f.write('\nLength: %i \tScore: %3.1f \tE-value: %2.1e'\
+                        %(hsp.identities[1], hsp.score, hsp.expect))
+                f.write( '\nIdentities: %i \tPositives: %i \tGaps: %i'\
+                         %(hsp.identities[0], hsp.positives[0],
+                           hsp.gaps[0] or 0 ))
 
+                f.write( '\n%s'%hsp.query  )
+                f.write( '\n%s'%hsp.match )
+                f.write( '\n%s'%hsp.sbjct )
+                i += 1
         f.close()
 
-      
+
+    def __writeClusteredBlastResult( self, selection ):
+        """
+        Reads the blast.out file and keeps only centers.
+        selection - list, write only sequences in list
+        """
+        f = open( self.outFolder + self.F_CLUSTER_BLAST_OUT, 'w' )
+
+        b  = open( self.outFolder + self.F_BLAST_OUT, 'r' )
+        line = b.readlines()
+        j=1
+        for i in range( len(line) ):
+            ## get sequence ID from alignment
+            if len( line[i])> 1:
+                for s in selection:
+                    if re.search( s, line[i][:30]):
+                        f.write( '\nCluster center %i:\n'%j )
+                        f.writelines( line[i:i+6] )
+
+                        j+=1
+            
+        f.close()        
+        b.close()
+            
 def test():
     options = {}
     options['q'] = '/home/Bis/raik/homopipe/test/nmr_hit.fasta'
