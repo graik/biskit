@@ -22,6 +22,7 @@
 ##
 ## last $Author$
 ## $Date$
+## $Revision$
 
 import Biskit.tools as t
 import sys
@@ -67,9 +68,6 @@ Options:   -i     pickeled list of Complex objects (file name)
                   contacted lists, collects result (can be resumed)
            -all   allow more than 512 solutions per model pair (keep all)
 
-           for xplorEnergy:
-           -restr  list, paths to restraints files
-           -scale  list, of scaling valuse (floats)
 
 Default options:
 """
@@ -144,49 +142,6 @@ def checkListStatus( cl, update=0, force_keys=[], version=-1 ):
         t.flushPrint( "\nList contains no data that can be updated\n" )
 
 
-def __scale_by_number( restraints, scale ):
-    """
-    restraints - lst, paths to restraints files
-    scale - list, scalefactors
-    
-    count the number of lines in the restraints file
-    and adapt the scale factor according to the number
-    of restraints.
-
-    -> lst, new sacal factors
-    """
-    old_scale = [ float(s) for s in scale ]
-    new_scale = []
-    
-    for i in enumerate( restraints ):
-        ## count lines in reastraints in restraint files
-        f = tempfile.mktemp('_xplor_scale.out')
-        p = os.system( "/bin/grep '^assi.*\n' %s | wc > %s "%( i[1], f ) )
-        
-        r = open( f )
-        nr = r.readlines()[0].split()[0]
-        r.close()
-        os.unlink(f)
-
-        new_scale += [ old_scale[i[0]] * 1./float(nr) ]
-    return new_scale
-
-
-def __checkPaths( str ):
-    """
-    Xplor doesn't tolerate paths longer than 80 character
-    check that this doean't occur
-    """
-    ## if more than one restraints file
-    restr = t.toList( str )
-    
-    for f in restr:
-        if len( t.absfile(f) )> 80:
-            raise IOError, 'path %s longer that 80 characters'%f
-
-    return  [ t.absfile(f) for f in restr ]
-    
-
 ###########################
 # MAIN
 ###########################
@@ -214,7 +169,7 @@ if options.has_key('f'):
                  'fnarc_9', 'fnarc_10', 'c_ratom_9', 'c_ratom_10',
                  'eProsa', 'ePairScore', 'foldX',
                  'cons_ent', 'cons_max', 'cons_abs',
-                 'rms_if', 'rms_if_bb', 'xplorEnergy']
+                 'rms_if', 'rms_if_bb']
 
     for key in raw_force:
         if key in validKeys:
@@ -232,13 +187,6 @@ if options.has_key('f'):
 if not 'all' in options and not isinstance( complex_lst, ComplexEvolvingList):
     complex_lst = reduceComplexList( complex_lst )
 
-## for xplorEnergy only
-restr = options.get('restr', None)
-scale = options.get('scale', None)
-if scale and restr:
-    restr = __checkPaths( restr)
-    scale = __scale_by_number( restr, scale )
-    
 ## load reference complex if given
 refComplex = None
 if options.has_key('ref'):
@@ -303,9 +251,7 @@ try:
                                            outFile = subFile,
                                            com_version = version,
                                            show_output = show_x,
-                                           add_hosts=add_hosts,
-                                           xplor_restraints=restr,
-                                           xplor_scale=scale)
+                                           add_hosts=add_hosts)
 
                     t.flushPrint('Start job processing .. ')
                     master.start()
@@ -342,9 +288,7 @@ try:
                                    outFile = options['o'],
                                    com_version = version,
                                    show_output = show_x,
-                                   add_hosts = add_hosts,
-                                   xplor_restraints = restr,
-                                   xplor_scale = scale)
+                                   add_hosts = add_hosts)
             master.start()
             
         else:

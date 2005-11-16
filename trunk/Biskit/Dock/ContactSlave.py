@@ -1,4 +1,3 @@
-## $Revision$
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
@@ -20,7 +19,7 @@
 ##
 ## last $Date$
 ## last $Author$
-
+## $Revision$
 
 from Biskit.PVM.dispatcher import JobSlave
 import Biskit.tools as T
@@ -95,12 +94,6 @@ class ContactSlave(JobSlave):
         ## only calculate certain values
         self.force = params.get('force', [] )
 
-        ## for xplorEnergy only
-        self.restraints = params.get('xplor_restraints', None)
-        self.scale = params.get('xplor_scale', None)
-        if not self.scale and not self.restraints:
-                self.reportError('WARNING: XplorEnergy calculation Error: Will not calculate NOE energy without restraints file and/or scale factor - Calculation skipped', -1)
-                
 
     def reportError(self, msg, soln ):
         try:
@@ -306,16 +299,6 @@ class ContactSlave(JobSlave):
                 self.reportError('Conservation score Error', soln)
 
 
-    def calcXplorEnergy( self, soln, c ):
-        """calculate xplor noe energy"""
-        if self.requested( c, 'xplorEnergy' ):
-            if self.scale and self.restraints:
-                try:
-                    c['xplorEnergy'] = c.xplorComplexEnergy( self.scale, self.restraints )
-                except:
-                    self.reportError('XplorEnergy calculation Error', soln)      
-
-
     def calcFoldX( self, soln, c ):
         """calculate fold-X binding energies"""
         if self.requested( c, 'foldX' ):
@@ -357,8 +340,6 @@ class ContactSlave(JobSlave):
             self.calcPairScore( soln, c )  ## uses res-contacts
 
             self.calcFoldX( soln, c ) ##uses rec/lig.info['foldX'] if available
-
-            self.calcXplorEnergy( soln, c )
 
             for method in ['cons_ent', 'cons_max', 'cons_abs']:
                 self.calcConservation( soln, c, method )

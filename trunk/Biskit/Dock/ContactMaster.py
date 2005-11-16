@@ -54,8 +54,7 @@ class ContactMaster(TrackingJobMaster):
                  updateOnly=0, niceness = nice_dic, force = [],
                  outFile = 'complexes_cont.cl',
                  com_version=-1,
-                 show_output = 0, add_hosts=0,
-                 xplor_restraints=None, xplor_scale=None ):
+                 show_output = 0, add_hosts=0 ):
         """
         cmplxLst       - ComplexList, input list
         chunks         - int, number of complexes to hand over to each slave
@@ -70,10 +69,6 @@ class ContactMaster(TrackingJobMaster):
         show_output    - 1||0, show x-window for each slave or not
         add_hosts      - 1||0, add hosts to PVM (can take some time) [0]
         force          - [str], force update of given info keys
-
-        for xplorEnergy only:
-          xplor_restraints - lst
-          xplor_scale      - lst
         """
         self.outFile = outFile
 
@@ -97,10 +92,6 @@ class ContactMaster(TrackingJobMaster):
 
         ## force update of given info keys
         self.force = force
-
-        ## for xplorEnergy only
-        self.xplor_restraints = xplor_restraints
-        self.xplor_scale = xplor_scale
              
         ## extract given version of each Complex from ComplexEvolvingList
         self.complexLst_original = None
@@ -112,8 +103,8 @@ class ContactMaster(TrackingJobMaster):
             if com_version != -1: raise BiskitError(
                 'Input list must be ComplexEvolvingList to extract version.')
 
-##         ## make sure models have a surfaceMask
-##         self.__addSurfaceMasks( complexLst )
+        ## make sure models have a surfaceMask
+        self.__addSurfaceMasks( complexLst )
  
         ## store class type so that same class can be returned
         self.list_class = complexLst.__class__
@@ -470,9 +461,7 @@ class ContactMaster(TrackingJobMaster):
              'mask_interface_bb': self.mask_interface_bb,
              'reduced_recs' : self.reduced_recs,
              'reduced_ligs' : self.reduced_ligs,
-             'c_ref_ratom_10'  : self.c_ref_ratom_10,
-             'xplor_restraints' : self.xplor_restraints,
-             'xplor_scale'  : self.xplor_scale
+             'c_ref_ratom_10'  : self.c_ref_ratom_10
              }
         
         return r
@@ -541,11 +530,11 @@ if __name__ == '__main__':
     niceness = {'default': 0}
     hosts = cpus_all[:4]
 
-##    lst = t.Load( t.testRoot() + "/dock/hex01/complexes.cl")
-    lst = t.Load( t.absfile('~/interfaces/c11/dock_xray/hex01/complexes.cl'))
+    lst = t.Load( t.testRoot() + "/dock/hex/complexes.cl")
     lst = lst[:15]
 
-    refcom = t.Load( t.absfile('~/interfaces/c11/com_wet/ref.complex'))
+    refcom = t.Load( t.testRoot() + "/com/ref.complex")
+
 
     master = ContactMaster(lst, chunks=3, hosts=hosts, niceness=niceness,
                            show_output = 1, refComplex=refcom,
