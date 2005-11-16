@@ -34,6 +34,39 @@ halt             ## stop pvm altogether
 exit / ^D        ## exit the PVM shell without quitting the PVM demon
 
 
+Using remote windows with pvm
+=============================
+
+For security reasons, the default setting in recent linux distributions is 
+to not allow a machine to remotely open a window. So, by default the X server
+on these machines is running as "tcp nolisten". The current implementation of 
+getting remote windows from PVM slaves is using "xterm - display host:0.0" 
+which will not run with the new secure settings.
+
+
+1) To change back to the old insecure X server settings 
+   (example from a Linux box running the CentOS distriburion):
+
+a) - Either comment in DisallowTCP=false in /etc/X11/gdm/gdm.conf 
+b) - Or use the graphical tools from menu: 
+       System Settings -> Login Screen -> Security 
+     and uncheck: Always disallow TCP connections to the X server ...
+
+
+2) Then on your local machine allow remote hosts to access the X server:
+
+a) - allow all hosts: xhosts +
+b) - or only specific hosts xhost +remote.host.name
+
+
+3) Finally test that it is working (you must have password free ssh set up):
+
+  % ssh remote.host.name xterm -display local.host.name:0.0
+  
+  An xterm window from the remote machine should show up on your local machine.
+
+
+
 TroubleShouting:
 ================
 
@@ -79,6 +112,11 @@ The following works for ssh2:
 
 cat id_rsa.pub-Bis  id_dsa.pub-Bis  >> authorized_keys2
 
+
+Or download and use ssh-keyinstall to set up your system: 
+  http://www.stearns.org/ssh-keyinstall/	
+
 That's it. Test!
 
+Still having problems? Check for firewalls!
 
