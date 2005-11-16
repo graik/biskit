@@ -32,8 +32,8 @@ import random
 import Biskit.tools as t
 from Biskit import BiskitError, PDBError, EHandler
 
-from Biskit.Dock.Complex import Complex
-from Biskit.Dock.ComplexModelRegistry import ComplexModelRegistry
+from Complex import Complex
+from ComplexModelRegistry import ComplexModelRegistry
 
 
 class ComplexListError( BiskitError ):

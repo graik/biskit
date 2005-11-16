@@ -25,7 +25,7 @@
 import Biskit.tools as t
 import Biskit.mathUtils as MU
 from Biskit import EHandler
-from Biskit.Dock.Complex import Complex as ProtComplex
+from Complex import Complex as ProtComplex
 from ComplexList import ComplexList, ComplexListError, ConditionError
      
 

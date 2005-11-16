@@ -25,7 +25,6 @@
 from Biskit import PCRModel, PDBModel, PDBDope, molUtils, mathUtils
 ## from Biskit import ProsaII
 from Biskit.Prosa2003 import Prosa2003
-## from Biskit.Dock.XplorComplexEnergy import XplorComplexEnergy
 
 import Biskit.tools as t
 
@@ -869,22 +868,6 @@ class Complex:
 
         return r
 
-
-##     def xplorComplexEnergy( self, scale=None, restraints=None,
-##                             debug=0, verbose=0):
-##         """
-##         Calculate Xplor energies for a complex using the given
-##         restraintsfiles and coresponding scaling factors.
-##         restraints - list, of paths to restraints files
-##         scale      - list, of scaling factors (floats)
-##         -> energy dictionary
-##         """
-##         x = XplorComplexEnergy( self, restraints=restraints,
-##                                 scale=scale, debug=debug, verbose=verbose )
-##         e = x.run()
-
-##         return e
-
         
     def conservationScore( self, cons_type='cons_ent', ranNr=150 ):
         """
@@ -1058,11 +1041,11 @@ if __name__ == '__main__':
     contProfile_rec = N.sum( cont, 1 )
 
     dope = PDBDope( c.rec_model )
-    dope.addFastSurf( probe=1.4 )
+    dope.addSurfaceRacer( probe=1.4 )
     rec_surf = c.rec_model.profile2mask( 'MS', 0.0000001, 1000 )
 
     dope = PDBDope( c.lig_model )
-    dope.addFastSurf( probe=1.4 )
+    dope.addSurfaceRacer( probe=1.4 )
     lig_surf = c.lig_model.profile2mask( 'MS', 0.0000001, 1000 )
     
     from Biskit import Pymoler
@@ -1090,7 +1073,7 @@ if __name__ == '__main__':
     pm.add( 'hide all')
 
     pm.add( 'color grey, (b=0)' )
-    pm.add( 'show surface, (rec or lig)' )
+    pm.add( 'show stick, (rec or lig)' )
 
     pm.add( 'zoom all' )
 
