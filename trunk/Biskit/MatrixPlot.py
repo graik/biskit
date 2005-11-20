@@ -23,7 +23,8 @@
 
 import biggles
 import Numeric as N
-import ColorSpectrum as C 
+
+from Biskit import ColorSpectrum 
 
 class Legend(biggles.FramedPlot):
 
@@ -68,7 +69,7 @@ class MatrixPlot(biggles.FramedPlot):
 
         biggles.FramedPlot.__init__(self)
 
-        self.palette = C.ColorSpectrum( palette )
+        self.palette = ColorSpectrum( palette )
 
         self.matrix = self.palette.color_array( matrix )
         s = N.shape( self.matrix )

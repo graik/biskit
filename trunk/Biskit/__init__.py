@@ -58,6 +58,7 @@ try:
     from Trajectory import Trajectory, TrajError, TrajProfiles
     from XplorInput import XplorInput, XplorInputError
     from Xplorer import Xplorer, XplorerError, RunError
+    from ColorSpectrum import ColorSpectrum
     from MatrixPlot import MatrixPlot
 
     from Hmmer import Hmmer
