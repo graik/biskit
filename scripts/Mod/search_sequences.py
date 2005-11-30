@@ -39,8 +39,12 @@ Syntax: search_sequences.py [-q |target.fasta| -o |outFolder| -log |logFile|
                -aln |n_alignments| -psi |psi-blast rounds|
                -... additional options for blastall (see SequenceSearcher.py) ]
 
-Result: folder 'sequences' with blast result, all found sequences in all.fasta,
-        clustered sequences in nr.fasta
+Result: folder 'sequences' with files:
+        - blast.out - result from blast search (all alignments)
+        - cluster_blast.out - blast alignments of cluster sequences
+        - cluster_result.out - clustering output
+        - all.fasta - all found sequences in fasta format
+        - nr.fasta - clustered sequences in fasta format
         
 Options:
     -q       fasta file with query sequence (default: ./target.fasta)
