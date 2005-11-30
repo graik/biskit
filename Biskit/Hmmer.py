@@ -25,10 +25,12 @@
 
 import tempfile
 import os, re, string
+import types
 import mathUtils as math
 import Numeric as N
 import molUtils
 import settings
+import Biskit.Mod.modUtils as MU
 
 ## executables
 hmmpfamExe = settings.hmmpfam_bin
@@ -117,21 +119,29 @@ class Hmmer:
         return  result, m.pdbCode
 
 
-    def searchHmmdb( self, model, noSearch=None ):
+    def searchHmmdb( self, target, noSearch=None ):
         """
         Search hmm database with a sequence in fasta format.
-        If the profile names have been provided - skip the search and only write
-           the temporary sequence files.
+        If the profile names have been provided - skip the search and
+          only write the temporary sequence files.
+        target - PDBModel or fasta file
         -> String, hmm name, 
         """
-        fastaSeq, self.fastaID = self.fasta( model )
+        ## if target is a PDBModel
+        if type(target) == types.InstanceType:
+            fastaSeq, self.fastaID = self.fasta( target )
         
-        ## write fasta sequence file
-        fName = self.fastaFile
-        seq = open( fName, 'w' )
-        seq.write( fastaSeq )
-        seq.close()
-
+            ## write fasta sequence file
+            fName = self.fastaFile
+            seq = open( fName, 'w' )
+            seq.write( fastaSeq )
+            seq.close()
+            
+        ## else assume it is a fasta sequence file   
+        else:
+            if MU.verify_fasta(target):
+                fName = target
+            
         if noSearch:
             print 'Profiles provided - No search will be performed.'
             return None
@@ -167,7 +177,8 @@ class Hmmer:
             return matches, hits
 
 
-    def selectMatches( self, matches, hits, score_cutoff=60 , eValue_cutoff = 1e-8 ):
+    def selectMatches( self, matches, hits, score_cutoff=60 ,
+                       eValue_cutoff = 1e-8 ):
         """
         select what hmm profiles to use based on score and e-Value cutoff
         score_cutoff - float
@@ -211,7 +222,7 @@ class Hmmer:
                 seqStart = int(hits[h][2])
                 seqEnd = int(hits[h][3])
                 if hmmHits.has_key(hmmName):
-                    hmmHits[hmmName] =  hmmHits[hmmName] + [[seqStart, seqEnd ]]
+                    hmmHits[hmmName] =  hmmHits[hmmName] +[[seqStart, seqEnd ]]
 
                 else:
                     hmmHits[hmmName] = [ [ seqStart, seqEnd ] ]
@@ -231,7 +242,8 @@ class Hmmer:
         profileDic = {}
         ## get hmm profile
         try:
-            out = os.popen( hmmfetchExe + ' ' + self.hmmdb + ' ' + hmmName ).read()
+            out = os.popen( hmmfetchExe + ' ' + self.hmmdb \
+                            + ' ' + hmmName ).read()
         except:
             print 'ERROR getting profile ' + hmmName
 
@@ -250,7 +262,7 @@ class Hmmer:
         profileDic['NrSeq'] = \
                   int( string.split(re.findall('NSEQ\s+[0-9]+', out)[0])[1] )
         profileDic['AA'] = \
-                  string.split(re.findall('HMM[ ]+' + '[A-Y][ ]+'*20, out)[0] )[1:]
+              string.split(re.findall('HMM[ ]+' + '[A-Y][ ]+'*20, out)[0] )[1:]
 
         ## collect null emmission scores
         pattern = 'NULE[ ]+' + '[-0-9]+[ ]+'*20
@@ -296,7 +308,8 @@ class Hmmer:
         p4 = []
         for i in range( len(p) ) :
             p_scale = (p[i] - N.average(p[i]) )/ math.SD(p[i])
-            p4 += [ N.resize( p_scale[N.argmax( N.array(p_scale) )] , N.shape( p[i] ) ) ]
+            p4 += [ N.resize( p_scale[N.argmax( N.array(p_scale) )] ,
+                              N.shape( p[i] ) ) ]
         profileDic['maxAllScale'] = p4
                          
         return profileDic
@@ -305,14 +318,15 @@ class Hmmer:
     def align( self, model, hits ):
         """
         Performs alignment
-        If there is more than one hit with the profile, the sequence will be subdevided
-           and the alignment will be performed on each part. a final merger profile for
-           the profile will be returned.
+        If there is more than one hit with the profile, the sequence will
+        be subdevided and the alignment will be performed on each part.
+        a final merger profile for the profile will be returned.
            
         -> fastaSeq - string
            hmmSeq - string
            repete - number of repetes of the profile
-           hmmGap - list with gaps (deletions in search sequence) for each repete
+           hmmGap - list with gaps (deletions in search sequence) for
+                    each repete
         """
         fastaSeq, self.fastaID = self.fasta( model )
         fastaSeq = fastaSeq.split()[1]
@@ -386,7 +400,8 @@ class Hmmer:
         Multilple hits with one profile cannot overlap!! Overlap == ERROR
         """
         if len(seq1) != len(seq2):
-            print 'ERR in mergeHmmSeq: Sequences of different lengths cannot be merged'
+            print 'ERR in mergeHmmSeq:'
+            print '\tSequences of different lengths cannot be merged'
             return None
         else:
             result = ''
@@ -472,10 +487,12 @@ class Hmmer:
         Get match emmission scores for search sequence.
         If profile name(s) are provided, no search will be performed.
 
-        If names and positions of hmm profiles is NOT provided == search performed
+        If names and positions of hmm profiles is NOT provided
+          == search performed
           -> score (array), hmmNames (dictionary)
 
-        If names and positions of hmm profiles is provided == NO search performed
+        If names and positions of hmm profiles is provided
+          == NO search performed
           -> score (array), hmmNames (dictionary - same as input)
         """
         if not hmmNames:
@@ -517,10 +534,12 @@ class Hmmer:
         Get match emmission scores for search sequence.
         If profile name(s) are provided, no search will be performed.
 
-        If names and positions of hmm profiles is NOT provided == search performed
+        If names and positions of hmm profiles is NOT provided
+          == search performed
           -> score (array), hmmNames (dictionary)
 
-        If names and positions of hmm profiles is provided == NO search performed
+        If names and positions of hmm profiles is provided
+          == NO search performed
           -> score (array), hmmNames (dictionary - same as input)
         """
         if not hmmNames:
@@ -613,17 +632,18 @@ class Hmmer:
 ## Testing
 
 if __name__ == '__main__':
-
+   
     import tools as T
     import glob
+    from PDBModel import PDBModel
     
     print "Loading PDB..."
-    f = glob.glob( T.testRoot()+'/rec_pc2_00/pdb/*_1_*pdb.gz' )[1]
+    f = glob.glob( T.testRoot()+'/lig_pcr_00/pcr_00/*_1_*pdb' )[1]
     m = PDBModel(f)
     model = m.compress( m.maskProtein() )
     
     ## initiate and check database status
-    a = Hmmer( hmmdb = '/Bis/db/pfam/hmmer/Pfam' )
+    a = Hmmer( hmmdb = settings.hmm_db )
     a.checkHmmdbIndex()
 
     ## scoring methods to use
