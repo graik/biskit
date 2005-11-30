@@ -34,7 +34,7 @@ from TemplateSearcher import TemplateSearcher
 from SequenceSearcher import SequenceSearcher
 from TemplateCleaner import TemplateCleaner
 
-
+import os.path
 import os, string
 
 class ValidationSetup:
@@ -111,7 +111,11 @@ class ValidationSetup:
     
 
     def createTemplatesFolder(self, validation_folder, cluster):
-        os.mkdir( '%s/%s'%(validation_folder,cluster) )
+        try:
+            os.mkdir( '%s/%s'%(validation_folder,cluster) )
+        except:
+            print 'Folder %s/%s alredy exists.'\
+                  %(self.F_RESULT_FOLDER, cluster) 
 
 
     def prepare_alpha(self, cluster_list, alpha_folder = None,
@@ -190,8 +194,14 @@ class ValidationSetup:
         output_folder = output_folder or self.outFolder + self.F_RESULT_FOLDER
         
         for cluster in cluster_list:
-            os.system('mkdir %s/%s'%(output_folder, cluster + \
-                                     TemplateSearcher.F_RESULT_FOLDER))
+            folder = '%s/%s'%(output_folder, cluster + \
+                              TemplateSearcher.F_RESULT_FOLDER)
+            if not os.path.exists( folder ):
+                os.mkdir( folder)
+            else:
+                print 'Directory %s exists, skipping'%( cluster + \
+                                   TemplateSearcher.F_RESULT_FOLDER)
+                
             pdb_path = pdb_dictionary["%s"%cluster]
             PDBModels_list = []
             pdb_name = []
@@ -225,22 +235,44 @@ class ValidationSetup:
         
         for cluster in cluster_list:
             ## Modellar pdb links
-            os.mkdir('%s/%s'%(output_folder, cluster + self.F_PDB_LINK))
+            folder = '%s/%s'%(output_folder, cluster + self.F_PDB_LINK)
+            if not os.path.exists( folder ):
+                os.mkdir( folder )
+            else:
+                print 'Directory %s exists, skipping'%\
+                      (cluster + self.F_PDB_LINK)
+                
             pdb_path = pdb_dictionary[cluster]
             
             for pdb in pdb_path:
-                os.link('%s'%pdb, '%s/%s/%s'%(output_folder,
-                                              cluster + self.F_PDB_LINK,
-                                              os.path.split(pdb)[1]))
+                target = '%s/%s/%s'%(output_folder, cluster + self.F_PDB_LINK,
+                                     os.path.split(pdb)[1])
+                if not os.path.exists( target ):
+                    os.link('%s'%pdb, target )
+                else:
+                    print 'File exists %s/%s no link made.'%\
+                          (self.F_PDB_LINK,
+                           os.path.split(pdb)[1])
 
             ## T-Coffee alpha links
-            os.mkdir('%s/%s'%(output_folder, cluster + self.F_ALPHA_FOLDER))
+            folder = '%s/%s'%(output_folder, cluster + self.F_ALPHA_FOLDER)
+            if not os.path.exists( folder ):
+                os.mkdir( folder )
+            else:
+                print '##'
+                
             alpha_path =  alpha_dictionary[cluster]
    
             for alpha in alpha_path:
-                os.link('%s'%alpha, '%s/%s/%s'%(output_folder,
-                                              cluster + self.F_ALPHA_LINK,
-                                              os.path.split(alpha)[1]))
+                target = '%s/%s/%s'%(output_folder,
+                                     cluster + self.F_ALPHA_LINK,
+                                     os.path.split(alpha)[1])
+                if not os.path.exists( target ):
+                    os.link('%s'%alpha, target )
+                else:
+                    print 'File exists %s/%s no link made.'%\
+                          (self.F_ALPHA_LINK,
+                           os.path.split(pdb)[1])                    
 
 
     def prepare_target(self,cluster, output_folder = None):
@@ -273,9 +305,17 @@ class ValidationSetup:
                            SequenceSearcher.F_RESULT_FOLDER
 
         output_folder = output_folder or self.outFolder + \
-                        self.F_RESULT_FOLDER + '/%s'%cluster
-                  
-        os.system('ln -s %s %s'%(sequences_folder , output_folder))
+                        self.F_RESULT_FOLDER + '/%s'%cluster + \
+                        SequenceSearcher.F_RESULT_FOLDER
+        
+        if not os.path.exists( output_folder ):
+            ## os.link doesn't seem to work with folders
+            os.system('ln -s %s %s'%(sequences_folder , output_folder))
+            
+        else:
+            print 'Folder %s alredy exists, linking skipped.\
+            '%(self.F_RESULT_FOLDER + '/%s'%cluster +
+               SequenceSearcher.F_RESULT_FOLDER )
         
 
     def link_reference_pdb(self, cluster, input_folder = None,
@@ -291,7 +331,9 @@ class ValidationSetup:
         files = os.listdir('%s'%input_folder)
         for pdb in files:
             if(cluster == pdb[0:4]):
-                os.system('ln %s %s'%(input_folder + pdb, output_file))
+                if not os.path.exists( output_file ):
+                    os.link( input_folder + pdb, output_file)
+#                os.system('ln %s %s'%(input_folder + pdb, output_file))
 
 
     def go(self, validation_folder = None):
