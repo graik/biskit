@@ -50,7 +50,7 @@ def parse_tabbed_file( fname ):
     return result
 
 
-def format_fasta(self, seq, width=60):
+def format_fasta(seq, width=60):
     """
     Transform a given sequence to fasta format
     seq -str, sequence

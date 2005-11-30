@@ -38,8 +38,8 @@ from Biskit.Mod.TemplateCleaner import TemplateCleaner as TC
 from Biskit.Mod.SequenceSearcher import SequenceSearcher as SS
 from Biskit.Mod.CheckIdentities import Check_Identities as CI
 from Aligner import Aligner
-from Biskit import ModelList
-from Biskit import DictList
+from Biskit.ModelList import ModelList
+from Biskit.DictList import DictList
 
 
 from Biskit import PDBModel
@@ -411,11 +411,11 @@ CALL ROUTINE = 'model'             # do homology modelling
         """
         
         model_folder = model_folder or self.outFolder + self.F_INPUT_FOLDER
-        
-        model_files = self.pdb_list(model_folder)
- 
-        pdb_list = ModelList(model_files)
 
+        model_files = self.pdb_list(model_folder)
+        
+        pdb_list = ModelList( model_files )
+        
         for model in pdb_list:
 
             model.info["mod_score"] = self.extract_modeller_score(
