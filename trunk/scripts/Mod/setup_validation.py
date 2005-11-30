@@ -60,7 +60,7 @@ if __name__ == '__main__':
         print 'Current directory is not a valid modeling folder.' 
         _use( options )
 
-    T.flushPrint( "Creating folders and links..." )
+    T.flushPrint( "Creating folders and links...\n" )
   
     for f in folders:
         sv = VS(outFolder=f)
