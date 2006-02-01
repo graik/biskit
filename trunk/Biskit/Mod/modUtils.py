@@ -20,16 +20,25 @@
 ## last $Author$
 ## last $Date$
 ## $Revision$
-"""utility funtions for Mod package"""
+"""
+utility funtions for Mod package
+"""
 
 import os.path
 import types
 import Biskit.molUtils as MU
 
+
 def parse_tabbed_file( fname ):
     """
-    fname - str, file name of key : value mapping
-    -> { key : value, }
+    Parse the chaim index file written by TemplateSearcher
+    L{TemplateSearcher.F_CHAIN_INDEX}.
+    
+    @param fname: name of file to parse 
+    @type  fname: str
+    
+    @return: key : value mapping
+    @rtype: {key:value}
     """
     f = open( fname )
 
@@ -53,8 +62,14 @@ def parse_tabbed_file( fname ):
 def format_fasta(seq, width=60):
     """
     Transform a given sequence to fasta format
-    seq -str, sequence
-    -> str, string sequence in fasta format
+    
+    @param seq: sequence
+    @type  seq: str
+    @param width: length of a line in characters (default: 60)
+    @type  width: int
+    
+    @return: string sequence in fasta format
+    @rtype: str
     """
     fasta_sequence = ""
 
@@ -73,10 +88,15 @@ def verify_fasta( target ):
     """
     Verify that a given file or string is in Fasta format.
     The definition used for a fasta file here is that:
-    - first line starts with '>'
-    - the following sequence lines are not longer that 80 characters
-    - the characters has to belong to the standard amino acid codes
-    -> True/False
+     - first line starts with '>'
+     - the following sequence lines are not longer that 80 characters
+     - the characters has to belong to the standard amino acid codes
+
+    @param target: name of fasta file OR file contents as list of strings
+    @type  target: str OR [str]
+    
+    @return: conforms to the fsata format
+    @rtype: True/False
     """
     if not type(target) == types.ListType:
         if os.path.exists( target ):
@@ -91,11 +111,11 @@ def verify_fasta( target ):
         if len( target[i] ) >= 80:
             print 'Fasta sequence lines longer that 80 characters'
             return False
-        
+
         for j in target[i]:
             aa_codes = MU.aaDicStandard.values() + [ '\n' ]
             if not j.upper() in aa_codes:
                 print 'Invalid amino acid code: %s'%j.upper()
                 return False
-            
+
     return True

@@ -17,6 +17,10 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
+## $Revision$
+## last $Date$
+## last $Author$
+
 """
 PVM interface.
 """
@@ -33,7 +37,7 @@ from cPickle import loads # as _loads
 ##     import sys
 
 ##     limit = sys.getrecursionlimit()
-    
+
 ##     while limit < MAX_RECURSION_LIMIT:
 
 ##         try:
@@ -57,7 +61,7 @@ from cPickle import loads # as _loads
 ##     import sys
 
 ##     limit = sys.getrecursionlimit()
-    
+
 ##     while limit < MAX_RECURSION_LIMIT:
 
 ##         try:
@@ -69,24 +73,28 @@ from cPickle import loads # as _loads
 
 ##     raise RuntimeError, "Maximum recursion depth exceeded."
 
-def pack(object):
 
+def pack(object):
     return pkstr(dumps(object))
 
-def unpack():
 
+def unpack():
     return loads(upkstr())
 
-def pack_and_send(tid, msg_tag, object, encoding = None):
 
+def pack_and_send(tid, msg_tag, object, encoding = None):
     if encoding is None:
         encoding = data['default']
 
     return psend_str(encoding, tid, msg_tag, dumps(object))
 
+
 def addHosts(hosts):
     """
-    hosts: list of hostnames
+    Add hosts to PVM.
+    
+    @param hosts: list of hostnames
+    @type  hosts: [str]
     """
     for host in hosts:
         try:
@@ -94,5 +102,12 @@ def addHosts(hosts):
         except:
             print host,'failed'
 
+
 def delHosts(hosts):
+    """
+    Remove hosts from PVM.
+    
+    @param hosts: list of hostnames
+    @type  hosts: [str]
+    """
     return delhosts( hosts )

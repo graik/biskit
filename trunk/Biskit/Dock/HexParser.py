@@ -1,4 +1,3 @@
-## HexParser:
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
@@ -17,11 +16,14 @@
 ## license.txt along with this program; if not, write to the Free
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
-##
-## Parse output file from hex docking run
-##
+## 
+## $Revision$
 ## last $Author$
 ## $Date$
+
+"""
+Parse output file from hex docking run.
+"""
 
 import re, sys
 import Numeric  ## array
@@ -41,11 +43,15 @@ class HexParser:
 
     def __init__(self, hexFile, rec_dic, lig_dic, forceModel=None):
         """
-        hexFile - string, name of hex output file
-        rec_dic - dictionary, map between model number and PCRModel
-                  { 1 : model1, 2 : model2,..} types: { int : PCRModel}
-        lig_dic - same for ligand PCRModels
-        forceModel - (int, int), force parser to accept model numbers
+        @param hexFile: name of hex output file
+        @type  hexFile: string
+        @param rec_dic: map between model number and PCRModel
+                        { 1 : model1, 2 : model2,..} types: { int : PCRModel}
+        @type  rec_dic: {int:model}
+        @param lig_dic: same as rec_dic but for ligand PCRModels
+        @type  lig_dic: {int:model}
+        @param forceModel: force parser to accept model numbers
+        @type  forceModel: int, int
         """
         self.hex = open( hexFile )
         self.rec_models = rec_dic
@@ -67,7 +73,9 @@ class HexParser:
         (Solution number, hex energy,..) also extract 16 numbers of
         the transformation matrix and put them into 4 by 4 numeric
         array.
-        -> Complex, created from that information
+        
+        @return: Complex created from the output from Hex
+        @rtype: Complex
         """
         ## get set of lines describing next complex:
         lines = self._nextBlock()
@@ -77,7 +85,7 @@ class HexParser:
         ## skip incomplete records
         if len(lines) < 13:
             lines = self._nextBlock()
-            
+
         ## fill info dictionary
         i = {}
         matrix = None
@@ -87,7 +95,7 @@ class HexParser:
                 m = self.ex_line.search( l )
                 if m != None:
                     m = m.groups()
-                
+
                     if m[0] == 'Orientation':
                         i['hex_clst'] = int(m[1])
                     elif m[0] == 'Solution':
@@ -132,17 +140,19 @@ class HexParser:
                         matrix = Numeric.array(matrix, 'f')
             except AttributeError:
                 print "HexParser.nextComplex(): ",t.lastError()
-                            
+
         ## Create new complex taking PCR models from dictionary
         c = Complex( self.rec_models[ i['model1'] ],
                      self.lig_models[ i['model2'] ],  matrix, i )
         return c
-        
+
 
     def _nextBlock(self):
         """
-        return all lines describing next complex in hex file.
-        -> [str, str, str, ...]
+        return all lines describing next complex in the Hex output file.
+        
+        @return: list of information strings
+        @rtype: [str]
         """
         line = self.hex.readline()
         result = []
@@ -163,9 +173,10 @@ class HexParser:
 
     def parseHex(self):
         """
-        Create one Complex Object for each paragraph in hex output
-        file.
-        -> ComplexList
+        Create one Complex Object for each paragraph in hex output file.
+        
+        @return: ComplexList with all complexes from the Hex output
+        @rtype: ComplexList
         """
         complexes = ComplexList()
         c = self.nextComplex()
@@ -176,18 +187,19 @@ class HexParser:
 
         return complexes
 
+
 #############################
 ## TESTING
 
 if __name__ == '__main__':
 
-    
-    
+
+
     rec_dic = t.Load( t.testRoot() + "/dock/rec/1A2P_model.dic" )
     lig_dic = t.Load( t.testRoot() + "/dock/lig/1A19_model.dic" )
 
     h = HexParser( t.testRoot() + "/dock/hex/1A2P-1A19_hex.out",
                    rec_dic, lig_dic)
     c_lst = h.parseHex()
-    
+
     print c_lst[1]

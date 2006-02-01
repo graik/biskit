@@ -24,15 +24,16 @@
 """
 pstat.py module
 
-#################################################
-#######  Written by:  Gary Strangman  ###########
-#######  Last modified:  Jun 29, 2001 ###########
-#################################################
+::
+ #################################################
+ #######  Written by:  Gary Strangman  ###########
+ #######  Last modified:  Jun 29, 2001 ###########
+ #################################################
 
 This module provides some useful list and array manipulation routines
 modeled after those found in the |Stat package by Gary Perlman, plus a
-number of other useful list/file manipulation functions.  The list-based
-functions include:
+number of other useful list/file manipulation functions. The list-based
+functions include::
 
       abut (source,*args)
       simpleabut (source, addon)
@@ -63,7 +64,7 @@ functions include:
 
 Some of these functions have alternate versions which are defined only if
 Numeric (NumPy) can be imported.  These functions are generally named as
-above, with an 'a' prefix.
+above, with an 'a' prefix.::
 
       aabut (source, *args)
       acolex (a,indices,axis=1)
@@ -126,7 +127,7 @@ use pstat.simpleabut().
 
 Usage:   abut(source, args)   where args=any # of lists
 Returns: a list of lists as long as the LONGEST list past, source on the
-         'left', lists in <args> attached consecutively on the 'right'
+'left', lists in <args> attached consecutively on the 'right'
 """
 
     if type(source) not in [ListType,TupleType]:
@@ -173,7 +174,7 @@ FIRST list passed.
 
 Usage:   simpleabut(source,addon)  where source, addon=list (or list-of-lists)
 Returns: a list of lists as long as source, with source on the 'left' and
-                 addon on the 'right'
+addon on the 'right'
 """
     if type(source) not in [ListType,TupleType]:
         source = [source]
@@ -208,7 +209,7 @@ columns 3 onward from the listoflists).
 
 Usage:   colex (listoflists,cnums)
 Returns: a list-of-lists corresponding to the columns from listoflists
-         specified by cnums, in the order the column numbers appear in cnums
+specified by cnums, in the order the column numbers appear in cnums
 """
     global index
     column = 0
@@ -240,9 +241,9 @@ others could be passed).
 
 Usage:    collapse (listoflists,keepcols,collapsecols,fcn1=None,fcn2=None,cfcn=None)
 Returns: a list of lists with all unique permutations of entries appearing in
-     columns ("conditions") specified by keepcols, abutted with the result of
-     cfcn (if cfcn=None, defaults to the mean) of each column specified by
-     collapsecols.
+columns ("conditions") specified by keepcols, abutted with the result of
+cfcn (if cfcn=None, defaults to the mean) of each column specified by
+collapsecols.
 """
      def collmean (inlist):
          s = 0
@@ -725,7 +726,7 @@ repeated until it is as long as the other.
 
 Usage:   aabut (source, args)    where args=any # of arrays
 Returns: an array as long as the LONGEST array past, source appearing on the
-         'left', arrays in <args> attached on the 'right'.
+'left', arrays in <args> attached on the 'right'.
 """
     if len(source.shape)==1:
         width = 1
@@ -773,8 +774,7 @@ N of the mean are desired, set either or both parameters to 1.
 
 Usage:   acollapse (a,keepcols,collapsecols,fcn1=None,fcn2=None,cfcn=None)
 Returns: unique 'conditions' specified by the contents of columns specified
-         by keepcols, abutted with the mean(s) of column(s) specified by
-         collapsecols
+by keepcols, abutted with the mean(s) of column(s) specified by collapsecols
 """
     def acollmean (inarray):
         return N.sum(N.ravel(inarray))
@@ -955,7 +955,7 @@ array of numbers or of python objects (which requires the cmp function).
 
 Usage:   arowcompare(row1,row2)
 Returns: an array of equal length containing 1s where the two rows had
-         identical elements and 0 otherwise
+identical elements and 0 otherwise
 """
     if row1.typecode()=='O' or row2.typecode=='O':
         cmpvect = N.logical_not(abs(N.array(map(cmp,row1,row2)))) # cmp fcn gives -1,0,1

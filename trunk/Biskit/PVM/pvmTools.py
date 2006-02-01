@@ -20,7 +20,9 @@
 ##
 ## last $Date$
 ## last $Author$
-"""low-level tools for PVM"""
+"""
+low-level tools for PVM
+"""
 
 import pvm
 import pypvm_core
@@ -32,24 +34,34 @@ def expandLocal( host ):
     """
     Expand name of local(!) host.
     For example, turn 'myhost' into 'myhost.mydomain.com'
+
+    @param host: host name
+    @type  host: str
+
+    @return: full host name
+    @rtype:  str
     """
     if os.uname()[1].split('.')[0] == host:
         return os.uname()[1]
-    
+
     return host
 
 
 def addHosts( number=len(H.nodes_all), hosts=H.nodes_all, expand=1 ):
     """
     Add hosts to PVM.
-    number   - int, number of requested nodes
-               if number == 0, nothing happens
-    hosts    - [ str ]
-    localise - [1|0], add full address to local node
+    
+    @param number: number of requested nodes
+                   if number == 0, nothing happens
+    @type  number: int
+    @param hosts: list of host names
+    @type  hosts: [str]
+    @param expand: add full address to local node
+    @type  expand: [1|0]
     """
     if expand:
         hosts = [ expandLocal( h ) for h in hosts ]
-    
+
     if number == None:
         pvm.addHosts( hosts )
 
@@ -59,6 +71,7 @@ def addHosts( number=len(H.nodes_all), hosts=H.nodes_all, expand=1 ):
 
 def countHosts():
     """
-    -> int, number of hosts registered with PVM
+    @return: number of hosts registered with PVM
+    @rtype: int
     """
     return PVM.pypvm_core.config()[0]

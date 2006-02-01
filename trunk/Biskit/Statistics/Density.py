@@ -22,6 +22,10 @@
 ## last $Date$
 ## $Revision$
 
+"""
+Analyze a density distribution of values.
+"""
+
 import Numeric as N
 import math
 import Biskit.hist as H
@@ -29,15 +33,23 @@ import Biskit.hist as H
 class Density:
     """
     Analyze a density distribution of values.
-    Can be created from a list of samples or from a discrete distribution:
-    Density( values = [ float ] )
-    or
-    Density( p = array(2xN,'f') )
-    by W.+M.
+    Can be created from a list of samples or from a discrete distribution::
+    
+      Density( values = [ float ] )
+        or
+      Density( p = array(2xN,'f') )
     """
 
     def __init__(self, p = None, values = None, bins = 20):
-
+        """
+        @param p: discrete distribution, array (2 x len(data) ) with
+                  start of bin and witdh of bin (default: None)
+        @type  p: array
+        @param values: list of samples  (default: None)
+        @type  values: [float]
+        @param bins: number of bins  (default: 20)
+        @type  bins: int
+        """
         if p is None and values is None:
             raise ValueError, 'Either a discrete distribution or ' + \
                   'a list of samples must be specified'
@@ -50,8 +62,15 @@ class Density:
 
         self.verbose = 0
 
+
     def store(self, val):
+        """
+        Analyze distribution data.
         
+        @param val: array (2 x len(data) ) with start of bin and witdh
+                    of bin (default: None)
+        @type  val: array        
+        """
         self.val = N.array(val, N.Float)
         self.x = self.val[:,0]
         self.p = self.val[:,1]
@@ -62,29 +81,37 @@ class Density:
 
         self.p /= Z
 
+
     def get(self):
         return self.val
+
 
     def __getslice__(self, *args, **kw):
         from operator import getslice
         return getslice(self.val, *args, **kw)
 
+
     def __getitem__(self, *args, **kw):
         from operator import getitem
         return getitem(self.val, *args, **kw)
 
+
     def confidenceInterval(self, level):
         """
         confidenceInterval(self, level)
-        level - float, confidence level (e.g. 0.68 for stdev interval)
-        -> ( float, float ), start and end of the confidence interval
-                             containing |level|*100 % of the probability 
-        """
+        
+        @param level: confidence level (e.g. 0.68 for stdev interval)
+        @type  level: float
+        
+        @return: start and end of the confidence interval
+                 containing |level|*100 % of the probability
+        @rtype: float, float
+        """          
         order = N.argsort(self.p).tolist()
         cumulative = N.add.accumulate(N.take(self.p, order)) * self.delta_x
 
         ind = N.nonzero(N.greater_equal(cumulative, 1. - level))
-        
+
         sub_set = order[ind[0]:]
 
         intervals = self.__find_intervals(sub_set)
@@ -93,12 +120,17 @@ class Density:
 
         return tuple(boundaries)
 
+
     def findConfidenceInterval(self, x):
         """
         findConfidenceInterval(self, x)
         Find the smallest possible density interval that still includes x.
-        x - float, value
-        -> ( float, (float, float) ), convidence level, interval start and end 
+        
+        @param x: value
+        @type  x: float
+        
+        @return: convidence level, interval start and end
+        @rtype: float, (float,float)
         """
         closest = N.argmin(abs(self.x - x))
 
@@ -114,22 +146,33 @@ class Density:
 
         return level, tuple(boundaries)
 
+
     def median(self):
+        """
+        Median of distribution.
+        """
         cum = N.add.accumulate(self.p) * self.delta_x
         index = N.argmin(abs(cum - 0.5))
 
         return self.x[index]
 
+
     def average(self):
+        """
+        Average of distribution.
+        """
         return self.delta_x * N.sum(self.p * self.x)
 
+
     def max(self):
+        """
+        Max height of distribution.
+        """        
         index = N.argmax(self.p)
         return self.x[index]
 
 
     def __find_intervals(self, l):
-
         l = N.array(l)
         l = N.take(l, N.argsort(l))
 
@@ -154,14 +197,20 @@ def p_lognormal(x, alpha, beta):
     is described by two parameters alpha and beta. Alpha and beta are not
     the usual mean and standard dev of the lognormal distribution itself but
     are the mean and stdev of the distribution after log-transformation.
-    The two parameters can hence be calculated from n sample values v:
-    alpha = 1/n N.sum( ln(vi) )
-    beta = N.sqrt( 1/(n-1) N.sum( ln(vi) - alpha )^2  )
+    The two parameters can hence be calculated from n sample values v::
     
-    x     - float, value
-    alpha - float, mean of the log-transformed random variable
-    beta  - float, stdev of the log-transformed random variable
-    -> float, probability of x
+      alpha = 1/n N.sum( ln(vi) )
+      beta = N.sqrt( 1/(n-1) N.sum( ln(vi) - alpha )^2  )
+
+    @param x: value
+    @type  x: float
+    @param alpha: mean of the log-transformed random variable
+    @type  alpha: float
+    @param beta: stdev of the log-transformed random variable
+    @type  beta: float
+    
+    @return: probability of x
+    @rtype: float
     """
     return 1. / math.sqrt(2. * math.pi) / beta / x * \
            math.exp(-0.5 / beta ** 2 * (math.log(x) - alpha) ** 2)
@@ -171,11 +220,17 @@ def logConfidence( x, R, clip=1e-32 ):
     """
     Estimate the probability of x NOT beeing a random observation from a
     lognormal distribution that is described by a set of random values.
-    The exact solution to this problem is in Biskit/Statistics/lognormal.py.
-    x    - float, observed value
-    R    - [ float ], sample of random values 0->don't clip (1e-32)
-    clip - float, clip zeros at this value
-    -> (float, float) confidence that x is not random, mean of random distrib.
+    The exact solution to this problem is in L{Biskit.Statistics.lognormal}.
+    
+    @param x: observed value
+    @type  x: float
+    @param R: sample of random values; 0 -> don't clip (default: 1e-32)
+    @type  R: [float]
+    @param clip: clip zeros at this value
+    @type  clip: float
+    
+    @return:  confidence that x is not random, mean of random distrib.
+    @rtype: (float, float)
     """
     if clip and 0 in R:
         R = N.clip( R, clip, max( R ) )
@@ -190,7 +245,7 @@ def logConfidence( x, R, clip=1e-32 ):
     stop = max( R ) * 50.0
     step = stop / 100000
     start = step / 10.0
-    
+
     X = [(v, p_lognormal(v, mean, stdv) ) for v in N.arange(start, stop, step)]
 
     ## analyse distribution
@@ -217,6 +272,6 @@ if __name__ == '__main__':
         beta = 0.6
 
         R = [ random.lognormvariate( alpha, beta ) for i in range( 10000 ) ]
-        
+
         print logConfidence( 6.0, R )[0], area(6.0, alpha, beta) 
-        
+

@@ -52,108 +52,28 @@ class InternalError( BiskitError ):
 class SequenceSearcher:
     """
     Take a sequence and return a list of nonredundant homolog
-    sequences as fasta file.
+    sequences as fasta file. The search can be performed using three
+    different methods:
 
-    ToDo: copy blast output
+     1. localBlast
+        Uses Bio.Blast.NCBIStandalone.blastall (Biopython) to perform
+        the search.
 
-    =============================== localBlast ==============================
-    
-    localBlast( seqFile, db, method='blastp', resultOut=None, e=0.01, **kw )
-        seqFile   - str, file name with search sequence as FASTA
-        db        - list of str, e.g. ['swissprot', 'pdb']
-        method    - str, e.g. 'blastp', 'fasta'
-        resultOut - str, save blast output to this new file
-        e         - expectaion value cutoff
+     2. localPSIBlast
+        Uses Bio.Blast.NCBIStandalone.blastpgp (Biopython)
         
-    You may pass more parameters to **kw to change the behavior of
-    the search.  Otherwise, default values will be chosen by blastall:
+     3. remoteBlast
+        Uses Bio.Blast.NCBIWWW.qblast (Biopython) which performs
+        a BLAST search using the QBLAST server at NCBI.
     
-    --- Scoring ---
-    matrix          Matrix to use (default BLOSUM62).
-    gap_open        Gap open penalty (default 0).
-    gap_extend      Gap extension penalty (default 0).
-
-    --- Algorithm ---
-    gapped          Whether to do a gapped alignment. T/F (default T)
-    wordsize        Word size (blastp default 11).
-    keep_hits       Number of best hits from a region to keep (default off).
-    xdrop           Dropoff value (bits) for gapped alignments (blastp default 25).
-    hit_extend      Threshold for extending hits (blastp default 11).
-
-    --- Processing ---
-    filter          Filter query sequence? (T/F, default F)
-    restrict_gi     Restrict search to these GI's.
-    believe_query    Believe the query defline? (T/F, default F)
-    nprocessors     Number of processors to use (default 1).
-    
-    --- Formatting ---
-    alignments      Number of alignments. (default 250)
-
-
-    ============================== localPSIBlast =============================
-    
-    localPSIBlast(seqFile, db, resultOut=None, e=0.01, **kw)
-        seqFile   - str, file name with search sequence as FASTA
-        db        - list of str, e.g. ['swissprot', 'pdb']
-        e         - float, expectation value cutoff
-        resultOut - str, save blast output to this new file
-
-    You may pass more parameters to **kw to change the behavior of
-    the search.  Otherwise, default values will be chosen by blastpgp:
-
-    --- Scoring --- 
-    matrix           Matrix to use (default BLOSUM62).
-    gap_open         Gap open penalty (default 11).
-    gap_extend       Gap extension penalty (default 1).
-    window_size      Multiple hits window size (default 40).
-    npasses          Number of passes (default 1).
-    passes           Hits/passes (Integer 0-2, default 1).
-
-    --- Algorithm --- 
-    gapped           Whether to do a gapped alignment (T/F, default T).
-    wordsize         Word size (default 3).
-    keep_hits        Number of beset hits from a region to keep (default 0).
-    xdrop            Dropoff value (bits) for gapped alignments (default 15).
-    hit_extend       Threshold for extending hits (default 11).
-    nbits_gapping    Number of bits to trigger gapping (default 22).
-    pseudocounts     Pseudocounts constants for multiple passes (default 9).
-    xdrop_final      X dropoff for final gapped alignment (default 25).
-    xdrop_extension  Dropoff for blast extensions (default 7).
-    model_threshold  E-value threshold to include in multipass model (default 0.005).
-    required_start   Start of required region in query (default 1).
-    required_end     End of required region in query (default -1).
-
-    --- Processing --- 
-    filter           Filter query sequence with SEG? (T/F, default F)
-    believe_query    Believe the query defline? (T/F, default F)
-    nprocessors      Number of processors to use (default 1).
-
-    --- Formatting --- 
-    alignments         Number of alignments (default 250).
-
-
-    ==================== remoteBlast, remotePSIBlast =========================
-    NCBIWWW.qblast
-
-    Do a BLAST search using the QBLAST server at NCBI.
-      program        BLASTP, BLASTN, BLASTX, TBLASTN, or TBLASTX.
-      database       Which database to search against.
-      sequence       The sequence to search.
-      ncbi_gi        TRUE/FALSE whether to give 'gi' identifier.  Def FALSE.
-      descriptions   Number of descriptions to show.  Def 500.
-      alignments     Number of alignments to show.  Def 500.
-      expect         An expect value cutoff.  Def 10.0.
-      matrix         Specify an alt. matrix (PAM30, PAM70, BLOSUM80, BLOSUM45).
-      filter         'none' turns off filtering.  Default uses 'seg' or 'dust'.
-      format_type    'HTML', 'Text', 'ASN.1', or 'XML'.  Def. 'HTML'
-
+    @todo: copy blast output
     """
 
     F_RESULT_FOLDER = '/sequences'
 
     ## standard file name for unclusterd sequences
     F_FASTA_ALL = F_RESULT_FOLDER + '/all.fasta'
-    
+
     ## standard file name for non-redundant seqs
     F_FASTA_NR =  F_RESULT_FOLDER + '/nr.fasta'
 
@@ -164,15 +84,22 @@ class SequenceSearcher:
     ## blast alignments
     F_BLAST_OUT = F_RESULT_FOLDER + '/blast.out'
     F_CLUSTER_BLAST_OUT = F_RESULT_FOLDER + '/cluster_blast.out'
-    
+
     ## default location of existing fasta file with target sequence
     F_FASTA_TARGET = '/target.fasta'
 
+
     def __init__(self, outFolder='.', clusterLimit=50, verbose=0, log=None ):
         """
-        clusterLimit - int, maximal number of returned sequence clusters [50]
-        verbose - 1||0, keep temporary files [0]
-        log     - LogFile, log file instance, if None, STDOUT is used [None]
+        @param outFolder: project folder (results are put into subfolder) ['.']
+        @type  outFolder: str
+        @param clusterLimit: maximal number of returned sequence clusters
+                             (default: 50)
+        @type  clusterLimit: int
+        @param verbose: keep temporary files (default: 0)
+        @type  verbose: 1|0
+        @param log: log file instance, if None, STDOUT is used (default: None)
+        @type  log: LogFile
         """
         self.outFolder = tools.absfile( outFolder )
 
@@ -204,30 +131,43 @@ class SequenceSearcher:
 
         ## the maximal number of clusters to return
         self.clusterLimit =  clusterLimit
-        
+
         self.clustersCurrent = None ## current number of clusters
 
         self.prepareFolders()
 
 
     def prepareFolders( self ):
+        """
+        Create needed output folders if not there.
+        """
         if not os.path.exists(self.outFolder + self.F_RESULT_FOLDER):
             os.mkdir( self.outFolder + self.F_RESULT_FOLDER )
 
 
     def getRecords( self ):
         """
-        -> [ Bio.Fasta.Record ], all found protein homologues
+        Get all homologues.
+        
+        @return: list of Bio.Fasta.Record with all found protein homologues
+        @rtype: [Bio.Fasta.Record]
+
+        @raise BlastError: if no sequences found
         """
         if not self.record_dic:
             raise BlastError( "No sequences found (yet)." )
-        
+
         return self.record_dic.values()
+
 
     def getClusteredRecords( self ):
         """
-        -> [ Bio.Fasta.Record ], best record of each cluster
-        !! BlastError, if called before clustering
+        Get representative of each cluster.
+        
+        @return: list with Bio.Fasta.Record with best record of each cluster
+        @rtype: [Bio.Fasta.Record]
+        
+        @raise BlastError: if called before clustering
         """
         if not self.clusters:
             raise BlastError( "Sequences are not yet clustered." )
@@ -237,10 +177,17 @@ class SequenceSearcher:
 
     def __blast2dict( self, parsed_blast, db ):
         """
-        blast2dic( Bio.Blast.Record.Blast ) -> { str:Bio.Fasta.Record }
         Convert parsed blast result into dictionary of FastaRecords indexed
-        by sequence ID.
+        by sequence ID.   
+        Writes all the sequences in fasta format to L{F_FASTA_ALL} and the
+        raw blast result to L{F_BLAST_OUT}.
+
+        @param parsed_blast: parsed blast result
+        @type  parsed_blast: Bio.Blast.Record.Blast
+        @param db: database
+        @type  db: str
         """
+        ## fastaFromIds( db, ids ) -> { str:Bio.Fasta.Record }
         ids = self.getSequenceIDs( parsed_blast )
         self.record_dic = self.fastaFromIds( db, ids )
 
@@ -254,23 +201,44 @@ class SequenceSearcher:
 
     def remoteBlast( self, seqFile, db, method, e=0.01, **kw ):
         """
-        seqFile- str, file name with search sequence as FASTA
-        db     - list of str, e.g. ['swissprot', 'pdb']
-        method - str, e.g. 'blastp', 'fasta'
-        e      - float, expectation value cutoff
-        ncbi_gi- TRUE/FALSE whether to give 'gi' identifier.  Def FALSE.
-        **kw   - blast options
+        Perform a remote BLAST search using the QBLAST server at NCBI.
+        Uses Bio.Blast.NCBIWWW.qblast (Biopython) for the search
+        
+        @param seqFile: file name with search sequence as FASTA
+        @type  seqFile: str
+        @param db: database(s) to search in, e.g. ['swissprot', 'pdb']
+        @type  db: [str]
+        @param method: search method, e.g. 'blastp', 'fasta'
+        @type  method: str
+        @param e: expectation value cutoff
+        @type  e: float
+        @param kw: optional keywords::
+               program        BLASTP, BLASTN, BLASTX, TBLASTN, or TBLASTX.
+               database       Which database to search against.
+               sequence       The sequence to search.
+               ncbi_gi        TRUE/FALSE whether to give 'gi' identifier.
+                              (default: FALSE)
+               descriptions   Number of descriptions to show.  Def 500.
+               alignments     Number of alignments to show.  Def 500.
+               expect         An expect value cutoff.  Def 10.0.
+               matrix         Specify an alt. matrix
+                              (PAM30, PAM70, BLOSUM80, BLOSUM45).
+               filter         'none' turns off filtering. Default uses 'seg'
+                              or 'dust'.
+               format_type    'HTML', 'Text', 'ASN.1', or 'XML'.  Def. 'HTML
+        @type  kw: any
+        
 
-        NOTE: Using the remoteBlast is asking for trouble, as
-              every change in the output file might kill the
-              parser. If you still want to use remoteBlast we
-              strongly recomend that you install BioPython
-              from CVS. Information on how to do this you
-              will find on the BioPython homepage.
+        @note: Using the remoteBlast is asking for trouble, as
+               every change in the output file might kill the
+               parser. If you still want to use remoteBlast we
+               strongly recomend that you install BioPython
+               from CVS. Information on how to do this you
+               will find on the BioPython homepage.
         """
         fasta = Fasta.Iterator( open(seqFile) )
         query = fasta.next()
-        
+
         blast_result = NCBIWWW.qblast( program=method, database=db,
                                        sequence=query, expect=e,
                                        ncbi_gi='FALSE', **kw)
@@ -286,11 +254,48 @@ class SequenceSearcher:
     def localBlast( self, seqFile, db, method='blastp',
                     resultOut=None, e=0.01, **kw ):
         """
-        seqFile- str, file name with search sequence as FASTA
-        db     - list of str, e.g. ['swissprot', 'pdb']
-        method - str, e.g. 'blastp', 'fasta'
-        e - float, expectation value cutoff
-        resultOut - str, save blast output to this new file
+        Performa a local blast search (requires that the blast binaries
+        and databases are installed localy).
+        Uses Bio.Blast.NCBIStandalone.blastall (Biopython) for the search.
+        
+        @param seqFile: file name with search sequence in FASTA format
+        @type  seqFile: str
+        @param db: database(s) to search, e.g. ['swissprot', 'pdb']
+        @type  db: [str]
+        @param method: search program to use, e.g. 'blastp', 'fasta'
+                       (default: blastp)
+        @type  method: str
+        @param e: expectation value cutoff
+        @type  e: float
+        @param resultOut: save blast output to this new file
+        @type  resultOut: str
+        @param kw: optional keywords::
+                --- Scoring ---
+                matrix         Matrix to use (default BLOSUM62).
+                gap_open       Gap open penalty (default 0).
+                gap_extend     Gap extension penalty (default 0).
+
+                --- Algorithm ---
+                gapped         Whether to do a gapped alignment. T/F 
+                                (default T)
+                wordsize       Word size (blastp default 11).
+                keep_hits      Number of best hits from a region to keep
+                                (default off).
+                xdrop          Dropoff value (bits) for gapped alignments
+                                (blastp default 25).
+                hit_extend     Threshold for extending hits (blastp default 11)
+
+                --- Processing ---
+                filter         Filter query sequence? (T/F, default F)
+                restrict_gi    Restrict search to these GI's.
+                believe_query  Believe the query defline? (T/F, default F)
+                nprocessors    Number of processors to use (default 1).
+
+                --- Formatting ---
+                alignments     Number of alignments. (default 250)
+        @type  kw: any
+        
+        @raise BlastError: if program call failes
         """
         results = err = p = None
         try:
@@ -304,11 +309,11 @@ class SequenceSearcher:
             results, err = NCBIStandalone.blastall( settings.blast_bin,
                                                     method, db, seqFile,
                                                     expectation=e, **kw)
-                                                                
+
             p = NCBIStandalone.BlastParser()
 
             parsed = p.parse( results )
-            
+
             self.__blast2dict( parsed, db )
 
         except Exception, why:
@@ -324,12 +329,57 @@ class SequenceSearcher:
     def localPSIBlast( self, seqFile, db, rounds=3, resultOut=None,
                        e=0.01, **kw ):
         """
-        seqFile- str, file name with search sequence as FASTA
-        db     - list of str, e.g. ['swissprot', 'pdb']
-        e - float, expectation value cutoff, def 0.001
-        resultOut - str, save blast output to this new file
+        Performa a local psi-blast search (requires that the blast binaries
+        and databases are installed localy).
+        Uses Bio.Blast.NCBIStandalone.blastpgp (Biopython) for the search
+        
+        @param seqFile: file name with search sequence in FASTA format
+        @type  seqFile: str
+        @param db: database(s) to search e.g. ['swissprot', 'pdb']
+        @type  db: [str]
+        @param rounds: number of iterations (default: 3)
+        @type  rounds: int
+        @param e: expectation value cutoff (default: 0.001)
+        @type  e: float
+        @param resultOut: save blast output to this new file
+        @type  resultOut: str
 
-        e_init - float, threshold for the initial BLAST search, def. 10
+        @param kw: optional keywords::
+            --- Scoring --- 
+            matrix           Matrix to use (default BLOSUM62).
+            gap_open         Gap open penalty (default 11).
+            gap_extend       Gap extension penalty (default 1).
+            window_size      Multiple hits window size (default 40).
+            npasses          Number of passes (default 1).
+            passes           Hits/passes (Integer 0-2, default 1).
+
+            --- Algorithm --- 
+            gapped           Whether to do a gapped alignment (T/F, default T).
+            wordsize         Word size (default 3).
+            keep_hits        Number of beset hits from a region to keep (def 0)
+            xdrop            Dropoff value (bits) for gapped alignments
+                             (def 15)
+            hit_extend       Threshold for extending hits (default 11).
+            nbits_gapping    Number of bits to trigger gapping (default 22).
+            pseudocounts     Pseudocounts constants for multiple passes
+                             (def 9).
+            xdrop_final      X dropoff for final gapped alignment (default 25).
+            xdrop_extension  Dropoff for blast extensions (default 7).
+            model_threshold  E-value threshold to include in multipass model
+                             (default 0.005).
+            required_start   Start of required region in query (default 1).
+            required_end     End of required region in query (default -1).
+
+            --- Processing --- 
+            filter           Filter query sequence with SEG? (T/F, default F)
+            believe_query    Believe the query defline? (T/F, default F)
+            nprocessors      Number of processors to use (default 1).
+
+            --- Formatting --- 
+            alignments       Number of alignments (default 250).
+        @type  kw: any
+
+        @raise BlastError: if program call failes
         """
         results = err = p = None
         try:
@@ -337,7 +387,7 @@ class SequenceSearcher:
                                                     db, seqFile,
                                                     npasses=rounds,
                                                     expectation=e, **kw)
-            
+
             p = NCBIStandalone.PSIBlastParser()
 
             parsed = p.parse( results )
@@ -357,8 +407,16 @@ class SequenceSearcher:
 
     def getSequenceIDs( self, blast_records ):
         """
-        getSequenceIDs(  Bio.Blast.Record.Blast ) -> [ str ]
+        getSequenceIDs( Bio.Blast.Record.Blast ) -> [ str ]
         extract sequence ids from BlastParser result.
+
+        @param blast_records: blast search result
+        @type  blast_records: Bio.Blast.Record.Blast
+
+        @return: list of sequence IDs
+        @rtype: [str]
+        
+        @raise BlastError: if can't find ID
         """
         result = []
         ids = []
@@ -371,7 +429,7 @@ class SequenceSearcher:
 
             if not ids:
                 raise BlastError( "Couldn't find ID in " + a.title)
-                
+
             result += [ ids[0] ]
 
         return result
@@ -380,17 +438,26 @@ class SequenceSearcher:
     def fastaRecordFromId( self, db, id ):
         """
         fastaRecordFromId( db, id ) -> Bio.Fasta.Record
-        !! BlastError
+
+        @param db: database
+        @type  db: str
+        @param id: sequence database ID
+        @type  id: str
+
+        @return: fasta record
+        @rtype: Bio.Fasta.Record
+        
+        @raise BlastError: if can't fetch fasta record from database
         """
         cmd = settings.fastacmd_bin + ' -d %s -s %s' % (db, id)
 
         err, o = commands.getstatusoutput( cmd )
         if err:
             raise BlastError( err )
-        
+
         frecord = Fasta.Record()
         frecord.title = id
-        
+
         try:
             for line in o.split('\n'):
                 if line[0] == '>':
@@ -403,12 +470,21 @@ class SequenceSearcher:
                   % (id,db)
 
         return frecord
-        
+
 
     def fastaFromIds( self, db, id_lst, fastaOut=None ):
         """
-        fastaFromIds( id_lst, fastaOut )
-        -> { str: Bio.Fasta.Record }
+        fastaFromIds( id_lst, fastaOut ) -> { str: Bio.Fasta.Record }
+
+        @param db: database
+        @type  db: str
+        @param id_lst: sequence database IDs
+        @type  id_lst: [str]
+        
+        @return: dictionary mapping IDs to Bio.Fasta.Records
+        @rtype: {str: Bio.Fasta.Record}
+
+        @raise BlastError: if couldn't fetch record
         """
         result = {}
         for i in id_lst:
@@ -422,6 +498,12 @@ class SequenceSearcher:
 
 
     def copyClusterOut( self, raw=None):
+        """
+        Write clustering results to file.
+
+        @param raw: write raw clustering result to disk (default: None)
+        @type  raw: 1|0        
+        """
         if self.verbose and raw:
             f = open( self.outFolder + self.F_CLUSTER_RAW, 'w', 1)
 
@@ -429,8 +511,18 @@ class SequenceSearcher:
             f.close()
 
 
-    def reportClustering( self, raw=None,  ):
+    def reportClustering( self, raw=None ):
         """
+        Report the clustering result.
+        
+        Writes:
+         - clustering results to L{F_CLUSTER_LOG}
+         - blast records to L{F_BLAST_OUT}
+         - blast records of centers to L{F_CLUSTER_BLAST_OUT}
+         - raw clustering results to L{F_CLUSTER_RAW} if raw not None
+
+        @param raw: write raw clustering result to disk (default: None)
+        @type  raw: 1|0         
         """
         try:
             if self.verbose:
@@ -444,34 +536,40 @@ class SequenceSearcher:
 
                 ## write blast records of centers to disc
                 centers = [ c[0] for c in self.clusters ]
-                
+
                 self.writeClusteredBlastResult( \
                     self.outFolder + self.F_BLAST_OUT,
                     self.outFolder + self.F_CLUSTER_BLAST_OUT, centers )
 
-        
+
                 self.copyClusterOut( raw=raw )
-                
+
         except IOError, why:
             EHandler.warning( "Can't write cluster report." + str(why) )
 
 
     def clusterFasta( self, fastaIn=None, simCut=1.75, lenCut=0.9, ncpu=1 ):
         """
+        Cluster sequences. The input fasta titles must be the IDs.
         fastaClust( fastaIn [, simCut, lenCut, ncpu] )
 
-        Cluster sequences. The input fasta titles must be the IDs.
-        fastaIn - str, file name
-        simCut  - double, similarity threshold (score < 3 or %identity) [1.75]
-        lenCut  - double, length threshold [ 0.9 ]
-        ncpu    - int, number of CPUs
-        !! BlastError
+        @param fastaIn: name of input fasta file
+        @type  fastaIn: str
+        @param simCut: similarity threshold (score < 3 or %identity)
+                       (default: 1.75)
+        @type  simCut: double
+        @param lenCut: length threshold (default: 0.9)
+        @type  lenCut: double
+        @param ncpu: number of CPUs
+        @type  ncpu: int
+        
+        @raise BlastError: if fastaIn is empty
         """
         fastaIn = fastaIn or self.outFolder + self.F_FASTA_ALL
 
         if tools.fileLength( fastaIn ) < 1:
             raise IOError( "File %s empty. Nothing to cluster"%fastaIn )
-        
+
         self.log.add( "\nClustering sequences:\n%s"%('-'*20) )
 
         cmd = settings.blastclust_bin + ' -i %s -S %f -L %f -a %i' %\
@@ -497,7 +595,7 @@ class SequenceSearcher:
         lines = [ l.split() for l in o.split('\n') ]
         dateline = [ l[-1] for l in lines ].index('queries')
         self.clusters = lines[dateline+1:]
-        
+
         self.reportClustering( raw=o )
 
         self.bestOfCluster = [ self.selectFasta( ids )
@@ -510,9 +608,19 @@ class SequenceSearcher:
         Run cluterFasta iteratively, with tighter clustering settings, until
         the number of clusters are less than self.clusterLimit.
 
-        Older versions of T-Coffee can't handle more that approx.
-        50 sequences (out of memory). This problem is taken care of
-        in versions > 3.2 of T-Coffee.
+        @note: Older versions of T-Coffee can't handle more that approx.
+               50 sequences (out of memory). This problem is taken care of
+               in versions > 3.2 of T-Coffee.
+
+        @param fastaIn: name of input fasta file
+        @type  fastaIn: str
+        @param simCut: similarity threshold (score < 3 or %identity)
+                       (default: 1.75)
+        @type  simCut: double
+        @param lenCut: length threshold (default: 0.9)
+        @type  lenCut: double
+        @param ncpu: number of CPUs
+        @type  ncpu: int  
         """
         iter = 1
         while self.clustersCurrent > self.clusterLimit \
@@ -520,22 +628,25 @@ class SequenceSearcher:
 
             self.clusterFasta( fastaIn, simCut, lenCut, ncpu )
             self.clustersCurrent = len( self.clusters )
-        
+
             self.log.add( "- Clustering iteration %i produced %i clusters." \
                           %( iter, len( self.clusters) ))
             self.log.add( "\tusing a simCut of %.2f and a lenCut of %.3f.\n" \
                           %( simCut, lenCut ) )
-            
+
             simCut -= 0.15
             lenCut -= 0.015
             iter += 1
 
-            
+
     def selectFasta( self, ids_from_cluster ):
         """
-        select one member of cluster of sequences.
-        ids - [ str ], list of sequence ids defining the cluster
-        -> str, id of best in cluster
+        Select one member of cluster of sequences.
+        
+        @param ids_from_cluster: list of sequence ids defining the cluster
+        @type  ids_from_cluster: [str]
+        @return: id of best in cluster
+        @rtype: str
         """
         return ids_from_cluster[0]
 
@@ -543,18 +654,25 @@ class SequenceSearcher:
     def writeFasta( self, frecords, fastaOut ):
         """
         Create fasta file for given set of records.
-        frecords - [ Bio.Blast.Record ]
-        fastaOut - str, file name
+        
+        @param frecords: list of Bio.Blast.Records
+        @type  frecords: [Bio.Blast.Record]
+        @param fastaOut: file name
+        @type  fastaOut: str
         """
         f = open( tools.absfile(fastaOut), 'w' )
         for r in frecords:
             f.write( str( r ) + '\n' )
         f.close()
 
+
     def writeFastaAll( self, fastaOut=None ):
         """
         Write all found template sequences to fasta file.
-        fastaOut - str, [ 'sequences/all.fasta' ]
+        
+        @param fastaOut: write all fasta records to file
+                         (default: L{F_FASTA_ALL})
+        @type  fastaOut: str OR None
         """
         fastaOut = fastaOut or self.outFolder + self.F_FASTA_ALL
         self.writeFasta( self.frecords, fastaOut )
@@ -563,7 +681,10 @@ class SequenceSearcher:
     def writeFastaClustered( self, fastaOut=None ):
         """
         Write non-redundant set of template sequences to fasta file.
-        fastaOut - str, [ 'sequences/nr.fasta' ]
+        
+        @param fastaOut: write non-redundant fasta records to file
+                         (default: L{F_FASTA_NR})
+        @type  fastaOut: str
         """
         fastaOut = fastaOut or self.outFolder + self.F_FASTA_NR
 
@@ -572,9 +693,15 @@ class SequenceSearcher:
 
     def __writeBlastResult( self, parsed_blast, outFile):
         """
+        Write the result from the blast search to file (similar to the
+        output produced by a regular blast run).
+        
         writeBlastResult( parsed_blast, outFile )
-        parsed_blast -  Bio.Blast.Record.Blast
-        outFile  - str
+        
+        @param parsed_blast: Bio.Blast.Record.Blast
+        @type  parsed_blast: Bio.Blast.Record.Blast
+        @param outFile: file to write the blast result to
+        @type  outFile: str
         """
         f = open( tools.absfile( outFile ), 'w' )
 
@@ -600,9 +727,13 @@ class SequenceSearcher:
     def writeClusteredBlastResult( self, allFile, clustFile, selection ):
         """
         Reads the blast.out file and keeps only centers.
-        allFile   - file, all blast results
-        clustFile - str, output file name
-        selection - list, write only sequences in list
+        
+        @param allFile: all blast results
+        @type  allFile: file
+        @param clustFile: output file name
+        @type  clustFile: str
+        @param selection: write only sequences in list
+        @type  selection: list
         """
         f = open( clustFile, 'w' )
 
@@ -630,24 +761,24 @@ class SequenceSearcher:
                             pass
                         else:
                             f.writelines( line[j] )  
-                
+
         f.close()        
         b.close()
 
-            
+
 def test():
     options = {}
     options['q'] = '/home/Bis/raik/homopipe/test/nmr_hit.fasta'
     options['o'] = '/home/Bis/johan/blats.test'
     return options
-  
+
 
 ##########
 ## TEST ##
 ##########
 
 if __name__ == '__main__':
-    
+
     options = test()
     #    options = cmdDict( _defOptions() )
 

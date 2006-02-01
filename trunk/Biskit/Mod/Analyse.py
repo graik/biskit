@@ -23,6 +23,10 @@
 ## last $Date$
 ## $Revision$
 
+"""
+Analyze model quality
+"""
+
 import Biskit.tools as tools
 from Biskit.PDBModel import PDBModel
 from Biskit.Mod.Benchmark import Benchmark
@@ -68,9 +72,13 @@ class Analyse:
     F_CROSS_VAL = F_RESULT_FOLDER + '/local_results.out'
     F_FINAL_PDB = F_RESULT_FOLDER + '/final.pdb'
 
+
     def __init__( self, outFolder, log=None ):
         """
-        log      - LogFile instance or None, None reports to STDOUT
+        @param outFolder: base folder for output
+        @type  outFolder: str
+        @param log: None reports to STDOUT
+        @type  log: LogFile instance or None
         """
         self.outFolder = tools.absfile( outFolder )
         self.log = log
@@ -89,12 +97,17 @@ class Analyse:
     def parseFile( self, name ):
         """
         Parse a identity matrix file
-        -> list of lists
+
+        @param name: file to parse
+        @type  name: str
+        
+        @return: contents of parsed file
+        @rtype: [[str]]
         """
         f = open( name, 'r')
         result = []
         lines = f.readlines()
-        
+
         for l in lines:
             if not l[0] == '#':
                 r =[]
@@ -105,24 +118,31 @@ class Analyse:
                         pass
                 if len(r)>=1:
                     result += [ r ]
-                
+
         f.close()
         return result
-            
+
 
 ######################################################################
 ####  GLOBAL RESTULTS: RMSD_AA, RMSD_CA,
 ####                   %ID(mean of the templates),
 ####                   Nb of Templates 
 
-    def global_rmsd_aa(self, input_folder = None, validation_folder= None):
+    def global_rmsd_aa(self, validation_folder= None):
         """
-        -> rmsd_aa_wo_if: list [], global all atom rmsd for each
-              template without iterative fitting
-        -> rmsd_aa_if: list [], global all atom rmsd for each
-              templates with iterative fitting
+        Global RMSD values.
+        
+        @param validation_folder: folder vith validation data
+                      (defult: None S{->} outFolder/L{F_TEMPLATE_FOLDER})
+        @type  validation_folder: str
+
+        @return: two dictionaries:
+                  - rmsd_aa_wo_if: global all atom rmsd for each
+                    template without iterative fitting
+                  - rmsd_aa_if: global all atom rmsd for each
+                    templates with iterative fitting
+        @rtype: dict, dict      
         """
-        input_folder = input_folder or self.F_INPUT_RMSD
         validation_folder = validation_folder or self.outFolder + \
                             self.F_TEMPLATE_FOLDER
 
@@ -130,26 +150,33 @@ class Analyse:
 
         rmsd_aa_wo_if = {}
         rmsd_aa_if = {}
-        
+
         for folder in folders:
 
             file = "%s/%s"%(validation_folder, folder + self.F_RMSD_AA)
             lst = self.parseFile( file )
-            
+
             rmsd_aa_wo_if[folder] = [ lst[0][0] ]
             rmsd_aa_if[folder]    = [ lst[0][1], lst[0][2]*100.]
 
         return rmsd_aa_wo_if, rmsd_aa_if
 
 
-    def global_rmsd_ca(self, input_folder = None, validation_folder= None):
+    def global_rmsd_ca(self, validation_folder= None):
         """
-        -> rmsd_ca_wo_if: list [], global CA rmsd for each template
-              without iterative fitting
-        -> rmsd_ca_if: list [], global CA rmsd for each template
-              with iterative fitting
+        Global RMSD CA values.
+        
+        @param validation_folder: folder vith validation data
+                       (defult: None S{->} outFolder/L{F_TEMPLATE_FOLDER})
+        @type  validation_folder: str
+
+        @return: two dictionaries:
+                  - rmsd_ca_wo_if: global CA rmsd for each template
+                    without iterative fitting
+                  - rmsd_ca_if: global CA rmsd for each template
+                    with iterative fitting
+        @rtype: dict, dict  
         """
-        input_folder = input_folder or self.F_INPUT_RMSD
         validation_folder = validation_folder or self.outFolder + \
                             self.F_TEMPLATE_FOLDER
 
@@ -157,25 +184,32 @@ class Analyse:
 
         rmsd_ca_wo_if = {}
         rmsd_ca_if = {}
-        
+
         for folder in folders:
 
             file = "%s/%s"%(validation_folder, folder + self.F_RMSD_CA)
-            
+
             lst = self.parseFile( file )
 
             rmsd_ca_wo_if[folder] = [ lst[0][0] ]
             rmsd_ca_if[folder]    = [ lst[0][1], lst[0][2]*100.]
-        
+
         return rmsd_ca_wo_if, rmsd_ca_if
-    
+
 
     def get_identities(self, nb_templates, validation_folder = None):
         """
         Calculate the mean of the percentage of identities for each
         template with the others.
-        nb_templates - int, number of templates used in the cross-validation
-        -> identities: dic {}, mean %ID for each template
+        
+        @param nb_templates: number of templates used in the cross-validation
+        @type  nb_templates: int
+        @param validation_folder: folder vith validation data
+                           (defult: None S{->} outFolder/L{F_TEMPLATE_FOLDER})
+        @type  validation_folder: str
+        
+        @return: dictionary with mean percent identities for each template
+        @rtype: {str:float}
         """
 
         validation_folder = validation_folder or self.outFolder + \
@@ -187,21 +221,26 @@ class Analyse:
         for folder in folders:
             file = "%s/%s"%(validation_folder, folder + \
                             CI.F_OUTPUT_IDENTITIES_COV)
-            
+
             lst = self.parseFile( file )
-            
+
             ## identity to mean template
             identities[folder] = N.sum(lst[0][1:])/nb_templates
-            
+
         return identities
 
 
-    def get_score(self, input_folder = None, validation_folder = None):
+    def get_score(self, validation_folder = None):
         """
         Get the best global modeller score for each template re-modeled
-        -> score: dic {}, modeller score for each template
+
+        @param validation_folder: folder vith validation data
+                             (defult: None S{->} outFolder/L{F_TEMPLATE_FOLDER})
+        @type  validation_folder: str
+        
+        @return: dictionary with modeller score for each template
+        @rtype: {str:float}
         """
-        input_folder = input_folder or Modeller.F_RESULT_FOLDER
         validation_folder = validation_folder or self.outFolder + \
                             self.F_TEMPLATE_FOLDER
 
@@ -210,18 +249,43 @@ class Analyse:
 
         for folder in folders:
             file = "%s/%s"%(validation_folder, folder + Modeller.F_SCORE_OUT)
-           
+
             file = open(file, 'r')
             string_lines = file.readlines()[3]
             score[folder] = float( split(string_lines)[1] )
 
         return score
-    
-    
+
+
     def output_values(self, rmsd_aa_wo_if, rmsd_aa_if,  rmsd_ca_wo_if,
                       rmsd_ca_if, identities, score, nb_templates,
                       output_file = None):
-
+        """
+        Write result to file.
+        
+        @param rmsd_aa_wo_if: Rmsd for heavy atoms and normal fit.
+                              Data should be a dictionary mapping pdb
+                              codes to a list containing the rmsd value
+                              and the percent of discharded atoms in
+                              the rmsd calculation.
+        @type  rmsd_aa_wo_if: {str:[float,float]}
+        @param rmsd_aa_if: Rmsd for heavy atoms, iterative fit.
+        @type  rmsd_aa_if: {str:[float,float]}
+        @param rmsd_ca_wo_if: rmsd for only CA, normal fit.
+        @type  rmsd_ca_wo_if: {str:[float,float]}
+        @param rmsd_ca_if: Rmsd for only CA, iterative fit.
+        @type  rmsd_ca_if: {str:[float,float]}
+        @param identities: mean identity to template, dictionary
+                           mapping pdb codes to identity values
+        @type  identities: {str:float}
+        @param score: score calculated by  Modeller
+        @type  score: float
+        @param nb_templates: number of templates used for re-modeling
+        @type  nb_templates: int
+        @param output_file: file to write
+                            (default: None S{->} outFolder/L{F_OUTPUT_VALUES})
+        @type  output_file: str
+        """
         output_file = output_file or self.outFolder + self.F_OUTPUT_VALUES
 
         file = open( output_file, 'w' )
@@ -245,51 +309,71 @@ class Analyse:
 
     def get_aln_info(self, output_folder = None):
         """
-        -> aln_dictionary {}, contains information from the alignment
-        between the target and its templates
+        Collect alignment information.
+        
+        @param output_folder: output folder (default: None S{->} outFolder)
+        @type  output_folder: str
+        
+        @return: aln_dictionary, contains information from the alignment
+                 between the target and its templates
+                 e.g. {'name':'target, 'seq': 'sequence of the target'}
+        @rtype: dict
         """
         output_folder = output_folder or self.outFolder
 
         ci = CI(outFolder=output_folder)
-        
+
         string_lines = ci.get_lines()
         aln_length = ci.search_length(string_lines)
         aln_dictionnary = ci.get_aln_sequences(string_lines, aln_length)
         aln_dictionnary = ci.get_aln_templates(string_lines, aln_dictionnary,
                                                aln_length)
         aln_dictionnary = ci.identities(aln_dictionnary)
-        
+
         return aln_dictionnary
-    
+
 
     def get_templates_rmsd(self, templates):
         """
-        templates - list [string], name of the different templates
-        -> template_rmsd_dic {}, contains all the rmsd per residues
-            of all the templates
+        Collect RMSD values between all the templates.
+
+        @param templates: name of the different templates
+        @type  templates: [str]
+        
+        @return: template_rmsd_dic, contains all the rmsd per residues
+                 of all the templates
+        @rtype: dict
         """
         template_rmsd_dic = {}
         for template in templates:
-            
+
             pdb_list = self.outFolder + self.F_TEMPLATE_FOLDER \
                        + "/%s"%template + self.F_PDBModels
-                
+
             pdb_list = tools.Load(pdb_list)
-            
-            template_rmsd_dic[template] = pdb_list[0].compress(pdb_list[0].maskCA()).aProfiles["rmsd2ref_if"]
-                
+
+            template_rmsd_dic[template] = \
+              pdb_list[0].compress(pdb_list[0].maskCA()).aProfiles["rmsd2ref_if"]
+
         return template_rmsd_dic
 
 
     def templates_profiles(self, templates, aln_dic, template_rmsd_dic):
         """
-        templates - list [string], name of the different templates
-        aln_dic   - dic {}, contains all the informations between the
-                       target and its templates from the alignment
-        template_rmsd_dic - {}, contains all the rmsd per residues of all
-                            the templates
-        -> template_profiles: dic {}, contains all the profile rmsd of
-            each template with the target and their %ID
+        Collect RMSD profiles of each template with the target and their %ID.
+        
+        @param templates: name of the different templates
+        @type  templates: [str]
+        @param aln_dic: contains all the informations between the
+                        target and its templates from the alignment
+        @type  aln_dic: dict
+        @param template_rmsd_dic: contains all the rmsd per residues of all
+                                  the templates
+        @type  template_rmsd_dic: dict
+        
+        @return: template_profiles, contains all the profile rmsd of
+                 each template with the target and their %ID
+        @rtype: dict
         """
         templates_profiles = {}
 
@@ -303,7 +387,7 @@ class Analyse:
             for key in aln_dic:
                 if(key[:4] == template):
                     template_aln = aln_dic[key]["seq"]
-                    
+
             no_res = -1
             for i in range(len(target_aln)):
                 if(template_aln[i] is not '-'):
@@ -311,12 +395,12 @@ class Analyse:
 
                 if(target_aln[i] != '-' and template_aln[i] != '-'):
                     template_profile.append(template_rmsd[no_res])
-                    
+
                 if(target_aln[i] != '-' and template_aln[i] == '-'):
                     template_profile.append(-1)
-                    
+
             template_info["rProfile"] = template_profile
-            
+
             for key in aln_dic["target"]["cov_ID"]:
                 if(key[:4] == template):
                     template_info["cov_ID"] = \
@@ -326,23 +410,43 @@ class Analyse:
 
         return templates_profiles
 
-        
+
 
     def output_cross_val(self, aln_dic, templates_profiles,
                          templates, model, output_file=None):
         """
+        Calculates the mean rmsd of the model to the templates and
+        write the result to a file.
+        
+        @param aln_dic: contains all the informations between the
+                        target and its templates from the alignment
+        @type  aln_dic: dict         
+        @param templates_profiles: contains all the profile rmsd of
+                                   each template with the target and their %ID
+        @type  templates_profiles: dict
+        @param templates: name of the different templates
+        @type  templates: [str]        
+        @param model: model
+        @type  model: PDBModel
+        @param output_file: output file
+                            (default: None S{->} outFolder/L{F_CROSS_VAL})
+        @type  output_file: str
+        
+        @return: mean_rmsd, dictionary with the mean rmsd of the model
+                 to the templates.
+        @rtype: dict        
         """
         output_file = output_file or self.outFolder + self.F_CROSS_VAL
 
         mean, sum, values = 0, 0, 0
         mean_rmsd = []
-        
+
         for k,v in aln_dic["target"]["cov_ID"].items():
-            
+
             if (k != "target"):
                 sum += aln_dic["target"]["cov_ID"][k]
                 values +=1
-        
+
         cov_id_target = float(sum/values)
 
         for i in range(len(templates_profiles[templates[0]]["rProfile"])):
@@ -350,13 +454,13 @@ class Analyse:
             mean = 0
             sum = 0
             n_values = 0
-             
+
             for k in templates_profiles:
 
                 if(templates_profiles[k]["rProfile"][i] != -1):
                     sum +=  templates_profiles[k]["rProfile"][i]
                     n_values += 1
-            
+
             if(n_values != 0):        
                 mean = float(sum) / float(n_values)
 
@@ -367,7 +471,7 @@ class Analyse:
         ## write header
         file = open (output_file, 'w')
         file.write("Mean rmsd of model to templates and the residue rmsd.\n")
-        
+
         ## write pdb code
         file.write(" "*7)
         for k in templates_profiles.keys():
@@ -387,9 +491,9 @@ class Analyse:
                                   resDic[i]['residue_name']))
             for k in templates_profiles:
                 file.write("%6.2f"%(templates_profiles[k]["rProfile"][i]))
-                
+
             file.write("%6.2f\n"%(mean_rmsd[i]))
-            
+
         file.close()
 
         return mean_rmsd
@@ -404,42 +508,53 @@ class Analyse:
         pickle down the final.pdb which is judged to be the best model
         of the project. The mean rmsd to the templates is written to the
         temperature_factor column.
-        
-        mean_rmsd_atoms - list[int], mean rmsd for each atom of the
-        target's model
-        model - PDBModel, target's model with the highest modeller score
+
+        @param mean_rmsd_atoms: mean rmsd for each atom of the
+                                target's model
+        @type  mean_rmsd_atoms: [int]
+        @param model: target's model with the highest modeller score
+        @type  model: PDBModel
         """
         for a,v in zip(model.atoms, mean_rmsd_atoms):
             a['temperature_factor'] = v
-    
+
         model.writePdb(self.outFolder + self.F_FINAL_PDB)       
-            
+
 
 
 ######################
 ### LAUNCH FUNCTION ##
 ######################
-    
+
     def go(self, output_folder = None, template_folder = None):
-        
+        """
+        Run analysis of models.
+
+        @param output_folder: folder for result files
+                         (default: None S{->} outFolder/L{F_RESULT_FOLDER})
+        @type  output_folder: str
+        @param template_folder: folder with template structures
+                         (default: None S{->} outFolder/L{VS.F_RESULT_FOLDER})
+        @type  template_folder: str
+        """
         ##
         pdb_list = tools.Load(self.outFolder + self.F_MODELS)
         model = PDBModel(pdb_list[0])
-        
+
         ## 
         output_folder = output_folder or self.outFolder + self.F_RESULT_FOLDER
         template_folder = template_folder or self.outFolder +VS.F_RESULT_FOLDER
-        
+
         templates = os.listdir(template_folder)
 
         ##
         global_rmsd_aa_wo_if, global_rmsd_aa_if = self.global_rmsd_aa()
         global_rmsd_ca_wo_if, global_rmsd_ca_if = self.global_rmsd_ca()
         nb_templates = len(templates)-1
-        
+
         identities = self.get_identities(nb_templates)
         score = self.get_score()
-        
+
         self.output_values(global_rmsd_aa_wo_if, global_rmsd_aa_if,
                            global_rmsd_ca_wo_if, global_rmsd_ca_if,
                            identities, score, nb_templates)
@@ -453,7 +568,7 @@ class Analyse:
                                                      template_rmsd_dic)
         mean_rmsd = self.output_cross_val(aln_dic, templates_profiles,
                                           templates, model)
-        
+
         ##
         mean_rmsd_atoms = model.res2atomProfile(mean_rmsd) 
         self.updatePDBs_charge(mean_rmsd_atoms, model)
@@ -472,16 +587,16 @@ if __name__ == '__main__':
     a = Analyse(outFolder = base_folder)
     a.go()
 
-    
+
  ##    folders = os.listdir(tools.absfile('~/Homstrad_final/'))
 
 
 ##     for folder in folders:
-        
+
 ##         base_folder = tools.absfile('~/Homstrad_final/%s'%folder)
 
 ##         a = Analyse(outFolder = base_folder)
-        
+
 ##         a.go()
-    
+
 

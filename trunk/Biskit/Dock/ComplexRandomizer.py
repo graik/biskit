@@ -23,6 +23,10 @@
 ## last $Author$
 ## last $Date$
 
+"""
+Create Complexes with random orientation
+"""
+    
 from Complex import Complex
 import Biskit.mathUtils as ma
 import Biskit.molUtils as mol
@@ -40,8 +44,16 @@ class ComplexRandomizer:
 
     def __init__( self, mrec, mlig, rec_out=None, lig_out=None, debug=0 ):
         """
-        mrec - PCRModel
-        mlig - PCRModel
+        @param mrec: receptor model
+        @type  mrec: PCRModel
+        @param mlig: ligand model
+        @type  mlig: PCRModel
+        @param rec_out: rec output(default: None)
+        @type  rec_out: str
+        @param lig_out: lig output (default: None)
+        @type  lig_out: str
+        @param debug: 1, keep temporary xplor files (default: 0)
+        @type  debug: 1|0
         """
         ## rec and lig with centered coordinates
         self.rec = self.__center_model( mrec )
@@ -62,11 +74,16 @@ class ComplexRandomizer:
         ## keep temporary xplor files
         self.debug = debug
 
+
     def __center_model( self, model ):
         """
         translate PDBModel so that it's center is in 0,0,0
-        model - PDBModel
-        -> PDBModel (clone of model)
+        
+        @param model: model to center
+        @type  model: PDBModel
+        
+        @return: PDBModel (clone of model)
+        @rtype: PDBModel
         """
         r = model.clone()
         r.keep( N.nonzero( N.logical_not( r.maskH2O() ) ) )
@@ -78,13 +95,17 @@ class ComplexRandomizer:
 
     def __max_distance( self, model ):
         """
-        largest center <-> atom distance
-        model - PDBModel, with centered coordinates
-        -> float
+        largest center to any other atom distance
+        
+        @param model: model with centered coordinates
+        @type  model: PDBModel
+        
+        @return: largest distance
+        @rtype: float
         """
         center, mass = model.centerOfMass(), model.mass()
         dist = N.sqrt( N.sum( ( model.getXyz()-center )**2 , 1 ) )
-        
+
         return max( dist )
 
 
@@ -92,7 +113,9 @@ class ComplexRandomizer:
         """
         Random translation on a sphere around 0,0,0 with fixed radius
         The radius is the sum of the (max) radius of receptor and ligand
-        -> array 3 x 1 of float
+        
+        @return: translation array 3 x 1 of float
+        @rtype: array
         """
         radius = (self.d_max_rec + self.d_max_lig) / 2.0
         xyz = ra.random( 3 ) - 0.5
@@ -104,7 +127,10 @@ class ComplexRandomizer:
 
     def __random_matrix( self ):
         """
-        -> 4 x 4 array of float, random rotation and translation matrix
+        Random rotation matrix.
+        
+        @return: 4 x 4 array of float, random rotation and translation matrix
+        @rtype: array
         """
         r = ma.randomRotation()
 ##         r = N.array([[1,0,0],[0,1,0],[0,0,1]],'f')
@@ -121,20 +147,32 @@ class ComplexRandomizer:
 
     def random_complex_remote( self ):
         """
-        -> Complex, rec & lig spaced r_rec + r_lig apart in random orientation
+        Create a complex where the recrptor and ligand have random
+        orientations but are spaced within contact distance.
+        
+        @return: rec & lig spaced r_rec + r_lig apart in random orientation
+        @rtype: Complex
         """
         return Complex( self.rec, self.lig,
                         ligMatrix= self.__random_matrix() )
 
 
     def __minimize_complex( self, com ):
+        """
+        Use Xplor to rigid body minimize the random complex.
 
+        @param com: random complex
+        @type  com: Complex
+        """
         xp = ComplexMinimizer( com, t.tempDir(), log=self.xp_log )
         xp.run()
-        
+
 
     def random_complex( self, inp_mirror=None ):
-
+        """
+        @return: randomized and minimized complex
+        @rtype: Complex
+        """
         self.cm = ComplexMinimizer( self.random_complex_remote(),
                                     debug=self.debug )
         self.cm.run( inp_mirror=inp_mirror)
@@ -149,13 +187,14 @@ class ComplexRandomizer:
 
 class ComplexMinimizer( Xplorer ):
     """
-    Rigid-body minimize receptor and ligand of a Complex using soft vdW pot.
+    Rigid-body minimize receptor and ligand of a Complex
+    using soft vdW pot.
     """
 
     def __init__( self, com, debug=0, **params ):
 
         self.com = com
-        
+
         self.rec_psf = com.rec().getPsfFile()
         self.lig_psf = com.lig().getPsfFile()
 
@@ -167,7 +206,7 @@ class ComplexMinimizer( Xplorer ):
 
         self.lig_out = tempfile.mktemp( "lig_out.pdb" )
         self.rec_out = tempfile.mktemp( "rec_out.pdb" )
-        
+
         self.inp_template = t.projectRoot() +\
                             '/external/xplor/rb_minimize_complex.inp'
 
@@ -178,14 +217,19 @@ class ComplexMinimizer( Xplorer ):
 
         Xplorer.__init__( self, self.inp_template, debug=debug, **params )
 
+
     def prepare( self ):
-        
+        """
+        Prepare for calculation. Write input files.
+        """
         self.com.rec().writePdb( self.rec_in )
         self.com.lig().writePdb( self.lig_in )
 
-        
-    def cleanup( self ):
 
+    def cleanup( self ):
+        """
+        Remove temporary files.
+        """
         Xplorer.cleanup( self )
 
         if not self.debug:
@@ -198,7 +242,9 @@ class ComplexMinimizer( Xplorer ):
 
 
     def finish( self ):
-
+        """
+        When done, write resuĺt to disc.
+        """
         self.rec = PCRModel( self.com.rec_model.getPsfFile(), self.rec_out )
         self.lig = PCRModel( self.com.lig_model.getPsfFile(), self.lig_out )
 
@@ -225,4 +271,4 @@ if __name__ == '__main__':
     traj.ref.writePdb( '~/test.pdb' )
     traj.writeCrd( '~/test.crd' )
 
-    
+

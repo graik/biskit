@@ -21,6 +21,10 @@
 ## last $Date$
 ## $Revision$
 
+"""
+Search for templates.
+"""
+
 from SequenceSearcher import SequenceSearcher, BlastError
 import settings
 import Biskit.tools as tools
@@ -52,7 +56,7 @@ class TemplateSearcher( SequenceSearcher ):
 
     ## standard file name for unclustered sequences
     F_FASTA_ALL = F_RESULT_FOLDER + '/all.fasta'
-    
+
     ## standard file name for non-redundant seqs
     F_FASTA_NR =  F_RESULT_FOLDER + '/nr.fasta'
 
@@ -63,18 +67,26 @@ class TemplateSearcher( SequenceSearcher ):
     ## pseudo blast output
     F_BLAST_OUT = F_RESULT_FOLDER + '/blast.out'
     F_CLUSTER_BLAST_OUT = F_RESULT_FOLDER + '/cluster_blast.out'
-    
+
     ## folders for PDB files
     F_ALL       = F_RESULT_FOLDER + '/all'## all PDB homologues
     F_NR        = F_RESULT_FOLDER + '/nr' ## best PDB homologue of each cluster
 
     ## default name for file : chain dic 
     F_CHAIN_INDEX = '/chain_index.txt'
-    
+
 
     def __init__( self, outFolder='.', clusterLimit=20,  verbose=1, log=None ):
         """
-        outFolder - str, project folder (results are put into subfolder) ['.']
+        @param outFolder: project folder (results are put into subfolder) ['.']
+        @type  outFolder: str
+        @param clusterLimit: maximal number of returned sequence clusters
+                             (default: 20)
+        @type  clusterLimit: int
+        @param verbose: keep temporary files (default: 1)
+        @type  verbose: 1|0
+        @param log: log file instance, if None, STDOUT is used (default: None)
+        @type  log: LogFile        
         """
         SequenceSearcher.__init__( self, outFolder, verbose=verbose )
 
@@ -84,19 +96,19 @@ class TemplateSearcher( SequenceSearcher ):
              'REMARK   2 RESOLUTION\. *([0-9\.]+|NOT APPLICABLE)' )
 
         self.prepareFolders()
-        
+
         self.log = log or StdLog()
-        
+
         ## the maximal number of clusters to return
         self.clusterLimit = clusterLimit
-        
+
 
     def prepareFolders( self ):
         """
         Create folders needed by this class.
         """
         SequenceSearcher.prepareFolders( self )
-        
+
         if not os.path.exists( self.outFolder + self.F_ALL ):
             os.mkdir( self.outFolder + self.F_ALL )
         if not os.path.exists( self.outFolder + self.F_NR ):
@@ -105,10 +117,15 @@ class TemplateSearcher( SequenceSearcher ):
 
     def getSequenceIDs( self, blast_records ):
         """
-        getSequenceIDs( Bio.Blast.Record.Blast )
-        -> [ {'pdb':str, 'chain':str } ]
+        Extract sequence ids (pdb codes and chain ID) from BlastParser result.
 
-        Extract sequence ids from BlastParser result.
+        @param blast_records: result from BlastParser
+        @type  blast_records: Bio.Blast.Record.Blast
+        
+        @return: list of dictionaries mapping pdb codes and chain IDs
+        @rtype: [ {'pdb':str, 'chain':str } ]
+
+        @raise BlastError: if couldn't find ID
         """
         result = []
         for a in blast_records.alignments:
@@ -117,19 +134,25 @@ class TemplateSearcher( SequenceSearcher ):
 
             if not ids:
                 raise BlastError( "Couldn't find ID in " + a.title)
-            
+
             for id in ids:
                 result += [ { 'pdb':id[0], 'chain':id[1] } ]
 
         return result
 
-    
+
     def fastaFromIds( self, db, id_lst, fastaOut=None ):
         """
         fastaFromIds( id_lst, fastaOut ) -> { str: Bio.Fasta.Record }
-        db      - str
-        id_lst  - [ {'pdb':str, 'chain':str} ]
-        The returned records have additional fields: annotation and chain.
+        
+        @param db: database name
+        @type  db: str
+        @param id_lst: list of dictionaries with pdb codes and chain IDs
+        @type  id_lst: [{'pdb':str, 'chain':str}]
+
+        @return: Dictionary mapping pdb codes to Bio.Fasta.Records. The
+                 returned records have an additional field: chain.
+        @rtype: { str: Bio.Fasta.Record }        
         """
         result = {}
         for i in id_lst:
@@ -145,9 +168,18 @@ class TemplateSearcher( SequenceSearcher ):
 
     def getLocalPDB( self, id, db_path=settings.pdb_path ):
         """
-        id - str, pdb code, 4 characters
-        db_path - str, path to pdb database
-        -> File handle
+        Get the coordinate file from a local pdb database.
+        
+        @param id: pdb code, 4 characters
+        @type  id: str
+        @param db_path: path to local pdb database
+                        (default: L{settings.pdb_path})
+        @type  db_path: str
+        
+        @return: the requested pdb file as a file handle
+        @rtype: open file handle
+
+        @raise BlastError: if couldn't find PDB file
         """
         id = string.lower( id )
         filenames = ['%s.pdb' % id,
@@ -174,35 +206,52 @@ class TemplateSearcher( SequenceSearcher ):
 
     def getRemotePDB( self, id, rcsb_url=settings.rcsb_url ):
         """
-        id - str, pdb code, 4 characters
-        rcsb_url - str, template url for pdb download
-        -> File handle
+        Get the coordinate file remotely from the RCSB.
+        
+        @param id: pdb code, 4 characters
+        @type  id: str
+        @param rcsb_url: template url for pdb download
+                         (default: L{settings.rcsb_url})
+        @type  rcsb_url: str
+        
+        @return: the requested pdb file as a file handle
+        @rtype: open file handle
+
+        @raise BlastError: if couldn't retrieve PDB file
         """
         handle = urllib.urlopen( rcsb_url% (id,id) )
-        
+
         uhandle = File.UndoHandle(handle)
-        
+
         if not uhandle.peekline():
             raise BlastError( "Couldn't retrieve ", rcsb_url )
-    
+
         return uhandle
 
 
     def __extractPDBInfos( self, handle ):
         """
-        Extract extra infos from PDB file line. NMR files get resolution 3.5.
-        handle - open file handle OR string
-        infos  - dict getting additional infos, if any
-        -> [ str ], { 'resolution':float }
+        Extract extra infos from PDB file.
+        NMR files get resolution 3.5.
+        
+        @param handle: open file handle OR string of file to examine
+        @type  handle: open file handle OR strings
+        
+        @return: pdb file as list of strings, dictionary with resolution
+        @rtype: [str], {'resolution':float }
+
+        @raise BlastError: if couldn't extract PDB Info
         """
         infos = {}
         if type( handle ) == types.FileType:
             lines = handle.readlines()
         elif type( handle ) == types.StringType and len(handle) > 5000:
             lines = handle.splitlines( True )
+        elif type( handle ) == types.InstanceType:
+            lines = handle.readlines()
         else:
             raise BlastError( "Couldn't extract PDB Info." )
-        
+
         for l in lines:
             found = self.ex_resolution.findall( l )
 
@@ -214,15 +263,22 @@ class TemplateSearcher( SequenceSearcher ):
         return lines, infos
 
 
-    def retrievePDBs( self,  outFolder=None, pdbCodes=None,
-                      db_path=settings.pdb_path,
-                      rcsb_url=settings.rcsb_url ):
+    def retrievePDBs( self,  outFolder=None, pdbCodes=None ):
         """
+        Get PDB from local database if it exists, if not try to
+        download the coordinartes drom the RSCB.
         Write PDBs for given fasta records. Add PDB infos to internal
         dictionary of fasta records. NMR structures get resolution 3.5.
-        outFolder - str, folder to put PDB files into [templates/all]
-        pdbCodes  - [ str ], list of PDB codes [all previously found templates]
-        -> [ str ], list of PDB file names
+        
+        @param outFolder: folder to put PDB files into (default: L{F_ALL})
+        @type  outFolder: str OR None
+        @param pdbCodes: list of PDB codes [all previously found templates]
+        @type  pdbCodes: [str]
+        
+        @return: list of PDB file names
+        @rtype: [str]
+
+        @raise BlastError: if can't write file
         """
         outFolder = outFolder or self.outFolder + self.F_ALL
         pdbCodes = pdbCodes or self.record_dic.keys()
@@ -236,14 +292,14 @@ class TemplateSearcher( SequenceSearcher ):
                 tools.flushPrint('#')
 
             fname = '%s/%s.pdb' % (outFolder, c)
-            
+
             try:
                 if os.path.exists( fname ):
                     h = open( fname, 'r' )
                 else:
-                    h = self.getLocalPDB( c, db_path )
+                    h = self.getLocalPDB( c )
             except:
-                h = self.getRemotePDB( c, rcsb_url )
+                h = self.getRemotePDB( c )
 
             try:
                 lines, infos = self.__extractPDBInfos( h )
@@ -262,9 +318,9 @@ class TemplateSearcher( SequenceSearcher ):
                     f = open( fname, 'w', 1 )
                     f.writelines( lines )
                     f.close()
-                
+
                 result += [ fname ]
-                
+
             except IOError, why:
                 raise BlastError( "Can't write file "+fname )
 
@@ -276,8 +332,12 @@ class TemplateSearcher( SequenceSearcher ):
     def selectFasta( self, ids_in_cluster ):
         """
         select one member of cluster of sequences.
-        ids - [ str ], list of sequence ids defining the cluster
-        -> Bio.Fasta.Record
+        
+        @param ids_in_cluster: list of sequence ids defining the cluster
+        @type  ids_in_cluster: [str]
+        
+        @return: Bio.Fasta.Record
+        @rtype: Bio.Fasta.Record
         """
         resolutions = []
         for id in ids_in_cluster:
@@ -288,6 +348,16 @@ class TemplateSearcher( SequenceSearcher ):
 
     def reportClustering( self, raw=None ):
         """
+        Report the clustering result.
+        
+        Writes:
+         - clustering results to L{F_CLUSTER_LOG}
+         - blast records to L{F_BLAST_OUT}
+         - blast records of centers to L{F_CLUSTER_BLAST_OUT}
+         - raw clustering results to L{F_CLUSTER_RAW} if raw not None
+
+        @param raw: write raw clustering result to disk (default: None)
+        @type  raw: 1|0 
         """
         try:
             if self.verbose:
@@ -300,16 +370,16 @@ class TemplateSearcher( SequenceSearcher ):
                     f.write( "\n")
 
                 f.close()
-                
+
                 ## write blast records of centers to disc
                 centers = [ c[0] for c in self.clusters ]
-     
+
                 self.writeClusteredBlastResult( \
                     self.outFolder + self.F_BLAST_OUT,
                     self.outFolder + self.F_CLUSTER_BLAST_OUT, centers )
-                
+
                 self.copyClusterOut( raw=raw )
-                
+
         except IOError, why:
             tools.errWriteln( "Can't write cluster report." + str(why) )
 
@@ -318,16 +388,23 @@ class TemplateSearcher( SequenceSearcher ):
         """
         Copy best PDB of each cluster into another folder.
         Create index file in same folder.
-        The returned dictionary or  index file can be used as input to
-        TemplateCleaner.
-        -> { str_filename : str_chain_id }, file names and chain ids
+        The returned dictionary or index file (L{F_CHAIN_INDEX}) is
+        used as input to TemplateCleaner.
+
+        @param outFolder: folder to write files to (default: L{F_NR})
+        @type  outFolder: str OR None
+        
+        @return: { str_filename : str_chain_id }, file names and chain ids
+        @rtype: {str, str}
+
+        @raise BlastError: if sequences are not clustered
         """
         result = {}
         outFolder = outFolder or self.outFolder + self.F_NR
 
         f_index = open( outFolder +self.F_CHAIN_INDEX, 'w')
         f_index.write('## template files mapped to matching chain ID\n')
-        
+
         if not self.bestOfCluster:
             raise BlastError( 'Sequences are not yet clustered.' )
 
@@ -342,24 +419,14 @@ class TemplateSearcher( SequenceSearcher ):
             f_index.write( '%s\t%s\n' % (fnNew, self.record_dic[ id ].chain) )
 
         f_index.close()
-        
+
         return result
 
-
-def test():
-    options = {}
-
-    options['q'] = '/home/Bis/raik/homopipe/test/nmr_hit.fasta'
-    options['o'] = '/home/Bis/johan/blats.test'
-    return options
-  
 
 ##########
 ## TEST ##
 ##########
 if __name__ == '__main__':
-    
-    options = test()
 
     db = 'pdbaa'
     outfolder = tools.projectRoot()+ '/test/Mod/project'

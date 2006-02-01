@@ -1,4 +1,3 @@
-from Biskit.PVM.dispatcher import JobSlave
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
@@ -18,6 +17,15 @@ from Biskit.PVM.dispatcher import JobSlave
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
+## $Revision$
+## last $Date$
+## last $Author$
+
+"""
+An example of a Slave/Master setup.
+"""
+
+from Biskit.PVM.dispatcher import JobSlave
 import Biskit.tools as T
 import subprocess
 
@@ -26,13 +34,18 @@ import time
 class Slave(JobSlave):
 
     def initialize(self, params):
-
+        """
+        Parameters handed over by master.
+        """
         self.params = params
         ## or perhaps easier:
         ## self.__dict__.update( params )
 
-    def go(self, dict):
 
+    def go(self, dict):
+        """
+        Perform slave task.
+        """
         d = {}
 
         T.flushPrint( self.params['progress_str'] )
@@ -42,19 +55,20 @@ class Slave(JobSlave):
 
             for i in range(1, 1000):
                 f = 1.0 * i / 1200232112312.11
-                
+
             T.flushPrint( str(id) + ' ' )
             time.sleep(0.5)
 
         print "Done."
         return d
-    
+
+
 if __name__ == '__main__':
 
     import os, sys
 
     if len(sys.argv) == 2:
-        
+
         niceness = int(sys.argv[1])
         os.nice(niceness)
 

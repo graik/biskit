@@ -22,6 +22,7 @@
 ##
 ## last $Author$
 ## last $Date$
+## $Revision$
 """
 Interface to Modeller
 """
@@ -54,7 +55,7 @@ class ModellerError( Exception ):
 class Modeller:
     """
     Take Alignment from t_coffee and template PDBs.
-    -> create modeller-script and run modeller
+    Creates a modeller-script and runs modeller.
     """
 
     MODELLER_TEMPLATE = """
@@ -89,28 +90,42 @@ CALL ROUTINE = 'model'             # do homology modelling
     ## standard file name output for Objective Function
     F_SCORE_OUT = F_RESULT_FOLDER + '/Modeller_Score.out'
 
-    
-    def __init__( self, outFolder='.', log=None ):
 
+    def __init__( self, outFolder='.', log=None ):
+        """
+        @param outFolder: base folder for Modeller output 
+                          (default: L{F_RESULT_FOLDER})
+        @type  outFolder: str
+        @param log: log file instance, if None, STDOUT is used (default: None)
+        @type  log: LogFile        
+        """
         self.outFolder = tools.absfile( outFolder )
         self.log = log
 
         self.prepareFolders()
 
         self.f_inp = None
-        
+
         ## sequence ids from the last prepared alignment
         self.pir_ids = [] 
-        
+
 
     def prepareFolders( self ):
-
+        """
+        Create needed output folders if they don't exist.
+        """
         if not os.path.exists( self.outFolder + self.F_RESULT_FOLDER ):
             self.logWrite( 'Creating '+self.outFolder + self.F_RESULT_FOLDER)
             os.mkdir( self.outFolder + self.F_RESULT_FOLDER )
 
 
     def logWrite( self, msg, force=1 ):
+        """
+        Write message to log.
+
+        @param msg: message to print
+        @type  msg: str        
+        """
         if self.log:
             self.log.add( msg )
         else:
@@ -122,17 +137,30 @@ CALL ROUTINE = 'model'             # do homology modelling
                     fout=None, alignment=0,
                     starting_model=1, ending_model=10 ):
         """
-        f_pir           - str, PIR alignment file
-        target_id       - str, ID of target in alignment
-        template_ids    - [ str ], ids of all templates in alignment
-        starting_model  - int,
-        ending_model    - int,
-        -> str, inp file name
+        Create a input (.top) file for Modeller.
+        See L{MODELLER_TEMPLATE}.
+        
+        @param f_pir: PIR alignment file
+        @type  f_pir: str
+        @param target_id: ID of target in the alignment file
+        @type  target_id: str
+        @param template_folder: folder with template coordinate files
+        @type  template_folder: str
+        @param template_ids: ids of all templates in the alignment file
+        @type  template_ids: [str]
+        @param fout: name of modeller script (default: None -> L{F_INP})
+        @type  fout: None or str
+        @param starting_model: first model
+        @type  starting_model: int
+        @param ending_model: last model
+        @type  ending_model: int
+        
+        @raise ModellerError: if can't create modeller inp file
         """
         template_ids = [ "'%s'"%id  for id in template_ids ]
         template_ids = ' '.join( template_ids )
 
-    
+
         params = { 'template_ids' : template_ids,
                    'target_id' : target_id,
                    'f_pir' : f_pir,
@@ -153,8 +181,12 @@ CALL ROUTINE = 'model'             # do homology modelling
     def get_template_ids( self, template_folder ):
         """
         Extract names of all PDB files in a folder (without .PDB)
-        template_folder - str, folder
-        -> [ str ]
+        
+        @param template_folder: folder with template coordinate files
+        @type  template_folder: str
+
+        @return: list of PDB names
+        @rtype: [str]      
         """
         fs = os.listdir( template_folder )
         return [ f[:-4] for f in fs if f[-4:].upper()=='.PDB' ]
@@ -164,10 +196,14 @@ CALL ROUTINE = 'model'             # do homology modelling
         """
         Extract (first) sequence id from fasta file. Make intelligent guess
         if there is no exact match between target fasta and alignment file.
-        f_fasta - str, fasta file with target sequence
+        
+        @param f_fasta: fasta file with target sequence
+        @type  f_fasta: str
+
+        @raise ModellerError: if target ID is not found in alignment
         """
         ex_fasta_id = re.compile('^>([A-Za-z0-9_]+)')
-        
+
         title = open( f_fasta ).readline()
 
         try:
@@ -191,20 +227,26 @@ CALL ROUTINE = 'model'             # do homology modelling
 
         self.logWrite('Warning: target sequence ID extracted without check'+
                       ' against alignment file. Use prepare_alignment first.')
-        
+
         title.close()
-        
+
         return id_fasta
-    
+
 
     def prepare_alignment( self, f_pir, template_ids ):
         """
         Convert t_coffee - generated PIR into PIR for Modeller.
         On the way all sequence ids are extracted into self.pir_ids.
-        f_pir_in        - str, PIR alignment file
-        f_pir_out       - str, file to create
-        template_ids    - [ str ], ids of all templates in alignment
-        -> str, pir alignment file name (for modeller)
+
+        @param f_pir: PIR alignment file
+        @type  f_pir: str
+        @param template_ids: file to create
+        @type  template_ids: str
+
+        @return: pir alignment file name (for modeller)
+        @rtype: str
+
+        @raise ModellerError: if can't rename file
         """
         ex_title = re.compile( '^>P1;([A-Za-z0-9_]+)' )
         ex_description = re.compile( '^sequence|^structure' )
@@ -242,21 +284,35 @@ CALL ROUTINE = 'model'             # do homology modelling
 
         open( f_pir, 'w' ).writelines( lines )
 
-            
+
 
 
     def prepare_modeller( self, fasta_target=None, f_pir=None,
                           template_folder=None, fout=None,
                           starting_model=1, ending_model=10 ):
         """
-        
+        @param fasta_target: target fasta file
+                             (default: None -> L{SS.F_FASTA_TARGET})
+        @type  fasta_target: str
+        @param f_pir: PIR alignment file
+                      (default: None -> L{Aligner.F_FINAL_ALN})
+        @type  f_pir: str
+        @param template_folder: folder with template coordinate files
+                                (default: None -> L{TC.F_MODELLER})
+        @type  template_folder: str
+        @param fout: name of modeller script (default: None -> L{F_INP})
+        @type  fout: None or str
+        @param starting_model: first model (default: 1)
+        @type  starting_model: int
+        @param ending_model: last model (default: 10)
+        @type  ending_model: int
         """
         fasta_target = fasta_target or self.outFolder + SS.F_FASTA_TARGET
         template_folder = template_folder or self.outFolder + TC.F_MODELLER
         f_pir = f_pir or self.outFolder + Aligner.F_FINAL_ALN
 
         template_ids = self.get_template_ids( template_folder )
-        
+
         ## add Modeller-style lines and extract sequence ids
         self.prepare_alignment( f_pir, template_ids )
 
@@ -266,17 +322,23 @@ CALL ROUTINE = 'model'             # do homology modelling
         self.create_inp( f_pir, target_id, template_folder, template_ids,
                     fout, starting_model=1, ending_model=10)
 
-        
+
     def go( self, host=None ):
         """
+        Run Modeller job.
+
+        @param host:  name of host to use (default: None -> localhost)
+        @type  host: str
+
+        @raise ModellerError: if Modeller job fails
         """
         try:
             cmd = "cd %s%s ; %s %s"% (self.outFolder, self.F_RESULT_FOLDER, \
                                    settings.modeller_bin, self.F_MOD_SCRIPT)
-            
+
             if host:
                 cmd = "ssh %s '%s'" % (host, cmd)
-            
+
             self.logWrite( 'Running Modeller .. ')
             self.logWrite( cmd )
 
@@ -287,7 +349,7 @@ CALL ROUTINE = 'model'             # do homology modelling
 
         except EnvironmentError, why:
             self.logWrite("ERROR: Can't run Modeller: "+ str( why ) )
-            raise AlignerError( "Can't run Modeller: " + str( why ) )
+            raise ModellerError( "Can't run Modeller: " + str( why ) )
 
 
     ####################
@@ -295,23 +357,35 @@ CALL ROUTINE = 'model'             # do homology modelling
 
     def pdb_list(self, model_folder):
         """
-        model_folder - str, folder containing model PDBs (output from Modeller)
-        -> [str], pdb files from modeller
+        Compile a list with the names of all models created by Modeller.
+        
+        @param model_folder: folder containing model PDBs
+                             (output from Modeller)
+        @type  model_folder: str
+
+        @return: pdb files from modeller
+        @rtype: [str]
         """
         return glob.glob('%s/target.B*'%(model_folder))
-          
+
 
     def extract_modeller_score(self, f_model, model):
         """
         Extract the modeller score from the models
-        f_model - str, file name of model pdb
+
+        @param f_model: file name of model pdb
+        @type  f_model: str
+        @param model: model
+        @type  model: PDBModel
+        
+        @return: modeller score for the models
+        @rtype: float
         """
         r1 = re.compile(r'\w\d.*\d')
-        
+
         line_of_interest = linecache.getline(f_model, 2)
         OF = r1.findall(line_of_interest)
 
-       
         file = open(model.validSource(),'r')
         string = file.readlines()[:2]
         model.info["headlines"] = string
@@ -322,17 +396,21 @@ CALL ROUTINE = 'model'             # do homology modelling
 
     def output_score(self, pdb_list, model_folder):
         """
-        pdb_list - ModelList
-        model_folder - str, ouput folder
+        Write a list of model scores to file L{F_SCORE_OUT}
+        
+        @param pdb_list: list of models
+        @type  pdb_list: ModelList
+        @param model_folder: ouput folder
+        @type  model_folder: str
         """
         file_output = open(self.outFolder+self.F_SCORE_OUT,'w')
         file_output.write("The models from modeller with their Score:\n")
 
         for model in pdb_list:
-        
+
             file_output.write('%s\t%6.2f\n'%(tools.stripFilename(
                 model.validSource()), model.info["mod_score"]))
-    
+
         file_output.close()
 
 
@@ -340,8 +418,14 @@ CALL ROUTINE = 'model'             # do homology modelling
         """
         Extract number of templates per residue position from alignment.
         Write new PDBs with number of templates in occupancy column.
-        """
 
+        @param pdb_list: list of models
+        @type  pdb_list: ModelList
+        @param cwd: current project directory
+        @type  cwd: str
+        @param model_folder: folder with models
+        @type  model_folder: str
+        """
         cwd = cwd or self.outFolder
 
         ci = CI(cwd)
@@ -358,29 +442,30 @@ CALL ROUTINE = 'model'             # do homology modelling
         amask = pdb_list[0].res2atomMask(rmask)
 
 
-
         for i in range(len(pdb_list)):
 
             for a,v in zip(pdb_list[i].atoms, amask):
                 a['occupancy'] = v
 
             t = []
-            
-            for string in pdb_list[i].info["headlines"]:
 
-                tuple = ()
+            for string in pdb_list[i].info["headlines"]:
                 
+                tuple = ()
                 tuple = string.split()[0],join(string.split()[1:])
                 t.append(tuple)
 
-    
             pdb_list[i].writePdb('%s/model_%02i.pdb'%(model_folder,i),
                                  headlines = t)
 
 
     def update_rProfiles(self, pdb_list):
         """
-        pdb_list - ModelList
+        Read Modeller score from the 'temperature_factor' column and
+        create a profile from it.
+        
+        @param pdb_list: list of models
+        @type  pdb_list: ModelList
         """
         for model in pdb_list:
 
@@ -390,14 +475,17 @@ CALL ROUTINE = 'model'             # do homology modelling
             prof = atoms.valuesOf( "temperature_factor")
 
             model.setResProfile('mod_score', prof)
-           
 
-            
+
+
     def write_PDBModels(self, pdb_list, model_folder = None):
         """
         Dump the list of PDBModels.
-        pdb_list - ModelList
-        model_folder - str, ouput folder
+        
+        @param pdb_list: list of models
+        @type  pdb_list: ModelList
+        @param model_folder: ouput folder (default: None -> L{F_PDBModels})
+        @type  model_folder: str
         """    
         tools.Dump(pdb_list, '%s'%(model_folder + self.F_PDBModels))
 
@@ -407,15 +495,18 @@ CALL ROUTINE = 'model'             # do homology modelling
         Rename model PDBs to 'model_01.pdb' - 'model_xx.pdb' according to their
         score, create and dump a ModelList instance containing these models
         and info-records and profiles with the Modeller score.
-        model_folder - str, folder containing model PDBs ['./modeller']
+
+        @param model_folder: folder containing model PDBs
+                             (default: None -> L{F_INPUT_FOLDER})
+        @type  model_folder: str
         """
-        
+
         model_folder = model_folder or self.outFolder + self.F_INPUT_FOLDER
 
         model_files = self.pdb_list(model_folder)
-        
+
         pdb_list = ModelList( model_files )
-        
+
         for model in pdb_list:
 
             model.info["mod_score"] = self.extract_modeller_score(
@@ -430,7 +521,7 @@ CALL ROUTINE = 'model'             # do homology modelling
         self.update_rProfiles(pdb_list)
 
         self.write_PDBModels(pdb_list, model_folder)
-    
+
 
 
 ##########
