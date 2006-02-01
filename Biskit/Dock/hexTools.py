@@ -21,6 +21,10 @@
 ## last $Date$
 ## $Revision$
 
+"""
+Various common functions used by the docking modeles.
+"""
+
 import Numeric as N
 import os
 
@@ -32,25 +36,35 @@ from Biskit import PDBDope, molUtils
 def createHexPdb_single( model, fout=None ):
     """
     Write PDB of one structure for hex.
-    model - PDBModel
-    fout  - str, out file name default is pdbCode + _hex.pdb
-    -> str, file name of result PDB
+    
+    @param model: model
+    @type  model: PDBModel
+    @param fout: out file name (default: pdbCode + _hex.pdb)
+    @type  fout: str
+    
+    @return: file name of result PDB
+    @rtype: str
     """
     fout = fout or model.pdbCode + '_hex.pdb'
     fout = t.absfile( fout )
     model.writePdb( fout )
     return fout
-    
+
 ##     dic = { 1:model }
 ##     return createHexPdb( dic, fout )
 
 
 def createHexPdb( modelDic, fout=None ):
     """
-    write pdb for hex with models separated by MODEL%i/ENDMODEL
-    modelDic - dict {int:PCRModel}
-    fout - str, output name, default is pdbCode + _hex.pdb
-    -> str, file name of result PDB
+    Write pdb for hex with models separated by MODEL%i/ENDMODEL
+    
+    @param modelDic: dictionary mapping an integer to each model
+    @type  modelDic: dict {int:PCRModel}
+    @param fout: output name, default is pdbCode + _hex.pdb
+    @type  fout: str
+    
+    @return: file name of result PDB
+    @rtype: str
     """
     fout = fout or modelDic[1].pdbCode + '_hex.pdb'
     fout = t.absfile( fout )
@@ -88,9 +102,15 @@ def createHexPdb( modelDic, fout=None ):
 def centerSurfDist( model, surf_mask, mask=None ):
     """
     Calculate the longest and shortest distance from
-    the center to the surface.
-    mask - atoms not to be considerd
-    surf_mask - atom surface mask, needed for minimum surface distance
+    the center of the molecule to the surface.
+    
+    @param mask: atoms not to be considerd (default: None)
+    @type  mask: [1|0]
+    @param surf_mask: atom surface mask, needed for minimum surface distance
+    @type  surf_mask: [1|0]
+
+    @return: max distance, min distance
+    @rtype: float, float
     """
     if mask == None:
             mask = model.maskHeavy()
@@ -112,16 +132,33 @@ def centerSurfDist( model, surf_mask, mask=None ):
 def createHexInp( recPdb, recModel, ligPdb, ligModel, comPdb=None,
                   outFile=None, macDock=None, silent=0, sol=512 ):
     """
-    Prepare docking of rec against lig.
-    recPdb, ligPdb - str, hex-formatted PDB
-    recModel, ligModel - PDBModel, get size from this one
-    comPdb - str, reference PDB
-    outFile - str, base of file name for mac and out
-    macDoc - None -> hex decides, 1 -> force macroDock, 0-> force off
-    silent - 0||1, don't print distances and macro warnings (default 0)
+    Prepare a Hex macro file for the docking of the receptor(s)
+    against ligand(s).
+
+    @param recPdb: hex-formatted PDB
+    @type  recPdb: str
+    @param recModel: hex-formatted PDB
+    @type  recModel: str
+    @param ligPdb: PDBModel, get distances from this one
+    @type  ligPdb: PDBModel
+    @param ligModel: PDBModel, getdistances from this one
+    @type  ligModel: PDBModel
+    @param comPdb: reference PDB
+    @type  comPdb: str
+    @param outFile: base of file name for mac and out
+    @type  outFile: str
     
-    -> (str, str, boolean), file name new HEX macro, future HEX out,
-                            macro docking status
+    @param macDock: None -> hex decides (from the size of the molecule),
+                    1 -> force macroDock, 0-> force off (default: None)
+    @type  macDock: None|1|0
+    @param silent: don't print distances and macro warnings (default: 0)
+    @type  silent: 0|1
+    @param sol: number of solutions that HEx should save (default: 512)
+    @type  sol: int
+    
+    @return: HEX macro file name, HEX out generated bu the macro,
+             macro docking status
+    @rtype: str, str, boolean
     """
     ## files and names
     recCode = t.stripFilename( recPdb )[0:4]          
@@ -164,7 +201,7 @@ def createHexInp( recPdb, recModel, ligPdb, ligModel, comPdb=None,
 
     if not silent:
         print 'Docking setup: %s\nRecMax: %.1f RecMin: %.1f\nLigMax: %.1f LigMin: %.1f\nMaxDist: %.1f MinDist: %.1f\nmolecular_separation: %.1f r12_range: %.1f\n'%(outFile, recMax, recMin, ligMax, ligMin, maxDist, minDist, molSep, molRange)
-    
+
     if recMax > 30 and ligMax > 30 and not silent:
         print '\nWARNING! Both the receptor and ligand radius is ',
         print 'greater than 30A.\n'     

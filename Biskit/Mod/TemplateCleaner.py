@@ -19,6 +19,9 @@
 ##
 ## last $Author$
 ## last $Date$
+"""
+Prepare template coordinates for modelling.
+"""
 
 import Biskit.tools as tools
 from Biskit import PDBModel, PDBCleaner, CleanerError
@@ -31,15 +34,18 @@ import os, string
 class TemplateCleaner:
     """
     Takes a list of PDB-files and chains identifiers.
-    -> cleaned PDB files with all chains
-    -> cleaned PDB files with needed chain for modeller.
-    -> CA trace PDB for T_coffee
-    -> sequences in fasta format for T_coffee
 
-    mkdir cleaned  .. complete PDBs but cleaned
-          modeller .. only chains needed
-          t_coffee .. CA traces
-    templates.fasta
+    Returns:
+      - cleaned PDB files with all chains
+      - cleaned PDB files with needed chain for modeller.
+      - CA trace PDB for T_coffee
+      - sequences in fasta format for T_coffee
+
+    Creates (folders and files):
+      - mkdir cleaned   .. complete PDBs but cleaned
+      - mkdir  modeller .. only the chains needed
+      - mkdir  t_coffee .. CA traces
+      - templates.fasta
     """ 
 
     F_RESULT_FOLDER = TemplateSearcher.F_RESULT_FOLDER
@@ -51,9 +57,10 @@ class TemplateCleaner:
 
     def __init__( self, outFolder, log=None ):
         """
-        pdbFiles - [ str ]
-        chain_ids- [ str ], chain ids for each file, '' means all
-        log      - LogFile instance or None, None reports to STDOUT
+        @param outFolder: output folder
+        @type  outFolder: str
+        @param log: None reports to STDOUT (drfault: None)
+        @type  log: LogFile instance or None
         """
         self.outFolder = tools.absfile( outFolder )
         self.log = log
@@ -74,6 +81,14 @@ class TemplateCleaner:
 
 
     def logWrite( self, msg, force=1 ):
+        """
+        Write message to log.
+
+        @param msg: message
+        @type  msg: str
+        @param force: if no log, print message (default: 1)
+        @type  force: 1|0 
+        """
         if self.log:
             self.log.add( msg )
         else:
@@ -83,15 +98,32 @@ class TemplateCleaner:
 
     def __chain_by_id( self, model, chainId ):
         """
-        chainId - str, chain identifier
-        -> PDBModel
+        Get a PDBModel with only requested chains.
+
+        @param model: original PDBModel
+        @type  model: PDBModel
+        @param chainId: chain identifier
+        @type  chainId: str
+        
+        @return: PDBModel with only the specified chain
+        @rtype: PDBModel
         """
         return model.compress( model.mask( \
             lambda a, id=chainId: a['chain_id'] == id ))
 
 
     def fasta_sequence( self, header, s ):
+        """
+        Convert sequence to fasta format.
+        
+        @param header: fasta header
+        @type  header: str
+        @param s: sequence
+        @type  s: str
 
+        @return: fasta formated sequence
+        @rtype: str   
+        """
         n_chunks = len( s ) / 80
 
         result = ">%s\n" % header 
@@ -111,8 +143,11 @@ class TemplateCleaner:
     def write_tcoffee_pdb( self, model, fname ):
         """
         Write CA trace PDB with SEQRES records for t_coffee.
-        model  - PDBModel
-        fname  - str
+        
+        @param model: PDBModel
+        @type  model: PDBModel
+        @param fname: filename of new PDB file
+        @type  fname: str
         """
         ## write CA trace
         m_ca = model.compress( model.maskCA() )
@@ -152,28 +187,44 @@ class TemplateCleaner:
             res_to += 13
 
         m_ca.writePdb( fname, headlines=head )
-        
+
 
 
     def write_modeller_pdb( self, model, fname ):
         """
+        Write a PDB file for modeller.
+
+        @param model: PDBModel
+        @type  model: PDBModel
+        @param fname: filename of new PDB file
+        @type  fname: str        
         """
         model = model.clone( deepcopy=1 )
         for a in model.atoms:
             a['chain_id'] = ''
-            
+
         model.writePdb( fname )
-        
+
 
     def process_all( self, file_dic, keep_hetatoms=0 ):
         """
-        Process PDB files in file_dic. The PDB is read from /templates/nr and
-        cleaned files are written to /templates/nr_cleaned, /templates/t_coffee
-        and /templates/modeller. If the /templates/nr_cleaned already exists,
-        this file is used to write modeller and t-coffee pdbs.
-        
-        file_dic      - { fname : chain_id, }
-        keep_hetatoms - 0||1, [0]
+        Process PDB files in file_dic.
+        The PDB is read from:
+          - L{TemplateSearcher.F_NR}
+
+        and cleaned files are written to:
+          - L{F_CLEANED}
+          - L{F_COFFEE}
+          - L{F_MODELLER}
+
+        If the file L{F_CLEANED} already exists, this file is
+        used to write modeller and t-coffee pdbs.
+
+        @param file_dic: dictionary mapping filenames of pdb files to
+                         the chains of interest, e.g. { fname : chain_id, }
+        @type  file_dic: {str:str}
+        @param keep_hetatoms: keep hetatoms (default: 0)
+        @type  keep_hetatoms: 0|1
         """
         fasta = ""
 

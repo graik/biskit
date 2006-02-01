@@ -18,10 +18,13 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-
 ## last $Author$
 ## last $Date$
 ## $Revision$
+
+"""
+List that blocks any modifications
+"""
 
 class FixedListError( Exception ):
     pass
@@ -34,13 +37,20 @@ class FixedList( list ):
     """
 
     def fixed(self):
-        """-> true, if list is fixed and modifications are prohibited"""
+        """
+        @return: if list is fixed and modifications are prohibited
+        @rtype: true
+        """
         return 1
 
+
     def __stop(self):
+        """
+        @raise GuardedListError: if attempt to modify fixed list
+        """
         if self.fixed():
             raise GuardedListError("Attempt to modify fixed list.")
-    
+
     def __setitem__(self, i, v ):
         self.__stop()
         super( GuardedList, self).__setitem__( i, v )

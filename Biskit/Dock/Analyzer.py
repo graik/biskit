@@ -22,6 +22,10 @@
 ## last $Date$
 ## last $Author$
 
+"""
+Analyze HEX docking result.
+"""
+
 import Biskit.tools as t
 from Biskit import Trajectory, mathUtils,  molUtils
 
@@ -38,8 +42,12 @@ class Analyzer:
 
     def __init__( self, **options ):
         """
-        rec,lig - file name, receptor, ligand trajectories
-        com     - file name, pickled reference complex
+        @param options: needs::
+                         rec,lig - file name, receptor, ligand trajectories
+                         com     - file name, pickled reference complex
+        @type  options: any
+
+        @raise AnalyzeError: if atoms are not aligned
         """
         self.options = options
 
@@ -58,7 +66,7 @@ class Analyzer:
 
         ## equalize atom content of free (trajectory) and bound models
         t.flushPrint('\nCasting...')
-        
+
         bnd_rec = self.com.rec()
         bnd_lig = self.com.lig_model
 
@@ -102,8 +110,16 @@ class Analyzer:
 
     def __categorizeHexSurf(self, cutoff=0.1):
         """
-        -> list of len(self.hexContacts) int
-           overlapping with native contact surface of lig, rec yes,no
+        Compare complexes of list to native complex to see if
+        their contact surfaces overlapp with the native complex.
+        
+        @param cutoff: fraction cutoff for defining a overlap (default: 0.1)
+        @type  cutoff: float
+        
+        @return: list of len(self.hexContacts) overlapping with
+                 native contact surface of lig and rec (0 - no overlap,
+                 1 - rec OR lig overlapps, 2- rec AND lig overlapps)
+        @rtype: [0|1|2]
         """
         result = [ self.com.fractionNativeSurface( c, self.contacts )
                    for c in self.hexContacts ]
@@ -115,10 +131,12 @@ class Analyzer:
     def setHexComplexes(self, com_lst, n=20 ):
         """
         add contact matrices of hex-generated (wrong) complexes for comparison
-        com_lst - ComplexList with Contacts
+        
+        @param com_lst: ComplexList with contacts calculated
+        @type  com_lst: ComplexList
         """
         t.flushPrint('adding hex-generated complexes')
-        
+
         self.hexContacts = []
 
         f = lambda a: molUtils.elementType(a['element']) == 'p'
@@ -128,7 +146,7 @@ class Analyzer:
 
             com = com_lst[i]
             t.flushPrint('#')
-                
+
             try:
                 if com['fractNatCont'] == 0.0:#com['fnac_10'] == 0.0:
                     com.rec_model.remove( com.rec().maskH() )
@@ -136,13 +154,13 @@ class Analyzer:
 
                     com.rec_model = com.rec_model.sort()
                     com.lig_model = com.lig_model.sort()
-                    
+
                     com.rec_model.remove( N.logical_not(self.mask_free_rec) )
                     com.lig_model.remove( N.logical_not(self.mask_free_lig) )
                     com.lig_transformed = None
 
                     self.hexContacts += [ com.atomContacts() ]
-                    
+
                 else:
                     n += 1
                 i+= 1
@@ -156,10 +174,18 @@ class Analyzer:
         """
         Create randomized surface contact matrix with same number of
         contacts and same shape as given contact matrix.
-        contMat - template contact matrix
-        n - number of matrices to generate
-        maskRec, maskLig - surface masks (or something similar)
-        -> list of [n] random contact matricies
+        
+        @param contMat: template contact matrix
+        @type  contMat: matrix
+        @param n: number of matrices to generate
+        @type  n: int
+        @param maskRec: surface masks (or something similar)
+        @type  maskRec: [1|0]
+        @param maskLig: surface masks (or something similar)
+        @type  maskLig: [1|0]
+        
+        @return: list of [n] random contact matricies
+        @rtype: [matrix]
         """
         a,b = N.shape( contMat )
         nContacts = N.sum( N.sum( contMat ))
@@ -184,10 +210,18 @@ class Analyzer:
             result += [ N.reshape( r, (a,b) ) ]
 
         return result
-    
+
 
     def __shuffleList(self, lst ):
-        """shuffle order of lst"""
+        """
+        shuffle order of lst
+
+        @param lst: list to shuffle
+        @type  lst: [any]
+        
+        @return: shuffeled list
+        @rtype: [any]
+        """
         pos = RandomArray.permutation( len( lst ))
         return N.take( lst, pos )
 
@@ -195,6 +229,16 @@ class Analyzer:
     def shuffledLists( self, n, lst, mask ):
         """
         shuffle order of a list n times, leaving masked(0) elements untouched
+
+        @param n: number of times to shuffle the list
+        @type  n: int
+        @param lst: list to shuffle
+        @type  lst: [any]
+        @param mask: mask to be applied to lst
+        @type  mask: [1|0]
+
+        @return: list of shuffeled lists
+        @rtype: [[any]]        
         """
         if mask == None:
             mask == N.ones( len(lst)  )
@@ -217,8 +261,13 @@ class Analyzer:
 
 
     def __plotSequence(self, list, **arg):
-        """add curve to current plot, with x1..xn = 0..n and y1..yn = |list|"""
-        
+        """
+        add curve to current plot, with x1..xn = 0..n and y1..yn = |list|
+
+        @param list: list to plot
+        @type  list: [any]        
+        """
+
         self.plot.add( biggles.Curve( range( len(list) ), list, **arg ) )
 
         if arg.has_key('label'):
@@ -228,15 +277,24 @@ class Analyzer:
                                               arg['label'], **arg ))
 
     def report(self):
-        """override for actual plotting"""
+        """
+        override for actual plotting
+        """
         pass
 
+
     def initPlot(self):
-        """override for plot creation"""
+        """
+        override for plot creation
+        """
         self.page = biggles.FramedPlot()
         self.plot = self.page
 
+
     def plotAll( self ):
+        """
+        Show plot
+        """
         self.initPlot()
         self.report()
         self.page.show()

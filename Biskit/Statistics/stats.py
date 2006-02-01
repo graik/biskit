@@ -26,10 +26,11 @@ stats.py module
 
 (Requires pstat.py module.)
 
-#################################################
-#######  Written by:  Gary Strangman  ###########
-#######  Last modified:  Dec 28, 2000 ###########
-#################################################
+::
+  #################################################
+  #######  Written by:  Gary Strangman  ###########
+  #######  Last modified:  Dec 28, 2000 ###########
+  #################################################
 
 A collection of basic statistical functions for python.  The function
 names appear below.
@@ -59,99 +60,99 @@ so than others), but they are far from bulletproof.  Thus, as with any
 free software, no warranty or guarantee is expressed or implied. :-)  A
 few extra functions that don't appear in the list below can be found by
 interested treasure-hunters.  These functions don't necessarily have
-both list and array versions but were deemed useful
+both list and array versions but were deemed useful::
 
-CENTRAL TENDENCY:  geometricmean
-                   harmonicmean
-                   mean
-                   median
-                   medianscore
-                   mode
+    CENTRAL TENDENCY:  geometricmean
+                       harmonicmean
+                       mean
+                       median
+                       medianscore
+                       mode
 
-MOMENTS:  moment
-          variation
-          skew
-          kurtosis
-          skewtest   (for Numpy arrays only)
-          kurtosistest (for Numpy arrays only)
-          normaltest (for Numpy arrays only)
+    MOMENTS:  moment
+              variation
+              skew
+              kurtosis
+              skewtest   (for Numpy arrays only)
+              kurtosistest (for Numpy arrays only)
+              normaltest (for Numpy arrays only)
 
-ALTERED VERSIONS:  tmean  (for Numpy arrays only)
-                   tvar   (for Numpy arrays only)
-                   tmin   (for Numpy arrays only)
-                   tmax   (for Numpy arrays only)
-                   tstdev (for Numpy arrays only)
-                   tsem   (for Numpy arrays only)
-                   describe
+    ALTERED VERSIONS:  tmean  (for Numpy arrays only)
+                       tvar   (for Numpy arrays only)
+                       tmin   (for Numpy arrays only)
+                       tmax   (for Numpy arrays only)
+                       tstdev (for Numpy arrays only)
+                       tsem   (for Numpy arrays only)
+                       describe
 
-FREQUENCY STATS:  itemfreq
-                  scoreatpercentile
-                  percentileofscore
-                  histogram
-                  cumfreq
-                  relfreq
+    FREQUENCY STATS:  itemfreq
+                      scoreatpercentile
+                      percentileofscore
+                      histogram
+                      cumfreq
+                      relfreq
 
-VARIABILITY:  obrientransform
-              samplevar
-              samplestdev
-              signaltonoise (for Numpy arrays only)
-              var
-              stdev
-              sterr
-              sem
-              z
-              zs
-              zmap (for Numpy arrays only)
+    VARIABILITY:  obrientransform
+                  samplevar
+                  samplestdev
+                  signaltonoise (for Numpy arrays only)
+                  var
+                  stdev
+                  sterr
+                  sem
+                  z
+                  zs
+                  zmap (for Numpy arrays only)
 
-TRIMMING FCNS:  threshold (for Numpy arrays only)
-                trimboth
-                trim1
-                round (round all vals to 'n' decimals; Numpy only)
+    TRIMMING FCNS:  threshold (for Numpy arrays only)
+                    trimboth
+                    trim1
+                    round (round all vals to 'n' decimals; Numpy only)
 
-CORRELATION FCNS:  covariance  (for Numpy arrays only)
-                   correlation (for Numpy arrays only)
-                   paired
-                   pearsonr
-                   spearmanr
-                   pointbiserialr
-                   kendalltau
-                   linregress
+    CORRELATION FCNS:  covariance  (for Numpy arrays only)
+                       correlation (for Numpy arrays only)
+                       paired
+                       pearsonr
+                       spearmanr
+                       pointbiserialr
+                       kendalltau
+                       linregress
 
-INFERENTIAL STATS:  ttest_1samp
-                    ttest_ind
-                    ttest_rel
-                    chisquare
-                    ks_2samp
-                    mannwhitneyu
-                    ranksums
-                    wilcoxont
-                    kruskalwallish
-                    friedmanchisquare
+    INFERENTIAL STATS:  ttest_1samp
+                        ttest_ind
+                        ttest_rel
+                        chisquare
+                        ks_2samp
+                        mannwhitneyu
+                        ranksums
+                        wilcoxont
+                        kruskalwallish
+                        friedmanchisquare
 
-PROBABILITY CALCS:  chisqprob
-                    erfcc
-                    zprob
-                    ksprob
-                    fprob
-                    betacf
-                    gammln 
-                    betai
+    PROBABILITY CALCS:  chisqprob
+                        erfcc
+                        zprob
+                        ksprob
+                        fprob
+                        betacf
+                        gammln 
+                        betai
 
-ANOVA FUNCTIONS:  F_oneway
-                  F_value
+    ANOVA FUNCTIONS:  F_oneway
+                      F_value
 
-SUPPORT FUNCTIONS:  writecc
-                    incr
-                    sign  (for Numpy arrays only)
-                    sum
-                    cumsum
-                    ss
-                    summult
-                    sumdiffsquared
-                    square_of_sums
-                    shellsort
-                    rankdata
-                    outputpairedstats
+    SUPPORT FUNCTIONS:  writecc
+                        incr
+                        sign  (for Numpy arrays only)
+                        sum
+                        cumsum
+                        ss
+                        summult
+                        sumdiffsquared
+                        square_of_sums
+                        shellsort
+                        rankdata
+                        outputpairedstats
                     findwithin
 """
 ## CHANGE LOG:
@@ -1348,7 +1349,7 @@ Usage:   lerfcc(x)
 def lzprob(z):
     """
 Returns the area under the normal curve 'to the left of' the given z value.
-Thus, 
+Thus, ::
     for z<0, zprob(z) = 1-tail probability
     for z>0, 1.0-zprob(z) = 1-tail probability
     for any z, 2.0*(1.0-zprob(abs(z))) = 2-tail probability
@@ -1456,7 +1457,7 @@ Usage:   lbetacf(a,b,x)
 
 def lgammln(xx):
     """
-Returns the gamma function of xx.
+Returns the gamma function of xx.::
     Gamma(z) = Integral(0,infinity) of t^(z-1)exp(-t) dt.
 (Adapted from: Numerical Recipies in C.)
 
@@ -1477,7 +1478,7 @@ Usage:   lgammln(xx)
 
 def lbetai(a,b,x):
     """
-Returns the incomplete beta function:
+Returns the incomplete beta function::
 
     I-sub-x(a,b) = 1/B(a,b)*(Integral(0,x) of t^(a-1)(1-t)^(b-1) dt)
 
@@ -1509,8 +1510,7 @@ def lF_oneway(*lists):
 Performs a 1-way ANOVA, returning an F-value and probability given
 any number of groups.  From Heiman, pp.394-7.
 
-Usage:   F_oneway(*lists)    where *lists is any number of lists, one per
-                                  treatment group
+Usage:   F_oneway(*lists)    where *lists is any number of lists, one per treatment group
 Returns: F value, one-tailed p-value
 """
     a = len(lists)           # ANOVA on 'a' groups, each in it's own list
@@ -1543,7 +1543,7 @@ Returns: F value, one-tailed p-value
 
 def lF_value (ER,EF,dfnum,dfden):
     """
-Returns an F-statistic given the following:
+Returns an F-statistic given the following::
         ER  = error associated with the null hypothesis (the Restricted model)
         EF  = error associated with the alternate hypothesis (the Full model)
         dfR-dfF = degrees of freedom of the numerator
@@ -1752,7 +1752,8 @@ Prints or write to a file stats for two groups, using the name, n,
 mean, sterr, min and max for each group, as well as the statistic name,
 its value, and the associated p-value.
 
-Usage:   outputpairedstats(fname,writemode,
+Usage::
+         outputpairedstats(fname,writemode,
                            name1,n1,mean1,stderr1,min1,max1,
                            name2,n2,mean2,stderr2,min2,max2,
                            statname,stat,prob)
@@ -2705,8 +2706,7 @@ first), an integer (the dimension over which to operate), or a
 sequence (operate over multiple dimensions).
 
 Usage:   asignaltonoise(instack,dimension=0):
-Returns: array containing the value of (mean/stdev) along dimension,
-         or 0 when stdev=0
+Returns: array containing the value of (mean/stdev) along dimension, or 0 when stdev=0
 """
     m = mean(instack,dimension)
     sd = stdev(instack,dimension)
@@ -3198,7 +3198,8 @@ to 'filename' using the given writemode (default=append).  Dimension
 can equal None (ravel array first), or an integer (the dimension over
 which to operate on a and b).
 
-Usage:   attest_ind (a,b,dimension=None,printit=0,
+Usage::
+         attest_ind (a,b,dimension=None,printit=0,
                      Name1='Samp1',Name2='Samp2',writemode='a')
 Returns: t-value, two-tailed p-value
 """
@@ -3249,7 +3250,8 @@ to 'filename' using the given writemode (default=append).  Dimension
 can equal None (ravel array first), or an integer (the dimension over
 which to operate on a and b).
 
-Usage:   attest_rel(a,b,dimension=None,printit=0,
+Usage::
+         attest_rel(a,b,dimension=None,printit=0,
                     name1='Samp1',name2='Samp2',writemode='a')
 Returns: t-value, two-tailed p-value
 """
@@ -3618,7 +3620,7 @@ Usage:   aerfcc(x)
  def azprob(z):
     """
 Returns the area under the normal curve 'to the left of' the given z value.
-Thus, 
+Thus, ::
     for z<0, zprob(z) = 1-tail probability
     for z>0, 1.0-zprob(z) = 1-tail probability
     for any z, 2.0*(1.0-zprob(abs(z))) = 2-tail probability
@@ -3763,7 +3765,7 @@ Usage:   abetacf(a,b,x,verbose=1)
 
  def agammln(xx):
     """
-Returns the gamma function of xx.
+Returns the gamma function of xx.::
     Gamma(z) = Integral(0,infinity) of t^(z-1)exp(-t) dt.
 Adapted from: Numerical Recipies in C.  Can handle multiple dims ... but
 probably doesn't normally have to.
@@ -3784,7 +3786,7 @@ Usage:   agammln(xx)
 
  def abetai(a,b,x,verbose=1):
     """
-Returns the incomplete beta function:
+Returns the incomplete beta function::
 
     I-sub-x(a,b) = 1/B(a,b)*(Integral(0,x) of t^(a-1)(1-t)^(b-1) dt)
 
@@ -3830,7 +3832,7 @@ Usage:   abetai(a,b,x,verbose=1)
  def aglm(data,para):
     """
 Calculates a linear model fit ... anova/ancova/lin-regress/t-test/etc. Taken
-from:
+from::
     Peterson et al. Statistical limitations in functional neuroimaging
     I. Non-inferential methods and statistical models.  Phil Trans Royal Soc
     Lond B 354: 1239-1260.
@@ -3866,8 +3868,7 @@ Returns: statistic, p-value ???
 Performs a 1-way ANOVA, returning an F-value and probability given
 any number of groups.  From Heiman, pp.394-7.
 
-Usage:   aF_oneway (*args)    where *args is 2 or more arrays, one per
-                                  treatment group
+Usage:   aF_oneway (*args)    where *args is 2 or more arrays, one per treatment group
 Returns: f-value, probability
 """
     na = len(args)            # ANOVA on 'na' groups, each in it's own array
@@ -3898,7 +3899,7 @@ Returns: f-value, probability
 
  def aF_value (ER,EF,dfR,dfF):
     """
-Returns an F-statistic given the following:
+Returns an F-statistic given the following::
         ER  = error associated with the null hypothesis (the Restricted model)
         EF  = error associated with the alternate hypothesis (the Full model)
         dfR = degrees of freedom the Restricted model
@@ -3927,7 +3928,7 @@ Returns an F-statistic given the following:
 
  def F_value_multivariate(ER, EF, dfnum, dfden):
      """
-Returns an F-statistic given the following:
+Returns an F-statistic given the following::
         ER  = error associated with the null hypothesis (the Restricted model)
         EF  = error associated with the alternate hypothesis (the Full model)
         dfR = degrees of freedom the Restricted model

@@ -39,15 +39,28 @@ import socket
 class ModelSlave(JobSlave):
 
     def initialize(self, params):
+        """
+        Initialize AlignerSlave.
 
+        @param params: dictionary with init parameters
+        @type  params: {param:value}          
+        """
         self.__dict__.update( params )
         self.params = params
 
         self.errorLog = LogFile( self.ferror, mode='a' )
 
-     
+
 
     def reportError(self, msg, d ):
+        """
+        Report error.
+
+        @param msg: error message
+        @type  msg: str
+        @param d: error data
+        @type  d: any
+        """
         try:
             s = '%s on %s, job %r\n' % (msg, os.uname()[1], d)
             s += '\nErrorTrace:\n' + T.lastErrorTrace() + '\n'
@@ -67,8 +80,14 @@ class ModelSlave(JobSlave):
                 pass
             f.close()
 
-    def go(self, dict):
 
+    def go(self, dict):
+        """
+        Run Modeller job.
+
+        @param dict: dictionary with run parameters
+        @type  dict: {param:value} 
+        """
         d = {}
         val = None
 
@@ -86,16 +105,17 @@ class ModelSlave(JobSlave):
                 m.prepare_modeller(fasta_target=val["fastaTarget"], f_pir=val["f_pir"], template_folder=val["template_folder"],starting_model=val["starting_model"], ending_model=val["ending_model"])
 
                 m.go()
-        
+
                 m.postProcess()
-                
+
         except Exception, why:
             self.reportError( 'ERROR '+str(why), val )
 
         print "Done."
 
         return d
-    
+
+
 if __name__ == '__main__':
 
     slave = ModelSlave()

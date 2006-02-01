@@ -18,10 +18,13 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-
 ## last $Author$
 ## last $Date$
 ## $Revision$
+
+"""
+Prepare and run a HEX docking.
+"""
 
 from Biskit import PDBModel, PDBDope, molUtils
 import Biskit.tools as t
@@ -54,8 +57,8 @@ class Docker:
     The models in the 2 given dictionaries might get different chainIds but
     Docker doesn't save them.
 
-    Todo: implement that as JobMaster / JobSlave instead, so that also the
-    Hex-file parsing is distributed.
+    @todo: implement that as JobMaster / JobSlave instead, so that also the
+           Hex-file parsing is distributed.
     """
 
     def __init__( self, recDic, ligDic, recPdb=None, ligPdb=None,
@@ -63,13 +66,28 @@ class Docker:
                   recChainId=None, ligChainId=None, macDock=None,
                   bin=settings.hex_bin ):
         """
-        recDic, ligDic - model dictionary
-        recPdb, ligPdb - str, hex-formatted PDB with rec/lig models
-        recNumber, ligNumber - int, model number rec/lig in dict and hex PDB
-        recChainId, ligChainId - list of str, force chain IDs only for HEX
-        out   - str, out folder name, will be formatted against date
-        macDock - force macro docking ON or OFF (default: size decides)
-        soln - int, number of solutions to keep from HEX (default 512)
+        @param recDic: receptor dictionary
+        @type  recDic: dict
+        @param ligDic: ligand dictionary
+        @type  ligDic: dict
+        @param recPdb: hex-formatted PDB with rec models
+        @type  recPdb: str
+        @param ligPdb: hex-formatted PDB with lig models
+        @type  ligPdb: str
+        @param comPdb: hex-formatted PDB with com models
+        @type  comPdb: str
+        @param soln: number of solutions to keep from HEX (default 512)
+        @type  soln: int
+        @param recChainId: force chain IDs only for HEX
+        @type  recChainId: [str]
+        @param ligChainId: force chain IDs only for HEX
+        @type  ligChainId: [str]
+        @param out: out folder name, will be formatted against date
+        @type  out: str
+        @param macDock: force macro docking ON or OFF (default: size decides)
+        @type  macDock: 1|0
+        @param bin: path to HEX binary
+        @type  bin: str
         """
         self.lock = RLock()
         self.lockMsg = Condition( self.lock )
@@ -77,7 +95,7 @@ class Docker:
         t.ensure( macDock, int, [None] )
         t.ensure( recDic, dict, )
         t.ensure( ligDic, dict, )
-        
+
         self.recDic = recDic
         self.ligDic = ligDic
 
@@ -107,7 +125,7 @@ class Docker:
             ## HEX PDB has to be created
             self.recHexPdbs = self.prepareHexPdbs( self.recDic,
                                                    self.recChainId, 'rec')
-    
+
         if ligPdb:
             for k in self.ligDic:
                 self.ligHexPdbs[ k ] = t.absfile( recPdb )
@@ -132,18 +150,27 @@ class Docker:
 
 
     def prepareOutFolder( self, fout ):
+        """
+        Setup an output folder
+        
+        @param fout: outfile name
+        @type  fout: str
+
+        @return: out path
+        @rtype: str
+        """
         ## date stamp in folder name
         try:
             datestr = "%02i%02i" % (localtime()[1], localtime()[2])
             fout = fout % ( datestr )
             if not os.path.exists( t.absfile( fout ) ):
                 os.mkdir( t.absfile( fout ) )
-                
+
         ## user provided folder name -> formatting fails
         except:
             if not os.path.exists( t.absfile( fout ) ):
                 os.mkdir( t.absfile( fout ) )
-                
+
         ## create folders for rec / lig HEX pdbs
         if not os.path.exists( t.absfile( fout ) + '/rec' ):
             os.mkdir( t.absfile( fout ) + '/rec' )
@@ -156,14 +183,20 @@ class Docker:
 
     def __setChainID( self, m, ids ):
         """
-        ids - list of str, len(ids) == m.lenChains
         set chaiID for Hex pdb files
-        -> m is changed directly
+
+        @param m: model
+        @type  m: PDBModel
+        @param ids: chain id, len(ids) == m.lenChains
+        @type  ids: [str]
+        
+        @return: m is changed directly
+        @rtype: PDBModel
         """
         if ids:
             ids = t.toList( ids )
             cMap = m.chainMap()
-            
+
             for chain in range( m.lenChains() ):
                 idx = N.nonzero( cMap == chain )
                 for i in idx:
@@ -173,12 +206,20 @@ class Docker:
     def prepareHexPdbs( self, modelDic, idList, subDir ):
         """
         create HEX-formatted PDB for each model
-        subDir - str, 'rec' or 'lig'
-        -> { modelNumber : file_name_created, .. }
+
+        @param modelDic: model dictionary to be prepared for HEX
+        @type  modelDic: dict
+        @param idList: force chain IDs for HEX pdb files
+        @type  idList: [str]
+        @param subDir: 'rec' or 'lig'
+        @type  subDir: str
+        
+        @return: model dictionary, { modelNumber : file_name_created, .. }
+        @rtype: dict
         """
         result = {}
         for k in modelDic:
-            
+
             m = modelDic[k].clone()
 
             fhex = self.out + '/%s/%s_%03d_hex.pdb' % (subDir, m.pdbCode, k)
@@ -201,10 +242,17 @@ class Docker:
     def createHexInp( self, nRec, nLig ):
         """
         Create a HEX macro file for docking a rec lig pair.
-        nRec, nLig - int, model number rec / lig in model dictionaries
-        -> (str, str), macro file name, future out file name
-        !! raises DockerError, if macro dock option is different from previous
-           call
+        
+        @param nRec: model number rec in model dictionaries
+        @type  nRec: int
+        @param nLig: model number lig in model dictionaries
+        @type  nLig: int
+        
+        @return: macro file name, future out file name
+        @rtype: (str, str)
+        
+        @raise DockerError: if macro dock option is different from previous
+                            call
         """
         ## fetch PDB file names for given model numbers
         recPdb, ligPdb = self.recHexPdbs[nRec], self.ligHexPdbs[nLig]
@@ -239,12 +287,23 @@ class Docker:
 
 
     def runHex( self, finp, log=0, ncpu=2, nice=0, host=os.uname()[1] ):
-
+        """
+        @param finp: hex macro file
+        @type  finp: str
+        @param log: write log file
+        @type  log: 1|0
+        @param ncpu: number of cpus to use
+        @type  ncpu: int
+        @param nice: nice value for HEX job (default: 0)
+        @type  nice: int
+        @param host: host to run jon on
+        @type  host: str
+        """
         flog = finp + '.log'
 
         cmd = "%s -ncpu %i -nice %i -noexec < %s > %s"
         cmd = cmd % (self.bin, ncpu, nice, finp, flog )
-        
+
         cmd = "ssh %s %s" % (host, cmd)
 
         runner = RunThread( cmd, self, finp=finp, host=host, log=log )
@@ -260,7 +319,8 @@ class Docker:
 
 
     def countDifferentModels( self, lst ):
-
+        """
+        """
         mrec = []
         mlig = []
         for c in lst:
@@ -288,7 +348,7 @@ class Docker:
         self.running.remove( runner )
 
         self.hexDone += 1
-        
+
         self.lockMsg.notifyAll()
         self.lock.release()
 
@@ -306,7 +366,7 @@ class Docker:
 
         self.lockMsg.notifyAll()
         self.lock.release()
-        
+
 
     def waitForLastHex( self ):
         """
@@ -319,7 +379,7 @@ class Docker:
 
         self.lock.release()
         return
-    
+
 
     def set_call_when_done( self, funct ):
         """
@@ -340,11 +400,25 @@ class Docker:
 
 class RunThread( Thread ):
     """
-    Todo: implement that as JobSlave instead
+    @todo: implement that as JobSlave instead
     """
 
     def __init__( self, cmd, owner, finp=None, log=0,
                   host=None, **kw ):
+        """
+        @param cmd: command to execute
+        @type  cmd: str
+        @param owner: Docker job to run to run
+        @type  owner: Docker instance
+        @param finp: hex macro file (default: None)
+        @type  finp: str
+        @param log: write log file (default: 0)
+        @type  log: 1|0
+        @param host: host to run jon on (default: None, localhost)
+        @type  host: str
+        @param kw: optional key/value pairs
+        @type  kw: key=value
+        """
         Thread.__init__( self, name=(host or 'local'), **kw )
         self.cmd = cmd
         self.owner = owner
@@ -358,7 +432,11 @@ class RunThread( Thread ):
 
 
     def run( self ):
+        """
+        Run HEX job.
 
+        @raise DockerError: if HEX exists with error
+        """
         try:
             if not os.path.exists( self.fout ):
 
@@ -391,10 +469,17 @@ class RunThread( Thread ):
             self.failed()
 
 
-    def done( self ):            
+    def done( self ):
+        """
+        HEX job done.
+        """
         self.owner.doneHex( self )
 
+
     def failed( self ):
+        """
+        If HEX job fails
+        """
         print "FAILED: ", self.host, ' ', t.stripFilename(self.finp)
         print "\tJob details:"
         print "\tCommand: ", self.cmd
@@ -403,7 +488,7 @@ class RunThread( Thread ):
         print "\tHex out: ", self.fout
         print
         print "\t", t.lastError()
-        
+
         errorRunner = self
         self.owner.failedHex( self )
 
@@ -413,8 +498,13 @@ class RunThread( Thread ):
         Replace current model numbers in HEX out file by given nRec and nLig.
         Only to be used with one-against-one dockings because all
         ReceptorModel and LigandModel entries are replaced by nRec, nLig.
-        nRec, nLig - int
-        fout - str, name of existing  out file, is overwritten
+        
+        @param nRec: receptor number
+        @type  nRec: int
+        @param nLig: ligand number
+        @type  nLig: int
+        @param fout: name of existing  out file, is overwritten
+        @type  fout: str
         """
         old_out = open( fout, 'r' )
         contents = old_out.readlines()
@@ -433,7 +523,7 @@ class RunThread( Thread ):
 
 
 #### TEST ######
-        
+
 if __name__ == '__main__':
 
 ##     rec = testRoot() + '/dock/pcr_rec/1A2P_1_0.pdb.model'
@@ -443,14 +533,14 @@ if __name__ == '__main__':
 
     recDic = t.Load( testf + '/pcr_rec/1AVV_models.dic' )
     ligDic = t.Load( testf + '/pcr_lig/1SHF_models.dic')
-    
+
     d = Docker( recDic, ligDic,                
                 out = '~/data/tmp/hex_%s' )
 
     fmac1, fout = d.createHexInp( 2, 2 )
     fmac2, fout2= d.createHexInp( 1, 1 )
-    
+
     d.runHex( fmac1, log=1, ncpu=2 )
     d.runHex( fmac2, log=0, ncpu=2, host='riddler' )
-    
+
     print "ALL jobs submitted."

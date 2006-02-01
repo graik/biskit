@@ -19,6 +19,8 @@
 ##
 ## last $Author$
 ## last $Date$
+## $Revision$
+
 """
 Distribute calculation of contact matrices for many complexes
 over many nodes.
@@ -52,23 +54,36 @@ class ContactMaster(TrackingJobMaster):
 
     def __init__(self, complexLst, chunks=5, hosts=cpus_all, refComplex=None,
                  updateOnly=0, niceness = nice_dic, force = [],
-                 outFile = 'complexes_cont.cl',
-                 com_version=-1,
+                 outFile = 'complexes_cont.cl', com_version=-1,
                  show_output = 0, add_hosts=0 ):
         """
-        cmplxLst       - ComplexList, input list
-        chunks         - int, number of complexes to hand over to each slave
-                         at once
-        hosts          - [str], hostnames
-        niceness       - {'hostname':nice_value, ..., 'default': nice_value}
-                         nice_value: int or str
-        cutoff         - float, distance (A) cutoff for atom-atom contacts
-        outFile        - str, file name for list of complexes with contacts
-        com_version    - int, contact the given version of a ComplexEvolving,
-                         only valid if input is ComplexEvolvingList [-1]
-        show_output    - 1||0, show x-window for each slave or not
-        add_hosts      - 1||0, add hosts to PVM (can take some time) [0]
-        force          - [str], force update of given info keys
+        @param complexLst: input list
+        @type  complexLst: ComplexList
+        @param chunks: number of complexes to hand over to each slave
+                       at each call
+        @type  chunks: int
+        @param hosts: list of hostnames
+        @type  hosts: [str]
+        @param niceness: dictionary mapping hosts to nice values::
+                         {'hostname':nice_value, ..., 'default': nice_value}
+                          nice_value: int or str
+        @type  niceness: dict
+        @param outFile: file name for output list of complexes with
+                        calculated contacts (default: 'complexes_cont.cl')
+        @type  outFile: str
+        @param com_version: contact the given version of a ComplexEvolving,
+                            only valid if input is ComplexEvolvingList
+                            (default: -1)
+        @type  com_version: int
+        @param show_output: show x-window for each slave or not (default: 0)
+        @type  show_output: 1|0
+        @param add_hosts: add hosts to PVM (can take some time) (default: 0)
+        @type  add_hosts: 1|0
+        @param force: force update of given info keys
+        @type  force: [str]
+
+        @raise BiskitError: if attempting to extract version from list
+                            that is not of type ComplexEvolvingList.
         """
         self.outFile = outFile
 
@@ -92,11 +107,11 @@ class ContactMaster(TrackingJobMaster):
 
         ## force update of given info keys
         self.force = force
-             
+
         ## extract given version of each Complex from ComplexEvolvingList
         self.complexLst_original = None
         self.com_version = None
-        
+
         if isinstance( complexLst, ComplexEvolvingList ):
             complexLst = self.__extractVersion( complexLst, com_version)
         else:
@@ -105,7 +120,7 @@ class ContactMaster(TrackingJobMaster):
 
         ## make sure models have a surfaceMask
         self.__addSurfaceMasks( complexLst )
- 
+
         ## store class type so that same class can be returned
         self.list_class = complexLst.__class__
 
@@ -114,14 +129,14 @@ class ContactMaster(TrackingJobMaster):
         t.flushPrint( '%i complexes total in list\n'%len(complexLst) )
         t.flushPrint( '\tof which %i need updating,\n'%len(complexDic) )
         t.flushPrint( '\tand %i are complete\n'%len(self.remainLst) )
-         
+
         self.__check_models( complexLst )
- 
+
         ## coarse models for reduced atom contacts
         self.reduced_recs, self.reduced_ligs = {}, {}
         self.reduced_refCom = None
         self.c_ref_ratom_10 = None
-        
+
         if not self.force or 'fnarc_10' in self.force or \
                'c_ratom_10' in self.force:
 
@@ -149,7 +164,9 @@ class ContactMaster(TrackingJobMaster):
 
 
     def __check_models( self, cl ):
-
+        """
+        Perform some checks for models assocciated with ComplexList.
+        """
         ## stray models are not in the ComplexLists.models because the don't
         ## have a identical pickled source
         if cl.strayModels() != ({},{}):
@@ -177,53 +194,73 @@ class ContactMaster(TrackingJobMaster):
 ##             m.slim()
 ##         t.flushPrint("done\n")
 
-                        
+
     def __extractVersion( self, cel, com_version=-1 ):
         """
-        cel          - ComplexEvolvingList
-        com_version  - int
-        -> ComplexList
-        """
+        Get a ComplexList by extracting a specified version (generation) of
+        a ComplexEvolvingList.
+        
+        @param cel: ComplexEvolvingList
+        @type  cel: ComplexEvolvingList
+        @param com_version: version of ComplexEvolvingList to get
+                            (default: -1, last version)
+        @type  com_version: int
 
+        @return: ComplexList 
+        @rtype: ComplexList
+        """
         self.complexLst_original = cel
         self.com_version = com_version
 
         ## mark complexes to detect mix-ups later on
         for i in range( len( cel ) ):
             cel[i][ com_version ]['$temp$'] = i
-        
+
         return cel.toComplexList( version=com_version )
 
 
     def __addSurfaceMasks( self, cl ):
         """
-        add surface area to model if not already there
+        Add surface area to rec and lig model if not already there.
+
+        @param cl: ComplexList
+        @type  cl: ComplexList
         """
         for m in cl.recModels():
             if not m.profile('surfMask', 0) != 0:
                 d = PDBDope( m )
                 d.addSurfaceMask()
-                
+
         for m in cl.ligModels():
             if not m.profile('surfMask', 0) != 0:
                 d = PDBDope( m )
                 d.addSurfaceMask()
-                
-                
+
+
     def __addSurface( self, m ):
         """
-        add surface area to model
+        Add surface area to model.
+
+        @param m: model
+        @type  m: PDBModel       
         """
         if m.profile('relASA', 0) != 0:
             return 
-        
+
         d = PDBDope( m )
         d.addASA()
 
 
     def __refMasks( self, refCom, normalCom ):
         """
-        create reference residue and atom contact masks.
+        Create residue and atom contact masks for reference complex.
+
+        @param refCom: reference complex
+        @type  refCom: Complex
+        @param normalCom: complex with different atom/residue content than
+                          the reference complex to be used for determining
+                          the sections that are identical in both complexes
+        @type  normalCom: Complex
         """
         t.flushPrint( 'Analyzing reference complex ... ')
 
@@ -235,7 +272,7 @@ class ContactMaster(TrackingJobMaster):
         h_lig = N.nonzero( RC.lig_model.maskH() )
         i_rec_ref = [ i for i in i_rec_ref if i not in h_rec ]
         i_lig_ref = [ i for i in i_lig_ref if i not in h_lig ]
-        
+
         RC = RC.take( i_rec_ref, i_lig_ref )
 
         ## convert casting indices for normalCom to mask
@@ -281,13 +318,23 @@ class ContactMaster(TrackingJobMaster):
 
     def __ref_interface( self, RC, NC, res_contacts, mask_rec, mask_lig, bb=0):
         """
-        RC - Complex, reference complex, casted to normal complex
-        NC - Complex, normal complex, not casted to RC
-        res_contacts - residue contact matrix for defining interface residues
-        mask_rec - [ int ], atom mask to cast NC.rec() to RC.rec()
-        mask_lig - [ int ], atom mask to cast NC.lig() to RC.lig()
-        -> ([ int ], PDBModel),
-           atom mask for getting interface from NC.model(), reference interface
+        @param RC: reference complex, casted to normal complex
+        @type  RC: Complex
+        @param NC: normal complex, not casted to RC
+        @type  NC: Complex
+        @param res_contacts: residue contact matrix for defining
+                             interface residues
+        @type  res_contacts: matrix
+        @param mask_rec: atom mask to cast NC.rec() to RC.rec()
+        @type  mask_rec: [1|0]
+        @param mask_lig: atom mask to cast NC.lig() to RC.lig()
+        @type  mask_lig: [1|0]
+        @param bb: apply a backbone mask (default: 0)
+        @type  bb: 1|0
+
+        @return: atom mask for getting interface from NC.model(),
+                 reference interface
+        @rtype: [int], PDBModel
         """
         try:
             ## calculate atom mask that extracts all interface residues from NC
@@ -295,7 +342,7 @@ class ContactMaster(TrackingJobMaster):
             if_rec = if_rec * NC.rec_model.maskHeavy() * mask_rec
             if bb:
                 if_rec = if_rec * NC.rec_model.maskBB()
-            
+
             if_lig = NC.lig_model.res2atomMask( N.sum( res_contacts, 0) )
             if_lig = if_lig * NC.lig_model.maskHeavy() * mask_lig
             if bb:
@@ -317,7 +364,7 @@ class ContactMaster(TrackingJobMaster):
 
         except ValueError, why:
             EHandler.error("ValueError (rescontacts: " + str(res_contacts)+")")
-        
+
 
     def __reduced_refContacts( self ):
         """
@@ -332,22 +379,36 @@ class ContactMaster(TrackingJobMaster):
 
 
     def __toBeUpdated( self, com ):
-        """-> 1, if complex needs to be contacted"""
+        """
+        Check if complex is to be updated.
+        
+        @param com: Complex
+        @type  com: Complex
 
+        @return: 1, if complex needs to be contacted
+        @rtype: 1|0
+        """
         if not self.updateOnly:
             return 1
 
         for ikey in com.keys():
             if com[ikey] == None:
-                
+
                 return 1
-        
+
         return 0
 
 
     def __complexDic( self, cl ):
         """
-        -> dict {soln:Complex,..}
+        Collect info about complexes in ComplexList that needs to be updated.
+        
+        @param cl: ComplexList
+        @type  cl: ComplexList
+        
+        @return: dictionary mapping solution number to Complex,
+                 remaining complexes as a ComplexList
+        @rtype: {int:Complex}, ComplexList
         """
         update = {}
         remain = ComplexList()
@@ -374,7 +435,12 @@ class ContactMaster(TrackingJobMaster):
         rel surf acc area > 30%. Do the same to the reference complex rec and
         lig. The result are PDBModels with actually less atoms than residues
         but whose contact matrix (and fnac) still resembles the one calculated
-        from all atoms. 
+        from all atoms.
+
+        @param cl: ComplexList
+        @type  cl: ComplexList
+        @param refCom: reference complex
+        @type  refCom: Complex        
         """
         t.flushPrint('preparing/saving coarse models of receptors&ligands...')
 
@@ -443,11 +509,17 @@ class ContactMaster(TrackingJobMaster):
         tempfile.tempdir = oldTemp
 
         t.flushPrint(' done\n')
-    
+
 
     def getInitParameters(self, slave_tid):
         """
         hand over parameters to slave once.
+
+        @param slave_tid: slave task id
+        @type  slave_tid: int
+
+        @return: dictionaty with slave parameters
+        @rtype: dict        
         """
         r = {'ferror': self.ferror, 'force' : self.force,
              'c_ref_res_4_5' : self.c_ref_res_4_5,
@@ -463,18 +535,21 @@ class ContactMaster(TrackingJobMaster):
              'reduced_ligs' : self.reduced_ligs,
              'c_ref_ratom_10'  : self.c_ref_ratom_10
              }
-        
+
         return r
+
 
     def isFinished( self ):
         return self.finished
 
 
     def cleanup( self ):
-        """Overrides TrackingJobMaster method"""
-
+        """
+        Remove temporary files.
+        Overrides TrackingJobMaster method
+        """
         print "Deleting temporary coarse rec/lig models..."
-        
+
         for m in self.reduced_recs.values() + self.reduced_ligs.values():
             if not t.tryRemove( str( m.source ) ):
                 print "Cannot remove ", str( m.source )
@@ -483,7 +558,9 @@ class ContactMaster(TrackingJobMaster):
     def getResult( self, **arg ):
         """
         Return result ComplexList, if it is available.
-        -> ComplexList
+
+        @return: resulting ComplexList
+        @rtype: ComplexList
         """
         return self.complexLst
 
@@ -491,6 +568,8 @@ class ContactMaster(TrackingJobMaster):
     def done(self ):
         """
         Collect the last complexes and write result ComplexList to file.
+
+        @raise BiskitError: if Complex version mixup
         """
         print "Assembling new ComplexList...",
         self.complexLst = self.list_class( self.result.values() )
@@ -512,7 +591,7 @@ class ContactMaster(TrackingJobMaster):
                 if not check_1 == check_2:
                     raise BiskitError('Complex version mixup: %i != %i' \
                                       % (check_1, check_2) )
-                
+
                 cev[ self.com_version ].info.update( c.info )
 
             self.complexLst = self.complexLst_original

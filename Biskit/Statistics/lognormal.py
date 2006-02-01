@@ -22,17 +22,19 @@
 ## last $Date$
 ## last $Author$
 
+"""
+lognormal distribution
+"""
+
 import Numeric as N
 import RandomArray as R
 
 
 def rand_log_normal(alpha, beta, shape):
-
     return N.exp(R.normal(alpha, beta, shape))
 
 
 def ln(r, alpha, beta):
-
     return N.exp(-0.5/beta**2 * (N.log(r) - alpha)**2 \
                  - 0.5*N.log(2*pi)-N.log(beta*r))
 
@@ -41,11 +43,16 @@ def erf(x):
     """
     Approximation to the erf-function with fractional error
     everywhere less than 1.2e-7
-    """
 
+    @param x: value
+    @type  x: float
+    
+    @return: value
+    @rtype: float
+    """
     if x > 10.: return 1.
     if x < -10.: return -1.
-    
+
     z = abs(x)
     t = 1. / (1. + 0.5 * z)
 
@@ -64,10 +71,16 @@ def logArea(x, alpha, beta):
     """
     Area of the smallest interval of a lognormal distribution that still
     includes x.
-    x     - float, border value
-    alpha - float, mean of log-transformed distribution
-    beta  - float, standarddev of log-transformed distribution
-    -> float, probability that x is NOT drawn from the given distribution
+    
+    @param x: border value
+    @type  x: float
+    @param alpha: mean of log-transformed distribution
+    @type  alpha: float
+    @param beta: standarddev of log-transformed distribution
+    @type  beta: float
+    
+    @return: probability that x is NOT drawn from the given distribution
+    @rtype: float
     """
     r_max = N.exp(alpha - beta**2)
 
@@ -80,27 +93,39 @@ def logArea(x, alpha, beta):
 
 def logMean( alpha, beta ):
     """
-    alpha - float, mean of log-transformed distribution
-    beta  - float, standarddev of log-transformed distribution
-    -> float, mean of the original lognormal distribution
+    @param alpha: mean of log-transformed distribution
+    @type  alpha: float
+    @param beta: standarddev of log-transformed distribution
+    @type  beta: float
+    
+    @return: mean of the original lognormal distribution
+    @rtype: float
     """
     return N.exp( alpha + (beta**2)/2. )
-    
+
 
 def logSigma( alpha, beta ):
     """
-    alpha - float, mean of log-transformed distribution
-    beta  - float, standarddev of log-transformed distribution
-    -> float, 'standard deviation' of the original lognormal distribution
+    @param alpha: mean of log-transformed distribution
+    @type  alpha: float
+    @param beta: standarddev of log-transformed distribution
+    @type  beta: float
+    
+    @return: 'standard deviation' of the original lognormal distribution
+    @rtype: float
     """
     return logMean( alpha, beta ) * N.sqrt( N.exp(beta**2) - 1.)
 
 
 def logMedian( alpha, beta=None ):
     """
-    alpha - float, mean of log-transformed distribution
-    beta  - float, not needed
-    -> float, median of the original lognormal distribution
+    @param alpha: mean of log-transformed distribution
+    @type  alpha: float
+    @param beta: not needed
+    @type  beta: float
+    
+    @return: median of the original lognormal distribution
+    @rtype: float
     """
     return N.exp( alpha )
 
@@ -109,10 +134,16 @@ def logConfidence( x, R, clip=0 ):
     """
     Estimate the probability of x NOT beeing a random observation from a
     lognormal distribution that is described by a set of random values.
-    x    - float, observed value
-    R    - [ float ], sample of random values
-    clip - float, clip zeros at this value  0->don't clip [0]
-    -> (float, float) confidence that x is not random, median of random distr.
+    
+    @param x: observed value
+    @type  x: float
+    @param R: sample of random values
+    @type  R: [float]
+    @param clip: clip zeros at this value  0->don't clip (default: 0)
+    @type  clip: float
+    
+    @return: confidence that x is not random, median of random distr.
+    @rtype: (float, float)
     """
     if clip and 0 in R:
         R = N.clip( R, clip, max( R ) )

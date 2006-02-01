@@ -22,24 +22,29 @@
 ## last $Author$
 ## last $Date$
 
+"""
+Complex that keeps track of its previous versions (conformations).
+"""
+
 import Biskit.tools as t
 import Biskit.mathUtils as MU
 from Biskit import EHandler
 from Complex import Complex as ProtComplex
 from ComplexList import ComplexList, ComplexListError, ConditionError
-     
+
 
 class ComplexEvolving( ProtComplex ):
     """
     Complex that keeps track of its previous versions. The object behaves
-    like a normal Biskit.Complex but encapsulates a ComplexList with older
-    versions/conformations of this Complex.
+    like a normal L{Biskit.Dock.Complex} but encapsulates a
+    L{Biskit.Dock.ComplexList} with older versions/conformations of
+    this Complex.
 
-    * com[0] gives the very first version, com[1] the second, etc.
-    * com[-1] gives the current version (but as normal Complex, not
-      ComplexEvolving).
-    * e.g. com[0, 'fnac'] gives the according info value of the first version
-    * e.g. com['fnac']    gives the current info value (as for Dock.Complex)
+      - com[0] gives the very first version, com[1] the second, etc.
+      - com[-1] gives the current version (but as normal Complex, not
+        ComplexEvolving).
+      - e.g. com[0, 'fnac'] gives the according info value of the first version
+      - e.g. com['fnac']    gives the current info value (as for Dock.Complex)
     """
 
     def __init__(self, rec_model, lig_model, com_0=None,
@@ -47,13 +52,18 @@ class ComplexEvolving( ProtComplex ):
         """
         Create a new ComplexEvolving from a previous Complex or ComplexEvolving
         and a new set of receptor, ligand conformation and transformation.
-        rec_model  - PDBModel/PCRModel, receptor conformation
-        lig_model  - PDBModel/PCRModel, ligand conformation
-        com_0      - Complex /ComplexEvolving, previous version(s) of this com
-        ligMatrix  - 4x4 array, transformation matrix of ligand versus receptor
-        info       - {'info_key': value, ..}, additional infos
+        
+        @param rec_model: PDBModel/PCRModel, receptor conformation
+        @type  rec_model: PDBModel
+        @param lig_model: PDBModel/PCRModel, ligand conformation
+        @type  lig_model: PDBModel
+        @param com_0: Complex /ComplexEvolving, previous version(s) of this com
+        @type  com_0: Complex OR ComplexEvolving
+        @param ligMatrix: transformation matrix of ligand versus receptor
+        @type  ligMatrix: 4x4 array
+        @param info: info dictionary {'info_key': value, ..}, additional infos
+        @type  info: dict
         """
-
         ProtComplex.__init__(self, rec_model, lig_model, ligMatrix, info )
 
         if isinstance( com_0, ComplexEvolving ):
@@ -76,13 +86,26 @@ class ComplexEvolving( ProtComplex ):
 
 
     def version( self ):
+        """
+        Version of class.
+        
+        @return: version of class
+        @rtype: str
+        """
         return 'ComplexEvolving $Revision$'
 
+
     def __iter__(self):
-        """__iter__() <==> for k in self"""
+        """
+        __iter__() <==> for k in self
+        """
         return iter( self.history + [self] )
 
+
     def __len__( self ):
+        """
+        length of self
+        """
         return len( self.history ) + 1
 
 
@@ -92,45 +115,62 @@ class ComplexEvolving( ProtComplex ):
         version. By default the info dictionary remains connected but
         other fields don't. I.e. replacing rec_model in the copy does
         not affect the original complex.
-        i    - int, index in complex history, -1 returns toComplex()
-        copy - 1||0, copy info dictionary in case of i==-1 (changes in
-               c.getComplex( -1 ).info will not appear in c.info [0]
-        -> Dock.Complex
+        
+        @param i: index in complex history, -1 returns toComplex()
+        @type  i: int
+        @param copy: copy info dictionary in case of i==-1 (changes in
+                     c.getComplex( -1 ).info will not appear in c.info [0]
+        @type  copy: 1|0
+        
+        @return: complex
+        @rtype: Dock.Complex
         """
         if i == -1:
             return self.toComplex( copy=copy )
-        
+
         if i >= 0 and i < len( self.history ):
             return self.history[ i ]
 
         return self.toSimpleList()[i]
-        
+
 
     def __getitem__( self, k ):
+        """
+        Get a Complex OR a info key value for a Complex specified Complex
+        OR info dic value.
+
+        @param k: tuple OR int OR str
+        @type  k: any OR Complex
+        """
         if type(k) == tuple:
 
             i, key = k[0], k[1]
 
             if i == len( self.history ):
                 return self.info[key]
-            
+
             return self.getComplex(i).info[key]
 
         if type(k) == int:
 
             return self.getComplex( k )
-        
+
         return self.info[k]
 
 
     def __syncModel( self, new_model, old_model ):
         """
         Connect new rec or lig model to old one, to minimize storage.
-        new_model - PDBModel / PCRModel
-        old_model - PDBModel / PCRModel
-        -> PDBModel / PCRModel, new model that only keeps changes relative
-                                to old,
-        the old model becomes the source of the new, if possible
+        
+        @param new_model: PDBModel / PCRModel
+        @type  new_model: PDBModel
+        @param old_model: PDBModel / PCRModel
+        @type  old_model: PDBModel
+        
+        @return: PDBModel / PCRModel, new model that only keeps
+                 changes relative to old, the old model becomes the
+                 source of the new, if possible
+        @rtype: PDBModel
         """
         ## try to fix atom order of new_model so that it is identical to old
         if old_model.equals( new_model ) != [1,1]:
@@ -144,7 +184,7 @@ class ComplexEvolving( ProtComplex ):
 
             ## stays compatible with PCRModel.__init__ and PDBModel.__init
             r = old_model.__class__( source=old_model )
-            
+
             r.setXyz( new_model.getXyz() )
 
             ## check for profiles identical to source and adapt 'changed'
@@ -163,18 +203,24 @@ class ComplexEvolving( ProtComplex ):
 
 
     def sortHistory( self ):
+        """
+        Sort by date
+        """
         self.history = self.history.sortBy( 'date' )
 
 
     def toList( self ):
         """
-        -> ComplexList, all historic complexes plus current one as Complex
+        @return: all historic complexes plus current one as Complex
+        @rtype: ComplexList
         """
         return self.history + [ self.toComplex() ]
 
+
     def toSimpleList( self ):
         """
-        -> [ Complex ], all historic complexes plus current one as Complex
+        @return: all historic complexes plus current one as Complex
+        @rtype: [Complex]
         """
         return self.history.toList() + [ self.toComplex() ]
 
@@ -182,8 +228,12 @@ class ComplexEvolving( ProtComplex ):
     def toComplex( self, copy=0 ):
         """
         Copy of latest version as a normal Complex.
-        copy - 1||0, also disconnect info dict [0]
-        -> Complex
+        
+        @param copy: also disconnect info dict (default: 0)
+        @type  copy: 1|0
+        
+        @return: Complex
+        @rtype: Complex
         """
         r = ProtComplex( self.rec_model, self.lig_model,
                          self.ligandMatrix, self.info )
@@ -192,15 +242,21 @@ class ComplexEvolving( ProtComplex ):
 
         return r
 
+
     def valuesOf( self, infoKey, default=None ):
         """
         Get info values from all versions of this complex (oldest first).
-        infoKey - str
-        default - any, default value, if key is not present
-        -> [ any ]
+        
+        @param infoKey: info dic key
+        @type  infoKey: str
+        @param default: default value, if key is not present
+        @type  default: any
+        
+        @return: list of values
+        @rtype: [any]
         """
         return [ c.get( infoKey, default ) for c in self ]
-        
+
 
 ### TEST ###
 

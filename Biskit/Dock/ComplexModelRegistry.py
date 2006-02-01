@@ -21,6 +21,10 @@
 ## last $Date$
 ## last $Author$
 
+"""
+This is a helper class for ComplexList.
+"""
+
 from Complex import Complex
 from Biskit import BiskitError
 from Biskit import LocalPath
@@ -33,7 +37,7 @@ class RegistryError( BiskitError ):
 class ComplexModelRegistry:
     """
     This is a helper class for ComplexList.
-    
+
     Keep unique copies of the rec and lig models from many Complexes.
     Make sure that 2 Complexes with the same rec_model (same by file
     name and unchanged) always point to the same PDBModel instance.
@@ -48,19 +52,28 @@ class ComplexModelRegistry:
         self.lig_f2com = {}
 
         self.initVersion = self.version()
-        
+
+
     def version( self ):
+        """
+        Version of class.
+        
+        @return: version of class
+        @rtype: str
+        """        
         return 'ComplexModelRegistry $Revision$'
 
 
     def addComplex( self, com ):
         """
         Register Complex with the registry.
-        com - Complex
+        
+        @param com: complex
+        @type  com: Complex
         """
         com.rec_model,fr = self.__sync_model( com.rec_model, self.rec_f2model )
         com.lig_model,fl = self.__sync_model( com.lig_model, self.lig_f2model )
-            
+
         ## optimized for speed, that's why a bit awkward
         if fr != None:
             coms = self.rec_f2com.get( fr, None )
@@ -68,7 +81,7 @@ class ComplexModelRegistry:
                 self.rec_f2com[ fr ] = [ com ]
             else:
                 coms.append( com )
-            
+
         if fl != None:
             coms = self.lig_f2com.get( fl, None )
             if coms == None:
@@ -78,11 +91,29 @@ class ComplexModelRegistry:
 
 
     def removeComplex( self, com ):
+        """
+        Remove a Complex from the registry.
+        
+        @param com: complex
+        @type  com: Complex
+        """        
         self.__removeModel(com.rec_model,com, self.rec_f2model, self.rec_f2com)
         self.__removeModel(com.lig_model,com, self.lig_f2model, self.lig_f2com)
 
 
     def __removeModel( self, model, com, f2model, f2com ):
+        """
+        Remove model of a complex from the registry.
+        
+        @param model: receptor or ligand model
+        @type  model: PDBModel
+        @param com: complex
+        @type  com: Complex
+        @param f2model: dictionary mapping files to models
+        @type  f2model: {str:PDBModel}
+        @param f2com: dictionary mapping files to complexes
+        @type  f2com: {str:Complex}
+        """        
         ## optimized for speed
         f = model.source
         coms = f2com[ f ]
@@ -114,7 +145,7 @@ class ComplexModelRegistry:
 ##                 for c in otherReg.rec_f2com[ k ]:
 ##                     if not c in self.rec_f2com[ k ]:
 ##                         self.rec_f2com[ k ] + [c]
-        
+
 ##         for k,v in otherReg.lig_f2model:
 
 ##             if not k in self.lig_f2model:
@@ -130,25 +161,69 @@ class ComplexModelRegistry:
 ##                 for c in otherReg.lig_f2com[ k ]:
 ##                     if not c in self.lig_f2com[ k ]:
 ##                         self.lig_f2com[ k ] + [c]
-        
+
 
     def getRecModel( self, source ):
+        """
+        Get receptor model belonging to source.
+        
+        @param source: path
+        @type  source: str
+        
+        @return: model
+        @rtype: PDBModel       
+        """
         return self.rec_f2model[source]
 
+
     def getLigModel( self, source ):
+        """
+        Get ligand model belonging to source.
+        
+        @param source: path
+        @type  source: str
+        
+        @return: model
+        @rtype: PDBModel       
+        """        
         return self.lig_f2model[source]
 
+
     def getModel( self, source):
+        """
+        Get model belonging to source.
+        
+        @param source: path
+        @type  source: str
+        
+        @return: model
+        @rtype: PDBModel       
+        """        
         if source in self.rec_f2model:
             return self.rec_f2model[ source ]
 
         return self.lig_f2model[ source ]
 
+
     def recModels( self ):
+        """
+        Get a list with all receptor models.
+
+        @return: list of models
+        @rtype: [PDBModel]       
+        """              
         return self.rec_f2model.values()
 
+
     def ligModels( self ):
+        """
+        Get a list with all ligand models.
+
+        @return: list of models
+        @rtype: [PDBModel]       
+        """                 
         return self.lig_f2model.values()
+
 
 ##     def getSubRegistry( self, cl ):
 ##         """
@@ -166,24 +241,48 @@ class ComplexModelRegistry:
 ##             r.addComplex( c )
 
 ##         return r
-        
+
 
     def getRecComplexes( self, model ):
         """
-        model - LocalPath or PDBModel
-        -> [ Complex ]
+        Get the complexes of which a given receptor model is a component.
+
+        @param model: LocalPath or PDBModel
+        @type  model: object
+        
+        @return: list of Complexes
+        @rtype: [Complex]
         """
         return self.__getComplexes( self.rec_f2com )
 
+
     def getLigComplexes( self, model ):
         """
-        model - LocalPath or PDBModel
-        -> [ Complex ]
+        Get the complexes of which a given ligand model is a component.
+        
+        @param model: LocalPath or PDBModel
+        @type  model: object
+        
+        @return: list of Complexes
+        @rtype: [Complex]
         """
         return self.__getComplexes( self.lig_f2com )
 
-    def __getComplexes( self, model, f2com ):
 
+    def __getComplexes( self, model, f2com ):
+        """
+        Get the complexes of which a given ligand model is a component.
+        
+        @param model: LocalPath or PDBModel
+        @type  model: object
+        @param f2com: dictionary mapping paths to complexes
+        @type  f2com: {str:Complex}
+        
+        @return: list of Complexes
+        @rtype: [Complex]
+
+        @raise RegistryError: if model has no source file.
+        """
         if isinstance( model, LocalPath):
             f = model
 
@@ -199,12 +298,18 @@ class ComplexModelRegistry:
     def __sync_model( self, m, f2model ):
         """
         Get a shared model instance that is equal to m. If there is no such
-        instance in the registry, m is returned and m is added to the regis-
-        try - but only if it has been pickled to disc and hasn't changed since.
-        m       - PDBModel
-        f2model - { str:PDBModel }
-        -> model from dic equivalent to m, otherwise add m to dic and return m
-        -> file_name or None for stray model
+        instance in the registry, m is returned and m is added to the
+        registry - but only if it has been pickled to disc and hasn't
+        changed since.
+        
+        @param m: PDBModel
+        @type  m: PDBModel
+        @param f2model: dictionary with the path to the file as key
+        @type  f2model: { str:PDBModel }
+        
+        @return: Model from f2model equivalent to m, otherwise add m to f2model
+                 and return m. File name or None for stray model
+        @rtype: PDBModel, str
         """
         ## The problem here is to minimize the calls to PDBModel.validSource()
         ## because 60.000 calls to os.path.exists() would take a lot of time
@@ -218,7 +323,7 @@ class ComplexModelRegistry:
             if m.xyzChanged or m.atomsChanged:
                 ## don't add it to registry, it will remain a stray model
                 return m, f
-            
+
             found = f2model.get( f, None )
             if found != None:
                 ## the source has already been checked, we can skip the usual..
@@ -230,6 +335,7 @@ class ComplexModelRegistry:
                 f2model[ f ] = m
 
         return m, f
+
 
     def __str__( self ):
         s = "Receptor models:"
@@ -253,8 +359,9 @@ if __name__ == '__main__':
     from Biskit.tools import *
     import profile
     import pstats
-    
-    cl = Load( absfile('~/data/tb/interfaces/c23/dock_multi_0919/bound/hex_lig_vs_all/complexes.cl') )
+
+#    cl = Load( absfile('~/data/tb/interfaces/c23/dock_multi_0919/bound/hex_lig_vs_all/complexes.cl') )
+    cl = Load( testRoot() +'/dock/hex/complexes.cl' )
     cl = cl.toList()
     r = ComplexModelRegistry()
 

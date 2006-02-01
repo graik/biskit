@@ -21,6 +21,10 @@
 ## last $Date$
 ## $Revision$
 
+"""
+Check sequence identity between templates.
+"""
+
 import os
 import re
 import linecache
@@ -38,29 +42,38 @@ class Check_Identities:
     """
     # standard directory for input
     F_INPUT_FOLDER = '/t_coffee'
-    
+
     # Standard Input Files
     # t_coffee final alignment
     F_INPUT_ALNS= F_INPUT_FOLDER +'/final.pir_aln'
-    
+
     # Standard Ouput Files
     F_OUTPUT_IDENTITIES = '/identities.out'
     F_OUTPUT_IDENTITIES_INF = '/identities_info.out' 
     F_OUTPUT_IDENTITIES_COV = '/identities_cov.out'
 
-    
+
     def __init__(self, outFolder='.', verbose=1):
         """
-        verbose - 1||0, write intermediary files [0]
+        @param outFolder: base folder
+        @type  outFolder: str
+        @param verbose: write intermediary files (default: 0)
+        @type  verbose: 1|0
         """
         self.outFolder = T.absfile( outFolder )
         self.verbose = verbose
         self.sequences_name=["target"]
 
-        
+
     def get_lines(self, aln_file = None):
         """
         Retrieve the lines from an aln file
+
+        @param aln_file: aln file (default: None -> L{F_INPUT_ALNS})
+        @type  aln_file: str
+
+        @return: file as list of strings
+        @rtype: [str]
         """
         aln_file = aln_file or self.outFolder + self.F_INPUT_ALNS
         file = open('%s'%aln_file, 'r')
@@ -69,14 +82,20 @@ class Check_Identities:
 
         return string_lines
 
-    
-    def search_length(self, string_lines, aln_file = None):
+
+    def search_length(self, string_lines):
         """
         This function returns the length an alignment in the
         file 'final.pir_aln'
+
+        @param string_lines: aln file as list of string
+        @type  string_lines: [str]
+
+        @return: length of alignment
+        @rtype: int
         """
         end_of_sequence=1
-        
+
         for x in string_lines:
             if(x == '*\n'):
                 endof_1st_sequence = end_of_sequence
@@ -85,13 +104,21 @@ class Check_Identities:
             end_of_sequence+=1
 
         return end_of_sequence - 3    
-        
 
-    def get_aln_sequences(self, string_lines, aln_length, aln_file = None):
+
+    def get_aln_sequences(self, string_lines, aln_length):
         """
         Create a dictionary with the name of the target (i.e 'target')
         and sequence from the final output from T-Coffee (final.pir_aln).
-        -> {'name':'target, 'seq': 'sequence of the target'}
+
+        @param string_lines: aln file as list of string
+        @type  string_lines: [str]
+        @param aln_length: length of alignment
+        @type  aln_length: int
+        
+        @return: alignment dictionary
+                 e.g. {'name':'target, 'seq': 'sequence of the target'}
+        @rtype: dict
         """
         aln_dictionary = {}
         target_sequence = ""
@@ -115,7 +142,15 @@ class Check_Identities:
         Add information about the name of the template sequences and
         the sequence that is aligned to the template. Data taken from
         the T-Coffee alignment (final.pir_aln).
-        -> { str :{'name':str, 'seq': str} }
+
+        @param string_lines: aln file as list of string
+        @type  string_lines: [str]
+        @param aln_dict: alignment dictionary
+        @type  aln_dict: dict
+     
+        @return: template alignment dictionary
+                 e.g. { str :{'name':str, 'seq': str} }
+        @rtype: dict
         """
         r1 = re.compile(r'>P1;\d')
 
@@ -134,13 +169,13 @@ class Check_Identities:
                 template_sequence = ""
                 for lines in string_lines[z+2:z+2+aln_length]:
                     template_sequence += lines[:-1]
-                    
+
                 self.sequences_name.append("%s"%pdb_name)
                 aln_dict["%s"%pdb_name] = {'name':'%s'%pdb_name,
                                            'seq':template_sequence}
-        
+
             z+=1
-            
+
         return aln_dict
 
 
@@ -149,22 +184,26 @@ class Check_Identities:
         Create a dictionary that contains information about all the
         alignments in the aln_dictionar using pairwise comparisons.
 
-        -> a dictionary of dictionaries with the sequence name as the
-           top key. Each sub dictionary then has the keys: 
-             'name' - str, sequence name
-             'seq' - str, sequence of
-             'template_info' - list of the same length as the 'key'
-                  sequence excluding deletions. The number of sequences
-                  in tha multiple alignmentthat contain information at
-                  this position.
-             'ID' - dict, sequence identity in precent comparing the
-                  'key'  sequence all other sequences (excluding deletions)
-             'info_ID' - dict, same as 'ID' but compared to the template
-                  sequence length (i.e excluding deletions and insertions
-                  in the 'key' sequence )
-             'cov_ID' - dict, same as 'info_ID' but insertions are defined
-                  comparing to all template sequences (i.e where
-                  'template_info' is zero )
+        @param aln_dictionary: alignment dictionary
+        @type  aln_dictionary: dict
+        
+        @return: a dictionary of dictionaries with the sequence name as the
+        top key. Each sub dictionary then has the keys: 
+         - 'name' - str, sequence name
+         - 'seq' - str, sequence of
+         - 'template_info' - list of the same length as the 'key'
+             sequence excluding deletions. The number of sequences
+             in tha multiple alignmentthat contain information at
+             this position.
+         - 'ID' - dict, sequence identity in precent comparing the
+            'key'  sequence all other sequences (excluding deletions)
+         - 'info_ID' - dict, same as 'ID' but compared to the template
+             sequence length (i.e excluding deletions and insertions
+             in the 'key' sequence )
+         - 'cov_ID' - dict, same as 'info_ID' but insertions are defined
+             comparing to all template sequences (i.e where
+             'template_info' is zero )
+        @rtype: dict
         """
         ## loop over all sequences in alignment
         for i in self.sequences_name:
@@ -193,7 +232,7 @@ class Check_Identities:
                     nb_of_info_res=0
                     if(aln_dictionary[i]["seq"][w] is not '-'):
                         nb_of_residues += 1
-                        
+
                         ## count identities
                         if(aln_dictionary[i]["seq"][w] == \
                            aln_dictionary[y]["seq"][w]):
@@ -220,7 +259,7 @@ class Check_Identities:
                 info_ID[y] = 100. * nb_of_identities / nb_of_template
                 ID[y]      = 100. * nb_of_identities / nb_of_residues
                 cov_ID[y]  = 100. * nb_of_identities / nb_cov_res
-                
+
             aln_dictionary[i]["info_ID"] = info_ID 
             aln_dictionary[i]["ID"] = ID
             aln_dictionary[i]["cov_ID"] = cov_ID
@@ -231,11 +270,20 @@ class Check_Identities:
 
     def __writeId( self, name, dic, key, description ):
         """
-        Write an identity matrix to file.
+        Write an sequence identity matrix to file.
+
+        @param name: file name 
+        @type  name: str
+        @param dic: alignment dictionary
+        @type  dic: dict
+        @param key: key in dictionary to write
+        @type  key: key
+        @param description: description to go into file (first line)
+        @type  description: str
         """
         f = open( name, 'w' )
         f.write( description +'\n\n')
-        
+
         ## write header
         f.write('%s'%(' '*5))
         for s in self.sequences_name:
@@ -248,14 +296,36 @@ class Check_Identities:
             for t in self.sequences_name:
                 f.write("%8.2f"%dic[s][key][t])
             f.write('\n')
-                    
-            
+
+
     def output_identities(self, aln_dictionary, identities_file = None,
                           identities_info_file = None,
                           identities_cov_file = None):
         """
         Writes three files to disk with identity info about the current
         multiple alignment.
+
+        @param aln_dictionary: alignment dictionary
+        @type  aln_dictionary: dict
+        @param identities_file: name for file with sequence identity
+                                in percent comparing a sequence to another
+                                (excluding deletions in the first sequence)
+                                (default: None -> L{F_OUTPUT_IDENTITIES})
+        @type  identities_file: str
+        @param identities_info_file: name for file with sequence identity in
+                                     percent comparing a sequence to another
+                                     (excluding deletions and insertions in
+                                     the first sequence)
+                                     (default: None -> L{F_OUTPUT_IDENTITIES_INF})
+        @type  identities_info_file: str
+        @param identities_cov_file: name for file with sequence identity in
+                                    percent comparing a sequence to another
+                                    (excluding deletions and insertions in
+                                    the first sequence but only when the
+                                    first sequence doesn't match any other
+                                    sequence in the multiple alignment)
+                                    (default: None -> L{F_OUTPUT_IDENTITIES_COV})
+        @type  identities_cov_file: str
         """
         ## filenames to create
         identities_file = identities_file or \
@@ -264,13 +334,13 @@ class Check_Identities:
                                self.outFolder + self.F_OUTPUT_IDENTITIES_INF
         identities_cov_file = identities_cov_file or \
                               self.outFolder + self.F_OUTPUT_IDENTITIES_COV
-        
-        head_ID = "Sequence identity in precent comparing a sequence to another \n(excluding deletions in the first sequence)"
 
-        head_info_ID ="Sequence identity in precent comparing a sequence to another \n(excluding deletions and insertions in the first sequence)"
+        head_ID = "Sequence identity in percent comparing a sequence to another \n(excluding deletions in the first sequence)"
 
-        head_conv_ID ="Sequence identity in precent comparing a sequence to another \n(excluding deletions and insertions in the first sequence but only \nwhen the first sequence doesn't match any other sequence in the \nmultiple alignment )"
-                  
+        head_info_ID ="Sequence identity in percent comparing a sequence to another \n(excluding deletions and insertions in the first sequence)"
+
+        head_conv_ID ="Sequence identity in percent comparing a sequence to another \n(excluding deletions and insertions in the first sequence but only \nwhen the first sequence doesn't match any other sequence in the \nmultiple alignment )"
+
         self.__writeId( identities_file, aln_dictionary,
                         'ID' , head_ID )
         self.__writeId( identities_info_file, aln_dictionary,
@@ -280,11 +350,16 @@ class Check_Identities:
 
 
     def go(self, output_folder = None):
-
+        """
+        Perform sequence comparison.
+        
+        @param output_folder: output folder
+        @type  output_folder: str
+        """
         output_folder = output_folder or self.outFolder
 
         string_lines = self.get_lines()
-        
+
         aln_length = self.search_length( string_lines )
 
         ## get information about the target sequence from the alignment
@@ -301,17 +376,17 @@ class Check_Identities:
         self.output_identities( aln_dictionary )
 
         return aln_dictionary
-        
-        
-	    
-		
+
+
+
+
 
 ############
 ### TEST ###
 ############
 
 if __name__ == '__main__':
-    
+
     m = Check_Identities( T.testRoot() + '/Mod/project')
     m.go()
 

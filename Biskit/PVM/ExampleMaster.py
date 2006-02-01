@@ -17,36 +17,60 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
+## $Revision$
+## last $Date$
+## last $Author$
+
+"""
+An example of a Master/Slave setup
+"""
+
 from Biskit.PVM.TrackingJobMaster import *
 
 from Biskit.hosts import nodes_all
 from Biskit.tools import projectRoot
 
+
 class Master(TrackingJobMaster):
 
+    ## Slave script that ges with this master
     slave_script =  projectRoot() + '/Biskit/PVM/ExampleSlave.py'
 
-    def __init__(self, *args, **kw):
 
+    def __init__(self, *args, **kw):
+        """
+        Parameters nedded by master and/or slave.
+        """
         TrackingJobMaster.__init__(self, *args, **kw)
 
+
     def getInitParameters(self, slave_tid):
-        """ hand over parameters to slave onnce. """
+        """
+        Hand over parameters to slave once. 
+        """
         return {'progress_str':'slave calculating..'}
 
+
     def cleanup( self ):
+        """
+        Tidy up tasks.
+        """
         print "Cleaning up..."
 
+
     def done( self ):
+        """
+        Called when master is done.
+        """
         print "Now we are done."
-    
+
 
 if __name__ == '__main__':
 
     import time
     from Biskit.PVM.ExampleMaster import Master as Master
 
-    hosts = nodes_all[12:17]
+    hosts = nodes_all[3:8]
 
     niceness = {'default': 20}
 

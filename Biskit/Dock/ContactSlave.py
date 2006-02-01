@@ -21,6 +21,10 @@
 ## last $Author$
 ## $Revision$
 
+"""
+Calculate contact matrix and some scores for complexes.
+"""
+
 from Biskit.PVM.dispatcher import JobSlave
 import Biskit.tools as T
 from Biskit import mathUtils as MU
@@ -37,6 +41,12 @@ class ContactSlave(JobSlave):
     """
 
     def version( self ):
+        """
+        Version of Dock.Complex
+        
+        @return: version of class
+        @rtype: str
+        """
         return 'ContactSlave $Revision$'
 
 
@@ -44,7 +54,9 @@ class ContactSlave(JobSlave):
         """
         Copy the parameters that ContactMaster is passing in as dict into
         fields of this class.
-        params - dict, defined in ContactMaster
+        
+        @param params: defined in L{ContactMaster}
+        @type  params: dict
         """
         self.ferror = params['ferror']
 
@@ -96,6 +108,14 @@ class ContactSlave(JobSlave):
 
 
     def reportError(self, msg, soln ):
+        """
+        Report any errors to log
+
+        @param msg: error message
+        @type  msg: str
+        @param soln: solution number for complex giving the error
+        @type  soln: int
+        """
         try:
             s = '%s on %s, soln %i\n' % (msg, os.uname()[1], soln)
             s += '\t' + T.lastError() + '\n'
@@ -110,17 +130,36 @@ class ContactSlave(JobSlave):
 
 
     def __containsAny( self, lst_or_dic, *items ):
+        """
+        Check if dictionary or list contains items.
         
+        @param lst_or_dic: lokk for items in this
+        @type  lst_or_dic: list OR dict
+        @param items: items to look for
+        @type  items: any
+ 
+        @return: result of test
+        @rtype: 1|0
+        """
         for i in items:
             if i in lst_or_dic:
                 return 1
         return 0
 
+
     def requested( self, c, *keys ):
         """
-        c   - Complex
-        key - str OR [str], key or keys for c.infos dict
-        -> 1|0, 1 if the given value should be calculated for the given complex
+        Determine what keys in info dictionary of a complex that
+        needs to be calculated or updated
+        
+        @param c: Complex
+        @type  c: Complex
+        @param keys: key or keys for c.infos dict
+        @type  keys: str OR [str]
+        
+        @return: 1 if the given value should be calculated for the
+                 given complex
+        @rtype: 1|0
         """
         ## force update
         if self.force and self.__containsAny( self.force, *keys):
@@ -133,7 +172,14 @@ class ContactSlave(JobSlave):
 
         return 0
 
+
     def pickleError( self, o ):
+        """
+        Pickle object to disc.
+        
+        @param o: object to pickle
+        @type  o: any
+        """
         try:
             fname = self.ferror + '_dat'
             if not os.path.exists( fname ):
@@ -149,6 +195,11 @@ class ContactSlave(JobSlave):
         """
         Calculate contact matrices and fraction of native contacts, residue-
         and atom-based, with different distance cutoffs.
+
+        @param soln: solution number
+        @type  soln: int
+        @param c: Complex
+        @type  c: Complex
         """
         try:
             if self.requested(c, 'fnac_4.5') and self.c_ref_atom_4_5:
@@ -172,7 +223,7 @@ class ContactSlave(JobSlave):
             if self.requested(c, 'c_res_4.5') \
                or ( self.c_ref_res_4_5 != None \
                     and (self.requested(c,'fnrc_4.5','fnSurf_rec'))):
-                
+
                 res_cont = c.resContacts( 4.5,
                                           cache=self.requested(c, 'c_res_4.5'))
 
@@ -203,10 +254,15 @@ class ContactSlave(JobSlave):
     def calcReducedContacts( self, soln, c ):
         """
         Get contact matrices and/or fnarc from reduced-atom models.
+
+        @param soln: solution number
+        @type  soln: int
+        @param c: Complex
+        @type  c: Complex       
         """
         if not (self.reduced_recs and self.reduced_ligs):
             return
-        
+
         if not self.requested(c,'c_ratom_10','fnarc_10'):
             return
 
@@ -235,10 +291,15 @@ class ContactSlave(JobSlave):
     def calcInterfaceRms( self, soln, c ):
         """
         RMS between this and reference interface atoms after superposition.
-        rms_if_bb considers backbone of interface residues (10 A cutoff)
-                  (is same as used for CAPRI)
-        rms_if    considers all atoms of more tightly defined interf. residues
-                  (correlates better with fraction of native contacts)
+          - rms_if_bb, considers backbone of interface residues (10 A cutoff)
+            (same as used for CAPRI)
+          - rms_if, considers all atoms of more tightly defined interf.
+            residues (correlates better with fraction of native contacts)
+
+        @param soln: solution number
+        @type  soln: int
+        @param c: Complex
+        @type  c: Complex
         """
         try:
             if self.requested(c, 'rms_if_bb') and self.ref_interface_model_bb:
@@ -265,9 +326,16 @@ class ContactSlave(JobSlave):
 ##                 self.reportError('Prosa Error', soln )
 ##                 c['eProsa'] = None
 
-                
+
     def calcProsa( self, soln, c ):
-        """Prosa2003 energy score"""
+        """
+        Prosa2003 energy score
+
+        @param soln: solution number
+        @type  soln: int
+        @param c: Complex
+        @type  c: Complex        
+        """
 #        import socket
         if self.requested( c, 'eProsa'):
             try:
@@ -280,7 +348,14 @@ class ContactSlave(JobSlave):
 
 
     def calcPairScore( self, soln, c ):
-        """calculate contact pair score"""
+        """
+        calculate contact pair score
+
+        @param soln: solution number
+        @type  soln: int
+        @param c: Complex
+        @type  c: Complex        
+        """
         if self.requested( c,'ePairScore'):
             try:
                 pairScore = c.contPairScore(cutoff=6.0)
@@ -291,7 +366,16 @@ class ContactSlave(JobSlave):
 
 
     def calcConservation( self, soln, c, method ):
-        """calculate conservation score"""
+        """
+        calculate conservation score
+
+        @param soln: solution number
+        @type  soln: int
+        @param c: Complex
+        @type  c: Complex
+        @param method: scoring method to use see L{Complex.conservationScore}
+        @type  method: str       
+        """
         if self.requested( c, method):
             try:
                 c[method] = c.conservationScore( method )
@@ -300,20 +384,34 @@ class ContactSlave(JobSlave):
 
 
     def calcFoldX( self, soln, c ):
-        """calculate fold-X binding energies"""
+        """
+        calculate fold-X binding energies
+
+        @param soln: solution number
+        @type  soln: int
+        @param c: Complex
+        @type  c: Complex        
+        """
         if self.requested( c, 'foldX' ):
             try:
                 c['foldX'] = c.foldXEnergy()
             except:
                 self.reportError('FoldX Error', soln)
-        
+
 
     def go(self, cmplxDic):
         """
         Obtain contact matrix for all complexes.
-        cmplxDic - {soln:Complex, soln:Complex, ...], dic of complexes
-        -> { soln : fname, soln : fname ....}, similar dictionary with
-           Complex.info['soln'] as keys and file names of matrices as value.
+        
+        @param cmplxDic: dictionary of complexes::
+                         {soln:Complex, soln:Complex, ...} 
+        @type  cmplxDic: {int:Complex}
+        
+        @return: similar dictionary with Complex.info['soln'] as keys and
+                 file names of matrices as value::
+                 { soln : fname, soln : fname ....}
+        @rtype: {int:str}
+
         """
         result = {}
 
@@ -345,14 +443,14 @@ class ContactSlave(JobSlave):
                 self.calcConservation( soln, c, method )
 
             c['__version_contacter'] = self.version()
-                
+
             result[ soln ] = c
 
             c.slim()
 
 ##             if not os.path.exists(T.absfile('~/debug_afterslave.dic') ):
 ##                 T.Dump( cmplxDic,  T.absfile('~/debug_afterslave.dic') )
- 
+
 
         print "\navg time for last %i complexes: %f s" %\
               ( len(cmplxDic), (time.time()-startTime)/len(cmplxDic))
@@ -383,7 +481,7 @@ if __name__ == '__main__':
     import os, sys
 
     if len(sys.argv) == 2:
-        
+
         niceness = int(sys.argv[1])
         os.nice(niceness)
 

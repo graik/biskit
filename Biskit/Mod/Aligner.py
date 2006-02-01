@@ -20,6 +20,9 @@
 ## last $Author$
 ## last $Date$
 ## $Revision$
+"""
+Sequence Alignment
+"""
 
 import re, os
 import commands
@@ -39,8 +42,8 @@ class Aligner:
     """
     Take template CA traces and template sequences plus non-template
     sequences.
-                                 
-    -> T-Coffee script or T-Coffee alignment
+
+    Returns a T-Coffee script or T-Coffee alignment
     """
 
     F_RESULT_FOLDER = '/t_coffee'
@@ -60,8 +63,11 @@ class Aligner:
 
     def __init__( self, outFolder='.', log=None, verbose=1 ):
         """
-        outFolder - str, base folder for t_coffee output folder
-        log - LogFile - deviate all messages to file [None=STDOUT]
+        @param outFolder: base folder for t_coffee output
+                          (default: L{F_RESULT_FOLDER})
+        @type  outFolder: str
+        @param log: log file instance, if None, STDOUT is used (default: None)
+        @type  log: LogFile
         """
         self.log = log
         self.outFolder = tools.absfile( outFolder )
@@ -83,6 +89,12 @@ class Aligner:
 
 
     def logWrite( self, msg, force=1 ):
+        """
+        Write message to log.
+
+        @param msg: message to print
+        @type  msg: str
+        """
         if self.log:
             self.log.add( msg )
         else:
@@ -92,9 +104,14 @@ class Aligner:
 
     def __add_type_code( self, inp ):
         """
-        Try guessing a t_coffee type code for file name and add type code.
-        inp - str, file name
-        -> type_code + file name OR file name unchanged
+        Try guessing a t_coffee type code for file name and add type code
+        (P for structurem S for sequence and L for library).
+        
+        @param inp: file name
+        @type  inp: str
+        
+        @return: type_code + file name OR file name unchanged
+        @rtype: str
         """
         for code, pattern in self.ex_inp_types.items():
             if pattern.match( inp ):
@@ -106,13 +123,23 @@ class Aligner:
                           output=None, outfile=None, **kw ):
         """
         Create a single t_coffee command.
-        input  - [ str ], list of input files
-        method - str, t_coffee method ('M' is added automatically) [None]
-        output - [ str ], output format(s) [None]
-        out_lib- str, output library file if needed [None]
-        outfile- str, output file (base) if needed [None]
-        ..     - additional param=value pairs
-        -> str, t_coffee command
+        
+        @param input: list of input files
+        @type  input: [str]
+        @param method: t_coffee method ('M' is added automatically)
+                       (default:None)
+        @type  method: str
+        @param output: output format(s) (default:None)
+        @type  output: [str]
+        @param out_lib: output library file if needed (default:None)
+        @type  out_lib: str
+        @param outfile: output file (base) if needed (default:None)
+        @type  outfile: str
+        @param kw: additional param=value pairs
+        @type  kw: param=value
+        
+        @return: t_coffee command
+        @rtype: str
         """
         r = settings.t_coffee_bin
 
@@ -146,7 +173,21 @@ class Aligner:
                                 fasta_sequences=None, fasta_target=None ):
         """
         Fetch missing fasta and pdb files from standard locations.
-        -> { .. } 
+
+        @param pdbFiles: fetch pdb file from L{TC.F_COFFEE} (default:None)
+        @type  pdbFiles: [str]
+        @param fasta_templates: fetch fasta template file from L{TC.F_FASTA}
+                                (default:None)
+        @type  fasta_templates: [str]
+        @param fasta_sequences: fetch fasta sequence file from
+                                L{SS.F_FASTA_NR} (default:None)
+        @type  fasta_sequences: [str]
+        @param fasta_target: fetch fasta target file from
+                             L{SS.F_FASTA_TARGET} (default:None)
+        @type  fasta_target: [str]
+        
+        @return: dictionary mapping input file class to path(s)
+        @rtype:  {str:[str]}
         """
         r = {}
 
@@ -163,154 +204,30 @@ class Aligner:
 
         return r
 
-        
+
     def align_for_modeller_inp( self, pdbFiles=None, fasta_templates=None,
                                 fasta_sequences=None, fasta_target=None,
                                 f_fast_tree=None, f_sequence_tree=None ):
         """
         Prepare alignment commands for homology modelling.
+
+        @note: If verbose==1, the commands are mirrored to t_coffee.inp.
         
-        If verbose==1, the commands are mirrored to t_coffee.inp .
-        pdbFiles  - [ str ], template PDBs [from templates/nr/chain_index.txt ]
-        fasta_templates  - str, template sequences [templates/templates.fasta ]
-        fasta_sequences  - str, more sequences           [ sequences/nr.fasta ]
-
-
-        T-COFFEE COMMANDS:
-        =================
-        
-        Input identifyers:
-        ------------------
-        T-Coffee input flags: A - alignment
-                              S - sequence(s)
-                              M - method
-                              P - pdb file
-                              R - profile
-                              L - library
-
-        Methods:
-        -------
-        fast_pair  Makes a global fasta style pairwise alignment. For
-                   proteins, matrix=blosum62mt, gep=-1, gop=-10, ktup=2.
-                   For DNA, matrix=idmat (id=10), gep=-1, gop=-20, ktup=5.
-                   Each pair of residue is given a score function of the
-                   weighting mode defined by -weight.
-
-        slow_pair  Identical to fast pair, but does a full dynamic
-                   programming, using the myers and miller algorithm. This
-                   method is recommended if your sequences are distantly
-                   related.
-
-        sap_pair  Uses sap to align two structures. Each pair of residue is
-                  given a score function defined by sap. You must have sap
-                  installed on your system to use this method.
-
-        lalign_id_pair  Same as lalign_rs_pir, but using the level of
-                        identity as a weight.
-
-        Flags:
-        ------
-        -out_lib  Usage:  -out_lib=<name of the library,default,no>
-                  Default:-out_lib=default
-                  Sets the name of the library output. Default implies
-                  <run_name>.tc_lib
-
-        -output   Usage:  -output=<format1,format2,...>
-                  Default:-output=clustalw
-                  Indicates the format used for outputting the -outfile.
-                  Supported formats are:
-                     clustalw_aln, clustal : ClustalW format.
-                     gcg, msf_aln          : MSF alignment.
-                     pir_aln               : pir alignment.              
-                     fasta_aln             : fasta alignment. 
-                     phylip                : Phylip format.
-                     pir_seq               : pir sequences (no gap).
-                     fasta_seq             : fasta sequences (no gap).
-                  As well as:
-                     score_ascii : causes the output of a reliability flag
-                     score_html  : causes the output to be a reliability
-                                   plot in HTML
-                     score_pdf   : idem in PDF (if ps2pdf is installed on
-                                   your system).
-                     score_ps    : idem in postscript.
-                  More than one format can be indicated:
-                     t_coffee sample_seq1.fasta -output=clustalw,gcg,
-                              score_html [**]
-
-        -outfile   Usage:  -outfile=<out_aln file,default,no>
-                   Default:-outfile=default
-                   Indicates the name of the alignment output by t_coffee.
-                   If the default is used, the alignment is named
-                   <your sequences>.aln
-
-        -convert   Usage: -convert
-                   Default: turned off
-                   Toggles on the conversion mode and causes T-Coffee to
-                   convert the sequences, alignments, libraries or structures
-                   provided via the -infile and -in flags. The output format
-                   must be set via the -output flag. This flag can also be
-                   used if you simply want to compute a library (i.e. you
-                   have an alignment and you want to turn it into a library).
-                   This flag is ClustalW compliant.
-
-        -newtree   Usage:   -newtree=<tree file>
-                   Default: No file specified
-                   Indicates the name of the file into which the guide
-                   tree will be written. The default will be
-                   <sequence_name>.dnd, or <run_name.dnd>. The tree is
-                   written in the parenthesis format known as newick
-                   or New Hampshire and used by Phylips (see the
-                   format section).
-
-        -quiet     Usage:  -quiet=<stderr,stdout,file name OR nothing>.
-                   Default:-quiet=stderr
-                   Redirects the standard output to either a file. -quiet on
-                   its own redirect the output to /dev/null. 
-
-        -weight    Usage:  -weight=<winsimN, sim or sim_<matrix_name
-                            or matrix_file> or <integer value>
-                   Default: -weight=sim
-                   Weight defines the way alignments are weighted when turned
-                   into a library.
-
-        METHOD:
-        ======
-        Step 1:
-          Makes a global fasta style pairwise alignment of all the sequences
-          : templates.fasta, target.fasta and nr.fasta. For proteins,
-          matrix=blosum62mt, gep=-1, gop=-10, ktup=2
-          -> fast_pair.lib
-             nr.aln
-             t_coffee.log_1
-             
-        Step 2:
-          Makes a local  optimized pairwise alignment using LALIGN.
-          -> lalign_id_pair.lib
-             t_coffee.log_2
-             
-        Step 3:
-          Uses SAP to do paiwise structural alignments.
-          -> sap_pair.lib
-             struct.aln
-             sequence.dnd
-             t_coffee.log_3
-             
-        Step 4:
-          Fix some chain identifier problems in the libraries.
-          -> sap_pair.lib
-             sap_pair.lib_original
-             struct.aln
-             struct.aln_original
-             
-        Step 5:
-          Combine the three libraries into a sequence/structure alignment
-          -> final.aln
-             final.phylip
-             final.pir_aln
-             final.score_ascii
-             final.score_html
-             fast_tree.dnd
-             t_coffee.log_4
+        @param pdbFiles: template PDBs from L{TC.F_COFFEE} (default:None)
+        @type  pdbFiles: [str]
+        @param fasta_templates: template sequences from
+                                templates/templates.fasta (default:None)
+        @type  fasta_templates: [str]
+        @param fasta_sequences: more sequences from L{SS.F_FASTA_NR}
+                                (default:None)
+        @type  fasta_sequences: [str]
+        @param fasta_target: fasta target files
+                             L{SS.F_FASTA_TARGET} (default:None)
+        @type  fasta_target: str
+        @param f_fast_tree: filename of clustalW style guide tree (.dnd)
+        @type  f_fast_tree: str
+        @param f_sequence_tree: filename of clustalW style guide tree (.dnd)
+        @type  f_sequence_tree: str    
         """
         ## Fetch default files where needed
         d = self.__default_input_files( pdbFiles, fasta_templates,
@@ -320,7 +237,7 @@ class Aligner:
         f_templates = d['templates']
         f_sequences = d['sequences']
         f_target    = d['target']
-        
+
         pdbFiles = [ tools.absfile( f ) for f in pdbFiles ]
 
         f_templates = tools.absfile( f_templates )
@@ -335,13 +252,13 @@ class Aligner:
         f_coffee_log= self.outFolder + self.F_COFFEE_LOG
         f_fast_tree= f_fast_tree or self.outFolder + self.F_FAST_TREE
         f_sequence_tree= f_sequence_tree or self.outFolder + self.F_SEQ_TREE
-        
+
         ## fix target file
         self.repair_target_fasta( f_target )
 
         if len( pdbFiles ) == 0:
             raise AlignerError( "\n No templates avaliable. ABORTING" )
-        
+
         ## SAP will not run if there is only one template
         if len( pdbFiles ) == 1:
             print '\n WARNING! Only one template avaliable:' + str(pdbFiles)
@@ -359,7 +276,7 @@ class Aligner:
                                        method='lalign_id_pair',
                                        out_lib=f_lalign_lib,
                                        quiet=f_coffee_log+'_2', convert='' ),
-            
+
                 ## combine alignments to one
                 self.coffee_align_inp( [ f_fast_lib, f_lalign_lib],
                                        clean_aln=0, newtree=f_fast_tree,
@@ -369,7 +286,7 @@ class Aligner:
                                        outfile=f_final_aln,
                                        quiet=f_coffee_log+'_4')
                 ]
-            
+
         ## Normal alignment run with structural alignment
         ## (more than one template)
         else:
@@ -417,13 +334,16 @@ class Aligner:
             for cmd in r:
                 f.write( str(cmd) + '\n\n' )
             f.close()
-        
+
 
     def repair_lib_file(self, fname ):
         """
         Msap_pair alignments mess up sequence ids of certain
         (single-chain?) structures.
-        Dirty hack..
+        @note: Dirty hack..
+
+        @param fname: Msap_pair file to repair
+        @type  fname: str
         """
         ex_sapfix = re.compile('_[A-Z]{0,1}_[A-Z]')
         ex_alpha = re.compile('.alpha') ## new from T-Coffe ver. 3.32
@@ -443,7 +363,11 @@ class Aligner:
         """
         Change target ID to 'target' and remove '|' etc. that mess up
         things in the alignments.
-        !! AlignerError
+
+        @param fname: fasta file to repair
+        @type  fname: str
+        
+        @raise AlignerError: if cannot fix target sequence file
         """
         bak_fname = fname+'_original'
         os.rename( fname,  bak_fname)
@@ -453,7 +377,7 @@ class Aligner:
             fin = open( bak_fname )
 
             l0 = fin.readline()
-            
+
             fout.write( '>target\n' )
 
             for l in fin:
@@ -465,12 +389,17 @@ class Aligner:
         except Exception, why:
             print tools.lastError()
             raise AlignerError("Cannot fix target sequence file: "+str(why))
-        
+
 
     def go( self, host=None ):
         """
         Run the previously added commands, delete internal command list.
-        host - str, host name for remote execution [None=local execution]
+        
+        @param host: host name for remote execution
+                     (default: None=local execution)
+        @type  host: str
+
+        @raise AlignerError: if T_Coffee execution failed
         """
         try:
             self.logWrite('\nALIGNING...\n')
@@ -494,7 +423,7 @@ class Aligner:
         except EnvironmentError, why:
             self.logWrite("ERROR: Can't run t_coffee: "+ str( why ) )
             raise AlignerError( "Can't run t_coffee: " + str( why ) )
-        
+
 
 ##########
 ## TEST ##

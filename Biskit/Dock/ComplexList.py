@@ -18,11 +18,15 @@
 ##
 ##
 ## organise, sort, and filter Complexes
-
+##
 ## last $Author$
 ## last $Date$
 ## $Revision$
 
+"""
+List of Complex objects.
+"""
+    
 import Numeric as N
 import types
 import biggles
@@ -55,7 +59,7 @@ class ComplexList( list ):
     entries in the Complexes' info dictionaries for filtering and sorting.
     Some care is taken to avoid the adding of non-Complex objects (but
     somehow it is, certainly, still possible).
-    
+
     The different rec- and lig_models of all Complexes are centrally kept in a
     ComplexModelRegistry. Before adding a Complex, we check
     whether its rec- or lig_model are equivalent (same fileName and unchanged)
@@ -68,19 +72,14 @@ class ComplexList( list ):
     more than the file name is transmitted). By contrast, unsaved ones will
     severly slow down the job distribution.
 
-    ToDo:
-    Removing items with pop(), del, remove() etc. will not remove unused
-    PDBModels from rec_models or lig_models. 
+    @todo: Removing items with pop(), del, remove() etc. will not remove
+           unused PDBModels from rec_models or lig_models. 
     """
 
     def __init__(self, lst=[] ):
         """
-        lst        - list of Complexes
-        rec_models - internal rec_models dict, fname : PDBModel
-        lig_models - internal lig_models dict
-        If both rec_models and lig_models are given, the model synchronisation
-        and type checking is skipped. (for internal use, see take() )
-        !! raise ComplexListError, if list contains non-Complex item.
+        @param lst: list of Complexes
+        @type  lst: [Complex]
         """
         ## non-redundant rec/lig_models of all complexes indexed by file name
         self.models = ComplexModelRegistry()
@@ -89,17 +88,26 @@ class ComplexList( list ):
 
         if lst != []:
             self.extend( lst )
-      
+
 
     def version( self ):
+        """
+        Version of class.
+        
+        @return: class version number
+        @rtype: str
+        """
         return 'ComplexList $Revision$'
 
 
     def __setstate__(self, state ):
-        """called for unpickling the object."""
+        """
+        called for unpickling the object.
+        """
         self.__dict__ = state
         ## backwards compability
         self.__defaults() 
+
 
     def __defaults( self ):
         self.models = getattr( self, 'models', ComplexModelRegistry() )
@@ -113,14 +121,22 @@ class ComplexList( list ):
 
 
     def checkType( self, v ):
-        """Make sure v is a Complex"""
+        """
+        Make sure v is a Complex.
+
+        @raise ComplexListError: if not a Complex
+        """
         if not isinstance(v, Complex):
             raise ComplexListError(
                 str( v ) + " not allowed. ComplexList requires "+str(Complex))
 
 
     def checkTypes( self, lst ):
-        """ !! raise ComplexListError, if list contains non-Complex item. """
+        """
+        Make sure lst is a list of Complexes.
+        
+        @raise  ComplexListError: if list contains non-Complex item.
+        """
         if not isinstance( lst, list ):
             raise ComplexListError("Wrong argument type: "+str(type(lst)))
 
@@ -128,7 +144,17 @@ class ComplexList( list ):
             for v in lst:
                 self.checkType( v )
 
+
     def __setitem__(self, i, v ):
+        """
+        Set value v of position i.
+          >>> lst[i] = v
+
+        @param i: list index
+        @type  i: int
+        @param v: value
+        @type  v: any
+        """
         self.checkType( v )
 
         if i < list.__len__( self ):
@@ -137,45 +163,71 @@ class ComplexList( list ):
 
         list.__setitem__( self, i, v)
 
+
     def __add__( self, lst ):
-        """-> new instance with simply one list appended to the other"""
+        """
+        New ComplexList with the two lists.
+        
+        @return: new instance with simply one list appended to the other
+        @rtype:  ComplexList
+        """
         r = self.__class__( self )
         r.extend( lst )
         return r
 
+
     def __iadd__( self, lst ):
-        """-> this instance with lst appended"""
+        """
+        List appendet to this ComplexList.
+        
+        @return: this instance with lst appended
+        @rtype: ComplexList
+        """
         self.extend( lst )
         return self
+
 
     def ligModels( self ):
         """
         Get all shared ligand PDBModels. Stray models (changed or unpickled)
         are not returned.
-        -> [ PDBModel ]
+        
+        @return: list of ligand models
+        @rtype: [PDBModel]
         """
         return self.models.ligModels()
+
 
     def recModels( self ):
         """
         Get all shared receptor PDBModels. Stray models (changed or unpickled)
         are not returned.
-        -> [ PDBModel ]
+        
+        @return:  list of receptor models
+        @rtype: [PDBModel]
         """
         return self.models.recModels()
 
+
     def __add_once( self, item, lst ):
+        """
+        Add eithem to list of it is not already there.
+        """
         if lst == None:
             lst = []
         if not item in lst:
             lst.append( item )
         return lst
 
+
     def strayModels( self ):
         """
-        mostly for DEBUGGING
         Look for models that are not in model registry.
-        -> { int|str:[ PDBModel ] }, { int|str:[ PDBModel ] }
+        
+        @return: { int|str:[ PDBModel ] }, { int|str:[ PDBModel ] }
+        @rtype: dict
+
+        @note: mostly for DEBUGGING
         """
         stray_ligs = {}
         stray_recs = {}
@@ -187,7 +239,7 @@ class ComplexList( list ):
                       or 1
                 stray_recs[ key ] = self.__add_once( c.rec_model,
                                                      stray_recs.get( key, []) )
-                
+
             if c.lig_model not in known_ligs:
                 key = c.get( 'model2', None ) or c.lig_model.fileName \
                       or 1
@@ -198,7 +250,9 @@ class ComplexList( list ):
 
 
     def extend( self, lst ):
-        """extend( list ). Add all items to (the end of) this instance"""
+        """
+        extend( list ). Add all items to (the end of) this instance
+        """
         self.checkTypes( lst )
 
         list.extend( self, lst )
@@ -206,35 +260,63 @@ class ComplexList( list ):
         for v in lst:
             self.models.addComplex( v )
 
+
     def append( self, v ):
-        """append( Complex ). Append Complex to the end of this list."""
+        """
+        append( Complex ). Append Complex to the end of this list.
+        """
         self.checkType( v )
         self.models.addComplex( v )
         list.append( self, v )
 
+
     def __getslice__( self, i, j ):
-        """-> new instance with only the given range of items"""
+        """
+        Slice list.
+        
+        @param i: start index
+        @type  i: int
+        @param j: end index
+        @type  j: int
+        
+        @return: new instance with only the given range of items
+        @rtype: ComplexList
+        """
         r = self.__class__(super(ComplexList, self).__getslice__(i,j))
         return r
 
 
     def argsortRandom( self ):
-        """ argsortRandom() -> [ int ], indices in random order."""
+        """
+        argsortRandom() -> [ int ], indices in random order.
+
+        @return: indices in random order
+        @rtype: [int]
+        """
         pairs = [(random.random(), i) for i in range(0, len(self))]
         pairs.sort()
         return [ x[1] for x in pairs ]
-        
+
 
     def argsort( self, sortKey ):
-        """ argsort( str_sortKey ) -> [ int ], indices after sorting """
+        """
+        argsort( str_sortKey ) -> [ int ], indices after sorting
+
+        @return: indices after sorting
+        @rtype: [int]
+        """
         pairs = [(self[i].info.get(sortKey), i) for i in range(0, len(self))]
         pairs.sort()
         return [ x[1] for x in pairs ]
+
 
     def sortBy( self, sortKey ):
         """
         sortBy( str_sortKey ) -> ComplexList (or sub-class) sorted by
         info[ str_sortKey ]
+
+        @return: sorted ComplexList
+        @rtype: ComplexList
         """
         return self.take( self.argsort( sortKey ))
 
@@ -242,11 +324,18 @@ class ComplexList( list ):
     def valuesOf(self, infoKey, default=None, indices=None, unique=0 ):
         """
         Get all values of a certain info record of all or some Complexes.
-        infoKey - str, key for info dict
-        default - any, default value if infoKey is not found (None)
-        indices - list of int OR None(=all), indices of Complexes (None)
-        unique  - 1|0, report each value only once (set union), (default 0)
-        -> list of values
+        
+        @param infoKey: key for info dict
+        @type  infoKey: str
+        @param default: default value if infoKey is not found (None)
+        @type  default: any
+        @param indices: list of int OR None(=all), indices of Complexes (None)
+        @type  indices: [int] OR None
+        @param unique: report each value only once (set union), (default 0)
+        @type  unique: 1|0
+        
+        @return: list of values
+        @rtype: [any]
         """
         l = self
         if indices != None:
@@ -266,7 +355,16 @@ class ComplexList( list ):
         """
         filterRange( str_infoKey, vLow, vHigh )
         Get indices of Complexes where vLow <= c.info[ infoKey ] <= vHigh.
-        -> array of int
+
+        @param infoKey: key for info dict
+        @type  infoKey: str
+        @param vLow: upper value limit
+        @type  vLow: float
+        @param vHigh: lower value limit
+        @type  vHigh: float
+        
+        @return: array of int
+        @rtype: [int]
         """
         vLst = self.valuesOf( infoKey )
 
@@ -280,36 +378,56 @@ class ComplexList( list ):
         """
         filterEqual( infoKey, lst )
         Get indices of Complexes where c.info[ infoKey ] in lst.
-        -> array of int
+
+        @param infoKey: key for info dict
+        @type  infoKey: str
+        @param lst: list of values to look for
+        @type  lst: [any]
+        
+        @return: array of int
+        @rtype: [int]
         """
         mask = [ c.info.get( infoKey ) in lst for c in self ]
         return N.nonzero( mask )
-        
-         
+
+
     def filterFunct( self, f ):
         """
         filterFunct( f )
         Get indices of Complexes where f( c ) == 1.
-        -> array of int
+
+        @param f: filterFunct
+        @type  f: function
+        
+        @return: array of int
+        @rtype: [int]
         """
         mask = [ f( c ) for c in self ]
         return N.nonzero( mask )
-        
+
 
     def filter( self, infoKey, cond ):
         """
         Complexes matching condition.
-        infoKey - key of Complex.info dict (not used if cond is function )
-        cond    - (vLow, vHigh) -> vLow <= c.info[ infoKey ] <= vHigh
+        
+        @param infoKey: key of Complex.info dict
+                        (not used if cond is function )
+        @type  infoKey: str
+        @param cond: filter condition::
+                - (vLow, vHigh) -> vLow <= c.info[ infoKey ] <= vHigh
                 - list          -> c.info[ infoKey ] in cond
                 - function      -> cond( c ) == 1
-        -> ComplexList (or sub-class)
-        !! ConditionError if cond is neither list nor tuple nor function
+        @type  cond: any
+                
+        @return: ComplexList (or sub-class)
+        @rtype: ComplexList
+        
+        @raise ConditionError if cond is neither list nor tuple nor function: 
         """
         indices = None
-        
+
         if type( cond ) == tuple:
-            
+
             indices = self.filterRange( infoKey, cond[0], cond[1] )
 
         if type( cond ) == list:
@@ -319,7 +437,7 @@ class ComplexList( list ):
         if type( cond ) == types.FunctionType:
 
             indices = self.filterFunct( cond )
-            
+
         if indices == None:
             try:
                 indices = self.filterEqual( infoKey, [cond] )
@@ -331,41 +449,71 @@ class ComplexList( list ):
 
     def argmax( self, infoKey ):
         """
-        infoKey - str
-        -> int, index of complex c with highest c.infos[infokey] value
+        Get index of complex c with highest c.infos[infokey] value
+        
+        @param infoKey: key for info dict
+        @type  infoKey: str
+        
+        @return: index of complex c with highest c.infos[infokey] value
+        @rtype: int
         """
         vLst = self.valuesOf( infoKey )
         return N.argmax( vLst )
 
+
     def max( self, infoKey ):
         """
-        infoKey - str
-        -> Complex, with highest c.info['infoKey'] value
+        Get higest c.infos[infokey] value.
+        
+        @param infoKey: key for info dict
+        @type  infoKey: str
+
+        @return: with highest c.info['infoKey'] value
+        @rtype: Complex
         """
         return self[ self.argmax(infoKey) ]
 
 
     def argmin( self, infoKey ):
         """
-        infoKey - str
-        -> int, index of complex c with lowest c.infos[infokey] value
+        Get index of complex c with lowest c.infos[infokey] value
+        
+        @param infoKey: key for info dict
+        @type  infoKey: str
+        
+        @return: index of complex c with lowest c.infos[infokey] value
+        @rtype: int
         """
         vLst = self.valuesOf( infoKey )
         return N.argmin( vLst )
 
     def min( self, infoKey ):
         """
-        infoKey - str
-        -> Complex, with lowest c.info['infoKey'] value
+        Get lowest c.infos[infokey] value.
+        
+        @param infoKey: key for info dict
+        @type  infoKey: str
+        
+        @return: with lowest c.info['infoKey'] value
+        @rtype: Complex
         """
         return self[ self.argmin( infoKey ) ]
 
 
     def getIndex( self, infoKey, value ):
         """
-        -> int, list position of Complex where c.info['infoKey'] == value
-        !! AmbiguousMatch, ComplexNotFound,
-           if there are more or less than 1 matches
+        Get list position of Complex where c.info['infoKey'] == value
+        
+        @param value: vaue to look for
+        @type  value: any
+        @param infoKey: key for info dict
+        @type  infoKey: str
+        
+        @return: position in ComplexList where c.info['infoKey'] == value
+        @rtype: int
+        
+        @raise AmbiguousMatch: ComplexNotFound,
+                               if there are more or less than 1 matches
         """
         l = self.filterEqual( infoKey, [ value ] )
 
@@ -380,17 +528,31 @@ class ComplexList( list ):
 
     def getItem( self, infoKey, value ):
         """
-        -> Complex where c.info['infoKey'] == value
-        !! AmbiguousMatch, ComplexNotFound,
-           if there are more or less than 1 matches
+        Get Complex from ComplexList where c.info['infoKey'] == value
+        
+        @param value: vaue to look for
+        @type  value: any
+        @param infoKey: key for info dict
+        @type  infoKey: str        
+    
+        @return: Complex where c.info['infoKey'] == value
+        @rtype: Complex
+        
+        @raise AmbiguousMatch: ComplexNotFound,
+                               if there are more or less than 1 matches
         """
         return self[ self.getIndex( infoKey, value ) ]
-    
+
 
     def take( self, indices ):
         """
-        indices - array/list of int, list positions
-        -> ComplexList with all items specified.
+        Take the complexes specified by indices.
+        
+        @param indices: array/list of int, list positions
+        @type  indices: [int]
+        
+        @return: ComplexList with all items specified.
+        @rtype: ComplexList
         """
         r = self.__class__( [ self[i] for i in indices ] )
 
@@ -400,13 +562,17 @@ class ComplexList( list ):
     def toDict( self, infoKey ):
         """
         Convert list into dict indexed by a certain info-record value.
-        infoKey - key of info dict in Complexes
         If several Complexes have the same value, the result will have
         a list registered for this key.
         
-        EXAMPLE: clst.toDict('soln') -> {1:Complex, 3:Complex, solnN:Complex}
+        EXAMPLE:
+          >>> clst.toDict('soln') -> {1:Complex, 3:Complex, solnN:Complex}
+        
+        @param infoKey: key of info dict in Complexes
+        @type  infoKey: str
 
-        -> dict, { info1:Complex, info2:Complex, info3:[Complex, Complex].. }
+        @return: { info1:Complex, info2:Complex, info3:[Complex, Complex].. }
+        @rtype: dict
         """
         result = {}
         for c in self:
@@ -414,17 +580,31 @@ class ComplexList( list ):
 
         return result
 
+
     def toList( self ):
-        """-> [ Complex ], simple python list of Complexes"""
+        """
+        Convert ComplexList to simple python list of Complexes
+        
+        @return: simple python list of Complexes
+        @rtype: [Complex]
+        """
         return list( self )
+
 
     def __maskNone( self, l1, l2 ):
         """
-        take out positions from l1 and l2 that are None in either of them.
-        -> (l1, l2) modified lists
+        Take out positions from l1 and l2 that are None in either of them.
+
+        @param l1: first ComplexList
+        @type  l1: ComplexList
+        @param l2: second ComplexList
+        @type  l2: ComplexList
+        
+        @return: (l1, l2) modified lists
+        @rtype: ComplexList, ComplexList
         """
         r1, r2 = [],[]
-        
+
         for i in range( len(l1)):
             if l1[i] != None and l2[i] != None:
                 r1 += [ l1[i] ]
@@ -435,9 +615,19 @@ class ComplexList( list ):
 
     def plot( self, xkey, *ykey, **arg ):
         """
-        plot( xkey, [ykey1, ykey2..],[arg1=x, arg2=y]) -> biggles.FramedPlot
         Plot pairs of info values. The additional arg arguments are handed
-        over to biggles.Points().
+        over to biggles.Points().::
+          plot( xkey, [ykey1, ykey2..],[arg1=x, arg2=y]) -> biggles.FramedPlot
+
+        @param xkey: key specifying x-values
+        @type  xkey: str
+        @param ykey: key specifying y-values
+        @type  ykey: str OR [str]
+        @param arg: additional biggles arguments
+        @type  arg: key=value
+        
+        @return: biggles plot object
+        @rtype: biggles.FramedPlot()
         """
         plot = biggles.FramedPlot()
 
@@ -462,10 +652,21 @@ class ComplexList( list ):
 
         return plot
 
+
     def plotArray( self, xkey, *ykey, **arg ):
         """
-        plot( xkey, [ykey1, ykey2..],[arg1=x, arg2=y]) -> biggles.FramedPlot
-        Plot pairs of info values.
+        Plot pairs of info values.::
+          plot( xkey, [ykey1, ykey2..],[arg1=x, arg2=y]) -> biggles.FramedArray
+
+        @param xkey: key specifying x-values
+        @type  xkey: str
+        @param ykey: key specifying y-values
+        @type  ykey: str OR [str]
+        @param arg: additional biggles arguments
+        @type  arg: key=value
+        
+        @return: biggles plot object
+        @rtype: biggles.FramedArray        
         """
         plot = biggles.FramedArray( len(ykey),1 )
 
@@ -489,8 +690,8 @@ class ComplexList( list ):
                                          color=colors[i] ) )
 
         return plot
-        
-    
+
+
 #############################
 ## TEST #####################
 

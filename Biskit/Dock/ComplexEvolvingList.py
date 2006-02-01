@@ -1,4 +1,3 @@
-## organise, sort, and filter Complexes in refinement
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
@@ -18,10 +17,13 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-
 ## last $Author$
 ## last $Date$
 ## $Revision$
+
+"""
+List of ComplexEvolving instances.
+"""
 
 from ComplexList import ComplexList
 from Complex import Complex as ProtComplex
@@ -30,36 +32,55 @@ from ComplexEvolving import ComplexEvolving
 class ComplexEvolvingList( ComplexList ):
     """
     List of ComplexEvolving instances.
-    @todo implement plotting functions for evolving Complexes
-    @todo right now normal Complexes are tolerated
-    @todo adapt model management
-    @see ComplexEvolving
+    Used for organising, sorting, and filtering Complexes during refinement.
+    
+    @todo: implement plotting functions for evolving Complexes
+    @todo: right now normal Complexes are tolerated
+    @todo: adapt model management
+    @see: L{Dock.ComplexEvolving}
     """
 
     def __init__(self, lst=[] ):
         """
-        lst - list of Complexes
-        !! raise ComplexListError, if list contains non-Complex item.
+        @param lst: list of Complexes
+        @type  lst: [ComplexEvolving]
+        
+        @raise ComplexListError: if list contains non-Complex item.
         """
         ComplexList.__init__( self, lst )
-        
+
 
     def version( self ):
+        """
+        Version of Dock.Complex
+        
+        @return: version of class
+        @rtype: str
+        """        
         return 'ComplexEvolvingList $Revision$'
 
 
     def checkType( self, v ):
-        """Make sure v is a ComplexEvolving"""
+        """
+        Make sure v is a ComplexEvolving
+
+        @param v: any
+        @type  v: any
+
+        @raise ComplexListError: if list contains non-Complex item.
+        """
         if not isinstance(v, ComplexEvolving):
             raise ComplexListError(
                 str( v ) + " not allowed. ComplexList requires "+
                 str(ComplexEvolving))
-        
+
 
     def allVersionList( self ):
         """
         Get all versions of each Complex as a seperate Complex instance.
-        -> ComplexList of normal Complex instances
+        
+        @return: ComplexList of normal Complex instances
+        @rtype: ComplexList
         """
         r = ComplexList()
 
@@ -68,15 +89,19 @@ class ComplexEvolvingList( ComplexList ):
                 r += c.toList()
             except:
                 r += [ c ]
-            
+
         return r
 
 
     def toComplexList( self, version=-1 ):
         """
         Get a ComplexList that contains only a single version of each Complex.
-        version - int, version in history, -1 == last [-1]
-        -> ComplexList
+        
+        @param version: version in history, -1 == last [-1] (default: -1)
+        @type  version: int
+        
+        @return: ComplexList
+        @rtype: ComplexList
         """
         return ComplexList( [ c[ version ] for c in self ] )
 
@@ -84,10 +109,15 @@ class ComplexEvolvingList( ComplexList ):
     def toList( self, version=None ):
         """
         Get a simple python list of Complexes. If version==None, the list
-        contains ComlexEvolving instances with all versions, otherwise
+        contains ComplexEvolving instances with all versions, otherwise
         the list contains Complex instances representing a single version.
-        version - int, version in history, -1 == last, None == all [None]
-        -> [ Complex ]
+        
+        @param version: version in history, -1 == last, None == all
+                        (default: None)
+        @type  version: int
+        
+        @return: python list of Complexes
+        @rtype: [ Complex ]
         """
         if version is None:
             return ComplexList.toList( self )
@@ -99,12 +129,21 @@ class ComplexEvolvingList( ComplexList ):
                   indices=None, unique=0 ):
         """
         Get all values of a certain info record of all or some Complexes.
-        infoKey - str, key for info dict
-        version - int, index in history or None (=current) [None]
-        default - any, default value if infoKey is not found [None]
-        indices - list of int OR None(=all), indices of Complexes [None]
-        unique  - 1|0, report each value only once (set union), [0]
-        -> list of values
+        
+        @param infoKey: key for info dict
+        @type  infoKey: str
+        @param version: index in history or None (=current) (default: None)
+        @type  version: int
+        @param default: default value if infoKey is not found (default: None)
+        @type  default: any
+        @param indices: list of int OR None(=all), indices of Complexes
+                        (default: None)
+        @type  indices: [int] OR None
+        @param unique: report each value only once (set union), (default: 0)
+        @type  unique: 1|0
+        
+        @return: list of values
+        @rtype: [any]
         """
         l = self
         if indices != None:
@@ -125,13 +164,13 @@ class ComplexEvolvingList( ComplexList ):
 
         return r
 
-    
+
 ### TEST ####
 
 if __name__ == '__main__':
 
     import Biskit.tools as t
-    
+
     l = t.Load( "~/interfaces/c15/dock_xray/hex01/complexes.cl")
 
     cl = ComplexList( l )

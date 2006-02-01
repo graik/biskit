@@ -40,18 +40,31 @@ class AlignerSlave(JobSlave):
     """
 
     def initialize(self, params):
+        """
+        Initialize AlignerSlave.
 
+        @param params: dictionary with init parameters
+        @type  params: {param:value}          
+        """
         self.__dict__.update( params )
         self.params = params
 
         ## Only the PATH must be updated from the master to run properly
         os.environ["PATH"]=self.params['os.environ']["PATH"]
-        
+
         self.errorLog = LogFile( self.ferror, mode='a' )
 
-     
+
 
     def reportError(self, msg, d ):
+        """
+        Report error.
+
+        @param msg: error message
+        @type  msg: str
+        @param d: error data
+        @type  d: any
+        """
         try:
             s = '%s on %s, job %r\n' % (msg, os.uname()[1], d)
             s += '\nErrorTrace:\n' + T.lastErrorTrace() + '\n'
@@ -73,7 +86,15 @@ class AlignerSlave(JobSlave):
 
 
     def prepareT_coffee(self, input_file):
-        
+        """
+        Prepare list of coordinate files (.alpha)
+
+        @param input_file: file with list of .alpha files
+        @type  input_file: str
+
+        @return: list of file names
+        @rtype: [str]
+        """
         alpha_index = open(T.absfile('%s'%input_file,'a+'))
 
         string_lines = alpha_index.readlines()
@@ -85,10 +106,15 @@ class AlignerSlave(JobSlave):
             alpha_path.append(line[:-1])
 
         return alpha_path
-    
+
 
     def go(self, dict):
+        """
+        Run alignment job.
 
+        @param dict: dictionary with run parameters
+        @type  dict: {param:value} 
+        """
         d = {}
         val = None
 
@@ -98,7 +124,7 @@ class AlignerSlave(JobSlave):
             for id, val in dict.items():
 
                 aligner_log = LogFile( '%s/Aligner.log' %val["outFolder"] )
-                
+
                 d[id] = val
 
                 aligner_log.add('Slave aligns %s on %s' % (id,os.uname()[1]) )
@@ -116,7 +142,7 @@ class AlignerSlave(JobSlave):
                               fasta_templates=val["fastaTemplates"],
                               fasta_sequences=val["fastaSequences"],
                               fasta_target=val["fastaTarget"])
-                    
+
                 ## For a classic project folder    
                 else:
                     a.align_for_modeller_inp(pdbFiles=val["pdbFiles"],
@@ -133,7 +159,8 @@ class AlignerSlave(JobSlave):
         print "Done."
 
         return d
-    
+
+
 if __name__ == '__main__':
 
     slave = AlignerSlave()
