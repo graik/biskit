@@ -22,6 +22,10 @@
 ## last $Date$
 ## $Revision$
 
+"""
+Clean PDB-files so that they can be used for MD.
+"""
+
 import Biskit.molUtils as MU
 import Biskit.tools as t
 from Biskit.PDBModel import PDBModel
@@ -40,8 +44,10 @@ class PDBCleaner:
 
     def __init__( self, fpdb, log=None ):
         """
-        fpdb  - str, pdb file OR PDBModel
-        log   - LogFile object
+        @param fpdb: pdb file OR PDBModel
+        @type  fpdb: str
+        @param log: LogFile object
+        @type  log: object
         """
         self.model = PDBModel( fpdb )
         self.log = log
@@ -85,7 +91,7 @@ class PDBCleaner:
                             self.logWrite(
                                 ('keeping non-A duplicate %s because of 1.0 '+
                                 'occupancy') % str_id )
-                    
+
                 except:
                     self.logWrite("Error removing duplicate: "+t.lastError() )
             i+=1
@@ -93,14 +99,18 @@ class PDBCleaner:
         try:
             self.model.remove( to_be_removed )
             self.logWrite('Removed %i atoms' % len( to_be_removed ) )
-            
+
         except:
             self.logWrite('No atoms with multiple occupancies to remove' )
 
 
     def replace_non_standard_AA( self, amber=0 ):
         """
-        amber - 1|0, don't rename HID, HIE, HIP, CYX, NME, ACE [0]
+        Replace amino acids with none standard names with standard
+        amino acids according to L{MU.nonStandardAA}
+        
+        @param amber: don't rename HID, HIE, HIP, CYX, NME, ACE [0]
+        @type  amber: 1||0
         """
         standard = MU.atomDic.keys()
 
@@ -111,7 +121,7 @@ class PDBCleaner:
 
         self.logWrite(self.model.pdbCode +
                       ': Looking for non-standard residue names...')
-        
+
         for a in self.model.getAtoms():
 
             resname = a['residue_name'].upper()
@@ -129,7 +139,7 @@ class PDBCleaner:
                     self.logWrite('Warning: unknown residue name %s %i: ' \
                                   % (resname, a['residue_number'] ) )
                     self.logWrite('\t->renamed to ALA.')
-                    
+
                 replaced += 1
 
         self.logWrite('Found %i atoms with non-standard residue names.'% \
@@ -138,8 +148,15 @@ class PDBCleaner:
 
     def __standard_res( self, resname ):
         """
-        resname - str, 3-letter residue name
-        -> str, name of closest standard residue or resname itself
+        Check if resname is a standard residue (according to L{MU.atomDic})
+        if not return the closest standard residue (according to
+        L{MU.nonStandardAA}).
+        
+        @param resname: 3-letter residue name
+        @type  resname: str
+        
+        @return: name of closest standard residue or resname itself
+        @rtype: str
         """
         if resname in MU.atomDic:
             return resname
@@ -148,13 +165,17 @@ class PDBCleaner:
             return MU.nonStandardAA[ resname ]
 
         return resname
-        
+
 
     def remove_non_standard_atoms( self ):
         """
         First missing standard atom triggers removal of standard atoms that
         follow in the standard order. All non-standard atoms are removed too.
-        -> int, number of atoms removed
+        Data about standard atoms are taken from L{MU.atomDic} and symomym
+        atom name is defined in L{MU.atomSynonyms}.
+        
+        @return: number of atoms removed
+        @rtype: int
         """
         mask = []
 
@@ -207,16 +228,22 @@ class PDBCleaner:
                       ' or followed a missing atom.' )
 
         return sum( mask )
-                    
+
 
     def process( self, keep_hetatoms=0, amber=0 ):
         """
         Remove Hetatoms, waters. Replace non-standard names.
         Remove non-standard atoms.
-        keep_hetatoms - 0|1
-        amber         - 0|1, don't rename amber residue names (HIE,HID,CYX,..)
-        -> PDBModel (reference to internal)
-        !! CleanerError
+        
+        @param keep_hetatoms: option
+        @type  keep_hetatoms: 0||1
+        @param amber: don't rename amber residue names (HIE, HID, CYX,..)
+        @type  amber: 0||1
+        
+        @return: PDBModel (reference to internal)
+        @rtype: PDBModel
+        
+        @raise CleanerError: if something doesn't go as expected ...
         """
 
         try:
@@ -243,8 +270,8 @@ class PDBCleaner:
 
 
 if __name__ == '__main__':
-   
+
     c = PDBCleaner( t.testRoot() + '/com/1BGS_original.pdb'  )
 
     m = c.process()
-    
+

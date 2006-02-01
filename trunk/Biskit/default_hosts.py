@@ -22,19 +22,24 @@
 ##
 ## last $Date$
 ## last $Author$
+## $Revision$
+
 """
 List of cluster computers.
-Each host must be accessible via ssh w/o password.
 
-nodes_* .. lists with one entry per computer
-cpus_*  .. lists with one entry per CPU (usuallly that's the one used)
+B{ Each host must be accessible via ssh w/o password. }
 
-nodes/cpus_own   .. computers reserved for own use, highest priority
-nodes/cpus_shared.. computers shared with others, medium priority
-nodes/cpus_other .. computers mainly used by others, lowest priority
+List and dictionaries describing avaliable hosts::
 
-nodes/cpus_all   .. all computers in descending priority
-nice_dic         .. nice value for each host
+  nodes_* .. lists with one entry per computer
+  cpus_*  .. lists with one entry per CPU (usuallly that's the one used)
+
+  nodes/cpus_own   .. computers reserved for own use, highest priority
+  nodes/cpus_shared.. computers shared with others, medium priority
+  nodes/cpus_other .. computers mainly used by others, lowest priority
+
+  nodes/cpus_all   .. all computers in descending priority
+  nice_dic         .. nice value for each host
 """
 import Biskit.mathUtils as MU
 from tools import *
@@ -47,16 +52,26 @@ import ConfigParser
 conf = ConfigParser.ConfigParser()
 conf.read( os.path.expanduser('~/.biskit/hosts.dat' ) )
 
+
 def getHosts( section, option ):
     """
-    Strip comment from setting (separator #)
-    Split list (separator ,)
-    
-    """
+    Get host names from the config file hosts.dat specified bythe
+    section and option parameters.
+     
+    @param section: ConfigParser section in ~/.biskit/hosts.dat
+    @type  section: str
+    @param option: ConfigParser option in ~/.biskit/hosts.dat
+    @type  option: str
+        
+    @return: host name taken from hosts.dat or None
+    @rtype: str OR None
+    """   
     if conf.has_option( section, option ):
     	setting = conf.get( section, option )
+        ## Strip comment from setting (separator #)
     	setting = string.split( setting, '#' )
 	hosts = []
+        ## Split list (separator ,)
 	for host in string.split( setting[0], ' ' ):
     		hosts += [ string.strip( host ) ] 
 	return hosts
@@ -65,17 +80,29 @@ def getHosts( section, option ):
 
 def getDict( section, option ):
     """
-    Strip comment from setting (separator: #)
-    Split entry (separator ,)
-    Split dictionary (separator :)
-    """
+    Get host dictionaries from the config file hosts.dat specified by
+    the section and option parameters. The dictionary has the host as key
+    and the values can be availiable RAM or a nice value.  
+ 
+    @param section: ConfigParser section in ~/.biskit/hosts.dat
+    @type  section: str
+    @param option: ConfigParser option in ~/.biskit/hosts.dat
+    @type  option: str
+        
+    @return: dictionary with host:value
+    @rtype: dict
+    """                      
     dic = {}
+    ## Strip comment from setting (separator: #)
+    ## Split entry (separator ,)    
     for i in getHosts( section, option ):
-        i = string.split( i, ':' )
-	dic[ string.strip(i[0]) ] =  float( i[1] )
+        ## Split dictionary (separator :)
+        if not len(i) == 0:
+            i = string.split( i, ':' )
+            dic[ string.strip(i[0]) ] =  float( i[1] )
     return dic
-   
-    
+
+
 dual = []
 
 ##
@@ -154,9 +181,9 @@ others_ram = getDict( 'others_hosts', 'ram' ) # installed RAM others computers i
 ram_dic = { 'default':0.5 }
 for h in dual:
     ram_dic[ h ] = 1.0
-    
+
 ram_dic.update(own_ram)
-rma_dic.update(shared_ram)
+ram_dic.update(shared_ram)
 ram_dic.update(others_ram)
 
 
@@ -167,7 +194,7 @@ nodes_exclude = []
 nodes_exclude += getHosts( 'own_hosts', 'exclude' ) # exclude list, temporarily remove some nodes, separate with space
 nodes_exclude += getHosts( 'shared_hosts', 'exclude' ) # exclude list, temporarily remove some nodes, separate with space
 nodes_exclude += getHosts( 'others_hosts', 'exclude' ) # exclude list, temporarily remove some nodes, separate with space
- 
+
 
 ##
 ## Switch On / Off temporary removal of nodes 

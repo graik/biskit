@@ -18,18 +18,19 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## Seperate PDB into continuous peptide chains for XPlor. Remove duplicate
-## peptide chains.
-## required by pdb2xplor.py
-##
 ## $Revision$
 ## last $Author$
 ## last $Date$
 
-# TODO: Use biopython insted of Blast2Seq, making the latter obsolete
+"""
+Seperate PDB into continuous peptide chains for XPlor. Remove duplicate
+peptide chains. Required by pdb2xplor.py
 
-# TODO: Create an override for the chain comparison if one wants
-#          to keep identical chains (i.e homodimers)
+@todo: Use biopython insted of Blast2Seq, making the latter obsolete
+
+@todo: Create an override for the chain comparison if one wants
+          to keep identical chains (i.e homodimers)
+"""
 
 from Blast2Seq import *   # compare 2 sequences
 from molUtils import singleAA
@@ -48,10 +49,14 @@ class ChainSeparator:
 
     def __init__(self, fname, outPath='', chainIdOffset=0, capBreaks=0 ):
         """
-        fname - str, pdb filename,
-        outPath - str, path for log file,
-        chainIdOffset - int, start chain numbering at
-        capBreaks - 0|1, add ACE and NME to N- and C-term. of chain breaks [0]
+        @param fname: pdb filename
+        @type  fname: str
+        @param outPath: path for log file
+        @type  outPath: str
+        @param chainIdOffset: start chain numbering at this offset
+        @type  chainIdOffset: int
+        @param capBreaks: add ACE and NME to N- and C-term. of chain breaks [0]
+        @type  capBreaks: 0||1
         """
         self.pdb = Structure(fname);
         self.fname = fname
@@ -59,7 +64,7 @@ class ChainSeparator:
         self.log = LogFile( T.absfile(outPath)+'/' + self.pdbname()+'.log')
         self.chainIdOffset = chainIdOffset
         self.capBreaks = capBreaks
-        
+
         self.chains = self.pdb.peptide_chains
         self.counter = -1
         self.threshold = 0.9 # sequence identity between multiple copies in PDB
@@ -77,7 +82,9 @@ class ChainSeparator:
     def pdbname(self):
         """
         Extract pdb code from file name.
-        -> str, (assumed) pdb code
+        
+        @return: (assumed) pdb code
+        @rtype: str
         """
         return T.stripFilename(self.pdb.filename)
 
@@ -85,7 +92,14 @@ class ChainSeparator:
     def _expressionCheck(self, findExpression, findClean):
         """
         Check and report if the regular expression 'findExpression'
-        exists in the PDB-file
+        exists in the PDB-file. Use this to locate data in the REMARK
+        section of a pdb file. Prints a warning to stdOut if the
+        regular expression is found.
+
+        @param findExpression: regular expression
+        @type  findExpression: str
+        @param findClean: clean name of regular expression
+        @type  findClean: str
         """
         pdb = open(self.fname,'r')
         pdbFile = pdb.read()
@@ -105,7 +119,7 @@ deleted by this script. To avoid this prepare the file for Xplor manualy \n""" %
                 self.log.add(searchResult[i])
             self.log.add(warningMessage2)
         pdb.close() 
-        
+
 
     def _hetatomCheck(self):
         """
@@ -124,7 +138,7 @@ deleted by this script. To avoid this prepare the file for Xplor manualy \n""" %
                 i=i-1
                 j=j-1
             i=i+1
-        
+
         warningMessage = """
 WARNING! The PDB-file contains coordinates for none water HETATMs.
 If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
@@ -136,17 +150,20 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
                self.log.add(searchResult[i][0:-1])
             self.log.add(warningMessage2)
         pdb.close()
-        
+
 
     def _removeDuplicateChains(self):
         """
         Get rid of identical chains by comparing all chains with Blast2seq.
+
+        @return: number of chains removed
+        @rtype: int
         """
         chainCount = len(self.chains)
         matrix = 1.0 * N.zeros((chainCount,chainCount))
         blast = Blast2Seq()
         chain_ids = []
-        
+
         ## create identity matrix for all chains against all chains
         for i in range(0, chainCount):
             chain_ids = chain_ids + [self.chains[i].chain_id] # collect for log file
@@ -170,7 +187,7 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
 
         ## look at diagonals in "identity matrix"
         ## (each chain against each)
-                    
+
         duplicate = len(self.chains)
         for offset in range(1,chainCount):
             diag = N.diagonal(matrix, offset ,0,1)
@@ -198,7 +215,7 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
         """
         counter = self.chainIdOffset
         for chain in self.chains:
-            
+
             ## Assemble segid from pdb code + one letter out of A to Z
             chain.segment_id = self.pdbname()[:3] + string.uppercase[counter]
             counter = counter + 1
@@ -214,17 +231,22 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
         """
         Calculate sequential atom-atom distance, report residues with
         longer distance than cutoff (chain break positions).
-        chain  - PDB.PeptideChain
-        cutoff - float, threshold for reporting gap (chain break)
-        atom   - str, type of atoms to check (i.e. 'CA')
+        
+        @param chain: Scientific.IO.PDB.PeptideChain object
+        @type  chain: object
+        @param cutoff: threshold for reporting gap (chain break)
+        @type  cutoff: float
+        @param atom: type of atoms to check (i.e. 'CA')
+        @type  atom: str
 
-        -> [int, int, ...], list of chain break positions (residue index
-                            for each first residue of two that are too distant)
+        @return: list of chain break positions (residue index for each
+                 first residue of two that are too distant)
+        @rtype: list of int           
         """        
         distanceList = []
         v0 = Vector( 0,0,0 )
         jump = 1
-        
+
         for res in range(0,len(chain)-2):
 
             try:
@@ -252,7 +274,7 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
                     str(chain[res+jump].name)+\
                     str(chain[res+jump].number)+ " in chain "+chain.chain_id)
                 self.log.add("Error: " + T.lastError() )
-                
+
         return distanceList
 
 ##     def _sequentialDist(self, chain, cutoff, atom):
@@ -282,7 +304,7 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
 ##                     str(chain[residue].number)+" and "+str(chain[residue+1].name)+\
 ##                     str(chain[residue+1].number)+ " in chain "+chain.chain_id)
 ##                 self.log.add("Error: " + T.lastError() )
-                
+
 ##         return distanceList
 
 
@@ -304,7 +326,7 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
             previous = 0
             ncap_next = 0
             for breakRes in breaks:
-                
+
                 residues = chain.residues[previous:breakRes+1]
                 previous = breakRes + 1
 
@@ -326,7 +348,7 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
                                     chain.segment_id)
             if ncap_next:
                 self.__nCap( chainNew )
-            
+
             fragments = fragments + [chainNew]
 
         self.chains = fragments
@@ -344,12 +366,13 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
 
         self.log.add('Capping chain break with ACE %i' % n) 
 
+
     def __cCap( self, pep_chain ):
         """
         Add methyle amine capping to C-terminal of peptide chain
         """
         n = (pep_chain[-1].number or len(pep_chain)) + 1
-        
+
         r = AminoAcidResidue('NME', number=n, atoms=[Atom('CA', Vector(0,0,0),
                                                           element='C')])
         pep_chain.residues = pep_chain.residues + [r]
@@ -388,13 +411,19 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
 
 
     def next(self):
-        """Return next 'clean', non-redundant, non-broken chain from PDB"""
+        """
+        Return next 'clean', non-redundant, non-broken chain from PDB
+
+        @return: Scientific.IO.PDB.PeptideChain, completed chain OR
+                 if no chain is left
+        @rtype: chain object OR None        
+        """
         self.counter = self.counter + 1
         if (len(self.chains) > self.counter):
             return self.chains[self.counter]
         else:
             return None
-    
+
 ############################
 ## TESTING
 ############################
@@ -412,5 +441,5 @@ if __name__ == '__main__':
         chain = sep.next()
         i += 1
 
-        
+
 

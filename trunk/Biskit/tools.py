@@ -17,11 +17,13 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## simply -  everyday tools
-##
 ## last $Author$
 ## last $Date$
 ## $Revision$
+
+"""
+simply -  everyday tools
+"""
 
 import sys, string
 import os.path as osp
@@ -40,16 +42,24 @@ import subprocess
 class ToolsError( Exception ):
     pass
 
+
 def errWriteln(s):
     """
     print s to standard error with line feed.
+    
+    @param s: string
+    @type  s: str
     """
     sys.stderr.write(s+'\n')
     sys.stderr.flush()
 
+
 def errWrite(s):
     """
     print s to standard error.
+
+    @param s: string
+    @type  s: str    
     """
     sys.stderr.write(s)
     sys.stderr.flush()
@@ -58,18 +68,21 @@ def errWrite(s):
 def flushPrint(s):
     """
     print s without line break and flush standard out.
+
+    @param s: string
+    @type  s: str    
     """
     sys.stdout.write(s)
     sys.stdout.flush()
-    
+
 
 def lastError():
     """
     Collect type and line of last exception.
-    -> String, '<ExceptionType> in line <lineNumber>:
-                  <Exception arguments>'
+    
+    @return: '<ExceptionType> in line <lineNumber>:<Exception arguments>'
+    @rtype: String
     """
-
     try:
         trace = sys.exc_info()[2]
         why = sys.exc_info()[1]
@@ -89,7 +102,6 @@ def lastError():
 
 
 def lastErrorTrace( limit=None ):
-
     tb = sys.exc_info()[2]
 
     lines = traceback.extract_tb( tb, None )
@@ -101,10 +113,15 @@ def lastErrorTrace( limit=None ):
 
     return result
 
-    
+
 def dictAdd( dic, key, value ):
     """
     Add value to dic, create list, if dic has already value in key.
+
+    @param key: dictionary key
+    @type  key: str
+    @param value: value
+    @type  value: any
     """
     if key in dic:
         old = dic[key]
@@ -121,10 +138,18 @@ def dictAdd( dic, key, value ):
 
 def absfile( filename, resolveLinks=1 ):
     """
-    filename     - str
-    resolveLinks - eliminate any symbolic links
-    expand ~ to user home, change ../../ to absolute path, resolve links
-    -> string, absolute path or filename
+    Get absolute file path::
+      - expand ~ to user home, change
+      - expand ../../ to absolute path
+      - resolve links
+
+    @param filename: name of file
+    @type  filename: str
+    @param resolveLinks: eliminate any symbolic links (default: 1)
+    @type  resolveLinks: 1|0
+    
+    @return: absolute path or filename
+    @rtype: string
     """
     if not filename:
         return filename
@@ -138,13 +163,20 @@ def homefile( filename, otherUser=1, ownCopy=1 ):
     """
     Relativize a file name to ~ or, if it is in another user's home,
     to ~otheruser or, if it is in nobody's home, to / .
-    splithome() is used to also guess home directories of other users.
-    filename  - str
-    otherUser - 1||0, look also in other user's home directories (default 1)
-    ownCopy   - 1||0, replace alien path by path into own home directory if
-                possible, e.g. ~other/data/x is replaced by ~/data/x if there
-                is such a file. (default 1) Careful!
-    -> str
+    
+    L{splithome()} is used to also guess home directories of other users.
+    
+    @param filename: name of file
+    @type  filename: str
+    @param otherUser: look also in other user's home directories (default 1)
+    @type  otherUser: 1|0
+    @param ownCopy: replace alien path by path into own home directory if
+                    possible, e.g. ~other/data/x is replaced
+                    by ~/data/x if there is such a file. (default 1) Careful!
+    @type  ownCopy: 1|0
+                
+    @return: path or filename
+    @rtype: str
     """
     f = absfile( filename )
     my_home = osp.expanduser('~')
@@ -165,13 +197,18 @@ def homefile( filename, otherUser=1, ownCopy=1 ):
 
     return f
 
-    
+
 def splithome( filename ):
     """
     Split path into home directory and remaining path. Valid home directories
     are folders belonging to the same folder as the current user's home. I.e.
     the method tries also to guess home directories of other users.
-    -> (str, str), home folder of some user, remaining path relative to home
+
+    @param filename: name of file
+    @type  filename: str
+    
+    @return: home folder of some user, remaining path relative to home
+    @rtype: (str, str)
     """
     home = osp.expanduser( '~' )
     home_base = osp.split( home )[0]
@@ -191,7 +228,12 @@ def splithome( filename ):
 def stripSuffix( filename ):
     """
     Return file name without ending.
-    -> str
+
+    @param filename: name of file
+    @type  filename: str
+    
+    @return: filename or path without suffix
+    @rtype: str
     """
     try:
         if filename.find('.') <> -1:
@@ -200,12 +242,17 @@ def stripSuffix( filename ):
         pass  ## just in case there is no ending to start with...
 
     return filename
-    
+
 
 def stripFilename( filename ):
     """
     Return filename without path and without ending.
-    -> str
+
+    @param filename: name of file
+    @type  filename: str
+    
+    @return: base filename
+    @rtype: str
     """
     name = osp.basename( filename )      # remove path
     try:
@@ -217,21 +264,29 @@ def stripFilename( filename ):
     return name
 
 
-def fileLength( file ):
-        """
-        Count number of lines in file
-        -> int, number of lines
-        """
-        p1 = subprocess.Popen( ['cat',file], stdout=subprocess.PIPE )
-        p2 = subprocess.Popen( ["wc", "-l"], stdin=p1.stdout,
-                               stdout=subprocess.PIPE )
-        return int(p2.communicate()[0])
+def fileLength( filename ):
+    """
+    Count number of lines in a file.
+
+    @param filename: name of file
+    @type  filename: str
     
+    @return: number of lines
+    @rtype: int
+    """
+    p1 = subprocess.Popen( ['cat',filename], stdout=subprocess.PIPE )
+    p2 = subprocess.Popen( ["wc", "-l"], stdin=p1.stdout,
+                               stdout=subprocess.PIPE )
+    return int(p2.communicate()[0])
+
 
 def tempDir():
     """
     Get folder for temporary files - either from environment settings
     or '/tmp'
+
+    @return: directort for temporary files
+    @rtype: str    
     """
     if tempfile.tempdir != None:
         return  tempfile.tempdir
@@ -239,16 +294,20 @@ def tempDir():
     return osp.dirname( tempfile.mktemp() )
 
 
-def file2dic( fname ):
+def file2dic( filename ):
     """
     Construct dictionary from file with key - value pairs (one per line).
-    !! ToolsError, if file can't be parsed into dictionary
-    !! IOError, if file can't be opened
+
+    @param filename: name of file
+    @type  filename: str
+    
+    @raise ToolsError: if file can't be parsed into dictionary
+    @raise IOError: if file can't be opened
     """
     try:
         line = None
         result = {}
-        for line in open( fname ):
+        for line in open( filename ):
 
             if '#' in line:
                 line = line[ : line.index('#') ]
@@ -273,18 +332,25 @@ def file2dic( fname ):
 
 def get_cmdDict(lst_cmd, dic_default):
     """
-    Parse commandline options into dictionary of type {<option> : <value>}
+    Parse commandline options into dictionary of type C{ {<option> : <value>} }
     Options are recognised by a leading '-'.
     Error handling should be improved.
-    Option -x |file_name| is interpreted as file with additional options.
+    
+    Option C{ -x |file_name| } is interpreted as file with additional options.
     The key value pairs in lst_cmd replace key value pairs in the
     -x file and in dic_default.
     
-    lst_cmd     - [str], e.g. ['-pdb', 'in1.pdb', 'in2.pdb', '-o', 'out.dat']
-    dic_default - {str : str}, default options e.g. {'psf':'in.psf'}
-    
-    -> {<option> : <value>},
-       ala {'pdb':['in1.pdb', 'in2.pdb'], 'psf':'in.psf', 'o':'out.dat'}
+
+    @param lst_cmd: list with the command line options::
+                    e.g. ['-pdb', 'in1.pdb', 'in2.pdb', '-o', 'out.dat']
+    @type  lst_cmd: [str]
+    @param dic_default: dictionary with default options::
+                        e.g. {'psf':'in.psf'}
+    @type  dic_default: {str : str}
+
+    @return: command dictionary::
+             ala {'pdb':['in1.pdb', 'in2.pdb'], 'psf':'in.psf', 'o':'out.dat'}
+    @rtype: {<option> : <value>}
     """
     dic_cmd = {}                     # create return dictionary
     try:
@@ -334,26 +400,41 @@ def get_cmdDict(lst_cmd, dic_default):
 
 def cmdDict( defaultDic={} ):
     """
-    Convenience implementation of get_cmdDict. Take command line options
+    Convenience implementation of L{get_cmdDict}. Take command line options
     from sys.argv[1:] and convert them into dictionary.
-    Example: '-o out.dat -in 1.pdb 2.pdb 3.pdb -d' will be converted to
-    {'o':'out.dat', 'in': ['1.pdb', '2.pdb', '3.pdb'], 'd':'' }
-    defaultDic - dic with default values.
-
-    Option -x |file_name| is interpreted as file with additional options.
+    Example::
+      '-o out.dat -in 1.pdb 2.pdb 3.pdb -d' will be converted to
+      {'o':'out.dat', 'in': ['1.pdb', '2.pdb', '3.pdb'], 'd':'' }
+      
+    Option C{ -x |file_name| } is interpreted as file with additional options.
     
-    -> dic
+    @param defaultDic: dic with default values.
+    @type  defaultDic: dic
+
+    @return: command dictionary
+    @rtype: dic
     """
     return get_cmdDict( sys.argv[1:], defaultDic )
 
 
 def Dump(this, filename, gzip = 0, mode = 'w'):
     """
-    Dump(this, filename, gzip = 0)
-    Supports also '~' or '~user'. gzip doesn't work.
-    Donated by Wolfgang Rieping
-    """
+    Dump this::
+      Dump(this, filename, gzip = 0)
+      Supports also '~' or '~user'.
 
+    @author: Wolfgang Rieping
+    @note gzip currently doesn't work.
+
+    @param this: object to dump
+    @type  this: any
+    @param filename: name of file
+    @type  filename: str
+    @param gzip: gzip dumped object (default 0)
+    @type  gzip: 1|0
+    @param mode: file handle mode (default w)
+    @type  mode: str
+    """
     filename = osp.expanduser(filename)
 
     if not mode in ['w', 'a']:
@@ -373,9 +454,17 @@ def Dump(this, filename, gzip = 0, mode = 'w'):
 def Load(filename, gzip = 0):
     """
     Load dumped object from file.
-    Donated by Wolfgang Rieping
-    """
 
+    @author: Wolfgang Rieping
+
+    @param filename: name of file
+    @type  filename: str
+    @param gzip: unzip dumped object (default 0)
+    @type  gzip: 1|0
+
+    @return: loaded object
+    @rtype: any
+    """
     filename = osp.expanduser(filename)
 
     f = open(filename)
@@ -386,7 +475,6 @@ def Load(filename, gzip = 0):
     n = 0
 
     while not eof:
-
         try:
             this = cPickle.load(f)
             objects.append(this)
@@ -401,24 +489,30 @@ def Load(filename, gzip = 0):
     else:
         return tuple(objects)
 
+
 ## obsolete
 def getOnDemand( attr, dumpIt=1):
     """
     Return attr either unpickled, freshly calculated or unchanged.
-    attr - tuple of string and function.
-       attr[0] - name of existing or non-existing file or ''
-       attr[1] - function to get result if it can't be unpickled
-    dumpIt - 0||1(default), try pickling return value to attr[0](if valid file)
-
     If attr is no tuple or anything else goes wrong it is returned unchanged
-    -> attr (unchanged or object unpickeled from file)
+    
+    @param attr: tuple of string and function::
+                 attr[0] - name of existing or non-existing file or ''
+                 attr[1] - function to get result if it can't be unpickled
+    @type  attr: (str, function)
+    @param dumpIt: try pickling return value to attr[0](if valid file)
+                   (default 1)
+    @type  dumpIt: 0|1
+
+    @return: attr (unchanged or object unpickeled from file)
+    @rtype: (str, function)
     """
     try:
         if type( attr ) == type( ('','') ) and type( attr[0] ) == type( '' ):
 
             fname = attr[0]
             function = attr[1]
-            
+
             ## file exists, try unpickling from it
             if type(fname)==type('') and osp.exists( attr[0] ):
                 return Load( fname )
@@ -431,7 +525,7 @@ def getOnDemand( attr, dumpIt=1):
                 Dump( result, fname )
 
             return result
-        
+
     except:
         print lastError()
 
@@ -441,8 +535,11 @@ def getOnDemand( attr, dumpIt=1):
 
 def projectRoot():
     """
-    -> string, absolute path of the root of current dock project.
-    i.e. '/home/Bis/raik/data/tb/dock'
+    Root of biskit project.
+    
+    @return: absolute path of the root of current project::
+             i.e. '/home/Bis/raik/biskit'
+    @rtype: string
     """
     ## import this module
     import tools
@@ -454,13 +551,26 @@ def projectRoot():
 
 
 def testRoot():
+    """
+    Root of Biskit test directory.
+
+    @return: absolute path
+    @rtype: string    
+    """
     return projectRoot() + '/test'
 
 
 def isBinary( f ):
     """
-    f - str, path to existing file
-    !! OSError, if file doesn't exist
+    Check if file is a binary.
+    
+    @param f: path to existing file
+    @type  f: str
+
+    @return: condition
+    @rtype: 1|0
+    
+    @raise OSError: if file doesn't exist
     """
     st = os.stat( f )
     mode = st[0]                         ## permissions
@@ -471,8 +581,13 @@ def isBinary( f ):
 
 def binExists( f ):
     """
-    f - str, binary file name
-    -> 1|0, True if binary file f is found in PATH and is executable
+    Check if binary with file name f exists.
+    
+    @param f: binary file name
+    @type  f: str
+    
+    @return: True if binary file f is found in PATH and is executable
+    @rtype: 1|0
     """
     if osp.exists( f ):
         return isBinary( f )
@@ -485,12 +600,19 @@ def binExists( f ):
             return True
 
     return False
-       
+
+
 def absbinary( f ):
     """
-    f - str, binary file name
-    -> str, full path to existing binary
-    !! IOError, if an executable binary is not found in PATH
+    Absolute path of binary.
+    
+    @param f: binary file name
+    @type  f: str
+    
+    @return: full path to existing binary
+    @rtype: str
+    
+    @raise IOError: if an executable binary is not found in PATH
     """
     if osp.exists( f ) and isBinary( f ):
         return f
@@ -508,8 +630,12 @@ def absbinary( f ):
 def platformFolder( f ):
     """
     Get a platform-specific subfolder of f for platform-dependent imports.
-    f - str, parent folder
-    -> str
+    
+    @param f: parent folder
+    @type  f: str
+
+    @return: path
+    @rtype: str
     """
     import platform as P
 
@@ -520,10 +646,19 @@ def platformFolder( f ):
     r = os.path.join( f, r)
 
     return r
-    
+
 
 def sortString( s ):
-    """sortString( str ) -> str with sorted letters"""
+    """
+    Sort the letters of a string::
+      sortString( str ) -> str with sorted letters
+      
+    @param s: string to be sorted
+    @type  s: str
+    
+    @return: sorted string
+    @rtype: str  
+    """
     l = list(s)
     l.sort()
     return ''.join(l)
@@ -533,6 +668,12 @@ def string2Fname( s ):
     """
     Remove forbidden character from string so that it can be used as a
     filename.
+
+    @param s: string
+    @type  s: str
+
+    @return: cleaned string
+    @rtype: str     
     """
     forbidden = ['*', '?', '|', '/', ' ']
     replaceme = ['-', '-', '-', '-', '_']
@@ -544,6 +685,12 @@ def string2Fname( s ):
 def toIntList( o ):
     """
     Convert single value or list of values into list of integers.
+    
+    @param o: value or list
+    @type  o: int or [int]
+
+    @return: list of integer
+    @rtype: [int]
     """
     if type( o ) != type( [] ):
         o = [ o ]
@@ -552,8 +699,15 @@ def toIntList( o ):
 
 
 def toIntArray( o ):
-    """Convert single value or list of values to Numeric array of int."""
+    """
+    Convert single value or list of values to Numeric array of int.
+    
+    @param o: value or list
+    @type  o: int or [int]
 
+    @return: array of integer
+    @rtype: Numeric.array('i')    
+    """
     if type( o ) == list or type( o ) == type( Numeric.array([])):
         return Numeric.array( map( int, o ) )
 
@@ -561,13 +715,34 @@ def toIntArray( o ):
 
 
 def toList( o ):
-    """toList(o) -> [o], or o,  if o is already a list"""
+    """
+    Make a list::
+      toList(o) -> [o], or o,  if o is already a list
+    
+    @param o: value(s)
+    @type  o: any or [any]
+
+    @return: list
+    @rtype: [any]
+    """
     if type( o ) != type( [] ):
         return [ o ]
     return o
 
+
 def toInt( o, default=None ):
-    """toInt(o) -> int, int(o) or default if o is impossible to convert."""
+    """
+    Convert to intereg if possible::
+      toInt(o) -> int, int(o) or default if o is impossible to convert.
+
+    @param o: value
+    @type  o: any
+    @param default: value to return if conversion is impossible (default: None)
+    @type  default: any
+    
+    @return: integer OR None 
+    @rtype: int OR None     
+    """
     if o == None or o == '':
         return default
     try:
@@ -580,10 +755,19 @@ def colorSpectrum( nColors, firstColor='FF0000', lastColor='FF00FF' ):
     """
     Creates a list of 'nColors' colors for biggles starting at
     'firstColor' ending at 'lastColor'
-    -> list of integers
+    Examples::
+     free spectrum red FF0000 to green 00FF00
+     bound spectrum cyan 00FFFF to magenta FF00FF
 
-    Examples: free spectrum red FF0000 to green 00FF00
-              bound spectrum cyan 00FFFF to magenta FF00FF
+    @param nColors: number of colors to create
+    @type  nColors: int
+    @param firstColor: first color in hex format (default: FF0000)
+    @type  firstColor: str
+    @param lastColor: last color in hex format (default: FF00FF)
+    @type  lastColor: str
+    
+    @return: list of colors
+    @rtype: [int]
     """
     spec = []
     out = os.popen( projectRoot() + '/external/spectrum.pl ' +str(nColors) +
@@ -599,10 +783,19 @@ def hexColors( nColors, firstColor='FF0000', lastColor='FF00FF' ):
     """
     Creates a list of 'nColors' colors for PyMol starting at
     'firstColor' ending at 'lastColor'
-    -> strings of hex colors
+    Examples::
+     free spectrum red FF0000 to green 00FF00
+     bound spectrum cyan 00FFFF to magenta FF00FF
+     
+    @param nColors: number of colors to create
+    @type  nColors: int
+    @param firstColor: first color in hex format (default: FF0000)
+    @type  firstColor: str
+    @param lastColor: last color in hex format (default: FF00FF)
+    @type  lastColor: str
 
-    Examples: free spectrum red FF0000 to green 00FF00
-              bound spectrum cyan 00FFFF to magenta FF00FF
+    @return: list of  hex colors
+    @rtype: [ str ]
     """
     spec = []
     out = os.popen( projectRoot() + '/extras/spectrum.pl ' +str(nColors) +
@@ -616,39 +809,61 @@ def hexColors( nColors, firstColor='FF0000', lastColor='FF00FF' ):
 
 def rgb2hex( rgbColor ):
     """
-    convert rgb color into 8 bit hex rgb color
-    [ 1.0, 0.0, 1.0, ] -> 'FF00FF'
+    convert rgb color into 8 bit hex rgb color::
+      [ 1.0, 0.0, 1.0, ] -> 'FF00FF'
+
+    @param rgbColor: RGB-color e.g. [ 1.0, 0.0, 1.0, ]
+    @type rgbColor : [int]
+    
+    @return: hex colors
+    @rtype: str 
     """
     hexRgb = ''
     for i in range(0,3):        
         component = hex( int( rgbColor[i]*255 ) )[2:]
-        
+
         if len(component) == 1:
             hexRgb += '0' + component
         else:
             hexRgb +=  component
-        
+
     return hexRgb
 
 
 def dateString():
-    """-> str, DD/MM/YYYY """
+    """
+    @return: DD/MM/YYYY
+    @rtype: str
+    """
     t = localtime()
     return '%02i/%02i/%i' % (t[2],t[1],t[0] )
 
+
 def dateSortString():
-    """-> YYYY/MM/DD:hh:mm.ss.ms"""
+    """
+    @return: YYYY/MM/DD:hh:mm.ss.ms
+    @rtype: 
+    """
     t = localtime()
     return "%i/%02i/%02i:%02i.%02i.%02i" % (t[0],t[1],t[2],t[3],t[4],t[5])
 
+
 def tryRemove(f, verbose=0, tree=0, wildcard=0 ):
     """
-    remove(f [,verbose=0, tree=0]), remove if possible, otherwise do nothing
-    f        - str
-    verbose  - 0|1, report failure (default 0)
-    tree     - 0|1, remove whole folder (default 0)
-    wildcard - filename contains wildcards
-    -> 1||0, 1 if file was removed
+    Remove file or folder::
+     remove(f [,verbose=0, tree=0]), remove if possible, otherwise do nothing
+
+    @param f: file path
+    @type  f: str
+    @param verbose: report failure (default 0)
+    @type  verbose: 0|1
+    @param tree: remove whole folder (default 0)
+    @type  tree: 0|1
+    @param wildcard: filename contains wildcards (default 0)
+    @type  wildcard: 0|1
+
+    @return: 1 if file was removed
+    @rtype: 1|0
     """
     try:
         if osp.isdir(f):
@@ -672,10 +887,15 @@ def tryRemove(f, verbose=0, tree=0, wildcard=0 ):
 def ensure( v, t, allowed=[], forbidden=[] ):
     """
     Check type of a variable
-    v - variable to test
-    t - required type
-    allowed - list of additional values allowed for v {default: []}
-    !! TypeError
+    
+    @param v: variable to test
+    @type  v: variable
+    @param t: required type
+    @type  t: str
+    @param allowed: list of additional values allowed for v {default: []}
+    @type  allowed: [str]
+    
+    @raise TypeError: if invalid
     """
     if allowed:
         allowed = toList( allowed )
@@ -690,13 +910,35 @@ def ensure( v, t, allowed=[], forbidden=[] ):
 
 
 def clipStr( s, length, suffix='..' ):
-    """clipStr( str, length ) -> str, with len( str ) <= length"""
+    """
+    Shorten string from end and replace the last characters with suffix::
+      clipStr( str, length ) -> str, with len( str ) <= length
+
+    @param s: original string
+    @type  s: str
+    @param length: desired length
+    @type  length: int
+    @param suffix: suffix (default: ..)
+    @type  suffix: str
+    
+    @return: shortend string
+    @rtype: str
+    """
     if len( s ) > length:
         s = s[:(length - len(suffix))] + suffix
     return s
 
+
 def info( item, short=1 ):
-    """info( item, short=1) -> Print useful information about item."""
+    """
+    Print info about ithem::
+      info( item, short=1) -> Print useful information about item.
+
+    @param item: query item
+    @type  item: item
+    @param short: short version (default: 1)
+    @type  short: 1|0
+    """
     ## quick and dirty ##
     if hasattr(item, '__name__'):
         print "NAME:    ", item.__name__

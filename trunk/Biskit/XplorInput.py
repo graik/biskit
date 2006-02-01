@@ -20,6 +20,9 @@
 ## $Revision$
 ## last $Author$
 ## $Date$
+"""
+Create Xplor input files.
+"""
 
 import Biskit.tools as t
 import os
@@ -31,21 +34,23 @@ class XplorInput:
     """
     Create Xplor input file. addFromTemplate() might be usefull for
     non-xplor-stuff, too.
-    Note, the file is only flushed to disc when the object is destructed,
+    
+    @note: The file is only flushed to disc when the object is destructed,
     or the flush() method is called!
     """
 
     def __init__(self, outName, mode='w'):
         """
-        outName - Folder to place output files in (String)
-        baseName- start of generated filenames, i.e. |1AKZ_|generate.inp
-        mode    - open file with this mode, w=override, a=append
+        @param outName: Folder to place output files in
+        @type  outName: str
+        @param mode: open file with this mode, w=override, a=append
+        @type  mode: str
         """
         self.foutName = os.path.abspath(outName)    # name of new .inp file
 
         # open for <appending|writing|reading>
         self.fgenerate = open(self.foutName, mode) 
-        
+
 
     def __del__(self):
         self.fgenerate.close()
@@ -56,11 +61,14 @@ class XplorInput:
         Flush output file (but keep it open).
         """
         self.fgenerate.flush()
-        
+
 
     def add(self, str):
         """
         Add String str and line break to xplor input file.
+
+        @param str: string to add to file
+        @type  str: str        
         """
         try:
             self.fgenerate.write(str + '\n')
@@ -74,6 +82,16 @@ class XplorInput:
         """
         return single parameter=value line with |indent| leading tabs.
         (Used by blockFromDic)
+
+        @param param: parameter
+        @type  param: str
+        @param value: value
+        @type  value: str
+        @param indent: number of tabs at begining of line
+        @type  indent: int
+
+        @return: line vith indent+parameter+value
+        @rtype: str
         """
         result = indent*'\t' + param
         try:
@@ -88,14 +106,22 @@ class XplorInput:
         """
         Returns block with parameters (as String).
         Use e.g. for minimize or paramter statement.
-        title   - first line of block
-        paramDic- dictionary of type {'param1':value1, 'param2':value2,...}
-        indent  - number of tabs to add before each line
-        priorityParams  - list of params to write first (in that order) e.g.
-                          [param1, param2] to have param1 and param2 come first
-        Will result in param1=value1, param2=value2.
-        If e.g. value1 is an empty string or None just param is written in that
-        line
+        
+        @param title: first line of block
+        @type  title: str
+        @param paramDic: dictionary of type
+                         C{ {'param1':value1, 'param2':value2,...} }
+        @type  paramDic: dict
+        @param indent: number of tabs to add before each line
+        @type  indent: int
+        @param priorityParams: list of params to write first (in that order)
+                               e.g. C{ [param1, param2] } to have param1 and
+                               param2 come first
+        @type  priorityParams: [str]
+        
+        @return: Will result in param1=value1, param2=value2. If e.g. value1
+                 is an empty string or None just param is written in that line
+        @rtype: str
         """
         result = ""
         if indent > 0:
@@ -127,14 +153,18 @@ class XplorInput:
         As block() but takes parameters as list of strings without resorting
         to the clumpsy dictionary.
 
-        title    - string, first line
-        paramLst - list of strings, i.e. ['nsteps=10', 'eps=1']
-        indent   - int, number of tabs indentation
+        @param title: first line
+        @type  title: string
+        @param paramLst: list of strings, i.e. C{ ['nsteps=10', 'eps=1'] }
+        @type  paramLst: [str]
+        @param indent: number of tabs indentation
+        @type  indent: int
 
-        -> string, block with parameters.
+        @return: block with parameters.
+        @rtype: str
         """
         result = indent*'\t' + title + '\n'  # first line of block
-        
+
         for param in paramLst:
             result = result + (indent+1) * '\t' + param + '\n'
         result = result + indent*'t' + 'end\n'
@@ -144,8 +174,16 @@ class XplorInput:
 
     def addBlockFromDic(self, title, paramDic, indent=0):
         """
-        Convenience implementation of block. This one directly appends the block
-        to the growing file.
+        Convenience implementation of block. This one directly appends
+        the block to the growing file.
+
+        @param title: first line of block
+        @type  title: str
+        @param paramDic: dictionary of type
+                         C{ {'param1':value1, 'param2':value2,...} }
+        @type  paramDic: dict
+        @param indent: number of tabs to add before each line
+        @type  indent: int        
         """
         self.add( self.blockFromDic(title, paramDic, indent) )
 
@@ -153,6 +191,13 @@ class XplorInput:
     def addBlock(self, title, paramLst, indent=0):
         """
         create block and directly add it to growing input file.
+
+        @param title: first line
+        @type  title: string
+        @param paramLst: list of strings, i.e. C{ ['nsteps=10', 'eps=1'] }
+        @type  paramLst: [str]
+        @param indent: number of tabs indentation
+        @type  indent: int        
         """
         self.add( self.block( title, paramLst, indent) )
 
@@ -160,7 +205,17 @@ class XplorInput:
     def renameAtom(self, resname, oldName, newName):
         """
         append statement for renaming atoms:
-        -> vector do (name=|newName|) (name |oldName| and resname |resname|)
+
+        @param resname: name of residue to replace atom in  
+        @type  resname: str
+        @param oldName: atom name to replace
+        @type  oldName: str
+        @param newName: new atom name
+        @type  newName: str
+        
+        @return: Line: C{ vector do (name=|newName|) (name |oldName|
+                          and resname |resname|) }
+        @rtype: str
         """
         self.add(
             ("""vector do (name="%(newName)s") (name "%(oldName)s" """+
@@ -170,10 +225,12 @@ class XplorInput:
     def renameAtoms( self, atomDicLst ):
         """
         Rename several atoms.
-        atomDicLst - list of dictionaries ala
-                     [{'res':'ALA', 'old':'HT1', 'new':'H1'},{...}]
-                     each dictionary describing one renaming task """
         
+        @param atomDicLst: list of dictionaries wher each dictionary
+                           describs one renaming task e.g. ::
+                             [{'res':'ALA', 'old':'HT1', 'new':'H1'},{...}]
+        @type  atomDicLst: dict
+        """ 
         for rename in atomDicLst:
             self.renameAtom(rename['res'], rename['old'], rename['new'])
 
@@ -181,47 +238,65 @@ class XplorInput:
     def renameRes(self, oldName, newName, select=''):
         """
         Append statement for renaming residues:
-        oldname - str, current residue name
-        newname - str, new one
-        select  - optional additional selection for residue, e.g. 'and resid 10'
-        -> str, 'vector do (resname=|newName|) (resname |oldName| |select|)' """
+
+        @param oldName: current residue name, to replace
+        @type  oldName: str
+        @param newName: new residue name
+        @type  newName: str
+        @param select: optional additional selection for residue,
+                       e.g. 'and resid 10'
+        @type  select: str
         
+        @return: Line: C{ 'vector do (resname=|newName|)
+                           (resname |oldName| |select|)' }
+        @rtype: str
+        """
+
         self.add(\
             ("""vector do (resname="%(newName)s") (resname "%(oldName)s" """+
              """%(select)s )""") % vars() )
-        
+
 
     def hbuild(self, selection):
         """
         Append hbuild block. Example for how to use the block() method.
-        selection - String with atom selection
+        
+        @param selection: String with atom selection
+        @type  selection: str
         """
         selection_value = "( %s )" % selection
         result = self.blockFromDic('hbuild',{'selection': selection_value,
                                              'print':'on'})
         self.add( result )
-        
+
 
     def patchSS(self, res1, res2):
         """
         Patch statement for disulfide bond between residue number 1 and 2.
-        res1, res2 - {'res':19,'id':'SEGID'}, number and segid for both residues
+        
+        @param res1: dictionary with number and segid for the first residue
+                     e.g. C{ {'res':19,'id':'SEGID'} }
+        @type  res1: dict
+        @param res2: dictionary with number and segid for the second residue
+        @type  res2: dict
         """
         select_1 = """( segid "%4s" and resid %s )""" % (res1['id'],res1['res'])
         select_2 = """( segid "%4s" and resid %s )""" % (res2['id'],res2['res'])
         result = self.blockFromDic("patch disu",
                             {'reference=1': select_1, 'reference=2': select_2} )
         self.add(result)
-        
+
 
     def addAmberSegment(self, seg_id, fpdb):
         """
         Return string holding xplor input for segment consisting of one chain.
         Example for nesting blocks with blockFromDic().
-        segid   - segment id
-        fpdb    - complete filename of pdb
+        
+        @param seg_id: segment id
+        @type  seg_id: str
+        @param fpdb: complete filename of pdb
+        @type  fpdb: str
         """
-
         ## read sequence from coordinates
         coord_statement = """coordinates @%(fpdb)s""" % vars()  
 
@@ -246,8 +321,11 @@ class XplorInput:
         """
         Read template input file with formatstr placeholders, insert values
         from valueDic.
-        fTemplate - String, filename for template
-        valueDic  - Dictionary, {placeHolder:value}
+        
+        @param fTemplate: filename for template
+        @type  fTemplate: str
+        @param valueDic: Dictionary, {placeHolder:value}
+        @type  valueDic: dict
         """
         try:
 
@@ -269,7 +347,7 @@ class XplorInput:
                  str( why[0] )
 
             raise XplorInputError, s
-        
+
         except:
             s =  "Error while adding template file."
             s += "\n  template file: " + fTemplate
@@ -278,7 +356,7 @@ class XplorInput:
 
             for i in valueDic.keys():
                 s += "\t%25s\t%s\n" % (i, str( valueDic[i] ) )
-                
+
             s += "\n  Error:\n  " + t.lastError()
 
             raise XplorInputError, s 

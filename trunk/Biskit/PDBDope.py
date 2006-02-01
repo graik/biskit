@@ -41,23 +41,43 @@ class PDBDope:
     """
 
     def __init__( self, model ):
+        """
+        @param model: model to dope
+        @type  model: PDBModel
+        """
         self.m = model
 
     def version( self ):
+        """
+        @return: version of class
+        @rtype: str
+        """
         return 'PDBDope $Revision$'
 
     def model( self ):
+        """
+        @return: model
+        @rtype: PDBModel
+        """
         return self.m
+
 
     def addASA( self ):
         """
         Add profiles of Accessible Surface Area: 'relASA', 'ASA_total',
-        'ASA_sc', 'ASA_bb'
-        !! ProfileError, if whatif-returned atom/residue lists don't match.
-           Usually that means, whatif didn't recognize some residue name
+        'ASA_sc', 'ASA_bb'. See L{Biskit.WhatIf}
+
+        @note: Using WhatIf to calculate relative accessabilities is not
+               nessesary any more. SurfaceRacer now also adds a profile
+               'relAS' (conataining relative solvent accessible surf) and
+               'relMS' (relative molecular surface).
+        
+        @raise ProfileError: if WhatIf-returned atom/residue lists don't match.
+                             Usually that means, WhatIf didn't recognize some
+                             residue name
         """
         w = WhatIf( self.m )
-        
+
         atomRelAcc, resASA, resMask = w.run()
 
 ##         normalAtoms = N.logical_not( N.logical_or(self.m.maskHetatm(),
@@ -82,24 +102,37 @@ class PDBDope:
         self.m.setResProfile( 'ASA_bb', resASA[:,2], normalRes, 0,
                            comment='back bone accessible surface area in A^2',
                            version= T.dateString() + ' ' + self.version() )
-        
 
-    def addSurfaceMask( self ):
+
+    def addSurfaceMask( self, pname='relAS' ):
+        """
+        Adds a surface mask profie that contains atoms with > 40% exposure
+        compared to a random coil state.
+
+        @param pname: name of relative profile to use
+                      (Whatif-relASA OR SurfaceRacer - relAS)
+                      (default: relAS)
+        @type  pname: str
+        """
         r = self.m.profile2mask( 'relASA', cutoff_min=40 )
         self.m.setResProfile( 'surfMask',  self.m.atom2resMask(r),
                               comment='residues with any atom > 40% exposed',
                               version= T.dateString() + ' ' + self.version() )
-        
+
 
     def addConservation( self, pfamEntries=None ):
         """
-        pfamEntries - external hmmSearch result, list of (non-overlapping)
-                      profile hits
-                      e.g. [{'ribonuclease': [[1, 108]]},..]
-                      [{profileName : [ [startPos, endPos],[start2, end2]]}]
-                    - startPos, endPos as reported by hmmPfam for PDB sequence
-                      generated from this model
-                    - default: None, do the search
+        Adds a conservation profile. See L{Biskit.Hmmer}
+        
+        @param pfamEntries: External hmmSearch result, list of
+                            (non-overlapping) profile hits.
+                            (default: None, do the search) Example::
+                              [{'ribonuclease': [[1, 108]]},..]
+                              [{profileName : [ [startPos, endPos],
+                                                [start2, end2]]}]
+                             - startPos, endPos as reported by hmmPfam
+                               for PDB sequence generated from this model
+        @type  pfamEntries: [{dict}]           
         """
         ## mask with normal AA also used for HMM search
         mask = self.m.maskCA()
@@ -133,18 +166,21 @@ class PDBDope:
         Count the number of heavy atoms within the given radius.
         Values are only collected for atoms with |minasa| accessible surface
         area.
-        minasa - float, 0 to 100%
-        radius - float, in A
+        
+        @param minasa: relative exposed surface - 0 to 100%
+        @type  minasa: float
+        @param radius: in Angstrom
+        @type  radius: float
         """
         mHeavy = self.m.maskHeavy()
 
         xyz = N.compress( mHeavy, self.m.getXyz(), 0 )
-        
-        if minasa and self.m.profile( 'relASA', 0 ) == 0:
+
+        if minasa and self.m.profile( 'relAS', 0 ) == 0:
             self.addASA()
 
         if minasa:
-            mSurf = self.m.profile2mask( 'relASA', minasa )
+            mSurf = self.m.profile2mask( 'relAS', minasa )
         else:
             mSurf = N.ones( self.m.lenAtoms() )
 
@@ -162,7 +198,8 @@ class PDBDope:
 
     def addFoldX( self ):
         """
-        adds dict with fold-X energies to PDBModel's info dict.
+        Adds dict with fold-X energies to PDBModel's info dict.
+        See L{Biskit.Fold_X}
         """
         x = Fold_X( self.m )
         self.m.info['foldX'] = x.run()
@@ -170,12 +207,24 @@ class PDBDope:
 
     def addSurfaceRacer( self, probe=1.4, vdw_set=1, probe_suffix=0 ):
         """
-        probe        - float, probe radius
-        probe_suffix - 1|0, append probe radius to profile names
-        Adds three different profiles as calculated by fastSurf
+        Always adds three different profiles as calculated by fastSurf::
            curvature - average curvature (or curvature_1.4 if probe_suffix=1)
            MS - molecular surface area   (or MS_1.4 if probe_suffix=1)
            AS - accessible surface area  (or AS_1.4 if probe_suffix=1)
+           
+        If the probe radii is 1.4 Angstrom the followint two profiles
+        are also added::
+           relAS - Relative solvent accessible surface
+           relMS - Relative molecular surface
+           
+        See {Bikit.SurfaceRacer}
+        
+        @param probe: probe radius
+        @type  probe: float
+        @param vdw_set: defines what wdv-set to use (1-Richards, 2-Chothia)
+        @type  vdw_set: 1|2
+        @param probe_suffix: append probe radius to profile names
+        @type  probe_suffix: 1|0
         """
         name_MS   = 'MS' + probe_suffix * ('_%3.1f' % probe)
         name_AS   = 'AS' + probe_suffix * ('_%3.1f' % probe)
@@ -186,13 +235,13 @@ class PDBDope:
         mask = m.maskHeavy()
         m = m.compress( mask )
 
-        
+
         fs = SurfaceRacer( m, probe, vdw_set=vdw_set )
         fs_dic = fs.run()
 
         fs_info= fs_dic['surfaceRacerInfo']
 
-        
+
         self.m.setAtomProfile( name_MS, fs_dic['MS'], mask, 0,
                                comment='Molecular Surface area in A',
                                version= T.dateString() + ' ' + self.version(),
@@ -213,12 +262,12 @@ class PDBDope:
                                    comment='Relative solvent accessible surf.',
                                    version= T.dateString()+' ' +self.version(),
                                    **fs_info )
-        
+
             self.m.setAtomProfile( 'relMS', fs_dic['relMS'], mask, 0,
                                    comment='Relative molecular surf.',
                                    version= T.dateString()+' '+self.version(),
                                    **fs_info )
-        
+
 if __name__ == '__main__':
 
     from Biskit import PDBModel
@@ -237,7 +286,7 @@ if __name__ == '__main__':
     print "Adding FoldX energy...",
     d.addFoldX()
     print 'Done.'
-    
+
     print "Adding WhatIf ASA...",
     d.addASA()
     print 'Done.'
@@ -245,19 +294,19 @@ if __name__ == '__main__':
     print "Adding surface mask...",
     d.addSurfaceMask()
     print 'Done.'
-    
+
     print "Adding conservation data...",
     d.addConservation()
     print 'Done.'
-    
+
     print "Adding surface density...",
     d.addDensity()
     print 'Done.'
-    
+
     print "Adding SurfaceRacer curvature...",
     d.addSurfaceRacer( probe=1.4 )
     print 'Done.'
-    
+
     print d.m.info
 
     ## check that nothing has changed

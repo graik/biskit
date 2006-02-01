@@ -17,12 +17,14 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## organise, sort, and filter list of PDBModels
 
 ## last $Author$
 ## last $Date$
 ## $Revision$
 
+"""
+organise, sort, and filter list of PDBModels
+"""
 from DictList import DictList
 from PDBModel import PDBModel
 
@@ -46,23 +48,39 @@ class ModelList( DictList ):
 
     def __init__( self, lst=[], item_type=PDBModel ):
         """
-        lst        - [ dict ]
-        item_type  - type, class of allowed items [ dict ]
-        !! raise DictListError, if list contains non-item_type item.
+        @param lst: list
+        @type  lst: [ dict ]
+        @param item_type: type, class of allowed items [ dict ]
+        @type  item_type: [ dict ]
+        
+        @raise raise DictListError: if list contains non-item_type item.
         """
         DictList.__init__( self, lst, item_type )
 
+
     def version( self ):
+        """
+        Version of class.
+        
+        @return: class version number
+        @rtype: str
+        """
         return DictList.version( self ) + '; ModelList $Revision$'
 
 
     def getItemValue( self, item, key, default=None ):
         """
         Get a value from a given item (dictionary). Overrides DictList method.
-        item    - dict, possible entry of this list
-        key     - any, dictionary key
-        default - any, return value if key is not found [None]
-        -> any
+        
+        @param item: possible entry of this list
+        @type  item: dict
+        @param key: dictionary key
+        @type  key: any
+        @param default: return value if key is not found (default: None)
+        @type  default: any
+
+        @return: any
+        @rtype: any
         """
         return item.info.get( key, default )
 
@@ -70,25 +88,36 @@ class ModelList( DictList ):
     def file2model( self, file_or_model ):
         """
         Load PDBModel from file if necessary.
-        file_or_model - str OR PDBModel, file name or existing model
-        -> PDBModel, existing model or model loaded from file
+        
+        @param file_or_model: file name or existing model
+        @type  file_or_model: str OR PDBModel
+        
+        @return: existing model or model loaded from file
+        @rtype: PDBModel
         """
         if isinstance( file_or_model, PDBModel ):
             return file_or_model
 
         return PDBModel( file_or_model )
 
+
     def _processNewItem( self, v, i ):
         """
         Called before an item is added to the list. Override but call.
-        i - int, index
-        v - dict, value
+        
+        @param i: index
+        @type  i: int
+        @param v: value
+        @type  v: dict
+
+        @return: value
+        @rtype: dict        
         """
         v = self.file2model( v )
 
         return DictList._processNewItem( self, v, i )
-        
-    
+
+
 ##
 ## TEST
 ##

@@ -17,13 +17,13 @@
 ## license.txt along with this program; if not, write to the Free
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
-##
-## Write cleaned peptide_chains as PDB for import into XPlor
-##
 ## $Version: $
 ## last $Date$
 ## last $Author$
 
+"""
+Write cleaned peptide_chains as PDB for import into XPlor
+"""
 from Scientific.IO.PDB import *
 import commands, os
 
@@ -39,16 +39,24 @@ class ChainWriter:
         """
         Take chains from ChainCleaner and write pdb files.
         File names are created from segid of each chain + '_seg.pdb'
-        path - string, output path for PDB files
+        
+        @param path: output path for PDB files
+        @type  path: string
         """
         self.path = T.absfile( path )
+
 
     def _startPDB(self, chain, fname):
         """
         Create pdb file and write header.
-        chain - Scientific.IO.PDB.PeptideChain
-        fname - string, file name
-        -> PDBFile, handle of open file
+        
+        @param chain: Scientific.IO.PDB.PeptideChain object
+        @type  chain: chain object
+        @param fname: file name
+        @type  fname: string
+        
+        @return: handle of open file
+        @rtype: PDBFile
         """
         f = PDBFile(fname, 'w')
         try:
@@ -58,10 +66,13 @@ class ChainWriter:
             pass
         return f
 
+
     def removeTER(self, fname):
         """
         Remove TER record from PDB.
-        fname - string, name of existing file.
+        
+        @param fname: name of existing file.
+        @type  fname: string
         """
         try:
             command = 'egrep -v "^TER " ' + fname + '> temp.pdb'
@@ -75,7 +86,9 @@ class ChainWriter:
     def writeChain(self, chain):
         """
         Write single chain as PDB. File name will be segid + '_seg.pdb'.
-        chain - Scientific.IO.PDB.PeptideChain
+        
+        @param chain: Scientific.IO.PDB.PeptideChain object
+        @type  chain: chain object
         """
         if (chain <> None):
             try:
@@ -84,13 +97,13 @@ class ChainWriter:
                 file = self._startPDB(chain, fname)     # include comments
                 chain.writeToFile(file)     # create PDB
                 file.close()                # make sure file is complete!
-                self.removeTER(file.file.file.name)   # remove TER record from PDB
-                return 1        # wrote a chain
+                self.removeTER(file.file.file.name) #remove TER record from PDB
+                return 1        # write a chain
 
             except (IOError):
                 T.errWriteln("Error writing chain to file %s:" % fname)
                 T.errWriteln( T.lastError() )
-                
+
         return 0            # false, no more chains to write
 
 ##############################
@@ -105,7 +118,7 @@ if __name__ == '__main__':
     cleaner = ChainCleaner( ChainSeparator( \
         T.testRoot()+'/com_wet/1BGS_edited.pdb',
         T.testRoot()+'/com_wet') )
-    
+
     writer = ChainWriter( T.testRoot()+'/com_wet' )
     print 'Writing separated, cleaned chains to disk...'
     print writer.writeChain( cleaner.next() )
@@ -114,4 +127,4 @@ if __name__ == '__main__':
 
     print "DONE."
 
-    
+

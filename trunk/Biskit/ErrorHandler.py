@@ -1,4 +1,3 @@
-## last $Author$
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
@@ -18,9 +17,14 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## last $Date$
 ## $Revision$
+## last $Date$
+## last $Author$
 
+"""
+Default Error Handler for Biskit classes.
+"""
+    
 import Biskit.tools as tools
 from Biskit.LogFile import ErrLog
 from Biskit.Errors import HandledError, NormalError, FatalError
@@ -32,7 +36,8 @@ class ErrorHandler( object ):
 
     def __init__( self, log=None ):
         """
-        log - LogFile, target of error messages, None->StdErr [None]
+        @param log: target of error messages, None->StdErr (default: None)
+        @type  log: LogFile
         """
         self.log = log or ErrLog()
 
@@ -40,8 +45,11 @@ class ErrorHandler( object ):
     def fatal( self, message ):
         """
         Handle a fatal error (likely a bug), stop program execution.
-        message - str, message to be given to user
-        !! FatalError
+        
+        @param message: message to be given to user
+        @type  message: str
+        
+        @raise FatalError: 
         """
         s = '\nFatal Error: '+str(message)
         s += '\n\t' + tools.lastError() + '\n'
@@ -55,8 +63,11 @@ class ErrorHandler( object ):
         """
         Handle a normal error (like non-existing file) that is not
         necessarily a bug.
-        message - str, message to be given to user
-        !! NormalError
+        
+        @param message: message to be given to user
+        @type  message: str
+        
+        @raise NormalError: 
         """
         s = '\nError: '+str(message)
         s += '\n\t' + tools.lastError()
@@ -69,9 +80,13 @@ class ErrorHandler( object ):
     def warning( self, message, error=1, trace=0 ):
         """
         Issue a warning. No exception is raised.
-        message - str, message to be given to user
-        error   - 1|0, report Exception with line [1]
-        trace   - 1|0, report full back trace to exception [0]
+        
+        @param message: message to be given to user
+        @type  message: str
+        @param error: report Exception with line (default: 1)
+        @type  error: 1||0
+        @param trace: report full back trace to exception (default: 0)
+        @type  trace: 1||0
         """
         s = '\nWarning (ignored): '+str(message)
         try:

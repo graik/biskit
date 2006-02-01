@@ -20,6 +20,9 @@
 ## last $Author$
 ## last $Date$
 ## $Revision$
+"""
+Reference data for SurfaceRacer.
+"""
 
 import Numeric
 
@@ -380,9 +383,16 @@ def relExposure( model, absSurf, key='AS', clip=1 ):
     Calculate how exposed an atom is relative to the same
     atom in a GLY-XXX-GLY tripeptide, an approximation of
     the unfolded state.
-    key - MS or AS
-    clip - clip values above 100%
-    -> rel - list of relative accessible surfaces
+
+    @param absSurf: Absolute MS OR AS values
+    @type  absSurf: [float]
+    @param key: MS or AS
+    @type  key: MS|AS
+    @param clip: clip values above 100% (default: 1)
+    @type  clip: 1|0
+    
+    @return: rel - list of relative accessible surfaces
+    @rtype: [float]
     """
     if not key=='MS' and not key=='AS':
         raise SurfaceRacer_Error,\
@@ -419,7 +429,18 @@ def relExposure( model, absSurf, key='AS', clip=1 ):
 
 def __Nter( a, rel, absSurf, key, i ):
     """
-    Get N-terminal relative exposures
+    Get N-terminal relative exposures.
+
+    @param rel: list in which relative exposures are collected
+    @type  rel: [float]
+    @param absSurf: Absolute MS OR AS values
+    @type  absSurf: [float]
+    @param key: MS or AS
+    @type  key: MS|AS
+    
+    @return: rel - list of relative accessible surfaces with data from
+                   N-terminal residues appended.
+    @rtype: [float]
     """
     atom = a['name']
     resi = a['residue_name']
@@ -439,6 +460,17 @@ def __Nter( a, rel, absSurf, key, i ):
 def __Cter( a, rel, absSurf, key, i ):
     """
     Get C-terminal relative exposures
+
+    @param rel: list in which relative exposures are collected
+    @type  rel: [float]
+    @param absSurf: Absolute MS OR AS values
+    @type  absSurf: [float]
+    @param key: MS or AS
+    @type  key: MS|AS
+    
+    @return: rel - list of relative accessible surfaces with data from
+                   C-terminal residues appended.
+    @rtype: [float]    
     """
     atom = a['name']
     resi = a['residue_name']
@@ -454,7 +486,18 @@ def __Cter( a, rel, absSurf, key, i ):
 
 def __bulk( a, rel, absSurf, key, i ):
     """
-    Get relative exposures for everything else
+    Get relative exposures for everything else.
+
+    @param rel: list in which relative exposures are collected
+    @type  rel: [float]
+    @param absSurf: Absolute MS OR AS values
+    @type  absSurf: [float]
+    @param key: MS or AS
+    @type  key: MS|AS
+    
+    @return: rel - list of relative accessible surfaces with data from
+    '              none-terminal residues appended.
+    @rtype: [float]   
     """
     atom = a['name']
     resi = a['residue_name']

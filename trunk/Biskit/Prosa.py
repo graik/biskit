@@ -22,6 +22,12 @@
 ## Created:       04/02/02
 ## Last modified: 04/06/02
 ##
+"""
+Run a ProsaII job.
+
+@attention: This class should be replaced by L{Prosa2003}. It will only stay
+for a while unitl  all transitions are made to the new version of Prosa.
+"""
 
 import tempfile
 import os
@@ -140,7 +146,7 @@ class ProsaII:
                   'surface_lower': surface_lower,
                   'surface_upper': surface_upper,
                   'factor_surface': self.getSurfaceFactor()}
-        
+
         command = 'pdb_dir = %(pdb_path)s\n' + \
                   'read pdb %(pdb_file)s %(obj_name)s\n' + \
                   'lower_k = %(lower_k)d\n' + \
@@ -154,7 +160,7 @@ class ProsaII:
 
         old_path = os.getcwd()
         os.chdir(self.temp_dir)
-        
+
         self.run(command % values)
 
         ## output is in .ana-file

@@ -20,6 +20,9 @@
 ## $Revision$
 ## last $Date$
 ## last $Author$
+"""
+Simple log file.
+"""
 
 import Biskit.tools as T
 import sys
@@ -32,29 +35,56 @@ class LogFile:
     """
 
     def __init__(self, fname, mode='w'):
+        """
+        @param fname: name of log file
+        @type  fname: str
+        @param mode: mode (default: w)
+        @type  mode: str
+        """
         self.fname = T.absfile( fname )
         self.mode  = mode
         self._f  = None
 
+
     def f( self ):
         """
         Open file only when needed for first time.
-        -> file object
+        
+        @return: open file handle
+        @rtype: object
         """
         if self._f is None:
             self._f = open( self.fname, self.mode )
 
         return self._f
 
+
     def add(self, s):
+        """
+        Add new line to logfile and flush
+
+        @param s: line
+        @type  s: str        
+        """
         self.f().writelines(s+"\n")
         self.f().flush()
 
+
     def add_nobreak(self, s):
+        """
+        Add new line without creating a linebreak to logfile and flush
+
+        @param s: line
+        @type  s: str
+        """
         self.f().writelines(s)
         self.f().flush()
 
+
     def __del__(self):
+        """
+        Close file handle.
+        """
         if self._f is not None:
             self.f().close()
             self._f = None

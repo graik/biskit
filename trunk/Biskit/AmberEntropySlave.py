@@ -21,6 +21,10 @@
 ## last $Date$
 ## last $Author$
 
+"""
+Parallellized AmberEntropist calculation.
+"""
+
 from Biskit.PVM.dispatcher import JobSlave
 import Biskit.tools as T
 import Biskit.settings as settings
@@ -33,14 +37,15 @@ import os, time
 
 class AmberEntropySlave( JobSlave ):
 
+
     def initialize(self, params):
         """
-        expects
-        {'nice':int, 'ferror':str, .. }
+        expects::
+          {'nice':int, 'ferror':str, .. }
         """
         self.__dict__.update( params )
         self.errorLog = LogFile( self.ferror, mode='a' )
-        
+
 
     def reportError(self, msg, id ):
         try:
@@ -68,8 +73,10 @@ class AmberEntropySlave( JobSlave ):
 
 
     def go(self, jobs):
-        """jobs - { int_soln : file_name_complex }"""
-
+        """
+        @param jobs: dictionary with { int_soln : file_name_complex }
+        @type  jobs: dict
+        """
         result = {}
 
         startTime = time.time()
@@ -114,7 +121,7 @@ if __name__ == '__main__':
     import os, sys
 
     if len(sys.argv) == 2:
-        
+
         nice = int(sys.argv[1])
         os.nice(nice)
 

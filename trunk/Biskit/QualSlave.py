@@ -21,6 +21,10 @@
 ## last $Date$
 ## last $Author$
 
+"""
+Plot RMSD, Energy of ensemble trajectory.
+"""
+    
 from os.path import dirname
 
 import tools as T
@@ -33,13 +37,28 @@ class QualSlave(JobSlave):
     """
     Plot RMSD, Energy of ensemble trajectory.
     """
-    
-    def initialize(self, params):
 
+    def initialize(self, params):
+        """
+        Copy the parameters that Master is passing in as dict into
+        fields of this class.
+        
+        @param params: defined in Master
+        @type  params: dict
+        """
         pass
 
-    def go( self, dict ):
 
+    def go( self, dict ):
+        """
+        Calculate rmsd values for trajectory and plot them.
+
+        @param dict: dictionary with path to trajectories as values
+        @type  dict: dict
+
+        @return: dictionary with path to trajectories as values
+        @rtype: dict
+        """
         for k, f in dict.items():
 
             fout = dirname( f )+'/'+'%s'+ T.stripFilename(f)+'.eps'
@@ -60,13 +79,28 @@ class QualSlave(JobSlave):
 
 
     def loadTraj( self, ftraj ):
+        """
+        Load trajectories from disc.
+        
+        @param ftraj: path to trajectory
+        @type  ftraj: str
 
+        @return: ensemble trajectory object
+        @rtype: EnsembleTraj
+        """
         t = T.Load( T.absfile( ftraj ) )
         return traj2ensemble( t )
 
 
     def calcRmsd( self, t ):
-
+        """
+        Calculate the rmsd to the reference, the CA rmsd to the average
+        member and the CA rmsd to last member frame. Add the results
+        into a profile.
+        
+        @param t: ensemble trajectory object
+        @type  t:  EnsembleTraj
+        """
         mCA = t.ref.maskCA()
 
         t.fit( ref=t.ref, prof='rms_all_ref', comment='all heavy')
@@ -78,6 +112,17 @@ class QualSlave(JobSlave):
 
 
     def plotRmsdRef( self, t, title ):
+        """
+        Plot the rmsd profiles calculated in L{ calcRmsd }.
+        
+        @param t: ensemble trajectory object
+        @type  t:  EnsembleTraj
+        @param title: plot title
+        @type  title: str
+
+        @return: biggles plot object
+        @rtype: biggles.FramedPlot
+        """
         p = t.plotMemberProfiles('rms_all_ref', 'rms_CA_av', 'rms_CA_last')
         p.title = title
         p.xlabel= 'frame #'
@@ -90,7 +135,7 @@ if __name__ == '__main__':
     import os, sys
 
     if len(sys.argv) == 2:
-        
+
         niceness = int(sys.argv[1])
         os.nice(niceness)
 

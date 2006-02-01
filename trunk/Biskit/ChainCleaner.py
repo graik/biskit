@@ -20,7 +20,9 @@
 ## $Revision$
 ## last $Date$
 ## last $Author$
-"""Fill in missing atoms, and report low occupancies"""
+"""
+Fill in missing atoms, and report low occupancies
+"""
 
 from ChainSeparator import ChainSeparator
 from Scientific.IO.PDB import *
@@ -35,12 +37,14 @@ class ChainCleaner:
     def __init__(self, chainSeparator):
         """
         Clean up separate chains.
-        chainSeparator - ChainSeparator
+        
+        @param chainSeparator: ChainSeparator
+        @type  chainSeparator: module
         """
         self.reader = chainSeparator
         self.pdbname = self.reader.pdbname()   # take over pdb name
         self.log = self.reader.log             # take over log file
-        
+
         self.aminoAcidDict = {'GLY':['N','CA','C','O'],
         'ALA':['N','CA','C','O','CB'],
         'VAL':['N','CA','C','O','CB','CG1','CG2'],
@@ -70,8 +74,13 @@ class ChainCleaner:
         """
         Tweak list of allowed atom names to one expected for a
         C-terminal residue.
-        aName_list - list of strings, e.g. ['N','CA','C','O','CB']
-        -> e.g. ['N','CA','C','OT1','CB','OT2']
+
+        @param aName_list: list of allowed atom names
+                           e.g. ['N','CA','C','O','CB']
+        @type  aName_list: list of strings
+        
+        @return: e.g. ['N','CA','C','OT1','CB','OT2']
+        @rtype: list of str
         """
         result = []         # make local copy instead of taking reference
         result += aName_list
@@ -82,12 +91,15 @@ class ChainCleaner:
             pass  ## skip for CBX (Methyl amine)
         return result
 
-    
+
     def _addMissing(self, residue, atom_name):
         """
         Add atom with given name to residue.
-        residue - Scientific.IO.PDB.Residue
-        atom_name - string
+        
+        @param residue: Scientific.IO.PDB.Residue object
+        @type  residue: object
+        @param atom_name: atom name
+        @type  atom_name: str
         """
         if len(atom_name) < 2:
             # Atom.__init__ complaints about 1-char names
@@ -101,8 +113,12 @@ class ChainCleaner:
         """
         Look for missing or unknown atom names, add missing atoms,
         report unknown atoms.
-        chain - Scientific.IO.PDB.PeptideChain
-        -> Scientific.IO.PDB.PeptideChain
+        
+        @param chain: Scientific.IO.PDB.PeptideChain object
+        @type  chain: object
+        
+        @return: Scientific.IO.PDB.PeptideChain object
+        @rtype: chain object
         """
         chain.deleteHydrogens() ## delete all hydrogens
         i = 0
@@ -130,7 +146,7 @@ class ChainCleaner:
                         self._addMissing(res, name)  
                         self.log.add('\tadded missing atom -> '+ name+ ' : '+\
                                      res.name+ str(res.number))
-            
+
             except:
                s = "\ncompleteResidues(): Error while checking atoms.\n"
                s = s + "residue " + str(i)+ " :"+ str(res) + "\n"
@@ -140,15 +156,23 @@ class ChainCleaner:
                self.log.add(s)
 
             i = i+1
-            
+
         return chain
 
 
     def _checkOccupancy(self, chain):
-        """Check and report atoms with ocupancies that is not 100% 
+        """
+        Check and report atoms with ocupancies that is not 100% 
         Scientific.PDB.IO will only take one of the atoms even if there are
         alternate locations indicated in the PDB-file. The code below does only
-        check for none 100% occupancies and report them to the log-file."""
+        check for none 100% occupancies and report them to the log-file.
+
+        @param chain: Scientific.IO.PDB.PeptideChain object
+        @type  chain: chain object
+
+        @return: Scientific.IO.PDB.PeptideChain object
+        @rtype: chain object
+        """
         self.log.add("Checking atom occupancies of chain "+chain.segment_id)
         for res in chain:
             for atom in res:
@@ -159,18 +183,40 @@ class ChainCleaner:
                                  str(res.number))
         return chain
 
-    
+
     def _find_and_change(self, chain, oldAtomName, residueNum, newAtomName):
-        """Change name of atoms in specified residue"""
+        """
+        Change name of atoms in specified residue.
+
+        @param chain: Scientific.IO.PDB.PeptideChain object
+        @type  chain: chain object
+        @param oldAtomName: atom name
+        @type  oldAtomName: str
+        @param residueNum: residue number
+        @type  residueNum: int
+        @param newAtomName: atom name
+        @type  newAtomName: str
+        
+        @return: Scientific.IO.PDB.PeptideChain object
+        @rtype: chain object
+        """
         changeRes = chain.residues[residueNum]
         if changeRes.atoms.has_key(oldAtomName) == 1:
             changeRes.atoms[oldAtomName].name = newAtomName
         return chain
 
-    
+
     def _correct_Cterm(self, chain):
-        """Terminal amino acid can't have atom type O and OXT - have to be
-        OT1 and OT2"""
+        """
+        Terminal amino acid can't have atom type O and OXT - have to be
+        OT1 and OT2
+
+        @param chain: Scientific.IO.PDB.PeptideChain object
+        @type  chain: chain object
+
+        @return: Scientific.IO.PDB.PeptideChain object
+        @rtype: chain object
+        """
         self._find_and_change(chain, 'O', -1, 'OT1')
         self._find_and_change(chain, 'OXT', -1, 'OT2')
         return chain
@@ -179,8 +225,10 @@ class ChainCleaner:
     def next(self):
         """
         Obtain next chain from ChainSeparator; Add missing atoms.
-        -> Scientific.IO.PDB.PeptideChain, completed chain
-        -> None, if no chain is left
+        
+        @return: Scientific.IO.PDB.PeptideChain, completed chain OR
+                 if no chain is left
+        @rtype: chain object OR  None
         """
         chain = self.reader.next()
         if (chain == None):
@@ -205,12 +253,12 @@ class ChainCleaner:
 
 if __name__ == '__main__':
 
-    
+
     fname =   T.testRoot() + '/com_wet/1BGS_original.pdb'
     outPath = T.testRoot() + '/com_wet'
-    
+
     cleaner = ChainCleaner (ChainSeparator(fname, outPath) )
 
     print cleaner.next()
-    
+
     print 'Wrote log: %s'%(cleaner.log.fname)

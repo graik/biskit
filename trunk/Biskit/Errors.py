@@ -18,9 +18,13 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-##
+## $Revision$
 ## last $Author$
 ## last $Date$
+
+"""
+Errors raised by Biskit scripts.
+"""
 
 import exceptions
 

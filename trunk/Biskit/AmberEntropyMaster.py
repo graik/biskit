@@ -20,6 +20,9 @@
 ## $Revision$
 ## last $Date$
 ## last $Author$
+"""
+Parallellized AmberEntropist calculation.
+"""
 
 import sys, os.path, tempfile, copy
 import Numeric as N
@@ -61,7 +64,8 @@ class AmberEntropyMaster(TrackingJobMaster):
     vibrations with too low frequencies (according to ptraj). All these
     are lists of values - one for each value of the variable option.
 
-    Example: * r[None]['fcom']['S_vibes'][0] -> float
+    Example::
+             * r[None]['fcom']['S_vibes'][0] -> float
                first vibr. Entropy of free fake complex for complete ensemble
              * r[0]['com']['S_total'] -> [ float, float, .. ]
                the total entropies of the complex calculated for the first
@@ -78,52 +82,77 @@ class AmberEntropyMaster(TrackingJobMaster):
                  restart=0,
                  **kw ):
         """
-        rec    - str, free rec trajectory              [required]
-        lig    - str, free lig trajectory              [required]
-        com    - str, complex trajectory               [required]
-        out    - str, file name for pickled result     [required]
-        cr     - [int], chains of receptor in complex trajectory [n_chains rec]
+        @param rec: free rec trajectory              [required]
+        @type  rec: str
+        @param lig: free lig trajectory              [required]
+        @type  lig: str
+        @param com: complex trajectory               [required]
+        @type  com: str
+        @param out: file name for pickled result     [required]
+        @type  out: str
+        @param cr: chains of receptor in complex trajectory [n_chains rec]
+        @type  cr: [int]
 
-        var    - str, name of variable option [ s ]
-        vrange - [any], set of values used for variable option
-                 OR 'start:stop:step', string convertable to range() input
-        jack   - [0|1], set up leave-one-trajectory-out jackknife test [0]
-                 (replaces var with 'ex1' and vrange with range(1,n_members+1))
+        @param var: name of variable option [ s ]
+        @type  var: str
+        @param vrange: set of values used for variable option
+                       OR 'start:stop:step', string convertable to
+                       range() input
+        @type  vrange: [any]
+        @param jack: set up leave-one-trajectory-out jackknife test
+                     (default: 0) (replaces var with 'ex1' and vrange with
+                     range(1,n_members+1))
+        @type  jack: [0|1]
 
-        zfilter- float, kick out outlyer trajectories using z-score threshold
-                 on RMSD trace [None->don't]
-        clean  - 0|1, remove pickled ref models and member trajectories [0]
-        all    - 0|1, skip single member trajs [1]
+        @param zfilter: kick out outlyer trajectories using z-score threshold
+                        on RMSD trace (default: None->don't)
+        @type  zfilter: float
+        @param clean: remove pickled ref models and member trajectories
+                      (default: 0)
+        @type  clean: 0|1
+        @param all: skip single member trajs (default: 1)
+        @type  all: 0|1
 
-        exrec  - [int], exclude certain members of receptor ensemble    [[]]
-        exlig  - [int], exclude certain members of ligand  ensemble     [[]]
-        excom  - [int], exclude certain members of complex ensemble     [[]]
+        @param exrec: exclude certain members of receptor ensemble    [[]]
+        @type  exrec: [int]
+        @param exlig: exclude certain members of ligand  ensemble     [[]]
+        @type  exlig: [int]
+        @param excom: exclude certain members of complex ensemble     [[]]
+        @type  excom: [int]
 
-        hosts  - [str], nodes to be used [all known]
-        debug  - 1|0, don't delete output files [0]
+        @param hosts: nodes to be used (default: all known)
+        @type  hosts: [str]
+        @param debug: don't delete output files (default: 0)
+        @type  debug: 1|0
 
-        ... parameters for AmberEntropist
-        cast    - 1|0, equalize free and bound atom content [1]
-        s,e     - int, start and stop frame                 [0, to end]
-        atoms   - [ str ], names of atoms to consider       [all]
-        step    - int, frame offset                         [no offset]
-        thin    - float, use randomly distributed fraction of frames [all]
-                  (similar to step but perhaps better for entropy calculations)
-        ex      - [int] OR ([int],[int]), exclude member trajectories   [[]]
-        ex_n    - int, exclude last n members  OR...                    [None]
-        ex3     - int, exclude |ex3|rd tripple of trajectories          [0]
-                  (index starts with 1! 0 to exclude nothing)
 
-        ... parameters for AmberCrdEntropist
-        f_template - str, alternative ptraj input template  [default]
+        @param kw: additional key=value parameters for AmberEntropist,
+                   AmberCrdEntropist, Executor and Master.
+        @type  kw: key=value pairs
+        ::
+          ... parameters for AmberEntropist
+          cast    - 1|0, equalize free and bound atom content [1]
+          s,e     - int, start and stop frame                 [0, to end]
+          atoms   - [ str ], names of atoms to consider       [all]
+          step    - int, frame offset                         [no offset]
+          thin    - float, use randomly distributed fraction of frames [all]
+                    (similar to step but perhaps better for entropy
+                    calculations)
+          ex      - [int] OR ([int],[int]), exclude member trajectories   [[]]
+          ex_n    - int, exclude last n members  OR...                  [None]
+          ex3     - int, exclude |ex3|rd tripple of trajectories          [0]
+                    (index starts with 1! 0 to exclude nothing)
 
-        ... parameters for Executor:
-        log      - Biskit.LogFile, program log (None->STOUT)        [None]
-        verbose  - 0|1, print progress messages to log     [log != STDOUT]
-
-        ... parameters for Master
-        w        - 0|1, show X window for each slave [0]
-        a        - 0|1, add hosts to PVM [1]
+          ... parameters for AmberCrdEntropist
+          f_template - str, alternative ptraj input template  [default]
+  
+          ... parameters for Executor:
+          log      - Biskit.LogFile, program log (None->STOUT)        [None]
+          verbose  - 0|1, print progress messages to log     [log != STDOUT]
+ 
+          ... parameters for Master
+          w        - 0|1, show X window for each slave [0]
+          a        - 0|1, add hosts to PVM [1]
         """
         ## normal and error output
         self.fout = T.absfile( out )
@@ -165,7 +194,7 @@ class AmberEntropyMaster(TrackingJobMaster):
         if not restart:
             ## Load trajectories, dump references, identify outliers
             self.processTrajs()
-        
+
             ## prepare dict of protocols for AmberEntropist
             self.protocols = self.protocols_var_range( **kw )
             self.saveProtocols()
@@ -182,7 +211,15 @@ class AmberEntropyMaster(TrackingJobMaster):
 
 
     def __vrange( self, v ):
-        """Interprete vrange option -> [ int ] or [ float ]"""
+        """
+        Interprete vrange option -> [ int ] or [ float ]
+
+        @param v: vrange option
+        @type  v: lst OR str
+        
+        @return: range option
+        @rtype: [int] OR [float]
+        """
         if type( v ) is list:
             return [ self.__float_int(x) for x in v ]
         if type( v ) is str and ':' in v:
@@ -191,8 +228,17 @@ class AmberEntropyMaster(TrackingJobMaster):
 
         return self.__float_int( v )
 
+
     def __float_int( self, v ):
-        """Convert v to int or, if necessary, float"""
+        """
+        Convert v to int or, if necessary, float
+
+        @param v: value
+        @type  v: any
+
+        @return: converted value
+        @rtype: int OR float        
+        """
         if float(v) % 1. != 0:
             return float( v )
         return int( float(v) )
@@ -200,7 +246,17 @@ class AmberEntropyMaster(TrackingJobMaster):
 
     def loadTraj( self, fname, outliers=[], refname=None  ):
         """
-        -> (EnsembleTraj, [ int ], [ str ])
+        Load trajectory from file.
+        
+        @param fname: path to trajectory
+        @type  fname: str
+        @param outliers: Identify outlier trajectories (default: [], identify)
+        @type  outliers: [int] OR [] 
+        @param refname: name of reference (efault: None)
+        @type  refname: str
+        
+        @return: t, outliers, members
+        @rtype: trajectoty, [int], [int]
         """
         self.log.add('Loading ' + fname )
         t = T.Load( fname )
@@ -218,7 +274,7 @@ class AmberEntropyMaster(TrackingJobMaster):
             members = self.dumpMembers( t, self.rec )
 
         return t, outliers, members
-    
+
 
     def processTrajs( self ):
         """
@@ -234,7 +290,7 @@ class AmberEntropyMaster(TrackingJobMaster):
         n_rec_members = t.n_members
         self.cr       = self.cr or range( t.ref.lenChains( breaks=0 ) )
         del t
-        
+
         ## free lig
         self.ref_flig = self.nameRef( self.lig )
 
@@ -243,7 +299,7 @@ class AmberEntropyMaster(TrackingJobMaster):
 
         n_lig_members = t.n_members
         del t
-        
+
         ## complex
         fname = T.stripSuffix( T.absfile( self.com, resolveLinks=0 ) )
         self.ref_com = fname + '_ref.complex'
@@ -270,7 +326,9 @@ class AmberEntropyMaster(TrackingJobMaster):
 
 
     def equalizeMemberCount( self, n_rec, n_lig, n_com ):
-        """ensure we keep equal number of members from frec, flig, and com"""
+        """
+        ensure we keep equal number of members from frec, flig, and com
+        """
         ex        = [ self.ex_frec, self.ex_flig, self.ex_com ]
         n_members = [ n_rec, n_lig, n_com ]
 
@@ -295,11 +353,11 @@ class AmberEntropyMaster(TrackingJobMaster):
                     n -= 1
                     self.log.add_nobreak('%i, ' % i )
                 i += 1
-        
+
             self.log.add('')
 
         self.n_members = n_min
-        
+
 
     def prepareJackknife( self ):
         """
@@ -307,21 +365,29 @@ class AmberEntropyMaster(TrackingJobMaster):
         """
         self.vrange = range( self.n_members + 1 )  ## 0: exclude nothing
         self.var = 'ex1'
- 
+
 
     def nameRef( self, fname ):
         fname = T.stripSuffix( T.absfile( fname, resolveLinks=0 ) )
         return fname + '_ref.model'
 
+
     def nameRefCom( self, fname ):
         fname = T.stripSuffix( T.absfile( fname, resolveLinks=0 ) )
         return fname + '_ref.complex'
 
-            
+
     def dumpMissing( self, o, fname ):
         """
         Pickle o to fname, if it is not already there.
-        -> str
+
+        @param o: object to dump
+        @type  o: any
+        @param fname: file name
+        @type  fname: str
+        
+        @return: file name
+        @rtype: str
         """
         if os.path.exists( fname ):
             self.log.add('using existing ' + fname )
@@ -331,30 +397,41 @@ class AmberEntropyMaster(TrackingJobMaster):
 
         return fname
 
-        
+
     def getOutliers( self, traj, outlaws=[] ):
         """
         Identify member trajectories that haved moved much further than normal.
-        outlaws - [ int ], members already marked for exclusion
-        -> [ int ], member indices of outlyer trajectories (plus outlaws)
+
+        @param traj: Trajectory to analyze
+        @type  traj: Trajectory
+        @param outlaws: members already marked for exclusion
+        @type  outlaws: [int]
+
+        @return: member indices of outlyer trajectories (plus outlaws)
+        @rtype: [int]
         """
         if not self.zfilter:
             return outlaws
-        
+
         outliers = N.nonzero( traj.outliers( z=self.zfilter,
                                              mask=traj.ref.maskCA(), step=10) )
         self.log.add('identified %i outliers with z-threshold %3.1f' %\
                      ( len(outliers), self.zfilter ) )
 
         return MU.union( outliers, outlaws )
-        
+
 
     def dumpMembers( self, traj, fname  ):
         """
         Dump ensemble member trajectories
-        traj  - Trajectory
-        fname - str, trajectory file name - used to derrive name for members
-        -> [str], list of trajectory files
+        
+        @param traj: Trajectory to dump
+        @type  traj: Trajectory
+        @param fname: trajectory file name - used to derrive name for members
+        @type  fname: str'
+        
+        @return: list of trajectory files
+        @rtype: [str]
         """
         fname = T.stripSuffix( T.absfile( fname, resolveLinks=0 ) )
         members = range( traj.n_members )
@@ -372,7 +449,7 @@ class AmberEntropyMaster(TrackingJobMaster):
             r += [ f ]
 
         return r
-        
+
 
     def getInitParameters(self, slave_tid):
         """
@@ -386,10 +463,16 @@ class AmberEntropyMaster(TrackingJobMaster):
 
 
     def cleanup( self ):
+        """
+        Tidy up
+        """
         if self.clean:
             self.cleanCache()
 
     def cleanCache( self ):
+        """
+        Remove leftover cache files
+        """
         fs = [ self.ref_frec, self.ref_flig, self.ref_com, self.ref_brec,
                self.ref_blig ]
         fs.extend( self.members_frec + self.members_flig )
@@ -401,6 +484,9 @@ class AmberEntropyMaster(TrackingJobMaster):
 
 
     def saveProtocols( self ):
+        """
+        Save protocol to file.
+        """
         f_prot = T.stripSuffix( T.absfile(self.fout) ) + '_protocols.dat'
         self.log.add_nobreak( 'Saving parameters to %s...' % f_prot )
         T.Dump( self.protocols, f_prot )
@@ -420,7 +506,9 @@ class AmberEntropyMaster(TrackingJobMaster):
     ## Assemble the protocols for many AmberEntropist runs
     ##
     def __cpupdate( self, d1, d2 ):
-        """Merge 2 dictionaries and return a copy"""
+        """
+        Merge 2 dictionaries and return a copy
+        """
         r = copy.copy( d1 )
         r.update( d2 )
         return r
@@ -433,15 +521,19 @@ class AmberEntropyMaster(TrackingJobMaster):
         Create 13 parameter sets for AmberEntropist that cover the calculation
         of rec, lig, com and fcom entropies with and without splitting of the
         complex, with and without shifting and shuffling of frames.
-        options - additional options (like cast, s, e, atoms, thin, step) that
-                  are the same in all parameter sets
-        -> dict of dict, each value of the returned dict contains a set of
-                         arguments for one AmberEntropist run
+        
+        @param options: additional options (like cast, s, e, atoms, thin, step)
+                        that are the same in all parameter sets
+        @type  options: key=value
+        
+        @return: each value of the returned dict contains a set of
+                 arguments for one AmberEntropist run
+        @rtype: dict of dict
         """
         fcp = self.__cpupdate
         r = {}
         S = self
-        
+
         d = { 'ref':None, 'cast':1, 'chains':None,
               'split':0, 'shift':0, 'shuffle':0, 'ex_n':0, 'ex3':None,
               'thin':None, 'step':1, 'ss':0, 'se':None, 'atoms':None }
@@ -465,7 +557,7 @@ class AmberEntropyMaster(TrackingJobMaster):
 
         r['com']  = fcp( d, {'traj':tcom, 'ex':ex_com,
                              'ref':'%s+%s' % (S.ref_frec, S.ref_flig) } )
-                         
+
         r['com_split'] = fcp( r['com'], { 'split':1,   'border':S.cl[0] } )
 ##      r['com_shuff'] = fcp( r['com'], { 'shuffle':1, 'border':S.cl[0] } )
         r['com_split_shuff'] = fcp( r['com'],
@@ -474,20 +566,26 @@ class AmberEntropyMaster(TrackingJobMaster):
 ##             r['com_shift'] = fcp( r['com'], { 'shift':1,'border':S.cl[0] } )
             r['com_split_shift'] = fcp( r['com'],
                                      {'split':1,'shift':1, 'border':S.cl[0] } )
-        
+
         return r
+
 
     def protocols_single_all( self, **options ):
         """
         Set of protocols for all-member trajectories AND single-member traj.
         with the different shuffle, shift, split settings.
         Usually 11 x 13 protocols for AmberEntropist (10 members and 1 for all)
-        options - additional options (like cast, s, e, atoms, thin, step) that
-                  are the same in all parameter sets
-        -> dict of dict, each value of the returned dict contains a set of
-        arguments for one AmberEntropist run, each key is a tuple of the
-        member index and the protocol name, i.e. (0, 'fcom_shuffle')
-        The set of protocols for all-member trajectories has member index None.
+        
+        @param options: additional options (like cast, s, e, atoms, thin, step)
+                        that are the same in all parameter sets
+        @type  options: key=value
+        
+        @return: each value of the returned dict contains a set of arguments
+                 for one AmberEntropist run, each key is a tuple of the
+                 member index and the protocol name, i.e. (0, 'fcom_shuffle')
+                 The set of protocols for all-member trajectories has member
+                 index None.
+        @rtype: dict of dict
         """
         r = {}
         ## put all-member protocolls under member index 'None'
@@ -506,7 +604,7 @@ class AmberEntropyMaster(TrackingJobMaster):
                                             **options )
                 for k, p in prots.items():
                     r[ (i, k) ] = p
-            
+
         return r
 
 
@@ -537,7 +635,8 @@ class AmberEntropyMaster(TrackingJobMaster):
         """
         Take dict with tuple keys (value, int_member, str_protocol) and build
         a tree-like dict of dicts in which the values of d can be accessed
-        like d[value][int_member][str_protocol]
+        like::
+          d[value][int_member][str_protocol]
         """
         r = {}
 
@@ -552,10 +651,10 @@ class AmberEntropyMaster(TrackingJobMaster):
         x_values = MU.nonredundant( [ k[0] for k in keys ] )
 
         for x in x_values:
-            
+
             sub_keys = [ k for k in keys if k[0] == x ]
             y_values = MU.nonredundant( [ k[1:] for k in sub_keys] )
-            
+
             r[ x ] = {}
             for y in y_values:
                 r[x][y] = d[ (x,) + y ]
@@ -568,8 +667,8 @@ class AmberEntropyMaster(TrackingJobMaster):
     def getResult( self, **arg ):
         """
         Collaps the results for different values of the variable parameter
-        into lists and put the results into a tree ala
-        r[ member_index ][ protocol_name ][ result_field ] -> [ values ]
+        into lists and put the results into a tree ala::
+          r[ member_index ][ protocol_name ][ result_field ] -> [ values ]
         """
         tree = self.dictionate( self.result )
 
@@ -604,8 +703,8 @@ class AmberEntropyMaster(TrackingJobMaster):
         return r
 
 
-  
-        
+
+
 #### TEST #######
 
 if __name__ == '__main__':

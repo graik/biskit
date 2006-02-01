@@ -1,4 +1,7 @@
 #! /usr/bin/env python2.2
+"""
+Older version of difflib. Here due to compability problems.
+"""
 
 from __future__ import generators
 
@@ -24,8 +27,8 @@ Class Differ:
 __all__ = ['get_close_matches', 'ndiff', 'restore', 'SequenceMatcher',
            'Differ', 'IS_CHARACTER_JUNK', 'IS_LINE_JUNK']
 
-class SequenceMatcher:
 
+class SequenceMatcher:
     """
     SequenceMatcher is a flexible class for comparing pairs of sequences of
     any type, so long as the sequence elements are hashable.  The basic
@@ -52,28 +55,29 @@ class SequenceMatcher:
 
     Example, comparing two strings, and considering blanks to be "junk":
 
-    >>> s = SequenceMatcher(lambda x: x == " ",
-    ...                     "private Thread currentThread;",
-    ...                     "private volatile Thread currentThread;")
-    >>>
+      >>> s = SequenceMatcher(lambda x: x == " ",
+      ...                     "private Thread currentThread;",
+      ...                     "private volatile Thread currentThread;")
+      >>>
 
     .ratio() returns a float in [0, 1], measuring the "similarity" of the
     sequences.  As a rule of thumb, a .ratio() value over 0.6 means the
     sequences are close matches:
 
-    >>> print round(s.ratio(), 3)
-    0.866
-    >>>
+      >>> print round(s.ratio(), 3)
+      ... 0.866
+      >>>
 
     If you're only interested in where the sequences match,
     .get_matching_blocks() is handy:
 
-    >>> for block in s.get_matching_blocks():
-    ...     print "a[%d] and b[%d] match for %d elements" % block
-    a[0] and b[0] match for 8 elements
-    a[8] and b[17] match for 6 elements
-    a[14] and b[23] match for 15 elements
-    a[29] and b[38] match for 0 elements
+      >>> for block in s.get_matching_blocks():
+      >>>     print "a[%d] and b[%d] match for %d elements" % block
+      a[0] and b[0] match for 8 elements
+      a[8] and b[17] match for 6 elements
+      a[14] and b[23] match for 15 elements
+      a[29] and b[38] match for 0 elements
+      >>>
 
     Note that the last tuple returned by .get_matching_blocks() is always a
     dummy, (len(a), len(b), 0), and this is the only case in which the last
@@ -82,12 +86,12 @@ class SequenceMatcher:
     If you want to know how to change the first sequence into the second,
     use .get_opcodes():
 
-    >>> for opcode in s.get_opcodes():
-    ...     print "%6s a[%d:%d] b[%d:%d]" % opcode
-     equal a[0:8] b[0:8]
-    insert a[8:8] b[8:17]
-     equal a[8:14] b[17:23]
-     equal a[14:29] b[23:38]
+      >>> for opcode in s.get_opcodes():
+      ...     print "%6s a[%d:%d] b[%d:%d]" % opcode
+       equal a[0:8] b[0:8]
+      insert a[8:8] b[8:17]
+       equal a[8:14] b[17:23]
+       equal a[14:29] b[23:38]
 
     See the Differ class for a fancy human-friendly file differencer, which
     uses SequenceMatcher both to compare sequences of lines, and to compare
@@ -101,36 +105,36 @@ class SequenceMatcher:
     expected-case behavior dependent in a complicated way on how many
     elements the sequences have in common; best case time is linear.
 
-    Methods:
+    Methods::
 
-    __init__(isjunk=None, a='', b='')
-        Construct a SequenceMatcher.
+        __init__(isjunk=None, a='', b='')
+            Construct a SequenceMatcher.
 
-    set_seqs(a, b)
-        Set the two sequences to be compared.
+        set_seqs(a, b)
+            Set the two sequences to be compared.
 
-    set_seq1(a)
-        Set the first sequence to be compared.
+        set_seq1(a)
+            Set the first sequence to be compared.
 
-    set_seq2(b)
-        Set the second sequence to be compared.
+        set_seq2(b)
+            Set the second sequence to be compared.
 
-    find_longest_match(alo, ahi, blo, bhi)
-        Find longest matching block in a[alo:ahi] and b[blo:bhi].
+        find_longest_match(alo, ahi, blo, bhi)
+            Find longest matching block in a[alo:ahi] and b[blo:bhi].
 
-    get_matching_blocks()
-        Return list of triples describing matching subsequences.
+        get_matching_blocks()
+            Return list of triples describing matching subsequences.
 
-    get_opcodes()
-        Return list of 5-tuples describing how to turn a into b.
+        get_opcodes()
+            Return list of 5-tuples describing how to turn a into b.
 
-    ratio()
-        Return a measure of the sequences' similarity (float in [0,1]).
+        ratio()
+            Return a measure of the sequences' similarity (float in [0,1]).
 
-    quick_ratio()
-        Return an upper bound on .ratio() relatively quickly.
+        quick_ratio()
+            Return an upper bound on .ratio() relatively quickly.
 
-    real_quick_ratio()
+        real_quick_ratio()
         Return an upper bound on ratio() very quickly.
     """
 
@@ -141,7 +145,7 @@ class SequenceMatcher:
         function that takes a sequence element and returns true iff the
         element is junk.  None is equivalent to passing "lambda x: 0", i.e.
         no elements are considered to be junk.  For example, pass
-            lambda x: x in " \\t"
+        lambda x: x in " \\t"
         if you're comparing lines as sequences of characters, and don't
         want to synch up on blanks or hard tabs.
 
@@ -312,17 +316,18 @@ class SequenceMatcher:
         self.isbjunk = junkdict.has_key
 
     def find_longest_match(self, alo, ahi, blo, bhi):
-        """Find longest matching block in a[alo:ahi] and b[blo:bhi].
+        """
+        Find longest matching block in a[alo:ahi] and b[blo:bhi].
 
-        If isjunk is not defined:
+        If isjunk is not defined::
 
-        Return (i,j,k) such that a[i:i+k] is equal to b[j:j+k], where
-            alo <= i <= i+k <= ahi
-            blo <= j <= j+k <= bhi
-        and for all (i',j',k') meeting those conditions,
-            k >= k'
-            i <= i'
-            and if i == i', j <= j'
+          Return (i,j,k) such that a[i:i+k] is equal to b[j:j+k], where
+              alo <= i <= i+k <= ahi
+              blo <= j <= j+k <= bhi
+          and for all (i',j',k') meeting those conditions,
+              k >= k'
+              i <= i'
+              and if i == i', j <= j'
 
         In other words, of all maximal matching blocks, return one that
         starts earliest in a, and of all those maximal matching blocks that
@@ -418,9 +423,10 @@ class SequenceMatcher:
         The last triple is a dummy, (len(a), len(b), 0), and is the only
         triple with n==0.
 
-        >>> s = SequenceMatcher(None, "abxcd", "abcd")
-        >>> s.get_matching_blocks()
-        [(0, 0, 2), (3, 2, 2), (5, 4, 0)]
+          >>> s = SequenceMatcher(None, "abxcd", "abcd")
+          >>> s.get_matching_blocks()
+          [(0, 0, 2), (3, 2, 2), (5, 4, 0)]
+          >>>
         """
 
         if self.matching_blocks is not None:
@@ -447,7 +453,8 @@ class SequenceMatcher:
                 self.__helper(i+k, ahi, j+k, bhi, answer)
 
     def get_opcodes(self):
-        """Return list of 5-tuples describing how to turn a into b.
+        """
+        Return list of 5-tuples describing how to turn a into b.
 
         Each tuple is of the form (tag, i1, i2, j1, j2).  The first tuple
         has i1 == j1 == 0, and remaining tuples have i1 == the i2 from the
@@ -455,24 +462,24 @@ class SequenceMatcher:
 
         The tags are strings, with these meanings:
 
-        'replace':  a[i1:i2] should be replaced by b[j1:j2]
-        'delete':   a[i1:i2] should be deleted.
+         - 'replace':  a[i1:i2] should be replaced by b[j1:j2]
+         - 'delete':   a[i1:i2] should be deleted.
                     Note that j1==j2 in this case.
-        'insert':   b[j1:j2] should be inserted at a[i1:i1].
+         - 'insert':   b[j1:j2] should be inserted at a[i1:i1].
                     Note that i1==i2 in this case.
-        'equal':    a[i1:i2] == b[j1:j2]
+         - 'equal':    a[i1:i2] == b[j1:j2]
 
-        >>> a = "qabxcd"
-        >>> b = "abycdf"
-        >>> s = SequenceMatcher(None, a, b)
-        >>> for tag, i1, i2, j1, j2 in s.get_opcodes():
-        ...    print ("%7s a[%d:%d] (%s) b[%d:%d] (%s)" %
-        ...           (tag, i1, i2, a[i1:i2], j1, j2, b[j1:j2]))
-         delete a[0:1] (q) b[0:0] ()
-          equal a[1:3] (ab) b[0:2] (ab)
-        replace a[3:4] (x) b[2:3] (y)
-          equal a[4:6] (cd) b[3:5] (cd)
-         insert a[6:6] () b[5:6] (f)
+          >>> a = "qabxcd"
+          >>> b = "abycdf"
+          >>> s = SequenceMatcher(None, a, b)
+          >>> for tag, i1, i2, j1, j2 in s.get_opcodes():
+          ...    print ("%7s a[%d:%d] (%s) b[%d:%d] (%s)" %
+          ...           (tag, i1, i2, a[i1:i2], j1, j2, b[j1:j2]))
+           delete a[0:1] (q) b[0:0] ()
+            equal a[1:3] (ab) b[0:2] (ab)
+          replace a[3:4] (x) b[2:3] (y)
+            equal a[4:6] (cd) b[3:5] (cd)
+           insert a[6:6] () b[5:6] (f)
         """
 
         if self.opcodes is not None:
@@ -642,7 +649,7 @@ class Differ:
     SequenceMatcher both to compare sequences of lines, and to compare
     sequences of characters within similar (near-matching) lines.
 
-    Each line of a Differ delta begins with a two-letter code:
+    Each line of a Differ delta begins with a two-letter code::
 
         '- '    line unique to sequence 1
         '+ '    line unique to sequence 2
@@ -720,13 +727,13 @@ class Differ:
     ?           ++++ ^                      ^
     +   5. Flat is better than nested.
 
-    Methods:
+    Methods::
 
-    __init__(linejunk=None, charjunk=None)
-        Construct a text differencer, with optional filters.
+     __init__(linejunk=None, charjunk=None)
+         Construct a text differencer, with optional filters.
 
-    compare(a, b)
-        Compare two sequences of lines; generate the resulting delta.
+     compare(a, b)
+         Compare two sequences of lines; generate the resulting delta.
     """
 
     def __init__(self, linejunk=None, charjunk=None):
@@ -735,15 +742,15 @@ class Differ:
 
         The two optional keyword parameters are for filter functions:
 
-        - `linejunk`: A function that should accept a single string argument,
-          and return true iff the string is junk. The module-level function
-          `IS_LINE_JUNK` may be used to filter out lines without visible
-          characters, except for at most one splat ('#').
+         - `linejunk`: A function that should accept a single string argument,
+           and return true iff the string is junk. The module-level function
+           `IS_LINE_JUNK` may be used to filter out lines without visible
+           characters, except for at most one splat ('#').
 
-        - `charjunk`: A function that should accept a string of length 1. The
-          module-level function `IS_CHARACTER_JUNK` may be used to filter out
-          whitespace characters (a blank or tab; **note**: bad idea to include
-          newline in this!).
+         - `charjunk`: A function that should accept a string of length 1. The
+           module-level function `IS_CHARACTER_JUNK` may be used to filter out
+           whitespace characters (a blank or tab; **note**: bad idea to include
+           newline in this!).
         """
 
         self.linejunk = linejunk
@@ -1014,15 +1021,15 @@ def ndiff(a, b, linejunk=IS_LINE_JUNK, charjunk=IS_CHARACTER_JUNK):
     Optional keyword parameters `linejunk` and `charjunk` are for filter
     functions (or None):
 
-    - linejunk: A function that should accept a single string argument, and
-      return true iff the string is junk. The default is module-level function
-      IS_LINE_JUNK, which filters out lines without visible characters, except
-      for at most one splat ('#').
+     - linejunk: A function that should accept a single string argument, and
+       return true iff the string is junk. The default is module-level function
+       IS_LINE_JUNK, which filters out lines without visible characters, except
+       for at most one splat ('#').
 
-    - charjunk: A function that should accept a string of length 1. The
-      default is module-level function IS_CHARACTER_JUNK, which filters out
-      whitespace characters (a blank or tab; note: bad idea to include newline
-      in this!).
+     - charjunk: A function that should accept a string of length 1. The
+       default is module-level function IS_CHARACTER_JUNK, which filters out
+       whitespace characters (a blank or tab; note: bad idea to include newline
+       in this!).
 
     Tools/scripts/ndiff.py is a command-line front-end to this function.
 

@@ -17,10 +17,13 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-
 ## last $Author$
 ## last $Date$
 ## $Revision$
+
+"""
+Class for calls to external programs.
+"""
 
 import tempfile, os, time, subprocess
 
@@ -38,6 +41,9 @@ class TemplateError( BiskitError ):
 
 class Executor:
     """
+    Executor
+    ========
+    
     All calls of external programs should be done via this class or subclasses.
 
     Executor gets the necessary information about a program (binary,
@@ -46,79 +52,85 @@ class Executor:
     program call into ssh and nice (if necessary), spawns an external process
     via subprocess.Popen, communicates the input file or string, waits for
     completion and collects the output file or string, and cleans up
-    temporary files. There are two ways of using Executor:
+    temporary files.
 
-    1) (recommended) Create a subclass of Executor for a certain program call.
-    Methods to override would be:
+    There are two ways of using Executor
+    ------------------------------------
     
-    * __init__  ... to set your own default values (call parent __init__!)
-    * prepare   ... called BEFORE program execution
-    * cleanup   ... called AFTER program execution (call parent cleanup!)
-    * finish    ... called AFTER successful program execution
-    * isfailed  ... to detect the success status after program execution
-    * failed    ... called if execution fails
+      1. (recommended) Create a subclass of Executor for a certain program
+          call. Methods to override would be:
 
-    Additionally, you should provide a simple program configuration file in
-    biskit/external/defaults/. See ExeConfig for details and examples!
+           - __init__  ... to set your own default values
+                           (call parent __init__!)
+           - prepare   ... called BEFORE program execution
+           - cleanup   ... called AFTER program execution
+                           (call parent cleanup!)
+           - finish    ... called AFTER successful program execution
+           - isfailed  ... to detect the success status after program execution
+           - failed    ... called if execution fails
+           
+          Additionally, you should provide a simple program configuration file
+          in biskit/external/defaults/. See See L{Biskit.ExeConfig} for
+          details and examples!
 
-    2) Use Executor directly.
-    An example is given in the __main__ section of this module. You first have
-    to create an Executor instance with all the parameters, then call its
-    run() method and collect the result.
+      2.  Use Executor directly.
+          An example is given in the __main__ section of this module.
+          You first have to create an Executor instance with all the
+          parameters, then call its run() method and collect the result.
 
-    In the most simple cases this can be combined into one line:
-    out, error, returncode = Executor('ls', strict=0).run()
+          In the most simple cases this can be combined into one line:
+         
+          >>> out, error, returncode = Executor('ls', strict=0).run()
 
-    strict=0 means, ExeConfig does not insist on an existing exe_ls.dat file
-    and instead looks for a program called 'ls' in the search path.
+          strict=0 means, ExeConfig does not insist on an existing exe_ls.dat
+          file and instead looks for a program called 'ls' in the search path.
 
 
-    Templates:
+    Templates
+    ---------
+      Templates are files or strings that contain place holders like,
+      for example:
+
+      >>> file_in=%(f_in)s
+      >>> file_out=%(f_out)s      
+
+      At run time, Executor will create an input file or pipe from the
+      template by replacing all place holders with values from its own
+      fields. Let's assume, the above example is put into a file 'in.template'.
+
+      >>> x = Executor( 'ls', template='in.template', f_in='in.dat')
+
+      ... will then pass the following input to the ls program:
     
-    Templates are files or strings that contain place holders like,
-    for example:
+      >>> file_in=in.dat
+      >>> file_out=/tmp/tmp1HYOvO
 
-    '''
-    file_in=%(f_in)s
-    file_out=%(f_out)s
-    '''
-
-    At run time, Executor will create an input file or pipe from the
-    template by replacing all place holders with values from its own
-    fields. Let's assume, the above example is put into a file 'in.template'.
+      However, the following input template will raise an error:
     
-    x = Executor( 'ls', template='in.template', f_in='in.dat')
+      >>> file_in=%(f_in)s
+      >>> seed=%(seed)i
+    
+      ...because Executor doesn't have a 'seed' field. You could provide
+      one by overwriting Executor.__init__. Alternatively, you can
+      provide seed as a keyword to the original Executor.__init__:
 
-    ... will then pass the following input to the ls program:
-    '''
-    file_in=in.dat
-    file_out=/tmp/tmp1HYOvO
-    '''
+      >>> x = Executor('ls', template='in.template',f_in='in.dat', seed=1.5)
 
-    However, the following input template will raise an error:
-    '''
-    file_in=%(f_in)s
-    seed=%(seed)i
-    '''
-    ...because Executor doesn't have a 'seed' field. You could provide
-    one by overwriting Executor.__init__. Alternatively, you can
-    provide seed as a keyword to the original Executor.__init__:
-
-    x = Executor('ls', template='in.template',f_in='in.dat', seed=1.5)
-
-    This works because Executor.__init__ puts all unknown key=value pairs
-    into the object's name space and passes them on to the template.
+      This works because Executor.__init__ puts all unknown key=value pairs
+      into the object's name space and passes them on to the template.
 
 
-    See also IcmCad for an Example of how to overwrite and use Executor.
-    See also ExeConfig for a description of program configuration.
+    References
+    ----------
+      See also L{Biskit.IcmCad} for an Example of how to overwrite and
+      use Executor.
+      See also L{Biskit.ExeConfig} for a description of program configuration.
     """
 
     def __init__( self, name, args='', template=None, f_in=None, f_out=None,
                   strict=1, catch_out=1, push_inp=1, node=None, nice=0,
-                  cwd=None,
-                  log=None, debug=0, verbose=0, **kw ):
-        
+                  cwd=None, log=None, debug=0, verbose=0, **kw ):
+
         """
         Create Executor. *name* must point to an existing program configuration
         unless *strict*=0. Executor will create a program input from
@@ -129,27 +141,46 @@ class Executor:
         is preceeded by nice. *cwd* specifies the working directory. By
         default, this setting is taken from the configuration file which
         defaults to the current working directory.
+
+        @param name: program name (configured in .biskit/exe_name.dat)
+        @type  name: str
+        @param args: command line arguments
+        @type  args: str
+        @param template: path to template for input file (default: None)
+        @type  template: str
+        @param f_in: path to complete input file (default: None, discard)
+        @type  f_in: str
+        @param f_out: target file for output (default: None, discard)
+        @type  f_out: str
+        @param strict: strict check of environment and configuration file
+                       (default: 1)
+        @type  strict: 1|0
+        @param catch_out: catch output in file (f_out or temporary)
+                          (default: 1)
+        @type  catch_out: 1|0
+        @param push_inp: push input file to process via stdin ('< f_in') [1]
+        @type  push_inp: 1|0
+        @param node: host for calculation (None->no ssh) (default: None)
+        @type  node: str
+        @param nice: nice level (default: 0)
+        @type  nice: int
+        @param cwd: working directory, overwrites ExeConfig.cwd (default: None)
+        @type  cwd: str
+        @param log: Biskit.LogFile, program log (None->STOUT) (default: None)
+        @type  log: 
+        @param debug: keep all temporary files (default: 0)
+        @type  debug: 0|1
+        @param verbose: print progress messages to log (log != STDOUT)
+        @type  verbose: 0|1
+        @param kw: key=value pairs with values for template file
+        @type  kw: key=value
         
-        name     - str, program name (configured in .biskit/exe_name.dat)
-        args     - str, command line arguments                          []
-        template - str, path to template for input file             [None]
-        f_in     - str, path to complete input file      [None .. discard]
-        f_out    - str, target file for output           [None .. discard]
-        strict   - 1|0, strict check of environment and configuration file [1]
-        catch_out- 1|0, catch output in file (f_out or temporary)      [1]
-        push_inp - 1|0, push input file to process via stdin ('< f_in') [1] 
-        node     - str, host for calculation (None->no ssh)         [None]
-        nice     - int, nice level                                     [0]
-        cwd      - str, working directory, overwrites ExeConfig.cwd [None]
-        log      - Biskit.LogFile, program log (None->STOUT)        [None]
-        debug    - 0|1, keep all temporary files                       [0]
-        verbose  - 0|1, print progress messages to log     [log != STDOUT]
-        **kw     - key=value pairs with values for template file
-        !! ExeConfigError, if environment is not fit for running the program
+        @raise ExeConfigError: if environment is not fit for running
+                               the program
         """
         self.exe = ExeConfigCache.get( name, strict=strict )
         self.exe.validate()
-        
+
         self.f_out = t.absfile( f_out )
         if not f_out and catch_out:
             self.f_out = tempfile.mktemp( '.out' )
@@ -159,7 +190,7 @@ class Executor:
         self.f_in  = f_in  ## will be overridden by self.run()
         self.keep_inp = f_in is not None
         self.push_inp = push_inp
-        
+
         self.args = args
         self.template = template
 
@@ -194,17 +225,31 @@ class Executor:
         See subprocess.Popen() for a detailed description of the parameters!
         This method should work for pretty much any purpose but may fail for
         very long pipes (more than 100000 lines).
-        inp     - str, (for pipes) input sequence
-        cmd     - str, command
-        bufsize    - int, see subprocess.Popen()                           [-1]
-        executable - str, see subprocess.Popen()                         [None]
-        stdin      - int|file|None, PIPE or file handle or None          [None]
-        stdout     - int|file|None, PIPE or file handle or None          [None]
-        shell      - 1|0, wrap process in shell; see subprocess.Popen()     [0]
-        env        - {str:str}, environment variables                    [None]
-        cwd        - str, working directory                              [None]
-        -> str, str - output and error output
-        !! RunError, if OSError occurs during Popen or Popen.communicate
+        
+        @param inp: (for pipes) input sequence
+        @type  inp: str
+        @param cmd: command
+        @type  cmd: str
+        @param bufsize: see subprocess.Popen() (default: -1)
+        @type  bufsize: int
+        @param executable: see subprocess.Popen() (default: None)
+        @type  executable: str
+        @param stdin: PIPE or file handle or None (default: None)
+        @type  stdin: int|file|None
+        @param stdout: PIPE or file handle or None (default: None)
+        @type  stdout: int|file|None
+        @param shell: wrap process in shell; see subprocess.Popen()
+                      (default: 0) 
+        @type  shell: 1|0
+        @param env: environment variables (default: None)
+        @type  env: {str:str}
+        @param cwd: working directory (default: None)
+        @type  cwd: str
+        
+        @return: output and error output
+        @rtype: str, str
+        
+        @raise RunError: if OSError occurs during Popen or Popen.communicate
         """
         try:
             p = subprocess.Popen( cmd.split(),
@@ -225,13 +270,20 @@ class Executor:
                   % e.strerror
 
         return output, error
-        
+
 
     def execute( self, inp=None ):
         """
-        Run external command and block until it is finished. Called by run().
-        inp  - str, input to be communicated via STDIN pipe    [None]
-        !! RunError, see communicate()
+        Run external command and block until it is finished.
+        Called by L{ run() }.
+        
+        @param inp: input to be communicated via STDIN pipe (default: None)
+        @type  inp: str
+
+        @return: execution time in seconds
+        @rtype: int
+        
+        @raise RunError: see communicate()
         """
         start_time = time.time()
 
@@ -273,17 +325,26 @@ class Executor:
 
         if self.exe.pipes and self.f_out:
             open( self.f_out, 'w').writelines( self.output )
-        
+
         if self.verbose: self.log.add(".. finished.")
 
         return time.time() - start_time
-       
+
 
     def run( self, inp_mirror=None ):
         """
-        calls (in that order): prepare(), execute(),
-        finish()/failed(), cleanup()
-        inp_mirror - str, file name for formatted copy of inp file [None]
+        Run the callculation. This calls (in that order):
+          - L{ prepare() },
+          - L{ execute() },
+          - L{ finish() }/ L{ failed() },
+          - L{ cleanup() }
+        
+        @param inp_mirror: file name for formatted copy of inp file
+                           (default: None)
+        @type  inp_mirror: str
+
+        @return: calculation result
+        @rtype: any
         """
         try:
             self.prepare()
@@ -308,13 +369,15 @@ class Executor:
             self.cleanup()
 
         return self.result
-        
+
 
     def command( self ):
         """
         Compose command string from binary, arguments, nice, and node.
         Override (perhaps).
-        -> str, the command to execute
+        
+        @return: the command to execute
+        @rtype: str
         """
         exe  = t.absbinary( self.exe.bin )
 
@@ -338,16 +401,22 @@ class Executor:
     def environment( self ):
         """
         Setup the environment for the process. Override if needed.
-        -> dict | None
+        
+        @return: environment dictionary
+        @rtype: dict OR None
         """
         if not self.exe.replaceEnv:
             return None
-        
+
         return self.exe.environment()
 
+
     def prepare( self ):
-        """called before running external program, override!"""
+        """
+        called before running external program, override!
+        """
         pass
+
 
     def cleanup( self ):
         """
@@ -356,31 +425,43 @@ class Executor:
         """
         if not self.keep_out and not self.debug and self.f_out:
             t.tryRemove( self.f_out )
-            
+
         if not self.keep_inp and not self.debug:
             t.tryRemove( self.f_in )
 
 
     def failed( self ):
-        """Called if external program failed, override! """
+        """
+        Called if external program failed, override! 
+        """
         pass
 
+
     def finish( self ):
-        """Called if external program finished successfully, override!"""
+        """
+        Called if external program finished successfully, override!
+        """
         self.result = self.output, self.error, self.returncode
 
+
     def isFailed( self ):
-        """Detect whether external program failed, override!"""
+        """
+        Detect whether external program failed, override!
+        """
         return 0
+
 
     def fillTemplate( self ):
         """
         Create complete input string from template with place holders.
-        -> str, input
-        !! TemplateError
+        
+        @return: input
+        @rtype: str
+        
+        @raise TemplateError: if unknown option/place holder in template file
         """
         inp = self.template
-        
+
         try:
 
             if os.path.isfile( inp ):
@@ -393,12 +474,17 @@ class Executor:
             s += "\n  template file: " + str( self.template )
             s += "\n  Template asked for a option called " + str( why[0] )
             raise TemplateError, s
-    
+
 
     def convertInput( self, inp):
         """
-        inp - str, path to existing input file or string with input
-        -> str, input string if self.exe.pipes; file name otherwise
+        Converst the input to a format used by the selected execution method.
+        
+        @param inp: path to existing input file or string with input
+        @type  inp: str
+        
+        @return: input string if self.exe.pipes; file name otherwise
+        @rtype: str
         """
         if self.exe.pipes:
 
@@ -425,8 +511,10 @@ class Executor:
         """
         Replace formatstr place holders in inp by fields of this class.
 
-        -> input file name OR (if pipes=1) content of input file
-        !! raise TemplateError
+        @return: input file name OR (if pipes=1) content of input file
+        @rtype: str
+        
+        @raise TemplateError: if error while creating template file
         """
         try:
             inp = None
@@ -435,7 +523,7 @@ class Executor:
                 inp = self.fillTemplate()
 
             return self.convertInput( inp )
-            
+
         except Exception, why:
             s =  "Error while creating template file."
             s += "\n  template file: " + str( self.template )

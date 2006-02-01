@@ -20,15 +20,27 @@
 ## last $Author$
 ## last $Date$
 ## $Revision$
-"""create a histogram from data"""
-
+"""
+create a histogram from data
+"""
 
 import Numeric
 
 
 def histogram(data, nbins, range = None):
     """
+    Create a histogram.
     Comes from Konrad Hinsen: Scientific Python
+    
+    @param data: data list or array
+    @type  data: [any]
+    @param nbins: number of bins
+    @type  nbins: int
+    @param range: data range to create histogram from (min val, max val)
+    @type  range: (float, float) OR None
+
+    @return: array (2 x len(data) ) with start of bin and witdh of bin. 
+    @rtype: array
     """
     data = Numeric.array(data, Numeric.Float)
     if range is None:
@@ -50,9 +62,22 @@ def histogram(data, nbins, range = None):
 
 def density(x, nBins, range = None, steps = 1, hist = 0):
     """
-    density( data, nBins [,range=None, steps=1, hist=0|1] ) -> array
-    returns the normalized histogram of x
-    steps = 1: histogram appears as a discrete graph
+    returns the normalized histogram of x::
+      density( data, nBins [,range=None, steps=1, hist=0|1] ) -> array
+      
+    @param x: data list or array
+    @type  x: [any]
+    @param nBins: number of bins
+    @type  nBins: int
+    @param range: data range to create histogram from (min val, max val)
+    @type  range: (float, float) OR None
+    @param steps: 1: histogram appears as a discrete graph (default 1)
+    @type  steps: 1|0
+    @param hist: 0: normalize histogram (default 0)
+    @type  hist: 1|0
+    
+    @return: array (2 x len(data) ) with start of bin and witdh of bin. 
+    @rtype: array
     """
     h = histogram(x, nBins, range)
     binWidth = h[1,0] - h[0,0]
@@ -72,8 +97,7 @@ def density(x, nBins, range = None, steps = 1, hist = 0):
         l.append((h[-1][0]+half,0))
 
         h = l
-        
-    return Numeric.array(h)
 
+    return Numeric.array(h)
 
 

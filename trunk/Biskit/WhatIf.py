@@ -20,7 +20,9 @@
 ## $Revision$
 ## last $Date$
 ## last $Author$
-"""Run WhatIf, calculate and collect accessibility data"""
+"""
+Run WhatIf, calculate and collect accessibility data
+"""
 
 import Numeric as N
 import string
@@ -36,19 +38,25 @@ class WhatIf_Error( Exception ):
 
 class WhatIf( Executor ):
     """
+    WhatIf
+    ======
     Run WhatIf accessibility calculation
     
-    pdbFileName - pdb file path
-    relativeASA_log - whatif per atom relative ASA log file
-    residueASA_log - whatif per residue absolute ASA log file
-    whatifScriptName - whatif script file name
+    Result
+    ------
+    A WhatIf log file containing the accessibilities (in square Angstrom)
+    per residue. The ASA is specified for the entire residue as well for
+    the backbone and side chain.
 
-    Result: A WhatIf log file containing the accessibilities
-            (in square Angstrom) per residue. The ASA is specified
-            for the entire residue as well for the backbone
-            and side chain.
+    Reference
+    ---------
+    U{ http://swift.cmbi.kun.nl/whatif/}    
+
+    @note: WhatIf is not free software, therefore the calculations performed
+           by this class can now also be performed by the freeware program
+           SurfaceRacer, see L{ Biskit.SurfaceRacer }. 
     """
-    
+
     whatif_script ="""SOUP  \nINISOU
 
 GETMOL  \n%(f_pdb)s  \nTEST
@@ -67,14 +75,18 @@ NOLOG"""
 
     def __init__( self, model, **kw ):
         """
-        model - PDBModel
+        @param model: PDBModel
+        @type  model: 
 
-        ... and additional key=value parameters for Executor:
-        debug    - 0|1, keep all temporary files                       [0]
-        verbose  - 0|1, print progress messages to log     [log != STDOUT]
-        node     - str, host for calculation (None->local) NOT TESTED [None]
-        nice     - int, nice level                                     [0]
-        log      - Biskit.LogFile, program log (None->STOUT)        [None]
+        @param kw: additional key=value parameters for Executor:
+        @type  kw: key=value pairs
+        ::
+          debug    - 0|1, keep all temporary files (default: 0)
+          verbose  - 0|1, print progress messages to log (log != STDOUT)
+          node     - str, host for calculation (None->local) NOT TESTED
+                          (default: None)
+          nice     - int, nice level (default: 0)
+          log      - Biskit.LogFile, program log (None->STOUT) (default: None)
         """
         Executor.__init__( self, 'whatif', template=self.whatif_script,
                            f_out='/dev/null', **kw )
@@ -87,14 +99,23 @@ NOLOG"""
 
 
     def prepare( self ):
-        """Overrides Executor method."""
+        """
+        Overrides Executor method.
+        """
         self.__prepareModel( self.model, self.f_pdb ) 
 
 
     def __prepareModel( self, m, f_pdb_out ):
         """
-        Don't change numbering of original model..
-        """           
+        Prepare a model that WhatIf likes.
+         - consecutive numbering of residues
+         - remove hydrogens (will be deleted anyway)
+        
+        @param m: model 
+        @type  m: PDBModel
+        @param f_pdb_out: name of pdb file to write
+        @type  f_pdb_out: str
+        """
         ## Whatif deletes hydrogens anyway
         m = m.compress( m.maskHeavy() )
         m.renumberResidues()
@@ -102,6 +123,9 @@ NOLOG"""
 
 
     def cleanup( self ):
+        """
+        Tidy up the mess you created.
+        """
         Executor.cleanup( self )
 
         if not self.debug:
@@ -117,21 +141,28 @@ NOLOG"""
 
 
     def isFailed( self ):
-        """Overrides Executor method"""
+        """
+        Overrides Executor method
+        """
         return not self.error is None 
 
 
     def finish( self ):
-        """Overrides Executor method"""
+        """
+        Overrides Executor method
+        """
         Executor.finish( self )
-        self.result = self.parse_whatif( self.output )
-        
-            
+        self.result = self.parse_whatif( )
+
+
     def __read_residueASA( self ):
         """
         Read solvent accessibility calculated with WHATIF and return array
         of ASA-values. First column is the total ASA, second column the ASA
         of the backbone, the third column is the ASA of the side-chain.
+
+        @return: array (3 x len(residues)) with ASA values
+        @rtype: array
         """
         ## [14:-27] skip header and tail lines line
 
@@ -145,11 +176,12 @@ NOLOG"""
 
     def __read_relativeASA( self ):
         """
-        Read the relative ASA data.
-        Return dic indexed by resNumber with atom and
-           relative accessibility (%)
-           
-        -> { 1: { 'N':34.6, 'CA':81.5 .. }, 2 : {.. }.... }
+        Read the relative ASA data. Return dic indexed by resNumber
+        with atom and relative accessibility (%)
+
+        @return: relative atom ASA dictionary. e.g::
+                 { 1: { 'N':34.6, 'CA':81.5 .. }, 2 : {.. }.... }
+        @rtype: dict of dict
         """
         AtomASA = {} 
 
@@ -182,16 +214,29 @@ NOLOG"""
 
         return AtomASA
 
-    
+
     def __exposedResidues( self, ASA_values, sidechainCut=0.0,
                          backboneCut=0.0, totalCut=0.0  ):
         """
         Decide what is a surface exposed residue and what is not.
         sidechainCut, backboneCut, totalCut - float, cutoff value
-           for what will be considered as a exposed residue. All
-           three values have to pass the test.
+        for what will be considered as a exposed residue. All
+        three values have to pass the test.
 
-        -> [0, 1, 0, 0, 1, 1, 1, 0 ...] where 0 = burried
+        @param ASA_values: array with ASA values for side chains, backbone
+                           and total calculated in L{__read_residueASA}.
+        @type  ASA_values: array
+        @param sidechainCut: cutoff ASA value for considering the side chain
+                             to consider thew residue being exposed
+                             (default: 0.0) 
+        @type  sidechainCut: float
+        @param backboneCut: cutoffvalue for back bone ASA
+        @type  backboneCut: float 
+        @param totalCut: cutoff for total ASA
+        @type  totalCut: float   
+
+        @return: residue mask, where 0 = burried
+        @rtype: [1|0]
         """
         col_0 = N.greater( N.transpose(ASA_values)[0], totalCut )
         col_1 = N.greater( N.transpose(ASA_values)[1], backboneCut )
@@ -204,26 +249,28 @@ NOLOG"""
         return exposedList
 
 
-    def parse_whatif( self, output ):
+    def parse_whatif( self ):
         """
-        Takes a PDBModel and returns three lists:
+        Takes a PDBModel and returns three lists::
 
-        relativeASA - a list of atom relative accessibilities
-                      (in %  - compared to the resideu in a
-                      Gly-XXX-Gly tripeptide, an approximation
-                      of the unfolded state)
+          relativeASA - a list of atom relative accessibilities
+                        (in %  - compared to the resideu in a
+                        Gly-XXX-Gly tripeptide, an approximation
+                        of the unfolded state)
 
-                    -> N.array( 1 x N_atoms )
+                      -> N.array( 1 x N_atoms )
 
-        residueASA  - array 3 x N_residues of float
-                      acc.surf.area per res: sidechain, backbone, total
+          residueASA  - array 3 x N_residues of float
+                        acc.surf.area per res: sidechain, backbone, total
 
 
-        burriedResidues - a burried atom mask
-                          note: cutoff values set above
+          burriedResidues - a burried atom mask
+                            note: cutoff values set above
 
-                        ->  [0, 1, 0, 0, 1, 1, 1, 0 ...]
+                          ->  [0, 1, 0, 0, 1, 1, 1, 0 ...]
 
+        @return: relative accessibility, residue ASA and burried atom mask
+        @rtype: array, array, [1|0]
         """
         # read ASA per residue log
         resASA = self.__read_residueASA( )
@@ -233,16 +280,20 @@ NOLOG"""
 
         # read the relative assesibility per atom log
         atomRelASA = self.__read_relativeASA( )
-        
+
         return self.__asaAtomList( atomRelASA ), resASA, burriedResidues
 
-    
+
     def __asaAtomList( self, relativeASA ):
         """
         convert ASA dict to list of values with len == atom number
-        relativeASA - dict, see __read_relativeASA()
         
-        -> [ 98.0, 0.0, 12.0, .. ], Numpy array 1 x N(atoms)
+        @param relativeASA: see __read_relativeASA()
+        @type  relativeASA: dict
+
+        @return: relative accessibilities e.g. [ 98.0, 0.0, 12.0, .. ],
+                 Numpy array 1 x N(atoms)
+        @rtype:  [float]
         """
         result = []
 
@@ -264,23 +315,23 @@ NOLOG"""
 
 
 if __name__ == "__main__":
-    
+
     from Biskit import PDBModel
     import Biskit.tools as T
     import glob
 
     print "Loading PDB..."
 
-    f = glob.glob( T.testRoot()+'/lig_pc2_00/pdb/*_1_*pdb.gz' )[1]
-    f = T.testRoot()+"/com_wet/1BGS.pdb"
+    f = glob.glob( T.testRoot()+'/lig_pcr_00/pcr_00/*_1_*pdb' )[1]
+    f = T.testRoot()+"/com/1BGS.pdb"
     m = PDBModel(f)
-    
+
     m = m.compress( m.maskProtein() )
     m.addChainFromSegid()
 #    m = m.compress( m.chainMap() == 1 )
     m = m.compress( m.maskProtein() )
     m = m.compress( m.maskHeavy() )
-    
+
     print "Starting WhatIf"
     x = WhatIf( m, debug=1, verbose=1 )
 
@@ -304,7 +355,7 @@ if __name__ == "__main__":
             print 'Not equal ', k
         else:
             print 'Equal ', k
-            
+
 ##     ## display exposed residues in PyMol
 ##     r = atomAcc
 ## #    mask = []
@@ -321,7 +372,7 @@ if __name__ == "__main__":
 ## #    r = m.residusMaximus(r)
 ## #    r = N.compress(m.maskCA(), r)
 ## #    r = N.greater(r, 40)
-   
+
 ##     from Pymoler import *
 ##     pm = Pymoler()
 
@@ -329,9 +380,9 @@ if __name__ == "__main__":
 ##     pm.colorRes( '1', r )
 
 ##     pm.show()
-    
 
-    
+
+
 
 
 

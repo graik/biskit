@@ -22,13 +22,16 @@
 ## $Revision$
 ## last $Author$
 ## last $Date$
+"""
+Use MSMS to calculate surface info. 
+"""
 
 import Numeric as N
 import string
 import os
 import tempfile
 
-import Mslib
+## import Mslib
 
 from Biskit import Executor, TemplateError
 import Biskit.settings as S
@@ -39,36 +42,49 @@ class pdb2xyzrnError( Exception ):
 
 class pdb2xyzrn( Executor ):
     """
-    Run the awk script pdb_to_xyzrn to extract names and radii.
-       nessesary to run msms. The radii od atoms depend on where
-       in the sequence an atom resides. The radii used is determined
-       by the information in the 'atomtypenumbers' file provided
-       with together with the MSMS application.
-       
-    ->  r   - atom radii array
-        n   - atom name list
-    """
+    MSMS - pdb2xyzrn
+    ================
     
+    Run the awk script C{ pdb_to_xyzrn } to extract names and radii.
+    This is nessesary to run msms. The radii and atoms depend on where
+    in the sequence an atom resides. The radii used is determined
+    by the information in the C{ atomtypenumbers } file provided
+    with the MSMS application.
+
+    Result
+    ------
+    ::
+      r   - atom radii array
+      n   - atom name list
+    """
+
     def __init__( self, model, **kw ):
         """
-        model - PDBModel, reference
+        @param model: reference
+        @type  model: PDBModel
+        
+        @param kw: additional key=value parameters for Executor:
+        @type  kw: key=value pairs
+        ::
+          debug    - 0|1, keep all temporary files (default: 0)
+          verbose  - 0|1, print progress messages to log (log != STDOUT)
+          node     - str, host for calculation (None->local) NOT TESTED
+                          (default: None)
+          nice     - int, nice level (default: 0)
+          log      - Biskit.LogFile, program log (None->STOUT) (default: None)
 
-        ... and additional key=value parameters for Executor:
-        debug    - 0|1, keep all temporary files                       [0]
-        verbose  - 0|1, print progress messages to log     [log != STDOUT]
-        node     - str, host for calculation (None->local) NOT TESTED [None]
-        nice     - int, nice level                                     [0]
-        log      - Biskit.LogFile, program log (None->STOUT)        [None]
         """
         self.f_pdb = tempfile.mktemp('_pdb_to_xyzrn.pdb')
-        
+
         Executor.__init__( self, 'pdb2xyzrn', f_in=self.f_pdb, **kw )
 
         self.model = model
 
 
     def prepare( self ):
-        """Overrides Executor method."""
+        """
+        Overrides Executor method.
+        """
         self.model.writePdb( self.f_pdb )
 
 
@@ -78,21 +94,23 @@ class pdb2xyzrn( Executor ):
         if not self.debug:
             T.tryRemove( self.f_pdb )
 
-            
+
     def parse_xyzrn( self, output ):
         """
         Extract xyz and r from output.
-        output - [str], STDOUT from pdb_to_xyzrn
+        
+        @param output: STDOUT from pdb_to_xyzrn
+        @type  output: [str]
 
-        -> r - array with atom radii
-           n - list with atom names
+        @return: r, n - array with atom radii, list with atom names
+        @rtype: array, array
         """
         lines = output.split('\n')
         ## convert into lists that mslib will like
         xyzr = []
         r = []
         n = []
-   
+
         for l in lines:
             ## don't let the last empty line mess things up
             if len(l)!=0:
@@ -112,167 +130,196 @@ class pdb2xyzrn( Executor ):
 
 
     def isFailed( self ):
-        """Overrides Executor method"""
+        """
+        Overrides Executor method
+        """
         return not self.error is None 
 
 
     def finish( self ):
-        """Overrides Executor method"""
+        """
+        Overrides Executor method
+        """
         Executor.finish( self )
         self.result = self.parse_xyzrn( self.output )
 
-        
-class MSLIB_Error( Exception ):
-    pass
+
+## class MSLIB_Error( Exception ):
+##     pass
 
 
-class MSLIB:
-    """
-    Calculate SAS (Solvent Accessible surface) and
-    SES (Solvent Excluded Surface) using msms.
+## class MSLIB:
+##     """
+##     MSLIB
+##     =====
+##     Calculate SAS (Solvent Accessible surface) and
+##     SES (Solvent Excluded Surface) using MSLIB.
 
-    NOTE: MSLIB fails when calling Mslib.MSMS()
-          The error seems to go back to Scientificpython.
-          ERROR:
-            File "/usr/tmp/python-8778q1e", line 160, in calc
-            surf = Mslib.MSMS( coords = xyz, radii = self.r )
-            File "Mslib/__init__.py", line 120, in __init__
-            msms.MOLSRF.__init__(self, name=name, coord=c, nat=nat, maxat=maxnat, names=atnames)
-            File "Mslib/msms.py", line 1832, in __init__
-            self.this = apply(msmsc.new_MOLSRF,_args,_kwargs)
-            ValueError: Failed to make a contiguous array of type 6
-    """
+##     @note: This class has been retired. If you need to run MSMS
+##            use the L[Biskit.MSMS} class insted. The current default class for
+##            calculating MS and AS is otherwise L{Biskit.SurfaceRacer}
 
-    def __init__( self , model ): 
-     
-        self.model = model
- 
-        ## get radiia and name array
-        p2x = pdb2xyzrn(self.model)
-        self.r, self.n = p2x.run()
-      
+##     @bug: MSLIB fails when calling Mslib.MSMS()
+##           The error seems to go back to Scientificpython:
+          
+##           ERROR::
+##             File "/usr/tmp/python-8778q1e", line 160, in calc
+##             surf = Mslib.MSMS( coords = xyz, radii = self.r )
+##             File "Mslib/__init__.py", line 120, in __init__
+##             msms.MOLSRF.__init__(self, name=name, coord=c, nat=nat, maxat=maxnat, names=atnames)
+##             File "Mslib/msms.py", line 1832, in __init__
+##             self.this = apply(msmsc.new_MOLSRF,_args,_kwargs)
+##             ValueError: Failed to make a contiguous array of type 6
+##     """
 
-    def calc( self, descr='no_name', probeRadius=1.5 ):
-        """
-        Run msms analytical surface calculation
-        i.e. msms -if xyzr.coord -af atoms.area -surface ases
+##     def __init__( self , model ): 
 
-        xyzrName - path and name of xyzr coordinate file
+##         self.model = model
 
-        ->  out     - dictionary - probe radii used, total SAS and SES
-            sesList - array of lenght atoms with SES
-                        (Solvent Excluded Surface)
-            sasList - array of lenght atoms with SAS
-                        (Solvent Accessible surface)
-        """
-        xyz = self.model.xyz
+##         ## get radiia and name array
+##         p2x = pdb2xyzrn(self.model)
+##         self.r, self.n = p2x.run()
 
-        print N.shape(xyz), N.shape(self.r)
-        print xyz[0], self.r[0]
-        print xyz[-1], self.r[-1]
-        ## run msms
-        surf = Mslib.MSMS( coords = xyz,
-                           radii = self.r, 
-                           atnames = self.n,
-                           name = descr,
-                           maxnat = len(xyz)+100 )
 
-        surf = Mslib.MSMS( coords = xyz, radii = self.r )
+##     def calc( self, descr='no_name', probeRadius=1.5 ):
+##         """
+##         Run msms analytical surface calculation, i.e.::
+##           msms -if xyzr.coord -af atoms.area -surface ases
+          
+##         @param descr: descriptive name
+##         @type  descr: str
+##         @param probeRadius: probe radius
+##         @type  probeRadius: float
 
-        surf.compute( probe_radius = probeRadius, density=1.0 )
-        area = surf.compute_ses_area()
+##         @return: out,  probe radii used, total SAS and SES
+##                  sesList, array of lenght atoms with SES
+##                         (Solvent Excluded Surface)
+##                  sasList, array of lenght atoms with SAS
+##                         (Solvent Accessible surface)
+##                  atmList, list of atom names
+##         @rtype: dict, array, array, [str]
+##         """
+##         xyz = self.model.xyz
 
-        out = {}
-        if area == 0:
-            surf.write_ses_area( surfName )
-            out['ses'] = surf.sesr.fst.a_ses_area
-            out['sas'] = surf.sesr.fst.a_sas_area
-        else:
-            raise MSLIB_Error('compute_ses_area not successfull')
-        
-        ## parse atom specific SAS (Solvent Accessible surface)
-        ## and SES (Solvent Excluded Surface)
-        surfName = surfName + '_0'
-        outList = open( surfName  , 'r').readlines()
+##         print N.shape(xyz), N.shape(self.r)
+##         print xyz[0], self.r[0]
+##         print xyz[-1], self.r[-1]
+##         ## run msms
+##         surf = Mslib.MSMS( coords = xyz,
+##                            radii = self.r, 
+##                            atnames = self.n,
+##                            name = descr,
+##                            maxnat = len(xyz)+100 )
 
-        sasList = []
-        sesList = []
-        atmList = []
+##         surf = Mslib.MSMS( coords = xyz, radii = self.r )
 
-        for i in range( 1, len(outList) ):
-            line = string.split( outList[i] )
-            sesList += [ float( line[1] ) ]
-            sasList += [ float( line[2] ) ]
-            atmList += [ line[3] ]
+##         surf.compute( probe_radius = probeRadius, density=1.0 )
+##         area = surf.compute_ses_area()
 
-        ## polar and nonepolar surfaces
-        N_mask = N.transpose(atmList)[0] == 'N'
-        O_mask = N.transpose(atmList)[0] == 'O'
-        C_mask = N.transpose(atmList)[0] == 'C'
-        out['ses_polar'] = N.sum( sesList * O_mask ) + N.sum( sesList * N_mask )
-        out['ses_non-polar'] = N.sum( sesList * C_mask )
-        out['sas_polar'] = N.sum( sasList * O_mask ) + N.sum( sasList * N_mask )
-        out['sas_non-polar'] = N.sum( sasList * C_mask )
-                
-        ## cleanup 
-        try:
-            os.remove( surfName )
-        except:
-            pass
+##         out = {}
+##         if area == 0:
+##             surf.write_ses_area( surfName )
+##             out['ses'] = surf.sesr.fst.a_ses_area
+##             out['sas'] = surf.sesr.fst.a_sas_area
+##         else:
+##             raise MSLIB_Error('compute_ses_area not successfull')
 
-        return out, sesList, sasList, atmList
+##         ## parse atom specific SAS (Solvent Accessible surface)
+##         ## and SES (Solvent Excluded Surface)
+##         surfName = surfName + '_0'
+##         outList = open( surfName  , 'r').readlines()
 
- 
+##         sasList = []
+##         sesList = []
+##         atmList = []
+
+##         for i in range( 1, len(outList) ):
+##             line = string.split( outList[i] )
+##             sesList += [ float( line[1] ) ]
+##             sasList += [ float( line[2] ) ]
+##             atmList += [ line[3] ]
+
+##         ## polar and nonepolar surfaces
+##         N_mask = N.transpose(atmList)[0] == 'N'
+##         O_mask = N.transpose(atmList)[0] == 'O'
+##         C_mask = N.transpose(atmList)[0] == 'C'
+##         out['ses_polar'] = N.sum( sesList * O_mask ) + N.sum( sesList * N_mask )
+##         out['ses_non-polar'] = N.sum( sesList * C_mask )
+##         out['sas_polar'] = N.sum( sasList * O_mask ) + N.sum( sasList * N_mask )
+##         out['sas_non-polar'] = N.sum( sasList * C_mask )
+
+##         ## cleanup 
+##         try:
+##             os.remove( surfName )
+##         except:
+##             pass
+
+##         return out, sesList, sasList, atmList
+
+
 class MSMS_Error( Exception ):
     pass
 
 
 class MSMS( Executor ):
     """
+    MSMS
+    ====
+    
     Calculate SAS (Solvent Accessible surface) and
-    SES (Solvent Excluded Surface) using msms.
+    SES (Solvent Excluded Surface) using the msms applicaton.
 
-    Run msms analytical surface calculation
-    i.e. msms -if xyzr.coord -af atoms.area -surface ases
+    Run msms analytical surface calculation i.e.::
+       msms -if xyzr.coord -af atoms.area -surface ases
 
-    ->  out     - dictionary - probe radii used, total SAS and SES
-        sesList - array of lenght atoms with SES (Solvent Excluded Surface)
-        sasList - array of lenght atoms with SAS (Solvent Accessible surface)
+    Result
+    ------
+    ::
+     out     - dictionary - probe radii used, total SAS and SES
+     sesList - array of lenght atoms with SES (Solvent Excluded Surface)
+     sasList - array of lenght atoms with SAS (Solvent Accessible surface)
+
+    @note: The current default class for calculating MS and AS
+           is L{Biskit.SurfaceRacer}.
     """
-                  
+
 
     def __init__( self, model, **kw ): 
         """
-        model - PDBModel
+        @param model: PDBModel
+        @type  model:
 
-        ... and additional key=value parameters for Executor:
-        debug    - 0|1, keep all temporary files                       [0]
-        verbose  - 0|1, print progress messages to log     [log != STDOUT]
-        node     - str, host for calculation (None->local) NOT TESTED [None]
-        nice     - int, nice level                                     [0]
-        log      - Biskit.LogFile, program log (None->STOUT)        [None]
+        @param kw: additional key=value parameters for Executor:
+        @type  kw: key=value pairs
+        ::
+          debug    - 0|1, keep all temporary files (default: 0)
+          verbose  - 0|1, print progress messages to log (log != STDOUT)
+          node     - str, host for calculation (None->local) NOT TESTED
+                          (default: None)
+          nice     - int, nice level (default: 0)
+          log      - Biskit.LogFile, program log (None->STOUT) (default: None)
         """
         self.f_xyzrn = tempfile.mktemp('_msms.xyzrn')
 
         ## output file from MSMS, will add .area exiension to file
         self.f_surf = tempfile.mktemp( )
-        
+
         arg =' -surface ases -if %s  -af %s'%( self.f_xyzrn, self.f_surf )
-        
+
         Executor.__init__( self, 'msms', args=arg, **kw )
 
         self.model = model.clone( deepcopy=1 )
 
-            
+
     def prepare( self ):
         """
+        Write a xyzrn coordinate file to disc.
         Overrides Executor method.
-        Write a xyzrn coordinate file to disk
         """
         ## get radiia and name array
         p2x = pdb2xyzrn(self.model)
         r, n = p2x.run()
-        
+
         xyz = self.model.xyz  
         xyzr = N.concatenate(  ( xyz, N.transpose([r]) ) ,axis=1 )
 
@@ -285,20 +332,25 @@ class MSMS( Executor ):
 
 
     def cleanup( self ):
+        """
+        Remove temp files.
+        """
         Executor.cleanup( self )
 
         if not self.debug:
             T.tryRemove( self.f_xyzrn )
             T.tryRemove( self.f_surf + '.area' )
 
-                
+
     def parse_msms( self ):
         """
-        ->  out     - dictionary - probe radii used, total SAS and SES
-            sesList - array of lenght atoms with SES
-                       (Solvent Excluded Surface)
-            sasList - array of lenght atoms with SAS
-                       (Solvent Accessible surface)
+        Parse the result file from a msms calculation.
+
+        @return: probe radii used, total SAS and SES, 
+                 array of lenght atoms with SES (Solvent Excluded Surface),
+                 array of lenght atoms with SAS (Solvent Accessible surface),
+                 and a list of atom names
+        @rtype: dict, array, array, [str]
         """        
         ## get ASA, SES and probe radiii from stdout
         out = string.split( open( self.f_out ).readlines()[-3] )
@@ -320,7 +372,7 @@ class MSMS( Executor ):
 
         for i in range( 1, len(outList) ):
             line = string.split( outList[i] )
-          
+
             if len(line)== 4:
                 sesList += [ float( line[1] ) ]
                 sasList += [ float( line[2] ) ]
@@ -330,17 +382,21 @@ class MSMS( Executor ):
 
         return out, sesList, sasList, atmList
 
-    
+
     def isFailed( self ):
-        """Overrides Executor method"""
+        """
+        Overrides Executor method
+        """
         return not self.error is None 
 
 
     def finish( self ):
-        """Overrides Executor method"""
+        """
+        Overrides Executor method
+        """
         Executor.finish( self )
         self.result = self.parse_msms( )
-        
+
 
 ####################################
 ## Testing
@@ -374,13 +430,13 @@ if __name__ == '__main__':
 
     #######
     ## get surfaces via the MSMS executable
-    
+
     print "Starting MSMS"
     a = MSMS( m, debug=1, verbose=1 )
 
     print "Running"
     out, sesList, sasList, atmList = a.run()
-    
+
     print out
     print '\nResult from MSMS (first 5 lines): '
     print 'SES \tSAS \tAtom name'
@@ -396,4 +452,4 @@ if __name__ == '__main__':
 ##     a = MSLIB( m )
 ##     out, sesList, sasList, atmList = a.calc( m.xyz  )
 ##     print out
-    
+

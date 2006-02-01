@@ -14,6 +14,9 @@
 #   allow importing even if gnuplot is not installed,
 #   check gnuplot.installed == 1, to be sure the program runs
 
+"""
+Simple Gnuplot interface.
+"""
 
 import os, string, tempfile
 

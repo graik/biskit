@@ -22,6 +22,10 @@
 ## last $Date$
 ## $Revision$
 
+"""
+Run ptraj entropy analysis on Trajectory instance.
+"""
+
 import tempfile, os, copy
 import Numeric as N
 import random, time
@@ -52,57 +56,93 @@ class AmberEntropist( AmberCrdEntropist ):
                   fit_s=None, fit_e=None, memsave=1,
                   **kw ):
         """
-        traj  - str, path to 1 or 2 pickled Trajectory (2 seperated by '+')
-        parm  - str, try using existing parm file & keep it [create+discard]
-        crd   - str, target file for amber crd & keep it           [discard]
-        ref   - str|PDBModel|Complex, superimpose onto this structure
-        cast  - 0|1, equalize atom content against ref (if given)       [1]
+        @param traj: path to 1 or 2 pickled Trajectory (2 seperated by '+')
+        @type  traj: str
+        @param parm: try using existing parm file & keep it [create+discard]
+        @type  parm: str
+        @param crd: target file for amber crd & keep it (default: discard)
+        @type  crd: str
+        @param ref: superimpose onto this structure
+        @type  ref: str|PDBModel|Complex
+        @param cast: equalize atom content against ref (if given) (default: 1)
+        @type  cast: 0|1
 
-        chains  - [ int ], extract chains from traj        [None..all chains]
-        border  - int, 1st chain of 2nd molecule - required for split, shift,
-                  shuffle if traj is not already a tuple of trajectories [] 
-        split   - 1|0, split trajectory after |border| and fit the two halfs
-                  separately                                   [0]
-        shift   - int, recombine rec and lig member trajectories, should
-                  disrupt correlations between rec and lig,
-                  requires |chains| or 2 traj files to identify rec     [0]
-        shuffle - 0|1, shuffle the order of frames for one trajectory half,
-                  requires |border| or 2 traj files to identify rec
-        s,e     - int, start and stop frame of complete traj.   [0, to end]
-        ss, se  - int, start and stop frame of single member trajectories
-                  (only works with EnsembleTraj; overrides s,e)
-        step    - int, frame offset                                 [no offset]
-        thin    - float, use only randomly distributed fraction of frames [all]
-        atoms   - [ str ], atom names to consider                       [all]
-        heavy   - 1|0, remove hydrogens                                 [0]
-        ex      - [int] OR ([int],[int]), exclude member trajectories   [[]]
-        ex_n    - int, exclude last n members  OR...                    []
-        ex3     - int, exclude |ex3|rd tripple of trajectories          [0]
-                  (index starts with 1! 0 to exclude nothing) OR....
-        ex1     - int, exclude ex1-th member remaining after applying ex [None]
-                  (index starts with 1! 0 to exclude nothing)
-        fit_s/e - int | None, fit to average of different frame slice   [=s/e]
-        memsave - 1|0, delete internal trajectory after writing crd     [1]
+        @param chains: extract chains from traj (default: None, all chains)
+        @type  chains: [int]
+        @param border: 1st chain of 2nd molecule - required for split, shift,
+                       shuffle if traj is not already a tuple of trajectories
+        @type  border: int
+        @param split: split trajectory after |border| and fit the two halfs
+                      separately (default: 0)
+        @type  split: 1|0
+        @param shift: recombine rec and lig member trajectories, should
+                      disrupt correlations between rec and lig, requires
+                      |chains| or 2 traj files to identify rec (default: 0)
+        @type  shift: int
+        @param shuffle: shuffle the order of frames for one trajectory half,
+                        requires |border| or 2 traj files to identify rec
+        @type  shuffle: 0|1
+        @param s: start frame of complete traj (default: 0)
+        @type  s: int
+        @param e: stop frame of complete traj (default: None)
+        @type  e: int
+        @param ss: start frame of single member trajectories (only works
+                   with EnsembleTraj; overrides s,e) (default: 0)
+        @type  ss: int
+        @param se: stop frame of single member trajectories (only works
+                   with EnsembleTraj; overrides s,e) (default: None)
+        @type  se: int                 
+        @param step: frame offset (default: 1, no offset)
+        @type  step: int
+        @param thin: use only randomly distributed fraction of frames
+                     (default: all)
+        @type  thin: float
+        @param atoms: atom names to consider (default: all)
+        @type  atoms: [str]
+        @param heavy: remove hydrogens (default: 0)
+        @type  heavy: 1|0
+        @param ex: exclude member trajectories
+        @type  ex: [int] OR ([int],[int])
+        @param ex_n: exclude last n members  OR...                
+        @type  ex_n: int
+        @param ex3: exclude |ex3|rd tripple of trajectories  (default: 0)
+                    (index starts with 1! 0 to exclude nothing) OR....
+        @type  ex3: int
+        @param ex1: exclude ex1-th member remaining after applying ex
+                    (default: None)(index starts with 1! 0 to exclude nothing)
+        @type  ex1: int
+        @param fit_s: fit to average of different frame slice 
+        @type  fit_s: int|None
+        @param fit_e: fit to average of different frame slice 
+        @type  fit_e: int|None
+        @param memsave: delete internal trajectory after writing crd
+                        (default: 1)
+        @type  memsave: 1|0
 
-        ... parameters for AmberCrdEntropist
-        f_template - str, alternative ptraj input template [default]
+        @param kw: additional key=value parameters for AmberCrdEntropist
+                   and Executor:
+        @type  kw: key=value pairs
+        ::
+          ... parameters for AmberCrdEntropist
+          f_template - str, alternative ptraj input template
 
-        ... and key=value parameters for Executor:
-        f_out    - str, target name for ptraj output file        [discard]
-        node     - str, host for calculation (None->local)              []
-        nice     - int, nice level                                     [0]
-        log      - Biskit.LogFile, program log (None->STOUT)            []
-        debug    - 0|1, keep all temporary files                       [0]
-        verbose  - 0|1, print progress messages to log     [log != STDOUT]
+          ... and key=value parameters for Executor:
+          f_out    - str, target name for ptraj output file (default: discard)
+          debug    - 0|1, keep all temporary files (default: 0)
+          verbose  - 0|1, print progress messages to log (log != STDOUT)
+          node     - str, host for calculation (None->local) NOT TESTED
+                          (default: None)
+          nice     - int, nice level (default: 0)
+          log      - Biskit.LogFile, program log (None->STOUT) (default: None)
         """
         tempfile.tempdir = '/work'
-        
+
         f_crd = crd or tempfile.mktemp('.crd')
         self.keep_crd = crd is not None
-        
+
         f_parm = t.absfile( parm or tempfile.mktemp( '.parm' ) )
         self.keep_parm = parm is not None
-        
+
         self.parmcrd = tempfile.mktemp('_ref.crd')
 
         AmberCrdEntropist.__init__( self, f_parm, f_crd,
@@ -141,7 +181,7 @@ class AmberEntropist( AmberCrdEntropist ):
             self.ex1 = None
         else:
             self.ex1 = ex1-1
-        
+
         ## delete non-protein atoms
         self.ref = self.prepareRef( ref )
 
@@ -156,8 +196,9 @@ class AmberEntropist( AmberCrdEntropist ):
 
 
     def prepare( self ):
-        """Overrides Executor method."""
-
+        """
+        Overrides Executor method.
+        """
         ## create Parm file for selected atoms of trajectory
         if not os.path.exists( self.f_parm ):
             self.buildParm()
@@ -173,9 +214,12 @@ class AmberEntropist( AmberCrdEntropist ):
             if self.memsave: self.traj = None
         else:
             self.log.add('using existing %s' % self.f_crd)
-        
+
 
     def buildParm( self ):
+        """
+        Build amber topology.
+        """
         a = AmberParmBuilder( self.traj.ref, verbose=self.verbose,
                               debug=self.debug )
         self.log.add_nobreak('Building amber topology...')
@@ -188,10 +232,19 @@ class AmberEntropist( AmberCrdEntropist ):
         """
         Fit trajectory until convergence onto it's own average and then
         transform the average of all frames onto the reference.
+        
+        @param traj: trajectory in which to fit frames
+        @type  traj: Trajectory  
+        @param refModel: reference PDBModel
+        @type  refModel: PDBModel
+        @param mask: atom mask for superposition (default: all)
+        @type  mask: [1|0]
+        @param conv: convergence criteria (default: 1e-6)
+        @type  conv: float
         """
         self.fit_e = self.fit_e or len( traj )
         self.fit_s = self.fit_s or 0
-        
+
         traj.fit( ref=traj.ref, mask=mask )
 
         m_avg = traj[self.fit_s : self.fit_e ].avgModel()
@@ -209,7 +262,7 @@ class AmberEntropist( AmberCrdEntropist ):
 
             dd = oldD - d
             m_avg = m_new_avg
-            
+
         ## transform trajectory en block onto reference
         if refModel:
             self.log.add('fitting trajectory en-block onto reference...')
@@ -222,13 +275,21 @@ class AmberEntropist( AmberCrdEntropist ):
                 m_avg    = m_avg.take( i )
 
                 if mask:   mask = N.take( mask, i )
-                
+
             r, t = m_avg.transformation( refModel, mask )
             traj.transform( r, t )
-            
+
 
     def __splitFilenames( self, f ):
-        """split(traj1.dat+traj2.dat) -> (traj1.dat, traj2.dat)
+        """
+        Split file name::
+          split(traj1.dat+traj2.dat) -> (traj1.dat, traj2.dat)
+        
+        @param f: file name
+        @type  f: str
+
+        @return: split filename
+        @rtype: str, str
         """
         if f.find("+") != -1 :
             split = f.find("+")
@@ -238,8 +299,17 @@ class AmberEntropist( AmberCrdEntropist ):
             return f1, f2
         return None
 
+
     def __cleanAtoms( self, m ):
-        """Remove non protein atoms and H if needed."""
+        """
+        Remove non protein atoms and H if needed.
+
+        @param m: model to clean
+        @type  m: PDBModel
+
+        @return: cleaned model
+        @rtype: PDBModel      
+        """
         m.keep( N.nonzero( m.maskProtein() ) )
         if self.heavy:
             m.keep( N.nonzero( m.maskHeavy() ) )
@@ -249,12 +319,17 @@ class AmberEntropist( AmberCrdEntropist ):
     def __getModel( self, f ):
         """
         Load PDBModel directly or extract it from Trajectory.
-        f - str, file name of PDB file, pickled PDBModel, or Trajectory
-        -> PDBModel
-        !! IOError, if file does not exist
+        
+        @param f: file name of PDB file, pickled PDBModel, or Trajectory
+        @type  f: str
+        
+        @return: model
+        @rtype: PDBModel
+        
+        @raise IOError: if file does not exist
         """
         p = LocalPath( f )
-        
+
         isPdb = (f[-4:].upper() == '.PDB' or f[-7:].upper() == '.PDB.GZ')
 
         if isPdb and p.exists():
@@ -271,7 +346,17 @@ class AmberEntropist( AmberCrdEntropist ):
 
 
     def prepareRef( self, fname ):
+        """
+        Prepare reference model.
+        
+        @param fname: file name 
+        @type  fname: str
 
+        @return: reference structure
+        @rtype: PDBModel|Complex        
+
+        @raise EntropistError: if unknown reference type
+        """
         if not fname:
             return None
 
@@ -302,10 +387,21 @@ class AmberEntropist( AmberCrdEntropist ):
     def __add3( self, n_members, excluded, trippleIndex ):
         """
         Add a tripple of numbers from range( n_members ) to excluded.
+
+        @param n_members:
+        @type  n_members:
+        @param excluded:
+        @type  excluded:
+        @param trippleIndex:
+        @type  trippleIndex:
+
+        @return: 
+        @rtype:      
         """
         remaining = MU.difference( range( n_members ), excluded )
         tripple = self.tripples( remaining, trippleIndex+1 )[-1]
         return MU.union( excluded, list(tripple) )
+
 
     def __add1( self, n_members, excluded, index ):
         """
@@ -315,7 +411,11 @@ class AmberEntropist( AmberCrdEntropist ):
         new_i = remaining[index]
         return excluded + [ new_i ]
 
+
     def __exclude( self, traj, exclude ):
+        """
+        Exclude members.
+        """
         if exclude == None or len( exclude ) == 0:
             return traj
 
@@ -323,10 +423,12 @@ class AmberEntropist( AmberCrdEntropist ):
         self.log.add("excluding members: " + str(exclude))
 
         return traj.takeMembers( MU.difference( members, exclude ) )
-            
+
+
     def __removeMembers( self, t ):
         """
-        t - EnsembleTraj OR ( EnsembleTraj, EnsembleTraj )
+        @param t: EnsembleTraj OR ( EnsembleTraj, EnsembleTraj )
+        @type  t: EnsembleTraj OR ( EnsembleTraj, EnsembleTraj )
         """
         if self.ex_n:
             self.exclude = range( self.ex_n )
@@ -338,7 +440,7 @@ class AmberEntropist( AmberCrdEntropist ):
             n_memb = ( t[0].n_members, t[1].n_members )
         else:
             n_memb = t.n_members
-            
+
         if self.ex3 != None and type( self.exclude ) is tuple:
             self.exclude = self.__add3(n_memb[0], self.exclude[0], self.ex3),\
                            self.__add3(n_memb[1], self.exclude[1], self.ex3)
@@ -366,6 +468,14 @@ class AmberEntropist( AmberCrdEntropist ):
 
     def prepareTraj( self, fname, ref=None, cast=1 ):
         """
+        Prepare trajectory for Amber.
+
+        @param fname: path to EnsembleTraj OR ( EnsembleTraj, EnsembleTraj )
+        @type  fname: str OR (str,str)
+        @param ref: reference structure
+        @type  ref: EnsembleTraj
+        @param cast: cast to reference (same atom content) (default: 1)
+        @type  cast: 1|0
         """
         ## Load 1 or 2
         if self.__splitFilenames( fname ):
@@ -378,7 +488,6 @@ class AmberEntropist( AmberCrdEntropist ):
 
         ## split 1 into 2 if necessary
         if not type(t) is tuple and self.border:
-
             lig = range( self.border, t.ref.lenChains() )
             t = t.takeChains( range(self.border) ), t.takeChains( lig )
 
@@ -405,7 +514,7 @@ class AmberEntropist( AmberCrdEntropist ):
         if cast and type( t ) is tuple:
             self.castTraj( t[0], ref.rec_model )
             self.castTraj( t[1], ref.lig_model )
-            
+
         ## reorder one half (requires -border or file name pair )
         if self.shift:
             t = self.shiftTraj( t[0], self.shift ), t[1]
@@ -438,6 +547,12 @@ class AmberEntropist( AmberCrdEntropist ):
     def load_locked( self, fname ):
         """
         wait with unpickling until another Entropist has finished.
+
+        @param fname: file name
+        @type  fname: str
+
+        @return: trajectroy
+        @rtype: Trajectroy
         """
         flock = fname + '__locked'
 
@@ -460,10 +575,12 @@ class AmberEntropist( AmberCrdEntropist ):
 
 
     def loadTraj( self, fname, shift=0 ):
-        """Load single trajectory."""
+        """
+        Load single trajectory.
+        """
         if self.verbose:
             self.log.add_nobreak( 'Loading %s...' % fname)
-            
+
         traj = self.load_locked( fname )
 
         if self.verbose:
@@ -492,7 +609,7 @@ class AmberEntropist( AmberCrdEntropist ):
                           MU.randomRange(0, len( traj ), targetLength )
             traj = traj.takeFrames( self.thin_i )
             self.log.add( "Thinned to %i frames." % len( traj ) )
-            
+
         ## keep only allowed atoms (default: all)
         if self.atoms:
             traj.ref.addChainId()
@@ -514,7 +631,9 @@ class AmberEntropist( AmberCrdEntropist ):
 
 
     def shiftTraj( self, traj, shift=0 ):
-        """reorder member trajectories"""
+        """
+        reorder member trajectories
+        """
         if not shift:
             return traj
 
@@ -528,13 +647,18 @@ class AmberEntropist( AmberCrdEntropist ):
 
 
     def shuffleTraj( self, traj ):
-        """reorder all frames at random"""
+        """
+        reorder all frames at random
+        """
         r = range( len( traj ) )
         random.shuffle( r )
         return traj.takeFrames( r )
 
+
     def castTraj( self, traj, refModel ):
-        """Equalize atom content of traj to refModel. """
+        """
+        Equalize atom content of traj to refModel. 
+        """
         l    = traj.lenAtoms()
         lref = len( refModel )
 
@@ -547,7 +671,7 @@ class AmberEntropist( AmberCrdEntropist ):
 
         traj.keepAtoms( i )
         self.log.add( "%i atoms deleted from trajectory."% (l-len(i) ) )
-        
+
 
     def tripples( self, lst, n ):
         """
@@ -583,6 +707,9 @@ class AmberEntropist( AmberCrdEntropist ):
 
 
     def cleanup( self ):
+        """
+        Remove temporary files.
+        """
         AmberCrdEntropist.cleanup( self )
 
         if not self.debug:
@@ -595,6 +722,9 @@ class AmberEntropist( AmberCrdEntropist ):
 
 
     def finish( self ):
+        """
+        Called when done.
+        """
         AmberCrdEntropist.finish( self )
 
         ## consistency check of result
