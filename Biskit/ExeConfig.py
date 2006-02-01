@@ -16,12 +16,14 @@
 ## license.txt along with this program; if not, write to the Free
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
-##
 
 ## last $Author$
 ## last $Date$
 ## $Revision$
-"""Collect settings for an external program from a configuration file."""
+
+"""
+Collect settings for an external program from a configuration file.
+"""
 
 import ConfigParser
 import user, os.path
@@ -44,37 +46,44 @@ class CaseSensitiveConfigParser( ConfigParser.SafeConfigParser ):
 class ExeConfig( object ):
 
     """
+    ExeConfig
+    =========
+    
     Manage the settings that Executor needs for calling an external
     program.
 
     ExeConfig is initialised with a program name and expects to find
     the configuration for this program in
-    ~/.biskit/exe_|name|.dat. Only if nothing is found there, it looks
-    for external/defaults/exe_|name|.dat in the biskit installation
+    C{ ~/.biskit/exe_|name|.dat }. Only if nothing is found there, it looks
+    for C{ external/defaults/exe_|name|.dat } in the biskit installation
     folder.  If neither of the two files are found, an error is raised
     (strict=1) or the binary is assumed to be |name| and must be
     accessible in the search path (strict=0).
 
-    The configuration file (exe_name.dat) should look like this:
 
-    ----example configuration----
-    [BINARY]
-
-    comment=the emacs editor
-    bin=emacs
-    cwd=
-    shell=0
-    shellexe=
-    pipes=0
-    ## Use new environment containing only variables given below
-    replaceEnv=0
-
-    [ENVIRONMENT]
-
-    HOME=
-    EMACS_CONFIG=~/.emacs/config.dat
-    ----end of example----
+    Example
+    -------
     
+    The configuration file (exe_name.dat) should look like this::
+
+      ---- start example configuration file ----
+      [BINARY]
+
+      comment=the emacs editor
+      bin=emacs
+      cwd=
+      shell=0
+      shellexe=
+      pipes=0
+      ## Use new environment containing only variables given below
+      replaceEnv=0
+
+      [ENVIRONMENT]
+
+      HOME=
+      EMACS_CONFIG=~/.emacs/config.dat
+      ---- end of example file ----
+
 
     This example config would ask Executor to look for an executable
     called 'emacs' in the local search path. Before running it,
@@ -84,23 +93,22 @@ class ExeConfig( object ):
 
     The other settings specify how the program call is done (see also
     Python 2.4 subprocess.Popen() ):
-    
-    cwd   ...    working directory (empty -- current working directory)
-    shell ...    wrap process in separate shell
-    shellexe ... which shell (empty -- sh)
-    pipes ...    paste input via STDIN, collect output at STDOUT
+
+      - cwd   ...    working directory (empty -- current working directory)
+      - shell ...    wrap process in separate shell
+      - shellexe ... which shell (empty -- sh)
+      - pipes ...    paste input via STDIN, collect output at STDOUT
 
     Missing options are reset to their default value; See
-    ExeConfig.reset().  All entries in section BINARY are put into the
+    L{ ExeConfig.reset() }.  All entries in section BINARY are put into the
     name space of the ExeConfig object. That means an ExeConfig object x
     created from the above file can be used as follows:
 
-    x = ExeConfig( 'emacs' )
-    x.cwd == None
-    >>>True
-    print x.comment
-    >>>the emacs editor
-
+      >>> x = ExeConfig( 'emacs' )
+      >>> x.cwd == None
+      >>> True
+      >>> print x.comment
+      >>> the emacs editor
     """
 
     ## static fields
@@ -111,10 +119,14 @@ class ExeConfig( object ):
 
     def __init__( self, name, strict=1 ):
         """
-        name   - str, unique name of the program
-        strict - 0|1, insist on a config file exe_name.dat
-                 and do not tolerate missing environment variables [1]
-        !! ExeConfigError, if strict==1 and config file incomplete/missing
+        @param name: unique name of the program
+        @type  name: str
+        @param strict: insist on a config file exe_name.dat
+                       and do not tolerate missing environment variables
+                       (default: 1)
+        @type  strict: 0|1
+        
+        @raise ExeConfigError: if strict==1 and config file incomplete/missing
         """
         self.name = name
         self.dat  = os.path.join( self.PATH_CONF, 'exe_%s.dat' % name )
@@ -139,7 +151,9 @@ class ExeConfig( object ):
 
 
     def reset( self ):
-        """Reset all required parameters. Called at creation"""
+        """
+        Reset all required parameters. Called at creation
+        """
         ## default values
         self.comment = 'incomplete or missing configuration file'
         self.bin = self.name
@@ -156,17 +170,18 @@ class ExeConfig( object ):
         """
         Load settings from associated configuration file (if available).
         Is automatically called at creation.
-        !! ExeConfigError, if section [BINARY] was not found in the file
+        
+        @raise ExeConfigError: if section [BINARY] was not found in the file
         """
         ## get parameters from config file if available; type-cast values 
         try:
             dconf = self.conf.items( self.SECTION_BIN )
 
             for key, value in dconf:
-                
+
                 ## default type is string
                 t = type( self.__dict__.get( key, '' ) )
-                
+
                 ## leave default value if None is given
                 if value is not '':
                     self.__dict__[ key ] = t( value )
@@ -180,11 +195,14 @@ class ExeConfig( object ):
             self.env = self.conf.items( self.SECTION_ENV )
         except:
             pass
-        
+
 
     def validate( self ):
         """
-        !! ExeConfigError, if environment is not fit for running the program
+        Validate the path to the binary.
+        
+        @raise ExeConfigError: if environment is not fit for running
+                               the program
         """
         try:
             self.bin = T.absbinary( self.bin )
@@ -201,29 +219,37 @@ class ExeConfig( object ):
 
         except IOError, why:
             raise ExeConfigError, str(why) + ' Check %s!' % self.dat
-        
-        
+
+
     def environment( self ):
         """
-        ->{ str : str }, dictionary with environment for subprocess.Popen
-        OR -> None, if no environment was specified
-        !! ExeConfigError, if env was not yet checked by update_environment
+        Get needed environment variables.
+        
+        @return: dictionary with environment for subprocess.Popen
+                 OR None, if no environment was specified
+        @rtype: {str:str} OR None
+
+        @raise ExeConfigError: if env was not yet checked by update_environment
         """
         if not self.env_checked:
             raise ExeConfigError, 'Environment not yet checked, validate()!'
-        
+
         if self.env is None:
             return None
-        
+
         r = {}
         for key,value in self.env:
             r[ key ] = value
 
         return r
 
+
     def update_environment( self ):
         """
-        -> [ str ], names of required but missing environment variables
+        Check for missing environment settings.
+        
+        @return: names of required but missing environment variables
+        @rtype: [str]
         """
         missing = []
 
@@ -253,7 +279,7 @@ class ExeConfig( object ):
 
     def __str__( self ):
         return self.__repr__()
-    
+
 
 if __name__ == '__main__':
 

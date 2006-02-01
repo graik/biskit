@@ -1,4 +1,3 @@
-## Parallize calculation of pairwise rmsd between the frames of a trajectory
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
@@ -23,6 +22,9 @@
 ## last $Date$
 ## $Revision$
 
+"""
+Parallize calculation of pairwise rmsd between the frames of a trajectory
+"""
 import Biskit.hosts as hosts
 
 import Biskit.tools as T
@@ -43,6 +45,7 @@ from Biskit.PVM.TrackingJobMaster import TrackingJobMaster
 class FlexError( BiskitError ):
     pass
 
+
 class TrajFlexMaster(TrackingJobMaster):
     """
     Parallize calculation of pairwise rmsd between the frames of one or two
@@ -51,30 +54,44 @@ class TrajFlexMaster(TrackingJobMaster):
 
     slave_script =  T.projectRoot() + '/Biskit/TrajFlexSlave.py'
 
-    def __init__(self, traj1, traj2=None,
-                 aMask       =None,
-                 hosts       =hosts.cpus_all,
-                 niceness    =hosts.nice_dic,
-                 show_output =0,
-                 add_hosts   =0,
+    def __init__(self, traj1, traj2=None, aMask=None, hosts=hosts.cpus_all,
+                 niceness=hosts.nice_dic, show_output=0, add_hosts=0,
                  log=None, slaveLog=None, verbose=1,
                  only_off_diagonal=1, only_cross_member=0):
         """
-        traj1, traj2 - Trajectory or EnsembleTraj, traj1 and 2 must have the
+        @param traj1: Trajectory or EnsembleTraj, traj1 and 2 must have the
                        same atom content. If only traj1 is given, the pairwise
                        rms is calculated between its frames.
-        aMask        - [ 0|1 ], atom mask, consider only subset of atoms [all]
-        hosts        - [ str ], slave hosts to be used [Biskit.hosts.cpus_all]
-        niceness     - { str:int, 'default':int }, nice value for each host []
-        show_output  - 0|1, open xterm window for each slave [0]
-        add_hosts    - 1|0, add hosts to PVM before starting [0]
-        log          - LogFile, log file for master [None-> StdErr]
-        slaveLog     - LogFile, slave log [None->'TrajFlexSlave_errors.log']
-        verbose      - 0|1, print progress infos [1]
-        the following two options are only considered for a single trajectory:
-        only_off_diagonal - 0|1, don't calculate self-rms of frames [1]
-        only_cross_member - 0|1, don't calculate rms between frames from same
-                            member trajectory (requires EnsembleTraj) [0]
+        @type  traj1: Trajectory OR EnsembleTraj
+        @param traj2: see traj1
+        @type  traj2: Trajectory OR EnsembleTraj
+        @param aMask: atom mask, consider only subset of atoms (default: all)
+        @type  aMask: [0|1]
+        @param hosts: slave hosts to be used
+                      (default: L{Biskit.hosts.cpus_all})
+        @type  hosts: [str]
+        @param niceness: { str:int, 'default':int }, nice value for each
+                         host 
+        @type  niceness: dict
+        @param show_output: open xterm window for each slave (default: 0)
+        @type  show_output: 0|1
+        @param add_hosts: add hosts to PVM before starting (default: 0)
+        @type  add_hosts: 1|0
+        @param log: log file for master (default: None-> StdErr )
+        @type  log: LogFile
+        @param slaveLog: slave log (default: None->'TrajFlexSlave_errors.log')
+        @type  slaveLog: LogFile
+        @param verbose: print progress infos (default: 1)
+        @type  verbose: 0|1
+        @param only_off_diagonal: Don't calculate self-rms of frames.
+                                  Only considered for a single trajectory
+                                  (default: 1)
+        @type  only_off_diagonal: 0|1
+        @param only_cross_member: Don't calculate rms between frames from
+                                  same member trajectory only considered for
+                                  a single trajectory(requires EnsembleTraj)
+                                  (default: 0)
+        @type  only_cross_member: 0|1
         """
 
         ## create temporary folder accessible to all slaves
@@ -89,7 +106,7 @@ class TrajFlexMaster(TrackingJobMaster):
         self.slaveLog = slaveLog or LogFile('TrajFlexSlave_errors.log')
         self.verbose  = verbose
         self.hosts    = hosts
-        
+
         self.traj_1 = traj1
         self.traj_2 = traj2
 
@@ -127,10 +144,15 @@ class TrajFlexMaster(TrackingJobMaster):
 
     def __windowSize( self, n_per_node, n_nodes, n_frames ):
         """
-        n_per_node - int, how many chunks should be generated per node
-        n_nodes    - int, number of slave nodes
-        n_frames   - int, length of trajectory
-        -> int, calculate number of frames per chunk
+        @param n_per_node: how many chunks should be generated per node
+        @type  n_per_node: int
+        @param n_nodes: number of slave nodes
+        @type  n_nodes: int
+        @param n_frames: length of trajectory
+        @type  n_frames: int
+        
+        @return: calculate number of frames per chunk
+        @rtype: int
         """
         r = int(round( n_frames * 1.0 / N.sqrt(n_per_node * n_nodes) ))
         if r > 25:
@@ -138,15 +160,23 @@ class TrajFlexMaster(TrackingJobMaster):
 
         return 25
 
+
     def cleanup( self ):
+        """
+        Tidy up.
+        """
         T.tryRemove( self.outFolder, verbose=self.verbose, tree=1 )
 
 
     def __getFrameWindows( self, traj, n_frames ):
         """
         Divide frame indices into chunks.
-        n_frames  - int, number of frames per chunk
-        -> [ (int, int) ], list with start and stop frame index of each chunk
+        
+        @param n_frames: number of frames per chunk
+        @type  n_frames: int
+        
+        @return: list with start and stop frame index of each chunk
+        @rtype: [(int, int)]
         """
         if traj is None:
             return None
@@ -171,13 +201,17 @@ class TrajFlexMaster(TrackingJobMaster):
             i_windows.append( (start, stop) )
 
         return i_windows
-        
+
 
     def __taskDict( self, f_frames_1, f_frames_2 ):
         """
-        f_frames - { (int, int) : str }, file name of each chunk of frames
-        n_frames - int, jobs will be sent out in chunks of n_frames x n_frames
-        -> { ((int, int),(int, int)) : (str, str) }
+        @param f_frames_1: file name of chunk 1 of frames
+        @type  f_frames_1: {(int, int) : str}
+        @param f_frames_2: file name of chunk 2 of frames
+        @type  f_frames_2: {(int, int) : str}
+        
+        @return: { ((int, int),(int, int)) : (str, str) }
+        @rtype:  {((int, int),(int, int)) : (str, str)}
         """
         intra_traj = f_frames_2 is None
         if intra_traj:
@@ -203,7 +237,7 @@ class TrajFlexMaster(TrackingJobMaster):
 
                 tasks[key] = ( f_frames_1[ i_windows[i] ],
                                f_frames_2[ j_windows[j] ] )
-                
+
         if self.verbose: self.log.add('done')
 
         return tasks
@@ -211,15 +245,18 @@ class TrajFlexMaster(TrackingJobMaster):
 
     def __dumpFrames(self, traj, outFolder, prefix ):
         """
-        traj      - Trajectory
-        outFolder - str, folder for pickled arrays
-        nFrames   - int, number of frames per window (chunk)
-        prefix    - str, file name prefix
-        -> { (int,int) : str } OR None, if traj is None
+        @param traj: Trajectory
+        @type  traj: Trajectory
+        @param outFolder: folder for pickled arrays
+        @type  outFolder: str
+        @param prefix: file name prefix
+        @type  prefix: str
+        @return: { (int,int) : str } OR None, if traj is None
+        @rtype: {(int,int) : str}
         """
         if traj is None:
             return None
-        
+
         if self.verbose: self.log.add_nobreak('dumping frame chunks...')
 
         n_frames = self.__windowSize( 20, len( self.hosts ), len( traj ) )
@@ -231,7 +268,7 @@ class TrajFlexMaster(TrackingJobMaster):
         for i in range( len(i_windows) ):
 
             w = i_windows[i]
-            
+
             a = traj.frames[ w[0]:w[1] ]
             f = outFolder + '/%s_%i_to_%i.dat' % ((prefix,) + w)
             T.Dump( a, f )
@@ -248,14 +285,19 @@ class TrajFlexMaster(TrackingJobMaster):
     def memberMap(self, traj):
         """
         Tell which traj frame belongs to which member trajectory.
-        -> [ int ], member index of each frame
-        -> None, if traj is not a EnsembleTraj
+
+        @param traj: Trajectory
+        @type  traj: Trajectory
+        
+        @return: member index of each frame OR None if traj is
+                 not a EnsembleTraj
+        @rtype: [ int ] OR None
         """
         if not isinstance( traj, EnsembleTraj ):
             return None
 
         r = N.zeros( len(traj), 'i' )
-        
+
         for i in range( traj.n_members ):
 
             mi = traj.memberIndices( i )
@@ -267,11 +309,16 @@ class TrajFlexMaster(TrackingJobMaster):
     def getResult( self, mirror=0 ):
         """
         Get result matrix ordered such as input trajectory.
-        mirror - 1|0, mirror the matrix at diagonal [1] (only for intra-traj)
-        -> array( (n_frames, n_frames), 'f'), matrix of pairwise rms
+        
+        @param mirror: mirror the matrix at diagonal (default: 1)
+                       (only for intra-traj)
+        @type  mirror: 1|0
+        
+        @return: array( (n_frames, n_frames), 'f'), matrix of pairwise rms
+        @rtype: array
         """
         if self.verbose:   self.log.add_nobreak('assembling result matrix...')
-        
+
         intra_traj = self.traj_2 is None
 
         n1 = n2 = len( self.traj_1 )
@@ -281,7 +328,7 @@ class TrajFlexMaster(TrackingJobMaster):
         a  = N.zeros( (n1,n2), 'f' )
 
         if self.verbose: self.log.add_nobreak('#')
-        
+
         for key, value in self.result.items():
             i_start, i_stop = key[0]
             j_start, j_stop = key[1]
@@ -317,11 +364,16 @@ class TrajFlexMaster(TrackingJobMaster):
         """
         Get result matrix ordered first by member then by time. (requires
         EnsembleTraj)
-        mirror - 0|1, mirror matrix at diagonal (only for intra-traj. rms) [0]
-        step   - int, take only every step frame [1]
+        
+        @param mirror: mirror matrix at diagonal (only for intra-traj. rms)
+                       (default: 0)
+        @type  mirror: 0|1
+        
+        @param step: take only every step frame [1]
+        @type  step: int
         """
         intra_traj = self.traj_2 is None
-        
+
         m = self.getResult( mirror=intra_traj )
 
         i1 = i2 = self.traj_1.argsortMember( step=step )
@@ -342,23 +394,27 @@ class TrajFlexMaster(TrackingJobMaster):
 
     def rmsList( self ):
         """
-        -> [float], list of all calculated pairwise rms values
-        !! FlexError, if there are no results yet
+        @return: list of all calculated pairwise rms values
+        @rtype: [float]
+        
+        @raise FlexError: if there are no results yet
         """
         r = []
         for v in self.result.values():
             r.extend( v )
-            
+
         if not r:
             raise FlexError, "No results yet."
 
         return r
 
-          
+
     def averageRms( self ):
         """
-        -> (float, float), average pairwise rmsd and it's standard deviation
-        !! FlexError, if there are no results yet
+        @return: average pairwise rmsd and it's standard deviation
+        @rtype: (float, float)
+        
+        @raise FlexError: if there are no results yet
         """
         r = self.rmsList()
         return N.average(r), mathUtils.SD(r)

@@ -18,11 +18,13 @@
 ##
 
 ##
-## Utilities for handling structures and sequences
-##
 ## last $Author$
 ## last $Date$
 ## $revision: $
+
+"""
+Utilities for handling structures and sequences
+"""
 
 import ErrorHandler
 from Biskit import EHandler
@@ -268,7 +270,8 @@ atomMasses = { 'H':1.00797, 'C':12.01115, 'N':14.0067,
 
 def allAACodes():
     """
-    -> list of all single AA codes, including B, Z, X
+    @return: list of all single AA codes, including B, Z, X
+    @rtype: [str]
     """
     result = []
     for aa in aaDic.values():
@@ -280,7 +283,8 @@ def allAACodes():
 
 def allAA():
     """
-    -> list of all 20 'exact' single AA codes.
+    @return: list of all 20 'exact' single AA codes.
+    @rtype: [str]
     """
     result = allAACodes()
 
@@ -291,7 +295,17 @@ def allAA():
 
 
 def elementType( eLetter ):
-    """atomType( eLetter ) -> list of types this element belongs to"""
+    """
+    Classify an atom as polar or unpolar::
+      atomType( eLetter ) -> list of types this element belongs to
+
+    @param eLetter: atom name
+    @type  eLetter: str
+    
+    @return: return 'p' for polar, 'u' for unpolar and None if not
+             in classified
+    @rtype: p|u OR None
+    """
     types = {'p' : ['N','O','H','Cl'],  ## polar
              'u' : ['C','S'] }          ## unpolar
 
@@ -300,11 +314,17 @@ def elementType( eLetter ):
             return key
     return None
 
+
 def resType( resCode ):
     """
-    -> list of types this residue belongs to...
-    """
+    Classify residues as aromatic (a), charged (c) or polar (p).
 
+    @param resCode: amino acid code
+    @type  resCode: str
+    
+    @return: list of types this residue belongs to...
+    @rtype: a|c|p OR None
+    """
     types = {'a' : ['F','Y','W','H'],     ## aromatic
              'c' : ['E','D','L','R','H'], ## charged
              'p' : ['Q','N','S'] }        ## polar
@@ -324,9 +344,14 @@ def resType( resCode ):
 def singleAA(seq, xtable=xxDic ):
     """
     convert list with 3-letter AA code to list with 1-letter code
-    seq    - [ str ]
-    xtable - dict, additional str:single_char mapping
-    -> ['A','C','L','A'...]
+    
+    @param seq: amino acid sequence in 3-letter code
+    @type  seq: [str]
+    @param xtable: dictionary with additional str:single_char mapping
+    @type  xtable: dict
+    
+    @return: list with 1-letter code; C{ ['A','C','L','A'...]}
+    @rtype: [str]
     """
     result = []             # will hold 1-letter list
     table = aaDic
@@ -346,9 +371,13 @@ def singleAA(seq, xtable=xxDic ):
 
 def single2longAA( seq ):
     """
-    convert string of 1-letter AA code into list of 3-letter AA codes.
-    seq - str
-    -> [ str ]
+    Convert string of 1-letter AA code into list of 3-letter AA codes.
+    
+    @param seq: amino acid sequence in 1-letter code
+    @type  seq: str
+    
+    @return: list with the amino acids in 3-letter code
+    @rtype: [str]
     """
     ## invert AA dict
     invTab = {}
@@ -370,15 +399,13 @@ def single2longAA( seq ):
 
 def positionByDescription( model, descr, report=0 ):
     """
-    obsolete -- use PDBModel.filter instead.
-    
+    @note: Obsolete: use PDBModel.filter instead. 
+
     Find the position of an atom(s) in the atom dictioanry by
     description. If the description matches more than one atom
     a list of matching positions is returned.
 
-    descr - dictionary with keys from the atom dictionary
-
-    Example atom dictioary (valid keys):
+    Example atom dictioary (valid keys)::
       {'name': 'OG1', 'residue_number': 20, 'insertion_code': '',
        'alternate': '', 'name_original': ' OG1',
        'temperature_factor': 23.640000000000001, 'occupancy': 1.0,
@@ -386,7 +413,13 @@ def positionByDescription( model, descr, report=0 ):
        'residue_name': 'THR', 'serial_number': 201, 'type': 'ATOM',
        'chain_id': ''}
 
-    -> int or list of matching positions
+    @param descr: dictionary with keys from the atom dictionary
+    @type  descr: dict
+    @param report: write a message to stdOut
+    @type  report: 1|0
+
+    @return: int or list of matching positions
+    @rtype: 
     """
     posLst = []
 
@@ -427,7 +460,7 @@ def positionByDescription( model, descr, report=0 ):
         if posLst.count(v) == nr_identifiers:
             positions += [v]
             posLst.remove( v )
-        
+
     if report:
         print 'pos serial_nr  segID  chainID  residue  atom'
         for p in positions:
@@ -440,7 +473,7 @@ def positionByDescription( model, descr, report=0 ):
                      atomDic['residue_number'],
                      atomDic['residue_name'],
                      atomDic['name'] )
-            
+
     if len(positions) ==1:
         return positions[0]
     return  positions
@@ -448,8 +481,18 @@ def positionByDescription( model, descr, report=0 ):
 
 def cmpAtoms( a1, a2 ):
     """
-    Comparison function for bringing atoms into standard order.
+    Comparison function for bringing atoms into standard order
+    within residues as defined by L{atomDic}.
+    
+    @param a1: model
+    @type  a1: PDBModel
+    @param a2: model
+    @type  a2: PDBModel
+    
+    @return: int or list of matching positions
+    @rtype: [-1|0|1]   
     """
+    ## get standard order within residues
     target = atomDic[ a1['residue_name'] ]
 
     i1 = len( target )
@@ -462,10 +505,16 @@ def cmpAtoms( a1, a2 ):
 
     return cmp(i1, i2)
 
-        
-def sortAtomsOfModel( model):
+
+def sortAtomsOfModel( model ):
     """
-    sort atoms within residues into standard order
+    Sort atoms within residues into the standard order defined in L{atomDic}.
+    
+    @param model: model to sort
+    @type  model: PDBModel
+
+    @return: model with sorted atoms
+    @rtype: PDBModel
     """
     ## make a copy
     model = model.take( range(model.lenAtoms()), deepcopy=1  )

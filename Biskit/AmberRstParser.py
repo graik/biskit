@@ -21,6 +21,10 @@
 ## last $Date$
 ## last $Author$
 
+"""
+Convert Amber restart file to array, PDBModel or Amber crd file.
+"""
+    
 import re
 import Numeric as N
 import sys
@@ -36,9 +40,10 @@ class AmberRstParser( AmberCrdParser ):
 
     def __init__( self, frst, rnAmber=0 ):
         """
-        frst - str, input restart file
-        fref - str, PDB or pickled PDBModel with same atom content and order
-        rnAmber - 1|0, rename Amber to standard residues (HIE, HID, HIP, CYX)
+        @param frst: input restart file
+        @type  frst: str
+        @param rnAmber: rename Amber to standard residues (HIE, HID, HIP, CYX)
+        @type  rnAmber: 1|0
         """
         self.frst = T.absfile( frst )
         self.crd  = open( self.frst )
@@ -62,16 +67,23 @@ class AmberRstParser( AmberCrdParser ):
 
 
     def crd2traj( self ):
+        """
+        @raise ParseError: Not supported for AmberRstParser
+        """
         raise ParseError("Not supported for AmberRstParser")
 
 
     def getXyz( self ):
         """
-        -> N.array( N x 3, 'f')
-        !! ParseError
+        Get coordinate array.
+        
+        @return: coordinates, N.array( N x 3, 'f')
+        @rtype: array
+        
+        @raise ParseError: if can't interprete second line
         """
         if not self.xyz:
-            
+
             ## skip first empty line
             self.crd.readline()
 
@@ -87,14 +99,19 @@ class AmberRstParser( AmberCrdParser ):
             if self.n % 6 != 0:  self.lines_per_frame += 1
 
             self.xyz = self.nextFrame()
-            
+
         return self.xyz
 
 
     def getModel( self, ref ):
         """
-        ref - PDBModel, reference with same number and order of atoms 
-        -> PDBModel
+        Get model.
+        
+        @param ref: reference with same number and order of atoms
+        @type  ref: PDBModel
+        
+        @return: PDBModel
+        @rtype: PDBModel
         """
         if not self.xyz:
             self.getXyz()
@@ -107,7 +124,10 @@ class AmberRstParser( AmberCrdParser ):
 
     def getFirstCrdLine( self ):
         """
-        -> str, first line of Amber crd formatted coordinate block
+        Return the first line of Amber crd.
+        
+        @return: first line of Amber crd formatted coordinate block
+        @rtype: str
         """
         if not self.xyz:
             self.getXyz()
@@ -117,15 +137,19 @@ class AmberRstParser( AmberCrdParser ):
             result += "%8.3f" % x
 
         return result + "\n"
-    
+
 
     def writeCrd( self, fcrd, append=1, lastAtom=None ):
         """
         Write/Append Amber-formatted block of coordinates to a file.
         If a file handle is given, the file will not be closed.
-        fcrd   - str or file object, file to write to
-        append - 0|1, append to existing file [1]
-        lastAtom - int, skip all atoms beyond this one [None]
+        
+        @param fcrd: file to write to
+        @type  fcrd: str or file object
+        @param append: append to existing file (default: 1)
+        @type  append: 0|1
+        @param lastAtom: skip all atoms beyond this one (default: None)
+        @type  lastAtom: int
         """
         if not self.xyz:
             self.getXyz()
@@ -162,7 +186,7 @@ class AmberRstParser( AmberCrdParser ):
             ## don't close file that was already given
             f.close()
 
-        
+
 if __name__ == '__main__':
 
     f='/home/Bis/raik/interfaces/a11/com_pme_ensemble/1b_eq_solvent_voV/sim.rst'
@@ -171,4 +195,4 @@ if __name__ == '__main__':
 
     x = p.getXyz()
 
-    
+

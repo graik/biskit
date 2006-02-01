@@ -21,7 +21,9 @@
 ## last $Author$
 ## last $Date$
 ## $Revision$
-"""organise, sort, and filter list of dictionaries or similar objects"""
+"""
+organise, sort, and filter list of dictionaries or similar objects
+"""
 
 import sys
 import Numeric as N
@@ -47,31 +49,38 @@ class DictList( BisList, list ):
     values within the dictionaries are easily accessible and can be
     plotted against each other.
 
-    Overriding / Extending:
-    
+    I{Overriding / Extending:}
     The class is designed to be easily adapted for holding more complex
     objects. In order to do so, the attribute item_type should be
-    set to the allowed class. All objects with a
-    get( key, default ) and a keys()
-    method should then work out of the box. If the two methods are missing,
-    getItemValue and getItemKeys must be overriden. 
+    set to the allowed class. All objects with a get( key, default )
+    and a keys() method should then work out of the box. If the two
+    methods are missing, getItemValue and getItemKeys must be overriden. 
     """
 
     def __init__(self, lst=[], item_type=dict ):
         """
-        lst        - [ dict ]
-        item_type  - type, class of allowed items [ dict ]
-        !! raise BisListError, if list contains non-item_type item.
+        @param lst: list of dictionaries
+        @type  lst: [ dict ]
+        @param item_type: class of allowed items [ dict ]
+        @type  item_type: type
+        
+        @raise raise BisListError: if list contains non-item_type item.
         """
         BisList.__init__( self )
-        
+
         self.item_type = item_type
 
         if lst != []:
             self.extend( lst )
-      
+
 
     def version( self ):
+        """
+        Version of class.
+        
+        @return: version of class
+        @rtype: str
+        """
         return 'DictList $Revision$'
 
 
@@ -79,10 +88,16 @@ class DictList( BisList, list ):
         """
         Get a value from a given item (dictionary). Override this
         method to use the DictList for entries without get() function.
-        item    - any, possible entry of this list
-        key     - any, dictionary key
-        default - any, return value if key is not found [None]
-        -> any
+        
+        @param item: possible entry of this list
+        @type  item: any
+        @param key: dictionary key
+        @type  key: any
+        @param default: return value if key is not found (default: None)
+        @type  default: any
+        
+        @return: any
+        @rtype: any
         """
         return item.get( key, default )
 
@@ -91,25 +106,39 @@ class DictList( BisList, list ):
         """
         Get the attribute keys used by a certain item. Override this
         method to use the DictList for entries without keys() function.
-        item    - any, possible entry of this list
-        -> [ any ], list of keys
+        
+        @param item: possible entry of this list
+        @type  item: any
+        
+        @return: list of keys
+        @rtype: [ any ],
         """
         return item.keys()
 
 
     def getValue( self, i, key, default=None ):
         """
-        Get the value of a dictionary entry of a list item. 
-        i       - int, position in list
-        key     - any, dictionary key
-        default - any, return value if key is not found [None]
-        -> any
+        Get the value of a dictionary entry of a list item.
+        
+        @param i: position in list
+        @type  i: int
+        @param key: dictionary key
+        @type  key: any
+        @param default: return value if key is not found (default: None)
+        @type  default: any
+        
+        @return: any
+        @rtype: any
         """
         return self.getItemValue( self[i], key, default )
-        
+
 
     def checkType( self, v ):
-        """Make sure v is a dictionary"""
+        """
+        Make sure v is a dictionary
+
+        @raise BisListError: if not a dictionary
+        """
         if not isinstance(v, self.item_type):
             raise BisListError(
                 str( v ) + " not allowed. DictList requires "+\
@@ -119,11 +148,18 @@ class DictList( BisList, list ):
     def _processNewItem( self, v, i=None ):
         """
         Called before an item is added to the list. Override but call.
-        v - dict, value
-        i - int, anticipated index (ignored in this implementation)
+        
+        @param v: value
+        @type  v: dict
+        @param i: anticipated index (ignored in this implementation)
+        @type  i: int
+
+        @return: value
+        @rtype: dict      
         """
         self.checkType( v )
         return v
+
 
     def _processNewItems( self, lst, indices=None ):
         """
@@ -131,9 +167,15 @@ class DictList( BisList, list ):
         For efficiency, the single new items are only processed if lst is
         not already an instance of this class (DictList by default).
         Override but call.
-        lst     - [ any ], list of new items
-        indices - [ int ], anticipated positions of the new items [None]
-                  defaults to indices following the current end of list
+        
+        @param lst: list of new items
+        @type  lst: [ any ]
+        @param indices:  anticipated positions of the new items (default: None)
+                         defaults to indices following the current end of list
+        @type  indices: [ int ]
+
+        @return: list
+        @rtype: list
         """
         if not isinstance( lst, list ):
             raise BisListError("Wrong argument type: "+str(type(lst)))
@@ -143,42 +185,79 @@ class DictList( BisList, list ):
             indices = indices or range( len(self), len(self)+len(lst) )
 
             lst = [self._processNewItem(v, i) for v,i in zip( lst, indices )]
-            
+
         return lst
 
 
     def __setitem__(self, i, v ):
-        """ lst[i] = v """
+        """
+        Set value v of position i.
+          >>> lst[i] = v
+
+        @param i: list index
+        @type  i: int
+        @param v: value
+        @type  v: any
+        """
         v = self._processNewItem( v, i )
         list.__setitem__( self, i, v)
 
+
     def __getslice__( self, i, j ):
-        """-> new instance with only the given range of items"""
+        """
+        Return new instance with only the given range of items.
+        
+        @param i: start list index
+        @type  i: int
+        @param j: end list index
+        @type  j: int
+        
+        @return: new instance with only the given range of items
+        @rtype: instance
+        """
         r = self.__class__(super(DictList, self).__getslice__(i,j))
         return r
 
+
     def extend( self, lst ):
-        """extend( list ). Add all items to (the end of) this instance"""
+        """
+        extend( list ). Add all items to (the end of) this instance
+
+        @param lst: list of new items
+        @type  lst: [ any ]
+        """
         lst = self._processNewItems( lst )
         list.extend( self, lst )
 
+
     def append( self, v ):
-        """append( dict ). Append item to the end of this list."""
+        """
+        append( dict ). Append item to the end of this list.
+
+        @param v: value
+        @type  v: any
+        """
         v = self._processItem( v, len( self ) )
         list.append( self, v )
 
+
     def take( self, indices ):
         """
-        indices - array/list of int, list positions
-        -> DictList (or sub-class) with specified items
+        @param indices: list positions
+        @type  indices: array/list of int
+        
+        @return: DictList (or sub-class) with specified items
+        @rtype: DictList
         """
         r = self.__class__( [ self[i] for i in indices ] )
 
         return r
 
+
     def keys( self ):
         """
-        -> [ any ], attribute keys used by the current items.
+        @return: attribute keys used by the current items.
+        @rtype: [ any ],
         """
         r = []
 
@@ -189,8 +268,14 @@ class DictList( BisList, list ):
 
         return r
 
+
     def argsortRandom( self ):
-        """ argsortRandom() -> [ int ], indices in random order."""
+        """
+        Random sort.
+         
+        @return: indices in random order.
+        @rtype: [ int ]
+        """
         r = range( len( self ) )
         random.shuffle( r )
         return r
@@ -210,7 +295,7 @@ if __name__ == '__main__':
         d = {'random':random.random(), 'name':'A'}
         l += [ d ]
 
-        
+
     p = l.plotArray( 'index', 'random', 'random' )
 
     p.show()

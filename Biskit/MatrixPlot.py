@@ -19,24 +19,33 @@
 ## last $Author$
 ## last $Date$
 ## $Revision$
-"""Plot a 2D matrix (up to 100 x 100)"""
+"""
+Plot a 2D matrix (up to 100 x 100)
+"""
 
 import biggles
 import Numeric as N
 
 from Biskit import ColorSpectrum 
 
+
 class Legend(biggles.FramedPlot):
+    """
+    Class to create a legend to use with a Matrix plot.
+    """
 
     def __init__(self, values):
-
+        """
+        @param values: color mapping for each color used
+        @type  values: [(float, int)]
+        """
         biggles.FramedPlot.__init__(self)
 
         values = N.array(values)
-        
+
         self.frame.draw_spine = 1
 
-        n_values = 4
+        n_values = 4 ## number of labeled ticks in legend
         step = len(values) / (n_values - 1) + 1
 
         indices = range(0, len(values), step)
@@ -49,12 +58,12 @@ class Legend(biggles.FramedPlot):
         self.y2.draw_ticks = 0
         self.x.draw_ticks = 0
         self.x.ticklabels = []
-        
+
         i = 2
         x = (2, 3)
 
         for value, color in values:
-            
+
             y1 = (i, i)
             y2 = (i + 1, i + 1)
 
@@ -63,9 +72,30 @@ class Legend(biggles.FramedPlot):
 
             i += 1
 
+
 class MatrixPlot(biggles.FramedPlot):
+    """
+    Class to plot the values of a matix, the rows and the columns
+    will be plotted along the x- and y-axis, respectively. The value
+    of each cell will be illutrated using the selected color range.
+    """
 
     def __init__(self, matrix, mesh = 0, palette = "plasma", legend = 0):
+        """
+        @param matrix: the 2-D array to plot
+        @type  matrix: array
+        @param mesh: create a plot with a dotted mesh
+        @type  mesh: 1|0
+        @param palette: color palette name see L{Biskit.ColorSpectrum}
+        @type  palette: str
+        @param legend: create a legend (scale) showing the walues of the
+                       different colors in the plot.  
+        @type  legend: 1|0
+        
+        @return: biggles plot object, view with biggles.FramedPlot.show() or
+                 save with biggles.FramedPlot.write_eps(file_name).
+        @rtype: biggles.FramedPlot
+        """
 
         biggles.FramedPlot.__init__(self)
 
@@ -104,19 +134,24 @@ class MatrixPlot(biggles.FramedPlot):
             self.add(biggles.PlotBox((-0.17, -0.1), (1.25, 1.1)))
 
         self.aspect_ratio = 1.0
-        
+
 
     def __make_legend(self):
-
+        """
+        Create and position the legend.
+        
+        @return: biggles legend object
+        @rtype: biggles.Inset
+        """
         l = self.palette.legend()
-
+        
         legend = Legend( l )
 
         inset = biggles.Inset((1.1, 0.60), (1.2, .97), legend)
 
         return inset
 
-    
+
 if __name__ == '__main__':
 
     from Numeric import *

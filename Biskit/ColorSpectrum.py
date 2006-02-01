@@ -22,7 +22,9 @@
 ##
 ## Contributions:
 ## mostly copied over from the MatrixPlot class of Wolfgang Rieping
-"""Create color scales"""
+"""
+Create color scales.
+"""
 
 import Numeric as N
 
@@ -36,9 +38,9 @@ class ColorSpectrum:
     Translate a range of numeric values into a range of color codes.
 
     Example:
-    p = ColorSpectrum( 'grey', 1, 500 )
-    single_color= p.color( 250 )
-    color_range = p.colors( range(25,250), resetLimits=0 )
+    >>> p = ColorSpectrum( 'grey', 1, 500 )
+    >>> single_color= p.color( 250 )
+    >>> color_range = p.colors( range(25,250), resetLimits=0 )
 
     Available palettes are:
     * grey
@@ -46,18 +48,26 @@ class ColorSpectrum:
     * plasma2 (default)
     * sausage (seems to have a discontinuity at 50%, see example below)
     """
-
+    
     MAX_COL = {'grey': 3 * 255,
                'plasma': 3 * 255,
                'plasma2': 3 * 255,
                'sausage': 2 * 255}
 
+
     def __init__(self, palette="plasma2", vmin=0., vmax=1. ):
         """
         Create a new palette of given type and value range.
-        palette - str, palette type (grey, sausage, plasma, plasma2) [plasma2]
-        vmin    - float, smallest value covered by the color range [0.]
-        vmax    - float, largest value covered by the color range  [1.]
+        
+        @param palette: palette type (grey, sausage, plasma, plasma2)
+                        (default: plasma2)
+        @type  palette: str
+        @param vmin: smallest value covered by the color range (default: 0.)
+        @type  vmin: float
+        @param vmax: largest value covered by the color range (default: 1.)
+        @type  vmax: float
+
+        @raise ColorError: if palette unknown
         """
 
         try:
@@ -75,41 +85,79 @@ class ColorSpectrum:
 
 
     def __make_col(self, red, green, blue):
+        """
+        Create color.
+        
+        @param red: rgb color, 0-255
+        @type  red: int
+        @param green: rgb color, 0-255
+        @type  green: int
+        @param blue: rgb color, 0-255
+        @type  blue: int
+
+        @return: color
+        @rtype: int
+        """
         return ((red << 16) + (green << 8) + blue)        
 
 
     def __normalize( self, value ):
+        """
+        Normalize values
+
+        @param value: normalization value
+        @type  value: float
+
+        @return: normalized color
+        @rtype: int 
+        """
         return (value - self.vmin) / ( self.vmax - self.vmin ) * self.col_max
 
 
     def color(self, value ):
         """
         Translate a single value into a color.
-        value - float, value to be translated into color
-        -> int, color code for value
+        
+        @param value: value to be translated into color
+        @type  value: float
+        @return: color code for value
+        @rtype: int
         """
         r = self.__make_col( *self.col_func(self.__normalize(value)) )
 
         return r
 
+
     def colors( self, values, resetLimits=1 ):
         """
         Translate a list of values into a list of colors.
-        values      - [float], values to be translated into colors
-        resetLimits - 1|0, re-define color range on max and min of values [1]
-        -> [int], color codes
+        
+        @param values: values to be translated into colors
+        @type  values: [float]
+        @param resetLimits: re-define color range on max and min of values
+                            (default: 1)
+        @type  resetLimits: 1|0
+        
+        @return: color codes
+        @rtype: [int]
         """
         if resetLimits:
             self.vmax = max( values )
             self.vmin = min( values )
-        
+
         return [ self.color(v) for v in values ]
+
 
     def color_array( self, a, resetLimits=1 ):
         """
-        a           - array of float
-        resetLimits - 1|0, re-define color range on max and min of values [1]
-        -> array of float, matrix of color codes with same dimensions as a 
+        @param a: array of float
+        @type  a: array of float
+        @param resetLimits: re-define color range on max and min of values
+                            (default: 1)
+        @type  resetLimits: 1|0
+        
+        @return: matrix of color codes with same dimensions as a
+        @rtype: array of float
         """
         s = N.shape( a )
         v = N.ravel( a )
@@ -120,9 +168,11 @@ class ColorSpectrum:
 
         return r
 
+
     def legend( self ):
         """
-        -> [ (float,int) ], value -> color mapping for each color 
+        @return: color mapping for each color
+        @rtype: [ (float,int) ], value
         """
         r = []
         step = (self.vmax - self.vmin) / self.col_max
@@ -133,7 +183,7 @@ class ColorSpectrum:
             c = self.color( v )
 
             r.append( (v,c) )
-        
+
         return r  
 
     def __map(self, x):
@@ -142,7 +192,7 @@ class ColorSpectrum:
     ##
     ## Available color palettes
     ##
-    
+
     def __grey(self, x):
         x = self.__map(255 * x / self.col_max)
         return x, x, x
@@ -152,7 +202,7 @@ class ColorSpectrum:
         blue_range = 150
         red_range = 255
         green_range = 255
-        
+
         if x <= blue_range:
             red = 0
             green = self.__map(x)
@@ -181,7 +231,7 @@ class ColorSpectrum:
         blue_range = 255
         red_range = 255
         green_range = 255
-        
+
         if x <= blue_range:
             red = 0
             green = self.__map(x)
@@ -249,5 +299,5 @@ if __name__ == '__main__':
     p.add( B.PlotLabel(  0.5 ,0.65, 'sausage') )
     p.add( B.PlotLabel(  0.5 ,0.4, 'plasma') )
     p.add( B.PlotLabel(  0.5 ,0.15, 'plasma2') )
-        
+
     p.show()

@@ -17,13 +17,12 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-
 ## last $Author$
 ## last $Date$
 ## $Revision$
 """
 organise, sort, and filter collection of dictionaries or similar objects
--> abstract base class (aka interface)
+S{->} abstract base class (aka interface)
 """
 
 import Numeric as N
@@ -60,19 +59,19 @@ class BisList:
 
     getValue, extend, append, take, keys,
     __len__, __setitem__, __getslice__
-    
+
     The latter 3 are not yet defined in BisList (no
     NotImplementedError) but are nevertheless required. They can also
     be provided from the built-in list type via multiple inheritence (see
     DictList, for an example).
 
-    That means there are two ways of implementing BisList:
-    1) via multiple inheritence from BisList (first!) and list
-    -> only getValue, extend, append, take need to be overriden
-    2) inheritence from BisList only
-    -> the __xxx__ methods have to be implemented too.
+    That means there are two ways of implementing BisList.
+      1. via multiple inheritence from BisList (first!) and list
+         -> only getValue, extend, append, take need to be overriden.
+      2. inheritence from BisList only
+         -> the __xxx__ methods have to be implemented too.
 
-    See DictList for an example of strategy 1).
+    See DictList for an example of strategy 1.
     """
 
     def __init__(self): 
@@ -83,7 +82,8 @@ class BisList:
 
     def version( self ):
         """
-        -> str, CVS version of this class (see also attribute initVersion)
+        @return: CVS version of this class (see also attribute initVersion)
+        @rtype: str
         """
         return 'BisList $Revision$'
 
@@ -91,11 +91,16 @@ class BisList:
     def getValue( self, i, key, default=None ): # abstract
         """
         Get the value of a dictionary entry of a list item.
-        Override!
-        i       - int, position in collection
-        key     - any, attribute key
-        default - any, return value if key is not found [None]
-        -> any
+        B{Override!}
+        
+        @param i: position in collection
+        @type  i: int
+        @param key: attribute key
+        @type  key: any
+        @param default: return value if key is not found [None]
+        @type  default: any
+        @return: any
+        @rtype: 
         """
         raise NotImplementedError
 
@@ -105,7 +110,7 @@ class BisList:
 ##         Override!
 ##         """
 ##         raise NotImplemented
-        
+
 ##     def __getslice__( self, i, j ): # abstract
 ##         """
 ##         c.__getslice__( i, j ) <==> c[ i : j ]
@@ -127,49 +132,64 @@ class BisList:
     def __add__( self, other ):
         """
         c.__add__( other ) <==> c + other
-        -> new instance with one collection appended to the other
+        
+        @return: new instance with one collection appended to the other
         """
         r = self.__class__( self )
         r.extend( other )
         return r
 
+
     def __iadd__( self, other ):
         """
-        c.__iadd__( other ) <==> c += other 
-        -> this instance with other appended
+        c.__iadd__( other ) <==> c += other
+        
+        @return: this instance with other appended
         """
         self.extend( other )
         return self
 
+
     def extend( self, other ): # abstract
         """
         Add all items of other to (the end of) this instance.
-        other - AbstractDictList (left to the implementing class)
-        Override!
+        B{Override!}
+        
+        @param other: AbstractDictList (left to the implementing class)
         """
         raise NotImplementedError
+
 
     def append( self, v ): # abstract
         """
         Append a single item to the end of this list.
-        Override!
-        v - any (left to the implementing class)
+        B{Override!}
+        
+        @param v: any (left to the implementing class)
         """
         raise NotImplementedError
 
+
     def keys( self ):
         """
-        -> [ any ], attribute keys used by the current items.
+        @return: attribute keys used by the current items.
+        @rtype: [ any ]
         """
         raise NotImplementedError
+
 
     def argsort( self, sortKey, cmpfunc=cmp ):
         """
         Sort by values of a certain item attribute.
-        sortKey - any, attribute key
-        cmpfunc - function, used for comparing values; cmpfunc(v1,v2) -> -1,0,1
-                  [built-in cmp]
-        -> [ int ], indices after sorting (the collection itself is not sorted)
+        
+        @param sortKey: attribute key
+        @type  sortKey: any
+        @param cmpfunc: used for comparing values; cmpfunc(v1,v2)
+                        -> -1,0,1 [built-in cmp]
+        @type  cmpfunc: function
+        
+        @return: indices after sorting (the collection itself is not sorted)
+        @rtype: [ int ]
         """
         pairs = [(self.getValue(i,sortKey),i) for i in range(0, len(self))]
         pairs.sort( cmpfunc )
@@ -179,20 +199,30 @@ class BisList:
     def take( self, indices, deepcopy=0 ): # abstract
         """
         Extract certain items in a certain order.
-        Override!
-        indices  - [ int ], positions
-        deepcopy - 0|1, deepcopy items [0]
-        -> new instance (or sub-class) with specified items
+        B{Override!}
+
+        @param indices: positions
+        @type  indices: [ int ]
+        @param deepcopy: deepcopy items (default: 0)
+        @type  deepcopy: 0|1
+        
+        @return: new instance (or sub-class) with specified items
+        @rtype: instance
         """
         raise NotImplementedError
+
 
     def compress( self, mask, deepcopy=0 ):
         """
         Extract certain items.
-        mask     - [ 1|0 ], mask of positions; len( mask ) == len( self )
-        deepcopy - 1|0, deepcopy items [0]
+        
+        @param mask: mask of positions; len( mask ) == len( self )
+        @type  mask: [ 1|0 ]
+        @param deepcopy: deepcopy items (default: 0)
+        @type  deepcopy: 1|0
         """
         return self.take( N.nonzero( mask ), deepcopy=deepcopy )
+
 
     def sortBy( self, sortKey, cmpfunc=cmp ):
         """
@@ -200,17 +230,25 @@ class BisList:
         """
         return self.take( self.argsort( sortKey, cmpfunc ))
 
+
     def valuesOf(self, key, default=None, indices=None, unique=0 ): #
         """
         Get all values assigned to a certain key of all or some
         items. The result is guaranteed to have the same length as the
         collection (or the list of given indices). Missing values are
         replaced by default (None).
-        key     - any, key for item attribute
-        default - any, default value if key is not found [None]
-        indices - list of int OR None(=all), indices [None]
-        unique  - 1|0, report each value only once (set union), (default 0)
-        -> list of values
+        
+        @param key: key for item attribute
+        @type  key: any
+        @param default: default value if key is not found (default: None)
+        @type  default: any
+        @param indices: list of int OR None(=all), indices (default: None)
+        @type  indices: list of int OR None
+        @param unique: report each value only once (set union), (default 0)
+        @type  unique: 1|0
+        
+        @return: list of values
+        @rtype: list
         """
         l = self
         if indices != None:
@@ -229,9 +267,16 @@ class BisList:
     def filterRange( self, key, vLow, vHigh ):
         """
         Get indices of items where vLow <= item[ key ] <= vHigh.
-        key - any, item attribute
-        vLow, vHigh - any, lower and upper bound
-        -> array of int
+        
+        @param key: item attribute
+        @type  key: any
+        @param vLow: lower bound
+        @type  vLow: any
+        @param vHigh: upper bound
+        @type  vHigh: any
+                          
+        @return: array of int
+        @rtype: array
         """
         vLst = self.valuesOf( key )
 
@@ -244,19 +289,28 @@ class BisList:
     def filterEqual( self, key, lst ):
         """
         Get indices of items for which item[ key ] in lst.
-        key - any, item attribute
-        lst - [ any ], list of allowed values
-        -> array of int
+        
+        @param key: item attribute
+        @type  key: any
+        @param lst: [ any ], list of allowed values
+        @type  lst: list
+        
+        @return: array of int
+        @rtype: array
         """
         mask = [ self.getValue( i,key) in lst for i in range( len(self)) ]
         return N.nonzero( mask )
 
-         
+
     def filterFunct( self, f ):
         """
         Get indices of items for which f( item ) == 1.
-        f - function, f must take a single item as argument and return 1 or 0
-        -> array of int
+        
+        @param f: f must take a single item as argument and return 1 or 0
+        @type  f: function
+        
+        @return: array of int
+        @rtype: array
         """
         mask = [ f( c ) for c in self ]
         return N.nonzero( mask )
@@ -265,17 +319,24 @@ class BisList:
     def filter( self, key, cond ):
         """
         Extract items matching condition.
-        key     - item attribute  (not used if cond is function )
-        cond    - (vLow, vHigh) -> vLow <= item[ key ] <= vHigh
-                - list          -> item[ key ] in cond
-                - function      -> cond( c ) == 1
-        -> new instance (or sub-class)
-        !! ConditionError if cond is neither list nor tuple nor function
+        
+        @param key: item attribute  (not used if cond is function )
+        @type  key: 
+        @param cond: conditon::
+                     - (vLow, vHigh) -> vLow <= item[ key ] <= vHigh
+                     - list          -> item[ key ] in cond
+                     - function      -> cond( c ) == 1
+        @type  cond: 
+                 
+        @return: new instance (or sub-class)
+        @rtype: instance
+        
+        @raise ConditionError if cond is neither list nor tuple nor function: 
         """
         indices = None
-        
+
         if type( cond ) == tuple:
-            
+
             indices = self.filterRange( key, cond[0], cond[1] )
 
         if type( cond ) == list:
@@ -285,7 +346,7 @@ class BisList:
         if type( cond ) == types.FunctionType:
 
             indices = self.filterFunct( cond )
-            
+
         if indices == None:
             try:
                 indices = self.filterEqual( key, [cond] )
@@ -294,42 +355,55 @@ class BisList:
 
         return self.take(indices)
 
+
     def argmax( self, key ):
         """
-        key - any, item attribute
-        -> int, index of item with highest item[key] value
+        @param key: item attribute
+        @type  key: any
+        @return: index of item with highest item[key] value
+        @rtype: int
         """
         vLst = self.valuesOf( key )
         return N.argmax( vLst )
 
+
     def max( self, key ):
         """
-        key - any, item attribute
-        -> any, item with highest item[key] value
+        @param key: item attribute
+        @type  key: any
+        @return: item with highest item[key] value
+        @rtype: any
         """
         return self[ self.argmax(key) ]
 
 
     def argmin( self, key ):
         """
-        key - any, item attribute
-        -> int, index of item with lowest item[infokey] value
+        @param key: item attribute
+        @type  key: any
+        @return: index of item with lowest item[infokey] value
+        @rtype: int
         """
         vLst = self.valuesOf( key )
         return N.argmin( vLst )
 
+
     def min( self, key ):
         """
-        key - any, item attribute
-        -> any, item with lowest item[key] value
+        @param key: item attribute
+        @type  key: any
+        @return: item with lowest item[key] value
+        @rtype: any
         """
         return self[ self.argmin( key ) ]
 
+
     def getIndex( self, key, value ):
         """
-        -> int, position of item for which item[key] == value
-        !! AmbiguousMatch, ItemNotFound,
-           if there are more or less than 1 matches
+        @return: position of item for which item[key] == value
+        @rtype: int
+        @raise AmbiguousMatch: ItemNotFound,
+               if there are more or less than 1 matches
         """
         l = self.filterEqual( key, [ value ] )
 
@@ -342,25 +416,31 @@ class BisList:
         raise ItemNotFound("No matching item.")
 
 
-
     def getItem( self, key, value ):
         """
-        -> any, item for which item[key] == value
-        !! AmbiguousMatch, ItemNotFound,
-           if there are more or less than 1 matches
+        @return: item for which item[key] == value
+        @rtype: any
+        
+        @raise AmbiguousMatch: ItemNotFound,
+               if there are more or less than 1 matches
         """
         return self[ self.getIndex( key, value ) ]
-    
+
+
     def toDict( self, key ):
         """
         Convert collection into dict indexed by the value of a certain item
         attribute. If several items have the same value, the result will have
         a list registered for this key.
-        key - any, item attribute
-        
-        EXAMPLE: lst.toDict('soln') -> {soln1:Item, soln3:Item, solnN:Item}
 
-        -> dict, { info1:dict, info2:dict, info3:[dict, dict].. }
+        C{ EXAMPLE: lst.toDict('soln')                 }
+        C{ -> {soln1:Item, soln3:Item, solnN:Item}     }
+        
+        @param key: item attribute
+        @type  key: any
+
+        @return: { info1:dict, info2:dict, info3:[dict, dict].. }
+        @rtype: dict
         """
         result = {}
         for i in range( len(self)):
@@ -370,14 +450,19 @@ class BisList:
 
 
     def toList( self ): 
-        """ -> [ item ], simple python list of items """
+        """
+        @return: simple python list of items
+        @rtype: [ item ]
+        """
         return list( self )
 
 
     def __maskNone( self, l1, l2 ):
         """
         Take out positions from l1 and l2 that are None in either of them.
-        -> (l1, l2) modified lists
+        
+        @return: modified lists
+        @rtype: (l1, l2)
         """
         r1, r2 = [],[]
 
@@ -388,15 +473,20 @@ class BisList:
 
         return r1, r2
 
+
     def plot( self, xkey, *ykey, **arg ):
         """
-        plot( xkey, [ykey1, ykey2..],[arg1=x, arg2=y]) -> biggles.FramedPlot
         Plot pairs of item values. The additional arg arguments are handed
         over to biggles.Points(). The special xkey value 'index' uses the
         position of each item as x-axis. If only one key is given,
         it is taken as ykey and the x-axis is the index of each item
         (xkey='index').
-        -> Biggles.FramedPlot, display with show() !
+
+        C{ EXAMPLE: plot( xkey, [ykey1, ykey2..],[arg1=x, arg2=y]) }
+        C{         -> biggles.FramedPlot                           }
+
+        @return: Biggles.FramedPlot, display with show() !
+        @rtype:  Biggles.FramedPlot
         """
         if len(ykey) == 0:
             xkey, ykey = 'index', [ xkey ]
@@ -430,9 +520,13 @@ class BisList:
 
     def plotArray( self, xkey, *ykey, **arg ):
         """
-        plot( xkey, [ykey1, ykey2..],[arg1=x, arg2=y]) -> biggles.FramedPlot
         Plot pairs of item values.
-        -> Biggles.FramedArray, display with show()
+        
+        C{ EXAMPLE: plot( xkey, [ykey1, ykey2..],[arg1=x, arg2=y]) }
+        C{         -> biggles.FramedPlot                           }
+        
+        @return: Biggles.FramedArray, display with show()
+        @rtype: Biggles.FramedArray
         """
         if len(ykey) == 0:
             xkey, ykey = 'index', [ xkey ]

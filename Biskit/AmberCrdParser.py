@@ -20,7 +20,9 @@
 ## $Revision$
 ## last $Date$
 ## last $Author$
-"""Convert single amber crd into Trajectory object"""
+"""
+Convert single amber crd into Trajectory object
+"""
 
 import re
 import Numeric as N
@@ -59,13 +61,21 @@ class AmberCrdParser:
 
     def __init__( self, fcrd, fref, box=0, rnAmber=0, pdbCode=None ):
         """
-        fcrd - str, input crd
-        fref - str, PDB or pickled PDBModel with same atom content and order
-        box  - 1|0, each frame in traj has additional line with box info
+        @param fcrd: path to input crd
+        @type  fcrd: str
+        @param fref: PDB or pickled PDBModel with same atom content and order
+        @type  fref: str
+        @param box: each frame in traj has additional line with box info
+                    (default: 0)
+        @type  box: 1|0
+        @param rnAmber: rename amber style residues into standard (default: 0)
+        @type  rnAmber: 1|0
+        @param pdbCode: pdb code (default: None)
+        @type  pdbCode: str
         """
         self.fcrd = T.absfile( fcrd )
         self.crd  = open( self.fcrd )
-        
+
         self.ref  = PDBModel( T.absfile(fref), pdbCode=pdbCode )
         self.box  = box
 
@@ -89,8 +99,15 @@ class AmberCrdParser:
         if not self.ref.getAtoms()[0].get('chain_id',''):
             self.ref.addChainId()
 
-    def renameAmberRes( self, model ):
 
+    def renameAmberRes( self, model ):
+        """
+        Rename special residue names from Amber back into standard names
+        (i.e CYX S{->} CYS )
+        
+        @param model: model 
+        @type  model: PDBModel
+        """
         for a in model.getAtoms():
             if a['residue_name'] == 'CYX':
                 a['residue_name'] = 'CYS'
@@ -99,22 +116,41 @@ class AmberCrdParser:
 
 
     def line2numbers( self, l ):
-        """convert line from crd/vel file to list of float numbers"""
+        """
+        convert line from crd/vel file to list of float numbers
+        
+        @param l: line
+        @type  l: str
+        
+        @return: list of floats
+        @rtype: [float]
+        """
         match = self.xnumbers.findall( l )
 
         return [ round( float(strCrd),3) for strCrd in match ] 
 
 
     def nextLine( self ):
-        """extract next 10 coordinates from crd file"""
+        """
+        extract next 10 coordinates from crd file
+
+        @return: coordinates
+        @rtype: [float]    
+        """
         l = self.crd.readline()
         if l == '':
             raise EOFError('EOF')
-        
+
         return self.line2numbers( l )
 
+
     def nextFrame( self ):
-        """-> array, collect next complete coordinate frame"""
+        """
+        Collect next complete coordinate frame
+
+        @return: coordinate frame
+        @rtype: array
+        """
 
         i = 0
         xyz = []
@@ -135,8 +171,12 @@ class AmberCrdParser:
 
 
     def crd2traj( self ):
-        """-> Trajectory """
+        """
+        Convert coordinates into a Trajectory object.
 
+        @return: trajectory object
+        @rtype: Trajectory
+        """
         ## skip first empty line
         self.crd.readline()
 
@@ -147,13 +187,13 @@ class AmberCrdParser:
 
         try:
             while 1==1:
-                
+
                 xyz += [ self.nextFrame() ]
                 i += 1
 
                 if i % 100 == 0:
                     T.flushPrint( '#' )
-                
+
         except EOFError:
             print "Read %i frames." % i
 

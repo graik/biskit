@@ -35,14 +35,14 @@ import threading
 def accept( *required, **optional ):
     """
     Decorator function that enforces type checking on arguments of a method.
-    Example:
 
-    @accept( int, float, opt1=int, opt2=PDBModel )
-    def method( n, fraction, opt2=PDBModel(), **args ):
-        ...
+    Example::
+     @accept( int, float, opt1=int, opt2=PDBModel )
+     def method( n, fraction, opt2=PDBModel(), **args ):
+         ...
 
     The leading 'self' argument of class methods is automatically accepted and
-    the parent class of the method should thus *not* be given as first type.
+    the parent class of the method should thus B{not} be given as first type.
     For keyword arguments, None is always an accepted value.
     """
     def wrapper( f ):
@@ -54,7 +54,7 @@ def accept( *required, **optional ):
             ## for methods of classes, expect 'self' at first position
             if f.func_code.co_varnames[0] == 'self':
                 req = ( types.InstanceType, ) + req
-            
+
             ## check obligatory arguments
             for (type, given) in zip( req, args ):
 
@@ -68,15 +68,15 @@ def accept( *required, **optional ):
                        "argument %s is not allowed" % name
 
                 if value is None: continue
-                
+
                 assert isinstance(value, optional[name]), \
                        "argument %s does not match %s" % (name, optional[name])
 
             return f( *args, **kwds )
-        
+
         new_f.func_name = f.func_name
         return new_f
-        
+
     return wrapper
 
 
@@ -86,13 +86,14 @@ def synchronized( f ):
     class method one after the other. That means, it is guaranteed
     that this method of a given object is never executed in
     parallel. However, different instances of the same class are not
-    blocked and can still call the routine in parallel.  Example:
+    blocked and can still call the routine in parallel.
 
-    @synchronized
-    def open_log_file( self, fname ):
-        ...
-
-    Note: the decorator adds (if not already present) a RLock object
+    Example::
+      @synchronized
+      def open_log_file( self, fname ):
+          ...
+          
+    @note: The decorator adds (if not already present) a RLock object
     'lock' and a Condition object 'lockMsg' to the object holding this
     method.  The wrapped method can hence call self.lockMsg.wait() or
     self.lockMsg.notify/notifyAll() directly without any need for
@@ -123,7 +124,7 @@ def synchronized( f ):
         return result
 
     return lock_call_release
-        
+
 
 ###########
 ## TEST

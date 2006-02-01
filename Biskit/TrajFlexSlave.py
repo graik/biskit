@@ -1,4 +1,3 @@
-## Parallize calculation of pairwise rmsd between the frames of a trajectory
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
@@ -23,6 +22,10 @@
 ## last $Date$
 ## $Revision$
 
+"""
+Parallize calculation of pairwise rmsd between the frames of a trajectory.
+"""
+
 from Biskit.PVM.dispatcher import JobSlave
 import Biskit.tools as T
 import Biskit.rmsFit as rmsFit
@@ -38,11 +41,14 @@ class TrajFlexSlave( JobSlave ):
 
     def initialize(self, params):
         """
-        expects
-        {'ferror':str,
-        'trajMap':[int],
-        'only_off_diagonal':1|0,
-        'only_cross_member':1|0}
+        Expects::
+          {'ferror':str,
+           'trajMap':[int],
+           'only_off_diagonal':1|0,
+           'only_cross_member':1|0}
+        
+        @param params: parameters passed over from the L{TrajFlexMaster}
+        @type  params: dict
         """
 
         self.__dict__.update( params )
@@ -56,7 +62,15 @@ class TrajFlexSlave( JobSlave ):
 
 
     def __getFrames(self, f ):
-        """Load coordinate frames from file or take them from own cache"""
+        """
+        Load coordinate frames from file or take them from own cache
+
+        @param f: file name
+        @type  f: str
+
+        @return: coordiante frames
+        @rtype: array        
+        """
         if f in self.frame_cache:
             return self.frame_cache[ f ]
 
@@ -67,8 +81,16 @@ class TrajFlexSlave( JobSlave ):
 
     def requested( self, i, j ):
         """
-        requested( int_f1, int_f2 ) -> 1|0
-        -> 1, if the rms of the two frames is supposed to be calculated
+        Checks if the rmsd of two frames i and j are to be calculated::
+          requested( int_f1, int_f2 ) -> 1|0
+
+        @param i: frame number
+        @type  i: int
+        @param j: frame number
+        @type  j: int
+        
+        @return: if the rms of the two frames is supposed to be calculated
+        @rtype: 1|0
         """
         if self.only_off_diagonal and i == j:
             return 0
@@ -81,15 +103,23 @@ class TrajFlexSlave( JobSlave ):
 
     def calcRmsd( self, window, f1, f2 ):
         """
-        window - ((int, int),(int,int)), start and end of two frame chunks
-                 within the whole trajectory
-        f1, f2 - array, the two frame chunks
-        -> [ float ], the rms between the frames
+        Calulate the rmsd between two frame chunks.
+        
+        @param window: start and end of two frame chunks within the
+                       whole trajectory
+        @type  window: ((int, int),(int,int))
+        @param f1: frame chunk
+        @type  f1: array
+        @param f2: frame chunk
+        @type  f2: array
+        
+        @return: the rms between the frames
+        @rtype: [float]
         """
         try:
             i_start, i_stop = window[0]
             j_start, j_stop = window[1]
-            
+
             a = N.zeros( (i_stop-i_start, j_stop-j_start), 'f' )
 
             i = j = -1
@@ -105,7 +135,7 @@ class TrajFlexSlave( JobSlave ):
                         rt, rmsdLst = rmsFit.match( f1[i-i_start],
                                                     f2[j-j_start], 1 )
                         a[i-i_start,j-j_start] = rmsdLst[0][1]
-        
+
             return N.ravel(a).tolist()
 
         except Exception, why:
@@ -113,12 +143,17 @@ class TrajFlexSlave( JobSlave ):
             return
 
 
-
     def go(self, jobs):
         """
-        jobs - { ((int,int),(int,int)) : (str, str) }, maps start and end
-               position of two chunks of coordinate frames to the files
-               where the two chunks are pickled.
+        Run job.
+        
+        @param jobs: { ((int,int),(int,int)) : (str, str) }, maps start and end
+                      position of two chunks of coordinate frames to the
+                      files where the two chunks are pickled.
+        @type  jobs: {((int,int),(int,int)) : (str, str)}
+
+        @return: the rms between the frames
+        @rtype: [float]              
         """
 
         result = {}
@@ -144,11 +179,20 @@ class TrajFlexSlave( JobSlave ):
             self.reportError("Cannot open temporary frame file "+\
                              "(can happen if slave catches exit signal)",
                              frames )
-            
+
         return result
 
 
     def reportError(self, msg, window ):
+        """
+        Report errors.
+        
+        @param msg: error message
+        @type  msg: str
+        @param window: start and end of two frame chunks within the
+                       whole trajectory
+        @type  window: ((int, int),(int,int))        
+        """
         try:
             s = '%s on %s, frames %s \n' % \
                 (msg, os.uname()[1], str(window) )
@@ -170,12 +214,13 @@ class TrajFlexSlave( JobSlave ):
                 pass
             f.close()
 
+
 if __name__ == '__main__':
 
     import os, sys
 
     if len(sys.argv) == 2:
-        
+
         niceness = int(sys.argv[1])
         os.nice(niceness)
 

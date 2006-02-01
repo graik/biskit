@@ -21,6 +21,10 @@
 ## last $Date$
 ## last $Author$
 
+"""
+Create Amber topology and coordinate file from PDB.
+"""
+
 import os, tempfile, commands, copy
 import Numeric as N
 
@@ -38,27 +42,29 @@ class AmberError( BiskitError ):
 
 class AmberParmBuilder:
     """
+    AmberParmBuilder
+    ================
     Create Amber topology and coordinate file from PDB.
 
-    parmMirror():
-    ...builds a fake parm that exactly mirrors a given PDB file.
-      This parm can be used for ptraj but not for simulations.
-      Currently, parmMirror only accepts amber-formatted PDBs as input.
-      It should be possible to create topologies that have the same content
-      and order of atoms as an xplor PDB but some atoms will have different
-      names.
+      - parmMirror():
+         ...builds a fake parm that exactly mirrors a given PDB file.
+         This parm can be used for ptraj but not for simulations.
+         Currently, parmMirror only accepts amber-formatted PDBs as
+         input. It should be possible to create topologies that have
+         the same content and order of atoms as an xplor PDB but
+         some atoms will have different names.
 
-    parmSolvated():
-    ...builds a solvated system for PME simulations (incl. closing of
-      S-S bonds, capping of chain breaks).
-      parmSolvated accepts both xplor and amber-formatted PDBs as input.
+      - parmSolvated():
+         ...builds a solvated system for PME simulations (incl. closing
+         of S-S bonds, capping of chain breaks). parmSolvated accepts
+         both xplor and amber-formatted PDBs as input.
 
-    Requires the amber programs tleap and ambpdb.
-    Requires leap template files in /external/amber/leap/.
+    Requires the amber programs C{tleap} and C{ambpdb}.
+    Requires leap template files in C{/external/amber/leap/}.
 
-    Note: The design of AmberParmBuilder is less than elegant. It would make
-    more sense to split it into two classes that are both derrived from
-    Executor.
+    @note: The design of AmberParmBuilder is less than elegant. It
+           would make more sense to split it into two classes that
+           are both derrived from Executor.
     """
 
     ## script to create a parm that exactly mirrors a given PDB
@@ -93,14 +99,18 @@ class AmberParmBuilder:
                   verbose=0,
                   **kw ):
         """
-        model   - PDBModel or str
-        leap_template - str, path to template file for leap input [..]
-        leaprc        - str, path to parameter file for leap [..]
-        leap_out      - str, target file for leap.log [default: discard]
-        leap_in       - str, target file for leap.in script [default: discard]
-        leap_bin      - str, path to tleap binary [..]
-        kw            - kw=value pairs for additional options in the
-                        leap_template
+        @param model: model
+        @type  model: PDBModel or str
+        @param leap_template: path to template file for leap input
+        @type  leap_template: str
+        @param leaprc: path to parameter file for leap
+        @type  leaprc: str
+        @param leap_out: target file for leap.log (default: discard)
+        @type  leap_out: str
+        @param leap_in: target file for leap.in script (default: discard)
+        @type  leap_in: str
+        @param kw: kw=value pairs for additional options in the leap_template
+        @type  kw: key=value
         """
         self.m = PDBModel( model )
 
@@ -127,16 +137,23 @@ class AmberParmBuilder:
     def __runLeap( self, in_script, norun=0, **kw ):
         """
         Create script file and run Leap.
-        in_script - str, content of ptraj script with place holders
-        norun     - 1|0, only create leap script                [0]
-        **kw      - key=value pairs for filling place holders in script
+
+        @param in_script: content of ptraj script with place holders
+        @type  in_script: str
+        @param norun: 1 - only create leap scrip (default: 0)
+        @type  norun: 1|0
+        @param kw: key=value pairs for filling place holders in script
+        @type  kw: key=value
+
+        @raise AmberError: if missing option for leap input file or
+                           if could not create leap input file
         """
         ## create leap script
         try:
             ## use own fields and given kw as parameters for leap script
             d = copy.copy( self.__dict__ )
             d.update( kw )
-            
+
             in_script = in_script % d
             f = open( self.leap_in, 'w')
             f.write( in_script )
@@ -164,7 +181,7 @@ class AmberParmBuilder:
                 raise AmberError, "tleap failed"
 
         ## clean up
-            
+
         if not self.keep_leap_in and not self.debug:
             t.tryRemove( self.leap_in )
         if not self.keep_leap_out and not self.debug:
@@ -174,9 +191,18 @@ class AmberParmBuilder:
     def parm2pdb( self, f_parm, f_crd, f_out, aatm=0 ):
         """
         Use ambpdb to build PDB from parm and crd.
-        f_parm - str, existing parm file
-        f_crd  - str, existing crd file
-        f_out  - str, target file name for PDB
+
+        @param f_parm: existing parm file
+        @type  f_parm: str
+        @param f_crd: existing crd file
+        @type  f_crd: str
+        @param f_out: target file name for PDB
+        @type  f_out: str
+
+        @return: f_out, target file name for PDB
+        @rtype: str
+
+        @raise AmberError: if ambpdb fail
         """
 ##         cmd = '%s -p %s -aatm < %s > %s' % \
         args = '-p %s %s' % (f_parm, '-aatm'*aatm )
@@ -190,11 +216,19 @@ class AmberParmBuilder:
             raise AmberError, 'ambpdb failed.'
 
         return f_out
-    
+
 
     def __ssBonds( self, model, cutoff=4. ):
         """
-        -> [ (int, int) ], list with numbers of residue pairs forming S-S
+        Identify disulfide bonds.
+
+        @param model: model
+        @type  model: PDBModel        
+        @param cutoff: distance cutoff for S-S distance (default: 4.0)
+        @type  cutoff: float
+        
+        @return: list with numbers of residue pairs forming S-S
+        @rtype: [(int, int)]
         """
         m = model.compress( model.mask( ['SG'] ) )
 
@@ -217,8 +251,11 @@ class AmberParmBuilder:
     def __cys2cyx( self, model, ss_residues ):
         """
         Rename all S-S bonded CYS into CYX.
-        model - PDBModel
-        ss_residues - [ ( int, int) ], original residue numbers of S-S pairs
+
+        @param model: model
+        @type  model: PDBModel
+        @param ss_residues: original residue numbers of S-S pairs
+        @type  ss_residues: [(int, int)]
         """
         ss = []
         for a,b in ss_residues:
@@ -232,8 +269,11 @@ class AmberParmBuilder:
     def capACE( self, model, chain ):
         """
         Cap N-terminal of given chain.
-        model - PDBModel
-        chain - int, index of chain to be capped
+
+        @param model: model
+        @type  model: PDBMode
+        @param chain: index of chain to be capped
+        @type  chain: int
         """
         self.log.add('Capping N-terminal of chain %i.' % chain )
         m_ace = PDBModel( self.F_ace_cap )
@@ -249,7 +289,7 @@ class AmberParmBuilder:
         ## could help if there is no HN
         if 'HN' in m_term.atomNames():
             m_ace.remove( ['CB'] )
-        
+
         ## rename overhanging residue in cap PDB
         for a in m_ace.atoms:
             if a['residue_name'] != 'ACE':
@@ -268,12 +308,15 @@ class AmberParmBuilder:
         ## re-assemble whole model
         return chains_before.concat( m_chain, chains_after )
 
-        
+
     def capNME( self, model, chain ):
         """
         Cap C-terminal of given chain.
-        model - PDBModel
-        chain - int, index of chain to be capped
+
+        @param model: model
+        @type  model: PDBMode
+        @param chain: index of chain to be capped
+        @type  chain: int        
         """
         self.log.add('Capping C-terminal of chain %i.' % chain )
         m_nme   = PDBModel( self.F_nme_cap )
@@ -308,14 +351,29 @@ class AmberParmBuilder:
 
         ## re-assemble whole model
         return chains_before.concat( m_chain, chains_after )
-        
+
 
     def centerModel( self, model ):
+        """
+        Geometric centar of model.
+        
+        @param model: model
+        @type  model: PDBMode
+        """
         center = N.average( model.getXyz() )
         model.setXyz( model.xyz - center )
 
+
     def leapModel( self, hetatm=0 ):
-        """Get a clean PDBModel for input into leap."""
+        """
+        Get a clean PDBModel for input into leap.
+
+        @param hetatm: keep HETATM records (default: 0)
+        @type  hetatm: 1|0
+
+        @return: model
+        @rtype: PDBMod
+        """
         m = self.m.clone()
         m.xplor2amber()
 
@@ -325,15 +383,16 @@ class AmberParmBuilder:
         m.renumberResidues( addChainId=1 )
 
         self.centerModel( m )
-        
+
         return m
 
 
     def __fLines( self, template, values ):
         if not type( values ) is list:
             values = [ values ]
-            
+
         return ''.join( [ template % v for v in values ] )
+
 
     def parmSolvated( self, f_out, f_out_crd=None, f_out_pdb=None,
                       hetatm=0, norun=0,
@@ -341,19 +400,34 @@ class AmberParmBuilder:
                       fmod=[], fprep=[],
                       box=10.0, **kw ):
         """
-        f_out     - str, target file for parm (topology)
-        f_out_crd - str, target file for crd (coordinates) [|f_out_base|.crd]
-        f_out_pdb - str, target file for pdb               [|f_out_base|.pdb]
-        hetatm    - 1|0, keep hetero atoms                                [0]
-        cap       - 1|0, put ACE and NME capping residue on chain breaks  [0]
-        capN      - [ int ], indices of chains that should get ACE cap   [[]]
-        capC      - [ int ], indices of chains that should get NME cap   [[]]
-        box       - float, minimal distance of solute from box edge    [10.0]
-        fmod      - [ str ], list of files with amber parameter modifications
-                    (to be loaded into leap with loadAmberParams)        [[]]
-        fprep     - [ str ], list of files with amber residue definitions
-                    (to be loaded into leap with loadAmberPrep)          [[]]
-        **kw .. additional key=value pairs for leap input template
+        @param f_out: target file for parm (topology)
+        @type  f_out: str
+        @param f_out_crd: target file for crd (coordinates)
+                          (default:|f_out_base|.crd)
+        @type  f_out_crd: str
+        @param f_out_pdb: target file for pdb (default:|f_out_base|.pdb)
+        @type  f_out_pdb: str
+        @param hetatm: keep hetero atoms (default: 0)
+        @type  hetatm: 1|0
+        @param cap: put ACE and NME capping residue on chain breaks 
+                    (default: 0)
+        @type  cap: 1|0
+        @param capN: indices of chains that should get ACE cap (default: [])
+        @type  capN: [int]
+        @param capC: indices of chains that should get NME cap (default: [])
+        @type  capC: [int]
+        @param box: minimal distance of solute from box edge (default: 10.0)
+        @type  box: float
+        @param fmod: list of files with amber parameter modifications
+                    (to be loaded into leap with loadAmberParams) (default:[])
+        @type  fmod: [str]
+        @param fprep: list of files with amber residue definitions
+                    (to be loaded into leap with loadAmberPrep) (default: [])
+        @type  fprep: [str]
+        @param kw: additional key=value pairs for leap input template
+        @type  kw: key=value
+
+        @raise IOError:
         """
         f_out = t.absfile( f_out )
         f_out_crd = t.absfile( f_out_crd ) or t.stripSuffix( f_out ) + '.crd'
@@ -376,7 +450,7 @@ class AmberParmBuilder:
                 m = self.capACE( m, i )
             for i in capC:
                 m = self.capNME( m, i )
-            
+
             m.renumberResidues( addChainId=1 )  ## again, to accomodate capping
 
             template = open( self.leap_template ).read()
@@ -409,8 +483,17 @@ class AmberParmBuilder:
 
 
     def __deleteAtoms( self, m, i_atoms ):
-        """ -> [ str ], leap statements for deleting given atoms """
+        """
+        Delet atoms
 
+        @param m: model
+        @type  m: PDBMode
+        @param i_atoms: atom index
+        @type  i_atoms: [int]
+        
+        @return: leap statements for deleting given atoms
+        @rtype: [str]
+        """
         cmd = 'remove p.%(res)i p.%(res)i.%(atom)i'
 
         rM = m.resMap()
@@ -427,8 +510,15 @@ class AmberParmBuilder:
 
 
     def __inverseIndices( self, model, i_atoms ):
-        """ -> [ int ], remaining atom indices of m that are NOT in i_atoms"""
-
+        """
+        @param model: model
+        @type  model: PDBMode
+        @param i_atoms: atom index
+        @type  i_atoms: [int]
+    
+        @return: remaining atom indices of m that are NOT in i_atoms
+        @rtype: [int]
+        """
         mask = N.zeros( len( model ),'i' )
         N.put( mask, i_atoms, 1 )
         return N.nonzero( N.logical_not( mask ) )
@@ -442,8 +532,11 @@ class AmberParmBuilder:
         build a final topology where these atoms are deleted.
         This parm is hence NOT suited for simulations but can be used to parse
         e.g. a trajectory or PDB into ptraj.
-        f_out     - str, target parm file
-        f_out_crd - str, target crd file (default: f_out but ending .crd)
+
+        @param f_out: target parm file
+        @type  f_out: str
+        @param f_out_crd: target crd file (default: f_out but ending .crd)
+        @type  f_out_crd: str
         """
         f_out = t.absfile( f_out )
         f_out_crd = t.absfile( f_out_crd ) or t.stripSuffix( f_out ) + '.crd'
@@ -475,7 +568,7 @@ class AmberParmBuilder:
             t.tryRemove( tmp_parm )
             t.tryRemove( tmp_crd )
             t.tryRemove( tmp_in )
-        
+
         ## load model with missing atoms added by leap
         m_leap = PDBModel( tmp_pdb  )
 
@@ -499,7 +592,7 @@ class AmberParmBuilder:
 
         if not self.debug:
             t.tryRemove( tmp_pdb )
-        
+
 
 #############
 ## TESTING ##

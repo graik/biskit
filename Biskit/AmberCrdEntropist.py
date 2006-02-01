@@ -17,11 +17,15 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-
 ## last $Author$
 ## last $Date$
 ## $Revision$
 
+"""
+Run ptraj entropy analysis on existing amber trajectory (.crd) and
+topology (.parm7) file.
+"""
+    
 import os.path as osp
 import re
 import tempfile
@@ -50,19 +54,28 @@ class AmberCrdEntropist( Executor ):
     def __init__( self, f_parm, f_crd, f_template=None,
                   s=0, e=None, step=1, **kw ):
         """
-        f_parm     - str, amber topology file
-        f_crd      - str, amber trajectory file
-        f_template - str, alternative ptraj input template [default]
-        s,e        - int, start and stop frame [0, None .. all ]
-        step       - int, frame offset         [1 .. no offset ]
+        @param f_parm: path to amber topology file
+        @type  f_parm: str
+        @param f_crd: path to amber trajectory file
+        @type  f_crd: str
+        @param f_template: alternative ptraj input template (default: None)
+        @type  f_template: str 
+        @param s: firat 'start' frame (default: 0, first)
+        @type  s: int
+        @param e: late 'end' frame (default: None, last)
+        @type  e: int
+        @param step: frame offset (default: 1, no offset )
+        @type  step: int
 
-        ... and key=value parameters for Executor:
-        f_out    - str, target name for ptraj output file  [None..discard]
-        node     - str, host for calculation (None->local)          [None]
-        nice     - int, nice level                                     [0]
-        log      - Biskit.LogFile, program log (None->STOUT)        [None]
-        debug    - 0|1, keep all temporary files                       [0]
-        verbose  - 0|1, print progress messages to log     [log != STDOUT]
+        @param kw: additional key=value parameters for Executor:
+        @type  kw: key=value pairs
+        ::
+          debug    - 0|1, keep all temporary files (default: 0)
+          verbose  - 0|1, print progress messages to log (log != STDOUT)
+          node     - str, host for calculation (None->local) NOT TESTED
+                          (default: None)
+          nice     - int, nice level (default: 0)
+          log      - Biskit.LogFile, program log (None->STOUT) (default: None)
         """
         template = f_template or self.ptraj_script
 
@@ -82,12 +95,26 @@ class AmberCrdEntropist( Executor ):
                         'contributions':None, 'nframes':None,
                         'version':self.version(), 'node':self.node }
 
-                           
+
     def version( self ):
+        """
+        Version of class.
+        
+        @return: version
+        @rtype: str
+        """
         return 'AmberCrdEntropist $Revision$'
 
+
     def command( self ):
+        """
+        Build the command string.
+        
+        @return: command
+        @rtype: str
+        """        
         return "%s %s %s" % (self.exe.bin, self.f_parm, self.f_in)
+
 
 
     def __tryMatch( self, regex, str, integer=0 ):
@@ -98,18 +125,34 @@ class AmberCrdEntropist( Executor ):
 
 
     def finish( self ):
+        """
+        Overrides Executor method
+        """
         self.result = self.parsePtrajResult( self.f_out )
 
 
     def isFailed( self ):
-        """Detect whether external program failed, override!"""
+        """
+        Detect whether external program failed, override!
+        """
         if not osp.exists( self.f_out ):
             return 1
 
         return 0
 
-    def parsePtrajResult( self, f_out ):
 
+    def parsePtrajResult( self, f_out ):
+        """
+        Extract results from ptraj.
+        
+        @param f_out: result of ptraj run
+        @type  f_out: str
+
+        @return: extracted prtaj result
+        @rtype: dict
+
+        @raise EntropistError: if unexpected end of ptraj output file
+        """
         ## regular expressions for parsing of ptraj output
         re_thermo= re.compile('- Thermochemistry -')
         re_T     = re.compile('^\s*temperature\s*(\d+\.\d+)\s*kelvin')
@@ -158,7 +201,7 @@ if __name__ == '__main__':
     print "Setting up"
 
     f = T.testRoot() + '/Amber/AmberCrdEntropist/' 
-    
+
     e = AmberCrdEntropist( f + 'lig_traj.parm',
                            f + 'lig_traj.crd', debug=0, verbose=1)
 

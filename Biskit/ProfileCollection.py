@@ -21,6 +21,10 @@
 ## last $Author$
 ## $Revision$
 
+"""
+Manage profiles.
+"""
+
 import Numeric as N
 import tools as T
 import mathUtils as M
@@ -52,20 +56,20 @@ class ProfileCollection:
     The 'isarray' entry of a profile's info dictionary tells whether
     the profile is stored as array or as list.
 
-    ProfileCollection p can be accessed like a dictionary of lists:
-    len( p )          -> number of profiles (== len( p.profiles ) )
-    p['prof1']        -> list with values of profile 'prof1'
-    del p['prof1']    -> remove a profile
-    p['prof1'] = [..] -> add a profile without additional infos
-    for k in p        -> iterate over profile keys
-    'prof1' in p      -> 1, if collection contains key 'prof1'
+    ProfileCollection p can be accessed like a dictionary of lists::
+      len( p )          -> number of profiles (== len( p.profiles ) )
+      p['prof1']        -> list with values of profile 'prof1'
+      del p['prof1']    -> remove a profile
+      p['prof1'] = [..] -> add a profile without additional infos
+      for k in p        -> iterate over profile keys
+      'prof1' in p      -> 1, if collection contains key 'prof1'
 
     But it is more than that - each key also has a dictionary of info values
     assigned to it (see getInfo(), setInfo(), p.infos). These can be accessed
-    like:
-    p['prof1','date']   -> date of creation of profile named 'prof1'
-    p.getInfo('prof1')  -> returns all info records
-    p['prof1','comment'] = 'first prof'  -> add/change single info value
+    like::
+      p['prof1','date']   -> date of creation of profile named 'prof1'
+      p.getInfo('prof1')  -> returns all info records
+      p['prof1','comment'] = 'first prof'  -> add/change single info value
     """
 
     def __init__( self, version=None, profiles=None, infos=None ):
@@ -77,63 +81,120 @@ class ProfileCollection:
 
 
     def version( self ):
+        """
+        Class version.
+        
+        @return: class version number
+        @rtype: str
+        """
         return 'ProfileCollection $Revision$'
 
 
     def __getitem__( self, k ):
         """
-        p['prof1']         <==>  p.get( 'prof1' )
-        p['prof1','info1]  <==>  p.get( 'prof1','info1' )
+        Get profile item::
+          p['prof1']         <==>  p.get( 'prof1' )         
+          p['prof1','info1]  <==>  p.get( 'prof1','info1' ) 
+
+        @return: item
+        @rtype: any
         """
         return self.get( k )
 
+
     def __setitem__( self, k, v ):
         """
-        p['prof1'] = range(10)       <==>  p.set( 'prof1', range(10) )
-        p['prof1','info1]='comment'  <==>  p.setInfo('prof1',info1='comment')
+        Set profile item::
+          p['prof1'] = range(10)      <==> p.set( 'prof1', range(10) )      
+          p['prof1','info1]='comment' <==> p.setInfo('prof1',info1='comment')
+
+        @return: item
+        @rtype: any        
         """
         if type(k) == tuple:
             return self.setInfo( k[0], **{k[1]:v} )
 
         return self.set( k, v )
 
+
     def __delitem__( self, k ):
         """
-        del p['prof1']         <==>  p.remove( 'prof1' )
-        del p['prof1','info1'] <==>  p.remove( 'prof1', 'info1' )
+        Delete profile item::
+          del p['prof1']         <==>  p.remove( 'prof1' )          
+          del p['prof1','info1'] <==>  p.remove( 'prof1', 'info1' ) 
         """
         result = self.remove( k )
 
+
     def __len__( self ):
+        """
+        Length of profile
+
+        @return: profile length
+        @rtype: int        
+        """
         return len( self.profiles )
 
+
     def __contains__( self, k ):
-        """k in self  <==>  p.has_key( k )"""
+        """
+        Check if profile contains key::
+          k in self  <==>  p.has_key( k ) 
+
+        @return: True or False
+        @rtype: 1|0  
+        """
         return self.has_key( k )
 
+
     def __iter__(self):
-        """for k in self  <==>  for k in p.keys()"""
+        """
+        Iterate over profile::
+          for k in self  <==>  for k in p.keys()
+        
+        @return: list of items
+        @rtype: list
+        """
         return iter(self.profiles)
+
 
     def keys( self ):
         return self.profiles.keys()
 
+
     def has_key( self, k ):
         return self.profiles.has_key(k)
+
 
     def values( self ):
         return self.profiles.values()
 
+
     def items( self ):
         """
-        p.items() -> [ (key1, [any]), (key2, [any]), ..) ]
-        Get list of tuples of profile names and profiles.
+        Get list of tuples of profile names and profiles::
+          p.items() -> [ (key1, [any]), (key2, [any]), ..) ]
+
+        @return: list of tuples of profile names and profiles
+        @rtype: list       
         """
         return self.profiles.items()
 
 
     def __array_or_list( self, prof, asarray ):
-        """convert to array or list depending on asarray option"""
+        """
+        Convert to array or list depending on asarray option
+
+        @param prof: profile
+        @type  prof: list OR array
+        @param asarray: option, convert to array
+        @type  asarray: 1|0
+        
+        @return: profile
+        @rtype: list OR array
+        
+        @raise ProfileError:
+        """
         ## autodetect type
         if asarray == 1:
             if isinstance( prof, N.arraytype ):
@@ -160,7 +221,19 @@ class ProfileCollection:
 
 
     def __expand( self, prof, mask, default ):
-        """expand profile to have a value also for masked positions"""
+        """
+        Expand profile to have a value also for masked positions.
+
+        @param prof: profile
+        @type  prof: list OR array
+        @param mask: atom mask
+        @type  mask: [int]
+        @param default: default value
+        @type  default: any
+        
+        @return: profile
+        @rtype: list OR array
+        """
         if mask:
 
             ## optimized variant for arrays
@@ -175,7 +248,7 @@ class ProfileCollection:
             for i in N.nonzero( mask ):
                 p[i] = prof.pop()
             return p
-            
+
         return prof
 
 
@@ -186,29 +259,39 @@ class ProfileCollection:
         which case all other parameters are ignored. Otherwise, the two info
         records 'version', 'changed' and 'isarray' are always modified but can
         be overridden by key=value pairs to this function.
-        name     - str, profile name (i.e. key)
-        prof     - list of values OR None
-        mask     - list 1 x N_items of 0|1, if there are less values than
-                   items, provide mask with 0 for missing values,
-                   N.sum(mask)==N_items
-        default  - any, value for items masked. [None for lists, 0 for arrays]
-        asarray  - 0|1|2, store as list (0), as array (2) or store
-                   numbers as array but everything else as list (1) [1]
-        comment  - str, goes into info[name]['comment']
-        moreInfo - additional key-value pairs for info[name]
-        !! raise ProfileError, if length of prof != length of other profiles
-        !! raise ProfileError, if mask is given but N.sum(mask) != len(prof)
+        
+        @param name: profile name (i.e. key)
+        @type  name: str
+        @param prof: list of values OR None
+        @type  prof: [any] OR None
+        @param mask: list 1 x N_items of 0|1, if there are less values than
+                      items, provide mask with 0 for missing values,
+                      N.sum(mask)==N_items
+        @type  mask: [int]
+        @param default: value for items masked.
+                        (default: None for lists, 0 for arrays]
+        @type  default: any
+        @param asarray: store as list (0), as array (2) or store numbers as
+                        array but everything else as list (1) (default: 1)
+        @type  asarray: 0|1|2
+        @param comment: goes into info[name]['comment']
+        @type  comment: str
+        @param moreInfo: additional key-value pairs for info[name]
+        @type  moreInfo: key=value
+        
+        @raise ProfileError: if length of prof != length of other profiles
+        @raise ProfileError: if mask is given but N.sum(mask) != len(prof)
         """
         if prof is None:
            self.profiles[ name ] = None
            return
-        
+
         ## consistency check
         if mask and N.sum(mask) != len(prof):
             raise ProfileError(
                 "Mask doesn't match profile ( N.sum(mask)!=len(prof) ). " +
                 "%i != %i" % (N.sum(mask), len( prof ) ) )
-        
+
         prof = self.__array_or_list( prof, asarray )
 
         ## use default == 0 for arrays
@@ -217,7 +300,7 @@ class ProfileCollection:
 
         ## expand profile to have a value also for masked positions
         prof = self.__expand( prof, mask, default )
-        
+
         l = self.profLength()
         if l and len( prof ) != l:
             raise ProfileError( "Profile %s has wrong length." % name )
@@ -231,7 +314,7 @@ class ProfileCollection:
 
         ## optional infos
         info.update( moreInfo )
-        
+
         ## new profiles are always changed=1, updated profiles are checked
         if not 'changed' in moreInfo:
             if name in self.keys():
@@ -246,17 +329,23 @@ class ProfileCollection:
 
 
     def setInfo( self, name, **args ):
-        """Add/Override infos about a given profile
-        e.g. setInfo('relASA', comment='new', params={'bin':'whatif'})
-        !! raise ProfileError, if no profile is found with |name|
+        """
+        Add/Override infos about a given profile::
+          e.g. setInfo('relASA', comment='new', params={'bin':'whatif'})
+        
+        @raise  ProfileError: if no profile is found with |name|
         """
         self.getInfo( name ).update( args )
 
 
     def setMany( self, profileDict, infos={} ):
-        """setMany( dict, [infoDict] ) Add/Override many profiles
-        profileDict - dict with name:profile pairs
-        info - dict of dict, info dicts for each profile, indexed by name
+        """
+        setMany( dict, [infoDict] ) Add/Override many profiles
+
+        @param profileDict: dict with name:profile pairs
+        @type  profileDict: dict
+        @param infos: info dicts for each profile, indexed by name
+        @type  infos: dict of dict
         """
         for key, value in profileDict.items():
             self.set( key, value, **infos.get( key,{} ) )
@@ -264,18 +353,22 @@ class ProfileCollection:
 
     def get( self, name, default=None ):
         """
-        get( profKey, [default] ) -> list of values
-        OR
-        get( (profKey, infoKey), [default] ) -> single value of info dict 
-        name    - str OR (str, str), profile key or profile and info key
-        default - default result if no profile is found,
-                  if None and no profile is found, raise exception
-        !! raise ProfileError, if no profile is found with |name|
+        get( profKey, [default] ) -> list of values 
+        B{OR} 
+        get( (profKey, infoKey), [default] ) -> single value of info dict
+        
+        @param name: profile key or profile and info key
+        @type  name: str OR (str, str)
+        @param default: default result if no profile is found,
+                        if None and no profile is found, raise exception
+        @type  default: any
+        
+        @raise ProfileError: if no profile is found with |name|
         """
         ## get an info value
         if type( name ) == tuple:
             result = self.getInfo( name[0] ).get( name[1], default )
-            
+
             if result is None and not self.infos[ name[0] ].has_key(name[1]):
                 raise ProfileError( 'No info value found for '+str(name[1]) )
 
@@ -290,12 +383,19 @@ class ProfileCollection:
 
         return result
 
-  
+
     def getInfo( self, name ):
         """
-        profileInfo( name ) -> dict with infos about profile
-        Guaranteed infos: 'version'->str, 'comment'->str, 'changed'->1||0
-        !! raise ProfileError, if no profile is found with |name|
+        getInfo( name ) -> dict with infos about profile::
+          Guaranteed infos: 'version'->str, 'comment'->str, 'changed'->1|0
+
+        @param name: profile name
+        @type  name: str
+
+        @return: dict with infos about profile
+        @rtype: dict
+        
+        @raise ProfileError: if no profile is found with |name|
         """
         result = self.infos.get( name, None )
 
@@ -307,7 +407,17 @@ class ProfileCollection:
 
     def profile2mask(self, profName, cutoff_min=None, cutoff_max=None ):
         """
-        -> mask len( get(profName) ) x 1|0
+        Convert profile into a mask based on the max and min cutoff values.
+        
+        @param profName: profile name
+        @type  profName: str
+        @param cutoff_min: lower limit
+        @type  cutoff_min: float
+        @param cutoff_max: upper limit
+        @type  cutoff_max: float
+        
+        @return: mask len( get(profName) ) x 1|0
+        @rtype: [1|0]
         """
         p = self.get( profName )
 
@@ -316,10 +426,19 @@ class ProfileCollection:
 
         return N.greater( p, cutoff_min ) * N.less( p, cutoff_max )
 
-        
+
     def take( self, indices ):
         """
-        take( indices ) -> ProfileCollection with extract of all profiles
+        Take on profile using provided indices::
+          take( indices ) -> ProfileCollection with extract of all profiles
+
+        @param indices: list of indices
+        @type  indices [int]
+
+        @return: new profile from indices
+        @rtype: profile
+        
+        @raise ProfileError: if take error
         """
         result = self.__class__( self.version() )
 
@@ -332,7 +451,7 @@ class ProfileCollection:
                     result.set( key, [ prof[i] for i in indices ], asarray=0 )
 
                 result.setInfo( key, **copy.deepcopy(self.getInfo(key)) )
-                
+
         except Exception, why:
             raise ProfileError( "Can't take sub-profile: "+str(why) )
 
@@ -341,8 +460,15 @@ class ProfileCollection:
 
     def remove( self, *key ):
         """
-        remove( profKey ) -> 1||0, 1 if complete entry has been removed
-        remove( profKey, infoKey ) -> 1||0, 1 if single info value was removed
+        Remove profile B{OR} info values of profile::
+          remove( profKey ) -> 1|0, 1 if complete entry has been removed
+          remove( profKey, infoKey ) -> 1|0, 1 if single info value was removed
+
+        @param key: profile name OR name, infoKey
+        @type  key: str OR str, str
+        
+        @return: sucess status
+        @rtype: 1|0
         """
         try:
             if len( key ) == 2:
@@ -360,11 +486,17 @@ class ProfileCollection:
 
     def concat( self, *profiles ):
         """
-        p0.concat( p1 [, p2, ..]) -> single ProfileCollection
         Concatenate all profiles in this with corresponding profiles in the
         given ProfileCollection(s). Profiles that are not found in all
-        ProfileCollections are skipped.
-        p1 [,p2, ..] - ProfileCollection
+        ProfileCollections are skipped::
+          p0.concat( p1 [, p2, ..]) -> single ProfileCollection with the
+          same number of profiles as p0 but with the length of p0+p1+p2..
+
+        @param profiles: profile(s) to concatenate
+        @type  profiles: profileCollection(s)
+        
+        @return: concatenated profile(s)  
+        @rtype: profileCollection
         """
 
         if len( profiles ) == 0:
@@ -373,7 +505,7 @@ class ProfileCollection:
         next = profiles[0]
 
         r = self.__class__()
-        
+
         for k, p in self.profiles.items():
 
             try:
@@ -393,12 +525,15 @@ class ProfileCollection:
         """
         Merge other ProfileCollection into this one, replacing existing
         profiles and info values. This is the obvious translation of
-        dict.update(). The changed flag of each profile is set to 1 if
-          a) an existing profile is overridden with different values
-          b) the profile is marked 'changed' in the other collection
-        other         - ProfileCollection
-        stickyChanged - 0|1, mark all profiles 'changed' that are marked
-                        'changed' in the other collection [1]
+        dict.update(). The changed flag of each profile is set to 1 if:
+           1. an existing profile is overridden with different values
+           2. the profile is marked 'changed' in the other collection
+          
+        @param other: profile
+        @type  other: ProfileCollection
+        @param stickyChanged: mark all profiles 'changed' that are marked
+                              'changed' in the other collection (default: 1)
+        @type  stickyChanged: 0|1
         """
         for key, prof in other.items():
 
@@ -412,7 +547,7 @@ class ProfileCollection:
                 del info['changed']
 
             self.set( key, prof, **info )
-            
+
 
     def updateMissing( self, source, copyMissing=1, allowEmpty=0 ):
         """
@@ -421,12 +556,19 @@ class ProfileCollection:
         Empty profiles (None or []) are replaced but their info records stay
         untouched. If copyMissing=0, profiles that are existing in source but
         not in this collection, are NOT copied (i.e. only empty profiles are
-        replaced). 
-        source      - ProfileCollection
-        copyMissing - 0||1
-        allowEmpty  - 0||1, tolerate zero-length profiles after update [0]
-        !! ProfileError, if allowEmpty is 0 and some empty profiles cannot be
-                         found in source
+        replaced).
+        
+        @param source: profile
+        @type  source: ProfileCollection
+        @param copyMissing: copy missing profiles that exist in source
+                            (default: 1)
+        @type  copyMissing: 0|1
+        @param allowEmpty: tolerate zero-length profiles after update
+                           (default: 0)
+        @type  allowEmpty: 0|1
+        
+        @raise ProfileError: if allowEmpty is 0 and some empty profiles
+                             cannot be found in source
         """
         for key, prof in source.items():
 
@@ -438,7 +580,7 @@ class ProfileCollection:
             if copyMissing and not key in self:
                 info = copy.copy( source.getInfo( key ) )
                 del info['changed']
-                
+
                 self.set( key, prof, **info )
 
         if not allowEmpty and ( None in self.values() or [] in self.values() ):
@@ -450,32 +592,54 @@ class ProfileCollection:
 
 
     def clone( self ):
-        """clone() -> ProfileCollection (or sub-class, actually a deepcopy)"""
+        """
+        Clone (deepcopy) profile::
+          clone() -> ProfileCollection (or sub-class, actually a deepcopy)
+
+        @return: profile
+        @rtype: profileCollection          
+        """
         return copy.deepcopy( self )
 
 
     def clear( self ):
-        """clear() -> None; delete all profiles and infos."""
+        """
+        Delete all::
+          clear() -> None; delete all profiles and infos.
+        """
         self.profiles = {}
         self.infos = {}
 
+
     def profLength( self ):
-        """profLength() -> int; length of first non-None profile or 0"""
+        """
+        Length of profile::
+          profLength() -> int; length of first non-None profile or 0
+        
+        @return: length of first non-None profile or 0
+        @rtype: int     
+        """
         for k, p in self.items():
 
             if p != None:
                 return len( p )
 
         return 0
-    
+
 
     def plot( self, *name, **arg ):
         """
-        plot( name1, [name2, ..],[arg1=x, arg2=y]) -> biggles.FramedPlot
-        Plot one or more profiles.
-        name - str, one or more profile names
-        arg  - key=value pairs for Biggles.Curve() function
-        !! TypeError, if profile contains non-number items
+        Plot one or more profiles using Biggles::
+          plot( name1, [name2, ..],[arg1=x, arg2=y]) -> biggles.FramedPlot
+        
+        @param name: one or more profile names
+        @type  name: str
+        @param arg: key=value pairs for Biggles.Curve() function
+        @type  arg: 
+        @raise TypeError: if profile contains non-number items
+
+        @return: plot, view using plot.show() 
+        @rtype: biggles.FramedPlot          
         """
         plot = biggles.FramedPlot()
 
@@ -496,6 +660,7 @@ class ProfileCollection:
 
         return plot
 
+
     def __shortString( self, s, maxLen ):
         """
         """
@@ -507,7 +672,8 @@ class ProfileCollection:
 
     def __repr__( self ):
         """
-        -> str, string representation within interactive python interpreter.
+        @return: string representation within interactive python interpreter.
+        @rtype: str
         """
         s = "ProfileCollection: %i profiles of length %i\n" % \
             (len( self ), self.profLength() )
@@ -523,7 +689,7 @@ class ProfileCollection:
 if __name__ == '__main__':
 
     import string
-    
+
     p = ProfileCollection()
 
     p.set( 't1', range(10), comment='test 1', option='x' )

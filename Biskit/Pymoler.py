@@ -19,7 +19,10 @@
 ##
 ## last $Date$
 ## $Revision$
-"""Display Structures with Pymol"""
+## last $Author: leckner 
+"""
+Display Structures with Pymol
+"""
 
 
 from PDBModel import PDBModel
@@ -38,7 +41,7 @@ import settings
 ## 					+ os.environ['PYMOL_EXTLIBPATH']
 ## except:
 ##     os.environ['LD_LIBRARY_PATH'] = os.environ['PYMOL_EXTLIBPATH']
-	
+
 ## # python modules
 ## try: 
 ##     os.environ['PYTHONPATH'] = os.environ['PYMOL_PATH'] + ':' \
@@ -58,11 +61,16 @@ os.environ['TMPDIR'] = settings.tempDirShared
 class PymolModel:
 
     def __init__( self, model, modName ):
-
+        """
+        @param model: model to view
+        @type  model: PDBModel
+        @param modName: model name, will show up in PyMol
+        @type  modName: str
+        """
         self.fname = ''
         self.temporary = 0
         self.struct = None
-        
+
         if type( model ) is str:
             self.fname = model
         else:
@@ -77,10 +85,18 @@ class PymolModel:
 
     def addProperty( self, values, key='temperature_factor' ):
         """
-        Add extra value to each atom in Structure.
-        key - string, key for Atom.properties dictionary
-	      ('occupancy', 'temperature_factor')
-        values - list of numbers, len( values ) == atom number
+        Add extra value to each atom in Structure. The values
+        will be written to either the B- (temperature_factor)
+        or Q-factor 'occupancy' column in the temporary pdb-file.
+        These values can then be used to display properties in PyMol
+        via commands like 'color_b' and 'color_q'. See also
+        L{addResProperty}.
+
+        @param values: list of numbers, len( values ) == number of atoms
+        @type  values: [float]      
+        @param key: key for Atom.properties dictionary
+                    ('occupancy' OR 'temperature_factor')
+        @type  key: occupancy|temperature_factor
         """
         if self.struct == None:
             self.struct = PDBModel( self.fname )
@@ -91,14 +107,20 @@ class PymolModel:
             atom[ key ] = values[i]
             i += 1
 
-                
+
     def addResProperty( self, values, key='temperature_factor'):
         """
-        Add extra value to each residue in Structure.
+        Does the same thing as L{addProperty} but on the residue level,
+        i.e adds extra value to each residue in Structure.
         (The same value is added to all atoms of a residue.)
-        key - string, key for Atom.properties dictionary
-	      ('occupancy', 'temperature_factor')
-        values - list of numbers, len( values ) == residue number
+        These values can then be used to display properties in PyMol
+        via commands like 'color_b' and 'color_q'.
+        
+        @param values: list of numbers, len( values ) == number of residues
+        @type  values: [float]      
+        @param key: key for Atom.properties dictionary
+                    ('occupancy' OR 'temperature_factor')
+        @type  key: occupancy|temperature_factor
         """
         try:
             if self.struct == None:
@@ -119,11 +141,14 @@ class PymolModel:
         """
         Create pdb on disc if it's not already there or if it
         has to be changed.
-        -> string, filename of new or existing pdb
+        
+        @return: filename of new or existing pdb
+        @rtype: str
         """
         if self.temporary:
             self.struct.writePdb( self.fname, 2 )
         return self.fname
+
 
 ## ========================= Pymoler ============================
 ## create Pymol input script and display Pymol ##
@@ -131,17 +156,19 @@ class PymolModel:
 class Pymoler:
     """
     Create PyMol script (.pml) file.
-    Note, the file is only flushed to disc when the object is destructed,
-    or the flush() method is called!
+    
+    @note: the file is only flushed to disc when the object
+           is destructed, or the flush() method is called!
     """
 
     def __init__(self, mode='w'):
         """
-        mode    - open file with this mode, w=override, a=append
+        @param mode: open file with this mode, w=override, a=append
+        @type  mode: str
         """
         #self.foutName = os.path.abspath(outName)    # name of new .pml file
 	self.foutName = tempfile.mktemp() + '.pml'
-	
+
         # open for <appending|writing|reading>
         self.fgenerate = open(self.foutName, mode) 
 
@@ -161,11 +188,14 @@ class Pymoler:
         Flush output file (but keep it open).
         """
         self.fgenerate.flush()
-        
+
 
     def add(self, str):
         """
         Add String str and line break to file.
+
+        @param str: string to add to pml file
+        @type  str: str        
         """
         try:
             self.fgenerate.write(str + '\n')
@@ -178,11 +208,19 @@ class Pymoler:
     def addMovie( self, pdb, modName=None ):
         """
         Add one or several existing pdb files or Structure objects
-        to one model. Several files will hence end up as single movie.
-        
-        pdb - str or list of str, file name(s) or ..
-            - PDBModel or list of it
-        modName - str, model name
+        to one model. Several files will hence end up as single movie
+        (i.e. as frames of a model in PyMol).
+ 
+        @param pdb: file name or a list of file names OR
+                    PDBModel or list of PDBModels
+        @type  pdb: str or [str] OR PDBModel or [PDBModel]
+        @param modName: model name, will show up in PyMol. If 'None' a
+                        model name will be created from the source file
+                        name and a serial number.
+        @type  modName: str OR None
+
+        @return: the modName of the added model
+        @rtype: str        
         """
         if type( pdb ) is not list:
             pdb = [pdb]
@@ -216,9 +254,13 @@ class Pymoler:
 
     def addFrame( self, frame, modName ):
         """
-        Add file(s) or Structure(s) to EXISTING model as movie.
-        frame - str or Scientific.IO.PDB.Structure
-        modName - str, model name, must be existing
+        Add file(s) or Structure(s) to an EXISTING model as movie.
+        
+        @param frame: the structure to add to an existing model
+        @type  frame: str(s) or PDBModel(s) 
+        @param modName: model name, must be existing
+                        (i.e. an already added model)
+        @type  modName: str
         """
         self.addMovie( frame, modName )
 
@@ -227,9 +269,14 @@ class Pymoler:
         """
         Return next free model name in dictionary, made up
         from base + index
-        base - str
-        index - int
-        -> str
+        
+        @param base: name base
+        @type  base: str
+        @param index: name suffix 
+        @type  index: int
+        
+        @return: name composed of base+suffix
+        @rtype: str
         """
         if self.dic.has_key( base ):
 
@@ -247,12 +294,19 @@ class Pymoler:
     def addPdb( self, pdb, modName=None ):
         """
         Add one or several existing pdbs. Make sure all go into
-        different model (have different model name).
-        pdb - str or [str, str, ..], file name or list of names
-              - PDBModel or list of it
-        modName - str, force model name, will change for list
-                  of file names
-        -> str, model name of first file
+        different models (have different model names).
+        
+        @param pdb: file name or a list of file names OR
+                    PDBModel or list of PDBModels
+        @type  pdb: str or [str] OR PDBModel or [PDBModel]
+
+        @param modName: force model name, will change for list
+                        of file names. If 'None' a model name will
+                        be created from the source file name.
+        @type  modName: str OR None
+        
+        @return: model name of first file
+        @rtype: str
         """
 
         if type( pdb ) is not list:
@@ -263,15 +317,18 @@ class Pymoler:
             result = self.addMovie( f, modName )
 
         return result
-    
+
 
     def makeSel( self, selDic ):
         """
-        Make a selection, that can be of three types:
-           1) dictionary with one or more of the keys:
-                'model' 'segment', 'chain', 'residue', 'atom'
-           2) dictionary with key:   'element'
-           3) dictionaty with key:   'expression'
+        Make a selection.
+        
+        @param selDic: a selection dictionary,  that can be of three types:
+                         1. dictionary with one or more of the keys:
+                           'model' 'segment', 'chain', 'residue', 'atom'
+                         2. dictionary with key:   'element'
+                         3. dictionaty with key:   'expression'
+        @type  selDic: dict
         """
         ## the selection must comply with one of the three selection
 	## schemes below
@@ -282,7 +339,7 @@ class Pymoler:
         for sel in selDic.keys():
             if sel not in keyList:
                 print 'Invalid selection in ' + str(selDic)
-        
+
         # element
         if selDic.has_key(keyList[5]):
             selection = '( elem ' + str(selDic[keyList[5]]) + ' )'
@@ -301,7 +358,7 @@ class Pymoler:
                         '/' + str(selDic['chain']) + \
                         '/' + str(selDic['residue']) + \
                         '/' + str(selDic['atom']) + ' )'
-            
+
         return selection
 
 
@@ -315,6 +372,7 @@ class Pymoler:
 
                 n = model.writeIfNeeded()
                 print n
+
 
     def addDeleteScript(self):
         """
@@ -340,13 +398,24 @@ class Pymoler:
     def setAtomValues( self, model, values, key='temperature_factor',
 		       lastOnly=0 ):
         """
-        Add numeric value to all atoms of all Structures
-        or the last Structure in a model.
-        model - str, model name
-        values - list of numbers, len == number of atoms
-        key - key for atom.properties dictionary
-        lastOnly - 0 .. add to all in model
-                   1 .. add only to last Structure
+        Add numeric value to all atoms of all Structures or the last
+        Structure in a model.. The values will be written to either
+        the B- (temperature_factor) or Q-factor 'occupancy' column in
+        the temporary pdb-file.
+        These values can then be used to display properties in PyMol
+        via commands like 'color_b' and 'color_q'. See also
+        L{setResValues}.
+
+        @param model: model name
+        @type  model: str
+        @param values: list of numbers, len( values ) == number of atoms
+        @type  values: [float]      
+        @param key: key for Atom.properties dictionary
+                    (default: temperature_factor)
+        @type  key: occupancy|temperature_factor
+        @param lastOnly: 0 - add to all in model OR
+                         1 - add only to last Structure (default: 0)
+        @type  lastOnly: 1|0
         """
         if lastOnly:
             self.dic[ model ][-1].addProperty( values, key )
@@ -359,18 +428,29 @@ class Pymoler:
                     T.errWriteln( "Warning: error while adding properties.")
 		    T.errWriteln( "Key: "+str( key )+" values: "+str( values ) )
                     T.errWriteln( T.lastError() )
-        
+
 
     def setResValues( self, model, values, key='temperature_factor',
 		      lastOnly=0 ):
         """
         Add numeric value per residue to all atoms of all Structures
-        or the last Structure in a model.
-        model - str, model name
-        values - list of numbers, len == number of residues
-        key - key for atom.properties dictionary
-        lastOnly - 0 .. add to all in model
-                   1 .. add only to last Structure
+        or the last Structure in a model. The values will be written to
+        either the B- (temperature_factor) or Q-factor 'occupancy' column
+        in the temporary pdb-file.
+        These values can then be used to display properties in PyMol
+        via commands like 'color_b' and 'color_q'. See also
+        L{setAtomValues}.
+        
+        @param model: model name
+        @type  model: str
+        @param values: list of numbers, len( values ) == number of residues
+        @type  values: [float]      
+        @param key: key for Atom.properties dictionary
+                    (default: temperature_factor)
+        @type  key: occupancy|temperature_factor
+        @param lastOnly: 0 - add to all in model OR
+                         1 - add only to last Structure (default: 0)
+        @type  lastOnly: 1|0
         """
         if lastOnly:
             self.dic[ model ][-1].addResProperty( values, key )
@@ -388,36 +468,49 @@ class Pymoler:
     def colorAtoms( self, model, values, lastOnly=0 ):
         """
         Color atoms of this model by list of values.
-        model - str, model name
-        values - list of numbers, len == number of atoms
-        lastOnly - 0 .. add to all in model
-                   1 .. add only to last Structure
+        
+        @param model: model name
+        @type  model: str
+        @param values: len == number of atoms
+        @type  values: [float]
+        @param lastOnly: 0 - add to all in model OR
+                         1 - add only to last Structure (default: 0)
+        @type  lastOnly: 1|0         
         """
         self.setAtomValues( model, values, lastOnly=lastOnly )
         self.add( "color_b('%s')" % model )
-        
+
 
     def colorRes( self, model, values, lastOnly=0 ):
         """
         Color residues of this model by list of values.
-        model - str, model name
-        values - list of numbers, len == number of residues
-        lastOnly - 0 .. add to all in model
-                   1 .. add only to last Structure
+        
+        @param model: model name
+        @type  model: str
+        @param values: len == number of residues
+        @type  values: list of numbers
+        @param lastOnly: 0 .. add to all in model
+              1 .. add only to last Structure
+        @type  lastOnly: 
         """
         self.setResValues( model, values, lastOnly=lastOnly )
         self.add( "color_b('%s')" % model )
-        
+
 
 
     def addColors( self, nColors, firstColor=[1.0, 0.0, 0.0],
                    lastColor=[0.0, 1.0, 0.0] ):
         """
-        Define a range of colors to be called in PyMol by name.
-        nColors - numbers of colors generated
-        firstColor - first rgb color
-        lastColor - last   ~    ~
-        -> colorNames, a list of the color names
+        Define a range of colors that can be called in PyMol by name.
+        
+        @param nColors: numbers of colors generated
+        @type  nColors: int
+        @param firstColor: first rgb color (default: [1.0, 0.0, 0.0])
+        @type  firstColor: [float]
+        @param lastColor: last rgb color (default: [0.0, 1.0, 0.0])
+        @type  lastColor: [float]
+        @return: a list of the color names
+        @rtype: [str]
         """   
         spectrum = T.hexColors( nColors, T.rgb2hex( firstColor ),
                               T.rgb2hex( lastColor ) )
@@ -435,7 +528,7 @@ class Pymoler:
             self.add( 'set_color '+ cName + ', ' + str(rgb) )
 
         return colorNames
-    
+
 
     def initPymol( self ):
         """
@@ -449,30 +542,34 @@ class Pymoler:
                     self.add( 'run ' + settings.pymol_scripts + script )
         else:
             print '\n\nWARNING: No external PyMol scripts added\n\n'
-    
+
 
 ##  	# MAKE default SELECTIONS
 ## 	self.add('select bb, ' + self.makeSel({'expression':'*/c,ca,o,n'} ))
 ##  	self.add('select sc, ' +\
 ## 		 self.makeSel({'expression':'!(*/c,o,ca,n) and !element h'}))
 ##         self.add('select none')
-        
-    
+
+
     def show(self, cleanUp=1 ):
 	"""
 	Takes a structure object.
 	Dispays it in PyMol, files are only temporarily created.
+
+        @param cleanUp: remove temporary pdb files and the pml script
+                        (default: 1)
+        @type  cleanUp: 1|0
 	"""
 	# clean up files from disc
         if cleanUp:
             self.addDeletePdbs()
             self.addDeleteScript()
-	
+
 	self.flush()
 
         ## Write PDB's to disc if needed
 	self.writeStructures()
-        
+
         ## -q for quiet mode
 	os.spawnlpe(os.P_NOWAIT, settings.pymol_bin,
                     settings.pymol_bin , '-q', self.foutName, os.environ )
@@ -482,14 +579,17 @@ class Pymoler:
 	"""
 	Dispays all added Pdbs full-screen in PyMol,
         files are only temporarily created.
-        cleanUp - 0||1, remove temporary files
-        sideMenu- 0||1, show side menu
+        
+        @param cleanUp: remove temporary files (default: 1)
+        @type  cleanUp: 0|1
+        @param sideMenu: show PyMol side menu (default: 1)
+        @type  sideMenu: 0|1
 	"""
 	# clean up files from disc
         if cleanUp:
             self.addDeletePdbs()
             self.addDeleteScript()
-	
+
 	self.flush()
 
         ## Write PDB's to disc if needed
@@ -507,12 +607,15 @@ class Pymoler:
 if __name__ == '__main__':
 
     import glob
-    
-    f = glob.glob( T.testRoot()+'/lig_pc2_00/pdb/*_1_*pdb.gz' )[:2]
+
+    f = glob.glob( T.testRoot()+'/lig_pcr_00/pcr_00/*_1_*pdb' )[:2]
     m = [ PDBModel(i) for i in f ]
     m = [ i.compress( i.maskProtein() ) for i in m ]
-    
-    pm = Pymoler( )
-    pm.addMovie( [ m[0], m[1] ] )
 
+    pm = Pymoler( )
+    mname = pm.addMovie( [ m[0], m[1] ] )
+
+    sel = pm.makeSel({'residue':29})
+    pm.add('show stick, %s'%sel)
+    
     pm.show()

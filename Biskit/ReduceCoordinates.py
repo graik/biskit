@@ -21,6 +21,9 @@
 ## last $Date$
 ## last $Author$
 
+"""
+Create structures with reduced number of atoms.
+"""
 
 from PDBModel import PDBModel
 import Numeric as N
@@ -30,27 +33,32 @@ import molUtils as MU
 
 class ReduceCoordinates:
     """
+    ReduceCoordinates
+    =================
+    
     Translate a PDBModel or frames from a trajectory to structure(s) with
     only one backbone and up to 2 side chain atoms per residue.
     The new atoms are the centers of mass of several atoms and carry the
     weight of the pooled atoms in an atom profile called 'mass'.
 
-    Examples:
-    reducer = ReduceCoordinates( m_ref ) ## create with reference PDBModel
-    m_red = reducer.reduceToModel()   ## creates reduced PDBModel from m_ref
+    Examples
+    --------
+      >>> ## create with reference PDBModel
+      >>> reducer = ReduceCoordinates( m_ref )
+      >>> ## creates reduced PDBModel from m_ref
+      >>> m_red = reducer.reduceToModel()
 
     OR:
-    ..
-    m_red_1 = reducer.reduceToModel( m1.getXyz() ) ## reduce many models
-    m_red_2 = reducer.reduceToModel( m2.getXyz() ) ## with identical atoms
+      >>> m_red_1 = reducer.reduceToModel( m1.getXyz() ) ## reduce many models
+      >>> m_red_2 = reducer.reduceToModel( m2.getXyz() ) ## with identical atoms
 
     OR:
-    ## reduce a complete Trajectory
-    reducer = ReduceCoordinates( traj.ref )
-    red_ref= reducer.reduceToModel()
-    frames = reducer.reduceXyz( traj.frames )
-    traj_red = Trajectory( ref=red_ref )
-    traj_red.frames = frames
+      >>> ## reduce a complete Trajectory
+      >>> reducer = ReduceCoordinates( traj.ref )
+      >>> red_ref= reducer.reduceToModel()
+      >>> frames = reducer.reduceXyz( traj.frames )
+      >>> traj_red = Trajectory( ref=red_ref )
+      >>> traj_red.frames = frames
     """
     ## modify order of TYR/PHE ring atoms to move centers away from ring axis
     aaAtoms = MU.aaAtoms
@@ -62,14 +70,30 @@ class ReduceCoordinates:
     def __init__( self, model,  maxPerCenter=4 ):
         """
         Prepare reduction of coordinates from a given model.
-        model - PDBModel, reference model defining atom content and order
-        maxPerCenter - max number of atoms per side chain center atom
+        
+        @param model: reference model defining atom content and order
+        @type  model: PDBModel
+        @param maxPerCenter: max number of atoms per side chain center atom
+                             (default: 4)
+        @type  maxPerCenter: int
         """
         self.m = model
         self.__addMassProfile( self.m )
 
         ## sort atoms within residues into standard order
         def cmpAtoms( a1, a2 ):
+            """
+            Comparison function for bringing atoms into standard order
+            within residues as defined by L{ aaAtoms }.
+
+            @param a1: model
+            @type  a1: PDBModel
+            @param a2: model
+            @type  a2: PDBModel
+
+            @return: int or list of matching positions
+            @rtype: [-1|0|1]            
+            """
             res = a1['residue_name']
             target = self.aaAtoms[ res ]
             try:
@@ -92,6 +116,12 @@ class ReduceCoordinates:
 
 
     def __addMassProfile( self, model ):
+        """
+        Add a mass profile to the model.
+
+        @param model: model
+        @type  model: PDBModel        
+        """
         h = MU.atomMasses['H']
         masses = []
         for a in model.atoms:
@@ -100,7 +130,7 @@ class ReduceCoordinates:
             else:
                 masses += [ MU.atomMasses[ a['element'] ] +
                             h * MU.aaAtomsH[a['residue_name']][a['name']] ]
-        
+
         model.setAtomProfile( 'mass', masses )
 
 
@@ -108,15 +138,20 @@ class ReduceCoordinates:
         """
         Group a bunch of integers (atom indices in PDBModel) so that each
         group has at most maxPerCenter items.
-        a_indices - list of int
-        maxPerCenter - int, max entries per group
-        -> list of lists of int
+        
+        @param a_indices: atom indices
+        @type  a_indices: [int]
+        @param maxPerCenter: max entries per group
+        @type  maxPerCenter: int
+        
+        @return: list of lists of int
+        @rtype: [[int],[int]..]
         """
         ## how many groups are necessary?
         n_centers = len( a_indices ) / maxPerCenter
         if len( a_indices ) % maxPerCenter:
             n_centers += 1
-            
+
         ## how many items/atoms go into each group?
         nAtoms = N.ones(n_centers, 'i') * int(len( a_indices ) / n_centers)
         i=0
@@ -130,25 +165,46 @@ class ReduceCoordinates:
         for n in nAtoms:
             result += [ N.take( a_indices, N.arange(n) + pos) ]
             pos += n
-            
+
         return result
 
-    
+
     def nextAtom( self, resName, resNumber, name, chainId, segid):
+        """
+        Create an atom dictionary.
+
+        @param resName: residue name
+        @type  resName: str
+        @param resNumber: residue number
+        @type  resNumber: int
+        @param name: atom name
+        @type  name: str
+        @param chainId: chain identifier
+        @type  chainId: str
+        @param segid: segnemt identifier
+        @type  segid: str
+        
+        @return: atom dictionary
+        @rtype: dict
+        """
         self.currentAtom += 1
-            
+
         return {'residue_name':resName, 'name':name, 'type':'ATOM',
                 'residue_number':resNumber,
                 'serial_number': self.currentAtom,
                 'segment_id': segid, 'chain_id':chainId,
                 'name_original':name, 'element':'X'}
-    
+
 
     def makeMap( self, maxPerCenter=4 ):
         """
         Calculate mapping between complete and reduced atom list.
-        -> (list of lists of int, list of atom dictionaries)
-           groups of atom indices into original model, new center atoms
+        Creates a (list of lists of int, list of atom dictionaries)
+        containing groups of atom indices into original model, new center atoms
+        
+        @param maxPerCenter: max number of atoms per side chain center atom
+                             (default: 4)
+        @type  maxPerCenter: int
         """
 
         resIndex = self.m_sorted.resIndex()
@@ -163,17 +219,17 @@ class ReduceCoordinates:
         for i in range( len( resIndex ) ):
 
             first_atom = resIndex[ i ]
-            
+
             if i < len( resIndex )-1:
                 last_atom  = resIndex[ i+1 ] - 1
             else:
                 last_atom = len( self.a_indices ) - 1
-            
+
             res_name = m.atoms[ first_atom ]['residue_name']
             segid    = m.atoms[ first_atom ]['segment_id']
             chainId  = m.atoms[ first_atom ]['chain_id']
             res_number = m.atoms[first_atom]['serial_number']
-            
+
             ## position of this residue's atoms in original PDBModel (unsorted)
             a_indices = self.a_indices[ first_atom : last_atom+1 ]
 
@@ -210,9 +266,15 @@ class ReduceCoordinates:
         Reduce the number of atoms in the given coordinate set. The set must
         have the same length and order as the reference model. It may have
         an additional (time) dimension as first axis.
-        xyz - array, (N_atoms x 3) or (N_frames x N_atoms x 3)
-        axis- axis with atoms
-        -> array (N_less_atoms x 3) or (N_frames x N_less_atoms x 3)
+        
+        @param xyz: coordinates (N_atoms x 3) or (N_frames x N_atoms x 3)
+        @type  xyz: array
+        @param axis: axis with atoms (default: 0)
+        @type  axis: int
+        
+        @return: coordinate array (N_less_atoms x 3) or
+                 (N_frames x N_less_atoms x 3)
+        @rtype: array
         """
         masses = self.m.atomProfile('mass')
         r_xyz = None
@@ -243,8 +305,13 @@ class ReduceCoordinates:
         """
         Create a reduced PDBModel from coordinates. Atom profiles the source
         PDBModel are reduced by averaging over the grouped atoms.
-        xyz - array (N_atoms x 3) or None (->use reference coordinates)
-        -> PDBModel with reduced atom set and profile 'mass'
+        
+        @param xyz: coordinte array (N_atoms x 3) or
+                    None (->use reference coordinates)
+        @type  xyz: array OR None
+        
+        @return: PDBModel with reduced atom set and profile 'mass'
+        @rtype: PDBModel
         """
 
         mass = self.m.atomProfile('mass')
@@ -257,10 +324,10 @@ class ReduceCoordinates:
         result.setAtoms( self.atoms )
         result.setXyz( xyz )
         result.setAtomProfile( 'mass', mProf )
-        
+
         if reduce_profiles:
             self.reduceAtomProfiles( self.m, result )
-            
+
             result.rProfiles = self.m.rProfiles
 
         return result
@@ -270,9 +337,11 @@ class ReduceCoordinates:
         """
         reduce all atom profiles according to the calculated map by calculating
         the average over the grouped atoms.
-        model - PDBModel
-        profname - str
-        do_sum - 1|0, use sum of atom values instead of average (default 0)
+        
+        @param from_model: model
+        @type  from_model: PDBModel
+        @param to_model: model
+        @type  to_model: PDBModel
         """
         for profname in from_model.aProfiles:
 
@@ -280,10 +349,10 @@ class ReduceCoordinates:
             info = from_model.profileInfo( profname )
 
             pr = [ N.average( N.take( p0, group ) ) for group in self.groups ]
-            
+
             to_model.setAtomProfile( profname, pr )
             to_model.setProfileInfo( profname, **info )
-        
+
 
 
 if __name__ == '__main__':
@@ -294,7 +363,7 @@ if __name__ == '__main__':
     m = m.compress( N.logical_not( m.maskH2O() ) )
 
     m.setAtomProfile('test', range(len(m)))
-    
+
     red = ReduceCoordinates( m, 4 )
 
     mred = red.reduceToModel()

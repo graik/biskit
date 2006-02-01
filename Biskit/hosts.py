@@ -5,17 +5,17 @@
 ## last $Author$
 """
 List of cluster computers.
-Each host must be accessible via ssh w/o password.
+Each host must be accessible via ssh w/o password::
 
-nodes_* .. lists with one entry per computer
-cpus_*  .. lists with one entry per CPU (usuallly that's the one used)
+  nodes_* .. lists with one entry per computer
+  cpus_*  .. lists with one entry per CPU (usuallly that's the one used)
 
-nodes/cpus_own   .. computers reserved for own use, highest priority
-nodes/cpus_shared.. computers shared with others, medium priority
-nodes/cpus_other .. computers mainly used by others, lowest priority
+  nodes/cpus_own   .. computers reserved for own use, highest priority
+  nodes/cpus_shared.. computers shared with others, medium priority
+  nodes/cpus_other .. computers mainly used by others, lowest priority
 
-nodes/cpus_all   .. all computers in descending priority
-nice_dic         .. nice value for each host
+  nodes/cpus_all   .. all computers in descending priority
+  nice_dic         .. nice value for each host
 """
 import Biskit.mathUtils as MU
 import os
@@ -27,11 +27,21 @@ import ConfigParser
 conf = ConfigParser.ConfigParser()
 conf.read( os.path.expanduser('~/.biskit/hosts.dat' ) )
 
+
 def getHosts( section, option ):
     """
-    Strip comment from setting (separator #)
-    Split list (separator 'space')
+    Get a list of hosts from the host list using ConfigParser.
+    
+    @param section: ConfigParser section in ~/.biskit/hosts.dat
+    @type  section: str
+    @param option: ConfigParser option in ~/.biskit/hosts.dat
+    @type  option: str
+    
+    @return: a list of hosts
+    @rtype: [str]
     """
+    ## Strip comment from setting (separator #)
+    ## Split list (separator 'space')
     if conf.has_option( section, option ):
     	setting = conf.get( section, option )
     	setting = S.split( setting, '#' )
@@ -45,17 +55,26 @@ def getHosts( section, option ):
 
 def getDict( section, option ):
     """
-    Strip comment from setting (separator: #)
-    Split entry (separator 'space')
-    Split value for dictionary (separator :)
+    Get a dictionary with host as key.
+
+    @param section: ConfigParser section in ~/.biskit/hosts.dat
+    @type  section: str
+    @param option: ConfigParser option in ~/.biskit/hosts.dat
+    @type  option: str
+    
+    @return: a dictionary with host as key and (nice) value as value
+    @rtype: dict
     """
+    ## Strip comment from setting (separator: #)
+    ## Split entry (separator 'space')
+    ## Split value for dictionary (separator :)
     dic = {}
     for i in getHosts( section, option ):
         i = S.split( i, ':' )
 	dic[ S.strip(i[0]) ] =  float( i[1] )
     return dic
-   
-    
+
+
 dual = []
 
 ##
@@ -134,7 +153,7 @@ others_ram = getDict( 'others_hosts', 'ram' ) # installed RAM others computers i
 ram_dic = { 'default':0.5 }
 for h in dual:
     ram_dic[ h ] = 1.0
-    
+
 ram_dic.update(own_ram)
 ram_dic.update(shared_ram)
 ram_dic.update(others_ram)
@@ -147,7 +166,7 @@ nodes_exclude = []
 nodes_exclude += getHosts( 'own_hosts', 'exclude' ) # exclude list, temporarily remove some nodes, separate with space
 nodes_exclude += getHosts( 'shared_hosts', 'exclude' ) # exclude list, temporarily remove some nodes, separate with space
 nodes_exclude += getHosts( 'others_hosts', 'exclude' ) # exclude list, temporarily remove some nodes, separate with space
- 
+
 
 ##
 ## Switch On / Off temporary removal of nodes 

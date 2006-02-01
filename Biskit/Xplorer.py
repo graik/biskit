@@ -21,6 +21,10 @@
 ## last $Date$
 ## last $Author$
 
+"""
+Prepare and run a xplor job.
+"""
+
 import tempfile
 from time import time
 import os
@@ -40,26 +44,37 @@ class RunError( XplorerError ):
     pass
 
 class Xplorer:
-    """Prepare and run a xplor job
-    @todo:  Most of this has been abstracted into Executor
-            -> subclass Executor and delete redundant parts
+    """
+    Prepare and run a xplor job
+
+    @todo:  Most of this has been abstracted into Executor next thing
+            to do is to subclass Executor and delete redundant parts 
     """
 
     def __init__( self, inpFile, xout=None, bin=settings.xplor_bin,
                   node=None, nice=0, log=None, debug=0, verbose=None,
                   **params ):
         """
-        inpFile - str, file name of inp template
-        xout    - str, file name of xplor log file (None->discard) [None]
-        bin     - str, file name of xplor binary     [settings.xplor_bin]
-        node    - str, host for calculation (None->local)          [None]
-        nice    - int, nice level                                     [0]
-        log     - Biskit.LogFile, program log (None->STOUT)        [None]
-        debug   - 0|1, keep all temporary files                       [0]
-        verbose - 0|1, print xplor command to log         [log != STDOUT]
-        [ additional key=value pairs for inp file ]
+        @param inpFile: file name of inp template
+        @type  inpFile: str
+        @param xout: file name of xplor log file (None->discard)
+                     (default: None)
+        @type  xout: str
+        @param bin: file name of xplor binary (default: settings.xplor_bin)
+        @type  bin: str
+        @param node: host for calculation (None->local) (default: None)
+        @type  node: str
+        @param nice: nice level (default: 0)
+        @type  nice: int
+        @param log: Biskit.LogFile, program log (None->STOUT) (default: None)
+        @type  log: str OR None
+        @param debug: keep all temporary files (default: 0)
+        @type  debug: 0|1
+        @param verbose: print xplor command to log         [log != STDOUT]
+        @type  verbose: 0|1
+        @param params: additional key=value pairs for inp file
+        @type  params: key=value
         """
-
         self.__dict__.update( params )
 
         self.bin = t.absfile( bin ) or settings.xplor_bin
@@ -88,6 +103,12 @@ class Xplorer:
 
 
     def version( self ):
+        """
+        Version of class.
+        
+        @return: version
+        @rtype: str
+        """       
         return 'Xplorer $Revision$'
 
 
@@ -95,8 +116,12 @@ class Xplorer:
         """
         Run Xplor with given inp file and wait until it is finished.
         Called by run().
-        finp - str, name of existing input file (w/o place holders)
-        -> float, run time in s
+        
+        @param finp: name of existing input file (w/o place holders)
+        @type  finp: str
+        
+        @return: run time in s
+        @rtype: float
         """
         start_time = time()
 
@@ -104,7 +129,7 @@ class Xplorer:
 
         lead_cmd = settings.ssh_bin
         str_ssh = "%s %s" % ( settings.ssh_bin, self.node )
-        
+
         cmd = "%s %s %s < %s > %s"\
               %(str_ssh, str_nice, self.bin, finp, self.xout)
 
@@ -120,9 +145,16 @@ class Xplorer:
 
     def run( self, inp_mirror=None ):
         """
-        calls (in that order): prepare(), runXplor(), parseLog(),
-        finish()/failed(), cleanup()
-        inp_mirror - str, file name for formatted copy of inp file [None]
+        Run the callculation. This calls (in that order):
+          - L{ prepare() },
+          - L{ runXplor() },
+          - L{ parseLog() },
+          - L{ finish() }/ L{ failed() },
+          - L{ cleanup() }
+          
+        @param inp_mirror: file name for formatted copy of inp file
+                           (default: None)
+        @type  inp_mirror: str
         """
 
         self.prepare()
@@ -152,65 +184,93 @@ class Xplorer:
                 self.finish()
         finally:
             self.cleanup()
-        
+
 
     def cleanup( self ):
-        """Remove temporary files, override it but call it in the child"""
+        """
+        Remove temporary files, override it but call it in the child
+        """
         if not self.keepLog and not self.debug:
             t.tryRemove( self.xout )
-            
+
         if not self.debug:
             t.tryRemove( self.finp )
 
 
     def parseLog( self ):
-        """Parse xplor log into self.logLines"""
+        """
+        Parse xplor log into self.logLines
+        """
         self.logLines = open( self.xout ).readlines()
 
 
     def isFailed( self ):
-        """-> 1, if xplor died"""
+        """
+        Calculation completion check.
+        
+        @return: if xplor died
+        @rtype: 1
+        """
         return self.logLines == None or \
                self.logLines[-1].find("X-PLOR: exit time") == -1
 
+
     def prepare( self ):
-        """called before running xplor, override!"""
+        """
+        called before running xplor, override!
+        """
         pass
+
 
     def finish(self ):
-        """called after normal termination, override!"""
+        """
+        called after normal termination, override!
+        """
         pass
 
+
     def failed( self ):
-        """called after aborted calculation, override!"""
+        """
+        called after aborted calculation, override!
+
+        @raise RunError: if Xplor terminated with an error
+        """
         s = ''
         try:
             s += ''.join( self.logLines[-7:] )
         except:
             pass
-                
+
         raise RunError, 'Xplor terminated with an error:\n' + s
+
 
     def generateInp(self, inp, fout):
         """
         Replace formatstr place holders in inp by fields of this class.
-        inp - str, content of the input file with place holders
-        -> str, complete inp file
-        !! raise TemplateError
+        
+        @param inp: content of the input file with place holders
+        @type  inp: str
+        @param fout: output file mane (xplor input file)
+        @type  fout: str
+        
+        @return: complete inp file
+        @rtype: str
+        
+        @raise TemplateError: if unknown option/place holder in template file
+        @raise TemplateError: if error while creating template file
         """
         try:
-
             s = inp % self.__dict__
             f = open( fout, 'w')
             f.write(s)
             f.close()
-            
+
         except KeyError, why:
             s =  "Unknown option/place holder in template file."
             s += "\n  template file: " + self.inp
             s += "\n  Template asked for a option called " + str( why[0] )
             raise TemplateError, s
-        
+
         except Exception, why:
             s =  "Error while creating template file."
             s += "\n  template file: " + self.inp
@@ -222,8 +282,11 @@ class Xplorer:
     def saveXLog( self, fname ):
         """
         Save the content of the XPlor log file to a new file.
-        fname - str, target file name
-        !! XPlorerError, if logLines is empty (Xplor hasn't been run)
+        
+        @param fname: target file name
+        @type  fname: str
+        
+        @raise XPlorerError: if logLines is empty (Xplor hasn't been run)
         """
         if not self.logLines:
             raise XPlorerError('Xplor log file is (yet) empty.')
@@ -232,7 +295,7 @@ class Xplorer:
         f.writelines( self.logLines )
         f.close()
 
-        
+
 
 ### TEST #####
 

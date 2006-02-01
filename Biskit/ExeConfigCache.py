@@ -16,12 +16,13 @@
 ## license.txt along with this program; if not, write to the Free
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
-##
 
 ## last $Author$
 ## last $Date$
 ## $Revision$
-"""Singleton Cache of ExeConfig instances"""
+"""
+Singleton Cache of ExeConfig instances
+"""
 
 import threading
 from Biskit import ExeConfig
@@ -33,7 +34,7 @@ class ExeConfigCache:
     only static methods -- it is not necessary to create an instance of it.
 
     Usage:
-    my_config = ExeConfigCache.get( 'my_program' )
+     >>> my_config = ExeConfigCache.get( 'my_program' )
 
     Should be thread-save, i.e. multiple threads can simultaniously access
     the cache (not tested).
@@ -47,11 +48,18 @@ class ExeConfigCache:
     def get( name, reload=0, **kw ):
         """
         Get the ExeConfig instance for the given program.
-        name   - str, program name
-        reload - 0|1, force new instance (re-read configuration file) [0]
-        **kw   - options for ExeConfig(); no effect for cached entries unless
-                 reload=1
-        -> ExeConfig
+        
+        @param name: program name
+        @type  name: str
+        @param reload: force new instance (re-read configuration file)
+                       (default: 0)
+        @type  reload: 0|1
+        @param kw: options for L{ Biskit.ExeConfig() }; no effect for
+                   cached entries unless reload=1
+        @type  kw: key=value
+        
+        @return: ExeConfig object
+        @rtype: ExeConfig
         """
 
         ExeConfigCache.LOCK.acquire()
@@ -83,9 +91,12 @@ class ExeConfigCache:
     def len():
         """
         Number of entries in the cache.
-        -> int
+        
+        @return: length of cache
+        @rtype: int
         """
         return len( ExeConfigCache.CACHE )
+
 
 ## Testing
 if __name__ == '__main__':

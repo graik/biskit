@@ -1,4 +1,3 @@
-from UserList import *
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
@@ -18,6 +17,14 @@ from UserList import *
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
+
+"""
+@attention: This class is only used by Prosa.py which should be replaced
+by L{Prosa2003}. It will only stay for a while until all transitions are made
+to the new version of Prosa.
+"""
+
+from UserList import *
 import string
 from copy import copy
 
@@ -82,7 +89,7 @@ class Table(UserList):
             else:
                 lStart = index[0]
                 lStop = lStart + 1
-                
+
             if type(index[1]).__name__ == 'slice':
                 rStart = index[1].start
                 rStop = index[1].stop
@@ -93,7 +100,7 @@ class Table(UserList):
                 rStop = rStart + 1
 
             columns = self.columns(rStart,rStop)
-            
+
             return table(lists = columns[lStart:lStop])
 
     def __repr__(self):
@@ -122,7 +129,7 @@ class Table(UserList):
             columns = (columns,)
 
         result = []
-            
+
         if len(columns) == 1:
             for row in self.data:
                 for column in columns:
@@ -151,7 +158,7 @@ class Table(UserList):
             map(lambda item: str(item), row), ss) + '\n'), self.data)
         f.close()
 
-        
+
 from Scientific.IO import TextFile
 def fromFile(fileName, format = None):
 
@@ -162,4 +169,4 @@ def asTable(list):
     return Table(lists = list)
 
 
-        
+

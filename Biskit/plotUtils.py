@@ -20,22 +20,40 @@
 ## last $Author$
 ## last $Date$
 ## $Revision$
-"""bar-plotting for Biggles"""
+"""
+bar-plotting for Biggles
+"""
 
 import biggles as B
+
 
 ##############################
 ## low-level tools
 
+
 def multibar_curve( values, x0=None, xwidth=0.25, xsep=0.15 ):
     """
-    -> ([float],[float]), x,y values that draw a bar for each y value
-    not used at the moment because it draws connecting line at the bottom
+    Get x,y values to draw many bars.
+    
+    @param values: values to bar-plot
+    @type  values: [float]
+    @param x0: start of first bar
+    @type  x0: float
+    @param xwidth: width of bars (default: 0.25)
+    @type  xwidth: float
+    @param xsep: space between bars (default: 0.15)
+    @type  xsep: float
+    
+    @return: x,y values that draw a bar for each y value
+    @rtype: [float],[float]
+    
+    @note: not used at the moment because it draws connecting
+           line at the bottom
     """
     x  = x0 or xsep
     vy = []
     vx = []
-    
+
     for y in values:
         vy += [ 0, y,y, 0]
         vx += [ x, x, x+xwidth, x+xwidth]
@@ -43,20 +61,48 @@ def multibar_curve( values, x0=None, xwidth=0.25, xsep=0.15 ):
 
     return vx, vy
 
+
 def bar_curve( height, x0, xwidth=0.25, y0=0. ):
-    """ -> ([ float ], [ float ]) - x,y values that draw a single bar."""
+    """
+    Get x,y values for a single bar.
+    
+    @param height: height of bar
+    @type  height: float
+    @param x0: start of first bar
+    @type  x0: float
+    @param xwidth: width of bars (default: 0.25)
+    @type  xwidth: float
+    @param y0: start of first bar
+    @type  y0: float
+    
+    @return: x,y values that draw a single bar.
+    @rtype: [ float ], [ float ]
+    """
     y = height - y0
     return [ x0, x0, x0+xwidth, x0+xwidth ], [y0,y,y,y0]
-    
+
 
 def boxed_diagonal( x0, y0, x1, y1, vy ):
     """
     Get a diagonal connecting left (x0) to right (x1) edge but which is only
     visible within a rectangular box.
-    x0,y0, x1,y1 - rectangular window of visibility
-    vy - virtual starting point (y-coordinate, may be outside of the box)
-    -> xa, ya, xb, yb - start and end point of a diagonal line originating at
-       (x0, vy) but beeing only visible within the rectangle (x0,y0,x1,y1)
+
+    @param x0: rectangular window of visibility  
+    @type  x0: float
+    @param y0: rectangular window of visibility
+    @type  y0: float
+    @param x1: rectangular window of visibility
+    @type  x1: float
+    @param y1: rectangular window of visibility
+    @type  y1: float
+    
+    @param vy: virtual starting point (y-coordinate, may be outside of the box)
+    @type  vy: float
+    
+    @return: xa, ya, xb, yb - start and end point of a diagonal
+             line originating at (x0, vy) but beeing only visible
+             within the rectangle (x0,y0,x1,y1)
+    @rtype: float, float, float, float
     """
     dx = x1 - x0
     dy = y1 - y0
@@ -83,27 +129,69 @@ def boxed_diagonal( x0, y0, x1, y1, vy ):
 ##########################
 ## Fill patterns
 
+
 def line_fill( x0, y0, x1, y1, sep=0.1, size=0.06, color='black', **kw ):
     """
-    -> [ Biggles.Curve ], horizontal lines filling the given rectangle
+    Fill the rectangle described by x0, y0, x1, y1 with horizontal lines.
+    
+    @param x0: rectangular coorinates
+    @type  x0: float
+    @param y0: rectangular coorinates
+    @type  y0: float
+    @param x1: rectangular coorinates
+    @type  x1: float
+    @param y1: rectangular coorinates
+    @type  y1: float
+    @param sep: separation between lines (default: 0.1)
+    @type  sep: float
+    @param size: line thickness (default: 0.06)
+    @type  size: float
+    @param color: color name (default: black)
+    @type  color: str
+    @param kw: additional key-value pairs
+    @type  kw: key=value
+    
+    @return: list of biggles plot objects
+    @rtype: [Biggles.Curve]
     """
     if not 'color' in kw:
         kw['color'] = color
     if not 'width' in kw:
         kw['width'] = size
-        
+
     r = []
     y = y1
     while y >= y0:
 
         r += [ B.Curve( [x0,x1], [y,y], **kw ) ]
         y -= sep
-        
+
     return r
+
 
 def bar_fill( x0, y0, x1, y1, sep=0.1, size=0.06, color='grey', **kw ):
     """
-    -> [ Biggles.FillBetween ], horizontal bars filling the given rectangle
+    Fill the rectangle described by x0, y0, x1, y1 with horizontal bars.
+    
+    @param x0: rectangular coorinates
+    @type  x0: float
+    @param y0: rectangular coorinates
+    @type  y0: float
+    @param x1: rectangular coorinates
+    @type  x1: float
+    @param y1: rectangular coorinates
+    @type  y1: float
+    @param sep: separation between lines (default: 0.1)
+    @type  sep: float
+    @param size: line thickness (default: 0.06)
+    @type  size: float
+    @param color: color name (default: grey)
+    @type  color: str
+    @param kw: additional key-value pairs
+    @type  kw: key=value
+    
+    @return: list of biggles plot objects
+    @rtype: [Biggles.FillBetween]
     """
     kw.update( {'color':color} )
     r = []
@@ -117,16 +205,34 @@ def bar_fill( x0, y0, x1, y1, sep=0.1, size=0.06, color='grey', **kw ):
         r += [ B.FillBetween( [x0,x1], [y,y], [x0,x0,x1,x1], [y,y_low,y_low,y],
                               **kw ) ]
         y -= sep
-        
+
     return r
+
 
 def diagonal_fill( x0, y0, x1, y1, sep=0.2, size=0.05, invert=0, **kw ):
     """
-    x0,y0,x1,y1 - lowerleft and upper right corner of rectangle to be filled
-    sep    - float, offset between (low edges of) diagonal lines [0.2]
-    size   - float, width of diagonal lines [0.05]
-    invert - 1|0, mirror diagonals [0]
-    -> [ Biggles.FillBetween ], set of diagonal bars filling rectangle
+    Fill the rectangle described by x0,y0, x1,y1 (lower left and
+    upper right corner) with diagonal bars.
+    
+    @param x0: rectangular coorinates
+    @type  x0: float
+    @param y0: rectangular coorinates
+    @type  y0: float
+    @param x1: rectangular coorinates
+    @type  x1: float
+    @param y1: rectangular coorinates
+    @type  y1: float
+    @param sep: offset between (low edges of) diagonal lines (default: 0.2)
+    @type  sep: float
+    @param size: width of diagonal line (default: 0.05)
+    @type  size: float
+    @param invert: mirror diagonals (default: 0)
+    @type  invert: 1|0
+    @param kw: additional key-value pairs
+    @type  kw: key=value
+    
+    @return: list of biggles plot objects
+    @rtype: [Biggles.FillBetween]
     """
     r = [] ## will hold result
 
@@ -153,7 +259,7 @@ def diagonal_fill( x0, y0, x1, y1, sep=0.2, size=0.05, invert=0, **kw ):
             xb = x0 - (xb - x1)
             xc = x1 - (xc - x0)
             xd = x0 - (xd - x1)
-        
+
         r += [ B.FillBetween( [xc,xa,xb,xd],[yc,ya,yb,yd], [xc,xd],[yc,yd],
                               **kw)]
         vy += sep
@@ -163,18 +269,35 @@ def diagonal_fill( x0, y0, x1, y1, sep=0.2, size=0.05, invert=0, **kw ):
 
 def diagonal_line_fill( x0, y0, x1, y1, sep=0.2, size=0.05, invert=0, **kw ):
     """
-    x0,y0,x1,y1 - lowerleft and upper right corner of rectangle to be filled
-    sep    - float, offset between (low edges of) diagonal lines [0.2]
-    size   - float, width of diagonal lines [0.05]
-    invert - 1|0, mirror diagonals [0]
-    -> [ Biggles.Curve ], set of diagonal lines filling rectangle
+    Fill the rectangle described by x0,y0, x1,y1 (lower left and
+    upper right corner) with diagonal lines.
+    
+    @param x0: rectangular coorinates
+    @type  x0: float
+    @param y0: rectangular coorinates
+    @type  y0: float
+    @param x1: rectangular coorinates
+    @type  x1: float
+    @param y1: rectangular coorinates
+    @type  y1: float
+    @param sep: offset between (low edges of) diagonal lines (default: 0.2)
+    @type  sep: float
+    @param size: width of diagonal line (default: 0.05)
+    @type  size: float
+    @param invert: mirror diagonals (default: 0)
+    @type  invert: 1|0
+    @param kw: additional key-value pairs
+    @type  kw: key=value
+    
+    @return: list of biggles plot objects
+    @rtype: [Biggles.Curve]
     """
     r = [] ## will hold result
 
     vy = y0 - (x1 - x0) - sep ## virtual y coordinate
 
     kw[ 'width' ] = kw.get('width',None) or size
-    
+
     ## shift mirrored lines horizontally to get better criss-cross effect
     if invert: vy = vy - sep/2
 
@@ -187,14 +310,31 @@ def diagonal_line_fill( x0, y0, x1, y1, sep=0.2, size=0.05, invert=0, **kw ):
         if invert:
             xa = x1 - (xa - x0)
             xb = x0 - (xb - x1)
-        
+
         r += [ B.Curve( [xa,xb],[ya,yb], **kw) ]
         vy += sep
 
     return r
 
 def solid_fill( x0, y0, x1, y1, **kw ):
-    """ -> [ Biggles.FillBetween ], list with single filled area """
+    """
+    Fill the rectangle described by x0,y0, x1,y1 (lower left and
+    upper right corner).
+    
+    @param x0: rectangular coorinates
+    @type  x0: float
+    @param y0: rectangular coorinates
+    @type  y0: float
+    @param x1: rectangular coorinates
+    @type  x1: float
+    @param y1: rectangular coorinates
+    @type  y1: float
+    @param kw: additional key-value pairs
+    @type  kw: key=value
+    
+    @return: list of biggles plot objects
+    @rtype: [Biggles.FillBetween]
+    """
     return [ B.FillBetween( [x0,x0,x1,x1], [y1,y0,y0,y1], [x0,x1], [y1,y1],
                           filltype=1, **kw) ]
 
@@ -202,22 +342,69 @@ def solid_fill( x0, y0, x1, y1, **kw ):
 #####################
 ## Bar-plotting
 
+
 def box_curve( x0, y0, x1, y1, **kw ):
-    """-> biggles.Curve, describing rectangle"""
+    """
+    A rectangle described by x0,y0, x1,y1 (lower left and
+    upper right corner).
+    
+    @param x0: rectangular coorinates
+    @type  x0: float
+    @param y0: rectangular coorinates
+    @type  y0: float
+    @param x1: rectangular coorinates
+    @type  x1: float
+    @param y1: rectangular coorinates
+    @type  y1: float
+    @param kw: additional key-value pairs
+    @type  kw: key=value
+    
+    @return: biggles plot object
+    @rtype: biggles.Curv
+    """
     return B.Curve( [x0,x1,x1,x0,x0],[y0,y0,y1,y1,y0], **kw )
 
+
 def box_fill( x0, y0, x1, y1, **kw ):
-    """-> biggles.FillBetween"""
-    return B.FillBetween( [x0,x1,x1],[y0,y0,y1],[x1,x0,x0],[y1,y1,y0], **kw)
+    """
+    Fill for a rectangle described by x0,y0, x1,y1 (lower left and
+    upper right corner).
     
+    @param x0: rectangular coorinates
+    @type  x0: float
+    @param y0: rectangular coorinates
+    @type  y0: float
+    @param x1: rectangular coorinates
+    @type  x1: float
+    @param y1: rectangular coorinates
+    @type  y1: float
+    @param kw: additional key-value pairs
+    @type  kw: key=value
+    
+    @return: biggles plot object
+    @rtype: biggles.FillBetween
+    """
+    return B.FillBetween( [x0,x1,x1],[y0,y0,y1],[x1,x0,x0],[y1,y1,y0], **kw)
+
+
 def add_box( p, x0, y0, x1, y1, fillfunc=solid_fill, **kw ):
     """
     Add single filled box to plot.
-    p        - biggles.FramedPlot
-    x0, y0   - float, lower left corner
-    x1, y1   - float, upper right corner
-    fillfunc - function
-    key=value arguments for fillfunc and (starting with 'l') for Curve
+
+    @param p: plot object which to add rectangle to
+    @type  p: biggles.FramedPlot
+    @param x0: rectangular coorinates, lower left corner
+    @type  x0: float
+    @param y0: rectangular coorinates, lower left corner
+    @type  y0: float
+    @param x1: rectangular coorinates, upper right corner
+    @type  x1: float
+    @param y1: rectangular coorinates, upper right corner
+    @type  y1: float
+    @param fillfunc: function name (default: solid_fill)
+    @type  fillfunc  str
+    @param kw: arguments for fillfunc and (starting with 'l') for Curve
+    @type  kw: key=value
     """
 
     for f in fillfunc( x0,y0, x1,y1, **kw ):
@@ -231,18 +418,27 @@ def add_box( p, x0, y0, x1, y1, fillfunc=solid_fill, **kw ):
 
     p.add( box_curve( x0,y0, x1,y1, **attr ) )
 
-    
+
 def fill_bars( p, values, x0=None, xwidth=0.25, xoffset=1, fillfunc=solid_fill,
                margin=0.01, **kw ):
     """
-    Add filling to bars described y values, left-most x, width and offset. 
-    p        - Biggles.FramedPlot, fill objects are added directly to the plot
-    values   - [ float ], bar heights
-    x0       - float, left edge of first bar [xwidth]
-    xwidth   - float, width of each bar [0.25]
-    offset   - float, distance between bars (measured between left edges) [1]
-    fillfunc - function, solid_fill | line_fill | diagonal_fill | bar_fill
-    **kw     - key=value, attributes for fill function, e.g. color, size, sep
+    Add filling to bars described y values, left-most x, width and offset.
+    
+    @param p: fill objects are added directly to the plot
+    @type  p: Biggles.FramedPlot
+    @param values: bar heights
+    @type  values: [float]
+    @param x0: left edge of first bar (default: None, xwidth)
+    @type  x0: float
+    @param xwidth: width of each bar (default: 0.25)
+    @type  xwidth: float
+    @param xoffset: distance between bars (measured between left edges)
+                   (default: 1)
+    @type  xoffset: float
+    @param fillfunc: function solid_fill | line_fill | diagonal_fill | bar_fill
+    @type  fillfunc: str
+    @param kw: attributes for fill function, e.g. color, size, sep
+    @type  kw: key=value
     """
     vx, vy = multibar_curve( values, x0=x0 or xwidth, xwidth=xwidth,
                              xsep=xoffset-xwidth )
@@ -258,15 +454,25 @@ def fill_bars( p, values, x0=None, xwidth=0.25, xoffset=1, fillfunc=solid_fill,
 def add_bars( p, values, x0=None, xwidth=0.25, xoffset=1, fillfunc=solid_fill,
               **kw ):
     """
-    Add bars to plot, described by y values, left-most x, width and offset. 
-    p        - Biggles.FramedPlot, fill objects are added directly to the plot
-    values   - [ float ], bar heights
-    x0       - float, left edge of first bar [xwidth]
-    xwidth   - float, width of each bar      [0.25]
-    offset   - float, distance between bars (measured between left edges) [1]
-    fillfunc - func, solid_fill | line_fill | diagonal_fill | bar_fill | None
-    **kw     - key=value, attributes for fill function (e.g. color, size, sep)
+    Add bars to plot, described by y values, left-most x, width and offset.
+    
+    @param p: fill objects are added directly to the plot
+    @type  p: Biggles.FramedPlot
+    @param values: bar heights
+    @type  values: [float]
+    @param x0: left edge of first bar (default: None, xwidth)
+    @type  x0: float
+    @param xwidth: width of each bar  (default 0.25)
+    @type  xwidth: float
+    @param xoffset: distance between bars (measured between left edges)
+                    (default 1)
+    @type  xoffset: float
+    @param fillfunc: function solid_fill | line_fill | diagonal_fill
+                              | bar_fill | None
+    @type  fillfunc: str
+    @param kw: attributes for fill function (e.g. color, size, sep)
                and Curve (the latter ones have to start with "l", e.g. lcolor)
+    @type  kw: key=value
     """
     if x0 is None:
         x0 = xwidth
@@ -294,7 +500,25 @@ def add_bars( p, values, x0=None, xwidth=0.25, xoffset=1, fillfunc=solid_fill,
 
 def prepare_plot( xlabel='', ylabel='', yrange=None, xrange=None,
                   width=500, height=350 ):
+    """
+    Initiate a biggles.FramedPlot object.
 
+    @param xlabel: label for x-axis 
+    @type  xlabel: str
+    @param ylabel: label for y-axis 
+    @type  ylabel: str
+    @param yrange: range of y-axis
+    @type  yrange: (float,float)
+    @param xrange: range of x-axis
+    @type  xrange: (float,float)
+    @param width: hard plot width (in pixels or cm)
+    @type  width: int
+    @param height: hard plot height
+    @type  height: int
+
+    @return: biggles plot object
+    @rtype: biggles.FillBetween    
+    """
     B.configure( 'screen', 'height', height )
     B.configure( 'screen', 'width', width )
 
@@ -314,7 +538,7 @@ def plot_test():
 
     p = prepare_plot(xlabel='', ylabel='flex $\langle{x}\rangle$',
                      xrange=(0,5), yrange=(0,4) )
-    
+
     add_bars( p, [ 1, 2.5, 1.25, 0.3 ], fillfunc=diagonal_fill,
               color='grey', size=0.1, invert=1,
               lcolor='black', lwidth=1  )
@@ -330,8 +554,10 @@ def plot_test():
 
 if __name__ == '__main__':
 
+    import Biskit.tools as T 
     p = plot_test()
-    p.write_eps(T.absfile('~/test.eps'), width='10cm', height='8.7cm')
+    
+##     p.write_eps(T.absfile('~/test.eps'), width='10cm', height='8.7cm')
 
     p.show()
-    
+

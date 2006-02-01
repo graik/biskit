@@ -18,12 +18,16 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## required by pdbs2struct.py
-##
 ## $Revision$
 ## last $Date$
 ## last $Author$
+##
+## required by pdbs2struct.py
 
+"""
+Convert a PDB file to a pickled PDBModel object.
+"""
+    
 from PDBModel import PDBModel
 import tools as T
 
@@ -37,12 +41,24 @@ class StructureSlave(JobSlave):
     """
 
     def initialize(self, params):
-
+        """
+        Copy the parameters that Master is passing in as dict into
+        fields of this class.
+        
+        @param params: defined in Master
+        @type  params: dict
+        """
         self.params = params
 
 
     def renameAmberRes( self, model ):
-
+        """
+        Rename special residues (from Amber) back into standard
+        names (i.e CYX S{->} CYS).
+        
+        @param model: model
+        @type  model: PDBModel
+        """
         for a in model.getAtoms():
             if a['residue_name'] == 'CYX':
                 a['residue_name'] = 'CYS'
@@ -51,8 +67,14 @@ class StructureSlave(JobSlave):
 
 
     def renameToAmberAtoms( self, model ):
-        """ptraj puts last letter/number of 4-letter atom names first. Undo.
-        could be avoided if ptraj would be told: trajout |file| pdb nowrap
+        """
+        ptraj puts last letter/number of 4-letter atom names first. Undo.
+        
+        @param model: model
+        @type  model: PDBModel
+        
+        @note: could be avoided if ptraj would be told:
+               trajout |file| pdb nowrap
         """
         numbers = map( str, range(10) )
 
@@ -62,16 +84,24 @@ class StructureSlave(JobSlave):
 
 
     def go(self, dict):
+        """
+        Calculate rmsd values for trajectory and plot them.
 
+        @param dict: dictionary with path to pdb files as keys
+        @type  dict: dict
+
+        @return: dictionary mapping input:output names
+        @rtype: dict        
+        """
         d = {}
 
         print "working on :",
         for pdbIn, out in dict.items():
 
             print T.stripFilename( pdbIn )
-            
+
             ## set file name for pickled Structure object
-            dir = os.path.dirname( pdbIn)
+            dir = os.path.dirname( pdbIn )
             if self.params['out'] <> None:
                 dir = self.params['out']
 
@@ -104,13 +134,13 @@ class StructureSlave(JobSlave):
 
         print "Done."
         return d
-    
+
 if __name__ == '__main__':
 
     import os, sys
 
     if len(sys.argv) == 2:
-        
+
         niceness = int(sys.argv[1])
         os.nice(niceness)
 

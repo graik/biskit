@@ -21,6 +21,9 @@
 ## last $Date$
 ## last $Author$
 
+"""
+Path handling.
+"""
 
 import Biskit.tools as t
 from Biskit import EHandler
@@ -45,19 +48,19 @@ class LocalPath( object ):
     substitution of single letters or '/a' etc.
 
     LocalPath tries behaving like the simple absolute path string when it
-    comes to slicing etc:
-    l = LocalPath( '{/home/raik|$USER}/data/x.txt' )
-    l[:] == '/home/raik/data/x.txt' == l.local()
-    l[-4:] == '.txt'
-    str( l ) == l.local()
+    comes to slicing etc::
+      l = LocalPath( '{/home/raik|$USER}/data/x.txt' )
+      l[:] == '/home/raik/data/x.txt' == l.local()
+      l[-4:] == '.txt'
+      str( l ) == l.local()
 
-    l.formatted() == '{/home/raik|$USER}/data/x.txt'
+      l.formatted() == '{/home/raik|$USER}/data/x.txt'
 
-    ToDo: - simple-minded implementation, could be made more intelligent
-          - creation from formatted string not yet implemented
-    e.g.   - input:  allow multiple or overlapping substitutions
-           - input:  restrict allowed environment variables
-           - output: only substitute what is necessary until path exists
+    @todo: - simple-minded implementation, could be made more intelligent
+    @todo: - creation from formatted string not yet implemented, e.g.::
+             input:  allow multiple or overlapping substitutions
+             input:  restrict allowed environment variables
+             output: only substitute what is necessary until path exists
     """
 
     def __init__( self, path=None, checkEnv=1, minLen=3, **vars ):
@@ -68,11 +71,15 @@ class LocalPath( object ):
         A path will be analyzed to substitute as big chunks as possible
         by environment variables. ~ and ../../ will be expanded both in
         the given path and in the environment variables.
-        path      - [ (str, str) ] OR str
-        checkEnv  - 1||0, look for substitution values among environment
-                    variables (default 1)
-        vars      - alternative envVar=value pairs, to be used instead of
-                    environment variables
+        
+        @param path: path(s)
+        @type  path: [ (str, str) ] OR str
+        @param checkEnv: look for substitution values among environment
+                         variables (default 1)
+        @type  checkEnv: 1|0
+        @param vars: alternative envVar=value pairs, to be used instead of
+                      environment variables
+        @type  vars: envVar=value
         """
 
         self.fragments = [] ## list of tuples (absolut,variable_name)
@@ -83,7 +90,9 @@ class LocalPath( object ):
 
 
     def __setstate__(self, state ):
-        """called for unpickling the object."""
+        """
+        called for unpickling the object.
+        """
         self.__dict__ = state
         ## backwards compability
         self.__hash = getattr( self, '_LocalPath__hash', None )
@@ -93,15 +102,20 @@ class LocalPath( object ):
         """
         Return a valid, absolute path. Either the existing original or with
         all substitutions for which environment variables exist.
-        existing   - 0||1, don't return a non-existing path
         This function is time consuming (absfile - os.realpath is the culprit).
-        -> str, absolute path in current environment
-        !! LocalPathError, if existing==1 and no existing path can be
-           constructed via environment variables
+                         
+        @param existing: don't return a non-existing path                
+        @type  existing: 0|1
+        
+        @return: valid absolute path in current environment
+        @rtype: str
+        
+        @raise LocalPathError: if existing==1 and no existing path can be
+                               constructed via environment variables
         """
         result = string.join( [ f[0] for f in self.fragments ], '' )
         result = t.absfile( result )
-        
+
         if os.path.exists( result ):
             return result
 
@@ -125,7 +139,9 @@ class LocalPath( object ):
         """
         Get a string representation that describes the original path and all
         possible substitutions by environment variables.
-        -> str, e.g. '{/home/raik|$USER}/data/x.txt'
+        
+        @return: formated path e.g. C{ '{/home/raik|$USER}/data/x.txt' }
+        @rtype: str
         """
         r = ""
         for absolut,var in self.fragments:
@@ -140,7 +156,9 @@ class LocalPath( object ):
         """
         Get the original path (also non-absolute) that is used if there are
         no environment variables for any of the substitutions.
-        -> str
+        
+        @return: original path
+        @rtype: str
         """
         result = [ f[0] for f in self.fragments ]
         return string.join( result, '' )
@@ -149,9 +167,13 @@ class LocalPath( object ):
     def set( self, v, checkEnv=1, minLen=3, **vars ):
         """
         Assign a new file name
-        v        - [ (str,str) ] OR str, fragment tuples or path
-        checkEnv - 0||1, look for possible substitutions in environment
-        minLen   - int, mininal length of environment variables to consider 
+        
+        @param v: fragment tuples or path
+        @type  v: [ (str,str) ] OR str
+        @param checkEnv: look for possible substitutions in environment
+        @type  checkEnv: 0|1
+        @param minLen: mininal length of environment variables to consider
+        @type  minLen: int
         """
         if type( v ) == list:
             self.set_fragments( v )
@@ -174,7 +196,9 @@ class LocalPath( object ):
         Set new path from list of path fragments and their possible
         environment variable substitutions. Fragments that can not be
         substituted are given as (str, None).
-        fragments - [ (str, str), (str, None), .. ], list of fragment tuples
+        
+        @param fragments: list of fragment tuples
+        @type  fragments: [ (str, str), (str, None), .. ]
         """
         self.fragments = fragments
         self.__hash = None
@@ -183,7 +207,11 @@ class LocalPath( object ):
     def set_string( self, s ):
         """
         Set a new path and its substitutable parts from a formatted string.
-        s - str, formatted like {/home/raik|$USER}/data/test.txt
+        
+        @param s: formatted like {/home/raik|$USER}/data/test.txt
+        @type  s: str
+
+        @raise PathError: formatted input is not yet implemented
         """
         raise PathError, 'formatted input is not yet implemented'
 
@@ -192,8 +220,11 @@ class LocalPath( object ):
         """
         Set a new path and try to identify environment variables that could
         substitute parts of it. If vars is given, env. variables are ignored.
-        fname - str, relative or absolute file name
-        vars  - alternative param=value pairs with suggested substitutors
+        
+        @param fname: relative or absolute file name
+        @type  fname: str
+        @param vars: alternative param=value pairs with suggested substitutors
+        @type  vars: param=value
         """
         env_items = self.__paths_in_env( minLen=minLen, vars=vars )
 
@@ -209,7 +240,10 @@ class LocalPath( object ):
 
     def exists( self ):
         """
-        -> 1||0, 1 if if current path exists
+        Check if path exists
+        
+        @return: 1 if if current path exists
+        @rtype: 1|0
         """
         return os.path.exists( self.local() )
 
@@ -217,19 +251,25 @@ class LocalPath( object ):
     def load( self ):
         """
         Try to unpickle an object from the currently valid path.
-        -> anything
-        !! IOError, if file can not be found
+        
+        @return: unpickled object 
+        @rtype: any
+        
+        @raise IOError: if file can not be found
         """
         try:
             return t.Load( self.local( existing=1 ) )
         except LocalPathError, why:
             raise IOError, "Cannot find file %s (constructed from %s)" %\
                   self.local(), str( self )
-           
+
+
     def dump( self, o ):
         """
         Try to pickle an object to the currently valid path.
-        -> str, the absolute path to which o was pickled
+        
+        @return: the absolute path to which o was pickled
+        @rtype: str
         """
         try:
             f = self.local()
@@ -240,14 +280,21 @@ class LocalPath( object ):
                          self.formatted(), self.local() )
             raise
 
+
     def __substitute( self, fragments, name, value ):
         """
         Look in all not yet substituted fragments for parts that can be
         substituted by value and, if successful, create a new fragment
-        fragments  - [ (str, str) ]
-        name       - str, substitution variable name
-        value      - str, susbtitution value in current environment
-        -> [ (str, str) ]
+        
+        @param fragments: fragment tuples
+        @type  fragments: [ (str, str) ]
+        @param name: substitution variable name
+        @type  name: str
+        @param value: susbtitution value in current environment
+        @type  value: str
+        
+        @return: fragment tuples
+        @rtype: [ (str, str) ]
         """
         result = []
 
@@ -282,13 +329,17 @@ class LocalPath( object ):
                                  '\nvalue:' + str( value ) )
 
         return result
-    
-    
+
+
     def __is_path( self, o, minLen=3 ):
         """
         Check whether an object is a path string (existing or not).
-        minLen - int, minimal length of string o to be counted as path
-        -> 1||0
+        
+        @param minLen: minimal length of string o to be counted as path
+        @type  minLen: int
+        
+        @return: 1|0
+        @rtype: int
         """
         r = ( type( o ) == str and o.find('/') != -1 and len(o) >= minLen )
         if r:
@@ -303,8 +354,13 @@ class LocalPath( object ):
     def __paths_in_env( self, minLen=3, vars={} ):
         """
         Get all environment variables with at least one '/' sorted by length.
-        vars - alternative param=value pairs to consider instead of environment
-        -> [ (str,str) ], [ (variable name, value) ] sorted by length of value
+        
+        @param vars: alternative param=value pairs to consider
+                     instead of environment
+        @type  vars: param=value
+        
+        @return: [ (variable name, value) ] sorted by length of value
+        @rtype: [ (str,str) ]
         """
         vars = vars or os.environ
 
@@ -313,7 +369,7 @@ class LocalPath( object ):
 
         pairs = [ (len(v[1]), v) for v in items
                   if self.__is_path(v[1]) and v[0]!= 'PWD' and v[0]!= 'OLDPWD']
-        
+
         pairs.sort()
         pairs.reverse()
 
@@ -322,54 +378,70 @@ class LocalPath( object ):
 
     def __str__( self ):
         """
-        -> str, Same as local(). string representation for print and str()
+        @return: Same as local(). string representation for print and str()
+        @rtype: str
         """
         return self.local()
-        
+
+
     def __repr__( self ):
         """
-        -> str, formatted output (Python representation)
+        @return: formatted output (Python representation)
+        @rtype: str
         """
         return "LocalPath[ %s ]" % self.formatted()
-    
+
+
     def __len__( self ):
         """
         Time costly when repeated many times.
-        -> int, length of file name in current environment
+        
+        @return: length of file name in current environment
+        @rtype: int
         """
         return len( self.local() )
 
+
     def __getslice__( self, a, b ):
         return self.local()[a:b]
+
 
     def __getitem__( self, i ):
         return self.local()[i]
 
 
     def __eq__( self, other ):
-        """supports this == other -> 0|1"""
+        """
+        supports this == other -> 0|1
+        """
         if not isinstance( other, LocalPath ):
             return 0
         return self.fragments == other.fragments
 
+
     def __ne__( self, other ):
-        """supports this != other -> 0|1"""
+        """
+        supports this != other -> 0|1
+        """
         if not isinstance( other, LocalPath ):
             return 1
         return self.fragments != other.fragments
+
 
     def __hash__( self ):
         """
         if __eq__ or __cmp__ are defined hash has to be defined too, otherwise
         the objects cannot be used as keys in dictionaries (needed for Complex-
         ModelRegistry).
-        -> int
+        
+        @return: int
+        @rtype: 
         """
         if self.__hash == None:
             self.__hash = self.formatted().__hash__()
 
         return self.__hash
-        
+
 
 if __name__ == '__main__':
 

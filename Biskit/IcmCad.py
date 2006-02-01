@@ -21,7 +21,10 @@
 ## last $Author$
 ## last $Date$
 ## $Revision$
-"""Calculate Contact Area Difference (CAD) with ICMBrowser."""
+
+"""
+Calculate Contact Area Difference (CAD) with ICMBrowser.
+"""
 
 import tempfile, re
 
@@ -34,14 +37,15 @@ class IcmCadError( Exception ):
 
 class IcmCad( Executor ):
     """
+    CAD calculation
+    ===============
     Calculate ContactAreaDifference between a reference structure and one or
-    many other structures.
-    Described in Abagyan and Totrov, 1997.
+    many other structures. Described in Abagyan and Totrov, 1997.
 
-    Example usage:
-    
-    x = IcmCad( ref_model, [ m1, m2 ], verbose=1 )
-    result = x.run()
+    Example usage
+    -------------
+       >>> x = IcmCad( ref_model, [ m1, m2 ], verbose=1 )
+       >>> result = x.run()
 
     IcmCad writes temporary pdb files, calls the icmbrowser program,
     and parses the result from the STDOUT pipe. The result values are then in
@@ -50,13 +54,13 @@ class IcmCad( Executor ):
     to 100 (completely different). This scaling is not recommended for
     docking solutions.
 
-    ToDo: Not speed-optimized!
-    a) it should be possible to pipe the PDB-files directly into icmbrowser
-       instead of writing temporary files to disc
-    b) Abagyan and Totrov mention a c-library available -- the best solution
-       would hence be to wrap this c-library in python...
+    @todo: Not speed-optimized!
+             - it should be possible to pipe the PDB-files directly into
+               icmbrowser instead of writing temporary files to disc
+             - Abagyan and Totrov mention a c-library available -- the best
+               solution would hence be to wrap this c-library in python...
 
-    Command configuration in: biskit/external/defaults/exe_icmbrowser.dat
+    @note: Command configuration in: biskit/external/defaults/exe_icmbrowser.da
     """
 
     inp_head = \
@@ -76,15 +80,20 @@ copy a_ \"mol2\" delete
 
     def __init__( self, ref_model, models, **kw ):
         """
-        ref_model - PDBModel, reference
-        models    - [ PDBModel ], structures to be compared with reference
-
-        ... and additional key=value parameters for Executor:
-        debug    - 0|1, keep all temporary files                       [0]
-        verbose  - 0|1, print progress messages to log     [log != STDOUT]
-        node     - str, host for calculation (None->local) NOT TESTED [None]
-        nice     - int, nice level                                     [0]
-        log      - Biskit.LogFile, program log (None->STOUT)        [None]
+        @param ref_model: reference
+        @type  ref_model: PDBModel
+        @param models: structures to be compared with reference
+        @type  models: [PDBModel]
+        
+        @param kw: additional key=value parameters for Executor:
+        @type  kw: key=value pairs
+        ::
+          debug    - 0|1, keep all temporary files (default: 0)
+          verbose  - 0|1, print progress messages to log (log != STDOUT)
+          node     - str, host for calculation (None->local) NOT TESTED
+                          (default: None)
+          nice     - int, nice level (default: 0)
+          log      - Biskit.LogFile, program log (None->STOUT) (default: None)
         """
         Executor.__init__( self, 'icmbrowser', template=self.inp_head, **kw )
 
@@ -99,21 +108,37 @@ copy a_ \"mol2\" delete
 
 
     def __prepareModel( self, model, f_out ):
+        """
+        Prepare a model that ICM likes.
+         - consecutive numbering of residues
+         - no chain identifier
+        
+        @param model: model 
+        @type  model: PDBModel
+        @param f_out: name of pdb file to write
+        @type  f_out: str        
+        """
         model.renumberResidues()
         for a in model.getAtoms():
             a['chain_id']=''
         model.writePdb( f_out )
 
+
     def prepare( self ):
-        """Overrides Executor method."""
+        """
+        Overrides Executor method.
+        """
         self.__prepareModel( self.ref_model, self.f_ref )
 
         for i,m in enumerate( self.models ):
-            
+
             self.__prepareModel( m, self.f_pdb % i )
 
 
     def cleanup( self ):
+        """
+        Tidy up the mess you created.
+        """        
         Executor.cleanup( self )
 
         if not self.debug:
@@ -126,7 +151,14 @@ copy a_ \"mol2\" delete
     def parse_icm( self, output ):
         """
         Extract CAD value from icm output.
-        lines - [str], STDOUT result of ICM run
+        
+        @param output: STDOUT result of ICM run
+        @type  output: [str]
+
+        @return: ICM result
+        @rtype: [str]
+
+        @raise IcmCadError: if no result
         """
         lines = output.split('\n')
         if  len(lines) == 0:
@@ -140,24 +172,31 @@ copy a_ \"mol2\" delete
 
         return r
 
+
     def isFailed( self ):
-        """Overrides Executor method"""
+        """
+        Overrides Executor method
+        """
         return not self.error is None 
 
+
     def finish( self ):
-        """Overrides Executor method"""
+        """
+        Overrides Executor method
+        """
         Executor.finish( self )
         self.result = self.parse_icm( self.output )
 
-    
+
     def generateInp(self):
         """
         Has to be overridden to support head / segment / tail structure.
         Replace formatstr place holders in inp by fields of this class.
-        inp  - ignored
-        fout - ignored
-        -> ICM input script 
-        !! raise TemplateError
+        
+        @return: ICM input script
+        @rtype: [str]
+        
+        @raise  TemplateError: if template not found
         """
         try:
             s = self.inp_head % self.__dict__
@@ -168,12 +207,12 @@ copy a_ \"mol2\" delete
             s += self.inp_tail
 
             return s
-        
+
         except KeyError, why:
             s =  "Unknown option/place holder in template file."
             s += "\n  Template asked for a option called " + str( why[0] )
             raise TemplateError, s
-        
+
         except Exception, why:
             s =  "Error while creating template file."
             s += "\n  why: " + str( why )
@@ -209,4 +248,4 @@ if __name__ == '__main__':
     r = x.run()
 
     print "Result: ", r
-    
+
