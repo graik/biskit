@@ -299,7 +299,7 @@ pdb2xplor:  Create xplor generate.inp from PDB. Chains are separated,
             chain ends in the input PDB (using the same segid as the rest
             of the chain).
 
-            NOTE!! The pdb file name has to be 4 characters long (in
+            NOTE!! The pdb file name has to be 5 characters long (in
                    addition to the .pdb extension) and start with a
                    number.
 Syntax:
@@ -408,10 +408,24 @@ def main(options):
                    "-h, -s, -e are preferred.")
 
     ## check that input pdb file name (stripped of its path and extension)
-    ## is at least 4 characters long and starts with a number
+    ## is at least 5 characters long and starts with a number
     ## Prompt user for renaming of the file.
     name = stripFilename(fname)
 
+    ## the filename is OK, but it has the same name as used for the
+    ## XPLOR output therefore we append _original to the input file
+    if toInt( name[0] )== None or len(name)==4 :
+        print "##### NOTE: ######"
+        print "The pdb file name you gave is OK, but exactly"
+        print "the same name will be used for the output from"
+        print "the XPLOR script. Therefore '_original' will be"
+        print "appended to the input pdb file you gave."
+        base, ext = absfile(fname).split('.')
+        new_fname = base +'_original.' + ext
+
+        os.rename( fname, new_fname )
+        fname = new_fname
+        
     if toInt( name[0] )== None or len(name)<4 :
         print "##### WARNING: ######"
         print "The pdb file name you gave is either shorter "
@@ -436,6 +450,9 @@ def main(options):
                 print 'Link from %s to %s created sucessfully'\
                       %(absfile(fname), new_file)
                 fname = new_file
+                
+
+        
 
     ## switch on Amber specialities ?
     amber = options.has_key('a')
