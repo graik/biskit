@@ -34,7 +34,7 @@ from Biskit.Errors import XplorInputError
 from Numeric import *
 from string import *
 import sys        # sys.exc_type, os.abspath
-import re
+import re, os, os.path
 import commands   # getstatusoutput()
 
 
@@ -299,8 +299,9 @@ pdb2xplor:  Create xplor generate.inp from PDB. Chains are separated,
             chain ends in the input PDB (using the same segid as the rest
             of the chain).
 
-            NOTE!! The pdb file name has to be 4 characters long and start
-                   with a number.
+            NOTE!! The pdb file name has to be 4 characters long (in
+                   addition to the .pdb extension) and start with a
+                   number.
 Syntax:
 pdb2xplor -i |pdb_input| [-o |output_path| -c |chain_id_offset| -a -cap
           -t |template_folder| -h |header_template| -s |segment_template|
@@ -405,6 +406,36 @@ def main(options):
                    "(option -t) a folder that contains head.inp, segment.inp, end.inp.\n" +
                    "If both -t and -h, -s, or -e are present, files specified with\n" +
                    "-h, -s, -e are preferred.")
+
+    ## check that input pdb file name (stripped of its path and extension)
+    ## is at least 4 characters long and starts with a number
+    ## Prompt user for renaming of the file.
+    name = stripFilename(fname)
+
+    if toInt( name[0] )== None or len(name)<4 :
+        print "##### WARNING: ######"
+        print "The pdb file name you gave is either shorter "
+        print "than 4 characters or it doesn't start with a number."
+        print "This will cause the X-PLOR job to fail"
+        msg = "Do you want to rename the file (Y/N)?"
+
+        if upper( raw_input( msg ) ) == 'Y':
+            new_name = upper( raw_input( "Give a new filname:" ) )
+
+            ## check that the new name is OK
+            if toInt( new_name[0] )== None or len(new_name)<4 :
+                raise StandardError, \
+                      'You gave an incorrect new filename. Exiting'
+            
+            ## create link
+            else:
+                new_file = '%s/%s.%s'%(os.path.dirname(absfile(fname)),
+                                        new_name,
+                                        fname.split('.')[-1])
+                os.link(fname, new_file)
+                print 'Link from %s to %s created sucessfully'\
+                      %(absfile(fname), new_file)
+                fname = new_file
 
     ## switch on Amber specialities ?
     amber = options.has_key('a')
