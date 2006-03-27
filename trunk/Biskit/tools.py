@@ -798,7 +798,7 @@ def hexColors( nColors, firstColor='FF0000', lastColor='FF00FF' ):
     @rtype: [ str ]
     """
     spec = []
-    out = os.popen( projectRoot() + '/extras/spectrum.pl ' +str(nColors) +
+    out = os.popen( projectRoot() + '/external/spectrum.pl ' +str(nColors) +
                     ' ' + str(firstColor) + ' ' +  str(lastColor) ).readlines()
 
     for s in out:    
@@ -813,7 +813,7 @@ def rgb2hex( rgbColor ):
       [ 1.0, 0.0, 1.0, ] -> 'FF00FF'
 
     @param rgbColor: RGB-color e.g. [ 1.0, 0.0, 1.0, ]
-    @type rgbColor : [int]
+    @type rgbColor : [float]
     
     @return: hex colors
     @rtype: str 
@@ -828,6 +828,34 @@ def rgb2hex( rgbColor ):
             hexRgb +=  component
 
     return hexRgb
+
+
+def hex2rgb( hexColor, str=0 ):
+    """
+    convert 8 bit hex rgb color into  rgb color  ::
+       'FF00FF' -> [ 1.0, 0.0, 1.0, ] 
+
+    @param rgbColor: HEX-color e.g. 'FF00FF'
+    @type rgbColor : str
+    @param str: return rgb colors as a tring (i.e for PyMol)
+    @type  str: 1|0
+    
+    @return: rgb colors
+    @rtype: [float]
+    """
+    rgb = []
+    if hexColor[:2] == '0x':
+        hexColor = hexColor[2:]
+    
+    for i in range(0,6,2):
+        rgb += [ int(hexColor[i:i+2], 16)/255.0 ]
+
+    if str:
+        rgb_str= '[ %.3f, %.3f, %.3f ]'%(rgb[0], rgb[1], rgb[2])
+        
+        return rgb_str
+    
+    return rgb
 
 
 def dateString():

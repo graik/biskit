@@ -81,6 +81,7 @@ hmmindex_bin     = 'hmmindex', s, 'Part of HMMER; http://hmmer.wustl.edu'
 
 xplor_bin 	  = 'ifcxplor', s, 'X-Plor with PCR-restraint capabilities'
 gbxplor_bin       = 'gbxplor', s, 'X-Plor with Generalized Born implementation'
+xplornih_bin     = 'xplor-nih', s, 'XPLOR-NIH;  http://nmr.cit.nih.gov/xplor-nih'
 
 pymol_bin 	  = 'pymol.com', s, 'http://pymol.sourceforge.net/'
 
