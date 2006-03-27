@@ -114,7 +114,7 @@ class PDBDope:
                       (default: relAS)
         @type  pname: str
         """
-        r = self.m.profile2mask( 'relASA', cutoff_min=40 )
+        r = self.m.profile2mask( pname, cutoff_min=40 )
         self.m.setResProfile( 'surfMask',  self.m.atom2resMask(r),
                               comment='residues with any atom > 40% exposed',
                               version= T.dateString() + ' ' + self.version() )
