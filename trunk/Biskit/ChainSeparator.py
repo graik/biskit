@@ -47,7 +47,8 @@ class ChainSeparator:
     called.
     """
 
-    def __init__(self, fname, outPath='', chainIdOffset=0, capBreaks=0 ):
+    def __init__(self, fname, outPath='', chainIdOffset=0,
+                 capBreaks=0, chainMask=0 ):
         """
         @param fname: pdb filename
         @type  fname: str
@@ -56,7 +57,9 @@ class ChainSeparator:
         @param chainIdOffset: start chain numbering at this offset
         @type  chainIdOffset: int
         @param capBreaks: add ACE and NME to N- and C-term. of chain breaks [0]
-        @type  capBreaks: 0||1
+        @type  capBreaks: 0|1
+        @param chainMask: chain mask for overriding the default sequence identity [None]
+        @type  chainMask: [1|0]
         """
         self.pdb = Structure(fname);
         self.fname = fname
@@ -74,7 +77,7 @@ class ChainSeparator:
         self._hetatomCheck()
 
         self.log.add("Separate chains: \n------------------")
-        self._removeDuplicateChains()   # keep only one copy of molecule
+        self._removeDuplicateChains(chainMask)   # keep only one copy of molecule
         self._separateChainBreaks()
         self._assign_seg_ids()          # new segment id for each chain
 
@@ -152,10 +155,14 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
         pdb.close()
 
 
-    def _removeDuplicateChains(self):
+    def _removeDuplicateChains(self, chainMask=None):
         """
         Get rid of identical chains by comparing all chains with Blast2seq.
 
+        @param chainMask: chain mask for overriding the
+                          chain identity checking (default: None)
+        @type  chainMask: [int]
+        
         @return: number of chains removed
         @rtype: int
         """
@@ -185,26 +192,42 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
                 else:                           # aln length too short, ignore
                     matrix[i,j] = 0
 
-        ## look at diagonals in "identity matrix"
-        ## (each chain against each)
-
-        duplicate = len(self.chains)
-        for offset in range(1,chainCount):
-            diag = N.diagonal(matrix, offset ,0,1)
-            # diagonal of 1's mark begin of duplicate
-            avg = 1.0 * N.sum(diag)/len(diag)
-            if (avg >= self.threshold):
-                duplicate = offset
-                break
-        self.chains = self.chains[:duplicate]
-
         ## report activity
-        self.log.add("Removing duplicate chains:")
-        self.log.add("\tChain ID's of compared chains: "+str(chain_ids))
-        self.log.add("\tCross-Identity between chains:\n"+str(matrix))
-        self.log.add("\tIdentity threshold used: "+str(self.threshold))
+        self.log.add("\n  Chain ID's of compared chains: "+str(chain_ids))
+        self.log.add("  Cross-Identity between chains:\n"+str(matrix))
+        self.log.add("  Identity threshold used: "+str(self.threshold))
+        
+        ## override the automatic chain deletion by supplying a
+        ## chain mask to this function
+        if chainMask:
+            if len(chainMask) == chainCount:
+                self.chains = N.compress(chainMask, self.chains)
+                self.log.add("NOTE: chain mask %s used for removing chains.\n"%chainMask)
+           
+            else:
+                self.log.add("########## ERROR ###############")
+                self.log.add("# Chain mask is only %i chains long"%len(chainMask))
+                self.log.add("# when a mask of length %i is needed"%chainCount)
+                self.log.add("# No cleaning will be performed.\n")
+
+        if not chainMask:
+            ## look at diagonals in "identity matrix"
+            ## (each chain against each)
+            duplicate = len(self.chains)
+            for offset in range(1,chainCount):
+                diag = N.diagonal(matrix, offset ,0,1)
+                # diagonal of 1's mark begin of duplicate
+                avg = 1.0 * N.sum(diag)/len(diag)
+                if (avg >= self.threshold):
+                    duplicate = offset
+                    break
+            self.chains = self.chains[:duplicate]
+            self.log.add("NOTE: Identity matrix will be used for removing identical chains.")
+
+        ## report activit
         self.log.add(str(chainCount - len(self.chains))+\
-                     " chains have been removed.")
+                     " chains have been removed.\n")
+        
         # how many chains have been removed?
         return (chainCount - len(self.chains))
 
@@ -403,7 +426,18 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
                 pdb.het_flag = 0
                 pdb.writeAtom('OH2', w.atoms['O'].position)
 
+            ## keep TIP3 waters as well
+            if len(waters) == 0:
+                TIP3_waters = self.pdb.molecules[ 'TIP3' ]
+                for w in TIP3_waters:
+                    pdb.nextResidue('TIP3')
+                    ## XPLOR wants "ATOM" not "HETATM":
+                    pdb.het_flag = 0
+                    pdb.writeAtom('OH2', w.atoms['OH2'].position)
+                    pdb.writeAtom('H1', w.atoms['H1'].position)
+                    pdb.writeAtom('H2', w.atoms['H2'].position)
             pdb.close()
+            
         except:
             T.errWriteln("Error writing waters to %s: " % fTarget )
             T.errWriteln( T.lastError() )
