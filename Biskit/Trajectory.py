@@ -1019,7 +1019,7 @@ class Trajectory:
         return self.profiles.plot( *name, **args )
 
 
-    def pairwiseRmsd( self, aMask=None ):
+    def pairwiseRmsd( self, aMask=None, noFit=0 ):
         """
         Calculate rmsd between each 2 coordinate frames.
         
@@ -1038,9 +1038,13 @@ class Trajectory:
         for i in range(0, len( frames ) ):
 
             for j in range( i+1, len( frames ) ):
-
-                rt, rmsdLst = rmsFit.match( frames[i], frames[j], 1 )
-                result[i,j] = result[j,i] = rmsdLst[0][1]
+                if noFit:
+                    d = N.sqrt(N.sum(N.power(frames[i]-frames[j], 2), 1))
+                    result[i,j] = result[j,i] = N.sqrt( N.average(d**2) )
+                    
+                else:
+                    rt, rmsdLst = rmsFit.match( frames[i], frames[j], 1 )
+                    result[i,j] = result[j,i] = rmsdLst[0][1]
 
         return result
 
