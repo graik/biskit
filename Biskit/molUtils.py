@@ -51,10 +51,10 @@ nsDicStandard = {'atp':'A', 'gtp':'G', 'ctp':'C', 'thy':'T', 'ura':'U'}
 aaDic = copy.copy( aaDicStandard )
 
 aaDic.update( {'cyx':'C', 'hid':'H', 'hie':'H', 'hip':'H',
-               'unk':'X', 'ace':'X', 'nme':'X' } )
+               'unk':'X', 'ace':'X', 'nme':'X'} )#, 'ndp':'X' } )
 
 ## translate common hetero residues to pseudo single letter code
-xxDic = {'tip3':'~', 'hoh':'~', 'wat':'~', 'cl-':'-', 'na+':'+'}
+xxDic = {'tip3':'~', 'hoh':'~', 'wat':'~', 'cl-':'-', 'na+':'+', 'ndp':'X'}
 
 ## map non-standard amino acid names to closest standard amino acid
 ##
@@ -191,6 +191,14 @@ nsAtoms={
            'O2*', 'C1*', 'N9', 'C8', 'N7', 'C5', 'C6', 'O6', 'N1', 'C2', 'N2',
            'N3', 'C4'],
     'MG' :['MG'],
+    'NDP':['P1', 'O1', 'O2', 'O5R', 'C5R', 'O1R', 'C4R', 'C3R', 'O3R', 'C2R',
+           'O2R', 'C1R', 'N9', 'C8', 'N7', 'C5', 'C6', 'N6', 'N1', 'C2',
+           'N3', 'C4', 'O10', 'P2', 'O11', 'O21', 'O51R', 'C51R', 'O11R',
+           'C41R', 'C31R', 'O31R', 'C21R', 'O21R', 'C11R', 'N11', 'C61',
+           'C51', 'C71', 'O71', 'N71', 'C41', 'C31', 'C21', 'P3', 'O3',
+           'O4', 'O5', 'H8', 'H9', 'H7', 'H6', 'H1', 'H5', 'H4', 'H13',
+           'H11', 'H12', 'H10', 'H18', 'H19', 'H17', 'H16', 'H3', 'H15',
+           'H2', 'H14', 'H23', 'H24', 'H25', 'H22', 'H26', 'H21', 'H20'],
     }
 
 ## map AA and NS and some other residue names to single letter code
@@ -204,7 +212,57 @@ atomDic.update( nsAtoms )
 ## some common synonyms of atom names
 atomSynonyms = { "O'":'O', 'OT1':'O', "O''":'OXT', 'OT2':'OXT',
                  'O1':'O', 'O2':'OXT',
-                 'CD':'CD1', }
+                 'CD':'CD1'}
+
+hydrogenSynonyms = { 'H':'HN',      '1HE2':'HE21', '2HE2':'HE22',
+                     '1HH1':'HH11', '2HH1':'HH12', '1HH2':'HH21',
+                     '2HH2':'HH22', '1HD2':'HD21', '2HD2':'HD22' }
+
+###################
+## Hydrogen bond
+##
+hbonds={ 'donors': {'GLY':['H','H1','H2','H3'],
+                    'ALA':['H','H1','H2','H3'],
+                    'VAL':['H','H1','H2','H3'],
+                    'LEU':['H','H1','H2','H3'],
+                    'ILE':['H','H1','H2','H3'],
+                    'MET':['H','H1','H2','H3'],
+                    'PRO':['H','H1','H2','H3'],
+                    'PHE':['H','H1','H2','H3'],
+                    'TRP':['H','H1','H2','H3','HE1'],
+                    'SER':['H','H1','H2','H3','HG'],
+                    'THR':['H','H1','H2','H3','HG1'],
+                    'ASN':['H','H1','H2','H3','1HD2','2HD2'],
+                    'GLN':['H','H1','H2','H3','1HE2','2HE2'],
+                    'TYR':['H','H1','H2','H3','HH'],
+                    'CYS':['H','H1','H2','H3','HG'],
+                    'LYS':['H','H1','H2','H3','HZ1','HZ2','HZ3'],
+                    'ARG':['H','H1','H2','H3','HE','1HH1','2HH1',
+                           '1HH2','2HH2'],
+                    'HIS':['H','H1','H2','H3','HD1','HE2'],
+                    'ASP':['H','H1','H2','H3'],
+                    'GLU':['H','H1','H2','H3']},
+         'acceptors': {'GLY':['O','OXT' ],
+                       'ALA':['O','OXT'],
+                       'VAL':['O','OXT'],
+                       'LEU':['O','OXT'],
+                       'ILE':['O','OXT'],
+                       'MET':['O','SD','OXT'],
+                       'PRO':['O','OXT'],
+                       'PHE':['O','OXT'],
+                       'TRP':['O','OXT'],
+                       'SER':['O','OG', 'OXT'],
+                       'THR':['O','OG1','CG2', 'OXT'],
+                       'ASN':['O','OD1','OXT'],
+                       'GLN':['O','OE1','OXT'],
+                       'TYR':['O','OH','OXT'],
+                       'CYS':['O','SG','OXT'],
+                       'LYS':['O','OXT'],
+                       'ARG':['O','OXT'],
+                       'HIS':['O','OXT'],
+                       'ASP':['O','OD1','OD2', 'OXT'],
+                       'GLU':['O','OE1','OE2', 'OXT']} }
+
 
 ## Scoring matrix for protein-protein interaction surfaces
 ## (Volume normalized values, Table IV in reference)
