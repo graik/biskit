@@ -69,6 +69,7 @@ try:
     from PDBDope import PDBDope
     
     from ModelList import ModelList
+    from Ramachandran import Ramachandran
 
 except Exception, why:
     EHandler.warning('Could not import all biskit modules:', trace=1 )

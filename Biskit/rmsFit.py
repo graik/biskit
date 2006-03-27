@@ -111,7 +111,7 @@ def match(x, y, n_iterations=1, z=2, eps_rmsd=0.5, eps_stdv=0.05):
 
         ## calculate rmsd and stdv
         rmsd = N.sqrt(N.average(N.compress(mask, d)**2))
-        stdv = MU.standardDev(N.compress(mask, d))
+        stdv = MU.SD(N.compress(mask, d))
 
         ## check conditions for convergence
         d_rmsd = abs(rmsd - rmsd_old)
