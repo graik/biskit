@@ -2873,7 +2873,7 @@ class PDBModel:
             f_test = self.__testDict_or
 
         for k in kw:
-            kw[ k ] = T.toList( kw[ k ] )
+            kw[ k ] = t.toList( kw[ k ] )
 
         r = [ i for i in range(self.lenAtoms()) if f_test( atoms[i], kw ) ]
         return r
