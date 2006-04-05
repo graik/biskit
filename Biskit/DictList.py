@@ -64,7 +64,7 @@ class DictList( BisList, list ):
         @param item_type: class of allowed items [ dict ]
         @type  item_type: type
         
-        @raise raise BisListError: if list contains non-item_type item.
+        @raise BisListError: if list contains non-item_type item.
         """
         BisList.__init__( self )
 
