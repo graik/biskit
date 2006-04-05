@@ -835,8 +835,8 @@ def hex2rgb( hexColor, str=0 ):
     convert 8 bit hex rgb color into  rgb color  ::
        'FF00FF' -> [ 1.0, 0.0, 1.0, ] 
 
-    @param rgbColor: HEX-color e.g. 'FF00FF'
-    @type rgbColor : str
+    @param hexColor: HEX-color e.g. 'FF00FF'
+    @type  hexColor: str
     @param str: return rgb colors as a tring (i.e for PyMol)
     @type  str: 1|0
     
