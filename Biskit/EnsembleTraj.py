@@ -189,7 +189,7 @@ class EnsembleTraj( Trajectory ):
         """
         r = range( member, self.lenFrames(), self.n_members )
         if step != 1:
-            r = take( r, range( 0, len( r ), step ) ).tolist()
+            r = N.take( r, range( 0, len( r ), step ) ).tolist()
         return r
 
 
