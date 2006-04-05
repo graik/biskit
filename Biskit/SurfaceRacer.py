@@ -134,7 +134,7 @@ class SurfaceRacer( Executor ):
             if os.path.exists( T.projectRoot() +'/external/surface_racer_3'):
                 dir =  T.projectRoot() +'/external/surface_racer_3/'
             else:
-                raise FastSurf_Error, 'Cannot find SurfaceRacer directory. Set your path in ~/.biskit/settings.dat as surfaceracer_bin'
+                raise SurfaceRacer_Error, 'Cannot find SurfaceRacer directory. Set your path in ~/.biskit/settings.dat as surfaceracer_bin'
 
         Executor.__init__( self, 'surfaceracer', template=self.inp,\
                            f_out='/dev/null', cwd=dir, **kw )
