@@ -53,7 +53,7 @@ class ModelList( DictList ):
         @param item_type: type, class of allowed items [ dict ]
         @type  item_type: [ dict ]
         
-        @raise raise DictListError: if list contains non-item_type item.
+        @raise DictListError: if list contains non-item_type item.
         """
         DictList.__init__( self, lst, item_type )
 
