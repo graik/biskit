@@ -127,6 +127,8 @@ class TrajCluster:
         
         @return: number of clusters
         @rtype: int
+
+        @raise ClusterError: if can't determining number of clusters
         """
         pos = [ min_clst, max_clst ]
 
@@ -204,7 +206,7 @@ class TrajCluster:
                           only max membership (default: 0)
         @type  threshold: float
         
-        @return: n_cluster : lst of lst of int, frame indices
+        @return: n_cluster, lst of lst of int, frame indices
         @rtype: [[int]]
         """
         ## best cluster for each frame
@@ -348,14 +350,14 @@ class TrajCluster:
 
 ## TEST
 
-from Biskit.EnsembleTraj import *
+import Biskit.EnsembleTraj as ET
 import Biskit.tools
 
 if __name__ == '__main__':
 
     #traj = Biskit.tools.Load( Biskit.tools.testRoot()+'/lig_pc2_00/traj.dat')
     traj = Biskit.tools.Load('/home/Bis/raik/data/tb/interfaces/c11/lig_pcr_00/traj.dat')
-    traj = traj2ensemble( traj )
+    traj = ET.traj2ensemble( traj )
 
     aMask = traj.ref.mask( lambda a: a['name'] in ['CA','CB','CG'] )
 
