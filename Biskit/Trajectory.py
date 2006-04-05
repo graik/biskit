@@ -939,7 +939,7 @@ class Trajectory:
         @param moreInfo: additional key-value pairs for info[name]
         @type  moreInfo:
         
-        @raise raise ProfileError: if length of prof != N_residues
+        @raise ProfileError: if length of prof != N_residues
         """
         self.profiles.set( name, prof, mask, default, asarray=asarray,
                            comment=comment, **moreInfo )
@@ -955,7 +955,7 @@ class Trajectory:
         @param default: default result if no profile is found
         @type  default: any
         
-        @raise raise ProfileError: if no profile is found with |name|
+        @raise ProfileError: if no profile is found with |name|
         """
         return self.profiles.get( name, default )
 
@@ -969,7 +969,7 @@ class Trajectory:
         @param name: profile name
         @type  name: str
         
-        @raise raise ProfileError: if no profile is found with |name|
+        @raise ProfileError: if no profile is found with |name|
         """
         return self.profiles.getInfo( name )
 
@@ -982,7 +982,7 @@ class Trajectory:
         @param name: profile name
         @type  name: str
         
-        @raise raise ProfileError: if no profile is found with |name|
+        @raise ProfileError: if no profile is found with |name|
         """
         self.profiles.setInfo( name, **args )
 
@@ -1264,7 +1264,7 @@ class Trajectory:
         @return: array 1 x N_residues of float
         @rtype: [float]
 
-        @raise TrajError if result length <> N_residues: 
+        @raise TrajError: if result length <> N_residues: 
         """
         if atomFluctList == None:
             atomFluctList = self.getFluct_global()
@@ -1587,7 +1587,7 @@ class Trajectory:
 
 if __name__ == '__main__':
 
-    import os, time
+    import time
 
 ##     f = T.testRoot() + '/lig_pc2_00/pdb/'
 ##     allfiles = os.listdir( f )
@@ -1603,7 +1603,7 @@ if __name__ == '__main__':
 ##     traj = Trajectory( pdbs[:3], ref, rmwat=0 )
 
     print "Loading"
-    traj = T.Load(T.testRoot() + '/lig_pc2_00/traj.dat')
+    traj = T.Load(T.testRoot() + '/lig_pcr_00/traj.dat')
 
     t0 = time.time()
 
