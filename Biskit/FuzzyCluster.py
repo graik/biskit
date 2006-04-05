@@ -223,11 +223,11 @@ class FuzzyCluster:
     def entropySD(self):
         centropy = N.sum(-N.log(self.msm)*\
                          self.msm)/float(self.n_cluster)
-        return MU.standardDeviation(centropy)
+        return MU.SD(centropy)
 
 
     def standardDeviation(self):
-        sd = MU.standardDeviation(self.msm)
+        sd = MU.SD(self.msm)
         return sd
 
 
