@@ -26,6 +26,7 @@ Reference data for SurfaceRacer.
 
 import Numeric
 
+
 ## dictionary with average accessabilities in 500 random
 ## GLY-XX-GLY peptides calculated with SurfaceRacer using
 ## a probe radius of 1.4 A
@@ -395,7 +396,7 @@ def relExposure( model, absSurf, key='AS', clip=1 ):
     @rtype: [float]
     """
     if not key=='MS' and not key=='AS':
-        raise SurfaceRacer_Error,\
+        raise Exception,\
               'Incorrect key for relative exposiure: %s '%key
 
     rel = []
