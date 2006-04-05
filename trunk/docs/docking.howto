@@ -175,11 +175,11 @@ the HIC-Up server (http://xray.bmc.uu.se/hicup/).
 You will have to add something like this to your generate.inp file::
 
  topology                  
-    @@/home/myself/nad_edit.top
+    @@/home/myself/substrate.top
  end
 
  parameter                  
-    @@/home/myself/nad_edit.par
+    @@/home/myself/substrate.par
  end
 
  segment name="SUBS"
