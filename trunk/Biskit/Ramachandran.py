@@ -30,7 +30,6 @@ import biggles
 from Biskit.PDBDope import PDBDope 
 
 import Biskit.mathUtils as MU
-import Biskit.PDBModel as PDBModel
 import Biskit.tools as T
 
 import Numeric as N
@@ -38,13 +37,12 @@ import Numeric as N
 
 class Ramachandran:
 
-    def __init__( self, models, name=None, profileName='relAS',
-                  noPlot=0):
+    def __init__( self, models, name=None, profileName='relAS'):
         """
-        @param model: List of models display a Ramachandran plot for
-        @type  model: [ PDBModel ] OR PDBModel
-        @param modName: model name, will show up in plot
-        @type  modName: str
+        @param models: List of models display a Ramachandran plot for
+        @type  models: [ PDBModel ] OR PDBModel
+        @param name: model name, will show up in plot
+        @type  name: str
         @param profileName: name of profile to use for coloring
                             (default: 'relAS')
         @type  profileName: str
@@ -64,7 +62,7 @@ class Ramachandran:
         self.name=name
 
         # calculate angles, profiles ...
-        self.calc( models, noPlot )
+        self.calc( models )
         
         self.prof = N.ravel(self.prof)
         self.gly = N.ravel(self.gly)
@@ -76,7 +74,7 @@ class Ramachandran:
         Calculate angles, profiles and other things needed.
         
         @param models: List of models 
-        @type  model: [ PDBModel ]
+        @type  models: [ PDBModel ]
         """              
         res_count = 0
         for m in models:
@@ -128,7 +126,7 @@ class Ramachandran:
                 print "Adding conservation data...",
                 d.addConservation()
                                                
-            if self.profileName in ['ASA_total','ASA_sc', 'ASA_bb']:
+            if self.profileName in ['ASA_total', 'ASA_sc', 'ASA_bb']:
                 print "Adding WhatIf ASA...",
                 d.addASA()
       
@@ -141,8 +139,8 @@ class Ramachandran:
             resIdx =  m.resIndex()
             resIdx += [ m.lenAtoms()]
             for i in range(len(resIdx)-1):
-                prof+=[ N.average( N.take(aProfile, range(resIdx[i],
-                                                          resIdx[i+1]) ) )]
+                prof += [ N.average( N.take(aProfile, range(resIdx[i],
+                                                            resIdx[i+1]) ) )]
         else:
             prof = m.profile( self.profileName )
 
@@ -167,9 +165,9 @@ class Ramachandran:
 
             xyz = cModel.xyz
 
-            xyz_CA =  N.compress( cModel.maskCA(), xyz,0 )
-            xyz_N  =  N.compress( cModel.mask( ['N'] ), xyz,0 )
-            xyz_C  =  N.compress( cModel.mask( ['C'] ), xyz,0 )
+            xyz_CA =  N.compress( cModel.maskCA(), xyz, 0 )
+            xyz_N  =  N.compress( cModel.mask( ['N'] ), xyz, 0 )
+            xyz_C  =  N.compress( cModel.mask( ['C'] ), xyz, 0 )
 
             ## phi: c1 - N
             ##      c2 - CA
@@ -189,50 +187,51 @@ class Ramachandran:
                 self.psi += [self.dihedral( xyz_C[i-1], xyz_N[i],
                                             xyz_CA[i], xyz_C[i] )]
 
-    def dihedral( self, c1, c2, c3, c4 ):
+
+    def dihedral( self, coor1, coor2, coor3, coor4 ):
         """
         Calculates the torsion angle of a set of four atom coordinates.
         The dihedral angle returned is the angle between the projection
         of i1-i2 and the projection of i4-i3 onto a plane normal to i2-i3.
 
-        @param c1: coordinates
-        @type  c1: [float]
-        @param c2: coordinates
-        @type  c2: [float]
-        @param c3: coordinates
-        @type  c3: [float]
-        @param c4: coordinates
-        @type  c4: [float]        
+        @param coor1: coordinates
+        @type  coor1: [float]
+        @param coor2: coordinates
+        @type  coor2: [float]
+        @param coor3: coordinates
+        @type  coor3: [float]
+        @param coor4: coordinates
+        @type  coor4: [float]        
         """
-        v21 = c2 - c1
-        v32 = c3 - c2
-        L = MU.cross( v21, v32 )
+        vec21 = coor2 - coor1
+        vec32 = coor3 - coor2
+        L = MU.cross( vec21, vec32 )
         L_norm = N.sqrt(sum(L**2))
 
-        v43 = c4 - c3
-        v23 = c2 - c3
-        R = MU.cross( v43, v23 )
+        vec43 = coor4 - coor3
+        vec23 = coor2 - coor3
+        R = MU.cross( vec43, vec23 )
         R_norm = N.sqrt(sum(R**2))
 
-        S   = MU.cross( L, R )
+        S     = MU.cross( L, R )
         angle = sum( L*R ) / ( L_norm * R_norm )
 
-        if angle > 1.0: angle=1.0
-        if angle <-1.0: angle = -1.0
+        ## sometimes the value turns out to be ever so little greater than 
+        ## one, to prevent N.arccos errors for this, set angle = 1.0
+        if angle >  1.0: angle = 1.0
+            
+        if angle < -1.0: angle = -1.0
 
         angle = N.arccos(angle) *180/N.pi
-        if sum(S*v32) < 0.0:
+        if sum(S*vec32) < 0.0:
             angle = -angle
 
         return angle
 
     
-    def ramachandran( self, property=None ):
+    def ramachandran( self ):
         """
         Create all the ramachandran plot points.
-        
-        @param property: property to use for coloring of data
-        @type  property: array
 
         @return: list of biggles.Point objects (all the points of the
                  plot)and a biggles.Inset object (property scale).
@@ -242,11 +241,11 @@ class Ramachandran:
 
         ## calculate colors and create a legend if a property is given
         if self.profileName:
-            palette=CS('plasma', 0,100)
-            col = palette.color_array( self.prof )
+            palette = CS('plasma', 0, 100)
+            col     = palette.color_array( self.prof )
 
             legend = Legend(  palette.legend() )
-            inset = biggles.Inset((1.1, 0.60), (1.2, .97), legend)
+            inset  = biggles.Inset((1.1, 0.60), (1.2, .97), legend)
 
         else:
             col = ['black']*len(self.phi)
@@ -283,14 +282,14 @@ class Ramachandran:
         x, y = N.shape(mat)
         for i in range(x):
             for j in range(y):
-                if mat[i,j]<200:
+                if mat[i,j] < 200:
                     a = (360./y)*j    - 180
                     b = (360./x)*(x-i)- 180
                     bg += [ biggles.Point( a, b, type="dot" )]
         return bg
 
 
-    def show( self ):
+    def show( self, fileName=None ):
         """
         Show ramachandran plot.
         """
@@ -321,18 +320,21 @@ class Ramachandran:
       
         plot.show()
 
+        if fileName:
+            plot.write_eps( fileName )
 
 ## TEST ##
 
 if __name__ == '__main__':
 
     import glob
+    import Biskit.PDBModel as PDBModel
 
-    f = glob.glob( T.testRoot()+'/lig_pcr_00/pcr_00/*_1_*pdb' )[:2]
-    m = [ PDBModel(i) for i in f ]
-    m = [ i.compress( i.maskProtein() ) for i in m ]
+    fns = glob.glob( T.testRoot()+'/lig_pcr_00/pcr_00/*_1_*pdb' )[:2]
+    mdl = [ PDBModel(f) for f in fns ]
+    mdl = [ md.compress( md.maskProtein() ) for md in mdl ]
 
-    r = Ramachandran( m , name='test')
-    r.show()
+    rama = Ramachandran( mdl , name='test')
+    rama.show()
     
 
