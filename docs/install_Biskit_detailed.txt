@@ -1,0 +1,425 @@
+.. ===================================================================
+.. Biskit, a toolkit for the manipulation of macromolecular structures
+.. Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
+..
+.. This program is free software; you can redistribute it and/or
+.. modify it under the terms of the GNU General Public License as
+.. published by the Free Software Foundation; either version 2 of the
+.. License, or any later version.
+..
+.. This program is distributed in the hope that it will be useful,
+.. but WITHOUT ANY WARRANTY; without even the implied warranty of
+.. MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+.. General Public License for more details.
+..
+.. You find a copy of the GNU General Public License in the file
+.. license.txt along with this program; if not, write to the Free
+.. Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+..
+..
+.. last $Author$
+.. last $Date$
+.. $Revision$
+.. ===================================================================
+
+
+=============================
+Contents Detailed Instruction
+=============================
+- `Biskit`_
+- `Install required libraries / programs`_
+- `Setup environment`_
+- `Required programs`_
+- `NOTE 1`_ `NOTE 2`_ `NOTE 3`_ `NOTE 4`_
+
+
+----
+
+
+Biskit
+======
+check out the project from CVS server (creates folder biskit)::
+
+	% cvs co biskit
+
+
+----
+
+
+Install required libraries / programs
+=====================================
+
++ Python (version 2.4 recomended)
+	*from rpm or source*
+
+        1. install from rpms 
+
+           - python and python-devel (source / include files) 
+ 
+        2. from source
+
+           - download from http://www.python.org/
+           - in: python-2.4.x::
+                
+                          ./configure
+                           make
+		           make install  (installs in /usr/local)
+
++ Plotutils 
+	*from rpm or source*
+
+        1. install from rpms 
+ 
+        2. from source
+
+           - download from http://www.gnu.org/software/plotutils/
+           - in plotutils-2.4.1::
+
+                              ./configure
+                               make
+                               make check
+                               make install
+
++ Gnuplot
+	*from rpm*
+
+
++ Numeric
+	*from rpm or source*
+
+        1. install from rpms 
+ 
+        2. from source
+
+           - download from http://sourceforge.net/projects/numpy
+           - in Numeric-24.0b2:  python setup.py install -- `NOTE 1`_
+	
+
++ NetCDF 
+	*from rpm or source*
+
+	1. install from rpms 
+ 
+	2. from source
+
+ 	   - download from http://www.unidata.ucar.edu/software/netcdf/
+ 	   - in netcdf-3.6.0-p1/src::
+
+                                   ./configure --prefix=/usr/local
+                                   make test
+                                   make install
+
++ Scientific python
+	- download from http://starship.python.net/~hinsen/ScientificPython/
+	- in ScientificPython-2.4.9::
+
+                                      python setup.py build
+	                              python setup.py install
+	
++ Biggles
+	- download from http://biggles.sourceforge.net/
+	- in python2-biggles-1.6.4 -- `NOTE 2`_::
+
+                                     python setup.py build 
+	                             python setup.py install
+	
+	
++ BioPython
+	*from source*
+
+        1. mxTextTool
+
+	   - download from http://www.egenix.com/files/python/mxTextTools.html
+	   - in egenix-mx-base-2.0.6:  python setup.py install
+
+	2. BioPython
+
+	   - download from http://www.biopython.org/
+	   - in biopython-1.40b -- `NOTE 3`_::
+
+                                python setup.py build
+                                python setup.py test  
+                                python setup.py install
+			   
+			   
++ PVM - Parallel Virtual Machine
+    *from rpm or source*
+
+    1. install from rpms 
+
+       - install pvm and pvm-devel from rpm
+
+    2. from source
+
+       - download from http://www.csm.ornl.gov/pvm/pvm_home.html
+       - set the environment variable "PVM_ROOT" to the pvm3 folder
+       - in pvm3: make
+
+    * setup environment:
+
+      - example - add to .zshenv::
+
+              export PVM_ROOT=/usr/lib/pvm3  ## depends on system
+              export PVM_RSH=/usr/bin/ssh
+              #optional: export PVM_ARCH=LINUX 
+
+        (the variable $PVM_ARCH should match the name of a folder in $PVM_ROOT/lib/ describing the machine architecture )
+
+      - in $PVM_ROOT/bin/$PVM_ARCH make links to applications that pvm needs (i.e. xterm and python)
+
+      - You also have to set up your
+	system so that you can ssh from the master to any
+	slave without providing a password. -- `NOTE 4`_
+	    
+  
+      * compile pypvm (C -> Python interface to pvm library):
+
+        - Example::
+
+	      cd biskit/Biskit/PVM
+	      make 
+
+	  **Note:** the Makefile might have to be edited::
+  
+            VERSION - should match your pyhon version
+            LFLAGS - should include to your pvm installation. 
+            IFLAGS - the pythom shared libraries might reside in
+                     /usr/local/include/python2.4/
+                     also check the pvm path
+
+        - optional: compile platform-specific pypvm versions for
+	  different python versions or hardware architectures
+
+	  **Note:** 
+          The Biskit.PVM package first tries to import pypvm
+          from a subfolder called like the current return value
+          of Biskit.tools.platformFolder(). If no such folder
+          exists, the default pypvm_core.so is taken from
+          biskit/Biskit/PVM/.
+
+	  Example::
+
+	    cd biskit/Biskit/PVM
+	    mkdir py2.4_x86_64  (if not already available)
+	    cd py2.4_x86_64
+	    make
+
+        - see pvm.howto for testing your PVM installation!
+
+----
+
+
+Setup environment
+=================
+
+* Adapt Biskit settings (binary paths etc):
+
+  - create default settings and adapt them::
+
+	  biskit/scripts/Biskit/setup_biskit.py
+	  edit ~/.biskit/settings.dat
+	
+
+* To use a specific python version (at least 2.4 required):
+
+  - create an alias to the python version that you are 
+    going to use (e.g. ln -s /usr/bin/python2.4 python)
+  - then edit your enviorment so that your linked 
+    python version ends up first in your PATH.
+    
+    Example(shell; settings file; export statement)::
+
+	   tcsh ; .~/cshrc   ; setenv PATH ~/name:$PATH
+           zsh  ;  ~/.zshenv ; export PATH=~/name:$PATH
+
+
+* optional: 
+  - include scripts in search path (zsh, bash)::
+
+	BPath=~/biskit/scripts/
+	export PATH=$PATH:$BPath/Biskit:$BPath/Dock:$BPath/Mod
+
+----
+
+
+Required programs 
+=================
+
+biskit/Biskit 
+-------------
+(see install_helper_apps.txt for more info)
+
+All optional:
+
+- xplor, gbxplor (compiled for generalized Born)
+- NCBI toolkit
+- HMMER
+- whatif
+- prosa2003
+- foldX
+- pymol
+
+
+biskit/Biskit/Mod
+-----------------
+(see install_helper_apps.txt for more info)
+
+All required:
+
+- blastall, fastacmd, blastclust (= NCBI toolkit programs)
+- local sequence data bases nr, pdbaa, sprot (formatted with -o)
+- local PDB structure data base (folder with .ent files)
+- t_coffee
+- modeller
+
+
+biskit/Biskit/Dock
+------------------
+(see install_helper_apps.txt for more info)
+
+All required:
+
+- xplor, HEX, WhatIf
+- recommended: pymol, prosa, hmmer, foldX
+
+
+----
+
+
+NOTE 1
+======
+
+Lapack is broken in some recent versions of Numerical Python. This will affect
+some Biskit modules (e.g clustering and entropy calculations) as well as some
+BioPython modules.
+ 
+To test if your Lapack is broken type this in your python interpreter:
+
+>>> from Numeric import *
+>>> from LinearAlgebra import eigenvalues
+>>> x = array([[1,2],[3,4]])
+>>> eigenvalues(x)
+
+If it hangs you will have to find a version of Numeric without this
+bug or find find a way to compile Numeric not resulting in this
+bug. One way to do this is to install ALTAL and LAPACK localy and then
+compile Numeric using this.  More instructions here:
+https://cirl.berkeley.edu/view/Grants/BuildLapack
+
+ATLAS (http://math-atlas.sourceforge.net)
+in ATLAS::
+ 
+   make       
+   make install arch=<arch> (takes a very long time)
+
+Lapack (http://www.netlib.org/lapack/)
+in LAPACK::
+
+   cp INSTALL/make.inc.LINUX make.inc
+   make lapacklib
+   make clean
+	    
+Complementing ATLAS with LAPACK::
+ 
+    cd ~/ATLAS/lib/<arch>
+    cp liblapack.a liblapack_orig.a # make a backup
+    mkdir tmp; cd tmp
+    ar x ../liblapack.a
+    cp ~/LAPACK/lapack_LINUX.a ../liblapack.a
+    ar r ../liblapack.a *.o
+    cd ..; rm -rf tmp	    
+
+Install::
+
+   mkdir /usr/local/lib/atlas (if not there)
+   cp ~/ATLAS/lib/<arch>/*.a  /usr/local/lib/atlas/.
+  
+   mkdir /usr/local/include/atlas (if not there)
+   cp ~/ATLAS/include/cblas.h /usr/local/include/atlas/.
+   cp ~/ATLAS/include/clapack.h /usr/local/include/atlas/.
+
+
+Then in Numeric-24.0b2 edit customize.py::
+
+   use_system_lapack = 1
+   lapack_library_dirs = ['/usr/local/lib/atlas']
+   lapack_libraries = ['lapack', 'cblas', 'f77blas', 'atlas', 'g2c']
+   lapack_extra_link_args = []
+
+Now install Numeric and things should work.::
+
+    python setup.py build
+    python setup.py install
+
+
+----
+
+
+NOTE 2
+======
+
+Error::
+
+  /usr/bin/ld: cannot find -lXaw
+  (Biggles 1.6.4 on a freshly installed CentOS 4.1 machine)
+
+Cause::
+
+   links in /usr/X11R6/lib missing
+
+Remedy::
+
+   link libXaw.so to libXaw.so.7.0
+   (i.e. ln -s /usr/X11R6/lib/libXaw.so.7.0 /usr/X11R6/lib/libXaw.so)
+
+Comment::
+
+   the same link problem occured for libXmu, libXt, libSM, 
+   libICE, libXext and libX11
+   
+The above links will make Biggles compile. If you get errors like this 
+when calling a script that uses Biggles:
+
+>>>  libplot: ignoring request to create plotter of unknown type
+>>>  Segmentation fault (core dumped)
+
+There are probably more links missing in /usr/X11R6/lib that you
+will have to create. To check that Biggles is running as it should
+past this script into your python interpreter:
+
+>>> import biggles, Numeric
+>>> x = Numeric.arange(0,10,0.3)
+>>> p = biggles.FramedPlot()
+>>> p.add( biggles.Curve(x, Numeric.cos(x)) )
+>>> p.show()
+
+
+----
+
+
+NOTE 3
+======
+
+If the biopython test hags at "test_SVDSuperimposer ..." you are suffering from
+the Numeric/eigenvalue problems. See `NOTE 1`_.
+
+
+----
+
+
+NOTE 4
+======
+
+Here is a recipe for setting up passwordless SSH:
+
+Perform the following steps to set up passwordless ssh (protocol 2):
+  1. Ensure you have a id_rsa.pub file by running: ssh-keygen -t dsa
+  2. Check that there is no .ssh directory on the remote machine
+  3. Run: cat ~/.ssh/id_dsa.pub | ssh user\@machine "(mkdir .ssh;cat >> .ssh/authorized_keys2)"
+  4. On the remote machine run: chmod go-w . .ssh .ssh/authorized_keys2
+  5. Check that passwordless login works
+   
+Or download and use ssh-keyinstall to set up your system: 
+  http://www.stearns.org/ssh-keyinstall/	
+
+Still having problems? Check for firewalls!
