@@ -116,10 +116,10 @@ if __name__ == '__main__':
     from ChainSeparator import ChainSeparator
 
     cleaner = ChainCleaner( ChainSeparator( \
-        T.testRoot()+'/com_wet/1BGS_edited.pdb',
-        T.testRoot()+'/com_wet') )
+        T.testRoot()+'/com/1BGS_edited.pdb',
+        T.testRoot()+'/com') )
 
-    writer = ChainWriter( T.testRoot()+'/com_wet' )
+    writer = ChainWriter( T.testRoot()+'/com' )
     print 'Writing separated, cleaned chains to disk...'
     print writer.writeChain( cleaner.next() )
     print writer.writeChain( cleaner.next() )
