@@ -42,27 +42,27 @@ principal component restrained simulation (PCR-MD) is similar to the
 classic approach described above, but the ensemble is considerably more 
 diverse.
 
-Technical rap (extracted from `Grunberg, Leckner and Nilges (2004)`_):
- Simulations are performed with a modified version of X-PLOR 
- by using the CHARMM19 force field and an electrostatic cutoff of 
- 12 A with force shifting. The protein is surrounded by a 9 A layer of 
- TIP3 water molecules, and the solvent is briefly equilibrated.
- Ten copies will be the starting point for parallel simulations of 50 ps 
- length, summing up to 500 ps total simulation time per system (default setting). 
- SHAKE constraints are put on all bonds to hydrogens and on all TIP3 waters. 
- Each copy is heated from 100 to 300 K in 50 K steps of 1 ps each, followed 
- by additional 5 ps of equilibration with continued reassignment of 
- velocities every 1 ps. The temperature is kept constant by explicit 
- coupling to a heat bath via Langevin dynamics and a friction coefficient 
- of 20 ps^-1 for water oxygens and between 0.5 and 5.5 ps^-1 for protein 
- atoms, dependent on their solvent accessible area. A time step of 2 fs 
- is used. 
+ Technical rap (extracted from `Grunberg, Leckner and Nilges (2004)`_):
+  Simulations are performed with a modified version of X-PLOR 
+  by using the CHARMM19 force field and an electrostatic cutoff of 
+  12 A with force shifting. The protein is surrounded by a 9 A layer of 
+  TIP3 water molecules, and the solvent is briefly equilibrated.
+  Ten copies will be the starting point for parallel simulations of 50 ps 
+  length, summing up to 500 ps total simulation time per system (default setting). 
+  SHAKE constraints are put on all bonds to hydrogens and on all TIP3 waters. 
+  Each copy is heated from 100 to 300 K in 50 K steps of 1 ps each, followed 
+  by additional 5 ps of equilibration with continued reassignment of 
+  velocities every 1 ps. The temperature is kept constant by explicit 
+  coupling to a heat bath via Langevin dynamics and a friction coefficient 
+  of 20 ps^-1 for water oxygens and between 0.5 and 5.5 ps^-1 for protein 
+  atoms, dependent on their solvent accessible area. A time step of 2 fs 
+  is used. 
 
- The principal component restrained simulation are performed with identical 
- setup but by adding an additional force onto the potential acting along 
- the principle components of motion, basically as described by 
- `Abseher and Nilges (2000)`_. In difference to the published method, we 
- redefined the principal components iteratively during the calculation. 
+  The principal component restrained simulation are performed with identical 
+  setup but by adding an additional force onto the potential acting along 
+  the principle components of motion, basically as described by 
+  `Abseher and Nilges (2000)`_. In difference to the published method, we 
+  redefined the principal components iteratively during the calculation. 
 
 
 **None:**
@@ -77,8 +77,10 @@ Contents
 ========
 
 - `Preparing the structure`_
-- `Conformal sampling`_
-- `Generate a ligand ensemble`_
+- `Conformal sampling without PCR`_
+- `Conformal sampling with PCR`_
+- `Create a trajectory`_
+- `Cluster the trajectory frames`_
 
 --------------------------------------------------------------------
 
@@ -330,8 +332,8 @@ writes a trajectory output file: *traj.dat*
 
 --------------------------------------------------------------------
 
-Cluster the trajectories
-========================
+Cluster the trajectory frames
+=============================
 We don't want to use all 500 snapshots for the docking, rather we
 want to select representative structures from the ensemble. In this
 example we select 10 conformers and we do this by means of 
@@ -346,6 +348,15 @@ to disc as a PDBModel and a model dictionary.
 
 >>> selectModels.py -i ../str_pcr_40/traj.dat \    
 >>>		    -n 10 
+
+  **Comment:** 
+  This creates n pickled Biskit.PDBModel instances and a
+  pickled dictionary that contains all of them indexed by cluster
+  number. The dictionary is the input to the Biskit docking routines.
+
+If you need PDB files...
+
+>>> model2pdb.py -i *model
 
 --------------------------------------------------------------------
 
@@ -362,5 +373,6 @@ to disc as a PDBModel and a model dictionary.
 .. Complementarity of structure ensembles in protein-protein binding.
 .. Structure. 2004 Dec;12(12):2125-36.
 
+.. _`pasword free ssh access`: install/detailed-instructions/detailed-installation-instructions-for-biskit#note-4
 
 
