@@ -38,7 +38,7 @@ from ProfileCollection import ProfileCollection, ProfileError
 import Numeric as N
 import MLab
 from Scientific.IO.PDB import PDBFile
-import os
+import os, sys
 import copy
 import time
 import string
