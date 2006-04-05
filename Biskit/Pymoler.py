@@ -233,7 +233,7 @@ class Pymoler:
                 modName = self._getFreeModName( modName, 0 )
 
             else:
-                modName = self._getFreeModName( 'model', 0 )
+                modName = self._getFreeModName( 'models', 0 )
 
         ## create new empty list
         if not self.dic.has_key( modName ):
