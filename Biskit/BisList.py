@@ -55,10 +55,10 @@ class BisList:
     the internal data structure.
 
     Classes derived from AbstractDictList have to override several
-    methods to be functional (a NotImplementedError is raised otherwise):
+    methods to be functional (a NotImplementedError is raised otherwise)::
 
-    getValue, extend, append, take, keys,
-    __len__, __setitem__, __getslice__
+     getValue, extend, append, take, keys,
+     __len__, __setitem__, __getslice__
 
     The latter 3 are not yet defined in BisList (no
     NotImplementedError) but are nevertheless required. They can also
@@ -71,7 +71,7 @@ class BisList:
       2. inheritence from BisList only
          -> the __xxx__ methods have to be implemented too.
 
-    See DictList for an example of strategy 1.
+    See L{DictList} for an example of strategy 1.
     """
 
     def __init__(self): 
@@ -99,8 +99,9 @@ class BisList:
         @type  key: any
         @param default: return value if key is not found [None]
         @type  default: any
+        
         @return: any
-        @rtype: 
+        @rtype: any
         """
         raise NotImplementedError
 
@@ -132,8 +133,12 @@ class BisList:
     def __add__( self, other ):
         """
         c.__add__( other ) <==> c + other
+       
+        @param other: other instance
+        @type  other: instance
         
         @return: new instance with one collection appended to the other
+        @rtype: any
         """
         r = self.__class__( self )
         r.extend( other )
@@ -143,8 +148,12 @@ class BisList:
     def __iadd__( self, other ):
         """
         c.__iadd__( other ) <==> c += other
+
+        @param other: other instance
+        @type  other: instance
         
         @return: this instance with other appended
+        @rtype: any
         """
         self.extend( other )
         return self
@@ -154,8 +163,12 @@ class BisList:
         """
         Add all items of other to (the end of) this instance.
         B{Override!}
+
+        @param other: other instance
+        @type  other: instance
         
         @param other: AbstractDictList (left to the implementing class)
+        @type  other: any
         """
         raise NotImplementedError
 
@@ -166,6 +179,7 @@ class BisList:
         B{Override!}
         
         @param v: any (left to the implementing class)
+        @type  v: any
         """
         raise NotImplementedError
 
@@ -220,6 +234,9 @@ class BisList:
         @type  mask: [ 1|0 ]
         @param deepcopy: deepcopy items (default: 0)
         @type  deepcopy: 1|0
+
+        @return: new instance (or sub-class) with specified items
+        @rtype: instance
         """
         return self.take( N.nonzero( mask ), deepcopy=deepcopy )
 
@@ -227,6 +244,14 @@ class BisList:
     def sortBy( self, sortKey, cmpfunc=cmp ):
         """
         sortBy( sortKey ) -> new instance sorted by item[ sortKey ]
+
+        @param sortKey: key for item attribute
+        @type  sortKey: any
+        @param cmpfunc: comparison function
+        @type  cmpfunc: function
+        
+        @return: new instance (or sub-class) sorted by item
+        @rtype: instance        
         """
         return self.take( self.argsort( sortKey, cmpfunc ))
 
@@ -321,17 +346,17 @@ class BisList:
         Extract items matching condition.
         
         @param key: item attribute  (not used if cond is function )
-        @type  key: 
+        @type  key: any
         @param cond: conditon::
                      - (vLow, vHigh) -> vLow <= item[ key ] <= vHigh
                      - list          -> item[ key ] in cond
                      - function      -> cond( c ) == 1
-        @type  cond: 
+        @type  cond: any
                  
         @return: new instance (or sub-class)
         @rtype: instance
         
-        @raise ConditionError if cond is neither list nor tuple nor function: 
+        @raise ConditionError: if cond is neither list nor tuple nor function: 
         """
         indices = None
 
@@ -360,6 +385,7 @@ class BisList:
         """
         @param key: item attribute
         @type  key: any
+        
         @return: index of item with highest item[key] value
         @rtype: int
         """
@@ -371,8 +397,9 @@ class BisList:
         """
         @param key: item attribute
         @type  key: any
+        
         @return: item with highest item[key] value
-        @rtype: any
+        @rtype: float
         """
         return self[ self.argmax(key) ]
 
@@ -381,6 +408,7 @@ class BisList:
         """
         @param key: item attribute
         @type  key: any
+        
         @return: index of item with lowest item[infokey] value
         @rtype: int
         """
@@ -392,16 +420,23 @@ class BisList:
         """
         @param key: item attribute
         @type  key: any
+        
         @return: item with lowest item[key] value
-        @rtype: any
+        @rtype: float
         """
         return self[ self.argmin( key ) ]
 
 
     def getIndex( self, key, value ):
         """
+        @param key: item attribute
+        @type  key: any
+        @param value: item value
+        @type  value: any        
+        
         @return: position of item for which item[key] == value
         @rtype: int
+        
         @raise AmbiguousMatch: ItemNotFound,
                if there are more or less than 1 matches
         """
@@ -418,6 +453,11 @@ class BisList:
 
     def getItem( self, key, value ):
         """
+        @param key: item attribute
+        @type  key: any
+        @param value: item value
+        @type  value: any
+
         @return: item for which item[key] == value
         @rtype: any
         
@@ -460,6 +500,11 @@ class BisList:
     def __maskNone( self, l1, l2 ):
         """
         Take out positions from l1 and l2 that are None in either of them.
+
+        @param l1: first list
+        @type  l1: list
+        @param l2: second list
+        @type  l2: list
         
         @return: modified lists
         @rtype: (l1, l2)
@@ -483,8 +528,15 @@ class BisList:
         (xkey='index').
 
         C{ EXAMPLE: plot( xkey, [ykey1, ykey2..],[arg1=x, arg2=y]) }
-        C{         -> biggles.FramedPlot                           }
-
+        C{         -> biggles.FramedPlot }
+        
+        @param xkey: key for x-values
+        @type  xkey: any
+        @param ykey: key for y-values
+        @type  ykey: any
+        @param arg: arguments handed over to biggles.Points()
+        @type  arg: any
+        
         @return: Biggles.FramedPlot, display with show() !
         @rtype:  Biggles.FramedPlot
         """
@@ -525,6 +577,13 @@ class BisList:
         C{ EXAMPLE: plot( xkey, [ykey1, ykey2..],[arg1=x, arg2=y]) }
         C{         -> biggles.FramedPlot                           }
         
+        @param xkey: key for x-values
+        @type  xkey: any
+        @param ykey: key for y-values
+        @type  ykey: any
+        @param arg: arguments handed over to biggles.Points()
+        @type  arg: any
+
         @return: Biggles.FramedArray, display with show()
         @rtype: Biggles.FramedArray
         """
