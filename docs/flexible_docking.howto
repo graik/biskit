@@ -141,7 +141,7 @@ months.
 
 The pcr force is here set to zero - i.e. this is a standard parallell 
 MD simulation. If you would like an even greater diversity run the script
-with a *-pcr* argument greater than zero (hint: aim at something close to 
+with a *-f* argument greater than zero (hint: aim at something close to 
 0.2 times the number of amino acids).
 
 Extracted from the *runPCR.py* help screen::
