@@ -43,7 +43,7 @@ def accumulate( a ):
     @return: float
     @rtype: float
     """
-    return add.accumulate( a ) / N.sum( a )
+    return N.add.accumulate( a ) / N.sum( a )
 
 
 def variance(x, avg = None):
