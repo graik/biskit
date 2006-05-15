@@ -351,13 +351,14 @@ class TrajCluster:
 ## TEST
 
 import Biskit.EnsembleTraj as ET
+from Biskit.EnsembleTraj import traj2ensemble
 import Biskit.tools
 
 if __name__ == '__main__':
 
-    #traj = Biskit.tools.Load( Biskit.tools.testRoot()+'/lig_pc2_00/traj.dat')
-    traj = Biskit.tools.Load('/home/Bis/raik/data/tb/interfaces/c11/lig_pcr_00/traj.dat')
-    traj = ET.traj2ensemble( traj )
+    traj = Biskit.tools.Load( Biskit.tools.testRoot()+'/lig_pcr_00/traj.dat')
+    #traj = Biskit.tools.Load('/home/Bis/raik/data/tb/interfaces/c11/lig_pcr_00/traj.dat')
+    traj = traj2ensemble( traj )
 
     aMask = traj.ref.mask( lambda a: a['name'] in ['CA','CB','CG'] )
 
