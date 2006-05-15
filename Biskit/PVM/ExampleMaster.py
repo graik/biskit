@@ -25,7 +25,7 @@
 An example of a Master/Slave setup
 """
 
-from Biskit.PVM.TrackingJobMaster import *
+from Biskit.PVM.TrackingJobMaster import TrackingJobMaster
 
 from Biskit.hosts import nodes_all
 from Biskit.tools import projectRoot
@@ -71,7 +71,7 @@ if __name__ == '__main__':
     from Biskit.PVM.ExampleMaster import Master as Master
 
     hosts = nodes_all[3:8]
-
+    
     niceness = {'default': 20}
 
     data = {}
