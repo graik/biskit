@@ -31,6 +31,10 @@ from Biskit import LogFile
 from Biskit import ChainSeparator, ChainWriter, ChainCleaner, XplorInput
 from Biskit.Errors import XplorInputError
 
+from Biskit import Executor
+from Biskit import settings
+from Biskit import Pymoler
+
 from Numeric import *
 from string import *
 import sys        # sys.exc_type, os.abspath
@@ -209,7 +213,6 @@ class Xplor (XplorInput):
         """
         Return all amber patches for both termini as string
         """
-
         ## prepare patch for N- and C-terminus
         nTerResNum = str(chain.residues[0].number)
         n2TerResNum = str(chain.residues[1].number)
@@ -306,7 +309,7 @@ Syntax:
 pdb2xplor -i |pdb_input| [-o |output_path| -c |chain_id_offset| -a -cap
           -t |template_folder| -h |header_template| -s |segment_template|
           -e |end_template| -thickness |solvation_layer|
-          -x |file_with_extra_options|]
+          -cmask |mask| -exe -view -x |file_with_extra_options|]
 or 
 pdb2xplor -x |file_with_options|
 
@@ -318,6 +321,10 @@ pdb2xplor -x |file_with_options|
                        (i.e. -c 3 means, chains are labeled D, E, etc.)
           -cap      .. add ACE and NME to N- and C-terminal of chain breaks
           -thickness ..the thickness of the solvation layer in Angstrom
+          -cmask    .. chain mask for overriding the default sequence identity
+                       based cleaning (e.g. 1 0 0 1 0 0 )
+          -exe      .. also execute XPLOR, write log to file
+          -view     .. show the cleaned pdb file in PyMol
 
 Default values:
     """
@@ -388,6 +395,9 @@ def main(options):
     fname = options['i']            # input pdb file
     outPath = options['o']
 
+    chainMask = options.get('cmask', None)
+    if chainMask: chainMask = toIntList(chainMask)
+    
     try:
         if options.has_key('h'):
             fheader = options['h']
@@ -425,7 +435,7 @@ def main(options):
 
         os.rename( fname, new_fname )
         fname = new_fname
-        
+
     if toInt( name[0] )== None or len(name)<4 :
         print "##### WARNING: ######"
         print "The pdb file name you gave is either shorter "
@@ -451,9 +461,6 @@ def main(options):
                       %(absfile(fname), new_file)
                 fname = new_file
                 
-
-        
-
     ## switch on Amber specialities ?
     amber = options.has_key('a')
 
@@ -462,14 +469,46 @@ def main(options):
 
     cleaner = ChainCleaner(
                  ChainSeparator(fname, outPath,
-                                int(options['c']), capBreaks=capBreaks ) )
+                                int(options['c']),
+                                capBreaks=capBreaks,
+                                chainMask=chainMask) )
 
     # initialize with output path and base file name for generate.inp file
     xplorer = Xplor(outPath, cleaner, fheader, fsegment, ftail, amber, extras=options )
 
     xplorer.generateInp()
 
+    ## run X-Plor
+    if options.has_key('exe'):
+        
+        out, error, returncode = Executor( settings.xplornih_bin , strict=0,
+                                           f_in=xplorer.cleaner.pdbname + "_generate.inp",
+                                           f_out=xplorer.cleaner.pdbname + '_generate.log').run()
+    ## Show structure in pymol
+    if options.has_key('view'):
 
+        pm = Pymoler( )
+        mname = pm.addPdb( xplorer.outname + '.pdb' )
+        pm.add('select xray-wat, segi 1XWW')
+        pm.add('select added-wat, segi 1WWW')
+        pm.add('select hydrogens, elem H')
+        pm.add('hide everything, xray-wat OR added-wat OR hydrogens')
+        pm.add('select none')
+
+        colors = [ hex2rgb(c, str) for c in hexColors( len(xplorer.chains) )]
+        
+        i=0
+        for c in xplorer.chains:
+            print colors[i], c.segment_id
+            pm.add( 'set_color col_%i, %s'%( i, colors[i] ) )
+            pm.add('color col_%i, segi %s and elem c'%( i, c.segment_id ) )
+            i += 1
+
+        pm.add('zoom all')
+        pm.show()
+
+
+    
 if __name__ == '__main__':
 
     options = cmdDict( _defaultOptions() )
