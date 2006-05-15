@@ -75,7 +75,9 @@ def defOptions():
             's':'0','step':'3',
             'conv':1e-11,
             'dic':None,
-            'hex':None}
+##            'hex':None,
+##            'id':None
+            }
 
 
 def load( options ):
@@ -266,7 +268,9 @@ def cluster( tc, options ):
     fdic = options['dic'] or m.getPdbCode() + '_models.dic'
     T.Dump( model_dic, T.absfile( fdic ) )
 
-    ## save all models in the dictionary as HEX pdb files
+## REDUNDANT CODE AS MULTIDOCK NOW WRITES THE HEX PDB FILES
+##
+##     ## save all models in the dictionary as HEX pdb files
 ##     for k in model_dic.keys():
 ##         m = model_dic[k]
         
@@ -281,10 +285,10 @@ def cluster( tc, options ):
 ##         else:
 ##             fhex = m.getPdbCode() + '_%03d_hex.pdb'%(k)
    
-##         createHexPdb_single( m, T.absfile( fhex ) )
+##         hexTools.createHexPdb_single( m, T.absfile( fhex ) )
        
 #    fhex = options['hex'] or m.getPdbCode() + '_hex.pdb'
-#    createHexPdb( model_dic, T.absfile( fhex ) )
+#    hexTools.createHexPdb( model_dic, T.absfile( fhex ) )
     
     return result
 
