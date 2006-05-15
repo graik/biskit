@@ -212,8 +212,8 @@ class PDBDope:
            MS - molecular surface area   (or MS_1.4 if probe_suffix=1)
            AS - accessible surface area  (or AS_1.4 if probe_suffix=1)
            
-        If the probe radii is 1.4 Angstrom the followint two profiles
-        are also added::
+        If the probe radii is 1.4 Angstrom and the Richards vdw radii
+        set is used the following two profiles are also added::
            relAS - Relative solvent accessible surface
            relMS - Relative molecular surface
            
@@ -231,16 +231,12 @@ class PDBDope:
         name_curv = 'curvature' + probe_suffix * ('_%3.1f' % probe)
 
         ## hydrogens are not allowed during FastSurf calculation
-        m = self.m.clone()
-        mask = m.maskHeavy()
-        m = m.compress( mask )
-
-
-        fs = SurfaceRacer( m, probe, vdw_set=vdw_set )
+        mask = self.m.maskHeavy()
+        
+        fs = SurfaceRacer( self.m, probe, vdw_set=vdw_set )
         fs_dic = fs.run()
 
         fs_info= fs_dic['surfaceRacerInfo']
-
 
         self.m.setAtomProfile( name_MS, fs_dic['MS'], mask, 0,
                                comment='Molecular Surface area in A',
@@ -257,7 +253,7 @@ class PDBDope:
                                version= T.dateString() + ' ' + self.version(),
                                **fs_info )
 
-        if probe == 1.4:
+        if round(probe, 1) == 1.4 and vdw_set == 1:
             self.m.setAtomProfile( 'relAS', fs_dic['relAS'], mask, 0,
                                    comment='Relative solvent accessible surf.',
                                    version= T.dateString()+' ' +self.version(),
@@ -276,36 +272,38 @@ if __name__ == '__main__':
     print "Loading PDB..."
     f = glob.glob( T.testRoot()+'/lig_pcr_00/pcr_00/*_1_*pdb' )[1]
     f = T.testRoot()+"/com/1BGS.pdb"
-    m = PDBModel(f)
-    m = m.compress( m.maskProtein() )
+    mdl = PDBModel(f)
+    
+    mdl = mdl.compress( mdl.maskProtein() )
 
     print "Initiating PDBDope...",
-    d = PDBDope( m )
+    d = PDBDope( mdl )
     print 'Done.\n'
 
     print "Adding FoldX energy...",
     d.addFoldX()
     print 'Done.'
 
-    print "Adding WhatIf ASA...",
-    d.addASA()
-    print 'Done.'
+#    print "Adding WhatIf ASA...",
+#    d.addASA()
+#    print 'Done.'
 
+    print "Adding SurfaceRacer curvature...",
+    d.addSurfaceRacer( probe=1.4 )
+    print 'Done.'
+    
     print "Adding surface mask...",
     d.addSurfaceMask()
     print 'Done.'
 
-    print "Adding conservation data...",
-    d.addConservation()
-    print 'Done.'
+#    print "Adding conservation data...",
+#    d.addConservation()
+#    print 'Done.'
 
     print "Adding surface density...",
     d.addDensity()
     print 'Done.'
 
-    print "Adding SurfaceRacer curvature...",
-    d.addSurfaceRacer( probe=1.4 )
-    print 'Done.'
 
     print d.m.info
 
@@ -315,7 +313,7 @@ if __name__ == '__main__':
     m_ref = m_ref.compress( m_ref.maskProtein() )
     for k in m_ref.atoms[0].keys():
         ref = [ m_ref.atoms[i][k] for i in range( m_ref.lenAtoms() ) ]
-        mod = [ m.atoms[i][k] for i in range( m.lenAtoms() ) ]
+        mod = [ mdl.atoms[i][k] for i in range( mdl.lenAtoms() ) ]
         if not ref == mod:
             print 'CHANGED!! ', k
         if ref == mod:
@@ -327,6 +325,6 @@ if __name__ == '__main__':
     from Biskit.Pymoler import Pymoler
 
     pm = Pymoler()
-    pm.addPdb( m, 'm' )
-    pm.colorAtoms( 'm', N.clip(m.profile('relAS'), 0.0, 100.0) )
+    pm.addPdb( mdl, 'm' )
+    pm.colorAtoms( 'm', N.clip(mdl.profile('relAS'), 0.0, 100.0) )
     pm.show()
