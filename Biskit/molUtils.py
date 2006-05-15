@@ -54,7 +54,8 @@ aaDic.update( {'cyx':'C', 'hid':'H', 'hie':'H', 'hip':'H',
                'unk':'X', 'ace':'X', 'nme':'X'} )#, 'ndp':'X' } )
 
 ## translate common hetero residues to pseudo single letter code
-xxDic = {'tip3':'~', 'hoh':'~', 'wat':'~', 'cl-':'-', 'na+':'+', 'ndp':'X'}
+xxDic = {'tip3':'~', 'hoh':'~', 'wat':'~', 'cl-':'-', 'na+':'+',
+         'ndp':'X', 'nap':'X'}
 
 ## map non-standard amino acid names to closest standard amino acid
 ##
@@ -198,8 +199,9 @@ nsAtoms={
            'C51', 'C71', 'O71', 'N71', 'C41', 'C31', 'C21', 'P3', 'O3',
            'O4', 'O5', 'H8', 'H9', 'H7', 'H6', 'H1', 'H5', 'H4', 'H13',
            'H11', 'H12', 'H10', 'H18', 'H19', 'H17', 'H16', 'H3', 'H15',
-           'H2', 'H14', 'H23', 'H24', 'H25', 'H22', 'H26', 'H21', 'H20'],
-    }
+           'H2', 'H14', 'H23', 'H24', 'H25', 'H22', 'H26', 'H21', 'H20'] }
+
+nsAtoms['NAP'] = nsAtoms['NDP'].remove('H26')
 
 ## map AA and NS and some other residue names to single letter code
 resDic = copy.copy( aaDic )
@@ -262,6 +264,41 @@ hbonds={ 'donors': {'GLY':['H','H1','H2','H3'],
                        'HIS':['O','OXT'],
                        'ASP':['O','OD1','OD2', 'OXT'],
                        'GLU':['O','OE1','OE2', 'OXT']} }
+
+
+##############################
+## Polar hydrogen connectivity -- PARAM19
+
+polarH = {'GLY':{'H':'N','H1':'N','H2':'N','H3':'N'},
+          'ALA':{'H':'N','H1':'N','H2':'N','H3':'N'},
+          'VAL':{'H':'N','H1':'N','H2':'N','H3':'N'},
+          'LEU':{'H':'N','H1':'N','H2':'N','H3':'N'},
+          'ILE':{'H':'N','H1':'N','H2':'N','H3':'N'},   
+          'MET':{'H':'N','H1':'N','H2':'N','H3':'N'},
+          'PRO':{'H':'N','H1':'N','H2':'N','H3':'N'},
+          'PHE':{'H':'N','H1':'N','H2':'N','H3':'N'},
+          'TRP':{'H':'N','H1':'N','H2':'N','H3':'N',
+                 'HE1':'NE1'},
+          'SER':{'H':'N','H1':'N','H2':'N','H3':'N',
+                 'HG':'OG'},
+          'THR':{'H':'N','H1':'N','H2':'N','H3':'N',
+                 'HG1':'OG1'},
+          'ASN':{'H':'N','H1':'N','H2':'N','H3':'N',
+                 'HD21':'ND2','HD22':'ND2'},
+          'GLN':{'H':'N','H1':'N','H2':'N','H3':'N',
+                 'HE21':'NE2','HE22':'NE2'},
+          'TYR':{'H':'N','H1':'N','H2':'N','H3':'N',
+                 'HH':'OH'},
+          'CYS':{'H':'N','H1':'N','H2':'N','H3':'N'},
+          'LYS':{'H':'N','H1':'N','H2':'N','H3':'N',
+                 'HZ1':'NZ','HZ2':'NZ','HZ3':'NZ'},
+          'ARG':{'H':'N','H1':'N','H2':'N','H3':'N',
+                 'HE':'NE', 'HH11':'NH1','HH12':'NH1',
+                 'HH21':'NH2','HH22':'NH2'},
+          'HIS':{'H':'N','H1':'N','H2':'N','H3':'N',
+                 'HD1':'ND1','HE2':'NE2'},
+          'ASP':{'H':'N','H1':'N','H2':'N','H3':'N'},
+          'GLU':{'H':'N','H1':'N','H2':'N','H3':'N'}}
 
 
 ## Scoring matrix for protein-protein interaction surfaces
