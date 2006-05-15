@@ -1058,6 +1058,48 @@ class Complex:
         return score
 
 
+    def interfaceArea( self, profiles=0 ):
+        """
+        Calculate the difference between the surface area of the
+        complex vs. its free components in square angstrom.
+
+        @param profiles: option to return the lig, rec and com profiles
+                          rather than the value (both absolute and relative
+                          values are returned)
+        @type  profiles: 1|0 (default: 0)
+
+        @return: AS area, MS area OR
+                 a dictionary of lig, rec and com profiles
+        @rtype: (float, float) or dict      
+        """
+        rcom = self.rec()
+        lcom = self.lig()
+        ccom = self.model()
+        result = {}
+
+        def getSurface( model, key ):
+            print "Calculating SurfaceRacer data for %s..."%key,
+            d = PDBDope( model )
+            d.addSurfaceRacer( probe=1.4 )
+            print 'Done.'
+            result['%s_AS'%key] = model.profile('AS')
+            result['%s_MS'%key] = model.profile('MS')
+            result['%s_relAS'%key] = model.profile('relAS')
+            result['%s_relMS'%key] = model.profile('relMS')
+
+        getSurface( rcom, 'rec' )
+        getSurface( lcom, 'lig' )
+        getSurface( ccom, 'com' )
+
+        if not profiles:
+            return sum(result['rec_AS']) + sum(result['lig_AS']) - \
+                   sum(result['com_AS']),\
+                   sum(result['rec_MS']) + sum(result['lig_MS']) - \
+                   sum(result['com_MS'])              
+        else:
+            return result
+        
+
 ##     def prosaProfile( self ):
 ##         """
 ##         Call ProsaII and calculate PROSA energy profile for the Complex.
