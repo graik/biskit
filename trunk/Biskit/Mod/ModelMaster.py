@@ -24,7 +24,7 @@
 Parallelize Modeller runs
 """
 
-from Biskit.PVM.TrackingJobMaster import *
+from Biskit.PVM.TrackingJobMaster import TrackingJobMaster
 
 import Biskit.hosts as hosts
 from Biskit.tools import projectRoot
