@@ -29,7 +29,7 @@ import Numeric
 
 ## dictionary with average accessabilities in 500 random
 ## GLY-XX-GLY peptides calculated with SurfaceRacer using
-## a probe radius of 1.4 A
+## a probe radius of 1.4 A and the Richards vdw radii set
 
 ## random coil molecular surface in a GLY-XXX-GLY peptide
 ranMS = {'CYS': {'C'  :  1.969, 'CB' : 21.339, 'CA' :  8.077,
