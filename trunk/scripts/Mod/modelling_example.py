@@ -68,7 +68,7 @@ Options:
    -view  show the superimposed models in PyMol
 
 
-HINT: If you want to instect the alignment used for modeling: 
+HINT: If you want to inspect the alignment used for modeling: 
       ~project/t_coffee/final.score_html 
 
 
@@ -193,7 +193,7 @@ except:
 ##
 ## Prepare pdb files in templates/nr for T-coffee and modeller
 ## (replace nonstandard residues, remove hydrogens,
-#    remove atoms with nultiple configurations, etc.)
+##   remove atoms with multiple configurations, etc.)
 
 ## input: templates/nr/*.pdb
 ##        templates/nr/chain_index.txt
