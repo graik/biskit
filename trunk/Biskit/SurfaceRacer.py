@@ -48,6 +48,8 @@ class SurfaceRacer( Executor ):
     Runs surface_racer_3 with given PDBModel, and returns a dictionary with
     accessible, molecular surface areas (MS and AS) and average curvature.
     Hydrogens should not be present in the pdb-file during the calculation.
+    If a probe radius of 1.4 A and the Richards vdw radii set is used the
+    relative exposure is also calculated.
 
     Options
     -------
@@ -221,8 +223,12 @@ class SurfaceRacer( Executor ):
         ms   = [] ## molecular surface area
         as   = [] ## accessible surface area
 
-        lines = open( self.f_out_name ).readlines()
-
+        try:
+            lines = open( self.f_out_name ).readlines()
+        except:
+            raise SurfaceRacer_Error,\
+                  'SurfaceRacer result file %s does not exist. You have probably encountered a very rare SurfaceRacer round off error that have caused the program to terminate. The simplest remedy to this problem is to increase the probe radii with a very small number, for example from %.3f to %.3f.'%(self.f_out_name, self.probe,self.probe+0.001  )
+        
         if  len(lines) == 0:
             raise SurfaceRacer_Error,\
                   'SurfaceRacer result file %s empty'%self.f_out_name
@@ -307,6 +313,9 @@ class SurfaceRacer( Executor ):
         """
         Overrides Executor method
         """
+        if not os.path.exists(self.f_out_name):
+            T.flushPrint( '\nSurfaceRacer result file %s does not exist. You have probably encountered a very rare SurfaceRacer round off error that have caused the program to terminate. Will now try to recalculate the surface with a slightly increased surface probe radii: increasing radii from %.3f to %.3f.\n'%(self.f_out_name, self.probe,self.probe+0.001))
+            return 1
         return not self.error is None 
 
 
@@ -315,13 +324,32 @@ class SurfaceRacer( Executor ):
         Overrides Executor method
         """
         Executor.finish( self )
+
         self.result = self.parse_result( self.output )
-        if self.probe == 1.4:
+
+        ## if probe radius other than 1.4 A the relative surface exposure
+        ## cannot be calculated, but allow this check to be a little flexible
+        ## if we ate forced to slightly increase the radii to excape round off
+        ## SurfaceRacer errors
+        if round(self.probe, 1) == 1.4 and self.vdw_set == 1:
             self.__relExposure('MS')
             self.__relExposure('AS')
         else:
-            print "No relative accessabilities calculated when using other prob radius then 1.4 A"
+            T.flushPrint("\nNo relative accessabilities calculated when using a prob radius other than 1.4 A or not using the Richards vdw radii set.")
 
+
+    def failed( self ):
+        """
+        Called if external program failed, Overrides Executor method.
+
+        In some very rare cases SurfaceRacer round off error cause the program
+        to terminate. The simplest remedy to this problem is to increase the
+        probe radii with a very small number and rerun the calculation.
+        """
+        self.probe = self.probe + 0.001
+        self.run()
+        
+    
 #######
 ## test
 if __name__ == '__main__':
@@ -337,8 +365,8 @@ if __name__ == '__main__':
     m = PDBModel(f)
     m = m.compress( m.maskProtein() )
 
-    print "Starting SurfaceRAcer"
-    x = SurfaceRacer( m, 1.4, vdw_set=2, debug=1, verbose=1 )
+    print "Starting SurfaceRacer"
+    x = SurfaceRacer( m, 1.4, vdw_set=1, debug=1, verbose=1 )
 
     print "Running"
     r = x.run()
