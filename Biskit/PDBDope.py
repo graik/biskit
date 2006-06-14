@@ -30,7 +30,7 @@ import os.path
 
 from Biskit.WhatIf import WhatIf 
 from Biskit.Hmmer import Hmmer
-
+from Biskit.DSSP import Dssp
 from Biskit.Fold_X import Fold_X
 from Biskit.SurfaceRacer import SurfaceRacer
 
@@ -119,6 +119,27 @@ class PDBDope:
                               comment='residues with any atom > 40% exposed',
                               version= T.dateString() + ' ' + self.version() )
 
+    def addSecondaryStructure( self ):
+        """
+        Adds a residue profile with the secondary structure as
+        calculated by the DSSP program.
+
+        Profile code::
+          B = residue in isolated beta-bridge
+          E = extended strand, participates in beta ladder
+          G = 3-helix (3/10 helix)
+          I = 5 helix (pi helix)
+          T = hydrogen bonded turn
+          S = bend
+          . = loop or irregular
+        """
+        dssp = Dssp( self.m )
+        ss = dssp.run()
+        
+        self.m.setResProfile( 'secondary',  ss,
+                              comment='secondary structure from DSSP',
+                              version= T.dateString() + ' ' + self.version() )
+        
 
     def addConservation( self, pfamEntries=None ):
         """
@@ -296,6 +317,10 @@ if __name__ == '__main__':
     d.addSurfaceMask()
     print 'Done.'
 
+    print "Adding secondary structure profile...",
+    d.addSecondaryStructure()
+    print 'Done.'
+    
 #    print "Adding conservation data...",
 #    d.addConservation()
 #    print 'Done.'
