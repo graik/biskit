@@ -208,8 +208,8 @@ class SurfaceRacer( Executor ):
 
     def parse_result( self, output ):
         """
-        Parse the SurfaceRacer output file which has the same mane as the input
-        pdb, but with a txt extension. The output ends up un the same folser
+        Parse the SurfaceRacer output file which has the same nawe as the input
+        pdb, but with a txt extension. The output ends up un the same folder
         as the input. In addition a file called result.txt is created in the
         same directory as the binary.
         
@@ -224,7 +224,9 @@ class SurfaceRacer( Executor ):
         as   = [] ## accessible surface area
 
         try:
-            lines = open( self.f_out_name ).readlines()
+            out_file = open( self.f_out_name )
+            lines = out_file.readlines()
+            out_file.close()
         except:
             raise SurfaceRacer_Error,\
                   'SurfaceRacer result file %s does not exist. You have probably encountered a very rare SurfaceRacer round off error that have caused the program to terminate. The simplest remedy to this problem is to increase the probe radii with a very small number, for example from %.3f to %.3f.'%(self.f_out_name, self.probe,self.probe+0.001  )
