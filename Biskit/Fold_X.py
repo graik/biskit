@@ -25,7 +25,7 @@ Get binding energy from fold_X
 """
 
 from Biskit import Executor, TemplateError
-import Biskit.settings as S
+## import Biskit.settings as S
 import Biskit.tools as T
 
 import re, string, tempfile

@@ -32,7 +32,7 @@ import random, time
 
 import Biskit.tools as t
 import Biskit.mathUtils as MU
-import Biskit.settings as settings
+## import Biskit.settings as settings
 from Biskit.Errors import BiskitError
 from Biskit.AmberCrdEntropist import AmberCrdEntropist, EntropistError
 from Biskit.AmberParmBuilder import AmberParmBuilder

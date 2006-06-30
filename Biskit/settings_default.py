@@ -90,7 +90,7 @@ pymol_bin 	  = 'pymol.com', s, 'http://pymol.sourceforge.net/'
 ## AMBER
 s = 'amber'
 
-sander_bin        = 'sander', s, 'part of Amber package'
+# sander_bin        = 'sander', s, 'part of Amber package'
 leaprc            = __os.getenv('AMBERHOME','')+'/dat/leap/cmd/leaprc.ff99',s,\
                     'default force field for Amber tleap'
 
@@ -110,10 +110,10 @@ s = 'biskit_db'
 hmm_db            = '/Bis/db/pfam/hmmer/Pfam', s,\
                     'Pfam (http://pfam.wustl.edu) for HMMER'
 
-s = 'test'
+## s = 'test'
 
-test_bin    = 'superprogram',   s, 'test parameter, not used'
-test_float  = 1.2, s, 'test parameter, not used'
+## test_bin    = 'superprogram',   s, 'test parameter, not used'
+## test_float  = 1.2, s, 'test parameter, not used'
 
 #############################
 ## clean up module content ##

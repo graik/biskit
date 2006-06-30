@@ -31,7 +31,7 @@ import re
 import tempfile
 
 import Biskit.tools as T
-import Biskit.settings as settings
+## import Biskit.settings as settings
 from Biskit.Errors import BiskitError
 from Biskit.Executor import Executor
 
