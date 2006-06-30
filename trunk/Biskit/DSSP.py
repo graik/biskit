@@ -30,7 +30,7 @@ import os.path
 import string
 import Numeric as N
 from Biskit import Executor, TemplateError
-import Biskit.settings as S
+## import Biskit.settings as S
 import Biskit.tools as T
 import Biskit.molUtils as MU
 

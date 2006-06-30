@@ -29,7 +29,7 @@ import string
 import tempfile
 
 from Biskit import Executor, TemplateError
-import Biskit.settings as S
+## import Biskit.settings as S
 import Biskit.tools as T
 
 

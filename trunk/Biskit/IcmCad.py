@@ -29,7 +29,7 @@ Calculate Contact Area Difference (CAD) with ICMBrowser.
 import tempfile, re
 
 from Biskit import Executor, TemplateError
-import Biskit.settings as S
+## import Biskit.settings as S
 
 
 class IcmCadError( Exception ):

@@ -33,7 +33,7 @@ import tempfile
 import Biskit.tools as T
 
 from Biskit import Executor, TemplateError
-import Biskit.settings as S
+## import Biskit.settings as S
 
 import time
 import subprocess
