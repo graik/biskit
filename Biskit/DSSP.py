@@ -33,9 +33,9 @@ from Biskit import Executor, TemplateError
 ## import Biskit.settings as S
 import Biskit.tools as T
 import Biskit.molUtils as MU
+from Biskit import BiskitError
 
-
-class Dssp_Error( Exception ):
+class Dssp_Error( BiskitError ):
     pass
 
 
@@ -243,28 +243,63 @@ class Dssp( Executor ):
         self.result = self.parse_result( )
 
 
-           
-#######
-## test
-if __name__ == '__main__':
-
+        
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
     from Biskit import PDBModel
     import Biskit.tools as T
-    import glob
     import Biskit.mathUtils as MA
 
-    print "Loading PDB..."
+    
+    def run( self ):
+        """
+        run function test
 
-    f = T.testRoot()+"/com/1BGS.pdb"
-    m = PDBModel(f)
-    m = m.compress( m.maskProtein() )
+        @return: secondary structure assignment
+        @rtype: str
+        """
+        print "Loading PDB..."
 
-    print "Starting DSSP"
-    x = Dssp( m )
+        f = T.testRoot()+"/com/1BGS.pdb"
+        m = self.PDBModel(f)
+        m = m.compress( m.maskProtein() )
 
-    print "Running"
-    r = x.run()
+        print "Starting DSSP"
+        self.dssp = Dssp( m )
 
-    print "Sequence :", m.sequence()
-    print "Secondary:", r
+        print "Running"
+        result = self.dssp.run()
+
+        print "Sequence :", m.sequence()
+        print "Secondary:", result
+
+        return result
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: secondary structure assignment
+        @rtype:  str
+        """
+        return '.....SHHHHHHHHHHHSS..TTEE.HHHHHHHT..GGGT.HHHHSTT.EEEEEEE..TT..S...TT..EEEEE.S..SSS..S.EEEEETT..EEEESSSSSS.EE...EEEEETTT..SHHHHHHHHHHHHT..TT..SSHHHHHHHHHHT..SSEEEEEE.HHHHHHHTTTTHHHHHHHHHHHHHHT..EEEEE.'
+
+        
+        
+
+if __name__ == '__main__':
+
+    test = Test()
+
+    assert test.run() == test.expected_result()
+
+
+
 

@@ -428,7 +428,11 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
 
             ## keep TIP3 waters as well
             if len(waters) == 0:
-                TIP3_waters = self.pdb.molecules[ 'TIP3' ]
+                try:
+                    TIP3_waters = self.pdb.molecules[ 'TIP3' ]
+                except:
+                    TIP3_waters = []
+                    
                 for w in TIP3_waters:
                     pdb.nextResidue('TIP3')
                     ## XPLOR wants "ATOM" not "HETATM":
@@ -458,22 +462,62 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
         else:
             return None
 
-############################
-## TESTING
-############################
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    def run( self ):
+        """
+        run function test
+
+        @return: amino acid sequence
+        @rtype: str
+        """
+        fname =   T.testRoot() + '/com/1BGS_original.pdb'
+        outPath = T.tempDir()
+
+        self.sep = ChainSeparator( fname, outPath, 1)   
+
+        chain = self.sep.next()
+        c = chain
+
+        i=1
+        all_chains = []
+        while chain <> None:
+            print 'Chain %i:'%i, ''.join( singleAA( chain.sequence() ) )
+            all_chains += chain.sequence()
+            chain = self.sep.next()
+            i += 1
+
+        return ''.join( singleAA( all_chains ) )
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: amino acid sequence
+        @rtype:  str
+        """
+        return 'AQVINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIRAQVINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIRAQVINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIRKKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDALTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILSKKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDALTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILSKKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDALTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILS'
+
+        
 
 if __name__ == '__main__':
-    sep = ChainSeparator(T.testRoot()+'/com/1BGS_original.pdb',
-                        T.testRoot(), 1)
 
-    chain = sep.next()
-    c = chain
+    test = Test()
 
-    i=1
-    while chain <> None:
-        print 'Chain %i:'%i, ''.join( singleAA( chain.sequence() ) )
-        chain = sep.next()
-        i += 1
+    assert test.run() == test.expected_result()
 
 
 
+
+
+
+
+        

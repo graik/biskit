@@ -21,7 +21,8 @@
 ## $Revision$
 ## last $Author:  
 """
-Display a Ramachandran plot for a list of PDBModels
+Display a Ramachandran plot for a list of PDBModels with
+the same atom contents.
 """
 
 from Biskit import ColorSpectrum as CS
@@ -323,18 +324,53 @@ class Ramachandran:
         if fileName:
             plot.write_eps( fileName )
 
-## TEST ##
+
+#############
+##  TESTING        
+#############
+
+class Test:
+    """
+    Test class
+    """
+    import Biskit.PDBModel as PDBModel
+
+    
+    def run( self ):
+        """
+        Ramachandran function test
+
+        @return: sum of all psi angles
+        @rtype: float      
+        """
+        traj = T.Load( T.testRoot()+'/lig_pcr_00/traj.dat' )
+        mdl = [ traj[0], traj[11] ]
+        mdl = [ md.compress( md.maskProtein() ) for md in mdl ]
+
+        self.rama = Ramachandran( mdl , name='test')
+
+        psi = N.array( self.rama.psi )
+        return N.sum( N.compress( psi != None, psi ) )
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: sum of all psi angles
+        @rtype: float     
+        """
+        # N.sum( N.compress(N.array(rama.psi) != None, N.array(rama.psi)))
+        return -11717.909796797909 
+        
 
 if __name__ == '__main__':
 
-    import glob
-    import Biskit.PDBModel as PDBModel
+    test = Test()
 
-    fns = glob.glob( T.testRoot()+'/lig_pcr_00/pcr_00/*_1_*pdb' )[:2]
-    mdl = [ PDBModel(f) for f in fns ]
-    mdl = [ md.compress( md.maskProtein() ) for md in mdl ]
+    assert test.run() == test.expected_result()
 
-    rama = Ramachandran( mdl , name='test')
-    rama.show()
+    test.rama.show()
+
+
     
-
