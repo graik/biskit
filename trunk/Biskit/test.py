@@ -73,11 +73,11 @@
 ## PDBModel.py
 ## plotUtils.py
 ## ProfileCollection.py
-## Prosa2003.py		lig/1A19.pdb + rec/2A2P.pdb
+## Prosa2003.py           lig/1A19.pdb + rec/2A2P.pdb
 ## Prosa.py
 ## Pymoler.py
 ## QualSlave.py
-## Ramachandran.py      /lig_pcr_00/traj.dat
+## Ramachandran.py        /lig_pcr_00/traj.dat
 ## ReduceCoordinates.py
 ## rmsFit.py
 ## settings_default.py
@@ -166,85 +166,87 @@ class Biskit_Test( unittest.TestCase ):
 
     def test_FuzzyCluster( self ):
         from Biskit.FuzzyCluster import Test
-        T = Test()
-        self.assertEquals( N.shape(T.run()), T.expected_result() )
+        t = Test()
+        self.assertEquals( N.shape(t.run()), t.expected_result() )
 
         
     def test_Ramachandran( self ):
         from Biskit.Ramachandran import Test
-        T = Test()
-        self.assertAlmostEquals( T.run(), T.expected_result(), 2 )
+        t = Test()
+        self.assertAlmostEquals( t.run(), t.expected_result(), 2 )
 
 
     def test_ColorSpectrum( self ):
         from Biskit.ColorSpectrum import Test
-        T = Test()
-        self.assertEquals( T.run(), T.expected_result() )
+        t = Test()
+        self.assertEquals( t.run(), t.expected_result() )
 
 
     def test_ChainCleaner( self ):
         from Biskit.ChainCleaner import Test
-        T = Test()
-        self.assertEquals( T.run(), T.expected_result() )
+        t = Test()
+        self.assertEquals( t.run(), t.expected_result() )
 
         
     def test_ChainSeparator( self ):
         from Biskit.ChainSeparator import Test
-        T = Test()
-        self.assertEquals( T.run(), T.expected_result() )
+        t = Test()
+        self.assertEquals( t.run(), t.expected_result() )
 
 
     def test_ChainWriter( self ):
         from Biskit.ChainWriter import Test
-        T = Test()
-        self.assertEquals( T.run(), T.expected_result() )    
+        t = Test()
+        self.assertEquals( t.run(), t.expected_result() )    
 
         
 class Biskit_Test_Applications( unittest.TestCase ):
 
     def test_Dssp( self ):
         from Biskit.DSSP import Test
-        T = Test()
-        self.assertEquals( T.run(), T.expected_result() )
+        t = Test()
+        self.assertEquals( t.run(), t.expected_result() )
 
 
     def test_Prosa2003( self ):
         from Biskit.Prosa2003 import Test
-        T = Test()
-        self.assertAlmostEquals( N.sum(T.run()),
-                                 N.sum(T.expected_result()),
+        t = Test()
+        self.assertAlmostEquals( N.sum(t.run()),
+                                 N.sum(t.expected_result()),
                                  2 )
 
     def test_Hmmer( self ):
         from Biskit.Hmmer import Test
-        T = Test()
-        self.assertAlmostEquals( N.sum(T.run()),
-                                 N.sum(T.expected_result()),
+        t = Test()
+        self.assertAlmostEquals( N.sum(t.run()),
+                                 N.sum(t.expected_result()),
                                  2 )
 
 def suite_biskit():
-    suite = unittest.TestSuite()
-    suite.addTest( Biskit_Test( "test_FuzzyCluster" ) )
-    suite.addTest( Biskit_Test( "test_Ramachandran" ) )
-    suite.addTest( Biskit_Test( "test_ColorSpectrum" ) )
-    suite.addTest( Biskit_Test( "test_ChainCleaner" ) )
-    suite.addTest( Biskit_Test( "test_ChainSeparator" ) )
-    suite.addTest( Biskit_Test( "test_ChainWriter" ) )
+    suite = unittest.makeSuite( Biskit_Test() )
+##     suite = unittest.TestSuite()
+##     suite.addTest( Biskit_Test( "test_FuzzyCluster" ) )
+##     suite.addTest( Biskit_Test( "test_Ramachandran" ) )
+##     suite.addTest( Biskit_Test( "test_ColorSpectrum" ) )
+##     suite.addTest( Biskit_Test( "test_ChainCleaner" ) )
+##     suite.addTest( Biskit_Test( "test_ChainSeparator" ) )
+##     suite.addTest( Biskit_Test( "test_ChainWriter" ) )
     return suite
 
 
         
 def suite_biskit_applications():
-    suite = unittest.TestSuite()
-    suite.addTest( Biskit_Test_Applications( "test_Dssp" ) )
-    suite.addTest( Biskit_Test_Applications( "test_Prosa2003" ) )
-    suite.addTest( Biskit_Test_Applications( "test_Hmmer" ) )
+    suite = unittest.makeSuite( Biskit_Test_Applications() )
+##     suite = unittest.TestSuite()
+##     suite.addTest( Biskit_Test_Applications( "test_Dssp" ) )
+##     suite.addTest( Biskit_Test_Applications( "test_Prosa2003" ) )
+##     suite.addTest( Biskit_Test_Applications( "test_Hmmer" ) )
     return suite
 
 
 if __name__ == '__main__':
 
-    f=open('/shared_bin/test.txt','w')
+    f=open('test.log','w')
     
     runner = unittest.TextTestRunner(f, verbosity=2)
     runner.run( suite_biskit_applications() )
@@ -252,7 +254,7 @@ if __name__ == '__main__':
 
     f.close()
     
-    r = open('/shared_bin/test.txt','r')
+    r = open('test.log','r')
     test_result = r.readlines()
     r.close()
 
