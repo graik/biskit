@@ -231,23 +231,54 @@ class FuzzyCluster:
         return sd
 
 
-if __name__ == '__main__':
+#############
+##  TESTING        
+#############
 
-	from RandomArray import *
-	from gnuplot import *
-	from time import clock
+class Test:
+    """
+    Test class
+    """    
+    from RandomArray import random
 
+    
+    def run( self ):
+        """
+        FuzzyCluster function test
+
+        @return: array with cluster centers
+        @rtype: array('f')
+        """
 	x1 = random((500,2))
 	x2 = random((500,2)) + 1
 	x3 = random((500,2)) + 2
 
 	x = N.concatenate((x1, x2, x3))
 
-	fc = FuzzyCluster(x, n_cluster = 5, weight = 1.5)
+	self.fuzzy = FuzzyCluster(x, n_cluster = 5, weight = 1.5)
 
-	start = clock()
+	centers = self.fuzzy.go(1.e-30, n_iterations=50, nstep=10)       
 
-	centers = fc.go(1.e-30, n_iterations=50, nstep=10)
+        return centers
 
-	print clock() - start, 's'
 
+    def expected_result( self ):
+        """      
+        fuzzy clustering -> the result is newer the same.
+        Therefore we will only check that the shape of the
+        output ids correct.
+
+        @return: shape of centers array
+        @rtype: tuple
+        """  
+        return (5, 2)
+
+          
+
+if __name__ == '__main__':
+
+    test = Test()
+
+    assert N.shape(test.run()) == test.expected_result()
+
+##     centers = test.fuzzy.go(1.e-30, n_iterations=50, nstep=10)

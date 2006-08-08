@@ -34,11 +34,11 @@ import Biskit.tools as T
 
 from Biskit import Executor, TemplateError
 ## import Biskit.settings as S
-
+from Biskit import BiskitError
 import time
 import subprocess
 
-class Prosa2003_Error( Exception ):
+class Prosa2003_Error( BiskitError ):
     pass
 
 
@@ -334,30 +334,60 @@ exit\n
         self.result = self.parse_result( )
 
 
-#######
-## test
-if __name__ == '__main__':
+#############
+##  TESTING        
+#############   
 
+class Test:
+    """
+    Test class
+    """
+    
     from Biskit import PDBModel
     import Biskit.tools as T
-    import glob
 
-    print "Loading PDB..."
-    fl = glob.glob( T.testRoot()+'/lig_pc2_00/pdb/*_1_*pdb.gz' )[1]
-    ml = PDBModel(fl)
-    ml = ml.compress( ml.maskProtein() )
 
-    fr = glob.glob( T.testRoot()+'/rec_pc2_00/pdb/*_1_*pdb.gz' )[1]
-    mr = PDBModel(fr)
-    mr = mr.compress( mr.maskProtein() )
+    def run( self ):
+        """
+        Prosa2003 function test
 
-    print "Starting Prosa2003"
-    p = Prosa2003( [ml, mr], debug=0, verbose=1 )
+        @return: list of energies
+        @rtype: [ float ]
+        """
+        print "Loading PDB..."
+        ml = self.PDBModel( T.testRoot()+'/lig/1A19.pdb' )
+        ml = ml.compress( ml.maskProtein() )
 
-    print "Running"
-    ene = p.run()
+        mr = self.PDBModel( T.testRoot()+'/rec/1A2P.pdb' )
+        mr = mr.compress( mr.maskProtein() )
 
-    print "Result: ",
-    print p.prosaEnergy()
+        print "Starting Prosa2003"
+        self.prosa = Prosa2003( [ml, mr], debug=0, verbose=1 )
 
+        print "Running"
+        ene = self.prosa.run()
+
+        result = self.prosa.prosaEnergy()
+        print "Result: ", result
+
+        return result
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+        
+        @return: list of energies
+        @rtype: [ float ]
+        """
+        return  [ -94.568,  -64.903, -159.463 ]
+
+        
+
+if __name__ == '__main__':
+
+    test = Test()
+
+    assert test.run() == test.expected_result()
+    
 

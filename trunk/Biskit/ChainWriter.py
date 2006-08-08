@@ -26,6 +26,7 @@ Write cleaned peptide_chains as PDB for import into XPlor
 """
 from Scientific.IO.PDB import *
 import commands, os
+import os.path
 
 import tools as T
 
@@ -75,9 +76,11 @@ class ChainWriter:
         @type  fname: string
         """
         try:
-            command = 'egrep -v "^TER " ' + fname + '> temp.pdb'
+            #command = 'egrep -v "^TER " ' + fname + '> temp.pdb'
+            path = os.path.dirname( fname )
+            command = 'egrep -v "^TER " %s > %s/temp.pdb'%( fname, path )
             commands.getstatusoutput(command)
-            os.rename('temp.pdb', fname)
+            os.rename('%s/temp.pdb'%path, fname)
         except (OSError):
             T.errWriteln("Error removing 'TER' statement from %s: ")
             T.errWriteln( T.lastError() )
@@ -106,25 +109,59 @@ class ChainWriter:
 
         return 0            # false, no more chains to write
 
-##############################
-## TESTING
-##############################
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """   
+    def run( self ):
+        """
+        run function test
+
+        @return: message
+        @rtype: str
+        """
+        from ChainCleaner import ChainCleaner
+        from ChainSeparator import ChainSeparator
+    
+        fname =   T.testRoot() + '/rec/1A2P_rec_original.pdb'
+
+        outPath = T.tempDir()
+
+        cleaner = ChainCleaner( ChainSeparator( fname, outPath) )
+
+        self.writer = ChainWriter( outPath )
+        
+        all_msg = []
+        print 'Writing separated, cleaned chains to disk...'
+        for i in range(3):
+            msg = self.writer.writeChain( cleaner.next() )
+            print msg
+            all_msg += [ msg ]
+
+        return all_msg
+        
+        
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: message
+        @rtype:  str
+        """
+        return [1, 0, 0]
+    
 
 if __name__ == '__main__':
 
-    from ChainCleaner import ChainCleaner
-    from ChainSeparator import ChainSeparator
+    test = Test()
 
-    cleaner = ChainCleaner( ChainSeparator( \
-        T.testRoot()+'/com/1BGS_edited.pdb',
-        T.testRoot()+'/com') )
+    assert test.run() == test.expected_result()
 
-    writer = ChainWriter( T.testRoot()+'/com' )
-    print 'Writing separated, cleaned chains to disk...'
-    print writer.writeChain( cleaner.next() )
-    print writer.writeChain( cleaner.next() )
-    print writer.writeChain( cleaner.next() )
 
-    print "DONE."
 
 

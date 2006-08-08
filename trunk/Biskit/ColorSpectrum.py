@@ -267,37 +267,76 @@ class ColorSpectrum:
 
         return red, green, blue
 
-##
-## Test
-##
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: grey color spectrum
+        @rtype:  [ int ]
+        """
+        import biggles as B
+        
+        c_grey    = ColorSpectrum( 'grey', 0, 100 )
+        c_sausage = ColorSpectrum( 'sausage', 0, 100 )
+        c_plasma  = ColorSpectrum( 'plasma', 0, 100 )
+        c_plasma2 = ColorSpectrum( 'plasma2', 0, 100 )
+
+        self.p = B.FramedPlot()
+        
+        result = []
+        for i in range( 100 ):
+
+            x = (i, i+1 )
+            self.p.add( B.FillBelow( x, (1., 1.),
+                                    color = c_grey.color( i ) ) )
+            result += [ c_grey.color( i ) ]
+            
+            self.p.add( B.FillBelow( x, (0.75, 0.75),
+                                    color = c_sausage.color( i ) ) )
+            self.p.add( B.FillBelow( x, (0.5, 0.5),
+                                    color = c_plasma.color( i ) ) )
+            self.p.add( B.FillBelow( x, (0.25, 0.25),
+                                    color = c_plasma2.color( i ) ) )
+
+        self.p.add( B.Curve( (0,100), (1.,1.)) )
+        self.p.add( B.Curve( (0,100), (.75,.75)) )
+        self.p.add( B.Curve( (0,100), (.5,.5) ))
+        self.p.add( B.Curve( (0,100), (0.25, 0.25)) )
+        self.p.add( B.Curve( (0,100), (0.0, 0.0)) )
+
+        self.p.add( B.PlotLabel(  0.5 ,0.9, 'grey') )
+        self.p.add( B.PlotLabel(  0.5 ,0.65, 'sausage') )
+        self.p.add( B.PlotLabel(  0.5 ,0.4, 'plasma') )
+        self.p.add( B.PlotLabel(  0.5 ,0.15, 'plasma2') )
+
+        return result
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: grey color spectrum
+        @rtype:  [ int ]
+        """
+        return [0, 197379, 328965, 526344, 657930, 855309, 986895, 1184274, 1315860, 1513239, 1710618, 1842204, 2039583, 2171169, 2368548, 2500134, 2697513, 2829099, 3026478, 3158064, 3355443, 3552822, 3684408, 3881787, 4013373, 4210752, 4342338, 4539717, 4671303, 4868682, 5066061, 5197647, 5395026, 5526612, 5723991, 5855577, 6052956, 6184542, 6381921, 6513507, 6710886, 6908265, 7039851, 7237230, 7368816, 7566195, 7697781, 7895160, 8026746, 8224125, 8421504, 8553090, 8750469, 8882055, 9079434, 9211020, 9408399, 9539985, 9737364, 9868950, 10066329, 10263708, 10395294, 10592673, 10724259, 10921638, 11053224, 11250603, 11382189, 11579568, 11776947, 11908533, 12105912, 12237498, 12434877, 12566463, 12763842, 12895428, 13092807, 13224393, 13421772, 13619151, 13750737, 13948116, 14079702, 14277081, 14408667, 14606046, 14737632, 14935011, 15132390, 15263976, 15461355, 15592941, 15790320, 15921906, 16119285, 16250871, 16448250, 16579836]
+        
+        
+
 if __name__ == '__main__':
 
-    import biggles as B
+    test = Test()
 
-    c_grey    = ColorSpectrum( 'grey', 0, 100 )
-    c_sausage = ColorSpectrum( 'sausage', 0, 100 )
-    c_plasma  = ColorSpectrum( 'plasma', 0, 100 )
-    c_plasma2 = ColorSpectrum( 'plasma2', 0, 100 )
+    assert test.run() == test.expected_result()
+    
+    test.p.show()
 
-    p = B.FramedPlot()
-
-    for i in range( 100 ):
-
-        x = (i, i+1 )
-        p.add( B.FillBelow( x, (1., 1.),     color = c_grey.color( i ) ) )
-        p.add( B.FillBelow( x, (0.75, 0.75), color = c_sausage.color( i ) ) )
-        p.add( B.FillBelow( x, (0.5, 0.5),   color = c_plasma.color( i ) ) )
-        p.add( B.FillBelow( x, (0.25, 0.25), color = c_plasma2.color( i ) ) )
-
-    p.add( B.Curve( (0,100), (1.,1.)) )
-    p.add( B.Curve( (0,100), (.75,.75)) )
-    p.add( B.Curve( (0,100), (.5,.5) ))
-    p.add( B.Curve( (0,100), (0.25, 0.25)) )
-    p.add( B.Curve( (0,100), (0.0, 0.0)) )
-
-    p.add( B.PlotLabel(  0.5 ,0.9, 'grey') )
-    p.add( B.PlotLabel(  0.5 ,0.65, 'sausage') )
-    p.add( B.PlotLabel(  0.5 ,0.4, 'plasma') )
-    p.add( B.PlotLabel(  0.5 ,0.15, 'plasma2') )
-
-    p.show()
