@@ -56,7 +56,8 @@ class AmberEntropist( AmberCrdEntropist ):
                   fit_s=None, fit_e=None, memsave=1,
                   **kw ):
         """
-        @param traj: path to 1 or 2 pickled Trajectory (2 seperated by '+')
+        @param traj: path to 1 or 2 pickled Trajectory instances
+                     (2 separated by '+', e.g. 'rec.traj+lig.traj')
         @type  traj: str
         @param parm: try using existing parm file & keep it [create+discard]
         @type  parm: str
@@ -69,18 +70,18 @@ class AmberEntropist( AmberCrdEntropist ):
 
         @param chains: extract chains from traj (default: None, all chains)
         @type  chains: [int]
-        @param border: 1st chain of 2nd molecule - required for split, shift,
+        @param border: 1st chain of 2nd molecule; required for split, shift,
                        shuffle if traj is not already a tuple of trajectories
         @type  border: int
-        @param split: split trajectory after |border| and fit the two halfs
+        @param split: split trajectory after *border* and fit the two halfs
                       separately (default: 0)
         @type  split: 1|0
         @param shift: recombine rec and lig member trajectories, should
                       disrupt correlations between rec and lig, requires
-                      |chains| or 2 traj files to identify rec (default: 0)
+                      *chains* or 2 traj files to identify rec (default: 0)
         @type  shift: int
         @param shuffle: shuffle the order of frames for one trajectory half,
-                        requires |border| or 2 traj files to identify rec
+                        requires *border* or 2 traj files to identify rec
         @type  shuffle: 0|1
         @param s: start frame of complete traj (default: 0)
         @type  s: int
@@ -105,10 +106,10 @@ class AmberEntropist( AmberCrdEntropist ):
         @type  ex: [int] OR ([int],[int])
         @param ex_n: exclude last n members  OR...                
         @type  ex_n: int
-        @param ex3: exclude |ex3|rd tripple of trajectories  (default: 0)
+        @param ex3: exclude *ex3*rd tripple of trajectories  (default: 0)
                     (index starts with 1! 0 to exclude nothing) OR....
         @type  ex3: int
-        @param ex1: exclude ex1-th member remaining after applying ex
+        @param ex1: exclude *ex1*-th member remaining after applying *ex*
                     (default: None)(index starts with 1! 0 to exclude nothing)
         @type  ex1: int
         @param fit_s: fit to average of different frame slice 
@@ -386,17 +387,20 @@ class AmberEntropist( AmberCrdEntropist ):
 
     def __add3( self, n_members, excluded, trippleIndex ):
         """
-        Add a tripple of numbers from range( n_members ) to excluded.
+        Add a tripple of numbers from range( n_members ) to be
+        excluded for error estimation. Tripples are chosen to have
+        minimal overlap. For 10 trajectories (*n_members*=10), the
+        first 3 tripples will be (1,2,3), (4,5,6), (7,8,9).
 
-        @param n_members:
-        @type  n_members:
-        @param excluded:
-        @type  excluded:
-        @param trippleIndex:
-        @type  trippleIndex:
+        @param n_members: number of member trajectories
+        @type  n_members: int
+        @param excluded: excluded member trajectories
+        @type  excluded: [ int ]
+        @param trippleIndex: 
+        @type  trippleIndex: int
 
-        @return: 
-        @rtype:      
+        @return: the indices of all excluded member trajectories
+        @rtype: [ int ]
         """
         remaining = MU.difference( range( n_members ), excluded )
         tripple = self.tripples( remaining, trippleIndex+1 )[-1]
@@ -406,6 +410,16 @@ class AmberEntropist( AmberCrdEntropist ):
     def __add1( self, n_members, excluded, index ):
         """
         Add one number from range( n_members ) to list of excluded indices
+
+        @param n_members: number of member trajectories
+        @type  n_members: int
+        @param excluded: excluded member trajectories
+        @type  excluded: [ int ]
+        @param index: 
+        @type  index: int
+
+        @return: the indices of all excluded member trajectories
+        @rtype: [ int ]
         """
         remaining = MU.difference( range( n_members ), excluded )
         new_i = remaining[index]
@@ -414,7 +428,14 @@ class AmberEntropist( AmberCrdEntropist ):
 
     def __exclude( self, traj, exclude ):
         """
-        Exclude members.
+        Exclude members from a (set of) Trajectory.
+        @param traj: input trajectory
+        @type traj: EnsembleTraj
+        @param exclude: set of indices to be excluded
+        @type exclude: [ int ]
+
+        @return: 
+        @rtype: EnsembleTraj
         """
         if exclude == None or len( exclude ) == 0:
             return traj
@@ -427,8 +448,15 @@ class AmberEntropist( AmberCrdEntropist ):
 
     def __removeMembers( self, t ):
         """
-        @param t: EnsembleTraj OR ( EnsembleTraj, EnsembleTraj )
-        @type  t: EnsembleTraj OR ( EnsembleTraj, EnsembleTraj )
+        Some individual trajectories may have to be excluded as
+        outliers or for error estimation (depending on the parameters
+        passed to AmberEntropist). 
+
+        @param t: one or two ensembles of trajectories
+        @type t: EnsembleTraj OR (EnsembleTraj, EnsembleTraj )
+
+        @return: t with some member trajectories excluded, if needed
+        @rtype: EnsembleTraj OR (EnsembleTraj, EnsembleTraj )
         """
         if self.ex_n:
             self.exclude = range( self.ex_n )
@@ -476,6 +504,9 @@ class AmberEntropist( AmberCrdEntropist ):
         @type  ref: EnsembleTraj
         @param cast: cast to reference (same atom content) (default: 1)
         @type  cast: 1|0
+
+        @return: split, fitted or shuffled, etc. trajectory instance
+        @rtype: EnsembleTraj OR (EnsembleTraj, EnsembleTraj )
         """
         ## Load 1 or 2
         if self.__splitFilenames( fname ):

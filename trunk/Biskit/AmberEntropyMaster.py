@@ -212,7 +212,7 @@ class AmberEntropyMaster(TrackingJobMaster):
 
     def __vrange( self, v ):
         """
-        Interprete vrange option -> [ int ] or [ float ]
+        Interprete the vrange option -> [ int ] or [ float ]
 
         @param v: vrange option
         @type  v: lst OR str
@@ -327,7 +327,15 @@ class AmberEntropyMaster(TrackingJobMaster):
 
     def equalizeMemberCount( self, n_rec, n_lig, n_com ):
         """
-        ensure we keep equal number of members from frec, flig, and com
+        Ensure we keep equal number of members trajectories from frec,
+        flig, and com.
+
+        @param n_rec: number of receptor trajectories
+        @type  n_rec: int
+        @param n_lig: number of ligand trajectories
+        @type  n_lig: int
+        @param n_com: number of complex trajectories
+        @type  n_com: int
         """
         ex        = [ self.ex_frec, self.ex_flig, self.ex_com ]
         n_members = [ n_rec, n_lig, n_com ]
@@ -379,7 +387,7 @@ class AmberEntropyMaster(TrackingJobMaster):
 
     def dumpMissing( self, o, fname ):
         """
-        Pickle o to fname, if it is not already there.
+        Pickle *o* to path *fname*, if it is not already there.
 
         @param o: object to dump
         @type  o: any
@@ -454,6 +462,8 @@ class AmberEntropyMaster(TrackingJobMaster):
     def getInitParameters(self, slave_tid):
         """
         hand over parameters to slave once.
+
+        @rtype: dict
         """
         host = self.hostnameFromTID( slave_tid )
         nice = self.niceness.get( host, self.niceness.get('default',0) )
@@ -471,7 +481,7 @@ class AmberEntropyMaster(TrackingJobMaster):
 
     def cleanCache( self ):
         """
-        Remove leftover cache files
+        Remove left-over cache files
         """
         fs = [ self.ref_frec, self.ref_flig, self.ref_com, self.ref_brec,
                self.ref_blig ]
@@ -507,7 +517,7 @@ class AmberEntropyMaster(TrackingJobMaster):
     ##
     def __cpupdate( self, d1, d2 ):
         """
-        Merge 2 dictionaries and return a copy
+        Merge 2 dictionaries *d1* and *d2* and return a copy
         """
         r = copy.copy( d1 )
         r.update( d2 )
@@ -532,7 +542,7 @@ class AmberEntropyMaster(TrackingJobMaster):
         """
         fcp = self.__cpupdate
         r = {}
-        S = self
+        S = self  ## make rest more readable
 
         d = { 'ref':None, 'cast':1, 'chains':None,
               'split':0, 'shift':0, 'shuffle':0, 'ex_n':0, 'ex3':None,
@@ -637,6 +647,12 @@ class AmberEntropyMaster(TrackingJobMaster):
         a tree-like dict of dicts in which the values of d can be accessed
         like::
           d[value][int_member][str_protocol]
+
+        @param d: the raw results accumulated from the slave nodes
+        @type d: dict
+
+        @return: tree-like dict ordered by variable value, member, protocol
+        @rtype: dict of dict of dict of dict
         """
         r = {}
 
@@ -666,9 +682,12 @@ class AmberEntropyMaster(TrackingJobMaster):
 
     def getResult( self, **arg ):
         """
-        Collaps the results for different values of the variable parameter
+        Collapse the results for different values of the variable parameter
         into lists and put the results into a tree ala::
           r[ member_index ][ protocol_name ][ result_field ] -> [ values ]
+
+        @return: tree-like dict ordered by variable value, member, protocol
+        @rtype: dict of dict of dict of lists
         """
         tree = self.dictionate( self.result )
 

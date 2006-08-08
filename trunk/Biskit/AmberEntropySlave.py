@@ -36,12 +36,17 @@ from Biskit.AmberCrdEntropist import EntropistError
 import os, time
 
 class AmberEntropySlave( JobSlave ):
-
+    """
+    Collect AmberEntropist jobs from AmberEntropyMaster and return result.
+    """
 
     def initialize(self, params):
         """
         expects::
           {'nice':int, 'ferror':str, .. }
+
+        @param params: initialisation parameters passed from the master
+        @type: dict
         """
         self.__dict__.update( params )
         self.errorLog = LogFile( self.ferror, mode='a' )
@@ -74,8 +79,13 @@ class AmberEntropySlave( JobSlave ):
 
     def go(self, jobs):
         """
-        @param jobs: dictionary with { int_soln : file_name_complex }
+        The calculation.
+        
+        @param jobs: dictionary with { int_id : str_protocol }
         @type  jobs: dict
+
+        @return: result from AmberEntropist.run()
+        @rtype: dict
         """
         result = {}
 

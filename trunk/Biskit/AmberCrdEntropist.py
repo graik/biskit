@@ -60,9 +60,9 @@ class AmberCrdEntropist( Executor ):
         @type  f_crd: str
         @param f_template: alternative ptraj input template (default: None)
         @type  f_template: str 
-        @param s: firat 'start' frame (default: 0, first)
+        @param s: start frame (default: 0, first)
         @type  s: int
-        @param e: late 'end' frame (default: None, last)
+        @param e: end frame (default: None, last)
         @type  e: int
         @param step: frame offset (default: 1, no offset )
         @type  step: int

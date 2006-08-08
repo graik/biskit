@@ -61,16 +61,16 @@ class AmberCrdParser:
 
     def __init__( self, fcrd, fref, box=0, rnAmber=0, pdbCode=None ):
         """
-        @param fcrd: path to input crd
+        @param fcrd: path to input coordinate file
         @type  fcrd: str
         @param fref: PDB or pickled PDBModel with same atom content and order
         @type  fref: str
-        @param box: each frame in traj has additional line with box info
+        @param box: expect line with box info at the end of each frame
                     (default: 0)
         @type  box: 1|0
         @param rnAmber: rename amber style residues into standard (default: 0)
         @type  rnAmber: 1|0
-        @param pdbCode: pdb code (default: None)
+        @param pdbCode: pdb code to be put into the model (default: None)
         @type  pdbCode: str
         """
         self.fcrd = T.absfile( fcrd )
@@ -105,7 +105,7 @@ class AmberCrdParser:
         Rename special residue names from Amber back into standard names
         (i.e CYX S{->} CYS )
         
-        @param model: model 
+        @param model: model, will be modified in-place
         @type  model: PDBModel
         """
         for a in model.getAtoms():
@@ -117,7 +117,7 @@ class AmberCrdParser:
 
     def line2numbers( self, l ):
         """
-        convert line from crd/vel file to list of float numbers
+        convert a line from crd/vel file to list of float numbers
         
         @param l: line
         @type  l: str

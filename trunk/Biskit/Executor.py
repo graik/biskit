@@ -70,7 +70,7 @@ class Executor:
            - failed    ... called if execution fails
            
           Additionally, you should provide a simple program configuration file
-          in biskit/external/defaults/. See See L{Biskit.ExeConfig} for
+          in biskit/external/defaults/. See L{Biskit.ExeConfig} for
           details and examples!
 
       2.  Use Executor directly.
@@ -478,7 +478,7 @@ class Executor:
 
     def convertInput( self, inp):
         """
-        Converst the input to a format used by the selected execution method.
+        Convert the input to a format used by the selected execution method.
         
         @param inp: path to existing input file or string with input
         @type  inp: str
