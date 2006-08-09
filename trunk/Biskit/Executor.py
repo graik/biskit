@@ -541,7 +541,7 @@ if __name__ == '__main__':
 
 ##     e = Executor( 'emacs', args='.zshenv', strict=0, catch_out=0,
 ##                   verbose=1, cwd=t.absfile('~') )
-    e = Executor( 'emacs', args='.zshenv', strict=0, node='magneto',
+    e = Executor( 'emacs', args='.zshenv', strict=0,
                   f_in=None,
                   f_out=t.absfile('~/test.out'),
                   verbose=1, cwd=t.absfile('~') )
