@@ -163,10 +163,49 @@ class Blast2Seq:
             return {}
 
 
-####################################
-## TESTING
-####################################
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+
+    def run( self ):
+        """
+        run function test
+
+        @return: balast alignment result
+        @rtype: dict
+        """
+        blaster = Blast2Seq()
+        
+        return blaster.runBlast("AAAFDASEFFGIGHHSFKKEL",
+                                "AAAFDASEFFGIGHHSAKK")
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: alignment data
+        @rtype:  str
+        """
+        return {'aln_len': 19, 'aln_id': 0.94736842105263153, 'res_id': 18}
+
+            
 
 if __name__ == '__main__':
-    blaster = Blast2Seq()
-    print blaster.runBlast("AAAFDASEFFGIGHHSFKKEL","AAAFDASEFFGIGHHSAKK")
+
+    test = Test()
+
+    result = test.run()
+    print result
+    
+    assert result == test.expected_result()
+
+
+
+
+

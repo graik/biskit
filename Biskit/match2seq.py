@@ -27,6 +27,7 @@ a residue mask for each of them.
 """
 
 import Numeric as N
+import Biskit.tools as T
 import sys
 from Biskit.difflib_old import SequenceMatcher
 #from difflib import SequenceMatcher
@@ -457,28 +458,67 @@ def compareModels( model_1, model_2 ):
 
 
 
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
 
-###################
-## Main
+        @return: secondary structure assignment
+        @rtype: str
+        """
+        print 'Reading pdb files.'
+        lig_traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )[:2]
+        m = [ m.compress( m.maskProtein() ) for m in lig_traj ]
+
+        ## make the models different
+        m[1].removeRes(['ALA'])
+
+        mask1, mask2 = compareModels( m[0], m[1] )
+        print 'Reading and comparing two models'
+
+        print '\nResidue masks to make the two maodels equal'
+        print 'mask1\n', mask1
+        print 'mask2\n', mask2
+
+        return mask1, mask2
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: secondary structure assignment
+        @rtype:  str
+        """
+        return N.array([1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1,
+                        1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1,
+                        1, 1, 1, 1],'i'),\
+               N.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],'i')
+
+
 
 if __name__ == '__main__':
 
-    from time import time
-    from PDBModel import PDBModel
-    import tools as T
-    import glob
+    test = Test()
 
-    f = glob.glob( T.testRoot()+'/lig_pc2_00/pdb/*_1_*pdb.gz' )[:2]
-    m = [ PDBModel(i) for i in f ]
-    m = [ i.compress( i.maskProtein() ) for i in m ]
-    print 'Reading pdb files.'
+    assert test.run() == test.expected_result()
 
-    start_time = time()
-    m[1].removeRes(['ALA'])
+    
 
-    mask1, mask2 = compareModels( m[0], m[1] )
-    print 'Reading and comparing two models in ',time()-start_time, ' seconds.'
 
-    print '\nResidue masks to make the two maodels equal'
-    print 'mask1\n', mask1
-    print 'mask2\n', mask2
+

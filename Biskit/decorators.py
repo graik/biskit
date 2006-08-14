@@ -126,39 +126,73 @@ def synchronized( f ):
     return lock_call_release
 
 
-###########
-## TEST
-###########
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: count
+        @rtype: int
+        """
+        import time
+        from Biskit import PDBModel
+
+        class A:
+
+            def __init__( self, id=1 ):
+
+                self.id = id
+
+            @accept( int, model=PDBModel, x=str )
+            def simple( self, i, model=None, **arg ):
+
+                i += 1
+                return i
+
+
+            @synchronized
+            def report( self, j, i=1, **arg ):
+                print self.id
+
+
+        a = A()
+
+        t = time.clock()
+
+        result = 0
+        for i in range( 10000 ):
+
+            result += a.simple( 8, x='a' )
+
+        print time.clock() - t
+
+        return result
+
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: count
+        @rtype:  int
+        """
+        return 90000
+
+        
 
 if __name__ == '__main__':
 
-    import time
-    from Biskit import PDBModel
+    test = Test()
 
-    class A:
+    assert test.run() == test.expected_result()
 
-        def __init__( self, id=1 ):
-
-            self.id = id
-
-        @accept( int, model=PDBModel, x=str )
-        def simple( self, i, model=None, **arg ):
-
-            i = 1 + 1
-            return i
-
-
-        @synchronized
-        def report( self, j, i=1, **arg ):
-            print self.id
-
-
-    a = A()
-
-    t = time.clock()
-
-    for i in range( 10000 ):
-
-        a.simple( 9, x='a' )
-
-    print time.clock() - t
+    

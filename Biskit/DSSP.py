@@ -253,8 +253,6 @@ class Test:
     Test class
     """
     from Biskit import PDBModel
-    import Biskit.tools as T
-    import Biskit.mathUtils as MA
 
     
     def run( self ):
@@ -299,6 +297,8 @@ if __name__ == '__main__':
     test = Test()
 
     assert test.run() == test.expected_result()
+
+    
 
 
 

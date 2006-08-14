@@ -477,8 +477,8 @@ def single2longAA( seq ):
     ## invert AA dict
     invTab = {}
 
-    for key in resDic:
-        invTab[ resDic[key] ] = key
+    for key in aaDicStandard:
+        invTab[ aaDicStandard[key] ] = key
 
     result = []
     for aa in seq:

@@ -717,20 +717,68 @@ class SparseArray:
 ##         pass
 
 
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: reconstructed full array
+        @rtype: array
+        """
+        a = N.zeros( (6,), 'f' )
+
+        self.sa = SparseArray( a.shape )
+        self.sa[3] = 1.
+        self.sa[5] = 2.
+
+        b = N.zeros( (5, 6), 'f' )
+        b[0,1] = 3.
+        b[0,2] = 4
+        b[4,2] = 5
+        b[3,0] = 6
+
+        self.sb = SparseArray( b )
+
+        self.sb.append( self.sa )
+
+        return self.sb.toarray()
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: full array representation
+        @rtype:  array
+        """
+        return N.array([[ 0.,  3.,  4.,  0.,  0.,  0.],
+                        [ 0.,  0.,  0.,  0.,  0.,  0.],
+                        [ 0.,  0.,  0.,  0.,  0.,  0.],
+                        [ 6.,  0.,  0.,  0.,  0.,  0.],
+                        [ 0.,  0.,  5.,  0.,  0.,  0.],
+                        [ 0.,  0.,  0.,  1.,  0.,  2.]])
+
+
 if __name__ == '__main__':
 
-    a = N.zeros( (6,), 'f' )
+    test = Test()
 
-    sa = SparseArray( a.shape )
-    sa[3] = 1.
-    sa[5] = 2.
+    assert test.run() == test.expected_result()
 
-    b = N.zeros( (5, 6), 'f' )
-    b[0,1] = 3.
-    b[0,2] = 4
-    b[4,2] = 5
-    b[3,0] = 6
+    
 
-    sb = SparseArray( b )
 
-    sb.append( sa )
+
+
+
+
