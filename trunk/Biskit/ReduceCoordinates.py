@@ -355,25 +355,53 @@ class ReduceCoordinates:
 
 
 
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: atoms after reduction
+        @rtype: int
+        """
+        m = PDBModel( T.testRoot()+'/com/1BGS.pdb' )
+        m = m.compress( N.logical_not( m.maskH2O() ) )
+
+        m.setAtomProfile('test', range(len(m)))
+
+        red = ReduceCoordinates( m, 4 )
+
+        mred = red.reduceToModel()
+
+        print 'Atoms before reduction %i'%m.lenAtoms()
+        print 'Atoms After reduction %i'%mred.lenAtoms()
+
+        return mred.lenAtoms()
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: atoms after reduction
+        @rtype:  int
+        """
+        return 445
+
+        
+        
+
 if __name__ == '__main__':
 
-##     from Numeric import array_constructor
+    test = Test()
 
-    m = PDBModel( T.testRoot()+'/com_wet/1BGS.pdb' )
-    m = m.compress( N.logical_not( m.maskH2O() ) )
+    assert test.run() == test.expected_result()
 
-    m.setAtomProfile('test', range(len(m)))
-
-    red = ReduceCoordinates( m, 4 )
-
-    mred = red.reduceToModel()
-
-    print 'Atoms before reduction %i'%m.lenAtoms()
-    print 'Atoms After reduction %i'%mred.lenAtoms()
-##     frames = red.reduceXyz( t.frames, axis=1 )
-
-##     ref = red.reduceToModel( t.ref.getXyz() )
-
-##     t.frames = frames
-##     t.ref = ref
-
+    

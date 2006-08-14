@@ -30,6 +30,7 @@ import tempfile, re
 
 from Biskit import Executor, TemplateError
 ## import Biskit.settings as S
+import Biskit.tools as T
 
 
 class IcmCadError( Exception ):
@@ -220,32 +221,66 @@ copy a_ \"mol2\" delete
             raise TemplateError, s
 
 
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    from Biskit import PDBModel
+    
+
+    def run( self ):
+        """
+        run function test
+
+        @return: icmCad values
+        @rtype: [float]
+        """
+        print "Loading PDB..."
+
+        f = T.testRoot() + '/lig/1A19.pdb'
+        m1 = self.PDBModel(f)
+        m1 = m1.compress( m1.maskProtein() )
+
+        ms = []
+
+        lig_traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
+        for m in lig_traj[:3]:
+            m = m.compress( m.maskProtein() )
+            ms.append(m)
+            T.flushPrint('*')
+
+        print "Starting ICM"
+
+        self.x = IcmCad( m1, ms, debug=0, verbose=1 )
+
+        print "Running"
+        r = self.x.run()
+
+        print "Result: ", r
+
+        return r
+
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: icmCad values
+        @rtype:  [float]
+        """
+        return [8.8603529999999999, 9.0315890000000003, 8.5055429999999994]
+    
+        
 
 if __name__ == '__main__':
 
-    from Biskit import PDBModel
-    import Biskit.tools as T
-    import glob
+    test = Test()
 
-    print "Loading PDBs..."
+    assert test.run() == test.expected_result()
 
-    m1 = PDBModel( T.testRoot()+'/lig_pc2_00/pdb/1A19_1_0.pdb.gz' )
-    m1 = m1.compress( m1.maskProtein() )
-
-    ms = []
-
-    for f in glob.glob( T.testRoot()+'/lig_pc2_00/pdb/*_1_*pdb.gz' )[:3]:
-        m = PDBModel(f)
-        m = m.compress( m.maskProtein() )
-        ms.append(m)
-        T.flushPrint('*')
-
-    print "Starting ICM"
-
-    x = IcmCad( m1, ms, debug=0, verbose=1 )
-
-    print "Running"
-    r = x.run()
-
-    print "Result: ", r
 

@@ -232,29 +232,61 @@ class Fold_X( Executor ):
         self.result = self.parse_foldx( self.output )
 
 
-##########
-## test ##
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    from Biskit import PDBModel
+    
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: dictionary with foldx energy terms
+        @rtype: dict
+        """
+        print "Loading PDB..."
+
+        f = T.testRoot() + '/rec/1A2P.pdb'
+        m = self.PDBModel(f)
+        m = m.compress( m.maskProtein() )
+
+        print "Starting fold_X"
+
+        x = Fold_X( m, debug=0, verbose=1 )
+
+        print "Running"
+        r = x.run()
+
+        print "Result: ", r
+
+        return r
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: dictionary with foldx energy terms
+        @rtype:  dict
+        """
+        return {'el': -9.0299999999999994, 'hyd': -145.41999999999999, 'wtbr': -0.10000000000000001, 'mc': 44.640000000000001, 'DDG': -8.0099999999999998, 'hb': -44.079999999999998, 'pol': 192.72, 'nbhb': 0.0, 'vw': -85.859999999999999, 'sc': 39.109999999999999, 'vwcl': 0.0, 'ene': -8.0099999999999998}
+
+        
 
 if __name__ == '__main__':
 
-    from Biskit import PDBModel
-    import Biskit.tools as T
-    import glob
+    test = Test()
 
-    print "Loading PDB..."
+    assert test.run() == test.expected_result()
 
-    f = glob.glob( T.testRoot()+'/rec_pc2_00/pdb/*_1_*pdb.gz' )[1]
-    m = PDBModel(f)
-    m = m.compress( m.maskProtein() )
+    
 
-    print "Starting fold_X"
-
-    x = Fold_X( m, debug=0, verbose=1 )
-
-    print "Running"
-    r = x.run()
-
-    print "Result: ", r
 
 
 

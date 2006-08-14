@@ -160,3 +160,56 @@ def rowDistances( x, y ):
 
     ## calculate row distances
     return N.sqrt(N.sum(N.power(x - z, 2), 1)) 
+
+
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: rotation matrix
+        @rtype: array
+        """
+        import Biskit.tools as T
+
+        traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
+
+        rt, rmsdLst = match( traj.ref.xyz, traj[-1].xyz)
+        
+        print 'RMSD: %.2f'%rmsdLst[0][1]
+        
+        # return rotation matrix
+        return rt[0]
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: rotation matrix
+        @rtype:  array
+        """
+        return N.array( [[ 0.9999011,   0.01311352,  0.00508244,],
+                         [-0.01310219,  0.99991162, -0.00225578,],
+                         [-0.00511157,  0.00218896,  0.99998454 ]] )
+        
+
+if __name__ == '__main__':
+
+    test = Test()
+
+    assert abs( N.sum( N.ravel( test.run()- test.expected_result() ) ) ) < 1e-6
+
+
+
+

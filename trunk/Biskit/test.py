@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
@@ -33,34 +35,34 @@
 ## AmberEntropySlave.py
 ## AmberParmBuilder.py
 ## AmberRstParser.py
-## BisList.py
-## Blast2Seq.py
-## ChainCleaner.py        /rec/1A2P_rec_original.pdb
-## ChainSeparator.py      /com/1BGS_original.pdb
-## ChainWriter.py
+## N --BisList.py
+## Blast2Seq.py           None
+## ChainCleaner.py        rec/1A2P_rec_original.pdb
+## ChainSeparator.py      com/1BGS_original.pdb
+## ChainWriter.py         rec/1A2P_rec_original.pdb
 ## ColorSpectrum.py       None
-## decorators.py
+## decorators.py          None
 ## default_hosts.py
-## DictList.py
+## -- DictList.py
 ## difflib_old.py
 ## DSSP.py                com/1BGS.pdb
 ## EnsembleTraj.py
-## ErrorHandler.py
-## Errors.py
+## N -- ErrorHandler.py
+## N -- Errors.py
 ## ExeConfigCache.py
 ## ExeConfig.py
 ## Executor.py
-## Fold_X.py
+## Fold_X.py              /rec/1A2P.pdb
 ## FuzzyCluster.py        None
-## gnuplot.py
-## hist.py
+## -- gnuplot.py
+## N -- hist.py
 ## Hmmer.py               lig/1A19.pdb
 ## hosts.py
-## IcmCad.py
+## IcmCad.py              lig/1A19.pdb, lig_pcr_00/traj.dat
 ## __init__.py
-## LocalPath.py
-## LogFile.py
-## match2seq.py
+## -- LocalPath.py
+## N - LogFile.py
+## match2seq.py           lig_pcr_00/traj.dat
 ## mathUtils.py
 ## MatrixPlot.py
 ## ModelList.py
@@ -74,20 +76,20 @@
 ## plotUtils.py
 ## ProfileCollection.py
 ## Prosa2003.py           lig/1A19.pdb + rec/2A2P.pdb
-## Prosa.py
+##  -- Prosa.py -- outdated --
 ## Pymoler.py
 ## QualSlave.py
-## Ramachandran.py        /lig_pcr_00/traj.dat
-## ReduceCoordinates.py
-## rmsFit.py
+## Ramachandran.py        lig_pcr_00/traj.dat
+## ReduceCoordinates.py   com/1BGS.pdb
+## rmsFit.py              lig_pcr_00/traj.dat
 ## settings_default.py
 ## SettingsManager.py
 ## settings.py
-## SparseArray.py
+## SparseArray.py         None
 ## StructureSlave.py
-## SurfaceRacer.py
-## surfaceRacerTools.py
-## Table.py
+## SurfaceRacer.py        lig/1A19.pdb
+## N -- surfaceRacerTools.py
+## -- Table.py -- outdated --
 ## tools.py
 ## TrajCluster.py
 ## Trajectory.py
@@ -164,42 +166,81 @@ import Numeric as N
 
 class Biskit_Test( unittest.TestCase ):
 
-    def test_FuzzyCluster( self ):
-        from Biskit.FuzzyCluster import Test
-        t = Test()
-        self.assertEquals( N.shape(t.run()), t.expected_result() )
+##     def test_FuzzyCluster( self ):
+##         from Biskit.FuzzyCluster import Test
+##         t = Test()
+##         self.assertEquals( N.shape(t.run()), t.expected_result() )
 
         
-    def test_Ramachandran( self ):
-        from Biskit.Ramachandran import Test
+##     def test_Ramachandran( self ):
+##         from Biskit.Ramachandran import Test
+##         t = Test()
+##         self.assertAlmostEquals( t.run(), t.expected_result(), 2 )
+
+
+##     def test_ColorSpectrum( self ):
+##         from Biskit.ColorSpectrum import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
+
+
+##     def test_ChainCleaner( self ):
+##         from Biskit.ChainCleaner import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
+
+        
+##     def test_ChainSeparator( self ):
+##         from Biskit.ChainSeparator import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
+
+
+##     def test_ChainWriter( self ):
+##         from Biskit.ChainWriter import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
+
+
+    def test_Blast2Seq( self ):
+        from Biskit.Blast2Seq import Test
         t = Test()
-        self.assertAlmostEquals( t.run(), t.expected_result(), 2 )
+        self.assertEquals( t.run(), t.expected_result() )        
 
 
-    def test_ColorSpectrum( self ):
-        from Biskit.ColorSpectrum import Test
+    def test_decorators( self ):
+        from Biskit.decorators import Test
         t = Test()
         self.assertEquals( t.run(), t.expected_result() )
 
 
-    def test_ChainCleaner( self ):
-        from Biskit.ChainCleaner import Test
+    def test_ReduceCoordinates( self ):
+        from Biskit.ReduceCoordinates import Test
+        t = Test()
+        self.assertEquals( t.run(), t.expected_result() )
+            
+
+    def test_rmsFit( self ):
+        from Biskit.rmsFit import Test
+        t = Test()
+        self.assertAlmostEquals( N.sum(N.ravel(t.run())),
+                                 N.sum(N.ravel(t.expected_result())),
+                                 4 )
+
+
+    def test_SparseArray( self ):
+        from Biskit.SparseArray import Test
         t = Test()
         self.assertEquals( t.run(), t.expected_result() )
 
-        
-    def test_ChainSeparator( self ):
-        from Biskit.ChainSeparator import Test
+
+    def test_match2seq( self ):
+        from Biskit.match2seq import Test
         t = Test()
         self.assertEquals( t.run(), t.expected_result() )
 
-
-    def test_ChainWriter( self ):
-        from Biskit.ChainWriter import Test
-        t = Test()
-        self.assertEquals( t.run(), t.expected_result() )    
-
-        
+                        
+            
 class Biskit_Test_Applications( unittest.TestCase ):
 
     def test_Dssp( self ):
@@ -208,48 +249,60 @@ class Biskit_Test_Applications( unittest.TestCase ):
         self.assertEquals( t.run(), t.expected_result() )
 
 
-    def test_Prosa2003( self ):
-        from Biskit.Prosa2003 import Test
-        t = Test()
-        self.assertAlmostEquals( N.sum(t.run()),
-                                 N.sum(t.expected_result()),
-                                 2 )
+##     def test_Prosa2003( self ):
+##         from Biskit.Prosa2003 import Test
+##         t = Test()
+##         self.assertAlmostEquals( N.sum(t.run()),
+##                                  N.sum(t.expected_result()),
+##                                  2 )
 
-    def test_Hmmer( self ):
-        from Biskit.Hmmer import Test
+##     def test_Hmmer( self ):
+##         from Biskit.Hmmer import Test
+##         t = Test()
+##         self.assertAlmostEquals( N.sum(t.run()),
+##                                  N.sum(t.expected_result()),
+##                                  2 )
+        
+##     def test_Fold_X( self ):
+##         from Biskit.Fold_X import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
+
+
+##     def test_IcmCad( self ):
+##         from Biskit.IcmCad import Test
+##         t = Test()
+##         self.assertAlmostEquals( N.sum(t.run()),
+##                                  N.sum(t.expected_result()),
+##                                  2  )
+
+
+    def test_SurfaceRacer( self ):
+        from Biskit.SurfaceRacer import Test
         t = Test()
         self.assertAlmostEquals( N.sum(t.run()),
                                  N.sum(t.expected_result()),
-                                 2 )
+                                 4 )
+
 
 def suite_biskit():
-    suite = unittest.makeSuite( Biskit_Test() )
-##     suite = unittest.TestSuite()
-##     suite.addTest( Biskit_Test( "test_FuzzyCluster" ) )
-##     suite.addTest( Biskit_Test( "test_Ramachandran" ) )
-##     suite.addTest( Biskit_Test( "test_ColorSpectrum" ) )
-##     suite.addTest( Biskit_Test( "test_ChainCleaner" ) )
-##     suite.addTest( Biskit_Test( "test_ChainSeparator" ) )
-##     suite.addTest( Biskit_Test( "test_ChainWriter" ) )
+    suite = unittest.makeSuite( Biskit_Test )
     return suite
 
 
         
 def suite_biskit_applications():
-    suite = unittest.makeSuite( Biskit_Test_Applications() )
-##     suite = unittest.TestSuite()
-##     suite.addTest( Biskit_Test_Applications( "test_Dssp" ) )
-##     suite.addTest( Biskit_Test_Applications( "test_Prosa2003" ) )
-##     suite.addTest( Biskit_Test_Applications( "test_Hmmer" ) )
+    suite = unittest.makeSuite( Biskit_Test_Applications )
     return suite
 
 
 if __name__ == '__main__':
 
+
     f=open('test.log','w')
     
     runner = unittest.TextTestRunner(f, verbosity=2)
-    runner.run( suite_biskit_applications() )
+#    runner.run( suite_biskit_applications() )
     runner.run( suite_biskit() )
 
     f.close()
@@ -258,6 +311,7 @@ if __name__ == '__main__':
     test_result = r.readlines()
     r.close()
 
+    print  '='*60+'\n======= TEST RESULTS\n' + '='*60 +'\n'
     for line in test_result:
         if line != '\n':
             print line

@@ -28,7 +28,7 @@ Calculates accessible, molecular surface areas and average curvature.
 import tempfile, re
 import os.path
 import string
-import Numeric
+import Numeric as N
 
 from Biskit import Executor, TemplateError
 import Biskit.settings as S
@@ -246,9 +246,9 @@ class SurfaceRacer( Executor ):
             ms   += [ float( string.strip( lines[i][-17:-11] ) ) ]
             as   += [ float( string.strip( lines[i][-24:-17] ) ) ]
 
-        result = {'curvature':Numeric.array(curv),
-                  'MS':Numeric.array(ms),
-                  'AS':Numeric.array(as),
+        result = {'curvature':N.array(curv),
+                  'MS':N.array(ms),
+                  'AS':N.array(as),
                   'surfaceRacerInfo':{'probe_radius':self.probe,
                                   'vdw_set':self.vdw_set}
                   }
@@ -277,10 +277,10 @@ class SurfaceRacer( Executor ):
         @return: profile with inspected values
         @rtype: [float]
         """
-        mask = Numeric.greater( profile, upperLimit )
-        mask += Numeric.less( profile, lowerLimit )
+        mask = N.greater( profile, upperLimit )
+        mask += N.less( profile, lowerLimit )
 
-        for i in  Numeric.nonzero(mask):
+        for i in  N.nonzero(mask):
             print 'WARNING! Profile value %.2f set to O\n'%profile[i]
             profile[i] = 0
 
@@ -352,33 +352,68 @@ class SurfaceRacer( Executor ):
         self.run()
         
     
-#######
-## test
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    from Biskit import PDBModel
+    import Biskit.mathUtils as MA
+    
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: sum of relMS, relAS and curvature for atoms 10 to 20
+        @rtype:  float, float, float
+        """
+        print "Loading PDB..."
+
+        f = T.testRoot()+'/lig/1A19.pdb'
+        m = self.PDBModel(f)
+        m = m.compress( m.maskProtein() )
+
+        print "Starting SurfaceRacer"
+        self.x = SurfaceRacer( m, 1.4, vdw_set=1, debug=1, verbose=1 )
+
+        print "Running"
+        r = self.x.run()
+
+        print "Result: "
+
+        c= r['curvature']
+        ms= r['MS']
+        print "Curvature: weighted mean %.6f and standard deviation %.3f"\
+              %(self.MA.wMean(c,ms), self.MA.wSD(c,ms))
+
+        print 'Relative MS of atoms 10 to 20 atoms:', r['relMS'][10:20]
+
+        print 'Relative AS of atoms 10 to 20 atoms:', r['relAS'][10:20]
+
+        return N.sum(r['relMS'][10:20]), N.sum(r['relAS'][10:20]), N.sum(r['curvature'][10:20])
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: sum of relMS, relAS and curvature for atoms 10 to 20
+        @rtype:  float, float, float
+        """
+        
+        return 570.47829086283639, 356.81939295543083, 0.80000000000000004
+
+
+    
 if __name__ == '__main__':
 
-    from Biskit import PDBModel
-    import Biskit.tools as T
-    import glob
-    import Biskit.mathUtils as MA
+    test = Test()
 
-    print "Loading PDB..."
+    assert test.run() == test.expected_result()
 
-    f = glob.glob( T.testRoot()+'/lig_pcr_00/pcr_00/*_1_*pdb' )[1]
-    m = PDBModel(f)
-    m = m.compress( m.maskProtein() )
 
-    print "Starting SurfaceRacer"
-    x = SurfaceRacer( m, 1.4, vdw_set=1, debug=1, verbose=1 )
 
-    print "Running"
-    r = x.run()
-
-    print "Result: ",
-
-    c= r['curvature']
-    ms= r['MS']
-    print "weighted mean %.6f and standard deviation %.3f"%(MA.wMean(c,ms), MA.wSD(c,ms))
-
-    print 'Relative MS of atoms 10 to 20 atoms:', r['relMS'][10:20]
-
-    print 'Relative AS of atoms 10 to 20 atoms:', r['relAS'][10:20]
