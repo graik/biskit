@@ -1140,6 +1140,7 @@ class Trajectory:
         @type  left_atoms: [str]
         @param right_atoms: atoms (names) to use from these neighbore residues
         @type  right_atoms: [str]
+        
         @return: Numpy array ( N_unmasked x 1 ) of float
         @rtype: array
         """
@@ -1581,72 +1582,74 @@ class Trajectory:
         return result
 
 
-###################
-## TESTING
-###################
+
+#############
+##  TESTING        
+#############
+    
+class Test:
+    """
+    Test class
+    """
+    
+
+    def run( self ):
+        """
+        run function test
+
+        @return: sum of all residue rmsd values
+        @rtype:  float
+        """
+##         f = T.testRoot() + '/lig_pc2_00/pdb/'
+##         allfiles = os.listdir( f )
+##         pdbs = []
+##         for fn in allfiles:
+##             try:
+##                 if (fn[-7:].upper() == '.PDB.GZ'):
+##                     pdbs += [f + fn]
+##             except:
+##                 pass
+
+##         ref = pdbs[0]
+##         traj = Trajectory( pdbs[:3], ref, rmwat=0 )
+
+        print "Loading"
+        self.traj = T.Load(T.testRoot() + '/lig_pcr_00/traj.dat')
+
+        ## sort frames after frameNames
+        self.traj.sortFrames()
+
+        ## sort atoms 
+        self.traj.sortAtoms()
+
+        ## remove waters
+        self.traj = self.traj.compressAtoms( \
+            N.logical_not( self.traj.ref.maskH2O()) )
+
+        ## get fluctuation on a residue level
+        r1 = self.traj.getFluct_local()
+
+        ## fit backbone of frames to reference structure
+        self.traj.fit( ref=self.traj.ref, mask=self.traj.ref.maskBB() )
+
+        return N.sum( self.traj.profile('rms') )
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: sum of all residue rmsd values
+        @rtype:  float
+        """
+        return 58.101235746353879
+
 
 if __name__ == '__main__':
 
-    import time
+    test = Test()
 
-##     f = T.testRoot() + '/lig_pc2_00/pdb/'
-##     allfiles = os.listdir( f )
-##     pdbs = []
-##     for fn in allfiles:
-##         try:
-##             if (fn[-7:].upper() == '.PDB.GZ'):
-##                 pdbs += [f + fn]
-##         except:
-##             pass
+    assert abs( test.run() - test.expected_result() ) < 1e-6
 
-##     ref = pdbs[0]
-##     traj = Trajectory( pdbs[:3], ref, rmwat=0 )
 
-    print "Loading"
-    traj = T.Load(T.testRoot() + '/lig_pcr_00/traj.dat')
 
-    t0 = time.time()
-
-    traj.sortFrames()
-
-    ## sort atoms 
-    traj.sortAtoms()
-
-    traj = traj.compressAtoms( N.logical_not( traj.ref.maskH2O()) )
-    r1 = traj.getFluct_local()
-
-    t_res = traj.takeAtoms( traj.ref.res2atomIndices(
-        traj.ref.atom2resIndices( [0] ) ) )
-
-    t_res.fit( ref=t_res.ref, mask=t_res.ref.maskBB() )
-
-    print "done in %f s." % (time.time() - t0)
-
-## ## eigenvectors (rows)
-
-## U = u
-
-## ## frames (centered)
-
-## x_avg = N.average(traj.frames, 0)
-## X = N.array([N.ravel(x) for x in traj.frames - x_avg])
-
-## ## reference structure j, eigenvector of interest U[i]
-
-## j = 0
-## i = 0
-
-## alpha_0 = N.dot(X[j], U[i])
-## alpha_range = N.dot(X, U[i]) - alpha_0
-## alpha_range = N.arange(-200., 200., 40.)
-## Y = N.array([X[j] + alpha * U[i] for alpha in alpha_range])
-## Y = N.reshape(Y, (Y.shape[0], -1, 3))
-## Y = x_avg + Y
-
-##     from Biskit.EnsembleTraj import traj2ensemble
-
-##     T.flushPrint("Loading...")
-##     traj = T.Load('~/interfaces/a11/com_pcr_00/traj_0.dat')
-##     traj = traj.thin( step=50 )
-##     traj = traj2ensemble( traj )
-##     T.flushPrint("done\n")

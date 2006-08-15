@@ -490,7 +490,7 @@ class Pymoler:
         @param values: len == number of residues
         @type  values: list of numbers
         @param lastOnly: 0 .. add to all in model
-              1 .. add only to last Structure
+                         1 .. add only to last Structure
         @type  lastOnly: 
         """
         self.setResValues( model, values, lastOnly=lastOnly )
@@ -602,20 +602,58 @@ class Pymoler:
   	os.spawnlpe(os.P_NOWAIT, settings.pymol_bin, settings.pymol_bin,
                     options, self.foutName, os.environ )
 
-## TEST ##
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self, quit=1 ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
+
+        self.pm = Pymoler( )
+        mname = self.pm.addMovie( [ traj[i] for i in range(0,100,20) ] )
+
+        sel = self.pm.makeSel({'residue':29})
+        self.pm.add('show stick, %s'%sel)
+
+        self.pm.add('mplay')
+        
+        if quit:
+            self.pm.add('quit')
+
+        self.pm.show()
+
+        return 1
+
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+        
 
 if __name__ == '__main__':
 
-    import glob
+    test = Test()
 
-    f = glob.glob( T.testRoot()+'/lig_pcr_00/pcr_00/*_1_*pdb' )[:2]
-    m = [ PDBModel(i) for i in f ]
-    m = [ i.compress( i.maskProtein() ) for i in m ]
+    assert test.run( quit=0 ) == test.expected_result()
 
-    pm = Pymoler( )
-    mname = pm.addMovie( [ m[0], m[1] ] )
 
-    sel = pm.makeSel({'residue':29})
-    pm.add('show stick, %s'%sel)
-    
-    pm.show()
+
+

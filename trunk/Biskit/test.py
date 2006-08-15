@@ -35,36 +35,36 @@
 ## AmberEntropySlave.py
 ## AmberParmBuilder.py
 ## AmberRstParser.py
-## N --BisList.py
+##   N --BisList.py
 ## Blast2Seq.py           None
 ## ChainCleaner.py        rec/1A2P_rec_original.pdb
 ## ChainSeparator.py      com/1BGS_original.pdb
 ## ChainWriter.py         rec/1A2P_rec_original.pdb
 ## ColorSpectrum.py       None
 ## decorators.py          None
-## default_hosts.py
-## -- DictList.py
+##   N -- default_hosts.py
+##     -- DictList.py
 ## difflib_old.py
 ## DSSP.py                com/1BGS.pdb
-## EnsembleTraj.py
-## N -- ErrorHandler.py
-## N -- Errors.py
+## EnsembleTraj.py        lig_pcr_00/traj.dat
+##   N -- ErrorHandler.py
+##   N -- Errors.py
 ## ExeConfigCache.py
 ## ExeConfig.py
-## Executor.py
+##     -- Executor.py
 ## Fold_X.py              /rec/1A2P.pdb
 ## FuzzyCluster.py        None
-## -- gnuplot.py
-## N -- hist.py
+##     -- gnuplot.py
+##   N -- hist.py
 ## Hmmer.py               lig/1A19.pdb
-## hosts.py
+##   N -- hosts.py
 ## IcmCad.py              lig/1A19.pdb, lig_pcr_00/traj.dat
 ## __init__.py
-## -- LocalPath.py
-## N - LogFile.py
+##     -- LocalPath.py
+##   N -- LogFile.py
 ## match2seq.py           lig_pcr_00/traj.dat
-## mathUtils.py
-## MatrixPlot.py
+##   N -- mathUtils.py
+## MatrixPlot.py          None
 ## ModelList.py
 ## molTools.py
 ## molUtils.py
@@ -76,8 +76,8 @@
 ## plotUtils.py
 ## ProfileCollection.py
 ## Prosa2003.py           lig/1A19.pdb + rec/2A2P.pdb
-##  -- Prosa.py -- outdated --
-## Pymoler.py
+##    -- Prosa.py -- outdated --
+## Pymoler.py             lig_pcr_00/traj.dat
 ## QualSlave.py
 ## Ramachandran.py        lig_pcr_00/traj.dat
 ## ReduceCoordinates.py   com/1BGS.pdb
@@ -88,11 +88,11 @@
 ## SparseArray.py         None
 ## StructureSlave.py
 ## SurfaceRacer.py        lig/1A19.pdb
-## N -- surfaceRacerTools.py
-## -- Table.py -- outdated --
+##   N -- surfaceRacerTools.py
+##     -- Table.py -- outdated --
 ## tools.py
 ## TrajCluster.py
-## Trajectory.py
+## Trajectory.py          lig_pcr_00/traj.dat
 ## TrajFlexMaster.py
 ## TrajFlexSlave.py
 ## WhatIf.py
@@ -239,8 +239,29 @@ class Biskit_Test( unittest.TestCase ):
         t = Test()
         self.assertEquals( t.run(), t.expected_result() )
 
-                        
-            
+
+    def test_Trajectory( self ):
+        from Biskit.Trajectory import Test
+        t = Test()
+        self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
+
+
+    def test_EnsembleTraj( self ):
+        from Biskit.EnsembleTraj import Test
+        t = Test()
+        self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
+
+
+    def test_MatrixPlot( self ):
+        """
+        No testing done, will just display a matrix plot
+        """
+        from Biskit.MatrixPlot import Test
+        t = Test()
+        self.assertEquals( t.run(), t.expected_result() )
+
+
+
 class Biskit_Test_Applications( unittest.TestCase ):
 
     def test_Dssp( self ):
@@ -277,12 +298,21 @@ class Biskit_Test_Applications( unittest.TestCase ):
 ##                                  2  )
 
 
-    def test_SurfaceRacer( self ):
-        from Biskit.SurfaceRacer import Test
+##     def test_SurfaceRacer( self ):
+##         from Biskit.SurfaceRacer import Test
+##         t = Test()
+##         self.assertAlmostEquals( N.sum(t.run()),
+##                                  N.sum(t.expected_result()),
+##                                  4 )
+
+    def test_Pymoler( self ):
+        """
+        A PyMol wondow should be shown briefly .. not a real test.
+        """
+        from Biskit.Pymoler import Test
         t = Test()
-        self.assertAlmostEquals( N.sum(t.run()),
-                                 N.sum(t.expected_result()),
-                                 4 )
+        self.assertEquals( t.run(), t.expected_result() )        
+
 
 
 def suite_biskit():
