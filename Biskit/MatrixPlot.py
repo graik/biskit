@@ -152,17 +152,53 @@ class MatrixPlot(biggles.FramedPlot):
         return inset
 
 
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self, quit=1 ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        n = 30
+
+        z = N.zeros((n,n), N.Float)
+
+        for i in range(N.shape(z)[0]):
+            for j in range(N.shape(z)[1]):
+                z[i,j] = N.exp(-0.01*((i-n/2)**2+(j-n/2)**2))
+            
+        p = MatrixPlot(z, palette='sausage', legend=1)
+
+        p.show()
+
+        return 1
+
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+        
+
 if __name__ == '__main__':
 
-    from Numeric import *
+    test = Test()
 
-    n = 30
+    assert test.run( quit=0 ) == test.expected_result()
 
-    z = zeros((n,n), Float)
 
-    for i in range(shape(z)[0]):
-        for j in range(shape(z)[1]):
-            z[i,j] = exp(-0.01*((i-n/2)**2+(j-n/2)**2))
-
-    p = MatrixPlot(z, palette='sausage', legend=1)
-    p.show()

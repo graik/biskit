@@ -616,45 +616,82 @@ class EnsembleTraj( Trajectory ):
         return [ r - mean < - z * sd for r in slopes ]
 
 
-#######TEST############
+#############
+##  TESTING        
+#############
+    
+class Test:
+    """
+    Test class
+    """
+    
+
+    def run( self, full=None ):
+        """
+        run function test
+
+        @return: sum of 'rms_CA_av' profile
+        @rtype:  float
+        """
+        tr = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat')
+
+        ## The second part of the test will fail with the slimmed
+        ## down test trajectory of T.testRoot(). To run the full
+        ## test pease select a larger trajectory.    
+
+        if full:
+            tr = T.Load( '~/interfaces/c11/lig_pcr_00/traj.dat')
+
+        self.tr = traj2ensemble( tr )
+
+        mask = self.tr.memberMask( 1 )
+
+        self.tr.fit( ref=self.tr.ref,
+                     mask=self.tr.ref.maskCA(),
+                     prof='rms_CA_ref' )
+
+        self.tr.fitMembers(mask=self.tr.ref.maskCA(),
+                           prof='rms_CA_0', refIndex=0)
+        
+        self.tr.fitMembers(mask=self.tr.ref.maskCA(),
+                           prof='rms_CA_av')
+
+        p = self.tr.plotMemberProfiles( 'rms_CA_av', 'rms_CA_0',
+                                        'rms_CA_ref', xlabel='frame' )
+
+        p.show()
+
+        if full:
+
+            print "Outliers..."
+
+            o = self.tr.outliers( z=1.2, mask=self.tr.ref.maskCA() )
+            print o
+
+            self.t = self.tr.compressMembers( N.logical_not( o ) )
+
+            p2 = self.t.plotMemberProfiles( 'rms_CA_av', 'rms_CA_0',
+                                            'rms_CA_ref', xlabel='frame' )
+            p2.show()
+
+
+        return N.sum( self.tr.profile('rms_CA_av') )
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: sum of 'rms_CA_av' profile
+        @rtype:  float
+        """
+        return 26.19851451238333
+
 
 if __name__ == '__main__':
 
-    import time
+    test = Test()
 
-    tr = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat')
+    assert abs( test.run() - test.expected_result() ) < 1e-6
 
-    ## The second part of the test will fail with the slimmed
-    ## down test trajectory of T.testRoot(). To run the full
-    ## test pease select a larger trajectory.    
 
-    ## tr = T.Load( '~/interfaces/c11/lig_pcr_00/traj.dat')
-
-    t0 = time.time()
-
-    tr = traj2ensemble( tr )
-
-    mask = tr.memberMask( 1 )
-
-    tr.fit( ref=tr.ref, mask=tr.ref.maskCA(), prof='rms_CA_ref' )
-
-    tr.fitMembers(mask=tr.ref.maskCA(), prof='rms_CA_0', refIndex=0)
-    tr.fitMembers(mask=tr.ref.maskCA(), prof='rms_CA_av')
-
-    p = tr.plotMemberProfiles( 'rms_CA_av', 'rms_CA_0', 'rms_CA_ref',
-                               xlabel='frame' )
-
-    p.show()
-
-    print "Outliers..."
-
-    o = tr.outliers( z=1.2, mask=tr.ref.maskCA() )
-    print o
-
-    t = tr.compressMembers( N.logical_not( o ) )
-
-    p2 = t.plotMemberProfiles( 'rms_CA_av', 'rms_CA_0', 'rms_CA_ref',
-                               xlabel='frame' )
-    p2.show()
-
-    print "done in ", time.time() - t0, 's'
