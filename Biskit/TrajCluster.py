@@ -348,27 +348,68 @@ class TrajCluster:
         return rms
 
 
-## TEST
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
 
-import Biskit.EnsembleTraj as ET
-from Biskit.EnsembleTraj import traj2ensemble
-import Biskit.tools
+        @return: 1
+        @rtype: int
+        """
+        from Biskit.EnsembleTraj import traj2ensemble
+
+        traj = T.Load( T.testRoot()+'/lig_pcr_00/traj.dat')
+
+        traj = traj2ensemble( traj )
+
+        aMask = traj.ref.mask( lambda a: a['name'] in ['CA','CB','CG'] )
+
+        traj = traj.thin( 1 )
+
+        traj.fit( aMask )
+
+        self.tc = TrajCluster( traj )
+
+        ## check how many clusters that are needed with the given criteria
+        self.n_clusters = self.tc.calcClusterNumber( min_clst=3,
+                                                     max_clst=15,
+                                                     rmsLimit=0.7,
+                                                     aMask=aMask )
+        ## cluster
+        self.tc.cluster( self.n_clusters, aMask=aMask )
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+        
 
 if __name__ == '__main__':
 
-    traj = Biskit.tools.Load( Biskit.tools.testRoot()+'/lig_pcr_00/traj.dat')
-    #traj = Biskit.tools.Load('/home/Bis/raik/data/tb/interfaces/c11/lig_pcr_00/traj.dat')
-    traj = traj2ensemble( traj )
+    test = Test()
 
-    aMask = traj.ref.mask( lambda a: a['name'] in ['CA','CB','CG'] )
+    assert test.run( ) == test.expected_result()
 
-    traj = traj.thin( 1 )
 
-    traj.fit( aMask )
+    member_frames = test.tc.memberFrames()
 
-    tc = TrajCluster( traj )
-
-    n_clusters = tc.calcClusterNumber( min_clst=3, max_clst=30,
-                                       rmsLimit=0.8, aMask=aMask )
-
-    tc.cluster( n_clusters, aMask=aMask )
+    print 'There are %i clusters where the members are:'%test.n_clusters
+    for i in range(test.n_clusters):
+        print 'Cluster %i (%i members): %s'%( i+1, len(member_frames[i]),
+                                              member_frames[i] )

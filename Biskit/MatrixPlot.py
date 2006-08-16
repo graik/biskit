@@ -161,7 +161,7 @@ class Test:
     Test class
     """
     
-    def run( self, quit=1 ):
+    def run( self ):
         """
         run function test
 
@@ -199,6 +199,6 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( quit=0 ) == test.expected_result()
+    assert test.run( ) == test.expected_result()
 
 

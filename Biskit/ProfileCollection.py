@@ -683,34 +683,68 @@ class ProfileCollection:
             s += '\t' + self.__shortString( str(self.profiles[k]), 50 ) + '\n'
         return s
 
-############
-### TEST ###
-############
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        import string
+
+        p = ProfileCollection()
+
+        p.set( 't1', range(10), comment='test 1', option='x' )
+        p.set( 't2', range(12,22), comment='second test', option='y' )
+
+        mask = N.zeros( 10 )
+        mask[0:10:2] = 1
+        l = [ s for s in string.letters[:5] ] ## list of letters
+        p.set( 't3', l, comment='masked test', option='z',
+               mask=mask, default=99, asarray=0 )
+
+        print repr( p['t3'] )
+
+        p = p.take( range(0,10,2) )
+
+        print repr( p['t3'] )
+
+        p2 = ProfileCollection()
+        p2.set( 't1', p['t1'], comment='overridden', changed=1 )
+        p2.set( 't4', range(30, 35), comment='added' )
+
+        r = p.concat( p, p )  ## concatenate 3 copies of p
+
+        p.update( p2, stickyChanged=1 )
+
+        return r['t1']
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return N.array([0, 2, 4, 6, 8, 0, 2, 4, 6, 8, 0, 2, 4, 6, 8])
+    
+        
+
 if __name__ == '__main__':
 
-    import string
+    test = Test()
 
-    p = ProfileCollection()
+    assert test.run() == test.expected_result()
 
-    p.set( 't1', range(10), comment='test 1', option='x' )
-    p.set( 't2', range(12,22), comment='second test', option='y' )
 
-    mask = N.zeros( 10 )
-    mask[0:10:2] = 1
-    l = [ s for s in string.letters[:5] ] ## list of letters
-    p.set( 't3', l, comment='masked test', option='z',
-           mask=mask, default=99, asarray=0 )
-
-    print repr( p['t3'] )
-
-    p = p.take( range(0,10,2) )
-
-    print repr( p['t3'] )
-
-    p2 = ProfileCollection()
-    p2.set( 't1', p['t1'], comment='overridden', changed=1 )
-    p2.set( 't4', range(30, 35), comment='added' )
-
-    r = p.concat( p, p )  ## concatenate 3 copies of p
-
-    p.update( p2, stickyChanged=1 )

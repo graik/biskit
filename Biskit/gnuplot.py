@@ -348,26 +348,59 @@ def parallelAxesPlot(data, **keywords):
     command, filelist = _parallelAxesPlotData(data, origin)
     _execute(command, filelist, keywords)
 
-#
-# Demo code
-#
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        if 0:
+            # List of (x, y) pairs
+            plot([(0.,1),(1.,5),(2.,3),(3.,4)])
+
+            # List of y values, file output
+            plot([1, 5, 3, 4], file = 'junk.ps')
+
+            # Two plots; each given by a 2d array
+            from Numeric import *
+            x = arange(10)
+            y1 = x**2
+            y2 = (10-x)**2
+            plot(transpose(array([x, y1])), transpose(array([x, y2])))
+
+        if 1:
+            # Parallel-Axes plot
+            data = [[0., 1., 0.], [1., -1., 0.], [0.5, 0., 1.]]
+            parallelAxesPlot(data)
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+        
+
 if __name__ == '__main__':
 
-    if 0:
-	# List of (x, y) pairs
-	plot([(0.,1),(1.,5),(2.,3),(3.,4)])
+    test = Test()
 
-	# List of y values, file output
-	plot([1, 5, 3, 4], file = 'junk.ps')
+    assert test.run( ) == test.expected_result()
 
-	# Two plots; each given by a 2d array
-	from Numeric import *
-	x = arange(10)
-	y1 = x**2
-	y2 = (10-x)**2
-	plot(transpose(array([x, y1])), transpose(array([x, y2])))
 
-    if 1:
-	# Parallel-Axes plot
-	data = [[0., 1., 0.], [1., -1., 0.], [0.5, 0., 1.]]
-	parallelAxesPlot(data)

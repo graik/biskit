@@ -24,7 +24,7 @@
 Create Xplor input files.
 """
 
-import Biskit.tools as t
+import Biskit.tools as T
 import os
 
 class XplorInputError(Exception):
@@ -73,9 +73,9 @@ class XplorInput:
         try:
             self.fgenerate.write(str + '\n')
         except (IOError):
-            t.errWriteln(
+            T.errWriteln(
                 "XPlorInput.append(): Error adding string to xplor input file.")
-            t.errWriteln( t.lastError() )
+            T.errWriteln( T.lastError() )
 
 
     def _singleParam(self, param, value, indent):
@@ -357,27 +357,84 @@ class XplorInput:
             for i in valueDic.keys():
                 s += "\t%25s\t%s\n" % (i, str( valueDic[i] ) )
 
-            s += "\n  Error:\n  " + t.lastError()
+            s += "\n  Error:\n  " + T.lastError()
 
             raise XplorInputError, s 
 
 
-##################################################
-# main function for testing only
-##################################################
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self, verbose=0 ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        import tempfile
+
+        ## create an temporery input template
+        f_inp = tempfile.mktemp('_test.inp')
+        f = open(f_inp, 'w')
+        f.write('Test Template with %(number)i values:\n')
+        f.write('\n')
+        f.write('%(value)s\n')
+        f.close()
+
+        ## temporery outpot template
+        f_out_inp = tempfile.mktemp('_test_out.inp')
+
+        ## write to output
+        test = XplorInput( f_out_inp )
+        test.add("\nremarks test generate.inp\n")
+
+        test.addBlockFromDic("minimize powell",{"nsteps":100,"npr":5})
+        test.addAmberSegment("id_1", "/home/Bis/super.pdb")
+        test.patchSS({'res':23, 'id':'id_1'},{'res':44, 'id':'id_1'} )
+        test.hbuild("hydrogen and not known")
+
+        test.renameRes("CYS", "CYX")
+        test.renameAtom("ARG","HG1","HG2")
+        test.addFromTemplate(f_inp, {'value':'TEST','number':10})
+        test.flush()
+
+        if verbose:
+            ## check result
+            f = open(f_out_inp, 'r')
+            for line in f.readlines():
+                print line[:-1]
+            f.close()
+
+        ## cleanup
+        T.tryRemove( f_inp )
+        T.tryRemove( f_out_inp )
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+        
 if __name__ == '__main__':
 
-    test = XplorInput('TEST')
-    test.add("\nremarks test generate.inp\n")
+    test = Test()
 
-    test.addBlockFromDic("minimize powell",{"nsteps":100,"npr":5})
-    test.addAmberSegment("id_1", "/home/Bis/super.pdb")
-    test.patchSS({'res':23, 'id':'id_1'},{'res':44, 'id':'id_1'} )
-    test.hbuild("hydrogen and not known")
+    assert test.run( verbose=1 ) == test.expected_result()
 
-    test.renameRes("CYS", "CYX")
-    test.renameAtom("ARG","HG1","HG2")
-    test.addFromTemplate("/home/Bis/raik/data/tb/xplor/t_template.dat",
-                         {'value':'TEST','number':10})
-    test.flush()
-##    test = 1
+
+
+

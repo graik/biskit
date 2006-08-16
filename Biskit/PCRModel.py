@@ -87,16 +87,66 @@ class PCRModel( PDBModel ):
         return r
 
 
-###############
-## Testing
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
 
+    def run( self ):
+        """
+        run function test
+
+        @return: rmsd value
+        @rtype:  float
+        """
+        print "Loading PDB..."
+
+        m_com = PCRModel( t.testRoot() + "/com/1BGS.psf",
+                          t.testRoot() + "/com/1BGS.pdb" )
+
+        m_rec = PCRModel( t.testRoot() + "/rec/1A2P.psf",
+                          t.testRoot() + "/rec/1A2P.pdb" )
+
+        ## remove waters
+        m_com = m_com.compress( m_com.maskProtein() )
+        m_rec = m_rec.compress( m_rec.maskProtein() )
+
+        ## fit the complex structure to the free receptor
+        m_com_fit = m_com.magicFit( m_rec )
+
+        ## calculate the rmsd between the original complex and the
+        ## one fitted to the free receptor
+        rms = m_com_fit.rms(m_com, fit=0)
+
+        print 'Rmsd between the two complex structures: %.2f Angstrom'%rms
+    
+        return rms
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: rmsd value
+        @rtype:  float
+        """
+        return 58.784401345508634
+    
+        
 if __name__ == '__main__':
 
-    from Biskit import *
+    test = Test()
 
-    m = PCRModel( t.testRoot() + "/com_wet/1BGS.psf",
-                  t.testRoot() + "/com_wet/1BGS.pdb" )
-    print m.sequence()
-    print m.resMap()
+    assert abs( test.run() - test.expected_result() ) < 1e-8
+
+
+
+
+
 
 

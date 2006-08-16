@@ -1013,13 +1013,57 @@ def info( item, short=1 ):
             print clipStr( s, 79 )
 
 
-###################################################
-# main
-###################################################
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        from Biskit import PDBModel
+        from Biskit import Trajectory
+
+        print "\nTEST info:"
+        m = PDBModel( testRoot()+'/rec/1A2P.pdb')
+        info(m)
+
+        print "\nTEST Exception:"
+        try:
+            i = 1/0
+        except:
+            print lastErrorTrace()
+
+        print "\nTEST ensure"
+        ensure( m, PDBModel )
+        # ensure( m, Trajectory )
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+        
+
 if __name__ == '__main__':
 
-    print "TEST Exception:"
-    try:
-        i = 1/0
-    except:
-        print lastErrorTrace()
+    test = Test()
+
+    assert test.run( ) == test.expected_result()
+
+

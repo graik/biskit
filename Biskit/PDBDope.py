@@ -285,71 +285,109 @@ class PDBDope:
                                    version= T.dateString()+' '+self.version(),
                                    **fs_info )
 
+
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    from Biskit import PDBModel
+    
+
+    def run( self, show=0 ):
+        """
+        run function test
+
+        @return: 1
+        @rtype:  int
+        """
+        print "Loading PDB..."
+        # f = T.testRoot() + '/lig/1A19.pdb'
+        f = T.testRoot() + '/com/1BGS.pdb'
+        mdl = self.PDBModel(f)
+
+        mdl = mdl.compress( mdl.maskProtein() )
+
+        print "Initiating PDBDope...",
+        self.d = PDBDope( mdl )
+        print 'Done.\n'
+
+        print "Adding FoldX energy...",
+        self.d.addFoldX()
+        print 'Done.'
+
+    #    print "Adding WhatIf ASA...",
+    #    self.d.addASA()
+    #    print 'Done.'
+
+        print "Adding SurfaceRacer curvature...",
+        self.d.addSurfaceRacer( probe=1.4 )
+        print 'Done.'
+
+        print "Adding surface mask...",
+        self.d.addSurfaceMask()
+        print 'Done.'
+
+        print "Adding secondary structure profile...",
+        self.d.addSecondaryStructure()
+        print 'Done.'
+
+        ## skipped in test as it takes long time to calculate
+    #    print "Adding conservation data...",
+    #    self.d.addConservation()
+    #    print 'Done.'
+
+        print "Adding surface density...",
+        self.d.addDensity()
+        print 'Done.'
+
+
+        print self.d.m.info
+
+        ## check that nothing has changed
+        print '\nChecking that models are unchanged by doping ...'
+        m_ref = self.PDBModel(f)
+        m_ref = m_ref.compress( m_ref.maskProtein() )
+        for k in m_ref.atoms[0].keys():
+            ref = [ m_ref.atoms[i][k] for i in range( m_ref.lenAtoms() ) ]
+            mod = [ mdl.atoms[i][k] for i in range( mdl.lenAtoms() ) ]
+            if not ref == mod:
+                print 'CHANGED!! ', k
+            if ref == mod:
+                print 'Unchanged ', k
+
+        if show:
+            ## display in Pymol
+            print "Starting PyMol..."
+            from Biskit.Pymoler import Pymoler
+
+            pm = Pymoler()
+            pm.addPdb( mdl, 'm' )
+            pm.colorAtoms( 'm', N.clip(mdl.profile('relAS'), 0.0, 100.0) )
+            pm.show()
+
+        return 1
+
+    
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+        
+
 if __name__ == '__main__':
 
-    from Biskit import PDBModel
-    import glob
+    test = Test()
 
-    print "Loading PDB..."
-    f = glob.glob( T.testRoot()+'/lig_pcr_00/pcr_00/*_1_*pdb' )[1]
-    f = T.testRoot()+"/com/1BGS.pdb"
-    mdl = PDBModel(f)
-    
-    mdl = mdl.compress( mdl.maskProtein() )
-
-    print "Initiating PDBDope...",
-    d = PDBDope( mdl )
-    print 'Done.\n'
-
-    print "Adding FoldX energy...",
-    d.addFoldX()
-    print 'Done.'
-
-#    print "Adding WhatIf ASA...",
-#    d.addASA()
-#    print 'Done.'
-
-    print "Adding SurfaceRacer curvature...",
-    d.addSurfaceRacer( probe=1.4 )
-    print 'Done.'
-    
-    print "Adding surface mask...",
-    d.addSurfaceMask()
-    print 'Done.'
-
-    print "Adding secondary structure profile...",
-    d.addSecondaryStructure()
-    print 'Done.'
-    
-#    print "Adding conservation data...",
-#    d.addConservation()
-#    print 'Done.'
-
-    print "Adding surface density...",
-    d.addDensity()
-    print 'Done.'
+    assert test.run( show=1 ) == test.expected_result()
 
 
-    print d.m.info
-
-    ## check that nothing has changed
-    print '\nChecking that models are unchanged by doping ...'
-    m_ref = PDBModel(f)
-    m_ref = m_ref.compress( m_ref.maskProtein() )
-    for k in m_ref.atoms[0].keys():
-        ref = [ m_ref.atoms[i][k] for i in range( m_ref.lenAtoms() ) ]
-        mod = [ mdl.atoms[i][k] for i in range( mdl.lenAtoms() ) ]
-        if not ref == mod:
-            print 'CHANGED!! ', k
-        if ref == mod:
-            print 'Unchanged ', k
-
-
-    ## display in Pymol
-    print "Starting PyMol..."
-    from Biskit.Pymoler import Pymoler
-
-    pm = Pymoler()
-    pm.addPdb( mdl, 'm' )
-    pm.colorAtoms( 'm', N.clip(mdl.profile('relAS'), 0.0, 100.0) )
-    pm.show()

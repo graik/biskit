@@ -420,43 +420,71 @@ class TrajFlexMaster(TrackingJobMaster):
         return N.average(r), mathUtils.SD(r)
 
 
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self, quit=1 ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        from Biskit.MatrixPlot import MatrixPlot
+        from RandomArray import random
+
+        traj_1 = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
+        traj_1 = traj2ensemble( traj_1 )
+
+        ## create fake second trajectory by adding
+        ## increasing noise to first
+        frames = []
+        for i in range( len( traj_1 ) ):
+            f = traj_1.frames[i]
+            d = N.zeros( N.shape( f ), 'f')
+            if i > 0:
+                d = random( N.shape( f ) ) * ((i / 10) + 1) 
+            frames += [f + d]
+
+        traj_2 = traj_1.clone()
+        traj_2.frames = frames
+
+        master = TrajFlexMaster( traj_1, traj_2,
+                                 hosts=hosts.cpus_all,
+                                 show_output=0,
+                                 add_hosts=1,
+                                 log=None, slaveLog=None,
+                                 verbose=0,
+                                 only_cross_member=0)
+
+        r = master.calculateResult( mirror=0 )
+
+        p = MatrixPlot( r, palette='plasma2', legend=1 )
+        p.show()
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+        
+
 if __name__ == '__main__':
 
-    from Biskit.MatrixPlot import MatrixPlot
-    from RandomArray import random
+    test = Test()
 
-    traj_1 = T.Load( T.testRoot() + '/lig_pc2_00/traj.dat' )
-    traj_1 = traj2ensemble( traj_1 )
+    assert test.run( ) == test.expected_result()
 
-    ## create fake second trajectory by adding noise to first
-    frames = []
-    for i in range( len( traj_1 ) ):
-        f = traj_1.frames[i]
-        d = N.zeros( N.shape( f ), 'f')
-        if i > 0:
-            d = random( N.shape( f ) ) * ((i / 10) + 1) 
-        frames += [f + d]
-
-    traj_2 = traj_1.clone()
-    traj_2.frames = frames
-
-
-    ## Bigger example (use all nodes!):
-##     T.flushPrint("Loading...")
-##     traj = T.Load('~/interfaces/a11/com_pcr_00/traj_0.dat')
-##     traj = traj.thin( step=50 )
-##     traj = traj2ensemble( traj )
-##     T.flushPrint("done\n")
-
-    master = TrajFlexMaster( traj_1, traj_2,
-                             hosts=hosts.cpus_all,
-                             show_output=0,
-                             add_hosts=1,
-                             log=None, slaveLog=None,
-                             verbose=0,
-                             only_cross_member=0)
-
-    r = master.calculateResult( mirror=0 )
-
-    p = MatrixPlot( r, palette='plasma2', legend=1 )
-    p.show()
