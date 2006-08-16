@@ -27,6 +27,7 @@ Use MSMS to calculate surface info.
 """
 
 import Numeric as N
+import Biskit.tools as T
 import string
 import os
 import tempfile
@@ -76,7 +77,16 @@ class pdb2xyzrn( Executor ):
         """
         self.f_pdb = tempfile.mktemp('_pdb_to_xyzrn.pdb')
 
-        Executor.__init__( self, 'pdb2xyzrn', f_in=self.f_pdb, **kw )
+        ## gpdb_to_xyzrn have to be run i the local directory where
+        ##   it resides. Otherwise it will not find the data file 
+        ##   called "atmtypenumbers".
+        if os.path.exists( T.projectRoot() +'/external/msms/'):
+            dir =  T.projectRoot() +'/external/msms/'
+        else:
+            raise pdb2xyzrnError_Error, 'Cannot find msms directory. This should reside in ~biskit/external/msms'
+      
+        Executor.__init__( self, 'pdb2xyzrn', f_in=self.f_pdb,
+                           cwd=dir, **kw )
 
         self.model = model
 
@@ -398,58 +408,117 @@ class MSMS( Executor ):
         self.result = self.parse_msms( )
 
 
-####################################
-## Testing
 
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    from Biskit import PDBModel
+    
+
+    def run( self ):
+        """
+        run function test
+
+        @return: sum of SAS and SES areas
+        @rtype:  float
+        """
+        from Biskit import PDBModel
+
+        print "Loading PDB..."
+
+        m = PDBModel( T.testRoot() + '/lig/1A19.pdb' )
+        m = m.compress( m.maskProtein() )
+
+        ## get surfaces via the MSMS executable
+        print "Starting MSMS"
+        self.ms = MSMS( m, debug=0, verbose=1 )
+
+        print "Running"
+        out, sesList, sasList, atmList = self.ms.run()
+
+        print out
+        print '\nResult from MSMS (first 5 lines): '
+        print 'SES \tSAS \tAtom name'
+        for i in range(5):
+            print '%.2f \t%.2f \t%s'%(sesList[i], sasList[i], atmList[i])
+
+        print 'MSMS done'
+
+        return out['sas'] + out['ses']
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: sum of SAS and SES areas
+        @rtype:  float
+        """
+        return 5085.1580000000004 + 4208.7389999999996
+
+    
+        
 if __name__ == '__main__':
 
-    from Biskit import PDBModel
-    import Biskit.tools as T
-    import glob
-    import mathUtils as MA
+    test = Test()
 
-    print "Loading PDB..."
+    assert abs( test.run() - test.expected_result() ) < 1e-8
 
-    f = glob.glob( T.testRoot()+'/lig_pc2_00/pdb/*_1_*pdb.gz' )[1]
-    m = PDBModel(f)
-    m = m.compress( m.maskProtein() )
+
+## ####################################
+## ## Testing
+
+## if __name__ == '__main__':
+
+##     from Biskit import PDBModel
+    
+##     print "Loading PDB..."
+
+##     m = PDBModel( T.testRoot() + '/lig/1A19.pdb' )
+##     m = m.compress( m.maskProtein() )
+
+
+## ##     #######
+## ##     ## convert pdb file to coordinates, radii and names
+## ##     print "Starting xpdb_to_xyzrn"
+## ##     x = pdb2xyzrn( m, debug=0, verbose=1 )
+
+## ##     print "Running"
+## ##     r, n = x.run()
+
+
+## ##     print '\nResult from pdb_to_xyzrn (first 5 lines): '
+## ##     print 'radii \t\tnames'
+## ##     for i in range(5):
+## ##         print '%f \t%s'%(r[i], n[i])
 
 ##     #######
-##     ## convert pdb file to coordinates, radii and names
-##     print "Starting xpdb_to_xyzrn"
-##     x = pdb2xyzrn( m, debug=0, verbose=1 )
+##     ## get surfaces via the MSMS executable
+
+##     print "Starting MSMS"
+##     a = MSMS( m, debug=1, verbose=1 )
 
 ##     print "Running"
-##     r, n = x.run()
+##     out, sesList, sasList, atmList = a.run()
 
-
-##     print '\nResult from pdb_to_xyzrn (first 5 lines): '
-##     print 'radii \t\tnames'
-##     for i in range(5):
-##         print '%f \t%s'%(r[i], n[i])
-
-    #######
-    ## get surfaces via the MSMS executable
-
-    print "Starting MSMS"
-    a = MSMS( m, debug=1, verbose=1 )
-
-    print "Running"
-    out, sesList, sasList, atmList = a.run()
-
-    print out
-    print '\nResult from MSMS (first 5 lines): '
-    print 'SES \tSAS \tAtom name'
-    for i in range(5):
-        print '%.2f \t%.2f \t%s'%(sesList[i], sasList[i], atmList[i])
-
-    print 'MSMS done'
-
-
-##     #######
-##     ## get surfaces via MSLIB
-
-##     a = MSLIB( m )
-##     out, sesList, sasList, atmList = a.calc( m.xyz  )
 ##     print out
+##     print '\nResult from MSMS (first 5 lines): '
+##     print 'SES \tSAS \tAtom name'
+##     for i in range(5):
+##         print '%.2f \t%.2f \t%s'%(sesList[i], sasList[i], atmList[i])
+
+##     print 'MSMS done'
+
+
+## ##     #######
+## ##     ## get surfaces via MSLIB
+
+## ##     a = MSLIB( m )
+## ##     out, sesList, sasList, atmList = a.calc( m.xyz  )
+## ##     print out
 

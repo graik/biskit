@@ -30,7 +30,8 @@ import Biskit.molUtils as MU
 import Biskit.tools as t
 from Biskit.PDBModel import PDBModel
 
-from Numeric import sum
+import Numeric as N
+
 import copy
 
 class CleanerError( Exception ):
@@ -223,11 +224,11 @@ class PDBCleaner:
 
         self.model.remove( mask )
 
-        self.logWrite('Removed ' + str(sum(mask)) +
+        self.logWrite('Removed ' + str(N.sum(mask)) +
                       ' atoms because they were non-standard' +
                       ' or followed a missing atom.' )
 
-        return sum( mask )
+        return N.sum( mask )
 
 
     def process( self, keep_hetatoms=0, amber=0 ):
@@ -245,7 +246,6 @@ class PDBCleaner:
         
         @raise CleanerError: if something doesn't go as expected ...
         """
-
         try:
             if not keep_hetatoms:
                 self.model.remove( self.model.maskHetatm() )
@@ -269,9 +269,44 @@ class PDBCleaner:
         return self.model
 
 
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+
+    def run( self ):
+        """
+        run function test
+
+        @return: molecular mass 
+        @rtype:  float
+        """
+        print "Loading PDB..."
+
+        self.c = PDBCleaner( t.testRoot() + '/rec/1A2P_rec_original.pdb'  )
+        m = self.c.process()
+    
+        return N.sum( m.masses())
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: molecular mass
+        @rtype:  float
+        """
+        return 34029.0115499993
+    
+        
 if __name__ == '__main__':
 
-    c = PDBCleaner( t.testRoot() + '/com/1BGS_original.pdb'  )
+    test = Test()
 
-    m = c.process()
-
+    assert abs( test.run() - test.expected_result() ) < 1e-8

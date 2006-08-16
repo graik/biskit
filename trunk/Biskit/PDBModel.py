@@ -3127,58 +3127,86 @@ class PDBModel:
         return c0, c_r
 
 
-###############
-## Testing
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: coordinates of center of mass
+        @rtype:  array
+        """
+        ## loading output file from X-plor
+        print 'Loading pdb file ..'
+        m = PDBModel( t.testRoot()+'/rec/1A2P.pdb')#"/com_wet/1BGS.pdb")
+
+        ## remove solvent
+        print "removing waters.."
+        m.removeRes(['TIP3', 'HOH'])
+
+        ## X-plor doesn't write chainIds, so during the simulation
+        ## we store them in the last letter of the segId. Here we
+        ## restore the chainId.
+        m.addChainFromSegid()
+
+        ## start positions of all chains
+        chainIdx = m.chainIndex()
+
+        ## print some chain info
+        print 'The molecule consists of %i chains'% m.lenChains()
+        print '\tChainId \tFirst atom'
+        for i in chainIdx:
+            print '\t%s \t\t%i'%(m.atoms[i]['chain_id'], i)
+
+        ## add accessibility and curvature
+        from PDBDope import PDBDope
+        m = m.compress( N.logical_not(m.maskSolvent() ) )
+        d = PDBDope( m )
+        d.addSurfaceRacer()   
+
+        ## iterate over all chains
+        for c in range( 0, len( chainIdx ) ):
+
+            print "chain ", c, " starts with ", 
+            print m.atoms[ chainIdx[c] ]['residue_name'],
+
+            print " and has sequence: "
+
+            ## mask out atoms of all other chains
+            chainMask  = N.equal( m.chainMap( breaks=1 ), c )
+            print m.sequence( chainMask )
+
+        ## test sorting
+        print "sorting atoms alphabetically..."
+        sort = m.argsort()
+        m2 = m.sort( sort )
+
+        return N.sum( m2.centerOfMass() )
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: coordinates of center of mass
+        @rtype:  array
+        """
+        return N.sum( N.array([ 29.13901386,  46.70021977,  38.34113311]) )
+    
+        
+
 if __name__ == '__main__':
 
-    t0 = time.time()
+    test = Test()
 
-    ## loading output file from X-plor
-    print 'Loading pdb file ..'
-    m = PDBModel( t.testRoot()+'/rec/1A2P.pdb')#"/com_wet/1BGS.pdb")
+    assert abs( test.run() - test.expected_result() ) < 1e-8
 
-    ## remove solvent
-    print "removing waters.."
-    m.removeRes(['TIP3', 'HOH'])
-
-    ## X-plor doesn't write chainIds, so during the simulation
-    ## we store them in the last letter of the segId. Here we
-    ## restore the chainId.
-    m.addChainFromSegid()
-
-    ## start positions of all chains
-    chainIdx = m.chainIndex()
-
-    ## print some chain info
-    print 'The molecule consists of %i chains'% m.lenChains()
-    print '\tChainId \tFirst atom'
-    for i in chainIdx:
-        print '\t%s \t\t%i'%(m.atoms[i]['chain_id'], i)
-
-    print "\ndone in ", time.time() - t0, "s"
-
-    ## add accessibility and curvature
-    from PDBDope import *
-    m = m.compress( N.logical_not(m.maskSolvent() ) )
-    d = PDBDope( m )
-    d.addSurfaceRacer()   
-
-    ## iterate over all chains
-    for c in range( 0, len( chainIdx ) ):
-
-        print "chain ", c, " starts with ", 
-        print m.atoms[ chainIdx[c] ]['residue_name'],
-
-        print " and has sequence: "
-
-        ## mask out atoms of all other chains
-        chainMask  = N.equal( m.chainMap( breaks=1 ), c )
-        print m.sequence( chainMask )
-
-    ## test sorting
-    print "sorting atoms alphabetically..."
-    sort = m.argsort()
-    m2 = m.sort( sort )
-
-    print "done in ", time.time() - t0, "s"
 

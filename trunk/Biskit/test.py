@@ -54,27 +54,27 @@
 ##     -- Executor.py
 ## Fold_X.py              /rec/1A2P.pdb
 ## FuzzyCluster.py        None
-##     -- gnuplot.py
+## gnuplot.py             None
 ##   N -- hist.py
 ## Hmmer.py               lig/1A19.pdb
 ##   N -- hosts.py
 ## IcmCad.py              lig/1A19.pdb, lig_pcr_00/traj.dat
-## __init__.py
+##   N -- __init__.py
 ##     -- LocalPath.py
 ##   N -- LogFile.py
 ## match2seq.py           lig_pcr_00/traj.dat
 ##   N -- mathUtils.py
 ## MatrixPlot.py          None
-## ModelList.py
-## molTools.py
-## molUtils.py
-## msms.py
-## PCRModel.py
-## PDBCleaner.py
-## PDBDope.py
-## PDBModel.py
-## plotUtils.py
-## ProfileCollection.py
+## ModelList.py           rec/1A2P.pdb, lig/1A19.pdb, com/1BGS.pdb
+## molTools.py            lig/1A19.pdb
+##   N -- molUtils.py
+## msms.py                lig/1A19.pdb
+## PCRModel.py            com/1BGS.psf com/1BGS.pdb rec/1A2P.psf rec/1A2P.pdb
+## PDBCleaner.py          rec/1A2P_rec_original.pdb
+## PDBDope.py             com/1BGS.pdb
+## PDBModel.py            rec/1A2P.pdb
+## plotUtils.py           None
+## ProfileCollection.py   None
 ## Prosa2003.py           lig/1A19.pdb + rec/2A2P.pdb
 ##    -- Prosa.py -- outdated --
 ## Pymoler.py             lig_pcr_00/traj.dat
@@ -86,18 +86,18 @@
 ## SettingsManager.py
 ## settings.py
 ## SparseArray.py         None
-## StructureSlave.py
+##   N -- StructureSlave.py 
 ## SurfaceRacer.py        lig/1A19.pdb
 ##   N -- surfaceRacerTools.py
 ##     -- Table.py -- outdated --
-## tools.py
-## TrajCluster.py
+## tools.py               rec/1A2P.pdb
+## TrajCluster.py         lig_pcr_00/traj.dat
 ## Trajectory.py          lig_pcr_00/traj.dat
-## TrajFlexMaster.py
-## TrajFlexSlave.py
-## WhatIf.py
-## Xplorer.py
-## XplorInput.py
+## TrajFlexMaster.py      lig_pcr_00/traj.dat
+##   --  TrajFlexSlave.py
+## WhatIf.py              com/1BGS.pdb
+##   N -- Xplorer.py
+## XplorInput.py          None
 
 
 ## DOCK
@@ -164,6 +164,19 @@
 import unittest
 import Numeric as N
 
+
+class Pvm_Depending( unittest.TestCase ):
+    
+    def test_TrajFlexMaster( self ):
+        """
+        No testing done, will just display a matrix plot
+        """
+        from Biskit.TrajFlexMaster import Test
+        t = Test()
+        self.assertEquals( t.run(), t.expected_result() )
+
+
+                           
 class Biskit_Test( unittest.TestCase ):
 
 ##     def test_FuzzyCluster( self ):
@@ -202,63 +215,144 @@ class Biskit_Test( unittest.TestCase ):
 ##         self.assertEquals( t.run(), t.expected_result() )
 
 
-    def test_Blast2Seq( self ):
-        from Biskit.Blast2Seq import Test
-        t = Test()
-        self.assertEquals( t.run(), t.expected_result() )        
+##     def test_Blast2Seq( self ):
+##         from Biskit.Blast2Seq import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )        
 
 
-    def test_decorators( self ):
-        from Biskit.decorators import Test
-        t = Test()
-        self.assertEquals( t.run(), t.expected_result() )
+##     def test_decorators( self ):
+##         from Biskit.decorators import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
 
 
-    def test_ReduceCoordinates( self ):
-        from Biskit.ReduceCoordinates import Test
-        t = Test()
-        self.assertEquals( t.run(), t.expected_result() )
+##     def test_ReduceCoordinates( self ):
+##         from Biskit.ReduceCoordinates import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
             
 
-    def test_rmsFit( self ):
-        from Biskit.rmsFit import Test
-        t = Test()
-        self.assertAlmostEquals( N.sum(N.ravel(t.run())),
-                                 N.sum(N.ravel(t.expected_result())),
-                                 4 )
+##     def test_rmsFit( self ):
+##         from Biskit.rmsFit import Test
+##         t = Test()
+##         self.assertAlmostEquals( N.sum(N.ravel(t.run())),
+##                                  N.sum(N.ravel(t.expected_result())),
+##                                  4 )
 
 
-    def test_SparseArray( self ):
-        from Biskit.SparseArray import Test
-        t = Test()
-        self.assertEquals( t.run(), t.expected_result() )
+##     def test_SparseArray( self ):
+##         from Biskit.SparseArray import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
 
 
-    def test_match2seq( self ):
-        from Biskit.match2seq import Test
-        t = Test()
-        self.assertEquals( t.run(), t.expected_result() )
+##     def test_match2seq( self ):
+##         from Biskit.match2seq import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
 
 
-    def test_Trajectory( self ):
-        from Biskit.Trajectory import Test
-        t = Test()
-        self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
+##     def test_Trajectory( self ):
+##         from Biskit.Trajectory import Test
+##         t = Test()
+##         self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
 
 
-    def test_EnsembleTraj( self ):
-        from Biskit.EnsembleTraj import Test
-        t = Test()
-        self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
+##     def test_EnsembleTraj( self ):
+##         from Biskit.EnsembleTraj import Test
+##         t = Test()
+##         self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
 
 
-    def test_MatrixPlot( self ):
+##     def test_MatrixPlot( self ):
+##         """
+##         No testing done, will just display a matrix plot
+##         """
+##         from Biskit.MatrixPlot import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
+
+
+##     def test_ModelList( self ):
+##         from Biskit.ModelList import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
+
+
+##     def test_molTools( self ):
+##         from Biskit.molTools import Test
+##         t = Test()
+##         self.assertAlmostEquals( t.run(), t.expected_result(), 8 )
+        
+
+##     def test_PCRModel( self ):
+##         from Biskit.PCRModel import Test
+##         t = Test()
+##         self.assertAlmostEquals( t.run(), t.expected_result(), 8 )
+
+
+##     def test_PDBCleaner( self ):
+##         from Biskit.PDBCleaner import Test
+##         t = Test()
+##         self.assertAlmostEquals( t.run(), t.expected_result(), 8 )
+
+
+##     def test_PDBModel( self ):
+##         from Biskit.PDBModel import Test
+##         t = Test()
+##         self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
+
+
+##     def test_plotUtils( self ):
+##         """
+##         No testing done, will just display a mock plot
+##         """
+##         from Biskit.plotUtils import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
+
+
+##     def test_ProfileCollection( self ):
+##         from Biskit.ProfileCollection import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
+        
+
+##     def test_gnuplot( self ):
+##         """
+##         No testing done, will just display a mock plot
+##         """
+##         from Biskit.gnuplot import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
+
+
+##     def test_tools( self ):
+##         """
+##         No testing done. Just let run trough
+##         """
+##         from Biskit.tools import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
+
+
+##     def test_TrajCluster( self ):
+##         """
+##         No testing done. Just let run trough
+##         """
+##         from Biskit.TrajCluster import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
+
+
+    def test_XplorInput( self ):
         """
-        No testing done, will just display a matrix plot
+        No testing done. Just let run trough
         """
-        from Biskit.MatrixPlot import Test
+        from Biskit.XplorInput import Test
         t = Test()
-        self.assertEquals( t.run(), t.expected_result() )
+        self.assertEquals( t.run(), t.expected_result() )        
 
 
 
@@ -305,16 +399,39 @@ class Biskit_Test_Applications( unittest.TestCase ):
 ##                                  N.sum(t.expected_result()),
 ##                                  4 )
 
-    def test_Pymoler( self ):
-        """
-        A PyMol wondow should be shown briefly .. not a real test.
-        """
-        from Biskit.Pymoler import Test
+##     def test_Pymoler( self ):
+##         """
+##         A PyMol wondow should be shown briefly .. not a real test.
+##         """
+##         from Biskit.Pymoler import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )        
+
+
+##     def test_msms( self ):
+##         from Biskit.msms import Test
+##         t = Test()
+##         self.assertAlmostEquals( t.run(), t.expected_result(), 8 )
+
+
+##     def test_PDBDope( self ):
+##         """
+##         No testing done. Just let run trough.
+##         """
+##         from Biskit.PDBDope import Test
+##         t = Test()
+##         self.assertEquals( t.run(), t.expected_result() )
+
+
+    def test_WhatIf( self ):
+        from Biskit.WhatIf import Test
         t = Test()
-        self.assertEquals( t.run(), t.expected_result() )        
+        self.assertAlmostEquals( t.run(), t.expected_result(), 8 )
 
 
-
+#######
+## Create test suits
+        
 def suite_biskit():
     suite = unittest.makeSuite( Biskit_Test )
     return suite
@@ -326,22 +443,39 @@ def suite_biskit_applications():
     return suite
 
 
+def pvm_depending():
+    suite = unittest.makeSuite( Pvm_Depending )
+    return suite
+
+
+def report( file ):
+    r = open('test.log','r')
+    test_result = r.readlines()
+    r.close()
+
+    print  '\n' + '='*60+'\n======= TEST RESULTS\n' + '='*60 +'\n'
+    for line in test_result:
+        if line != '\n':
+            print line[:-1]
+            
+
 if __name__ == '__main__':
 
 
     f=open('test.log','w')
     
     runner = unittest.TextTestRunner(f, verbosity=2)
-#    runner.run( suite_biskit_applications() )
+
+    f.write('\nTESTS FOR MODULES CALLING EXTERNAL APPLICATIONS:\n')
+    runner.run( suite_biskit_applications() )
+    
+    f.write('\nTESTS FOR BISKIT MODULES:\n')
     runner.run( suite_biskit() )
+    
+#    f.write('\nTESTS FOR MODULES USING PVM:\n')
+#    runner.run( pvm_depending() )
 
     f.close()
-    
-    r = open('test.log','r')
-    test_result = r.readlines()
-    r.close()
 
-    print  '='*60+'\n======= TEST RESULTS\n' + '='*60 +'\n'
-    for line in test_result:
-        if line != '\n':
-            print line
+    
+    report('test.log')

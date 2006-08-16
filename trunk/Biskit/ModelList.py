@@ -27,6 +27,7 @@ organise, sort, and filter list of PDBModels
 """
 from DictList import DictList
 from PDBModel import PDBModel
+import Biskit.tools as T
 
 class ModelList( DictList ):
     """
@@ -118,26 +119,61 @@ class ModelList( DictList ):
         return DictList._processNewItem( self, v, i )
 
 
-##
-## TEST
-##
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+
+    def run( self ):
+        """
+        run function test
+
+        @return: list with sequences of models
+        @rtype: [str]
+        """
+        import random
+        
+        f_lst = [ T.testRoot() + '/rec/1A2P.pdb',
+                  T.testRoot() + '/lig/1A19.pdb',
+                  T.testRoot() + '/com/1BGS.pdb' ]
+
+        print "Loading PDBs..."
+        self.l = ModelList( f_lst )
+
+        seq = []
+        for m in self.l:
+            m.info['score'] = random.random()
+            seq += [ m.compress( m.maskProtein() ).sequence() ]
+
+        print self.l.valuesOf('score')
+
+        p = self.l.plot( 'score' )
+
+        p.show()
+
+        return seq
+
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: list with sequences of models
+        @rtype:  [str]
+        """
+        return ['VINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIR', 'KKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDCLTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILS', 'AQVINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIRKKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDALTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILS']
+    
+        
+
 if __name__ == '__main__':
 
-    import Biskit.tools as T
-    import glob, random
+    test = Test()
 
-    f_lst = glob.glob( T.testRoot() + '/lig_pc2_00/pdb/*pdb.gz' )
+    assert test.run() == test.expected_result()
 
-    f_lst = f_lst[:5]
-
-    print "Loading PDBs..."
-    l = ModelList( f_lst )
-
-    for m in l:
-        m.info['score'] = random.random()
-
-    print l.valuesOf('score')
-
-    p = l.plot( 'score' )
-
-    p.show()

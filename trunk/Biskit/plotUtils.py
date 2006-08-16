@@ -531,33 +531,59 @@ def prepare_plot( xlabel='', ylabel='', yrange=None, xrange=None,
 
     return p
 
-#####################
-## Testing / Example
-
-def plot_test():
-
-    p = prepare_plot(xlabel='', ylabel='flex $\langle{x}\rangle$',
-                     xrange=(0,5), yrange=(0,4) )
-
-    add_bars( p, [ 1, 2.5, 1.25, 0.3 ], fillfunc=diagonal_fill,
-              color='grey', size=0.1, invert=1,
-              lcolor='black', lwidth=1  )
-
-    add_bars( p, [0.4, 1.5, 2., 0.6], x0=0.5,
-              fillfunc=solid_fill, lcolor='blue', lwidth=2 )
-
-    add_box( p, 3.5, 3, 4, 3.5, fillfunc=line_fill,
-             color='grey', size=5 )
 
 
-    return p
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        p = prepare_plot(xlabel='', ylabel='flex $\langle{x}\rangle$',
+                         xrange=(0,5), yrange=(0,4) )
+
+        add_bars( p, [ 1, 2.5, 1.25, 0.3 ], fillfunc=diagonal_fill,
+                  color='grey', size=0.1, invert=1,
+                  lcolor='black', lwidth=1  )
+
+        add_bars( p, [0.4, 1.5, 2., 0.6], x0=0.5,
+                  fillfunc=solid_fill, lcolor='blue', lwidth=2 )
+
+        add_box( p, 3.5, 3, 4, 3.5, fillfunc=line_fill,
+                 color='grey', size=5 )
+
+##         p.write_eps(T.absfile('~/test.eps'), width='10cm', height='8.7cm')
+        
+        p.show()
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+          
 
 if __name__ == '__main__':
 
-    import Biskit.tools as T 
-    p = plot_test()
-    
-##     p.write_eps(T.absfile('~/test.eps'), width='10cm', height='8.7cm')
+    test = Test()
 
-    p.show()
+    assert test.run( ) == test.expected_result()
+
+
 
