@@ -3,7 +3,7 @@
 comment=free ICM version
 
 ## binary
-bin=icmbrowser
+bin=icmbrowserpro
 
 ## working directory
 cwd=

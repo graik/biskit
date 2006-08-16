@@ -31,7 +31,7 @@ fi
 gawk 'BEGIN{
 	# read radius table and patterns from supplied file
 	npats=0
-	numfile = "/home/Bis/johan/dock/msms/atmtypenumbers"
+	numfile = "./atmtypenumbers"
 	while ((getline < numfile) > 0) {
 		if(NF==0||substr($1,1,1)=="#") continue;
 		if($1=="radius") {
