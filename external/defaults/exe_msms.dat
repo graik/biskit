@@ -3,7 +3,7 @@
 comment= http://www.scripps.edu/~sanner/html/msms_home.html
 
 ## binary
-bin=msms
+bin=msms.i86Linux2.2.5.7
 
 ## working directory
 cwd=

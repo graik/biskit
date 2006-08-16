@@ -3,7 +3,7 @@
 #comment= http://swift.cmbi.kun.nl/whatif/
 
 ## binary 
-bin=whatif.gnu
+bin=whatif
 
 ## working directory
 cwd=
