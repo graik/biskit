@@ -43,7 +43,7 @@ from ComplexEvolvingList import ComplexEvolvingList
 import Numeric as N
 import tempfile
 import os.path
-
+import time
 
 slave_path = t.projectRoot()+"/Biskit/Dock/ContactSlave.py"
 
@@ -602,22 +602,69 @@ class ContactMaster(TrackingJobMaster):
         self.finished = 1
 
 
-## TESTING ###
-##############
+#############
+##  TESTING        
+#############
+    
+class Test:
+    """
+    Test class
+    """
+    
+
+    def run( self ):
+        """
+        run function test
+
+        @return: sum of fnac values
+        @rtype:  floal
+        """        
+        niceness = {'default': 0}
+        hosts = cpus_all[:4]
+
+        lst = t.Load( t.testRoot() + "/dock/hex/complexes.cl")
+        lst = lst[:9]
+
+        refcom = t.Load( t.testRoot() + "/com/ref.complex")
+
+        cl_out = tempfile.mktemp('_test.cl')
+        master = ContactMaster( lst, chunks = 3, hosts = hosts,
+                                niceness = niceness,
+                                show_output = 1,
+                                refComplex = refcom,
+                                outFile = cl_out )
+
+        master.start()
+
+        ## wait for calculation to finish, then load contacted list
+        while not master.isFinished():
+            time.sleep(5)
+        
+        cl_cont = master.getResult()
+    
+        ## plot atom and residue contacts vs. rmsd
+        p=cl_cont.plot( 'rms', 'fnac_10','fnarc_10' )
+        p.show()
+        
+        return N.sum(cl_cont.valuesOf('fnac_10'))
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: sum of fnac values
+        @rtype:  float
+        """
+        return 0.50811038550663579
+
 
 if __name__ == '__main__':
-    niceness = {'default': 0}
-    hosts = cpus_all[:4]
 
-    lst = t.Load( t.testRoot() + "/dock/hex/complexes.cl")
-    lst = lst[:15]
+    test = Test()
 
-    refcom = t.Load( t.testRoot() + "/com/ref.complex")
+    assert abs( test.run() - test.expected_result() ) < 1e-6
 
 
-    master = ContactMaster(lst, chunks=3, hosts=hosts, niceness=niceness,
-                           show_output = 1, refComplex=refcom,
-                           outFile=t.testRoot()+'/test.cl')
 
-    master.start()
 

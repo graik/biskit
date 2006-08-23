@@ -32,7 +32,7 @@ import modUtils
 from TemplateCleaner import TemplateCleaner as TC
 from SequenceSearcher import SequenceSearcher as SS
 
-import Biskit.tools as tools
+import Biskit.tools as T
 from Biskit.Errors import *
 
 class AlignerError( BiskitError ):
@@ -70,7 +70,7 @@ class Aligner:
         @type  log: LogFile
         """
         self.log = log
-        self.outFolder = tools.absfile( outFolder )
+        self.outFolder = T.absfile( outFolder )
         self.verbose = verbose
 
         ## recognize file types for adding t_coffee type code
@@ -143,7 +143,7 @@ class Aligner:
         """
         r = settings.t_coffee_bin
 
-        input = [ self.__add_type_code( i ) for i in tools.toList(input) ]
+        input = [ self.__add_type_code( i ) for i in T.toList(input) ]
 
         if input or method:
             r += ' -in'
@@ -157,7 +157,7 @@ class Aligner:
 
         if output:
             r += ' -output'
-            for o in tools.toList( output ):
+            for o in T.toList( output ):
                 r += ' ' + o
 
         if outfile:
@@ -197,7 +197,7 @@ class Aligner:
             fs = os.listdir( folder )
             pdbFiles= [ folder + f for f in fs if f[-6:].upper()=='.ALPHA' ]
 
-        r['pdbs'] = tools.toList( pdbFiles )
+        r['pdbs'] = T.toList( pdbFiles )
         r['templates'] = fasta_templates or self.outFolder + TC.F_FASTA
         r['sequences'] = fasta_sequences or self.outFolder + SS.F_FASTA_NR
         r['target']    = fasta_target or self.outFolder + SS.F_FASTA_TARGET
@@ -238,10 +238,10 @@ class Aligner:
         f_sequences = d['sequences']
         f_target    = d['target']
 
-        pdbFiles = [ tools.absfile( f ) for f in pdbFiles ]
+        pdbFiles = [ T.absfile( f ) for f in pdbFiles ]
 
-        f_templates = tools.absfile( f_templates )
-        f_sequences = tools.absfile( f_sequences )
+        f_templates = T.absfile( f_templates )
+        f_sequences = T.absfile( f_sequences )
 
         ## create output file names
         f_fast_lib = self.outFolder + self.F_FAST_LIB
@@ -282,7 +282,7 @@ class Aligner:
                                        clean_aln=0, newtree=f_fast_tree,
                                        output=['clustalw','phylip','score_html',
                                                'pir_aln'],
-##                                     run_name=tools.stripFileName(f_final_aln),
+##                                     run_name=T.stripFileName(f_final_aln),
                                        outfile=f_final_aln,
                                        quiet=f_coffee_log+'_4')
                 ]
@@ -321,7 +321,7 @@ class Aligner:
                                        clean_aln=0, newtree=f_fast_tree,
                                        output=['clustalw','phylip','score_html',
                                                'pir_aln', 'score_ascii'],
- ##                                    run_name=tools.stripFileName(f_final_aln),
+ ##                                    run_name=T.stripFileName(f_final_aln),
                                        outfile=f_final_aln,
                                        quiet=f_coffee_log+'_4')
                 ]
@@ -387,7 +387,7 @@ class Aligner:
             fout.close()
 
         except Exception, why:
-            print tools.lastError()
+            print T.lastError()
             raise AlignerError("Cannot fix target sequence file: "+str(why))
 
 
@@ -425,13 +425,68 @@ class Aligner:
             raise AlignerError( "Can't run t_coffee: " + str( why ) )
 
 
-##########
-## TEST ##
-##########
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: 1
+        @rtype:  int
+        """
+        import tempfile
+        import shutil
+
+        ## collect the input files needed
+        outfolder = tempfile.mkdtemp( '_test_Aligner' )
+        os.mkdir( outfolder +'/templates' )
+        os.mkdir( outfolder +'/sequences/' )
+        
+        shutil.copytree( T.testRoot() + '/Mod/project/templates/t_coffee',
+                         outfolder + '/templates/t_coffee' )
+        
+        shutil.copy( T.testRoot() + '/Mod/project/templates/templates.fasta',
+                     outfolder + '/templates' )
+
+        shutil.copy( T.testRoot() + '/Mod/project/sequences/nr.fasta',
+                     outfolder + '/sequences/' )
+
+        shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
+                     outfolder  )
+
+        self.a = Aligner( outFolder=outfolder )
+
+        self.a.align_for_modeller_inp()
+
+        self.a.go()
+
+        print 'The alignment result can be found in %s/t_coffee'%outfolder
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+
 if __name__ == '__main__':
 
-    a = Aligner( outFolder=tools.projectRoot()+'/test/Mod/project/' )
+    test = Test()
+    
+    assert test.run() ==  test.expected_result()
 
-    a.align_for_modeller_inp()
 
-    a.go()

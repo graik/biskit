@@ -309,3 +309,48 @@ save_docking %(output_all)s""" \
     macOpen.close()
 
     return macName, outName_all, macroDocking
+
+
+
+#############
+##  TESTING        
+#############
+    
+class Test:
+    """
+    Test class
+    """
+
+    def run( self ):
+        """
+        run function test
+
+        @return: distance
+        @rtype:  float
+        """
+        from Biskit import PDBModel
+        m = PDBModel( t.testRoot() + '/com/1BGS.pdb' )
+        dist = centerSurfDist( m , m.maskCA() )
+
+        return dist[0]
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: distance
+        @rtype:  float
+        """
+        return 26.880976894654744
+
+
+if __name__ == '__main__':
+
+    test = Test()
+
+    assert abs( test.run() - test.expected_result() ) < 1e-8
+
+
+
+

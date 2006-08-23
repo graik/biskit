@@ -281,7 +281,45 @@ class ExeConfig( object ):
         return self.__repr__()
 
 
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        self.x = ExeConfig( 'xplor', strict=1 )
+        self.x.validate()
+
+        return 1
+
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+        
+
 if __name__ == '__main__':
 
-    x = ExeConfig( 'tleap', strict=1 )
-    x.validate()
+    test = Test()
+
+    assert test.run( ) == test.expected_result()
+
+    print test.x.bin

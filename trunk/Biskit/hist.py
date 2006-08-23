@@ -101,3 +101,52 @@ def density(x, nBins, range = None, steps = 1, hist = 0):
     return Numeric.array(h)
 
 
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: histogram data
+        @rtype:  array
+        """
+        x = Numeric.arange( 4, 12, 1.2 )
+        data = density( x, 3, hist=1 )
+
+        return data
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: histogram data
+        @rtype:  array
+        """
+        return Numeric.array([[  4. ,   0. ],
+                              [  4. ,   2. ],
+                              [  6.4,   2. ],
+                              [  6.4,   2. ],
+                              [  8.8,   2. ],
+                              [  8.8,   3. ],
+                              [ 11.2,   3. ],
+                              [ 11.2,   0. ]])
+
+    
+
+if __name__ == '__main__':
+
+    test = Test()
+
+    assert test.run( ) == test.expected_result()
+
+
+
+

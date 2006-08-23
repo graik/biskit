@@ -165,19 +165,68 @@ class ComplexEvolvingList( ComplexList ):
         return r
 
 
-### TEST ####
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: list of comment strings
+        @rtype: [str]
+        """
+        import Biskit.tools as t
+        from Biskit.Dock import ComplexEvolving
+        from Biskit.Dock import ComplexEvolvingList
+        from Biskit.Dock import ComplexList
+
+        l = t.Load(  t.testRoot() + "/dock/hex/complexes.cl" )
+
+        ## original complex
+        cl = ComplexList( l )
+
+        ## first evolution step
+        c = ComplexEvolving( cl[0].rec(), cl[0].lig(), cl[0],
+                             info={'comment':'test1'})
+
+        ## second evolution step
+        c = ComplexEvolving( c.rec(), c.lig(), c,
+                             info={'comment':'test2'})
+
+        ## create an evolving complex list
+        self.cl = ComplexEvolvingList( [c, c] )
+
+        return self.cl.valuesOf('comment'), self.cl[0].valuesOf('comment')
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: list of comment strings
+        @rtype:  [str]
+        """
+        return (['test2', 'test2'], [None, 'test1', 'test2'])
+    
 
 if __name__ == '__main__':
 
-    import Biskit.tools as t
+    test = Test()
 
-    l = t.Load( "~/interfaces/c15/dock_xray/hex01/complexes.cl")
+    assert test.run( ) == test.expected_result()
 
-    cl = ComplexList( l )
+    
+    ## last version of all complexes in list
+    print test.cl.valuesOf('comment')
 
-    c = ComplexEvolving( cl[0].rec(), cl[0].lig(), cl[0],
-                         info={'comment':'test1'})
-    c = ComplexEvolving( c.rec(), c.lig(), c,
-                         info={'comment':'test2'})
+    ## version 1
+    print test.cl.valuesOf('comment', version=1)
 
-    cl = ComplexEvolvingList( [c, c] )
+    ## the first complex in the list
+    print test.cl[0].valuesOf('comment')

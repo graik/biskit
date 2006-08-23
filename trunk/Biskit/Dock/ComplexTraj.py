@@ -318,20 +318,65 @@ class ComplexTraj( EnsembleTraj ):
         gnuplot.plot( hist.density( r, 10 ) )
 
 
+
+#############
+##  TESTING        
+#############
+    
+class Test:
+    """
+    Test class
+    """
+    
+
+    def run( self ):
+        """
+        run function test
+
+        @return: number of contacts in first frame
+        @rtype:  int
+        """
+        import Biskit.tools as T
+
+        ## there is no complex trajectori in the test folder so will have
+        ## to create a fake trajectory with a complex
+        f =  [ T.testRoot()+ '/com/1BGS.pdb' ] * 5
+        t = Trajectory( f )
+
+        #    t = T.Load( T.testRoot()+'/com_pcr_00/traj.dat' )
+
+        t = ComplexTraj( t, recChains=[0] )
+
+    ##    t.plotContactDensity( step=2 )
+        for i in range( 1093+98, 1968 ):
+            t.ref.atoms[i]['chain_id'] = 'B'
+
+        print 'Receptor chains: %s    Ligand chains: %s'%(t.cr, t.cl)
+
+        t.cl = [1,2]
+
+        r = N.concatenate((range(1093,1191), range(0,1093), range(1191,1968)))
+
+        tt = t.takeAtoms( r )
+
+        contactMat = tt.atomContacts( 1 )
+
+        return N.sum(N.ravel(contactMat))
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: number of contacts in first frame
+        @rtype:  int
+        """
+        return 308
+
+
 if __name__ == '__main__':
 
-    from tools import *
+    test = Test()
 
-    t = Load( testRoot()+'/com_pc2_00/traj.dat' )
+    assert test.run() ==  test.expected_result() 
 
-    t = ComplexTraj( t, [0] )
-
-##    t.plotContactDensity( step=2 )
-    for i in range( 1093+98, 1968 ):
-        t.ref.atoms[i]['chain_id'] = 'C'
-
-    t.cl = [1,2]
-
-    r = N.concatenate((range(1093,1191), range(0,1093), range(1191,1968)))
-
-    tt = t.takeAtoms( r )

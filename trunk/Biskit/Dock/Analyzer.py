@@ -35,7 +35,7 @@ import copy
 
 import biggles
 
-class AnalyzeError( Exception):
+class AnalyzeError( Exception ):
     pass
 
 class Analyzer:
@@ -44,7 +44,7 @@ class Analyzer:
         """
         @param options: needs::
                          rec,lig - file name, receptor, ligand trajectories
-                         com     - file name, pickled reference complex
+                         ref     - file name, pickled reference complex
         @type  options: any
 
         @raise AnalyzeError: if atoms are not aligned

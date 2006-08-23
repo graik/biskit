@@ -33,7 +33,7 @@ import linecache
 from string import *
 
 import settings
-import Biskit.tools as tools
+import Biskit.tools as T
 
 from Biskit.Mod.TemplateCleaner import TemplateCleaner as TC
 from Biskit.Mod.SequenceSearcher import SequenceSearcher as SS
@@ -99,7 +99,7 @@ CALL ROUTINE = 'model'             # do homology modelling
         @param log: log file instance, if None, STDOUT is used (default: None)
         @type  log: LogFile        
         """
-        self.outFolder = tools.absfile( outFolder )
+        self.outFolder = T.absfile( outFolder )
         self.log = log
 
         self.prepareFolders()
@@ -408,7 +408,7 @@ CALL ROUTINE = 'model'             # do homology modelling
 
         for model in pdb_list:
 
-            file_output.write('%s\t%6.2f\n'%(tools.stripFilename(
+            file_output.write('%s\t%6.2f\n'%(T.stripFilename(
                 model.validSource()), model.info["mod_score"]))
 
         file_output.close()
@@ -487,7 +487,7 @@ CALL ROUTINE = 'model'             # do homology modelling
         @param model_folder: ouput folder (default: None -> L{F_PDBModels})
         @type  model_folder: str
         """    
-        tools.Dump(pdb_list, '%s'%(model_folder + self.F_PDBModels))
+        T.Dump(pdb_list, '%s'%(model_folder + self.F_PDBModels))
 
 
     def postProcess(self, model_folder=None):
@@ -524,15 +524,66 @@ CALL ROUTINE = 'model'             # do homology modelling
 
 
 
-##########
-## TEST ##
-##########
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: 1
+        @rtype:  int
+        """
+        import tempfile
+        import shutil
+
+        ## collect the input files needed
+        outfolder = tempfile.mkdtemp( '_test_Modeller' )
+        os.mkdir( outfolder +'/templates' )
+        os.mkdir( outfolder +'/t_coffee' )
+
+        shutil.copytree( T.testRoot() + '/Mod/project/templates/modeller',
+                         outfolder + '/templates/modeller' )
+
+        shutil.copy( T.testRoot() + '/Mod/project/t_coffee/final.pir_aln',
+                     outfolder + '/t_coffee' )    
+
+        shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
+                     outfolder  )
+
+
+        m = Modeller( outfolder )
+
+        r = m.prepare_modeller( )
+
+        m.go()
+
+        m.postProcess()
+
+        print 'The modelling result can be found in %s/modeller'%outfolder
+
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+
 if __name__ == '__main__':
 
-    m = Modeller( tools.testRoot() + '/Mod/project')
-
-    r = m.prepare_modeller( )
-
-    m.go()
-
-    m.postProcess()
+    test = Test()
+    
+    assert test.run() ==  test.expected_result()

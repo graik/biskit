@@ -188,18 +188,51 @@ class HexParser:
         return complexes
 
 
-#############################
-## TESTING
+#############
+##  TESTING        
+#############
+    
+class Test:
+    """
+    Test class
+    """
+
+    def run( self, run=0 ):
+        """
+        run function test
+
+        @return: complex info dic keys
+        @rtype:  [str]
+        """
+        rec_dic = t.Load( t.testRoot() + "/dock/rec/1A2P_model.dic" )
+        lig_dic = t.Load( t.testRoot() + "/dock/lig/1A19_model.dic" )
+
+        self.h = HexParser( t.testRoot() + "/dock/hex/1A2P-1A19_hex.out",
+                            rec_dic, lig_dic)
+        
+        c_lst = self.h.parseHex()
+
+        print c_lst[1].info
+
+        return c_lst[1].info.keys()
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: complex info dic keys
+        @rtype:  [str]
+        """
+        return ['soln', 'rms', 'hex_clst', 'hex_eshape',
+                'model2', 'model1', 'hex_etotal', 'date']
+
 
 if __name__ == '__main__':
 
+    test = Test()
+
+    assert test.run( run=1 ) ==  test.expected_result() 
 
 
-    rec_dic = t.Load( t.testRoot() + "/dock/rec/1A2P_model.dic" )
-    lig_dic = t.Load( t.testRoot() + "/dock/lig/1A19_model.dic" )
 
-    h = HexParser( t.testRoot() + "/dock/hex/1A2P-1A19_hex.out",
-                   rec_dic, lig_dic)
-    c_lst = h.parseHex()
-
-    print c_lst[1]

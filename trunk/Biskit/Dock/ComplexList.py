@@ -36,7 +36,7 @@ import random
 import Biskit.tools as t
 from Biskit import BiskitError, PDBError, EHandler
 
-from Complex import Complex
+from Biskit.Dock.Complex import Complex
 from ComplexModelRegistry import ComplexModelRegistry
 
 
@@ -692,15 +692,47 @@ class ComplexList( list ):
         return plot
 
 
-#############################
-## TEST #####################
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
 
+        @return: 1
+        @rtype: int
+        """
+        print "DOING something"
+
+        cl = t.Load( t.testRoot() + "/dock/hex/complexes.cl" )
+
+        p = cl.plot( 'rms', 'hex_eshape', 'hex_etotal' )
+
+        p.show()
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+        
 if __name__ == '__main__':
 
-    print "DOING something"
+    test = Test()
 
-    l = t.Load(t.testRoot() + "/dock/hex01/complexes.cl")
+    assert test.run( ) == test.expected_result()
 
-    cl = ComplexList( l )
 
-    p = cl.plot( 'rms', 'hex_eshape', 'hex_etotal' )

@@ -25,10 +25,11 @@
 This is a helper class for ComplexList.
 """
 
-from Complex import Complex
+from Biskit.Dock import Complex
 from Biskit import BiskitError
 from Biskit import LocalPath
 
+import Biskit.tools as T
 import Numeric as N
 
 class RegistryError( BiskitError ):
@@ -350,21 +351,57 @@ class ComplexModelRegistry:
 
         return s
 
+
     def __repr__( self ):
         return "ComplexModelRegistry\n" + self.__str__()
 
-## TEST ##
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+
+    def __init__( self ):
+        self.cl = T.Load( T.testRoot() +'/dock/hex/complexes.cl' )
+        self.cl = self.cl.toList()
+        self.r = ComplexModelRegistry()
+
+
+    def run( self, inheret='test' ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        import profile
+        import pstats
+
+        str = 'for c in %s.cl[:500]: %s.r.addComplex( c )'%( inheret, inheret )
+        profile.run( str, 'report.out' )
+        p = pstats.Stats('report.out')
+        print p.sort_stats('cumulative').print_stats()
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
 
 if __name__ == '__main__':
-    from Biskit.tools import *
-    import profile
-    import pstats
 
-#    cl = Load( absfile('~/data/tb/interfaces/c23/dock_multi_0919/bound/hex_lig_vs_all/complexes.cl') )
-    cl = Load( testRoot() +'/dock/hex/complexes.cl' )
-    cl = cl.toList()
-    r = ComplexModelRegistry()
+    test = Test()
 
-    profile.run('for c in cl[:500]: r.addComplex( c )', 'report.out' )
-    p = pstats.Stats('report.out')
-    print p.sort_stats('cumulative').print_stats()
+    assert test.run( ) == test.expected_result()
+

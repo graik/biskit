@@ -31,7 +31,7 @@ from Bio.Blast import NCBIXML
 from Bio.Blast import NCBIStandalone
 from Bio import Fasta
 
-import Biskit.tools as tools
+import Biskit.tools as T
 from Biskit.Errors import *
 from Biskit import StdLog, EHandler
 
@@ -41,7 +41,7 @@ import re, os
 import string, copy
 import commands
 import copy
-from sys import *
+import sys
 
 class BlastError( BiskitError ):
     pass
@@ -65,6 +65,9 @@ class SequenceSearcher:
      3. remoteBlast
         Uses Bio.Blast.NCBIWWW.qblast (Biopython) which performs
         a BLAST search using the QBLAST server at NCBI.
+
+    @note: the blast sequence database has to be built with -o potion
+           e.g. cat db1.dat db2.dat | formatdb -i stdin -o T -n indexed_db
     
     @todo: copy blast output
     """
@@ -101,26 +104,31 @@ class SequenceSearcher:
         @param log: log file instance, if None, STDOUT is used (default: None)
         @type  log: LogFile
         """
-        self.outFolder = tools.absfile( outFolder )
+        self.outFolder = T.absfile( outFolder )
 
         ##
         ## NOTE: If you get errors of the type "Couldn't find ID in"
         ##       check these regexps (see getSequenceIDs function)!
         ##
-        self.ex_gi    = re.compile( '^>ref|gb|ngb|emb|dbj|prf\|{1,2}([A-Z_0-9.]{4,9})\|' )
-        self.ex_swiss = re.compile( '^>sp\|([A-Z0-9_]{5,7})\|' )
-        self.ex_pdb   = re.compile( '^>pdb\|([A-Z0-9]{4})\|' )
 
+        self.ex_gi    = re.compile( '^>(?P<db>ref|gb|ngb|emb|dbj|prf)\|{1,2}(?P<id>[A-Z_0-9.]{4,9})\|' )
+        self.ex_swiss = re.compile( '^>sp\|(?P<id>[A-Z0-9_]{5,7})\|' )
+        self.ex_pdb   = re.compile( '^>pdb\|(?P<id>[A-Z0-9]{4})\|' )
+        
         ##
         ##      RegExp for the remoteBlast searches. Somehow the
         ##      NCBI GI identifier is written before the identifier
         ##      we want (even though this is explicitly turned off in
         ##      SequenceSearcher.remoteBlast).
         ##
-        gi = '^gi\|[0-9]+\|'
-        self.ex_Rgi = re.compile( gi+'ref|gb|ngb|emb|dbj|prf\|([A-Z_0-9.]+)\|')
-        self.ex_Rswiss = re.compile( gi+'sp\|([A-Z0-9_]{5,7})\|' )
-        self.ex_Rpdb   = re.compile( gi+'pdb\|([A-Z0-9]{4})\|' )
+        
+        gi = '^gi\|(?P<gi>[0-9]+)\|'
+        self.ex_Rgi_1 = re.compile( gi+'(?P<db>ref|sp|pdb|gb|ngb|emb|dbj|prf|pir)\|(?P<id>[A-Z_0-9.]+)\|' )
+        self.ex_Rgi_2 = re.compile( gi+'(?P<db>ref|sp|pdb|gb|ngb|emb|dbj|prf|pir)\|{2}(?P<id>[A-Z_0-9.]+)' )
+        self.ex_Rswiss = re.compile( gi+'sp\|(?P<id>[A-Z0-9_]{5,7})\|' )
+        self.ex_Rpdb   = re.compile( gi+'pdb\|(?P<id>[A-Z0-9]{4})\|' )
+
+  
 
         self.verbose = verbose
         self.log = log or StdLog()
@@ -199,6 +207,7 @@ class SequenceSearcher:
                                    self.outFolder + self.F_BLAST_OUT)
 
 
+
     def remoteBlast( self, seqFile, db, method, e=0.01, **kw ):
         """
         Perform a remote BLAST search using the QBLAST server at NCBI.
@@ -235,20 +244,44 @@ class SequenceSearcher:
                strongly recomend that you install BioPython
                from CVS. Information on how to do this you
                will find on the BioPython homepage.
+
+        @todo: Remote Blasting is running as expected but sequences
+               are still retrieved from a local database. Implement remote
+               collection of fasta seuqences from NCBI (there should be
+               something like in Biopython). Otherwise something like this
+               will also work::
+
+               ## collect the entry with gi 87047648
+               url = 'http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?CMD=text&db=protein&dopt=FASTA&dispmax=20&uid=87047648'
+
+               import urllib
+               handle = urllib.urlopen(url)
+
+               lines = handle.readlines()
+
+               seq = ''
+               for i in range(len(lines)):
+                   if re.match( "[<]pre[>][<]div class='recordbody'[>]{2}gi", l[i] ):
+
+                       i+= 1
+                       while not re.match( "^[<]/pre[>][<]/div[>]", l[i]):
+                           seq += l[i][:-1]
+                           i+= 1
+
+               print seq       
         """
         fasta = Fasta.Iterator( open(seqFile) )
         query = fasta.next()
 
         blast_result = NCBIWWW.qblast( program=method, database=db,
                                        sequence=query, expect=e,
-                                       ncbi_gi='FALSE', **kw)
+                                       ncbi_gi='FALSE', **kw )
 
         p = NCBIXML.BlastParser()
 
         parsed = p.parse( blast_result )
 
-        self.__blast2dict( parsed, db )
-
+        self.__remote_blast2dict( parsed, db )
 
 
     def localBlast( self, seqFile, db, method='blastp',
@@ -321,13 +354,12 @@ class SequenceSearcher:
                            'blast_bin':settings.blast_bin, 'seqFile':seqFile,
                            'method':method, 'db':db,'kw':kw,
                            'exception':str(why) }
-            print tools.lastErrorTrace()
+            print T.lastErrorTrace()
             raise BlastError( str(why) + "\n" +
                               str( self.error ) ) 
 
 
-    def localPSIBlast( self, seqFile, db, rounds=3, resultOut=None,
-                       e=0.01, **kw ):
+    def localPSIBlast( self, seqFile, db, resultOut=None, e=0.01, **kw ):
         """
         Performa a local psi-blast search (requires that the blast binaries
         and databases are installed localy).
@@ -337,8 +369,6 @@ class SequenceSearcher:
         @type  seqFile: str
         @param db: database(s) to search e.g. ['swissprot', 'pdb']
         @type  db: [str]
-        @param rounds: number of iterations (default: 3)
-        @type  rounds: int
         @param e: expectation value cutoff (default: 0.001)
         @type  e: float
         @param resultOut: save blast output to this new file
@@ -385,7 +415,6 @@ class SequenceSearcher:
         try:
             results, err = NCBIStandalone.blastpgp( settings.psi_blast_bin,
                                                     db, seqFile,
-                                                    npasses=rounds,
                                                     expectation=e, **kw)
 
             p = NCBIStandalone.PSIBlastParser()
@@ -398,11 +427,11 @@ class SequenceSearcher:
             self.error = { 'results':results,'err':err.read(), 'parser':p,
                            'blast_bin':settings.blast_bin, 'seqFile':seqFile,
                            'db':db,'kw':kw,'exception':str(why) }
-            tools.errWriteln( "BlastError " + tools.lastErrorTrace() )
-            print tools.lastErrorTrace()
+            T.errWriteln( "BlastError " + T.lastErrorTrace() )
+            print T.lastErrorTrace()
             raise BlastError( str(why) + "\n" +
-                              str( self.error ) ) 
-
+                              str( self.error ) )
+        
 
 
     def getSequenceIDs( self, blast_records ):
@@ -419,18 +448,21 @@ class SequenceSearcher:
         @raise BlastError: if can't find ID
         """
         result = []
-        ids = []
+
         for a in blast_records.alignments:
             for pattern in [self.ex_gi,  self.ex_swiss,  self.ex_pdb,
-                            self.ex_Rgi, self.ex_Rswiss, self.ex_Rpdb]:
-                ids = pattern.findall( a.title )
-                if ids and ids[0]!='':
+                            self.ex_Rgi_1, self.ex_Rgi_2,
+                            self.ex_Rswiss, self.ex_Rpdb]:
+
+                match = re.search( pattern, a.title )
+
+                if match:
                     break
 
-            if not ids:
-                raise BlastError( "Couldn't find ID in " + a.title)
+            if not match.group('id'):
+                raise BlastError( "Couldn't find ID in " + a.title )
 
-            result += [ ids[0] ]
+            result += [ match.group('id') ]
 
         return result
 
@@ -492,7 +524,7 @@ class SequenceSearcher:
                 r = self.fastaRecordFromId( db, i )
                 result[i] = r
             except BlastError, why:
-                tools.errWriteln("ERROR (ignored): couldn't fetch %s"%str(i) )
+                T.errWriteln("ERROR (ignored): couldn't fetch %s"%str(i) )
 
         return result
 
@@ -567,7 +599,7 @@ class SequenceSearcher:
         """
         fastaIn = fastaIn or self.outFolder + self.F_FASTA_ALL
 
-        if tools.fileLength( fastaIn ) < 1:
+        if T.fileLength( fastaIn ) < 1:
             raise IOError( "File %s empty. Nothing to cluster"%fastaIn )
 
         self.log.add( "\nClustering sequences:\n%s"%('-'*20) )
@@ -660,7 +692,7 @@ class SequenceSearcher:
         @param fastaOut: file name
         @type  fastaOut: str
         """
-        f = open( tools.absfile(fastaOut), 'w' )
+        f = open( T.absfile(fastaOut), 'w' )
         for r in frecords:
             f.write( str( r ) + '\n' )
         f.close()
@@ -703,7 +735,7 @@ class SequenceSearcher:
         @param outFile: file to write the blast result to
         @type  outFile: str
         """
-        f = open( tools.absfile( outFile ), 'w' )
+        f = open( T.absfile( outFile ), 'w' )
 
         i=1
         for alignment in parsed_blast.alignments:
@@ -766,52 +798,80 @@ class SequenceSearcher:
         b.close()
 
 
-def test():
-    options = {}
-    options['q'] = '/home/Bis/raik/homopipe/test/nmr_hit.fasta'
-    options['o'] = '/home/Bis/johan/blats.test'
-    return options
 
 
-##########
-## TEST ##
-##########
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self, flavour='blastp' ):
+        """
+        run function test
+
+        @param flavour: flavour of blast to test, blastp for localBlast
+                          OR blastpgp for localPSIBlast (default: blastp)
+        @type  flavour: str
+
+        @return: 1
+        @rtype:  int
+        """
+        import tempfile
+        import shutil
+
+        query = T.testRoot() + '/Mod/project/target.fasta'
+        f_out = tempfile.mkdtemp( '_test_SequenceSearcher' )
+        shutil.copy( query, f_out )
+
+        self.searcher = SequenceSearcher( outFolder=f_out, verbose=1 )
+
+        ## blast db has to be built with -o potion
+        ## e.g. cat db1.dat db2.dat | formatdb -i stdin -o T -n indexed_db
+        db = 'swissprot'
+
+        f_target = self.searcher.outFolder + self.searcher.F_FASTA_TARGET
+
+        ## skipp remote blast for now
+        # self.searcher.remoteBlast( f_target, 'nr', 'blastp', alignments=50 )
+
+        if flavour == 'blastpgp':
+            self.searcher.localPSIBlast( f_target, db, 'blastpgp', npasses=2 )
+        else:
+            self.searcher.localBlast( f_target, db, 'blastp', alignments=500, e=0.01 )
+
+        self.searcher.clusterFasta()  ## expects all.fasta
+
+        self.searcher.writeFastaClustered()
+
+        print '\nThe clustered result from the search can be found in %s'%f_out
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+        
 
 if __name__ == '__main__':
 
-    options = test()
-    #    options = cmdDict( _defOptions() )
-
-    searcher = SequenceSearcher(
-        outFolder=tools.projectRoot()+'/test/Mod/project',
-        verbose=1 )
-
-    ## remote Blast
-#    r = searcher.remoteBlast( options['q'], 'swissprot',
-#                              'blastp', alignments=50 )
-
-    ## remote PSIBlast
-#    r = searcher.remotePSIBlast( options['q'], 'swissprot',
-#                              'blastp', alignments=50 )
-
-##    rl, el = searcher.localBlast( options['q'], 'pdbaa', 'blastp')
-
-    ## local PSIBlast
-##    rl, el = searcher.localPSIBlast( options['q'], 'pdbaa',
-##                                     'blastpgp', npasses=2)
-
-    db = 'swissprot'
-    f_target = searcher.outFolder + searcher.F_FASTA_TARGET
-    searcher.localBlast( f_target, db, 'blastp', alignments=500, e=0.01 )
-
-    searcher.clusterFasta()  ## expects all.fasta
-
-    searcher.writeFastaClustered()
-
-
-# fastacmd -d pdbaa -s 2098544
-# blast db has to be built with -o potion
-#    cat db1.dat db2.dat | formatdb -i stdin -o T -n indexed_db
+    test = Test()
+    
+    ## test localBlast
+    assert test.run() ==  test.expected_result()
+    
+    ## test localPSIBlast
+    assert test.run( flavour='blastpgp') ==  test.expected_result()
 
 
 
