@@ -443,24 +443,61 @@ class LocalPath( object ):
         return self.__hash
 
 
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        os.environ['PRJ_INTERFACES'] = '~raik/data/tb/interfaces'
+
+        l = LocalPath()
+
+        l.set_fragments(
+            ('/home/Bis/johan/data/tb/interfaces','PRJ_INTERFACES'),
+            ('/c11/com_wet/ref.com', None) )
+
+        print l.formatted(), " : ", l.local() 
+
+        l.set_path( '/home/Bis/raik/data/tb/interfaces/c11/com_wet/ref.com',
+                    USER='/home/Bis/raik' )
+
+        print l.formatted(), " : ", l.local()
+
+        l.set_path( '/home/Bis/raik/data/tb/interfaces/c11/com_wet/ref.com' )
+
+        print l.formatted(), " : ", l.local()
+
+
+        return 1
+
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+        
+
 if __name__ == '__main__':
 
-    os.environ['PRJ_INTERFACES'] = '~raik/data/tb/interfaces'
+    test = Test()
 
-    l = LocalPath()
-
-    l.set_fragments(
-        ('/home/Bis/johan/data/tb/interfaces','PRJ_INTERFACES'),
-        ('/c11/com_wet/ref.com', None) )
-
-    print l.formatted(), " : ", l.local() 
-
-    l.set_path( '/home/Bis/raik/data/tb/interfaces/c11/com_wet/ref.com',
-                USER='/home/Bis/raik' )
-
-    print l.formatted(), " : ", l.local()
-
-    l.set_path( '/home/Bis/raik/data/tb/interfaces/c11/com_wet/ref.com' )
-
-    print l.formatted(), " : ", l.local()
+    assert test.run( ) == test.expected_result()
 

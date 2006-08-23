@@ -27,7 +27,7 @@ utility funtions for Mod package
 import os.path
 import types
 import Biskit.molUtils as MU
-
+import Biskit.tools as T
 
 def parse_tabbed_file( fname ):
     """
@@ -119,3 +119,47 @@ def verify_fasta( target ):
                 return False
 
     return True
+
+
+
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: 1
+        @rtype:  int
+        """
+        
+        if verify_fasta( T.testRoot() + '/Mod/project/target.fasta'):
+            return 1
+        else:
+            return 0
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+
+if __name__ == '__main__':
+
+    test = Test()
+    
+    assert test.run() ==  test.expected_result()
+
+

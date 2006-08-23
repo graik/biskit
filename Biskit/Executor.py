@@ -532,18 +532,62 @@ class Executor:
             raise TemplateError, s
 
 
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self, kill=1 ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        ExeConfigCache.reset()
+
+        x = ExeConfigCache.get( 'emacs', strict=0 )
+        x.pipes = 1
+
+    ##     e = Executor( 'emacs', args='.zshenv', strict=0, catch_out=0,
+    ##                   verbose=1, cwd=t.absfile('~') )
+        if kill:
+            self.e = Executor( 'emacs', args='-kill .zshenv', strict=0,
+                          f_in=None,
+                          f_out=t.absfile('~/test.out'),
+                          verbose=1, cwd=t.absfile('~') )
+        else:
+            self.e = Executor( 'emacs', args='.zshenv', strict=0,
+                          f_in=None,
+                          f_out=t.absfile('~/test.out'),
+                          verbose=1, cwd=t.absfile('~') )            
+        
+        r = self.e.run()
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+       
+
 if __name__ == '__main__':
 
-    ExeConfigCache.reset()
+    test = Test()
 
-    x = ExeConfigCache.get( 'emacs', strict=0 )
-    x.pipes = 1
+    assert test.run( kill=0 ) == test.expected_result()
 
-##     e = Executor( 'emacs', args='.zshenv', strict=0, catch_out=0,
-##                   verbose=1, cwd=t.absfile('~') )
-    e = Executor( 'emacs', args='.zshenv', strict=0,
-                  f_in=None,
-                  f_out=t.absfile('~/test.out'),
-                  verbose=1, cwd=t.absfile('~') )
+    print 'Emacs were running for %.2f seconds'%test.e.runTime
 
-    r = e.run()
+

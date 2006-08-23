@@ -734,3 +734,49 @@ def projectOnSphere( xyz, radius=None, center=None ):
     rtp[ :, 0 ] = radius
 
     return polarToCartesian( rtp ) + center
+
+
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: something
+        @rtype:  float
+        """
+        print 'Calculating something ..'
+        d = N.array([[20.,30.,40.],[23., 31., 50.]])
+
+        a = polarToCartesian( cartesianToPolar( d ) )
+
+        t = eulerRotation( a[0][0], a[0][1], a[0][2]  )
+
+        return  N.sum( SD(a) )
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: something
+        @rtype:  float
+        """
+        return N.sum( N.array([ 2.12132034,  0.70710678,  7.07106781]) )
+    
+        
+if __name__ == '__main__':
+
+    test = Test()
+
+    assert abs( test.run( ) - test.expected_result() ) < 1e-8
+
+

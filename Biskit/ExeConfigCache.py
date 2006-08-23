@@ -98,9 +98,43 @@ class ExeConfigCache:
         return len( ExeConfigCache.CACHE )
 
 
-## Testing
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        self.x = ExeConfigCache.get( 'xplor' )
+
+        return 1
+
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+        
+
 if __name__ == '__main__':
 
-    x = ExeConfigCache.get( 'tleap' )
+    test = Test()
 
-    print x
+    assert test.run( ) == test.expected_result()
+
+    print test.x

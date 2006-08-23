@@ -1377,67 +1377,96 @@ class Complex:
         return (r,t)
 
 
-####################################
-## Testing
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self, show=0 ):
+        """
+        run function test
+
+        @return: total number of interatomic contacts
+        @rtype:  int
+        """
+
+        lig = PCRModel( t.testRoot() + "/com/1BGS.psf",
+                        t.testRoot() + "/com/lig.model")
+
+        rec = PCRModel( t.testRoot() + "/com/1BGS.psf",
+                        t.testRoot() + "/com/rec.model")
+
+        rec = rec.compress( rec.maskHeavy() )
+        lig = lig.compress( lig.maskHeavy() )
+
+        c = Complex(rec, lig)
+        c.info['soln'] = 1
+
+        cont = c.atomContacts( 6.0 )
+        contProfile_lig = N.sum( cont )
+        contProfile_rec = N.sum( cont, 1 )
+
+        dope = PDBDope( c.rec_model )
+        dope.addSurfaceRacer( probe=1.4 )
+        rec_surf = c.rec_model.profile2mask( 'MS', 0.0000001, 1000 )
+
+        dope = PDBDope( c.lig_model )
+        dope.addSurfaceRacer( probe=1.4 )
+        lig_surf = c.lig_model.profile2mask( 'MS', 0.0000001, 1000 )
+
+        if show:
+            from Biskit import Pymoler
+
+            pm = Pymoler()
+            pm.addPdb( c.rec(), 'rec' )
+            pm.addPdb( c.lig(), 'lig' )
+
+            pm.colorAtoms( 'rec', contProfile_rec )
+            pm.colorAtoms( 'lig', contProfile_lig )
+
+            rec_sphere = c.rec().clone()
+            rec_sphere.xyz = mathUtils.projectOnSphere( rec_sphere.xyz )
+
+            lig_sphere = c.lig().clone()
+            lig_sphere.xyz = mathUtils.projectOnSphere( lig_sphere.xyz )
+
+            pm.addPdb( rec_sphere, 'rec_sphere' )
+            pm.addPdb( lig_sphere, 'lig_sphere' )
+
+            pm.colorAtoms( 'rec_sphere', contProfile_rec )
+            pm.colorAtoms( 'lig_sphere', contProfile_lig )
+
+            pm.add( 'hide all')
+
+            pm.add( 'color grey, (b=0)' )
+            pm.add( 'show stick, (rec or lig)' )
+
+            pm.add( 'zoom all' )
+
+            pm.show()
+
+        return N.sum(contProfile_lig) + N.sum(contProfile_rec)
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: total number of interatomic contacts
+        @rtype:  int
+        """
+        return 2462
+    
 
 if __name__ == '__main__':
-    lig = PCRModel( t.testRoot() + "/com/1BGS.psf",
-                    t.testRoot() + "/com/lig.model")
 
-    rec = PCRModel( t.testRoot() + "/com/1BGS.psf",
-                    t.testRoot() + "/com/rec.model")
+    test = Test()
 
-##     lig = PCRModel( "~/interfaces/c17/com_wet/1WQ1.psf",
-##                     "~/interfaces/c17/com_wet/lig.model")
-
-##     rec = PCRModel( "~/interfaces/c17/com_wet/1WQ1.psf",
-##                     "~/interfaces/c17/com_wet/rec.model")
-
-    rec = rec.compress( rec.maskHeavy() )
-    lig = lig.compress( lig.maskHeavy() )
-
-    c = Complex(rec, lig)
-    c.info['soln'] = 1
-
-    cont = c.atomContacts( 6.0 )
-    contProfile_lig = N.sum( cont )
-    contProfile_rec = N.sum( cont, 1 )
-
-    dope = PDBDope( c.rec_model )
-    dope.addSurfaceRacer( probe=1.4 )
-    rec_surf = c.rec_model.profile2mask( 'MS', 0.0000001, 1000 )
-
-    dope = PDBDope( c.lig_model )
-    dope.addSurfaceRacer( probe=1.4 )
-    lig_surf = c.lig_model.profile2mask( 'MS', 0.0000001, 1000 )
-
-    from Biskit import Pymoler
-
-    pm = Pymoler()
-    pm.addPdb( c.rec(), 'rec' )
-    pm.addPdb( c.lig(), 'lig' )
-
-    pm.colorAtoms( 'rec', contProfile_rec )
-    pm.colorAtoms( 'lig', contProfile_lig )
-
-    rec_sphere = c.rec().clone()
-    rec_sphere.xyz = mathUtils.projectOnSphere( rec_sphere.xyz )
-
-    lig_sphere = c.lig().clone()
-    lig_sphere.xyz = mathUtils.projectOnSphere( lig_sphere.xyz )
-
-    pm.addPdb( rec_sphere, 'rec_sphere' )
-    pm.addPdb( lig_sphere, 'lig_sphere' )
-
-    pm.colorAtoms( 'rec_sphere', contProfile_rec )
-    pm.colorAtoms( 'lig_sphere', contProfile_lig )
+    assert test.run( show=1 ) ==  test.expected_result()
 
 
-    pm.add( 'hide all')
-
-    pm.add( 'color grey, (b=0)' )
-    pm.add( 'show stick, (rec or lig)' )
-
-    pm.add( 'zoom all' )
-
-    pm.show()

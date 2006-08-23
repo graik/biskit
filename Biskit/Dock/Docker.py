@@ -522,25 +522,64 @@ class RunThread( Thread ):
         new_out.close()
 
 
-#### TEST ######
+
+#############
+##  TESTING        
+#############
+    
+class Test:
+    """
+    Test class
+    """
+
+    def run( self, run=0 ):
+        """
+        run function test
+
+        @return: 1
+        @rtype:  int
+        """
+        import tempfile, time
+        import os.path
+
+        out_folder = tempfile.mktemp('_test_docker_%s')
+
+        ligDic = t.Load( t.testRoot() + '/multidock/lig/1A19_models.dic' )
+        recDic = t.Load( t.testRoot() + '/multidock/rec/1A2P_model.dic' )
+
+        self.d = Docker( recDic, ligDic, out = out_folder )
+
+        # dock rec 1 vs. lig 2 on localhost
+        fmac1, fout = self.d.createHexInp( 1, 2 )
+        if run:
+            self.d.runHex( fmac1, log=1, ncpu=2 )
+
+            while not os.path.exists( self.d.out + '/1A2P_1-1A19_2_hex.out'):
+                time.sleep(5)
+
+        ## dock receptor 1 vs. ligand one on remote host
+        #fmac2, fout2= d.createHexInp( 1, 1 )
+        #d.runHex( fmac2, log=0, ncpu=2, host='remote_host_name' )
+
+        print "ALL jobs submitted."
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+
 
 if __name__ == '__main__':
 
-##     rec = testRoot() + '/dock/pcr_rec/1A2P_1_0.pdb.model'
-##     lig = testRoot() + '/dock/pcr_lig/1A19_1_3.pdb.model'
-##     com = testRoot() + '/dock/com/1BGS.model'
-    testf = t.absfile('~/interfaces/c15/dock_multi_0919')
+    test = Test()
 
-    recDic = t.Load( testf + '/pcr_rec/1AVV_models.dic' )
-    ligDic = t.Load( testf + '/pcr_lig/1SHF_models.dic')
+    assert test.run( run=1 ) ==  test.expected_result() 
 
-    d = Docker( recDic, ligDic,                
-                out = '~/data/tmp/hex_%s' )
 
-    fmac1, fout = d.createHexInp( 2, 2 )
-    fmac2, fout2= d.createHexInp( 1, 1 )
-
-    d.runHex( fmac1, log=1, ncpu=2 )
-    d.runHex( fmac2, log=0, ncpu=2, host='riddler' )
-
-    print "ALL jobs submitted."

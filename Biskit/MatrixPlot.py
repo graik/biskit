@@ -183,7 +183,6 @@ class Test:
         return 1
 
 
-
     def expected_result( self ):
         """
         Precalculated result to check for consistent performance.

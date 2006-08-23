@@ -23,7 +23,7 @@
 Prepare template coordinates for modelling.
 """
 
-import Biskit.tools as tools
+import Biskit.tools as T
 from Biskit import PDBModel, PDBCleaner, CleanerError
 
 from TemplateSearcher import TemplateSearcher
@@ -62,7 +62,7 @@ class TemplateCleaner:
         @param log: None reports to STDOUT (drfault: None)
         @type  log: LogFile instance or None
         """
-        self.outFolder = tools.absfile( outFolder )
+        self.outFolder = T.absfile( outFolder )
         self.log = log
 
         self.prepareFolders()
@@ -272,7 +272,7 @@ class TemplateCleaner:
 
             except:
                 self.logWrite( 'Error cleaning ' + f)
-                self.logWrite( tools.lastError() )
+                self.logWrite( T.lastError() )
                 self.err_cleaner = c
                 self.err_file = f
 
@@ -281,13 +281,59 @@ class TemplateCleaner:
         fasta_out.close()
 
 
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: 1
+        @rtype:  int
+        """
+        import tempfile
+        import shutil
+
+        outfolder = tempfile.mkdtemp( '_test_TemplateCleaner' )
+        os.mkdir( outfolder +'/templates' )
+
+        shutil.copytree( T.testRoot() + '/Mod/project/templates/nr',
+                         outfolder + '/templates/nr' )
+
+        self.c = TemplateCleaner( outfolder )
+
+        inp_dic = modUtils.parse_tabbed_file(
+            T.absfile( outfolder + '/templates/nr/chain_index.txt' ) )
+
+        self.c.process_all( inp_dic )
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+        
+
 if __name__ == '__main__':
 
-    outfolder = tools.projectRoot()+ '/test/Mod/project'
+    test = Test()
+    
+    assert test.run() ==  test.expected_result()
 
-    c = TemplateCleaner( outfolder )
 
-    inp_dic = modUtils.parse_tabbed_file(
-        tools.absfile( outfolder + '/templates/nr/chain_index.txt' ) )
 
-    c.process_all( inp_dic )
+

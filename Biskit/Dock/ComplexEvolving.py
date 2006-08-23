@@ -258,24 +258,59 @@ class ComplexEvolving( ProtComplex ):
         return [ c.get( infoKey, default ) for c in self ]
 
 
-### TEST ###
 
-import time
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: list of comment strings
+        @rtype: [str]
+        """
+        import time
+
+        from Biskit.Dock import ComplexEvolving
+
+        c = t.Load( t.testRoot() + '/com/ref.complex' )
+
+        ce= ComplexEvolving( c.rec_model, c.lig(), c,
+                                  info={'comment':'test'} )
+
+        time.sleep( 2 )
+
+        lig = ce.lig().transform( MU.randomRotation(), [0,0,0] )
+        self.ce2 = ComplexEvolving( ce.rec_model, lig, ce,
+                                    info={'comment':'test2'})
+
+        for x in self.ce2:
+            print x['date']
+
+        return self.ce2.valuesOf('comment')
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: list of comment strings
+        @rtype:  [str]
+        """
+        return [None, 'test', 'test2']
+    
 
 if __name__ == '__main__':
 
-##     from Biskit import *
-##     from Biskit.Dock import *
+    test = Test()
 
-    c = t.Load( t.testRoot() + '/com_wet/ref.complex')
+    assert test.run( ) == test.expected_result()
 
-    ce= ComplexEvolving( c.rec_model, c.lig(), c, info={'comment':'test'} )
 
-    time.sleep( 2 )
-
-    lig = ce.lig().transform( MU.randomRotation(), [0,0,0] )
-    ce2 = ComplexEvolving( ce.rec_model, lig, ce,
-                           info={'comment':'test2'})
-
-    for x in ce2:
-        print x['date']
+    print test.ce2.valuesOf('comment')

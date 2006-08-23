@@ -27,7 +27,7 @@
 Create Complexes with random orientation
 """
     
-from Complex import Complex
+from Biskit.Dock.Complex import Complex
 import Biskit.mathUtils as ma
 import Biskit.molUtils as mol
 import Biskit.tools as t
@@ -250,25 +250,73 @@ class ComplexMinimizer( Xplorer ):
 
 
 
-#####TEST######
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self, verbose=0 ):
+        """
+        run function test
 
+        @return: 1
+        @rtype: int
+        """
+        from Biskit import Trajectory
+        import tempfile
+
+        ## read in rec and lig files
+        rec_pdb = t.testRoot() + '/rec/1A2P.pdb' 
+        lig_pdb = t.testRoot() + '/lig/1A19.pdb' 
+
+        rec_psf = t.testRoot() + '/rec/1A2P.psf' 
+        lig_psf = t.testRoot() + '/lig/1A19.psf' 
+
+        rec = PCRModel( rec_psf, rec_pdb )
+        lig = PCRModel( lig_psf, lig_pdb )
+
+
+        self.cr = ComplexRandomizer( rec, lig, debug=1 )
+
+        if verbose:
+            inp_copy = tempfile.mktemp( '_test_randomizer_xplor.inp')
+            self.cs = [ self.cr.random_complex( inp_mirror=inp_copy ) for i in range(5) ]
+            print 'Wrote copy of xplor inp file to: %s'%inp_copy
+
+        else:
+            self.cs = [ self.cr.random_complex( ) for i in range(5) ]
+
+        self.traj = Trajectory( [ c.model() for c in self.cs ] )
+
+        if verbose:
+            f_pfb = tempfile.mktemp('_test.pdb')
+            f_crd = tempfile.mktemp('_test.crd')
+            self.traj.ref.writePdb( f_pfb )
+            self.traj.writeCrd( f_crd )
+            print 'Wrote pdb file to: %s'%f_pfb
+            print 'Wrote crd file to: %s'%f_crd
+            
+        return len(self.traj)
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 5
+    
+        
 if __name__ == '__main__':
 
-    from Biskit.tools import *
-    from Biskit import Trajectory
+    test = Test()
 
-    rec = Load( '~/interfaces/c15/rec_wet/1AVV.model' )
-    lig = Load( '~/interfaces/c15/lig_wet/1SHF.model' )
-
-    inp_copy = absfile( 'test_randomizer_xplor.in')
-
-    cr = ComplexRandomizer( rec, lig, debug=1 )
-
-    cs = [ cr.random_complex( inp_mirror=inp_copy ) for i in range(5) ]
-
-    traj = Trajectory( [ c.model() for c in cs ] )
-
-    traj.ref.writePdb( '~/test.pdb' )
-    traj.writeCrd( '~/test.crd' )
+    assert test.run( verbose=1 ) == test.expected_result()
 
 

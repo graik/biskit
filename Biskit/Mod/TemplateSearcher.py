@@ -27,7 +27,7 @@ Search for templates.
 
 from SequenceSearcher import SequenceSearcher, BlastError
 import settings
-import Biskit.tools as tools
+import Biskit.tools as T
 from Biskit import StdLog, EHandler
 
 from Bio import Fasta
@@ -161,7 +161,7 @@ class TemplateSearcher( SequenceSearcher ):
                 r.chain = i['chain']
                 result[ i['pdb'] ] = r
             except BlastError, why:
-                tools.errWriteln("ERROR (ignored): couldn't fetch "+ str(i) )
+                T.errWriteln("ERROR (ignored): couldn't fetch "+ str(i) )
 
         return result
 
@@ -284,12 +284,12 @@ class TemplateSearcher( SequenceSearcher ):
         pdbCodes = pdbCodes or self.record_dic.keys()
         result = []
         i = 0
-        tools.flushPrint("retrieving %i PDBs..." % len( pdbCodes ) )
+        T.flushPrint("retrieving %i PDBs..." % len( pdbCodes ) )
         for c in pdbCodes:
 
             i += 1
             if i%10 == 0:
-                tools.flushPrint('#')
+                T.flushPrint('#')
 
             fname = '%s/%s.pdb' % (outFolder, c)
 
@@ -324,7 +324,7 @@ class TemplateSearcher( SequenceSearcher ):
             except IOError, why:
                 raise BlastError( "Can't write file "+fname )
 
-        tools.flushPrint('\n%i files written to %s\n' %(i,outFolder) )
+        T.flushPrint('\n%i files written to %s\n' %(i,outFolder) )
 
         return result
 
@@ -381,7 +381,7 @@ class TemplateSearcher( SequenceSearcher ):
                 self.copyClusterOut( raw=raw )
 
         except IOError, why:
-            tools.errWriteln( "Can't write cluster report." + str(why) )
+            T.errWriteln( "Can't write cluster report." + str(why) )
 
 
     def saveClustered( self, outFolder=None ):
@@ -423,26 +423,69 @@ class TemplateSearcher( SequenceSearcher ):
         return result
 
 
-##########
-## TEST ##
-##########
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: 1
+        @rtype:  int
+        """
+        import tempfile
+        import shutil
+
+        query = T.testRoot() + '/Mod/project/target.fasta'
+        outfolder = tempfile.mkdtemp( '_test_TemplateSearcher' )
+        shutil.copy( query, outfolder )
+
+        f_target = outfolder + '/target.fasta'
+
+        self.searcher = TemplateSearcher(outFolder=outfolder, verbose=1 )
+
+        db = 'pdbaa'
+        self.searcher.localBlast( f_target, db, 'blastp', alignments=200, e=0.0001)
+
+        ## first tries to collect the pdb files from a local db and if
+        ## that fails it tries to collect them remotely
+        self.searcher.retrievePDBs()
+
+        self.searcher.clusterFasta()  ## expects all.fasta
+
+        self.searcher.writeFastaClustered()
+
+        fn = self.searcher.saveClustered()
+
+        print '\nThe set of clustered template files from the search'
+        print '    can be found in %s/templates'%outfolder
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+        
+
 if __name__ == '__main__':
 
-    db = 'pdbaa'
-    outfolder = tools.projectRoot()+ '/test/Mod/project'
-    f_target = outfolder + '/target.fasta'
+    test = Test()
+    
+    assert test.run() ==  test.expected_result()
 
-    searcher = TemplateSearcher(outFolder=outfolder,
-                                verbose=1 )
-
-    searcher.localBlast( f_target, db, 'blastp', alignments=200, e=0.0001)
-
-    searcher.retrievePDBs()
-
-    searcher.clusterFasta()  ## expects all.fasta
-
-    searcher.writeFastaClustered()
-
-    fn = searcher.saveClustered()
 
 

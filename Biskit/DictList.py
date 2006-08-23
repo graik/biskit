@@ -281,21 +281,50 @@ class DictList( BisList, list ):
         return r
 
 
-##
-## TESTING
-##
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        l = DictList()
+
+        for i in range( 10 ):
+            d = {'random':random.random(), 'name':'A'}
+            l += [ d ]
+
+
+        p = l.plotArray( 'index', 'random', 'random' )
+
+        p.show()
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+       
 
 if __name__ == '__main__':
 
-    print "DOING something"
+    test = Test()
 
-    l = DictList()
-
-    for i in range( 10 ):
-        d = {'random':random.random(), 'name':'A'}
-        l += [ d ]
+    assert test.run( ) == test.expected_result()
 
 
-    p = l.plotArray( 'index', 'random', 'random' )
-
-    p.show()
