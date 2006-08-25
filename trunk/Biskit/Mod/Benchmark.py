@@ -387,43 +387,83 @@ class Benchmark:
 
 
 
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self, show=0 ):
+        """
+        run function test
+
+        @param pdb_list: show in PyMol
+        @type  pdb_list: 1|0
+
+        @return: 1
+        @rtype:  int
+        """
+        import tempfile
+        import shutil
+        from Biskit import PDBModel
+        from Biskit import Pymoler
+        
+        ## collect the input files needed
+        outfolder = tempfile.mkdtemp( '_test_Benchmark' )
+        os.mkdir( outfolder +'/modeller' )
+        
+        dir = '/Mod/project/validation/1DT7'
+        shutil.copy( T.testRoot() + dir + '/modeller/PDBModels.list',
+                     outfolder + '/modeller' )    
+        shutil.copy( T.testRoot() + dir + '/reference.pdb',
+                     outfolder )
+
+        self.b = Benchmark( outfolder )
+
+        self.b.go()
+
+        pdb = T.Load( outfolder + "/modeller/PDBModels.list" )[0]
+
+        reference  =  PDBModel(outfolder  + "/reference.pdb" )
+        tmp_model = pdb.clone()
+
+        reference = reference.compress( reference.maskCA() )
+        pdb       = pdb.compress( pdb.maskCA() )
+        tmp_model = tmp_model.compress(tmp_model.maskCA())
+
+        tm = tmp_model.transformation( reference, n_it=0,
+                                       profname="rms_outliers")
+        pdb = pdb.transform( tm )
+
+        if show:
+            pm = Pymoler()
+            pm.addPdb( pdb, "m" )
+            pm.addPdb( reference, "r" )
+            pm.colorAtoms( "m", tmp_model.profile("rms_outliers") )
+            pm.add('set ribbon_trace,1')
+            pm.add('show ribbon')
+            pm.show()
+
+        print 'The result from the benchmarking can be found in %s/benchmark'%outfolder
+
+        return 1
 
 
-############
-### TEST ###
-############
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
 
 if __name__ == '__main__':
 
-
-    vp = T.testRoot() + '/Mod/project/validation/1J55'
-
-    b = Benchmark( vp )
-
-    b.go()
-
-
-    from Biskit import *
-    from Biskit.gnuplot import *
-
-    pdb = T.Load( vp + "/modeller/PDBModels.list" )[0]
-    reference  =  PDBModel( vp + "/reference.pdb" )
-
-    tmp_model = pdb.clone()
-
-    reference = reference.compress( reference.maskCA() )
-    pdb       = pdb.compress( pdb.maskCA() )
-    tmp_model = tmp_model.compress(tmp_model.maskCA())
-
-    tm = tmp_model.transformation( reference, n_it=0,
-                                   profname="rms_outliers")
-    pdb = pdb.transform( tm )
-
-    pm = Pymoler()
-    pm.addPdb( pdb, "m" )
-    pm.addPdb( reference, "r" )
-    pm.colorAtoms( "m", tmp_model.profile("rms_outliers") )
-    pm.add('set ribbon_trace,1')
-    pm.add('show ribbon')
-    pm.show()
-
+    test = Test()
+    
+    assert test.run(show=1) ==  test.expected_result()

@@ -256,17 +256,54 @@ class SettingsManager:
                 pass
 
 
-### TEST ###
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        import tempfile
+        out_f = tempfile.mktemp('_test_config.dat')
+
+        ## importing Biskit calls SettingsManager automatically
+        import Biskit.settings_default as D
+
+        m = SettingsManager( defaults_module=D )
+
+        defaults = m.getDefaults( D )
+
+        m.writeConfig( defaults, T.absfile(out_f) )
+
+        print 'A test config file was written to %s'%out_f
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+        
 
 if __name__ == '__main__':
 
-    ## importing Biskit calls SettingsManager automatically
-    import Biskit.settings_default as D
+    test = Test()
 
-    m = SettingsManager( defaults_module=D )
-
-    defaults = m.getDefaults( D )
-
-    m.writeConfig( defaults, T.absfile('testconfig.dat') )
-
+    assert test.run( ) == test.expected_result()
 

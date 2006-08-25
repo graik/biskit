@@ -379,20 +379,73 @@ class Check_Identities:
 
 
 
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self, validate_testRoot=0 ):
+        """
+        run function test
+
+        @param validate_testRoot: check a validation project residing in
+                                     the test root (default: 0)
+        @type  validate_testRoot: 1|0
+
+        @return: 1
+        @rtype:  int
+        """
+        import tempfile
+        import shutil
+        
+        if validate_testRoot:
+            self.m = Check_Identities( T.testRoot() + '/Mod/project')
+            self.m.go()
+
+            val_root =  T.testRoot() + '/Mod/project/validation'
+            folders = os.listdir( val_root )
+
+            for f in folders:
+                self.m = Check_Identities( outFolder = val_root + '/' + f )
+                self.m.go()
+
+        else:
+            ## collect the input files needed
+            outfolder = tempfile.mkdtemp( '_test_CheckIdentities' )
+            os.mkdir( outfolder +'/t_coffee' )
+
+            shutil.copy( T.testRoot() + '/Mod/project/t_coffee/final.pir_aln',
+                         outfolder + '/t_coffee' )    
+
+            self.m = Check_Identities( outfolder )
+            self.m.go()
+
+            print """
+The result from the template comparison can be found in the three files %s, %s and %s that reside in the folder %s"""\
+            %(self.m.F_OUTPUT_IDENTITIES[1:], self.m.F_OUTPUT_IDENTITIES_INF[1:],
+              self.m.F_OUTPUT_IDENTITIES_COV[1:], outfolder )
+
+        return 1
 
 
-############
-### TEST ###
-############
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
 
 if __name__ == '__main__':
 
-    m = Check_Identities( T.testRoot() + '/Mod/project')
-    m.go()
+    test = Test()
+    
+    assert test.run() ==  test.expected_result()
 
-    val_root =  T.testRoot() + '/Mod/project/validation'
-    folders = os.listdir( val_root )
 
-    for f in folders:
-        m = Check_Identities( outFolder = val_root + '/' + f )
-        m.go()

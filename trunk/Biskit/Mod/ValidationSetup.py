@@ -26,7 +26,7 @@
 Setup directory structure for the validation.  
 """
 
-import Biskit.tools as tools
+import Biskit.tools as T
 from Biskit.PDBModel import PDBModel
 import re
 import glob
@@ -71,7 +71,7 @@ class ValidationSetup:
         @param log: None reports to STDOUT
         @type  log: LogFile instance or None
         """
-        self.outFolder = tools.absfile( outFolder )
+        self.outFolder = T.absfile( outFolder )
         self.log = log
 
         self.prepareFolders()
@@ -455,14 +455,57 @@ class ValidationSetup:
             self.link_reference_pdb(cluster)
 
 
-#######
-## TEST
-#######
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: 1
+        @rtype:  int
+        """
+        import tempfile
+        import shutil
+
+        ## collect the input files needed
+        outfolder = tempfile.mkdtemp( '_test_ValidationSetup' )
+        os.mkdir( outfolder +'/templates' )
+
+        shutil.copytree( T.testRoot() + '/Mod/project/templates/nr',
+                         outfolder + '/templates/nr' )
+
+        shutil.copytree( T.testRoot() + '/Mod/project/templates/modeller',
+                         outfolder + '/templates/modeller' )    
+
+        v = ValidationSetup( outFolder = outfolder )    
+
+        v.go( validation_folder =outfolder )  
+
+        print 'The validation project can be found in %s/validation'%outfolder
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+
 if __name__ == '__main__':
 
-    base_folder = tools.testRoot() + '/Mod/project'
-
-    v = ValidationSetup(outFolder = base_folder)    
-
-    v.go(validation_folder = base_folder)  
+    test = Test()
+    
+    assert test.run() ==  test.expected_result()
 

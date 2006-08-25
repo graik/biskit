@@ -27,7 +27,7 @@
 Analyze model quality
 """
 
-import Biskit.tools as tools
+import Biskit.tools as T
 from Biskit.PDBModel import PDBModel
 from Biskit.Mod.Benchmark import Benchmark
 from Biskit.Mod.ValidationSetup import ValidationSetup as VS
@@ -80,7 +80,7 @@ class Analyse:
         @param log: None reports to STDOUT
         @type  log: LogFile instance or None
         """
-        self.outFolder = tools.absfile( outFolder )
+        self.outFolder = T.absfile( outFolder )
         self.log = log
 
         self.prepareFolders()
@@ -350,7 +350,7 @@ class Analyse:
             pdb_list = self.outFolder + self.F_TEMPLATE_FOLDER \
                        + "/%s"%template + self.F_PDBModels
 
-            pdb_list = tools.Load(pdb_list)
+            pdb_list = T.Load(pdb_list)
 
             template_rmsd_dic[template] = \
               pdb_list[0].compress(pdb_list[0].maskCA()).aProfiles["rmsd2ref_if"]
@@ -538,7 +538,7 @@ class Analyse:
         @type  template_folder: str
         """
         ##
-        pdb_list = tools.Load(self.outFolder + self.F_MODELS)
+        pdb_list = T.Load(self.outFolder + self.F_MODELS)
         model = PDBModel(pdb_list[0])
 
         ## 
@@ -575,28 +575,90 @@ class Analyse:
 
 
 
-############
-## MAIN
-############
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self, analyse_testRoot=0 ):
+        """
+        run function test
+
+        @param analyse_testRoot: analyse the full project in testRoot
+        @type  analyse_testRoot: 1|0
+
+        @return: 1
+        @rtype:  int
+        """
+        import tempfile
+        import shutil
+
+        ## a full test case that demands a valid testRoot project
+        if analyse_testRoot:
+            outfolder = T.testRoot() + '/Mod/project'
+            
+            self.a = Analyse( outFolder = outfolder )
+            self.a.go()
+
+            print 'The result from the analysis can be found in %s/analyse'%outfolder
+            return 1
+
+        
+        ## collect the input files needed
+        outfolder = tempfile.mkdtemp( '_test_Analyse' )
+
+        ## data from validation sub-projects
+        dir = '/Mod/project/validation/'
+        for v in ['1DT7', '1J55']:
+
+            os.makedirs( outfolder +'/validation/%s/modeller'%v )
+            shutil.copy( T.testRoot() + dir + '/%s/modeller/Modeller_Score.out'%v,
+                         outfolder + '/validation/%s/modeller'%v)
+
+            shutil.copy( T.testRoot() + dir + '/%s/identities_cov.out'%v,
+                         outfolder + '/validation/%s'%v )
+
+            os.mkdir( outfolder +'/validation/%s/benchmark'%v )
+            for f in [ 'rmsd_aa.out', 'rmsd_ca.out', 'PDBModels.list' ]:
+                shutil.copy( T.testRoot() + dir + '/%s/benchmark/%s'%(v,f),
+                             outfolder + '/validation/%s/benchmark'%v )
+
+
+        ## data from main project
+        os.mkdir( outfolder +'/modeller' )
+        shutil.copy( T.testRoot() + '/Mod/project/modeller/PDBModels.list',
+                     outfolder + '/modeller' )  
+
+        os.mkdir( outfolder +'/t_coffee' )
+        shutil.copy( T.testRoot() + '/Mod/project/t_coffee/final.pir_aln',
+                     outfolder + '/t_coffee' )    
+
+        ## now analyze!
+        self.a = Analyse( outFolder = outfolder )
+        self.a.go()
+
+        print 'The result from the analysis can be found in %s/analyse'%outfolder
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
 
 if __name__ == '__main__':
 
-    #base_folder = tools.testRoot() + '/Mod/project'
-
-    base_folder = tools.absfile('~/Test')
-    a = Analyse(outFolder = base_folder)
-    a.go()
-
-
- ##    folders = os.listdir(tools.absfile('~/Homstrad_final/'))
-
-
-##     for folder in folders:
-
-##         base_folder = tools.absfile('~/Homstrad_final/%s'%folder)
-
-##         a = Analyse(outFolder = base_folder)
-
-##         a.go()
-
+    test = Test()
+    
+    assert test.run(analyse_testRoot=1) ==  test.expected_result()
 

@@ -254,24 +254,54 @@ def logConfidence( x, R, clip=1e-32 ):
     return d.findConfidenceInterval( x * 1.0 )[0], d.average()
 
 
-#########
-## TEST
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        import random
+
+        ## a proper lognormal density distribution the log of which has mean 1.0
+        ## and stdev 0.5
+        X = [ (x, p_lognormal(x, 1.0, 0.5)) for x in N.arange(0.00001, 50, 0.001)]
+
+        for i in range( 5 ):
+            ## Some random values drawn from the same lognormal distribution 
+
+            alpha = 2.
+            beta = 0.6
+
+            R = [ random.lognormvariate( alpha, beta ) for i in range( 10000 ) ]
+
+            print logConfidence( 6.0, R )[0]#, area(6.0, alpha, beta) 
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
 
 if __name__ == '__main__':
 
-    import random
+    test = Test()
 
-    ## a proper lognormal density distribution the log of which has mean 1.0
-    ## and stdev 0.5
-##  X = [ (x, p_lognormal(x, 1.0, 0.5)) for x in N.arange(0.00001, 50, 0.001)]
-
-    for i in range( 10 ):
-        ## Some random values drawn from the same lognormal distribution 
-
-        alpha = 2.
-        beta = 0.6
-
-        R = [ random.lognormvariate( alpha, beta ) for i in range( 10000 ) ]
-
-        print logConfidence( 6.0, R )[0], area(6.0, alpha, beta) 
+    assert test.run( ) == test.expected_result()
 
