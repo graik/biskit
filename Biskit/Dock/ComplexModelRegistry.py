@@ -254,7 +254,7 @@ class ComplexModelRegistry:
         @return: list of Complexes
         @rtype: [Complex]
         """
-        return self.__getComplexes( self.rec_f2com )
+        return self.__getComplexes( model, self.rec_f2com )
 
 
     def getLigComplexes( self, model ):
@@ -365,26 +365,20 @@ class Test:
     Test class
     """
 
-    def __init__( self ):
-        self.cl = T.Load( T.testRoot() +'/dock/hex/complexes.cl' )
-        self.cl = self.cl.toList()
-        self.r = ComplexModelRegistry()
-
-
-    def run( self, inheret='test' ):
+    def run( self ):
         """
         run function test
 
         @return: 1
         @rtype: int
         """
-        import profile
-        import pstats
+        cl = T.Load( T.testRoot() +'/dock/hex/complexes.cl' )
+        cl = cl.toList()
+        
+        self.r = ComplexModelRegistry()
 
-        str = 'for c in %s.cl[:500]: %s.r.addComplex( c )'%( inheret, inheret )
-        profile.run( str, 'report.out' )
-        p = pstats.Stats('report.out')
-        print p.sort_stats('cumulative').print_stats()
+        for c in cl[:500]:
+            self.r.addComplex( c )
 
         return 1
 
@@ -403,5 +397,5 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( ) == test.expected_result()
+    assert test.run() == test.expected_result()
 

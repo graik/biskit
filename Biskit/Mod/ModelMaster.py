@@ -134,12 +134,81 @@ class ModelMaster(TrackingJobMaster):
         print "Done modeling."
 
 
+
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self, model_testRoot=0 ):
+        """
+        run function test
+
+        @param model_testRoot: align the full validation project in testRoot
+        @type  model_testRoot: 1|0
+
+        @return: 1
+        @rtype:  int
+        """
+        import tempfile
+        import shutil
+
+        if model_testRoot:
+            
+            projRoot =  T.testRoot()+'/Mod/project'
+            projects = glob.glob( projRoot + '/validation/*' )
+            
+            self.master = ModelMaster(folders = projects,
+                                      hosts=hosts.cpus_all[ : 10 ])
+            
+            self.r = self.master.calculateResult()
+            return 1
+
+
+        ## collect the input files needed
+        outfolder = tempfile.mkdtemp( '_test_Modeller' )
+        os.mkdir( outfolder +'/templates' )
+        os.mkdir( outfolder +'/t_coffee' )
+
+        shutil.copytree( T.testRoot() + '/Mod/project/templates/modeller',
+                         outfolder + '/templates/modeller' )
+
+        shutil.copy( T.testRoot() + '/Mod/project/t_coffee/final.pir_aln',
+                     outfolder + '/t_coffee' )    
+
+        shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
+                         outfolder  )
+
+        self.master = ModelMaster(folders = [outfolder],
+                                  hosts=hosts.cpus_all[ : 10 ],
+                                  show_output = 1)
+
+        self.r = self.master.calculateResult()
+
+        print 'The models result can be found in %s/modeller'%outfolder
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+
 if __name__ == '__main__':
 
-    options = T.cmdDict({'d':glob.glob(T.absfile('~/Homstrad_modeller/*'))})
+    test = Test()
+    
+    assert test.run() ==  test.expected_result()
 
-    d = options['d']
 
-    master = ModelMaster(folders = d, hosts=hosts.cpus_all[ : 10 ])
-
-    r = master.calculateResult()

@@ -138,20 +138,87 @@ class AlignerMaster(TrackingJobMaster):
         print "Done aligning."
 
 
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self, align_testRoot=0 ):
+        """
+        run function test
+
+        @param align_testRoot: align the full validation project in testRoot
+        @type  align_testRoot: 1|0
+
+        @return: 1
+        @rtype:  int
+        """
+        import tempfile
+        import shutil
+
+        ## a full test case that demands a valid testRoot project
+        if align_testRoot:
+            projRoot =  T.testRoot()+'/Mod/project'
+            projects = glob.glob( projRoot + '/validation/*' )
+
+            self.master = AlignerMaster(folders = projects,
+                                   ferror = projRoot+'/AlignErrors.out',
+                                   hosts = hosts.cpus_all[ : 10 ],
+                                   show_output = 1)
+            
+            self.r = self.master.calculateResult()
+            
+            return 1
+
+        ## collect the input files needed
+        outfolder = tempfile.mkdtemp( '_test_AlignerMaster' )
+        os.mkdir( outfolder +'/templates' )
+        os.mkdir( outfolder +'/sequences' )
+
+        shutil.copytree( T.testRoot() + '/Mod/project/templates/t_coffee',
+                         outfolder + '/templates/t_coffee' )
+
+        shutil.copy( T.testRoot() + '/Mod/project/templates/templates.fasta',
+                     outfolder + '/templates' )
+
+        shutil.copy( T.testRoot() + '/Mod/project/sequences/nr.fasta',
+                     outfolder + '/sequences/' )
+
+        shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
+                     outfolder  )
+
+        self.master = AlignerMaster(folders=[outfolder],
+                               ferror=outfolder+'/AlignErrors.out',
+                               hosts=hosts.cpus_all[ : 5 ],
+                               show_output=1)
+
+        self.r = self.master.calculateResult()
+
+        print 'The alignment result can be found in %s/t_coffee'%outfolder
+
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 1
+    
+
 if __name__ == '__main__':
 
-    mask     = T.absfile(T.testRoot()+'/Mod/project/validation/1MQ1')
-    projects = glob.glob( mask )
-
-    master = AlignerMaster(folders=projects,
-                      ferror=T.testRoot()+'/Mod/project/AlignErrors.out',
-                      hosts=hosts.cpus_all[ : 10 ],
-                      show_output=1)
-
-    r = master.calculateResult()
-
-
-
+    test = Test()
+    
+    assert test.run() ==  test.expected_result()
 
 
 

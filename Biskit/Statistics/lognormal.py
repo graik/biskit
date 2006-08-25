@@ -165,23 +165,63 @@ def logConfidence( x, R, clip=0 ):
     return logArea( x, alpha, beta ), logMedian( alpha )
 
 
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self, show=0 ):
+        """
+        run function test
+
+        @return: 1
+        @rtype: int
+        """
+        import random
+        import Biskit.gnuplot as gnuplot
+        import Biskit.hist as H
+
+        cr = []
+        for i in range( 10000 ):
+            ## Some random values drawn from the same lognormal distribution 
+
+            alpha = 1.5
+            beta = .7
+            x = 10.
+
+            R = [ random.lognormvariate( alpha, beta ) for i in range( 10 ) ]
+
+            cr += [ logConfidence( x, R )[0] ]
+
+
+        ca = logArea( x, alpha, beta )
+
+        if show:
+            gnuplot.plot( H.density( N.array(cr) - ca, 100 ) )
+
+        return ca
+
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 1
+        @rtype:  int
+        """
+        return 0.86877651432955771
+    
+
 if __name__ == '__main__':
 
-    import random
+    test = Test()
 
-    cr = []
-    for i in range( 10000 ):
-        ## Some random values drawn from the same lognormal distribution 
-
-        alpha = 1.5
-        beta = .7
-        x = 10.
-
-        R = [ random.lognormvariate( alpha, beta ) for i in range( 10 ) ]
-
-        cr += [ logConfidence( x, R )[0] ]
+    assert abs( test.run( show=1 ) - test.expected_result() ) < 1e-8
 
 
-    ca = logArea( x, alpha, beta )
-
-    plot( density( N.array(cr) - ca, 100 ) )
