@@ -463,7 +463,11 @@ class AmberEntropyMaster(TrackingJobMaster):
         """
         hand over parameters to slave once.
 
-        @rtype: dict
+        @param slave_tid: slave task id
+        @type  slave_tid: int
+
+        @return: dictionary with init parameters
+        @rtype: {param:value}
         """
         host = self.hostnameFromTID( slave_tid )
         nice = self.niceness.get( host, self.niceness.get('default',0) )

@@ -132,9 +132,13 @@ class TrajFlexMaster(TrackingJobMaster):
                                    add_hosts=add_hosts)
 
 
-    def getInitParameters(self,  slave_tid):
+    def getInitParameters(self, slave_tid):
         """
-        hand over parameters to slave once.
+        @param slave_tid: slave task id
+        @type  slave_tid: int
+
+        @return: dictionary with init parameters
+        @rtype: {param:value}
         """
         return {'ferror':self.slaveLog.fname,
                 'trajMap':self.trajMap,

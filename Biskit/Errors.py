@@ -34,17 +34,20 @@ class BiskitError( Exception ):
     """
     pass
 
+
 class HandledError( BiskitError ):
     """
     Error raised by the ErrorHandler after an Error has been reported.
     """
     pass
 
+
 class FatalError( HandledError ):
     """
     Error raised by the ErrorHandler after a fatal Error has been reported.
     """
     pass
+
 
 class NormalError( HandledError ):
     """

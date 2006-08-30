@@ -145,10 +145,12 @@ class Test:
     Test class
     """
     
-    def run( self, model_testRoot=0 ):
+    def run( self, run=0, model_testRoot=0 ):
         """
         run function test
-
+        
+        @param run: run the full test (call external application) or not
+        @type  run: 1|0
         @param model_testRoot: align the full validation project in testRoot
         @type  model_testRoot: 1|0
 
@@ -188,9 +190,10 @@ class Test:
                                   hosts=hosts.cpus_all[ : 10 ],
                                   show_output = 1)
 
-        self.r = self.master.calculateResult()
+        if run:
+            self.r = self.master.calculateResult()
 
-        print 'The models result can be found in %s/modeller'%outfolder
+            print 'The models result can be found in %s/modeller'%outfolder
 
         return 1
 
@@ -209,6 +212,6 @@ if __name__ == '__main__':
 
     test = Test()
     
-    assert test.run() ==  test.expected_result()
+    assert test.run( run=1 ) ==  test.expected_result()
 
 

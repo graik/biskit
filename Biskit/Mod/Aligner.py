@@ -435,10 +435,13 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, run=0 ):
         """
         run function test
-
+        
+        @param run: run the full test (call external application) or not
+        @type  run: 1|0
+        
         @return: 1
         @rtype:  int
         """
@@ -466,9 +469,11 @@ class Test:
 
         self.a.align_for_modeller_inp()
 
-        self.a.go()
+        if run:
 
-        print 'The alignment result can be found in %s/t_coffee'%outfolder
+            self.a.go()
+
+            print 'The alignment result can be found in %s/t_coffee'%outfolder
 
         return 1
 
@@ -487,6 +492,6 @@ if __name__ == '__main__':
 
     test = Test()
     
-    assert test.run() ==  test.expected_result()
+    assert test.run( run=1 ) ==  test.expected_result()
 
 

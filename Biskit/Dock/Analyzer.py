@@ -170,7 +170,7 @@ class Analyzer:
         self.hexSurfaces = self.__categorizeHexSurf( 0.2 )
 
 
-    def random_contacts( self, contMat, n, maskRec, maskLig ):
+    def random_contacts( self, contMat, n, maskRec=None, maskLig=None ):
         """
         Create randomized surface contact matrix with same number of
         contacts and same shape as given contact matrix.
@@ -189,6 +189,11 @@ class Analyzer:
         """
         a,b = N.shape( contMat )
         nContacts = N.sum( N.sum( contMat ))
+
+        if not maskLig:
+            r_size, l_size = N.shape( contMat )
+            maskLig = N.ones( l_size )
+            maskRec = N.ones( r_size )
 
         c_mask = N.ravel( N.outerproduct( maskRec, maskLig ) )
         c_pos = N.nonzero( c_mask )
@@ -226,7 +231,7 @@ class Analyzer:
         return N.take( lst, pos )
 
 
-    def shuffledLists( self, n, lst, mask ):
+    def shuffledLists( self, n, lst, mask=None ):
         """
         shuffle order of a list n times, leaving masked(0) elements untouched
 
@@ -240,12 +245,12 @@ class Analyzer:
         @return: list of shuffeled lists
         @rtype: [[any]]        
         """
-        if mask == None:
-            mask == N.ones( len(lst)  )
+        if not mask:
+            mask = N.ones( len(lst)  )
 
         if type( lst ) == list:
             lst = N.array( lst )
-
+        
         pos = N.nonzero( mask )
 
         rand_pos = N.array( [ self.__shuffleList( pos ) for i in range(n) ] )
@@ -301,4 +306,60 @@ class Analyzer:
 
 
 
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: shape of ramdom contact matrix
+        @rtype:  tuple
+        """
+        import tempfile
+        from Biskit import Trajectory
+
+        ## create a minimal receptor trajectory from a pdb file
+        f_out = tempfile.mktemp( '_test_rec.traj' )
+        t_rec = Trajectory( [t.testRoot() + '/rec/1A2P.pdb'] )
+        t.Dump( t_rec, f_out )
+
+        ## load a complex list
+        cl = t.Load( t.testRoot() + '/dock/hex/complexes.cl')
+
+        self.a= Analyzer( rec = f_out,
+                          lig = t.testRoot()+'/lig_pcr_00/traj.dat',
+                          ref = t.testRoot()+'/com/ref.complex' )
+
+        ## shuffle this lsit five times
+        shuff_lst = self.a.shuffledLists( 5, range(8) )
+
+        ## create two random contact matrices
+        rand_mat = self.a.random_contacts( cl[0].atomContacts(), 2 )
+
+        return N.shape(rand_mat[1])
+
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: shape of ramdom contact matrix
+        @rtype:  tuple
+        """
+        return (1075, 876)
+    
+        
+if __name__ == '__main__':
+
+    test = Test()
+
+    assert test.run( ) == test.expected_result()
 

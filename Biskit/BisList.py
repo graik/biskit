@@ -50,7 +50,7 @@ class ItemNotFound( ConditionError):
 class BisList:
     """
     An *abstract* base class that lays out the basic interface for
-    collections of dictionary-like objects.  To the outside, it
+    collections of dictionary-like objects. To the outside, it
     behaves like a list. However, no assumptions are yet made as to
     the internal data structure.
 
@@ -256,7 +256,7 @@ class BisList:
         return self.take( self.argsort( sortKey, cmpfunc ))
 
 
-    def valuesOf(self, key, default=None, indices=None, unique=0 ): #
+    def valuesOf(self, key, default=None, indices=None, unique=0 ): 
         """
         Get all values assigned to a certain key of all or some
         items. The result is guaranteed to have the same length as the

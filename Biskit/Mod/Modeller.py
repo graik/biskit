@@ -533,9 +533,12 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, run=0 ):
         """
         run function test
+
+        @param run: run the full test (call external application) or not
+        @type  run: 1|0
 
         @return: 1
         @rtype:  int
@@ -562,11 +565,13 @@ class Test:
 
         r = m.prepare_modeller( )
 
-        m.go()
+        if run:
 
-        m.postProcess()
+            m.go()
+            
+            m.postProcess()
 
-        print 'The modelling result can be found in %s/modeller'%outfolder
+            print 'The modelling result can be found in %s/modeller'%outfolder
 
 
         return 1
@@ -586,4 +591,4 @@ if __name__ == '__main__':
 
     test = Test()
     
-    assert test.run() ==  test.expected_result()
+    assert test.run( run=1 ) ==  test.expected_result()
