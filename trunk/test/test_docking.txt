@@ -47,30 +47,36 @@ NOTE!!   The name of the input pdb file to pdb2xplor has to be
             - has to start with a number.
 
 cd rec
-pdb2xplor.py -i 1A2P_rec_original.pdb 
+pdb2xplor.py -i 1A2P_rec_original.pdb -exe
   Note: 1A2P_rec_original.log contains information on the changes done to the 
   input file (removed chains, detected chain breaks, residues with multiple
   occuopancies etc.). In this case the pdb file contained three identical 
   chains(three molecules in the unit cell) and therefore two was removed. 
   A zinc ion was alos removed as well as a number of residues with alternate 
   positions (the one with the highest occupancy was kept).
-xplor-nih < 1A2P_rec_original_generate.inp > 1A2P_rec_original_generate.log
-  Note: Runs xplor and writes log to file
+
+  Note: If you dont want that the pdb2xplor script should run the
+  XPLOR job for you just omitt the -exe option and then run XPLOR
+  manually like this:
+
+    xplor-nih < 1A2P_rec_original_generate.inp > 1A2P_rec_original_generate.log
+
   
 cd lig
-pdb2xplor.py -i 1A19_lig_original.pdb -c 1
+pdb2xplor.py -i 1A19_lig_original.pdb -c 1 -exe
  Note: The option "-c 1" sets the chainId of the ligand to B matching 
  that in the complex
-xplor-nih < 1A19_lig_original_generate.inp > 1A19_lig_original_generate.log
+
 
 cd com
-pdb2xplor.py -i 1BGS_edited.pdb
- Note: Here the script was not able to clean the original pdb file. In this case
- it contained three chains A,B,C,D,E and F and the separate complexes within the
- file is A-D, B-E and C-F. The script can not currently handle this
- configuration of chains (A-B, C-D and E-F would have been cleaned though).
- Therefor the pdb file had to be edited manually (deleting chains B,C,E and F). 
-xplor-nih < 1BGS_edited_generate.inp  > 1BGS_edited_generate.log
+pdb2xplor.py -i 1BGS_original.pdb -cmask 1 0 0 1 0 0 -exe
+ Note: Here the script was not able to clean the original pdb file automatically. 
+ In this case the structure contained six chains A,B,C,D,E and F and the 
+ separate complexes within the file are A-D, B-E and C-F. The script can not 
+ currently handle this configuration of chains (A-B, C-D and E-F would have 
+ been cleaned though). Therefor we use the -cmask option that hete specifies that
+ the first and fourth chain should be kept. Optionally you may edit the pdb-file
+ manually (deleting chains B,C,E and F). 
 
 pdb2complex.py -c 1BGS.pdb  -r 0 -l 1
   Note: Here we also create a reference complex object, that we will need later.
@@ -90,10 +96,10 @@ dope.py -s ../../rec/1A2P.pdb -so ../../rec/1A2P_dry.model -i 1A2P.model -dic 1A
      - conservation redidue profile derived (Hmmer.py)
   To the input models (-i) that have changed coordinates in all cases but the one 
   receprot vs. one ligand docking described here the following is added:
-     - relative ASA atom profiles (using WhatIf.py)
      - surface masks (atom profile) 
      - Fold-X energies (FoldX.py)
-     - surface curvature profiles, molecular surface and accessible surface profiles (SurfaceRacer.py) 
+     - surface curvature profiles, molecular surface (MS) profiles, 
+       accessible surface (AS) profiles and relative AS atom profiles (SurfaceRacer.py) 
   
 
 mkdir ../lig
