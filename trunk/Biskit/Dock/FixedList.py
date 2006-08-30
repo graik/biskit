@@ -46,22 +46,22 @@ class FixedList( list ):
 
     def __stop(self):
         """
-        @raise GuardedListError: if attempt to modify fixed list
+        @raise FixedListError: if attempt to modify fixed list
         """
         if self.fixed():
-            raise GuardedListError("Attempt to modify fixed list.")
+            raise FixedListError("Attempt to modify fixed list.")
 
     def __setitem__(self, i, v ):
         self.__stop()
-        super( GuardedList, self).__setitem__( i, v )
+        super( FixedList, self).__setitem__( i, v )
 
     def __setslice__(self, i, j, v ):
         self.__stop()
-        super( GuardedList, self).__setslice__( i, j, v )
+        super( FixedList, self).__setslice__( i, j, v )
 
     def __add__( self, lst ):
         self.__stop()
-        super( GuardedList, self).__add__( lst )
+        super( FixedList, self).__add__( lst )
 
     def __iadd__( self, lst ):
         self.__stop()
@@ -69,12 +69,59 @@ class FixedList( list ):
 
     def extend( self, lst ):
         self.__stop()
-        super( GuardedList, self).extend( lst )        
+        super( FixedList, self).extend( lst )        
 
     def append( self, v ):
         self.__stop()
-        super( GuardedList, self).append( v )        
+        super( FixedList, self).append( v )        
 
     def __delitem__(self, i ):
         self.__stop()
-        super( GuardedList, self).__delitem__( i )
+        super( FixedList, self).__delitem__( i )
+
+
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self, raiseErr=0 ):
+        """
+        run function test
+
+        @return: something
+        @rtype:  float
+        """
+        list = range(10)
+
+        f = FixedList( list )
+
+        print 'f.fixed() is %i for a FixedList'% f.fixed()
+        
+        if raiseErr:
+            f.append(6)
+                
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: something
+        @rtype:  float
+        """
+        return 1
+    
+        
+if __name__ == '__main__':
+
+    test = Test()
+
+    assert  test.run( raiseErr=1 ) == test.expected_result()
+    

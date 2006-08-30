@@ -115,3 +115,55 @@ class StdLog( LogFile ):
 
     def __del__(self):
         pass
+
+
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: something
+        @rtype:  float
+        """
+        import tempfile
+
+        f_out = tempfile.mktemp( '_test_LogFile' )
+        
+        l = LogFile( f_out, mode='w')
+
+        l.add('A line')
+
+        l.add_nobreak('A nonbreakling line')
+
+        l.add('... more text.')
+
+        print 'A log file was written to %s'%f_out
+        
+        return  1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: something
+        @rtype:  float
+        """
+        return 1
+        
+if __name__ == '__main__':
+
+    test = Test()
+
+    assert  test.run() == test.expected_result() 
+
+

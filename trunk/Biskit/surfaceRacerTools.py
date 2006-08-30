@@ -512,3 +512,51 @@ def __bulk( a, rel, absSurf, key, i ):
     return rel
 
 
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: something
+        @rtype:  float
+        """
+        from Biskit import PDBModel
+        import Biskit.tools as T
+        
+        ## load a structure
+        m = PDBModel( T.testRoot()+'/lig/1A19.pdb' )
+        m = m.compress( m.maskProtein() )
+        m = m.compress( m.maskHeavy() )
+        
+        ## some fake surface data
+        surf = Numeric.ones( m.lenAtoms()) * 10.0
+
+        relExp = relExposure( m, surf )
+        
+        return  Numeric.sum(relExp)
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: something
+        @rtype:  float
+        """
+        return 44276.860852223857
+    
+        
+if __name__ == '__main__':
+
+    test = Test()
+
+    assert  test.run( ) == test.expected_result() 

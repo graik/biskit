@@ -46,7 +46,13 @@ class Master(TrackingJobMaster):
 
     def getInitParameters(self, slave_tid):
         """
-        Hand over parameters to slave once. 
+        Hand over parameters to slave once.
+
+        @param slave_tid: slave task id
+        @type  slave_tid: int
+
+        @return: dictionary with init parameters
+        @rtype: {param:value}   
         """
         return {'progress_str':'slave calculating..'}
 

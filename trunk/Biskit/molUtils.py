@@ -579,10 +579,10 @@ def cmpAtoms( a1, a2 ):
     Comparison function for bringing atoms into standard order
     within residues as defined by L{atomDic}.
     
-    @param a1: model
-    @type  a1: PDBModel
-    @param a2: model
-    @type  a2: PDBModel
+    @param a1: atom dictionary
+    @type  a1: PDBModel.atoms
+    @param a2: atom dictionary
+    @type  a2: PDBModel.atoms
     
     @return: int or list of matching positions
     @rtype: [-1|0|1]   
@@ -618,3 +618,63 @@ def sortAtomsOfModel( model ):
     model = model.sort( model.argsort( cmpAtoms ) )
 
     return model
+
+
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: something
+        @rtype:  float
+        """
+        from Biskit import PDBModel
+        
+        ## load a structure
+        m = PDBModel( t.testRoot()+'/lig/1A19.pdb' )
+        model_1 = m.compress( m.maskProtein() )
+
+        ## now sort in standard order
+        model_2 = sortAtomsOfModel( model_1)
+
+        ## compare the atom order
+        cmp = []
+        for a in range( model_1.lenAtoms() ):
+            cmp += [ cmpAtoms( model_1.atoms[a], model_2.atoms[a] )]
+
+        ## get the primaty sequence as a string
+        seq = model_1.sequence()
+
+        ## convert it to a list of three letter code
+        seq=single2longAA(seq)
+
+        ## convert it to a list in one letter code
+        seq=singleAA(seq)
+        
+        return  N.sum(cmp)
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: something
+        @rtype:  float
+        """
+        return 159
+    
+        
+if __name__ == '__main__':
+
+    test = Test()
+
+    assert  test.run( ) == test.expected_result() 

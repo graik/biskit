@@ -297,8 +297,106 @@ class Xplorer:
 
 
 
-### TEST #####
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+
+    inp = """
+!! short test  minimzation 
+
+! ------------------------------------------------------------
+! Place holders to be inserted by Python script
+! ------------------------------------------------------------
+evaluate ($ligandpsf = "%(lig_psf)s")
+evaluate ($ligandpdb = "%(lig_pdb)s")
+evaluate ($param19 = "%(param19)s" )
+evaluate ($lig_out = "%(lig_out)s" )
+
+! -------------------------------------
+! read psf and pdb files for the ligand
+! -------------------------------------
+structure @@$ligandpsf end
+coor @@$ligandpdb
+delete selection= (resname TIP3) end
+
+! ------------------
+! set toplogies etc.
+! ------------------
+parameter
+  	reset
+        @@$param19
+end
+
+! ------------------------------------------------------------
+! minimize
+! ------------------------------------------------------------
+flags exclude * include bond angle impr elec end
+minimize powell nstep=10            end
+
+! ---------------------------------------------------
+! write minimized PDBs
+! ---------------------------------------------------
+write coor output= $lig_out end
+stop
+"""
+    
+    def run( self, verbose=0 ):
+        """
+        run function test
+
+        @return: 
+        @rtype:  
+        """
+        dir_out = tempfile.mkdtemp( '_test_Xplorer' )
+
+        ## write a test template inp file to disc
+        f = open( dir_out +'/test.inp', 'w')
+        f.writelines( self.inp )
+        f.close()
+
+        ## input template variables
+        param = t.projectRoot() + '/external/xplor/toppar/param19.pro'
+        pdb_out = dir_out +'/lig.pdb'
+        log_out = dir_out +'/test.out'
+        pdb_in = t.testRoot() + '/lig/1A19.pdb' 
+        psf_in = t.testRoot() + '/lig/1A19.psf'
+        
+        x= Xplorer( dir_out +'/test.inp',
+                    xout = log_out,
+                    verbose = verbose,
+                    lig_psf = psf_in,
+                    lig_pdb = pdb_in,
+                    param19 = param,
+                    lig_out = pdb_out )
+
+        x.run()
+        
+        print 'The minimized structure and the X-Plor log file has been written to %s and %s, respectively'%(pdb_out, log_out)
+        
+        return 1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: 
+        @rtype: 
+        """
+        return 1
+
+        
 
 if __name__ == '__main__':
 
-    pass
+    test = Test()
+
+    assert test.run( verbose=1 ) == test.expected_result()
+
+
+

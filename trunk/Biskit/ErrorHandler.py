@@ -99,3 +99,55 @@ class ErrorHandler( object ):
             pass
 
         self.log.add(s)
+
+
+
+#############
+##  TESTING        
+#############
+        
+class Test:
+    """
+    Test class
+    """
+    
+    def run( self ):
+        """
+        run function test
+
+        @return: something
+        @rtype:  float
+        """
+        import tempfile
+        from Biskit.LogFile import LogFile
+        
+        f_out = tempfile.mktemp( '_test_ErrorHandler' )
+        err_log = LogFile( f_out )
+        
+        
+        self.e = ErrorHandler( log=err_log )
+
+        self.e.warning( 'A warning' )
+
+        print 'An error log file was written to %s'%f_out
+        
+        return  1
+
+
+    def expected_result( self ):
+        """
+        Precalculated result to check for consistent performance.
+
+        @return: something
+        @rtype:  float
+        """
+        return 1
+
+        
+if __name__ == '__main__':
+
+    test = Test()
+
+    assert  test.run( ) == test.expected_result()
+    
+
