@@ -88,6 +88,7 @@ if __name__ == '__main__':
     ## Try to add project folders
     ## look for default cross-validation projects
     d = []
+    
     if os.path.exists( f + VS.F_RESULT_FOLDER ):
         d = glob.glob( f + VS.F_RESULT_FOLDER + '/*' )
 

@@ -78,7 +78,7 @@ options   = tools.cmdDict( defaultOptions() )
 outFolder = tools.absfile( options['o'] )
 
 ## Test, comment out for test
-outFolder = tools.testRoot() + '/Mod/project'
+# outFolder = tools.testRoot() + '/Mod/project'
 
 host = options['h']
 

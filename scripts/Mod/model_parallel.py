@@ -68,7 +68,7 @@ if __name__ == '__main__':
     d = []
     f = os.getcwd()
     if osp.exists( f + VS.F_RESULT_FOLDER ):
-        d = glob.glob( f + VS.F_RESULT_FOLDER + '/*' )
+        d = glob.glob( f + VS.F_RESULT_FOLDER + '/????' )
     ## does current look like a main project folder?
     if osp.exists( f + TS.F_RESULT_FOLDER ):
         d += [f]
