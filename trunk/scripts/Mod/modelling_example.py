@@ -301,7 +301,9 @@ try:
         m.go(options['host']) 
     else:
         m.go()
-        
+
+    m.postProcess()
+    
     tools.flushPrint('Done.\n')
     
 except:
