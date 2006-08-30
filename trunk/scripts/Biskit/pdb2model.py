@@ -19,8 +19,8 @@
 ##
 ##
 
-from Biskit.PVM.TrackingJobMaster import TrackingJobMaster
-from Biskit.PVM.dispatcher import JobMaster
+from Biskit.StructureMaster import StructMaster
+
 import Biskit.tools as T
 import Biskit.hosts as hosts
 import sys
@@ -28,8 +28,8 @@ import sys
 def _use( o ):
 
     print """
-Syntax: pdbs2struct.py -i |file1 file2 ..| [-h |host| -c |chunk| -a -w
-                       -o |other_outFolder| -wat -s]
+Syntax: pdbs2model.py -i |file1 file2 ..| [-h |host| -c |chunk| -a -w
+                      -o |other_outFolder| -wat -s]
 
     pvm must be running on the local machine!
 
@@ -54,51 +54,7 @@ Default options:
         print "\t-",key, "\t",value
 
     sys.exit(0)
-
-
-class StructMaster(TrackingJobMaster):
-
-    def __init__(self, dat, chunk, hosts, outFolder, skipWat=0, amber=0,
-                 sort=0, add_hosts=1, **kw):
-        """
-        dat - data dictionary
-        chunk - chunk size
-        hosts - list of host names
-        outFolder - string, alternative output folder
-        """
-
-        niceness = {'default': 0}
-        slave_script = T.projectRoot() + '/Biskit/StructureSlave.py'
-
-        TrackingJobMaster.__init__(self, dat, chunk, hosts, niceness,
-                           slave_script, **kw)
-
-        self.options = {}
-        self.options['out'] = outFolder
-
-        self.options['skipRes'] = None
-        if skipWat:
-            self.options['skipRes'] = ['WAT','TIP3','H2O','WWW','Na+','Cl-']
-        
-        if kw.has_key('show_output'):
-            self.options['report'] = not kw['show_output']
-
-        self.options['amber'] = amber
-
-        self.options['sort'] = sort
-
-
-    def getInitParameters(self, slave_tid):
-        """
-        hand over parameters to slave once.
-        """
-        return self.options
-
-
-    def done(self):
-
-        self.exit()
-        
+     
 
 if __name__ == '__main__':
 

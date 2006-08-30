@@ -22,8 +22,9 @@
 ## last $Author$
 
 from Biskit.tools import *
-from Biskit.hosts import hosts_all, nice_dic
-from PVM.TrackingJobMaster import *
+
+from Biskit.QualMaster import QualMaster
+
 
 def _use( options ):
     print """
@@ -44,39 +45,6 @@ Default options:
 
     sys.exit(0)
 
-
-class QualMaster(TrackingJobMaster):
-
-    def __init__(self, trajFiles, n_hosts=20, **kw):
-        """
-        dat - data dictionary
-        hosts - list of host names
-        """
-        dat = {}
-        i = 0
-        for f in trajFiles:
-            dat[i] = absfile( f )
-            i += 1
-
-        niceness = nice_dic
-        hosts = cpus_all[ :n_hosts ]
-
-        project_path = projectRoot() + '/scripts/modules/'
-        slave_script = project_path + 'QualSlave.py'
-
-        TrackingJobMaster.__init__(self, dat, 1, hosts, niceness,
-                           slave_script, **kw)
-
-
-    def getInitParameters(self, slave_tid):
-        """
-        hand over parameters to slave once.
-        """
-        return 1
-
-    def done(self):
-        self.exit()
-        
 
 if __name__ == '__main__':
 
