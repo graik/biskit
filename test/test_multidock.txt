@@ -5,7 +5,7 @@ one receptor model is docked to more than ome ligand model, here referenced
 to as multidocking (see Grunberg, Leckner, Nilges (2004) Structure 
 Dec;12(12):2095-6). The starting point for a multidocking is the
 free receptor and ligand structures and optionally the bound complex
-for reference. This example is the most somple multidocking possible - 
+for reference. This example is the most simple multidocking possible - 
 a single receptor model is docked against two ligand models.
 
 Preparation:
@@ -30,8 +30,8 @@ mkdir lig_pcr_00
 
 runPcr.py -t lig -r lig_pcr_00 -h localhost -nstep 10
   Run a (too) short simulation on localhost without any principal 
-  component restraints (the pcr flat is set to 0). This will result
-  in 500 shapshots (separated by 20 fs, 2 fs per step). The pcr force
+  component restraints (the pcr flag is set to 0). This will result
+  in 500 shapshots (separated by 20 fs, 10 x 2 fs time steps). The pcr force
   is here set to zero - i.e. this is a standard parallell MD simulation . 
   
   The script returns information about the simulation that is usefull
@@ -67,7 +67,7 @@ mkdir multidock/lig
 cd multidock/lig
 
 selectModels.py -i ../../lig_pcr_00/traj.dat -n 2
-  Cluster the trajectory snapshots in thw groups using fuzzy clustering. 
+  Cluster the trajectory snapshots in two groups using fuzzy clustering. 
   The structure closest to the center of each cluster will be written 
   to disc as a PDBModel.
 
