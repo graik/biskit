@@ -25,32 +25,38 @@
 Testing your Biskit setup
 *************************
 
-Each Biskit module comes with its own test class. All the input data needed
-to run the tests is checked into the project and can be found in the folder 
-*~biskit/test*. The tests are independent of each other and there is no 
-need to execute them in a specific order. 
 
-Many of the tests write an output to disc. The directory used for the output is the folder given by
-*tempfile.tempdir*, normally */tmp*. The tests will not remove the files and 
-directories written, you will have to do that yourself.
+- Each *Biskit* module comes with its own test class. 
 
--------
+- All the input data needed to run the tests is checked into the 
+  project and can be found in the folder *~biskit/test*. 
+  
+- The tests are independent of each other and there is no 
+  need to execute them in a specific order. 
+
+- Many of the tests write an output to disc. The directory used for the 
+  output is the folder given by *tempfile.tempdir*, normally */tmp*. 
+  The tests will not remove the files and directories written, you 
+  will have to do that yourself.
+
+
 
 Testing a single module:
 ========================
 To test a single module just execute the test code within the module. 
 
--------
+
 
 Testing the full installation:
 ==============================
 Testing of the full installation is facilitated by a script
 *~biskit/test/test.py*. This script accepts a few options. The most
-usfull option is *-tests* that decides what tests to run. The default setting
-*all exclude_long* takes approximately 10 minutes to run. To run *all* tests 
-will probably take about 20 minutes (depending on your system).
+usfull option is *-tests* that decides what set of tests to run. The 
+default setting *all exclude_long* takes approximately 10 minutes to run. 
+To run *all* tests will probably take about 20 minutes 
+(depending on your system).
 
-To get the help from the script: 
+To get some help from the script: 
 
 >>> ./test.py -HELP 
 
