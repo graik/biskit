@@ -123,6 +123,24 @@ class Analyse:
         return result
 
 
+    def __listDir( self, path ):
+        """
+        List all the files and folders in a directory
+        with the exceprion of ...
+        
+        @param path: dir to list
+        @type  path: str
+
+        @return: list of files
+        @rtype: [str]
+        """
+        files = os.listdir( path )
+        if 'CVS' in files:
+            files.remove('CVS')
+            
+        return files
+    
+
 ######################################################################
 ####  GLOBAL RESTULTS: RMSD_AA, RMSD_CA,
 ####                   %ID(mean of the templates),
@@ -146,7 +164,7 @@ class Analyse:
         validation_folder = validation_folder or self.outFolder + \
                             self.F_TEMPLATE_FOLDER
 
-        folders = os.listdir(validation_folder)
+        folders = self.__listDir(validation_folder)
 
         rmsd_aa_wo_if = {}
         rmsd_aa_if = {}
@@ -180,7 +198,7 @@ class Analyse:
         validation_folder = validation_folder or self.outFolder + \
                             self.F_TEMPLATE_FOLDER
 
-        folders = os.listdir(validation_folder)
+        folders = self.__listDir(validation_folder)
 
         rmsd_ca_wo_if = {}
         rmsd_ca_if = {}
@@ -215,7 +233,7 @@ class Analyse:
         validation_folder = validation_folder or self.outFolder + \
                             self.F_TEMPLATE_FOLDER
 
-        folders = os.listdir(validation_folder)
+        folders = self.__listDir(validation_folder)
         identities = {}
 
         for folder in folders:
@@ -244,7 +262,7 @@ class Analyse:
         validation_folder = validation_folder or self.outFolder + \
                             self.F_TEMPLATE_FOLDER
 
-        folders = os.listdir(validation_folder)
+        folders = self.__listDir(validation_folder)
         score = {}
 
         for folder in folders:
@@ -545,7 +563,7 @@ class Analyse:
         output_folder = output_folder or self.outFolder + self.F_RESULT_FOLDER
         template_folder = template_folder or self.outFolder +VS.F_RESULT_FOLDER
 
-        templates = os.listdir(template_folder)
+        templates = self.__listDir(template_folder)
 
         ##
         global_rmsd_aa_wo_if, global_rmsd_aa_if = self.global_rmsd_aa()
