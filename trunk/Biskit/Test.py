@@ -146,6 +146,10 @@
 ## QualSlave.py           -- tested via the master --
 
 ############################# DOCK ############################
+## Analyzer.py                    rec/1A2P.pdb, dock/hex/complexes.cl,
+##                                   lig_pcr_00/traj.dat, com/ref.complex
+##                                   dock/lig/1A19.model, lig/1A19_dry.model
+##                                   dock/rec/1A2P.model, rec/1A2P_dry.model
 ## Dock/ComplexModelRegistry.py   dock/hex/complexes.cl
 ## Dock/ComplexEvolvingList.py    dock/hex/complexes.cl
 ## Dock/ComplexEvolving.py        com/ref.complex
@@ -157,23 +161,23 @@
 ## Dock/ContactMaster.py          dock/hex/complexes.cl  com/ref.complex
 ## Dock/ContactSlave.py           -- tested via the master --
 ## Dock/Docker.py                 multidock/lig/1A19_models.dic,
-##                                  multidock/rec/1A2P_model.dic         
+##                                  multidock/rec/1A2P_model.dic
+##                                  multidock/lig/1A19_15_7.model
+##                                  multidock/lig/1A19_45_8.mod
 ## Dock/HexParser.py              dock/rec/1A2P_model.dic,
 ##                                  dock/lig/1A19_model.dic,
 ##                                  dock/hex/1A2P-1A19_hex.out
 ## Dock/hexTools.py               com/1BGS.pdb
 ## Dock/FixedList.py              None
-## Analyzer.py                    rec/1A2P.pdb, dock/hex/complexes.cl,
-##                                   lig_pcr_00/traj.dat,com/ref.complex 
 
 ############################# MOD #############################
-## Mod/Aligner.py              /Mod/project/templates/t_coffe/*
+## Mod/Aligner.py              Mod/project/templates/t_coffe/*
 ##                               (1DT7_A.alpha, 1K8U_A.alpha, 1MHO_.alpha,
 ##                                1NSH_A.alpha, 1J55_A.alpha, 1KSO_A.alpha,
 ##                                1MQ1_A.alpha, 1K2H_A.alpha, 1M31_A.alpha,
 ##                                1MWN_A.alpha),
 ##                                Mod/project/templates/templates.fasta,
-##                                Mod/project/sequences/nr.fast,
+##                                Mod/project/sequences/nr.fasta,
 ##                                Mod/project/target.fasta
 ## Mod/Modeller.py             Mod/project/templates/modeller/*
 ##                                (1DT7_A.pdb, 1K2H_A.pdb, 1KSO_A.pdb,
@@ -182,42 +186,51 @@
 ##                                 1NSH_A.pdb),
 ##                                Mod/project/t_coffee/final.pir_aln,
 ##                                Mod/project/target.fasta
-## Mod/TemplateCleaner.py        Mod/project/templates/nr/*
+## Mod/TemplateCleaner.py      Mod/project/templates/nr/*
 ##                                (1DT7.pdb, 1KSO.pdb, 1MWN.pdb, 1J55.pdb,
 ##                                 1M31.pdb, 1NSH.pdb, 1K2H.pdb, 1MHO.pdb,
 ##                                 chain_index.txt, 1K8U.pdb, 1MQ1.pdb )
-## Mod/TemplateSearcher.py       Mod/project/target.fasta
-## Mod/Analyse.py                /Mod/project/modeller/PDBModels.list,
-##                                /Mod/project/t_coffee/final.pir_aln,
-##                                /Mod/project/validation/,
-##                                /Mod/project/validation/1DT7/modeller/Modeller_Score.out,
-##                                /Mod/project/validation/1DT7/identities_cov.out,
-##                                /Mod/project/validation/1DT7/benchmark/rmsd_aa.out,
-##                                /Mod/project/validation/1DT7/benchmark/rmsd_ca.out,
-##                                /Mod/project/validation/1DT7/benchmark/PDBModels.list,
-##                                /Mod/project/validation/1J55/modeller/Modeller_Score.out,
-##                                /Mod/project/validation/1J55/identities_cov.out,
-##                                /Mod/project/validation/1J55/benchmark/rmsd_aa.out,
-##                                /Mod/project/validation/1J55/benchmark/rmsd_ca.out,
-##                                /Mod/project/validation/1J55/benchmark/PDBModels.list
-## Mod/Benchmark.py              /Mod/project/validation/1DT7/modeller/PDBModels.list,
-##                                /Mod/project/validation/1DT7/reference.pdb
-## Mod/CheckIdentities.py        Mod/project/t_coffee/final.pir_aln
-## Mod/AlignerMaster.py          same as Aligner.py
-## Mod/AlignerSlave.py           -- tested via the master --
-## Mod/ModelMaster.py            same as Modell.py
-## Mod/ModelSlave.py             -- tested via the master --
-## Mod/modUtils.py               Mod/project/target.fasta
-## Mod/SequenceSearcher.py       Mod/project/target.fasta
-## Mod/ValidationSetup.py        Mod/project/templates/modeller/*
-##                                (1DT7_A.pdb, 1K2H_A.pdb, 1KSO_A.pdb,
-##                                 1MHO_.pdb, 1MWN_A.pdb, 1J55_A.pdb,
-##                                 1K8U_A.pdb, 1M31_A.pdb, 1MQ1_A.pdb,
-##                                 1NSH_A.pdb),
-##                                Mod/project/templates/nr/* (1DT7.pdb,
-##                                 1KSO.pdb, 1MWN.pdb, 1J55.pdb, 1M31.pdb,
-##                                 1NSH.pdb, 1K2H.pdb, 1MHO.pdb, chain_index.txt,
-##                                 1K8U.pdb, 1MQ1.pdb )
+## Mod/TemplateSearcher.py     Mod/project/target.fasta
+## Mod/Analyse.py              Mod/project/modeller/PDBModels.list,
+##                                Mod/project/modeller/target.B99990001.pdb
+##                                Mod/project/t_coffee/final.pir_aln,
+##                                Mod/project/validation/,
+##                                Mod/project/validation/1DT7/modeller/Modeller_Score.out,
+##                                Mod/project/validation/1DT7/identities_cov.out,
+##                                Mod/project/validation/1DT7/benchmark/rmsd_aa.out,
+##                                Mod/project/validation/1DT7/benchmark/rmsd_ca.out,
+##                                Mod/project/validation/1DT7/benchmark/PDBModels.list,
+##                                Mod/project/validation/1DT7/modeller/target.B99990001.pdb
+##                                Mod/project/validation/1J55/modeller/Modeller_Score.out,
+##                                Mod/project/validation/1J55/identities_cov.out,
+##                                Mod/project/validation/1J55/benchmark/rmsd_aa.out,
+##                                Mod/project/validation/1J55/benchmark/rmsd_ca.out,
+##                                Mod/project/validation/1J55/benchmark/PDBModels.list
+##                                Mod/project/validation/1J55/modeller/target.B99990001.pdb
+## Mod/Benchmark.py            Mod/project/validation/1DT7/modeller/PDBModels.list,
+##                                Mod/project/validation/1DT7/reference.pdb
+##                                Mod/project/validation/1DT7/modeller/target.B999900??.pdb
+##                                  (target.B99990001.pdb, target.B99990002.pdb
+##                                   target.B99990003.pdb, target.B99990004.pdb
+##                                   target.B99990005.pdb, target.B99990006.pdb
+##                                   target.B99990007.pdb, target.B99990008.pdb
+##                                   target.B99990009.pdb, target.B99990010.pdb)
+## Mod/CheckIdentities.py      Mod/project/t_coffee/final.pir_aln
+## Mod/AlignerMaster.py        same as Aligner.py
+## Mod/AlignerSlave.py         -- tested via the master --
+## Mod/ModelMaster.py          same as Modell.py
+## Mod/ModelSlave.py           -- tested via the master --
+## Mod/modUtils.py             Mod/project/target.fasta
+## Mod/SequenceSearcher.py     Mod/project/target.fasta
+## Mod/ValidationSetup.py      Mod/project/templates/modeller/*
+##                              (1DT7_A.pdb, 1K2H_A.pdb, 1KSO_A.pdb,
+##                               1MHO_.pdb, 1MWN_A.pdb, 1J55_A.pdb,
+##                               1K8U_A.pdb, 1M31_A.pdb, 1MQ1_A.pdb,
+##                               1NSH_A.pdb),
+##                             Mod/project/templates/nr/* (1DT7.pdb,
+##                               1KSO.pdb, 1MWN.pdb, 1J55.pdb, 1M31.pdb,
+##                               1NSH.pdb, 1K2H.pdb, 1MHO.pdb, chain_index.txt,
+##                               1K8U.pdb, 1MQ1.pdb )
      
 
 ############################# PVM ############################
@@ -238,8 +251,10 @@
 ## rec/1A2P_rec_original.pdb
 ## rec/1A2P.pdb
 ## rec/1A2P.psf
+## rec/1A2P_dry.model
 ## lig/1A19.pdb
 ## lig/1A19.psf
+## lig/1A19_dry.model
 ## lig_pcr_00/traj.dat
 ## com/1BGS_original.pdb
 ## com/1BGS.pdb
@@ -250,17 +265,23 @@
 
 ## dock/hex/complexes.cl
 ## dock/rec/1A2P_model.dic
+## dock/rec/1A2P.model 
 ## dock/lig/1A19_model.dic
+## dock/lig/1A19.model 
+
+
 ## dock/hex/1A2P-1A19_hex.out
 ## multidock/lig/1A19_models.dic
 ## multidock/rec/1A2P_model.dic
+## multidock/lig/1A19_15_7.model
+## multidock/lig/1A19_45_8.model
 
-## /Mod/project/templates/t_coffe/* (1DT7_A.alpha, 1K8U_A.alpha, 1MHO_.alpha,
+## Mod/project/templates/t_coffe/* (1DT7_A.alpha, 1K8U_A.alpha, 1MHO_.alpha,
 ##                                   1NSH_A.alpha, 1J55_A.alpha, 1KSO_A.alpha,
 ##                                   1MQ1_A.alpha, 1K2H_A.alpha, 1M31_A.alpha,
 ##                                   1MWN_A.alpha),
 ## Mod/project/templates/templates.fasta
-## Mod/project/sequences/nr.fast
+## Mod/project/sequences/nr.fasta
 ## Mod/project/target.fasta
 ## Mod/project/templates/modeller/* (1DT7_A.pdb, 1K2H_A.pdb, 1KSO_A.pdb,
 ##                                   1MHO_.pdb, 1MWN_A.pdb, 1J55_A.pdb,
@@ -270,18 +291,32 @@
 ## Mod/project/templates/nr/* (1DT7.pdb, 1KSO.pdb, 1MWN.pdb, 1J55.pdb,
 ##                             1M31.pdb, 1NSH.pdb, 1K2H.pdb, 1MHO.pdb,
 ##                             chain_index.txt, 1K8U.pdb, 1MQ1.pdb )
-## /Mod/project/modeller/PDBModels.list
-## /Mod/project/validation/1DT7/modeller/Modeller_Score.out
-## /Mod/project/validation/1DT7/identities_cov.out
-## /Mod/project/validation/1DT7/benchmark/rmsd_aa.out
-## /Mod/project/validation/1DT7/benchmark/rmsd_ca.out
-## /Mod/project/validation/1DT7/benchmark/PDBModels.list
-## /Mod/project/validation/1J55/modeller/Modeller_Score.out
-## /Mod/project/validation/1J55/identities_cov.out
-## /Mod/project/validation/1J55/benchmark/rmsd_aa.out
-## /Mod/project/validation/1J55/benchmark/rmsd_ca.out
-## /Mod/project/validation/1J55/benchmark/PDBModels.list
+## Mod/project/modeller/PDBModels.list
+## Mod/project/modeller/target.B99990001.pdb
+
+## Mod/project/validation/1DT7/modeller/Modeller_Score.out
+## Mod/project/validation/1DT7/modeller/PDBModels.list
+## Mod/project/validation/1DT7/reference.pdb
+## Mod/project/validation/1DT7/identities_cov.out
+## Mod/project/validation/1DT7/benchmark/rmsd_aa.out
+## Mod/project/validation/1DT7/benchmark/rmsd_ca.out
+## Mod/project/validation/1DT7/benchmark/PDBModels.list
+## Mod/project/validation/1DT7/modeller/target.B999900??.pdb
+##                                  (target.B99990001.pdb, target.B99990002.pdb
+##                                   target.B99990003.pdb, target.B99990004.pdb
+##                                   target.B99990005.pdb, target.B99990006.pdb
+##                                   target.B99990007.pdb, target.B99990008.pdb
+##                                   target.B99990009.pdb, target.B99990010.pdb)
+## Mod/project/validation/1J55/modeller/Modeller_Score.out
+## Mod/project/validation/1J55/identities_cov.out
+## Mod/project/validation/1J55/benchmark/rmsd_aa.out
+## Mod/project/validation/1J55/benchmark/rmsd_ca.out
+## Mod/project/validation/1J55/benchmark/PDBModels.list
+## Mod/project/validation/1J55/modeller/target.B99990001.pdb
+
  
+
+
 
 import unittest
 import Numeric as N
