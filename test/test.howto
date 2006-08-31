@@ -1,0 +1,100 @@
+.. ===================================================================
+.. Biskit, a toolkit for the manipulation of macromolecular structures
+.. Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
+..
+.. This program is free software; you can redistribute it and/or
+.. modify it under the terms of the GNU General Public License as
+.. published by the Free Software Foundation; either version 2 of the
+.. License, or any later version.
+..
+.. This program is distributed in the hope that it will be useful,
+.. but WITHOUT ANY WARRANTY; without even the implied warranty of
+.. MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+.. General Public License for more details.
+..
+.. You find a copy of the GNU General Public License in the file
+.. license.txt along with this program; if not, write to the Free
+.. Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+..
+..
+.. last $Author$
+.. last $Date$
+.. $Revision$
+.. ===================================================================
+
+Testing your Biskit setup
+*************************
+
+Each Biskit module comes with its own test class. All the input data needed
+to run the tests is checked into the project and can be found in the folder 
+*~biskit/test*. The tests are independent of each other and there is no 
+need to execute them in a specific order. 
+
+Many of the tests write an output to disc. The directory used for the output is the folder given by
+*tempfile.tempdir*, normally */tmp*. The tests will not remove the files and 
+directories written, you will have to do that yourself.
+
+-------
+
+Testing a single module:
+========================
+To test a single module just execute the test code within the module. 
+
+-------
+
+Testing the full installation:
+==============================
+Testing of the full installation is facilitated by a script
+*~biskit/test/test.py*. This script accepts a few options. The most
+usfull option is *-tests* that decides what tests to run. The default setting
+*all exclude_long* takes approximately 10 minutes to run. To run *all* tests 
+will probably take about 20 minutes (depending on your system).
+
+To get the help from the script: 
+
+>>> ./test.py -HELP 
+
+
+Results in something like::
+
+  Run unittest tests for biskit.
+
+  log	- str, path to logfile that will be written
+  verb  - int, verbosity level
+  tests - [str], list of the test suits to be run, one or more of::
+
+	     biskit	    - most Biskit modules
+	     biskit_app     - Biskit modules calling external applications
+	     biskit_pvm     - Biskit modules using PVM
+	     dock	    - most Biskit.Dock modules
+	     dock_app	    - Biskit.Dock modules calling
+				external applications
+	     dock_app_long  - time-consuming Biskit.Dock modules calling
+				external applications (full test)
+	     dock_pvm	    - Biskit.Dock modules using PVM
+	     mod	    - all Biskit.Mod modules
+	     mod_long	    - time-consuming Biskit.Mod modules (full test)
+	     dock_pvm	    - Biskit.Dock modules using PVM
+	     dock_pvm_long  - time-consuming Biskit.Dock modules
+				using PVM (full test)
+	     stat	    - Biskit.Statistics modules
+	     pvm	    - Biskit.PVM modules
+
+	  Or one or more of the groups::
+
+	     all	 - all tests
+	     all_mod	 - all Biskit.Mod tests
+	     all_dock	 - all Biskit.Dock tests
+	     all_biskit  - all Biskit tests
+
+	  To exclude tests::
+
+	     exclude_long  - don't run time-consuming tests
+	     exclude_pvm   - dont run tests using PVM
+
+
+  Default options:
+
+        - tests         ['all', 'exclude_long']
+        - verb  2
+        - log   /mnt/data/shared_bin/biskit/test/test.log
