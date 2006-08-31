@@ -243,7 +243,7 @@ class ComplexMinimizer( Xplorer ):
 
     def finish( self ):
         """
-        When done, write resuĺt to disc.
+        When done, write result to disc.
         """
         self.rec = PCRModel( self.com.rec_model.getPsfFile(), self.rec_out )
         self.lig = PCRModel( self.com.lig_model.getPsfFile(), self.lig_out )
