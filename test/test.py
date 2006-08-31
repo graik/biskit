@@ -199,11 +199,11 @@ def report( file ):
 
 if __name__ == '__main__':
 
-   if sys.argv[-1].upper() in ['H', '-H', 'HELP', '-HELP']:   
-       _use()
-       sys.exit(0)
+    if sys.argv[-1].upper() in ['H', '-H', 'HELP', '-HELP']:   
+        _use()
+        sys.exit(0)
     
-   o = T.cmdDict( o )
+    o = T.cmdDict( o )
 
 
 ##     o = {'log':T.projectRoot()+'/test/test.log',
