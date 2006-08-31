@@ -539,12 +539,26 @@ class Test:
         @return: 1
         @rtype:  int
         """
-        import tempfile, time
+        import tempfile, time, os
         import os.path
 
         out_folder = tempfile.mktemp('_test_docker_%s')
 
         ligDic = t.Load( t.testRoot() + '/multidock/lig/1A19_models.dic' )
+
+        ## in the test root the directories "multidock/rec" and
+        ## "multidock/com" are symbolic links from "dock/rec" and
+        ## "dock/com". If this is a fleshly checked out project
+        ## they will not exist, so we will have to create them.
+        rec_dir = t.testRoot() + '/multidock/rec'
+        com_dir = t.testRoot() + '/multidock/com'
+        
+        if not os.path.exists( rec_dir ):
+            os.symlink( t.testRoot() + '/dock/rec', rec_dir )
+            
+        if not os.path.exists( rec_dir ):
+            os.symlink( t.testRoot() + '/dock/com', rec_dir )
+            
         recDic = t.Load( t.testRoot() + '/multidock/rec/1A2P_model.dic' )
 
         self.d = Docker( recDic, ligDic, out = out_folder )
