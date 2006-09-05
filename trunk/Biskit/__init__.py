@@ -77,7 +77,8 @@ except Exception, why:
 ## PVM-dependent modules
 try:
 
-    from QualSlave import QualSlave
+    from QualMaster import QualMaster
+    from StructureMaster import StructMaster
     from StructureSlave import StructureSlave
     from TrajFlexMaster import TrajFlexMaster, FlexError
 
