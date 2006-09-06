@@ -35,8 +35,21 @@ import Biskit.tools as T
 class SettingsError( Exception ):
     pass
 
-class InvalidPath( SettingsError):
+class InvalidType( SettingsError ):
     pass
+
+class InvalidValue( SettingsError ):
+    pass
+
+class SettingsWarning( SettingsError ):
+    pass
+
+class InvalidPath( SettingsWarning ):
+    pass
+
+class InvalidBinary( SettingsWarning ):
+    pass
+
 
 class SettingsParser:
     """
@@ -46,8 +59,12 @@ class SettingsParser:
     2. type-cast options (e.g. of the form int-some_name into int(some_name) )
     3. validate that all entries of section [PATH] point to existing paths
     4. absolutize all valid paths
-    5. validate that all entries of section [EXE] point to existing binaries
+    5. validate that all entries of section [BINARIES] point to binaries
     """
+
+    NOVALIDATION = 0
+    VALID_PATH = 1
+    VALID_BIN = 2
 
     def __init__(self, ini):
 
@@ -60,7 +77,7 @@ class SettingsParser:
         @param v: potential path name
         @type  v: str
 
-        @return: validated Path
+        @return: validated absolute Path
         @rtype : str
 
         @raise InvalidPath: if path is not found
@@ -68,17 +85,28 @@ class SettingsParser:
         try:
             v = T.absfile( v )
             if not os.path.exists( v ):
-                raise InvalidPath, 'invalid path' % v
+                raise InvalidPath, 'invalid path %r' % v
 
             return v
 
-        except Exception:
-            raise InvalidPath, 'error during path validation: %r'
+        except InvalidPath, e:
+            raise
+        except Exception, e:
+            raise InvalidPath, 'error during path validation: %r' % str(e)
         
 
     def __validBinary( self, v ):
+        """
+        @param v: potential binary path
+        @type  v: str
+
+        @return: validated absolute path to existing binary
+        @rtype : str
+
+        @raise InvalidBinary: if path is not found
+        """
         try:
-            v = T.absbinary( v )
+            return T.absbinary( v )
         except IOError, msg:
             raise InvalidBinary( str(msg) )
 
@@ -94,6 +122,8 @@ class SettingsParser:
 
         @return: type, stripped option name (e.g. 'int_var1' -> int, 'var1')
         @rtype: type, str
+
+        @raise TypeError, if type cannot be interpreted
         """
         t = default
         o = option
@@ -101,6 +131,7 @@ class SettingsParser:
         if option.count('-') > 0:
 
             try:
+                
                 splt = option.split('-')
 
                 s = splt[0]
@@ -109,15 +140,16 @@ class SettingsParser:
                 t = eval( s )
 
                 if not type(t) is type:
-                    raise SettingsError, '%s is not a valid type' % s
+                    raise TypeError, '%s is not a valid type' % s
                 
-            except:
-                EHandler.warning('Ignoring type %s of option %s'% s,option)
+            except Exception, e:
+                raise TypeError, 'Cannot extract type from %s: %r'\
+                      % option, e
 
         return t, o
 
 
-    def __process( self, option, value, path=False ):
+    def __process( self, option, value, valid=SettingsParser.NOVALIDATION ):
         """
         @param option: option name
         @type  option: str
@@ -131,36 +163,36 @@ class SettingsParser:
         @return: processed option name, processed value
         @rtype: str, any
 
-        @raise ValueError: if target type and value are incompatible
+        @raise SettingsError: InvalidPath/Binary/Type/Value
         """
-
-        t, name = self.__type( option )  ## target type and target name
-
-        v = value.split('#')[0].strip()  ## strip off comments
-
-        if not v:   ## don't return empty strings
-            v = None
-
         try:
 
-            if path:
+            t, name = self.__type( option )  ## target type and target name
+
+            v = value.split('#')[0].strip()  ## strip off comments
+
+            if not v:                        ## don't return empty strings
+                v = None
+
+            if valid is SettingsParser.VALID_PATH:
                 v = self.__validPath( v )
 
-            v = t( v )
+            if valid is SettingsParser.VALID_BIN:
+                v = self.__validBinary( v )
 
-        except InvalidPath, e:
-            self.error[ name ] = str(e)
-
-        except ValueError:
-            msg =  '%s: cannot convert value %s to %r.\n' %\
+            try:
+                v = t( v )
+            except ValueError, e:
+                raise InvalidValue, '%s: cannot convert "%s" to %r.' %\
                   (option,value,t)
-            self.error[ option ] = msg
-            msg += 'Please verify %s.' % self.f_ini
-            raise ValueError( msg )
+
+        except SettingsError, e:
+            self.error[ option ] = str(e)
+            raise e
 
         return name, v
 
-    def __processSection( self, items, path=False ):
+    def __processSection( self, items, valid=SettingsParser.NOVALIDATION ):
         """
         @param items: section comming from ConfigParser
         @type  items: [ ( str, str ) ]
@@ -177,11 +209,11 @@ class SettingsParser:
 
             try:
 
-                n, v = self.__process( name, value, path )
+                n, v = self.__process( name, value, valid )
 
                 r[ n ] = v
 
-            except ValueError, e:
+            except SettingsWarning, e:
                 B.EHandler.warning( str(e), trace=0, error=0 )
 
         return r
@@ -192,21 +224,29 @@ class SettingsParser:
         @return dict of type-cast params contained in fini
         @rtype: dict of dict
         """
-        ## read from file
-        c = ConfigParser.ConfigParser()
-        c.read( self.f_ini  )
+        try:
 
-        r = {}
-        self.error = {}  ## options with errors
+            ## read from file
+            c = ConfigParser.ConfigParser()
+            c.read( self.f_ini  )
 
-        for section in c.sections():
+            r = {}
+            self.error = {}  ## options with errors
 
-            paths = (section == 'PATHS')
+            for section in c.sections():
 
-            r.update( self.__processSection(c.items(section), paths) )
+                valid = SettingsParser.NOVALIDATION or \
+                        SettingsParser.VALID_PATH * (section == 'PATHS') or \
+                        SettingsParser.VALID_BIN  * (section == 'BINARIES')
 
-        return r
+                r.update( self.__processSection(c.items(section), valid) )
 
+            return r
+
+        except Exception, e:
+            B.EHandler.fatal('Biskit could not read its settings file %s'\
+                           % self.f_ini )
+            
 
 #############
 ##  TESTING        
@@ -224,7 +264,10 @@ class Test:
         @return: 1
         @rtype: int
         """
-        p = SettingsParser( T.projectRoot()+'/external/defaults/settings.dat')
+        p = SettingsParser( T.projectRoot()+'/external/defaults/settings.cfg')
+
+        globals().update( locals() )
+
         r = p.parse()
 
         globals().update( locals() )
