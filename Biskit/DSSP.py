@@ -252,30 +252,35 @@ class Test:
     """
     Test class
     """
-    from Biskit import PDBModel
-
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: secondary structure assignment
         @rtype: str
         """
-        print "Loading PDB..."
-
+        from Biskit import PDBModel
+        
+        ## Loading PDB...
         f = T.testRoot()+"/com/1BGS.pdb"
-        m = self.PDBModel(f)
+        m = PDBModel(f)
         m = m.compress( m.maskProtein() )
 
-        print "Starting DSSP"
-        self.dssp = Dssp( m )
+        ## Starting DSSP
+        dssp = Dssp( m )
 
-        print "Running"
-        result = self.dssp.run()
+        ## Running DSSP
+        result = dssp.run()
 
-        print "Sequence :", m.sequence()
-        print "Secondary:", result
+        if local:
+            print "Sequence :", m.sequence()
+            print "Secondary:", result            
+            globals().update( locals() )
 
         return result
 
@@ -296,7 +301,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run() == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
     
 

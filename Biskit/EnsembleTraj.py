@@ -626,9 +626,15 @@ class Test:
     """
     
 
-    def run( self, full=None ):
+    def run( self, local=0, traj=None ):
         """
         run function test
+
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        @param traj: run test on a specified none slimed trajectory
+        @type  traj: str
 
         @return: sum of 'rms_CA_av' profile
         @rtype:  float
@@ -639,8 +645,8 @@ class Test:
         ## down test trajectory of T.testRoot(). To run the full
         ## test pease select a larger trajectory.    
 
-        if full:
-            tr = T.Load( '~/interfaces/c11/lig_pcr_00/traj.dat')
+        if traj:
+            tr = T.Load( T.absfile(traj) )
 
         self.tr = traj2ensemble( tr )
 
@@ -661,7 +667,8 @@ class Test:
 
         p.show()
 
-        if full:
+        ## this only runs on an none slimmed traj
+        if traj:
 
             print "Outliers..."
 
@@ -674,6 +681,9 @@ class Test:
                                             'rms_CA_ref', xlabel='frame' )
             p2.show()
 
+
+        if local:
+            globals().update( locals() )
 
         return N.sum( self.tr.profile('rms_CA_av') )
 
@@ -692,6 +702,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert abs( test.run() - test.expected_result() ) < 1e-6
+    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-6
 
-
+    ## run a full test
+    # test.run( local=1, traj='~/interfaces/c11/lig_pcr_00/traj.dat')

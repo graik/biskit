@@ -720,30 +720,35 @@ class Test:
     """
     Test class
     """
-    from Biskit import PDBModel
-    import Biskit.tools as T
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
 
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: Hmmer emission scores
         @rtype:  [ float ]
         """
+        from Biskit import PDBModel
+        import Biskit.tools as T
+    
         print "Loading PDB..."
-        m = self.PDBModel( self.T.testRoot()+'/lig/1A19.pdb')
+        m = PDBModel( T.testRoot()+'/lig/1A19.pdb')
         model = m.compress( m.maskProtein() )
 
         ## initiate and check database status
-        self.hmmer = Hmmer( hmmdb = settings.hmm_db )
-        self.hmmer.checkHmmdbIndex()
+        hmmer = Hmmer( hmmdb = settings.hmm_db )
+        hmmer.checkHmmdbIndex()
 
         ## scoring methods to use
         method = [ 'emmScore', 'ent', 'maxAll', 'absSum', 'maxAllScale' ]
 
         ## search
-        searchMatches, searchHits = self.hmmer.searchHmmdb( model )
-        hmmNames = self.hmmer.selectMatches( searchMatches, searchHits )
+        searchMatches, searchHits = hmmer.searchHmmdb( model )
+        hmmNames = hmmer.selectMatches( searchMatches, searchHits )
 
         cons = []
         result = None
@@ -751,31 +756,33 @@ class Test:
         for name in hmmNames.keys():
 
             ## retrieve hmm model
-            hmmDic = self.hmmer.getHmmProfile( name )
+            hmmDic = hmmer.getHmmProfile( name )
 
             ## align sequence with model
             fastaSeq, hmmSeq, repete, hmmGap = \
-                  self.hmmer.align( model, hmmNames[ name ] )
+                  hmmer.align( model, hmmNames[ name ] )
 
             ## cast hmm model
             hmmDic_cast = \
-                  self.hmmer.castHmmDic( hmmDic, repete, hmmGap, method[0] )
+                  hmmer.castHmmDic( hmmDic, repete, hmmGap, method[0] )
 
             ## Hmmer profile match scores for sequence
-            cons = self.hmmer.matchScore( fastaSeq, hmmSeq,
-                                          hmmDic_cast, method[0] )
+            cons = hmmer.matchScore( fastaSeq, hmmSeq,
+                                     hmmDic_cast, method[0] )
 
             ## If there are more than one profile in the model, merge to one. 
             if result:
-                result = self.hmmer.mergeProfiles( result, cons )
+                result = hmmer.mergeProfiles( result, cons )
             else:
                 result = cons
 
         ## cleanup
-        self.hmmer.cleanup()
+        hmmer.cleanup()
 
+        if local:
+            globals().update( locals() )
+                              
         return result
-
 
 
 
@@ -789,13 +796,12 @@ class Test:
         return [2581.0, 3583.0, 1804.0, 2596.0, 3474.0, 2699.0, 3650.0, 2087.0, 2729.0, 2450.0, 2412.0, 2041.0, 3474.0, 1861.0, 2342.0, 2976.0, 5124.0, 2729.0, 2202.0, 2976.0, 3583.0, 2202.0, 2103.0, 2976.0, 1922.0, 2132.0, 4122.0, 2403.0, 4561.0, 4561.0, 3650.0, 2087.0, 4001.0, 2976.0, 3860.0, 3260.0, 2976.0, 6081.0, 3860.0, 5611.0, 2976.0, 3609.0, 3650.0, 6081.0, 3343.0, 2403.0, 3288.0, 4122.0, 2976.0, 2322.0, 2976.0, 1995.0, 4378.0, 2706.0, 2665.0, 4186.0, 3539.0, 2692.0, 3270.0, 2302.0, 2604.0, 2132.0, 2118.0, 2380.0, 2614.0, 2170.0, 3260.0, 2403.0, 1964.0, 3343.0, 2976.0, 2643.0, 3343.0, 2714.0, 2591.0, 3539.0, 3260.0, 2410.0, 1809.0, 3539.0, 2111.0, -774.0, 3860.0, 2450.0, 2063.0, 3474.0, 3474.0, 2057.0, 1861.0]
 
         
-        
 
 if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run() == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
 
 

@@ -541,10 +541,14 @@ class Test:
     Test class
     """
     
-    def run( self, kill=1 ):
+    def run( self, local=0  ):
         """
         run function test
 
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 1
         @rtype: int
         """
@@ -553,21 +557,23 @@ class Test:
         x = ExeConfigCache.get( 'emacs', strict=0 )
         x.pipes = 1
 
-    ##     e = Executor( 'emacs', args='.zshenv', strict=0, catch_out=0,
-    ##                   verbose=1, cwd=t.absfile('~') )
-        if kill:
-            self.e = Executor( 'emacs', args='-kill .zshenv', strict=0,
+        if not local:
+            e = Executor( 'emacs', args='-kill .zshenv', strict=0,
                           f_in=None,
                           f_out=t.absfile('~/test.out'),
                           verbose=1, cwd=t.absfile('~') )
         else:
-            self.e = Executor( 'emacs', args='.zshenv', strict=0,
+            e = Executor( 'emacs', args='.zshenv', strict=0,
                           f_in=None,
                           f_out=t.absfile('~/test.out'),
                           verbose=1, cwd=t.absfile('~') )            
         
-        r = self.e.run()
+        r = e.run()
 
+        if local:
+            print 'Emacs were running for %.2f seconds'%e.runTime
+            globals().update( locals() )
+            
         return 1
 
 
@@ -580,14 +586,13 @@ class Test:
         """
         return 1
     
-       
 
 if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( kill=0 ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
-    print 'Emacs were running for %.2f seconds'%test.e.runTime
+    
 
 

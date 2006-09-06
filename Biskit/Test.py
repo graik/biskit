@@ -75,9 +75,9 @@
 ## PVM/TrackingJobMaster.py
 
 ########################### STATISTICS #########################
-##  Statistics/__init__.py
-##  Statistics/pstat.py
-##  Statistics/stats.py
+## Statistics/__init__.py
+## Statistics/pstat.py
+## Statistics/stats.py
 
 
 
@@ -88,44 +88,44 @@
 #############################################################
 
 ###### BISKIT ########
-## SettingsManager.py     None
-## Blast2Seq.py           None
-## ChainCleaner.py        rec/1A2P_rec_original.pdb
-## ChainSeparator.py      com/1BGS_original.pdb
-## ChainWriter.py         rec/1A2P_rec_original.pdb
-## ColorSpectrum.py       None
-## decorators.py          None
-## DictList.py            None
-## DSSP.py                com/1BGS.pdb
-## EnsembleTraj.py        lig_pcr_00/traj.dat
-## ExeConfigCache.py      None
-## ErrorHandler.py        None
-## ExeConfig.py           None
-## Executor.py            None
-## Fold_X.py              /rec/1A2P.pdb
-## FuzzyCluster.py        None
-## gnuplot.py             None
-## hist.py                None
-## Hmmer.py               lig/1A19.pdb
-## IcmCad.py              lig/1A19.pdb, lig_pcr_00/traj.dat
-## LocalPath.py           None
-## LogFile.py             None
-## match2seq.py           lig_pcr_00/traj.dat
-## molUtils.py            lig/1A19.pdb
-## mathUtils.py           None
-## MatrixPlot.py          None
-## ModelList.py           rec/1A2P.pdb, lig/1A19.pdb, com/1BGS.pdb
-## molTools.py            lig/1A19.pdb
-## msms.py                lig/1A19.pdb
+## * SettingsManager.py     None
+## * Blast2Seq.py           None
+## * ChainCleaner.py        rec/1A2P_rec_original.pdb
+## * ChainSeparator.py      com/1BGS_original.pdb
+## * ChainWriter.py         rec/1A2P_rec_original.pdb
+## * ColorSpectrum.py       None
+## * decorators.py          None
+## * DictList.py            None
+## * DSSP.py                com/1BGS.pdb
+## ** EnsembleTraj.py        lig_pcr_00/traj.dat
+## * ExeConfigCache.py      None
+## * ErrorHandler.py        None
+## * ExeConfig.py           None
+## * Executor.py            None
+## * Fold_X.py              /rec/1A2P.pdb
+## * FuzzyCluster.py        None
+## * gnuplot.py             None
+## * hist.py                None
+## * Hmmer.py               lig/1A19.pdb
+## * IcmCad.py              lig/1A19.pdb, lig_pcr_00/traj.dat
+## * LocalPath.py           None
+## * LogFile.py             None
+## * match2seq.py           lig_pcr_00/traj.dat
+## * molUtils.py            lig/1A19.pdb
+## * mathUtils.py           None
+## ** MatrixPlot.py          None
+## * ModelList.py           rec/1A2P.pdb, lig/1A19.pdb, com/1BGS.pdb
+## * molTools.py            lig/1A19.pdb
+## * msms.py                lig/1A19.pdb
 ## PCRModel.py            com/1BGS.psf com/1BGS.pdb rec/1A2P.psf rec/1A2P.pdb
 ## PDBCleaner.py          rec/1A2P_rec_original.pdb
 ## PDBDope.py             com/1BGS.pdb
-## PDBModel.py            rec/1A2P.pdb
+## * PDBModel.py            rec/1A2P.pdb
 ## plotUtils.py           None
 ## ProfileCollection.py   None
 ## Prosa2003.py           lig/1A19.pdb + rec/2A2P.pdb
 ## Pymoler.py             lig_pcr_00/traj.dat
-## Ramachandran.py        lig_pcr_00/traj.dat
+## * Ramachandran.py        lig_pcr_00/traj.dat
 ## ReduceCoordinates.py   com/1BGS.pdb
 ## rmsFit.py              lig_pcr_00/traj.dat
 ## SparseArray.py         None

@@ -467,14 +467,18 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: secondary structure assignment
         @rtype: str
         """
-        print 'Reading pdb files.'
+        ## Reading pdb files
         lig_traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )[:2]
         m = [ m.compress( m.maskProtein() ) for m in lig_traj ]
 
@@ -482,11 +486,14 @@ class Test:
         m[1].removeRes(['ALA'])
 
         mask1, mask2 = compareModels( m[0], m[1] )
-        print 'Reading and comparing two models'
 
-        print '\nResidue masks to make the two maodels equal'
-        print 'mask1\n', mask1
-        print 'mask2\n', mask2
+        if local:
+            print 'Reading and comparing two models'
+
+            print '\nResidue masks to make the two maodels equal'
+            print 'mask1\n', mask1
+            print 'mask2\n', mask2            
+            globals().update( locals() )
 
         return mask1, mask2
 
@@ -516,7 +523,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run() == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
     
 

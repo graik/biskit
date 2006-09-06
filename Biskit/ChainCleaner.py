@@ -256,9 +256,13 @@ class Test:
     """
     Test class
     """   
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
 
         @return: log message
         @rtype: str
@@ -267,16 +271,20 @@ class Test:
 
         outPath = T.tempDir()
 
-        self.cleaner = ChainCleaner( ChainSeparator(fname, outPath) )
+        cleaner = ChainCleaner( ChainSeparator(fname, outPath) )
 
-        print self.cleaner.next()
+        print cleaner.next()
 
-        print 'Wrote log: %s'%(self.cleaner.log.fname)
+        print 'Wrote log: %s'%(cleaner.log.fname)
 
         ## return logfile contents
-        f= open( self.cleaner.log.fname, 'r')
+        f= open( cleaner.log.fname, 'r')
         result = f.readlines()
         f.close()
+
+        if local:
+            globals().update( locals() )
+            
         return result
 
 
@@ -294,6 +302,6 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run() == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
     

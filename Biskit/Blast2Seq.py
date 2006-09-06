@@ -172,17 +172,28 @@ class Test:
     Test class
     """
 
-    def run( self ):
+    
+    def run( self, local=0 ):
         """
         run function test
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
 
         @return: balast alignment result
         @rtype: dict
         """
         blaster = Blast2Seq()
+
+        result = blaster.runBlast("AAAFDASEFFGIGHHSFKKEL",
+                                  "AAAFDASEFFGIGHHSAKK")
+
+        if local:
+            print result
+            globals().update( locals() )
         
-        return blaster.runBlast("AAAFDASEFFGIGHHSFKKEL",
-                                "AAAFDASEFFGIGHHSAKK")
+        return result
 
 
     def expected_result( self ):
@@ -200,10 +211,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    result = test.run()
-    print result
-    
-    assert result == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
 
 
