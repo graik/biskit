@@ -129,10 +129,14 @@ class Test:
     """
     
 
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: list with sequences of models
         @rtype: [str]
         """
@@ -142,7 +146,7 @@ class Test:
                   T.testRoot() + '/lig/1A19.pdb',
                   T.testRoot() + '/com/1BGS.pdb' ]
 
-        print "Loading PDBs..."
+        ## Loading PDBs...
         self.l = ModelList( f_lst )
 
         seq = []
@@ -150,12 +154,13 @@ class Test:
             m.info['score'] = random.random()
             seq += [ m.compress( m.maskProtein() ).sequence() ]
 
-        print self.l.valuesOf('score')
-
         p = self.l.plot( 'score' )
 
-        p.show()
-
+        if local:
+            print self.l.valuesOf('score')
+            p.show()
+            globals().update( locals() )
+            
         return seq
 
 
@@ -175,5 +180,5 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run() == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 

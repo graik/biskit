@@ -111,10 +111,14 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0  ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: something
         @rtype:  float
         """
@@ -129,8 +133,10 @@ class Test:
 
         self.e.warning( 'A warning' )
 
-        print 'An error log file was written to %s'%f_out
-        
+        if local:
+            print 'An error log file was written to %s'%f_out
+            globals().update( locals() )
+            
         return  1
 
 
@@ -148,6 +154,6 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert  test.run( ) == test.expected_result()
+    assert  test.run( local=1 ) == test.expected_result()
     
 

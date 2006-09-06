@@ -453,32 +453,42 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
 
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 1
         @rtype: int
         """
         os.environ['PRJ_INTERFACES'] = '~raik/data/tb/interfaces'
 
+        path = []
+
         l = LocalPath()
 
+        ## Example 1
         l.set_fragments(
             ('/home/Bis/johan/data/tb/interfaces','PRJ_INTERFACES'),
             ('/c11/com_wet/ref.com', None) )
+        path += [ 'Example 1:\n %s : %s \n'%(l.formatted(), l.local()) ]
 
-        print l.formatted(), " : ", l.local() 
-
+        ## Example 2
         l.set_path( '/home/Bis/raik/data/tb/interfaces/c11/com_wet/ref.com',
                     USER='/home/Bis/raik' )
+        path +=  [ 'Example 2:\n %s : %s \n'%(l.formatted(), l.local()) ]
 
-        print l.formatted(), " : ", l.local()
-
+        ## Example 3
         l.set_path( '/home/Bis/raik/data/tb/interfaces/c11/com_wet/ref.com' )
+        path += [ 'Example 3:\n %s : %s \n'%(l.formatted(), l.local()) ]
 
-        print l.formatted(), " : ", l.local()
-
+        if local:
+            for p in path:
+                print p
+            globals().update( locals() )
 
         return 1
 
@@ -499,5 +509,5 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 

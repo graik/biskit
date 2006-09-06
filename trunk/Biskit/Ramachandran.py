@@ -336,20 +336,31 @@ class Test:
     import Biskit.PDBModel as PDBModel
 
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         Ramachandran function test
+
+        @param local: if this option is set, local variables
+                        will be transfered to global
+        @type  local: 1|0
 
         @return: sum of all psi angles
         @rtype: float      
         """
         traj = T.Load( T.testRoot()+'/lig_pcr_00/traj.dat' )
+
         mdl = [ traj[0], traj[11] ]
         mdl = [ md.compress( md.maskProtein() ) for md in mdl ]
 
-        self.rama = Ramachandran( mdl , name='test')
+        rama = Ramachandran( mdl , name='test')
 
-        psi = N.array( self.rama.psi )
+        psi = N.array( rama.psi )
+
+        if local:
+            rama.show()
+            
+            globals().update( locals() )
+            
         return N.sum( N.compress( psi != None, psi ) )
 
 
@@ -368,9 +379,9 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run() == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
-    test.rama.show()
-
+    
+    
 
     

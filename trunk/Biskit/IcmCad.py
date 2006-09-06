@@ -232,15 +232,18 @@ class Test:
     from Biskit import PDBModel
     
 
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
 
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: icmCad values
         @rtype: [float]
         """
-        print "Loading PDB..."
-
+        ## Loading PDB...
         f = T.testRoot() + '/lig/1A19.pdb'
         m1 = self.PDBModel(f)
         m1 = m1.compress( m1.maskProtein() )
@@ -251,17 +254,17 @@ class Test:
         for m in lig_traj[:3]:
             m = m.compress( m.maskProtein() )
             ms.append(m)
-            T.flushPrint('*')
 
-        print "Starting ICM"
+        ## Starting ICM
+        x = IcmCad( m1, ms, debug=0, verbose=0 )
 
-        self.x = IcmCad( m1, ms, debug=0, verbose=1 )
+        ## Running
+        r = x.run()
 
-        print "Running"
-        r = self.x.run()
-
-        print "Result: ", r
-
+        if local:
+            print "Result: ", r
+            globals().update( locals() )
+        
         return r
 
 
@@ -281,6 +284,6 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run() == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
 

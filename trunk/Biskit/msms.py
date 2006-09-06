@@ -23,7 +23,11 @@
 ## last $Author$
 ## last $Date$
 """
-Use MSMS to calculate surface info. 
+Use MSMS to calculate surface info.
+
+@note: This module is not any more the prefered module for
+       surface area calculations. SurfaceRacer is the default
+       module for this kind of calculations.
 """
 
 import Numeric as N
@@ -420,35 +424,41 @@ class Test:
     from Biskit import PDBModel
     
 
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
+
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
 
         @return: sum of SAS and SES areas
         @rtype:  float
         """
         from Biskit import PDBModel
 
-        print "Loading PDB..."
-
+        ## Loading PDB...
         m = PDBModel( T.testRoot() + '/lig/1A19.pdb' )
         m = m.compress( m.maskProtein() )
 
         ## get surfaces via the MSMS executable
-        print "Starting MSMS"
-        self.ms = MSMS( m, debug=0, verbose=1 )
+        ms = MSMS( m, debug=0, verbose=0 )
 
-        print "Running"
-        out, sesList, sasList, atmList = self.ms.run()
+        ## Running
+        out, sesList, sasList, atmList = ms.run()
+        
+        if local:
+            print out
+            print '\nResult from MSMS (first 5 lines): '
+            print 'SES \tSAS \tAtom name'
+            for i in range(5):
+                print '%.2f \t%.2f \t%s'%(sesList[i], sasList[i], atmList[i])
 
-        print out
-        print '\nResult from MSMS (first 5 lines): '
-        print 'SES \tSAS \tAtom name'
-        for i in range(5):
-            print '%.2f \t%.2f \t%s'%(sesList[i], sasList[i], atmList[i])
+            print 'MSMS done'
+        
+            globals().update( locals() )
 
-        print 'MSMS done'
-
+            
         return out['sas'] + out['ses']
 
 
@@ -467,7 +477,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert abs( test.run() - test.expected_result() ) < 1e-8
+    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
 
 
 ## ####################################

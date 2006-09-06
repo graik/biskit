@@ -746,20 +746,27 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: something
         @rtype:  float
         """
-        print 'Calculating something ..'
+        ## Calculating something ..
         d = N.array([[20.,30.,40.],[23., 31., 50.]])
 
         a = polarToCartesian( cartesianToPolar( d ) )
 
         t = eulerRotation( a[0][0], a[0][1], a[0][2]  )
 
+        if local:
+            globals().update( locals() )
+            
         return  N.sum( SD(a) )
 
 
@@ -777,6 +784,6 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert abs( test.run( ) - test.expected_result() ) < 1e-8
+    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
 
 

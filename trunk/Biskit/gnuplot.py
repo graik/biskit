@@ -358,10 +358,14 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 1
         @rtype: int
         """
@@ -384,6 +388,9 @@ class Test:
             data = [[0., 1., 0.], [1., -1., 0.], [0.5, 0., 1.]]
             parallelAxesPlot(data)
 
+        if local:
+            globals().update( locals() )
+            
         return 1
 
 
@@ -401,6 +408,6 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
 

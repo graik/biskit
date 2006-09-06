@@ -167,26 +167,41 @@ class Test:
     """
     Test class
     """
-    from Biskit import PDBModel
     
-
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: icmCad values
         @rtype: [float]
         """
-        print "Loading PDB..."
-
-        m = self.PDBModel( T.testRoot() + '/lig/1A19.pdb' )
+        from Biskit import PDBModel
+        
+        ## Loading PDB...
+        m = PDBModel( T.testRoot() + '/lig/1A19.pdb' )
         m = m.compress( m.maskProtein() )
 
-        self.hb = hbonds( m )
+        hb = hbonds( m )
 
-        self.xyz = xyzOfNearestCovalentNeighbour( 40, m )
+        xyz = xyzOfNearestCovalentNeighbour( 40, m )
         
-        return N.sum(N.ravel(self.hb[3:5])) + N.sum(self.xyz)
+        if local:
+            print '\nThe nearest covalently attached atom to the'
+            print '  atom with index 40 has the coordinates:'
+            print xyz
+    
+            print 'Potential h-bonds in model:'
+            print '(donor index, acceptor index, distance and angle)'
+            for h in hb:
+                print h
+                
+            globals().update( locals() )
+                              
+        return N.sum(N.ravel(hb[3:5])) + N.sum(xyz)
 
 
     def expected_result( self ):
@@ -204,13 +219,8 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert abs( test.run() - test.expected_result() ) < 1e-8
+    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
 
-    print 'Potential h-bonds in model:'
-    print '(donor index, acceptor index, distance and angle)'
-    for hb in test.hb:
-        print hb
 
-    print '\nThe nearest covalently attached atom to the'
-    print '  atom with index 40 has the coordinates:'
-    print test.xyz
+
+

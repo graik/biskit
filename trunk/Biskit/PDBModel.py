@@ -3137,10 +3137,14 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: coordinates of center of mass
         @rtype:  array
         """
@@ -3166,12 +3170,6 @@ class Test:
         for i in chainIdx:
             print '\t%s \t\t%i'%(m.atoms[i]['chain_id'], i)
 
-        ## add accessibility and curvature
-        from PDBDope import PDBDope
-        m = m.compress( N.logical_not(m.maskSolvent() ) )
-        d = PDBDope( m )
-        d.addSurfaceRacer()   
-
         ## iterate over all chains
         for c in range( 0, len( chainIdx ) ):
 
@@ -3188,6 +3186,16 @@ class Test:
         print "sorting atoms alphabetically..."
         sort = m.argsort()
         m2 = m.sort( sort )
+
+        if local:
+            ## add accessibility and curvature
+            print 'Adding surface information ...'
+            from PDBDope import PDBDope
+            m = m.compress( N.logical_not(m.maskSolvent() ) )
+            d = PDBDope( m )
+            d.addSurfaceRacer()
+
+            globals().update( locals() )
 
         return N.sum( m2.centerOfMass() )
 
@@ -3207,6 +3215,6 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert abs( test.run() - test.expected_result() ) < 1e-8
+    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
 
 

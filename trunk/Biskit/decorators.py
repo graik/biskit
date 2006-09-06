@@ -135,10 +135,14 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: count
         @rtype: int
         """
@@ -172,8 +176,11 @@ class Test:
 
             result += a.simple( 8, x='a' )
 
-        print time.clock() - t
-
+        
+        if local:
+            print time.clock() - t
+            globals().update( locals() )
+                              
         return result
 
 
@@ -193,6 +200,6 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run() == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
     

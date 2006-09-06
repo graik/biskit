@@ -239,12 +239,14 @@ class Test:
     """
     Test class
     """    
-    from RandomArray import random
-
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         FuzzyCluster function test
+
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
 
         @return: array with cluster centers
         @rtype: array('f')
@@ -255,10 +257,13 @@ class Test:
 
 	x = N.concatenate((x1, x2, x3))
 
-	self.fuzzy = FuzzyCluster(x, n_cluster = 5, weight = 1.5)
+	fuzzy = FuzzyCluster(x, n_cluster = 5, weight = 1.5)
 
-	centers = self.fuzzy.go(1.e-30, n_iterations=50, nstep=10)       
-
+	centers = fuzzy.go(1.e-30, n_iterations=50, nstep=10)
+        
+        if local:
+            globals().update( locals() )
+                              
         return centers
 
 
@@ -274,11 +279,10 @@ class Test:
         return (5, 2)
 
           
-
 if __name__ == '__main__':
 
     test = Test()
 
-    assert N.shape(test.run()) == test.expected_result()
+    assert N.shape(test.run( local=1 )) == test.expected_result()
 
-##     centers = test.fuzzy.go(1.e-30, n_iterations=50, nstep=10)
+

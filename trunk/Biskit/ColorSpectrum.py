@@ -37,10 +37,10 @@ class ColorSpectrum:
     """
     Translate a range of numeric values into a range of color codes.
 
-    Example:
-    >>> p = ColorSpectrum( 'grey', 1, 500 )
-    >>> single_color= p.color( 250 )
-    >>> color_range = p.colors( range(25,250), resetLimits=0 )
+    Example::
+     >>> p = ColorSpectrum( 'grey', 1, 500 )
+     >>> single_color= p.color( 250 )
+     >>> color_range = p.colors( range(25,250), resetLimits=0 )
 
     Available palettes are:
     * grey
@@ -276,9 +276,13 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
 
         @return: grey color spectrum
         @rtype:  [ int ]
@@ -290,34 +294,38 @@ class Test:
         c_plasma  = ColorSpectrum( 'plasma', 0, 100 )
         c_plasma2 = ColorSpectrum( 'plasma2', 0, 100 )
 
-        self.p = B.FramedPlot()
+        p = B.FramedPlot()
         
         result = []
         for i in range( 100 ):
 
             x = (i, i+1 )
-            self.p.add( B.FillBelow( x, (1., 1.),
-                                    color = c_grey.color( i ) ) )
+            p.add( B.FillBelow( x, (1., 1.),
+                                color = c_grey.color( i ) ) )
             result += [ c_grey.color( i ) ]
             
-            self.p.add( B.FillBelow( x, (0.75, 0.75),
-                                    color = c_sausage.color( i ) ) )
-            self.p.add( B.FillBelow( x, (0.5, 0.5),
-                                    color = c_plasma.color( i ) ) )
-            self.p.add( B.FillBelow( x, (0.25, 0.25),
-                                    color = c_plasma2.color( i ) ) )
+            p.add( B.FillBelow( x, (0.75, 0.75),
+                                color = c_sausage.color( i ) ) )
+            p.add( B.FillBelow( x, (0.5, 0.5),
+                                color = c_plasma.color( i ) ) )
+            p.add( B.FillBelow( x, (0.25, 0.25),
+                                color = c_plasma2.color( i ) ) )
 
-        self.p.add( B.Curve( (0,100), (1.,1.)) )
-        self.p.add( B.Curve( (0,100), (.75,.75)) )
-        self.p.add( B.Curve( (0,100), (.5,.5) ))
-        self.p.add( B.Curve( (0,100), (0.25, 0.25)) )
-        self.p.add( B.Curve( (0,100), (0.0, 0.0)) )
+        p.add( B.Curve( (0,100), (1.,1.)) )
+        p.add( B.Curve( (0,100), (.75,.75)) )
+        p.add( B.Curve( (0,100), (.5,.5) ))
+        p.add( B.Curve( (0,100), (0.25, 0.25)) )
+        p.add( B.Curve( (0,100), (0.0, 0.0)) )
 
-        self.p.add( B.PlotLabel(  0.5 ,0.9, 'grey') )
-        self.p.add( B.PlotLabel(  0.5 ,0.65, 'sausage') )
-        self.p.add( B.PlotLabel(  0.5 ,0.4, 'plasma') )
-        self.p.add( B.PlotLabel(  0.5 ,0.15, 'plasma2') )
+        p.add( B.PlotLabel(  0.5 ,0.9, 'grey') )
+        p.add( B.PlotLabel(  0.5 ,0.65, 'sausage') )
+        p.add( B.PlotLabel(  0.5 ,0.4, 'plasma') )
+        p.add( B.PlotLabel(  0.5 ,0.15, 'plasma2') )
 
+        if local:
+            globals().update( locals() )
+            p.show()
+            
         return result
 
 
@@ -336,7 +344,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run() == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
     
-    test.p.show()
+    
 

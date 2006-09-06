@@ -240,31 +240,36 @@ class Test:
     """
     Test class
     """
-    from Biskit import PDBModel
     
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
 
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: dictionary with foldx energy terms
         @rtype: dict
         """
-        print "Loading PDB..."
-
+        from Biskit import PDBModel
+        
+        ## Loading PDB...
         f = T.testRoot() + '/rec/1A2P.pdb'
-        m = self.PDBModel(f)
+        m = PDBModel(f)
         m = m.compress( m.maskProtein() )
 
-        print "Starting fold_X"
+        ## Starting fold_X
+        x = Fold_X( m, debug=0, verbose=0 )
 
-        x = Fold_X( m, debug=0, verbose=1 )
-
-        print "Running"
+        ## Running
         r = x.run()
 
-        print "Result: ", r
-
+        if local:
+            print "Result: ", r
+            globals().update( locals() )
+        
         return r
 
 
@@ -283,7 +288,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run() == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
     
 
