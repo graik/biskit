@@ -51,20 +51,55 @@ class InvalidBinary( SettingsWarning ):
     pass
 
 
+class Setting:
+    """
+    Simple container for a single parameter
+    """
+
+    def __init__( self, name=None, value=None, vtype=None, comment=None,
+                  error=None ):
+        self.name = name
+        self.value = value
+        self.vtype = vtype
+        self.comment = comment
+        self.error = error
+
+    def typeCast( self, vtype ):
+        """
+        Recast value to a new type.
+        @param vtype: new type for value
+        @type  vtype: type
+        @raise InvalidValue, if current value is incompatible with vtype
+        """
+        try:
+            self.value = vtype( self.value )
+            self.vtype = vtype
+        except ValueError, e:
+            raise InvalidValue, '%s: cannot convert "%s" to %r.' %\
+              (self.name,self.value,vtype)
+
+    def __repr__( self ):
+        return '%s=%s(%s)#%s!%s' %\
+               (self.name, self.vtype.__name__, str(self.value),\
+               (self.comment or ''), (self.error or ''))
+
+    def __str__( self ):
+        return self.__repr__()
+
 class SettingsParser:
     """
     A config file parser on steroids -- performs the following tasks:
 
     1. read a ini-style settings file
     2. type-cast options (e.g. of the form int-some_name into int(some_name) )
-    3. validate that all entries of section [PATH] point to existing paths
+    3. validate that all entries of section [PATHS] point to existing paths
     4. absolutize all valid paths
     5. validate that all entries of section [BINARIES] point to binaries
     """
 
-    NOVALIDATION = 0
-    VALID_PATH = 1
-    VALID_BIN = 2
+    NORMAL = 'NORMAL'
+    PATH = 'PATHS'
+    BIN = 'BINARIES'
 
     def __init__(self, ini):
 
@@ -149,7 +184,7 @@ class SettingsParser:
         return t, o
 
 
-    def __process( self, option, value, valid=SettingsParser.NOVALIDATION ):
+    def __process( self, option, value, valid=NORMAL ):
         """
         @param option: option name
         @type  option: str
@@ -160,39 +195,37 @@ class SettingsParser:
         @param path: validate as path name (warning if not existent)
         @type  path: bool
         
-        @return: processed option name, processed value
-        @rtype: str, any
+        @return: new setting
+        @rtype: Setting
 
-        @raise SettingsError: InvalidPath/Binary/Type/Value
+        @raise SettingsError: InvalidType or Value
         """
+        r = Setting()
+            
         try:
 
-            t, name = self.__type( option )  ## target type and target name
+            x = value.split('#')             ## split off comments
+            r.value = x[0].strip() or None   ## don't return empty strings
+            if len(x) > 1:
+                r.comment = ''.join( x[1:] )
 
-            v = value.split('#')[0].strip()  ## strip off comments
+            vtype, r.name = self.__type( option )
+            r.typeCast( vtype )
 
-            if not v:                        ## don't return empty strings
-                v = None
+            if valid == SettingsParser.PATH:
+                r.value = self.__validPath( r.value )
 
-            if valid is SettingsParser.VALID_PATH:
-                v = self.__validPath( v )
+            if valid == SettingsParser.BIN:
+                r.value = self.__validBinary( r.value )
 
-            if valid is SettingsParser.VALID_BIN:
-                v = self.__validBinary( v )
 
-            try:
-                v = t( v )
-            except ValueError, e:
-                raise InvalidValue, '%s: cannot convert "%s" to %r.' %\
-                  (option,value,t)
+        except SettingsWarning, e:           ## catch and record warnings
+            r.error = str(e)
 
-        except SettingsError, e:
-            self.error[ option ] = str(e)
-            raise e
+        return r
 
-        return name, v
 
-    def __processSection( self, items, valid=SettingsParser.NOVALIDATION ):
+    def __processSection( self, items, valid=NORMAL ):
         """
         @param items: section comming from ConfigParser
         @type  items: [ ( str, str ) ]
@@ -207,14 +240,12 @@ class SettingsParser:
 
         for name, value in items:
 
-            try:
+            s = self.__process( name, value, valid )
 
-                n, v = self.__process( name, value, valid )
+            r[ s.name ] = s
 
-                r[ n ] = v
-
-            except SettingsWarning, e:
-                B.EHandler.warning( str(e), trace=0, error=0 )
+            if s.error:
+                B.EHandler.warning( s.error, trace=0, error=0 )
 
         return r
 
@@ -230,18 +261,14 @@ class SettingsParser:
             c = ConfigParser.ConfigParser()
             c.read( self.f_ini  )
 
-            r = {}
-            self.error = {}  ## options with errors
+            self.result = {}
 
             for section in c.sections():
 
-                valid = SettingsParser.NOVALIDATION or \
-                        SettingsParser.VALID_PATH * (section == 'PATHS') or \
-                        SettingsParser.VALID_BIN  * (section == 'BINARIES')
+                valid = section
 
-                r.update( self.__processSection(c.items(section), valid) )
-
-            return r
+                self.result.update(
+                    self.__processSection(c.items(section), valid) )
 
         except Exception, e:
             B.EHandler.fatal('Biskit could not read its settings file %s'\
@@ -266,13 +293,13 @@ class Test:
         """
         p = SettingsParser( T.projectRoot()+'/external/defaults/settings.cfg')
 
+        p.parse()
+
+        t = p.result['testparam']
+
         globals().update( locals() )
 
-        r = p.parse()
-
-        globals().update( locals() )
-
-        return 1
+        return t.name, t.value
 
 
     def expected_result( self ):
@@ -282,7 +309,7 @@ class Test:
         @return: 1
         @rtype:  int
         """
-        return 1
+        return 'testparam', 42
     
         
 
