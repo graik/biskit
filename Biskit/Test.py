@@ -26,7 +26,7 @@
 
 #############################################################
 ##                                                         ##
-##            MODULES THAT DOESN'T HAVE ANT TEST           ##
+##            MODULES THAT DON'T HAVE ANT TEST             ##
 ##                                                         ##
 #############################################################
 
@@ -330,7 +330,7 @@ class Biskit( unittest.TestCase ):
     Tests for modules in ~biskit/Biskit that don't
     call external applications.
 
-    Modules that are dependent of PVM has been excluded and
+    Modules that are dependent of PVM have been excluded and
     can be found in L{Biskit_Pvm} and modules that call external
     applications can be found in L{Biskit_Applications}.    
     """
