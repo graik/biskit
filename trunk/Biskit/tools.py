@@ -911,6 +911,24 @@ def tryRemove(f, verbose=0, tree=0, wildcard=0 ):
         if verbose: errWriteln( 'Warning: Cannot remove %s.' % str(f) )
         return 0
 
+def backup( fname, suffix='~' ):
+    """
+    Create backup of file if it already exists.
+    @param fname: file name
+    @type  fname: str
+    @param suffix: suffix to add to backup file name ['~']
+    @type  suffix: str
+
+    @return: True if backup was created, False otherwise
+    @rtype: bool
+    """
+    fname = absfile( fname )
+    
+    if os.path.exists( fname ):
+        os.rename( fname, fname + '~' )
+        return True
+    return False
+
 
 def ensure( v, t, allowed=[], forbidden=[] ):
     """
@@ -937,7 +955,7 @@ def ensure( v, t, allowed=[], forbidden=[] ):
         raise TypeError, 'value %s is not allowed.' % (str(v)[:20])
 
 
-def clipStr( s, length, suffix='..' ):
+def clipStr( s, length, suffix='..', expandtabs=1 ):
     """
     Shorten string from end and replace the last characters with suffix::
       clipStr( str, length ) -> str, with len( str ) <= length
@@ -952,14 +970,17 @@ def clipStr( s, length, suffix='..' ):
     @return: shortend string
     @rtype: str
     """
-    if len( s ) > length:
+    if expandtabs:
+        s = s.expandtabs()
+        
+    if len(s) > length:
         s = s[:(length - len(suffix))] + suffix
     return s
 
 
 def info( item, short=1 ):
     """
-    Print info about ithem::
+    ::
       info( item, short=1) -> Print useful information about item.
 
     @param item: query item

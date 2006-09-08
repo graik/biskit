@@ -41,6 +41,9 @@ class InvalidType( SettingsError ):
 class InvalidValue( SettingsError ):
     pass
 
+class InvalidFile( SettingsError ):
+    pass
+
 class SettingsWarning( SettingsError ):
     pass
 
@@ -55,14 +58,19 @@ class Setting:
     """
     Simple container for a single parameter
     """
+    ## types of settings // section name in cfg file
+    NORMAL = 'NORMAL'
+    PATH = 'PATHS'
+    BIN = 'BINARIES'
 
-    def __init__( self, name=None, value=None, vtype=None, comment=None,
-                  error=None ):
+    def __init__( self, name=None, value=None, vtype=str, comment=None,
+                  error=None, section=NORMAL ):
         self.name = name
         self.value = value
         self.vtype = vtype
         self.comment = comment
         self.error = error
+        self.section = section
 
     def typeCast( self, vtype ):
         """
@@ -78,15 +86,54 @@ class Setting:
             raise InvalidValue, '%s: cannot convert "%s" to %r.' %\
               (self.name,self.value,vtype)
 
-    def __repr__( self ):
-        return '%s=%s(%s)#%s!%s' %\
-               (self.name, self.vtype.__name__, str(self.value),\
-               (self.comment or ''), (self.error or ''))
+    def __repr__( self, tab='' ):
+        error = ''
+        if self.error: error = '(!)'
+
+        comment = self.comment or ''
+        if comment: comment = ' # '+comment
+
+        return '%s%s = %s%s(%s)%s%s' %\
+               (error, self.name, tab, self.vtype.__name__, str(self.value),\
+               tab, comment)
 
     def __str__( self ):
-        return self.__repr__()
+        return self.__repr__( tab='\t' )
 
-class SettingsParser:
+    def __cmp__( self, other ):
+        """
+        Compare Setting instances by their name.
+        @return: 1,0,-1
+        @rtype: int
+        """
+        if isinstance( other, self.__class__ ):
+            return cmp( self.name, other.name )
+
+        return cmp( self, other )
+    
+
+    def formatted( self ):
+        """
+        @return: parameter formatted for setting file
+        @rtype: str
+        """
+        comment = ''
+        error = ''
+        name = self.name
+
+        if self.vtype != str:
+            name = self.vtype.__name__ + '-' + name
+
+        if self.comment:
+            comment = '\t## ' + self.comment
+
+        if self.error:
+            error = '\t#! ' + self.error + ' !'
+
+        return '%s = %s%s%s' % (name, str(self.value), comment, error)
+
+
+class SettingsParser(object):
     """
     A config file parser on steroids -- performs the following tasks:
 
@@ -97,13 +144,9 @@ class SettingsParser:
     5. validate that all entries of section [BINARIES] point to binaries
     """
 
-    NORMAL = 'NORMAL'
-    PATH = 'PATHS'
-    BIN = 'BINARIES'
-
     def __init__(self, ini):
 
-        self.f_ini = ini
+        self.f_ini = T.absfile( ini )
         self.result = {}
 
 
@@ -184,7 +227,7 @@ class SettingsParser:
         return t, o
 
 
-    def __process( self, option, value, valid=NORMAL ):
+    def __process( self, option, value, section=Setting.NORMAL ):
         """
         @param option: option name
         @type  option: str
@@ -200,7 +243,7 @@ class SettingsParser:
 
         @raise SettingsError: InvalidType or Value
         """
-        r = Setting()
+        r = Setting( section=section )
             
         try:
 
@@ -212,10 +255,10 @@ class SettingsParser:
             vtype, r.name = self.__type( option )
             r.typeCast( vtype )
 
-            if valid == SettingsParser.PATH:
+            if section == Setting.PATH:
                 r.value = self.__validPath( r.value )
 
-            if valid == SettingsParser.BIN:
+            if section == Setting.BIN:
                 r.value = self.__validBinary( r.value )
 
 
@@ -225,7 +268,7 @@ class SettingsParser:
         return r
 
 
-    def __processSection( self, items, valid=NORMAL ):
+    def __processSection( self, items, section=Setting.NORMAL, verbose=False ):
         """
         @param items: section comming from ConfigParser
         @type  items: [ ( str, str ) ]
@@ -240,40 +283,55 @@ class SettingsParser:
 
         for name, value in items:
 
-            s = self.__process( name, value, valid )
+            s = self.__process( name, value, section )
 
             r[ s.name ] = s
 
-            if s.error:
+            if verbose and s.error:
                 B.EHandler.warning( s.error, trace=0, error=0 )
 
         return r
 
 
-    def parse( self ):
+    def parse( self, verbose=False ):
         """
+        @param verbose: print warning messages via Biskit.EHandler
+        @type  verbose: bool
+        
         @return dict of type-cast params contained in fini
-        @rtype: dict of dict
+        @rtype: dict of Setting
+
+        @raise IOError, SettingsError (InvalidFile, InvalidValue, InvalidType)
         """
         try:
-
             ## read from file
             c = ConfigParser.ConfigParser()
-            c.read( self.f_ini  )
 
-            self.result = {}
-
+            if c.read( self.f_ini ) != [ self.f_ini ]:
+                raise IOError, 'Settings file %s not found.' % self.f_ini
+                
             for section in c.sections():
 
-                valid = section
-
                 self.result.update(
-                    self.__processSection(c.items(section), valid) )
+                    self.__processSection( c.items(section), section) )
 
-        except Exception, e:
-            B.EHandler.fatal('Biskit could not read its settings file %s'\
-                           % self.f_ini )
-            
+        except ConfigParser.Error, e:
+            raise InvalidFile, 'Error parsing settings file: ' + str(e)
+
+        return self.result
+
+    def __repr__( self, tab='\t' ):
+        r = super( SettingsParser, self).__repr__()
+        err = len( [ s for s in self.result.values() if s.error ] )
+        r += ' -- %i entries, (!) %i errors' % (len( self.result ), err)
+
+        values = self.result.values()
+        values.sort()
+
+        for v in values:
+            r+= T.clipStr( '\n - %s' % str(v), 75)
+
+        return r
 
 #############
 ##  TESTING        
@@ -295,7 +353,7 @@ class Test:
 
         p.parse()
 
-        t = p.result['testparam']
+        t = p.result.get('testparam', Setting())
 
         globals().update( locals() )
 
