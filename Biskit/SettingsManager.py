@@ -24,237 +24,223 @@
 Manage Biskit settings.
 """
 
-import os
-import user
-import sys
+import Biskit as B
+import Biskit.tools as T
+import Biskit.SettingsParser as P
+
+import user, os
 import ConfigParser
 
-import Biskit
-import Biskit.tools as T
-
-class SettingsError( Exception ):
+class WriteCfgError( P.SettingsError ):
     pass
 
 class SettingsManager:
     """
-    Merge and export information from settings_default and
-    ~/.biskit/settings.dat into a module settings. SettingsManager is
-    automatically called when importing Biskit.
+    SettingsManager merges the parameters from a default and a user
+    configuration file into a python module where they are published as
+    normal fields. The general flow is like this::
 
-    See L{ Biskit.settings } for details.
+    default.cfg ---[SettingsParser]---\
+                                       [SettingsManager]--->[settings]
+                                             /
+              user.cfg---[SettingsParser]---/
+
+    See L{P.SettingsParser}
+    See L{B.settings}
+
+    The default configurations should be located in:
+
+    * C{biskit/external/defaults/settings.cfg}      --> L{B.settings}
+    * C{biskit/external/defaults/settings_Mod.cfg}  --> L{B.Mod.settings}
+    * C{biskit/external/defaults/settings_Dock.cfg} --> L{B.Dock.settings}
+
+    The user configurations are expected in files of the same name in
+    C{~/.biskit/}.
     """
 
-    ## Static fields
-    conf_file = user.home + '/.biskit/settings.dat'
+    USER_HEADER = """
+##     This is a Biskit user configuration file. The parameters in
+##     this file are overriding the default parameters given in
+##     %(fdefault)s.
+##     If missing, Biskit creates a new user configuration file with
+##     only those parameters for which the default value seems
+##     invalid. See the default file for the complete set of parameters.
 
-    ## report missing settings at the end
-    warning_0="Biskit is missing %i parameters which were set to defaults:\n\n"
-    warning_1= "%s/ %s: \t%s\n"
-    warning_2= "\nPlease create or verify %s with setup_env.py!\n"
+##     Parameters in this file will be accessible from within python as
+##     fields of Biskit.settings. For example::
+##
+##       leaprc = some/path/to/leaprc  # some comment
+##
+##     will lead to a variable in Biskit.settings::
+##    
+##     >>> import Biskit.setting as S
+##     >>> S.leaprc
+##     >>> 'some/path/to/leaprc'
 
-    def __init__( self, defaults_module ):
+##     ...If, and only if, leaprc also exists in the default settings
+##     file.  Parameters that are not listed in the default settings file
+##     are ignored.
+
+##     The default type of parameters is str. A prefix to the name like
+##     'int-', 'float-', 'bool-', etc. will be interpreted as
+##     type-casting. For example::
+##
+##       float-nice_value = 10  # some comment
+##
+##     will lead to a variable in Biskit.settings::
+##
+##     >>> S.nice_value
+##     >>> 10.0
+
+"""
+
+    def __init__( self, fdefault, fuser, createmissing=False):
         """
-        @param defaults_module: source of parameter names and default values
-        @type  defaults_module: module
+        @param fdefault: default configuration file
+        @type  dfedault: str
+        @param fuser: user configuration file
+        @type  fuser: str
+        @param createmissing: create user config file if missing
+        @type  createmissing: bool
         """
-        self.defaults_module = defaults_module
+        self.fdefault = fdefault
+        self.fuser = fuser
+        self.createmissing = createmissing
+        self.fusermissing = not os.path.exists( T.absfile(fuser) )
 
-        ## Read configuration file
-        self.conf     = ConfigParser.ConfigParser()
-        self.conf.read( SettingsManager.conf_file )
+        self.settings = []
 
-        self.missing_settings = []
-
-
-    def getFromConfig( self, section, option, value_type=str ):
+    def __update( self, cfg_default, cfg_user ):
         """
-        @param section: ConfigParser section in ~/.biskit/settings.dat
-        @type  section: str
-        @param option: ConfigParser option in ~/.biskit/settings.dat
-        @type  option: str
-        @param value_type: try to convert value to this type (default: str)
-        @type  value_type: type
-        
-        @return: the value extracted from the config file
-        @rtype: any
-        
-        @raise ValueError: if type conversion fails
-        @raise SettingsError: if there is no parameter of that section / name
+        Override default settings by valid (or equally invalid) user settings.
+
+        @param cfg_default: settings read in from default file
+        @type  cfg_default: dict {'str':SettingsParser.Setting}
+        @param cfg_user   : settings read in from user config file
+        @type  cfg_user   : dict {'str':SettingsParser.Setting}
+
+        @return: configuration with valid user settings overriding default ones
+        @rtype: dict {'str':SettingsParser.Setting}
         """
-        if not self.conf.has_option( section, option):
-            raise SettingsError, 'cannot find %s / %s in %s' % \
-                  (section, option, self.conf_file )
+        r = {}
+        errors = {}
 
-        setting = self.conf.get( section, option )
+        for name, default in cfg_default.items():
 
-        r = setting.split('#')[0].strip()  ## strip off comments
-        if r:                      ## don't return empty strings
+            next = cfg_user.get( name, default )
 
-            return value_type( r )
+            if next.error > default.error:
+
+                B.EHandler.warning(\
+                    'User setting %s is reset to default (%r),\n\treason: %s'\
+                    % (name, default.value, next.error)\
+                    + '\n\tPlease check %s!' % self.fuser )
+
+                next = default
+
+            r[name] = next
+
+        return r
 
 
-    def __getSetting( self, section, option, default ):
+    def collectSettings( self ):
         """
-        Try to fetch a setting value from file and type cast it.
-        
-        @param section: ConfigParser section in ~/.biskit/settings.dat
-        @type  section: str
-        @param option: ConfigParser option in ~/.biskit/settings.dat
-        @type  option: str
-        @param default: default value if parameter is not found in settings.dat
-        @type  default: any
-        
-        @return: value taken from settings.dat or default, same type as default
-        @rtype: any
-        """
-        try:
-            return self.getFromConfig( section, option, type( default ) )
-
-        except ValueError:
-            msg =  '%s: cannot convert value %s to %r.\n' %\
-                  (option,r,type(default))
-            msg += 'Please verify %s.' % self.conf_file
-            Biskit.EHandler.warning( msg, trace=0, error=0 )
-
-        except SettingsError:
-            pass
-
-        ## didn't find parameter in .biskit/settings.dat
-        self.missing_settings += [ (section, option, default) ]
-
-        return default
-
-
-    def getDefaults( self, module=None ):
-        """
-        Parse default values defined in module into a dictionary.
-        
-        @param module: Biskit.(Mod/Dock.)settings_default
-        @type  module: python module
-        
-        @return: { str_section: {str_param: (value, str_comment) } }
-        @rtype: dict
-        """
-        module = module or self.defaults_module
-        result = {}
-
-        for param, descr in module.__dict__.items():
-
-            if param[0] != '_':   ## ignore private fields of settings_default
-
-                default = descr[0]
-                section = descr[1]
-                comment = None
-                if len( descr ) > 2:
-                    comment = descr[2]
-
-                if not section in result:
-                    result[ section ] = {}
-
-                result[ section ][ param ] = ( default, comment )
-
-        return result
-
-
-    def updateNamespace( self, namespace ):
-        """
-        Parse settings_default.py (and .biskit/settings.dat) and create one
-        entry in namespace for each of its fields.
-        
-        @param namespace: name space of module that wants to export parameters
-        @type  namespace: dict
-        """
-        defaults = self.getDefaults()
-
-        for section, sect_dict in defaults.items():
-
-            for param, descr_tuple in sect_dict.items():
-
-                default = descr_tuple[0]
-                value   = self.__getSetting( section, param, default ) 
-
-                namespace[ param ] = value  ## add param to module namespace
-
-        self.reportMissing()
-
-
-    def reportMissing( self ):
-        """
-        Report missing parameters (which were recorded by __getSetting ).
-        """
-        if len( self.missing_settings ) > 0:
-
-            msg = self.warning_0 % len( self.missing_settings )
-
-            for m in self.missing_settings:
-                msg += self.warning_1 % m
-
-            msg += self.warning_2 % SettingsManager.conf_file
-
-            Biskit.EHandler.warning( msg )
-
-            self.missing_settings = []
-
-
-    def __backup( self, fname ):
-        """
-        Create backup of file if it already exists.
-        """
-        if os.path.exists( fname ):
-            os.rename( fname, fname + '~' )
-
-
-    def writeConfig( self, settings, fname ):
-        """
-        Create a config file from a dictionary. This method is used by
-        setup_biskit.py.
-        
-        @param settings: { str_section: {str_param: (value, str_comment)}}
-        @type  settings: dict
-        @param fname: target file name (overwritten)
-        @type  fname: str
-        
-        @raise IOError: if the file cannot be written
+        Parse and combine default and user-defined config files.
         """
         try:
+            pdefault = P.SettingsParser( self.fdefault )
+            cdefault = pdefault.parse()
 
-            if not os.path.exists( os.path.dirname(fname) ):
-                os.mkdir( os.path.dirname(fname) )
+            try:
+                puser = P.SettingsParser( self.fuser )
+                cuser = puser.parse()
 
-            self.__backup( fname )
+            except IOError, e:
+                B.EHandler.warning(
+                    'Could not find file with user-defined settings in %s' \
+                    % self.fuser, trace=0, error=0)
 
-            f = open( T.absfile( fname ), 'w' )
+                cuser = {}
 
-            section_names = settings.keys()
-            section_names.sort()
+            self.settings = self.__update( cdefault, cuser )
 
-            ## create sections in alphabetical order
-            for sec_name in section_names:
+        except P.SettingsError, e:
+            B.EHandler.fatal( str(e) )
 
-                f.write( '[%s]\n' % sec_name)
 
-                params = settings[ sec_name ].keys()
-                params.sort()
+    def writeUserSettings( self, errorsonly=False ):
+        """
+        Create a settings file with all options that are invalid with their
+        default value.
+        """
+        try:
+            T.backup( self.fuser )  ## create backup if file already exists
 
-                ## create entries in alphabetical order
-                for param in params:
+            fpath = os.path.dirname(self.fuser)
+            if not os.path.exists( fpath ):
+                B.EHandler.warning('Creating folder %s for Biskit settings.'\
+                                   %fpath )
+                os.mkdir( fpath )
 
-                    descr = settings[ sec_name ][ param ]
+            sections = [P.Setting.NORMAL, P.Setting.PATH, P.Setting.BIN]
+            r = {}
 
-                    value   = descr[0]
-                    comment = descr[1]
+            for section in sections:
 
-                    f.write( '## %s\n' % comment or 'no comment')
+                r[ section ] = [ s for s in self.settings.values() \
+                                 if s.section == section]
+                r[ section ].sort()
 
-                    f.write( '%s = %s\n\n' % (param, value ) )
+            f = open( self.fuser, 'w' )
+
+            f.write( SettingsManager.USER_HEADER % self.__dict__ )
+
+            for section in sections:
+
+                f.write( '[%s]\n' % section )
+                f.write('\n')
+
+                for param in r[section]:
+
+                    if (not errorsonly) or param.error:
+                        f.write( param.formatted() + '\n')
 
                 f.write('\n')
-        finally:
-            try:
-                f.close()
-            except:
-                pass
 
+            f.close()
+
+        except OSError, e:
+            raise WriteCfgError, e
+        
+    def __settings2dict( self ):
+        """
+        Create dictionary from settings.
+        @return: dictionary of parameter names (keys) and values
+        @rtype: dict {str : any}
+        """
+        return dict( [ (s.name, s.value) for s in self.settings.values() ] )
+
+
+    def updateNamespace( self, ns ):
+        """
+        1. Parse in default configuration and user configuration file
+        2. Merge the two, preferring valid user settings
+        3. Create missing user configuration file if createmissing=True
+        4. Insert parameters into the given namespace
+
+        @param ns: namespace of a module ( obtained with locals() )
+        @type  ns: dict {str:any}
+        """
+        self.collectSettings()
+
+        if self.fusermissing and self.createmissing:
+            B.EHandler.warning('Creating new user configuration file %s.' \
+                               % self.fuser, trace=0, error=0)
+            self.writeUserSettings( errorsonly=True )
+
+        d = self.__settings2dict()
+
+        ns.update( d )
 
 
 #############
@@ -269,41 +255,37 @@ class Test:
     def run( self, local=0 ):
         """
         run function test
-        
         @param local: transfer local variables to global and perform
                       other tasks only when run locally
         @type  local: 1|0
-        
-        @return: 1
+
+        @return: 42
         @rtype: int
         """
-        import tempfile
-        out_f = tempfile.mktemp('_test_config.dat')
+        m = SettingsManager( T.projectRoot()+'/external/defaults/settings.cfg',
+                             T.tempDir() + '/settings.cfg',
+                             createmissing=True)
 
-        ## importing Biskit calls SettingsManager automatically
-        import Biskit.settings_default as D
+        ns = locals()             ## fetch local namespace
 
-        m = SettingsManager( defaults_module=D )
-
-        defaults = m.getDefaults( D )
-
-        m.writeConfig( defaults, T.absfile(out_f) )
-
-        if local:
-            print 'A test config file was written to %s'%out_f
-            globals().update( locals() )
+        m.updateNamespace( ns )   ## parse and insert options into namespace
         
-        return 1
+        if local:
+            globals().update( locals() ) ## publish namespace for debugging
+
+        T.tryRemove( T.tempDir() + '/settings.cfg' )  ## clean up
+
+        return testparam          ## from 'int-testparam = 42' in settings.cfg
 
 
     def expected_result( self ):
         """
         Precalculated result to check for consistent performance.
 
-        @return: 1
+        @return: 42
         @rtype:  int
         """
-        return 1
+        return 42
     
         
 
@@ -311,5 +293,4 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( local=1 ) == test.expected_result()
-
+    assert test.run( ) == test.expected_result()

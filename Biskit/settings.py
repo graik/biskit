@@ -31,55 +31,49 @@ This module provides global settings as fields. Throughout Biskit a
   >>> import Biskit.settings as S
   >>> bin = S.ssh_bin
 
-However, since a user should not be required to hack python modules, ssh_bin
-is not actually defined in settings.py. Instead, settings_default.py defines
-a parameter ssh_bin (with its default value and a comment), which
-tells settings.py that it should export a parameter of that name. The value
-of this parameter is taken from the Biskit configuration file
-C{~/.biskit/settings.dat} -- which should have an entry like
-C{ssh_bin=/bin/ssh  # comment}. If this entry (or the config file) is not
-found, settings.py uses the default value from settings_default.py,
-and informs the user that parameter ssh_bin is missing from the configuration
-file.
+However, since a user should not be required to hack python modules,
+ssh_bin is not actually defined in settings.py. Instead, the value is
+taken from C{~/.biskit/settings.cfg} -- which should have an entry
+like C{ssh_bin=/bin/ssh # comment}. If this entry (or the config file)
+is not found, settings.py uses the default value from
+C{biskit/external/defaults/settings.cfg}.
 
-The configuration file C{~/.biskit/settings.dat} is created with the
-script C{scripts/Biskit/setup_env.py} and then modified by the user.
+If missing, the user configuration file C{~/.biskit/settings.cfg} is
+created automatically during the startup of Biskit (i.e. for any
+import). The auto-generated file only contains parameters for which
+the default values don't seem to work (invalid paths or binaries).
+
+See L{Biskit.SettingsManager}
 
 Summary for Biskit users
 ------------------------
-  If you want to change a biskit parameter, do so in C{~/.biskit/settings.dat}
+  If you want to change a biskit parameter, do so in C{~/.biskit/settings.cfg}
 
 Summary for Biskit developpers
 ------------------------------
   If you want to create a new user-adjustable parameter, do so in
-  C{settings_default.py}.
+  C{biskit/external/defaults/settings.cfg}.
 
 Summary for all
 ---------------
-  !DON'T TOUCH C{settings.py}!
-  (Unless you came up with a better way of organising the whole parameter
-  system or have bug-fixes to make.)
+  !Dont't touch C{settings.py}!
 """
-import sys
-
 import Biskit as B
 import Biskit.tools as T
 import Biskit.SettingsManager as M
-import Biskit.settings_default as D
 
-##
-## Parse settings_default.py and create one static field for each of its
-## fields.
-##
+import user, sys
+
+__CFG_DEFAULT = T.projectRoot() + '/external/defaults/settings.cfg'
+__CFG_USER    = user.home + '/.biskit/settings.cfg'
+
 try:
+    m = M.SettingsManager(__CFG_DEFAULT, __CFG_USER, createmissing=True  )
 
-    this = locals()   ## get pointer to name space of this module
-
-    m = M.SettingsManager( defaults_module=D )
-    m.updateNamespace( this )
+    m.updateNamespace( locals() )
 
 except Exception, why:
-    B.EHandler.warning( 'Error importing %s' % D, trace=1 )
+    B.EHandler.fatal( 'Error importing Biskit settings')
 
 ##
 ## Create some settings on the fly
@@ -91,6 +85,8 @@ xterm_bin  = T.absbinary('xterm')
 ###################################
 ## required environment variables.
 ## format: ENV_NAME : path_example
+
+## Todo: These need to go to their Exe_*.dat files
 
 env = {}
 
@@ -112,3 +108,7 @@ env.update(blast_env)
 env.update(amber_env)
 env.update(prosaII_env)
 
+######################
+## clean up name space
+
+del B, T, M, user, sys
