@@ -54,6 +54,13 @@ class InvalidBinary( SettingsWarning ):
     pass
 
 
+class CaseSensitiveConfigParser( ConfigParser.SafeConfigParser ):
+    """
+    Change ConfigParser so that it doesn't convert option names to lower case.
+    """
+    def optionxform(self, optionstr):
+        return optionstr
+
 class Setting:
     """
     Simple container for a single parameter
@@ -74,13 +81,14 @@ class Setting:
 
     def typeCast( self, vtype ):
         """
-        Recast value to a new type.
+        Recast value to a new type. Value None remains unchanged.
         @param vtype: new type for value
         @type  vtype: type
         @raise InvalidValue, if current value is incompatible with vtype
         """
         try:
-            self.value = vtype( self.value )
+            if not self.value is None:
+                self.value = vtype( self.value )
             self.vtype = vtype
         except ValueError, e:
             raise InvalidValue, '%s: cannot convert "%s" to %r.' %\
@@ -120,6 +128,7 @@ class Setting:
         comment = ''
         error = ''
         name = self.name
+        value = self.value or ''
 
         if self.vtype != str:
             name = self.vtype.__name__ + '-' + name
@@ -130,7 +139,7 @@ class Setting:
         if self.error:
             error = '\t#! ' + self.error + ' !'
 
-        return '%s = %s%s%s' % (name, str(self.value), comment, error)
+        return '%s = %s%s%s' % (name, str(value), comment, error)
 
 
 class SettingsParser(object):
@@ -162,7 +171,7 @@ class SettingsParser(object):
         """
         try:
             v = T.absfile( v )
-            if not os.path.exists( v ):
+            if not v or not os.path.exists( v ):
                 raise InvalidPath, 'invalid path %r' % v
 
             return v
@@ -184,7 +193,11 @@ class SettingsParser(object):
         @raise InvalidBinary: if path is not found
         """
         try:
+            if not v:
+                raise IOError, 'empty path'
+
             return T.absbinary( v )
+
         except IOError, msg:
             raise InvalidBinary( str(msg) )
 
@@ -249,6 +262,7 @@ class SettingsParser(object):
 
             x = value.split('#')             ## split off comments
             r.value = x[0].strip() or None   ## don't return empty strings
+
             if len(x) > 1:
                 r.comment = ''.join( x[1:] )
 
@@ -260,7 +274,6 @@ class SettingsParser(object):
 
             if section == Setting.BIN:
                 r.value = self.__validBinary( r.value )
-
 
         except SettingsWarning, e:           ## catch and record warnings
             r.error = str(e)
@@ -305,7 +318,7 @@ class SettingsParser(object):
         """
         try:
             ## read from file
-            c = ConfigParser.ConfigParser()
+            c = CaseSensitiveConfigParser()
 
             if c.read( self.f_ini ) != [ self.f_ini ]:
                 raise IOError, 'Settings file %s not found.' % self.f_ini
@@ -316,7 +329,8 @@ class SettingsParser(object):
                     self.__processSection( c.items(section), section) )
 
         except ConfigParser.Error, e:
-            raise InvalidFile, 'Error parsing settings file: ' + str(e)
+            raise InvalidFile, 'Error parsing settings file %s: ' %\
+                  self.f_ini + str(e)
 
         return self.result
 

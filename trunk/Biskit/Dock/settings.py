@@ -25,62 +25,58 @@
 Settings
 ========
 
-This module provides global settings for Biskit.Dock as fields. Not very
-elegantly, it is simply a copy of Biskit.settings. The only difference
-is that it takes its default parameters from L{Biskit.Dock.settings_default}
-instead of L{Biskit.settings_default}. What follows is the description of
-Biskit.settings:
+This module provides Dock-global settings as fields. Throughout
+Biskit.Dock a (environment-dependent) parameter such as, e.g., ssh_bin
+can be addressed as:
 
-Throughout Biskit a (environment-dependent) parameter such
-as, e.g., ssh_bin can be addressed as:
-
-  >>> import Biskit.settings as S
+  >>> import Biskit.Dock.settings as S
   >>> bin = S.ssh_bin
 
-However, since a user should not be required to hack python modules, ssh_bin
-is not actually defined in settings.py. Instead, settings_default.py defines
-a parameter ssh_bin (with its default value and a comment), which
-tells settings.py that it should export a parameter of that name. The value
-of this parameter is taken from the Biskit configuration file
-C{~/.biskit/settings.dat} -- which should have an entry like
-C{ssh_bin=/bin/ssh  # comment}. If this entry (or the config file) is not
-found, settings.py uses the default value from settings_default.py,
-and informs the user that parameter ssh_bin is missing from the configuration
-file.
+However, since a user should not be required to hack python modules,
+ssh_bin is not actually defined in settings.py. Instead, the value is
+taken from C{~/.biskit/settings_Dock.cfg} -- which should have an entry
+like C{ssh_bin=/bin/ssh # comment}. If this entry (or the config file)
+is not found, settings.py uses the default value from
+C{biskit/external/defaults/settings_Dock.cfg}.
 
-The configuration file C{~/.biskit/settings.dat} is created with the
-script C{scripts/Biskit/setup_env.py} and then modified by the user.
+If missing, the user configuration file C{~/.biskit/settings_Dock.cfg} is
+created automatically during the startup of Biskit (i.e. for any
+import). The auto-generated file only contains parameters for which
+the default values don't seem to work (invalid paths or binaries).
+
+See L{Biskit.SettingsManager}
 
 Summary for Biskit users
 ------------------------
-  If you want to change a biskit parameter, do so in C{~/.biskit/settings.dat}
+  If you want to change a biskit parameter, do so in
+  C{~/.biskit/settings_Dock.cfg}
 
 Summary for Biskit developpers
 ------------------------------
   If you want to create a new user-adjustable parameter, do so in
-  C{settings_default.py}.
+  C{biskit/external/defaults/settings_Dock.cfg}.
 
 Summary for all
 ---------------
-  !DON'T TOUCH C{settings.py}!
-  (Unless you came up with a better way of organising the whole parameter
-  system or have bug-fixes to make.)
+  !Dont't touch C{settings.py}!
 """
 import Biskit as B
+import Biskit.tools as T
 import Biskit.SettingsManager as M
-import settings_default as D
 
-#
-## Parse settings_default.py and create one static field for each of its
-## fields.
-##
+import user, sys
+
+__CFG_DEFAULT = T.projectRoot() + '/external/defaults/settings_Dock.cfg'
+__CFG_USER    = user.home + '/.biskit/settings_Dock.cfg'
+
 try:
-    m = M.SettingsManager( defaults_module=D )
+    m = M.SettingsManager(__CFG_DEFAULT, __CFG_USER, createmissing=True  )
 
-    m.updateNamespace( locals())
+    m.updateNamespace( locals() )
 
 except Exception, why:
-    B.EHandler.warning( 'Error importing %s' % D, trace=1 )
+    B.EHandler.fatal( 'Error importing Biskit.Dock settings')
+
 
 ##############################
 ## Check environment variables
@@ -95,5 +91,7 @@ prosaII_env = {'PROSA_BASE':'/home/Bis/shared/rh73/prosa/prosabase/'}
 env.update(hex_env)
 env.update(prosaII_env)
 
+######################
+## clean up name space
 
-
+del B, T, M, user, sys
