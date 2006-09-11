@@ -84,7 +84,7 @@ class Setting:
         Recast value to a new type. Value None remains unchanged.
         @param vtype: new type for value
         @type  vtype: type
-        @raise InvalidValue, if current value is incompatible with vtype
+        @raise InvalidValue: if current value is incompatible with vtype
         """
         try:
             if not self.value is None:
@@ -146,11 +146,11 @@ class SettingsParser(object):
     """
     A config file parser on steroids -- performs the following tasks:
 
-    1. read a ini-style settings file
-    2. type-cast options (e.g. of the form int-some_name into int(some_name) )
-    3. validate that all entries of section [PATHS] point to existing paths
-    4. absolutize all valid paths
-    5. validate that all entries of section [BINARIES] point to binaries
+      1. read a ini-style settings file
+      2. type-cast options (e.g. of the form int-some_name into int(some_name))
+      3. validate that all entries of section [PATHS] point to existing paths
+      4. absolutize all valid paths
+      5. validate that all entries of section [BINARIES] point to binaries
     """
 
     def __init__(self, ini):
@@ -214,7 +214,7 @@ class SettingsParser(object):
         @return: type, stripped option name (e.g. 'int_var1' -> int, 'var1')
         @rtype: type, str
 
-        @raise TypeError, if type cannot be interpreted
+        @raise TypeError: if type cannot be interpreted
         """
         t = default
         o = option
@@ -248,8 +248,8 @@ class SettingsParser(object):
         @param value: option value
         @type  value: str
 
-        @param path: validate as path name (warning if not existent)
-        @type  path: bool
+        @param section: which section are we working on
+        @type  section: str
         
         @return: new setting
         @rtype: Setting
@@ -286,11 +286,11 @@ class SettingsParser(object):
         @param items: section comming from ConfigParser
         @type  items: [ ( str, str ) ]
 
-        @param path: validate path names
-        @type  path: bool
+        @param section: which config section are we working on?
+        @type  section: str
 
         @return: validated path values
-        @rtype : dict
+        @rtype : dict, {str: Setting}
         """
         r = {}
 
@@ -311,10 +311,11 @@ class SettingsParser(object):
         @param verbose: print warning messages via Biskit.EHandler
         @type  verbose: bool
         
-        @return dict of type-cast params contained in fini
-        @rtype: dict of Setting
+        @return: dict of type-cast params contained in fini
+        @rtype: dict, {str: Setting}
 
-        @raise IOError, SettingsError (InvalidFile, InvalidValue, InvalidType)
+        @raise IOError: if the settings file does not exist
+        @raise SettingsError: (InvalidFile, InvalidValue, InvalidType)
         """
         try:
             ## read from file

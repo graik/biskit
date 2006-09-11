@@ -97,7 +97,7 @@ class SettingsManager:
     def __init__( self, fdefault, fuser, createmissing=False):
         """
         @param fdefault: default configuration file
-        @type  dfedault: str
+        @type  fdedault: str
         @param fuser: user configuration file
         @type  fuser: str
         @param createmissing: create user config file if missing
