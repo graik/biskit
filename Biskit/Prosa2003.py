@@ -342,34 +342,39 @@ class Test:
     """
     Test class
     """
-    
-    from Biskit import PDBModel
-    import Biskit.tools as T
 
-
-    def run( self ):
+    def run( self, local=0 ):
         """
         Prosa2003 function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: list of energies
         @rtype: [ float ]
         """
-        print "Loading PDB..."
-        ml = self.PDBModel( T.testRoot()+'/lig/1A19.pdb' )
+        from Biskit import PDBModel
+        
+        ## Loading PDB...
+        ml = PDBModel( T.testRoot()+'/lig/1A19.pdb' )
         ml = ml.compress( ml.maskProtein() )
 
-        mr = self.PDBModel( T.testRoot()+'/rec/1A2P.pdb' )
+        mr = PDBModel( T.testRoot()+'/rec/1A2P.pdb' )
         mr = mr.compress( mr.maskProtein() )
 
-        print "Starting Prosa2003"
-        self.prosa = Prosa2003( [ml, mr], debug=0, verbose=1 )
+        ## Starting Prosa2003
+        prosa = Prosa2003( [ml, mr], debug=0, verbose=0 )
 
-        print "Running"
-        ene = self.prosa.run()
+        ## Running
+        ene = prosa.run()
 
-        result = self.prosa.prosaEnergy()
-        print "Result: ", result
+        result = prosa.prosaEnergy()
 
+        if local:
+            print "Result: ", result
+            globals().update( locals() )    
+       
         return result
 
 
@@ -383,11 +388,10 @@ class Test:
         return  [ -94.568,  -64.903, -159.463 ]
 
         
-
 if __name__ == '__main__':
 
-    test = Test()
+    test = Test( )
 
-    assert test.run() == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
     
 

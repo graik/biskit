@@ -174,22 +174,23 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: list of comment strings
         @rtype: [str]
         """
         import Biskit.tools as t
         from Biskit.Dock import ComplexEvolving
         from Biskit.Dock import ComplexEvolvingList
-        from Biskit.Dock import ComplexList
-
-        l = t.Load(  t.testRoot() + "/dock/hex/complexes.cl" )
-
+    
         ## original complex
-        cl = ComplexList( l )
+        cl = t.Load(  t.testRoot() + "/dock/hex/complexes.cl" )
 
         ## first evolution step
         c = ComplexEvolving( cl[0].rec(), cl[0].lig(), cl[0],
@@ -200,9 +201,21 @@ class Test:
                              info={'comment':'test2'})
 
         ## create an evolving complex list
-        self.cl = ComplexEvolvingList( [c, c] )
+        cl = ComplexEvolvingList( [c, c] )
+        
+        if local:
+            ## last version of all complexes in list
+            print cl.valuesOf('comment')
 
-        return self.cl.valuesOf('comment'), self.cl[0].valuesOf('comment')
+            ## version 1
+            print cl.valuesOf('comment', version=1)
+
+            ## the first complex in the list
+            print cl[0].valuesOf('comment')
+    
+            globals().update( locals() )
+            
+        return cl.valuesOf('comment'), cl[0].valuesOf('comment')
 
 
     def expected_result( self ):
@@ -219,14 +232,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
     
-    ## last version of all complexes in list
-    print test.cl.valuesOf('comment')
 
-    ## version 1
-    print test.cl.valuesOf('comment', version=1)
-
-    ## the first complex in the list
-    print test.cl[0].valuesOf('comment')

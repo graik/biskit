@@ -48,7 +48,7 @@ class ChainSeparator:
     """
 
     def __init__(self, fname, outPath='', chainIdOffset=0,
-                 capBreaks=0, chainMask=0 ):
+                 capBreaks=0, chainMask=0, log=None ):
         """
         @param fname: pdb filename
         @type  fname: str
@@ -60,13 +60,17 @@ class ChainSeparator:
         @type  capBreaks: 0|1
         @param chainMask: chain mask for overriding the default sequence identity [None]
         @type  chainMask: [1|0]
+        @param log: LogFile object
+        @type  log: object
         """
         self.pdb = Structure(fname);
         self.fname = fname
         self.outPath = T.absfile( outPath )
-        self.log = LogFile( T.absfile(outPath)+'/' + self.pdbname()+'.log')
         self.chainIdOffset = chainIdOffset
         self.capBreaks = capBreaks
+        self.log = LogFile( T.absfile(outPath)+'/' + self.pdbname()+'.log')
+        if log:
+            self.log = log
 
         self.chains = self.pdb.peptide_chains
         self.counter = -1
@@ -485,7 +489,7 @@ class Test:
         fname =   T.testRoot() + '/com/1BGS_original.pdb'
         outPath = T.tempDir()
 
-        sep = ChainSeparator( fname, outPath, 1)   
+        sep = ChainSeparator( fname, outPath, 1)  
 
         chain = sep.next()
         c = chain
@@ -499,6 +503,7 @@ class Test:
             i += 1
 
         if local:
+            print 'ChainSeparator log file written to: %s'%sep.log.fname
             globals().update( locals() )
             
         return ''.join( singleAA( all_chains ) )
@@ -519,7 +524,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( local=0 ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
 
 

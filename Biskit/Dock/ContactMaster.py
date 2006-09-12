@@ -612,10 +612,14 @@ class Test:
     """
     
 
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: sum of fnac values
         @rtype:  floal
         """        
@@ -630,7 +634,7 @@ class Test:
         cl_out = tempfile.mktemp('_test.cl')
         master = ContactMaster( lst, chunks = 3, hosts = hosts,
                                 niceness = niceness,
-                                show_output = 1,
+                                show_output = local,
                                 refComplex = refcom,
                                 outFile = cl_out )
 
@@ -641,10 +645,13 @@ class Test:
             time.sleep(5)
         
         cl_cont = master.getResult()
-    
-        ## plot atom and residue contacts vs. rmsd
-        p=cl_cont.plot( 'rms', 'fnac_10','fnarc_10' )
-        p.show()
+
+        if local:
+            ## plot atom and residue contacts vs. rmsd
+            p=cl_cont.plot( 'rms', 'fnac_10','fnarc_10' )
+            p.show()
+            
+            globals().update( locals() )
         
         return N.sum(cl_cont.valuesOf('fnac_10'))
 
@@ -663,7 +670,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert abs( test.run() - test.expected_result() ) < 1e-6
+    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-6
 
 
 

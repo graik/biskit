@@ -333,8 +333,6 @@ class Test:
     """
     Test class
     """
-    import Biskit.PDBModel as PDBModel
-
     
     def run( self, local=0 ):
         """
@@ -346,7 +344,7 @@ class Test:
 
         @return: sum of all psi angles
         @rtype: float      
-        """
+        """       
         traj = T.Load( T.testRoot()+'/lig_pcr_00/traj.dat' )
 
         mdl = [ traj[0], traj[11] ]

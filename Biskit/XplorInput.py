@@ -371,10 +371,14 @@ class Test:
     Test class
     """
     
-    def run( self, verbose=0 ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 1
         @rtype: int
         """
@@ -392,30 +396,32 @@ class Test:
         f_out_inp = tempfile.mktemp('_test_out.inp')
 
         ## write to output
-        test = XplorInput( f_out_inp )
-        test.add("\nremarks test generate.inp\n")
+        t = XplorInput( f_out_inp )
+        t.add("\nremarks test generate.inp\n")
 
-        test.addBlockFromDic("minimize powell",{"nsteps":100,"npr":5})
-        test.addAmberSegment("id_1", "/home/Bis/super.pdb")
-        test.patchSS({'res':23, 'id':'id_1'},{'res':44, 'id':'id_1'} )
-        test.hbuild("hydrogen and not known")
+        t.addBlockFromDic("minimize powell",{"nsteps":100,"npr":5})
+        t.addAmberSegment("id_1", "/home/Bis/super.pdb")
+        t.patchSS({'res':23, 'id':'id_1'},{'res':44, 'id':'id_1'} )
+        t.hbuild("hydrogen and not known")
 
-        test.renameRes("CYS", "CYX")
-        test.renameAtom("ARG","HG1","HG2")
-        test.addFromTemplate(f_inp, {'value':'TEST','number':10})
-        test.flush()
+        t.renameRes("CYS", "CYX")
+        t.renameAtom("ARG","HG1","HG2")
+        t.addFromTemplate(f_inp, {'value':'TEST','number':10})
+        t.flush()
 
-        if verbose:
+        if local:
             ## check result
             f = open(f_out_inp, 'r')
             for line in f.readlines():
                 print line[:-1]
             f.close()
+            
+            globals().update( locals() )
 
         ## cleanup
         T.tryRemove( f_inp )
         T.tryRemove( f_out_inp )
-
+        
         return 1
 
 
@@ -433,7 +439,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( verbose=1 ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
 
 

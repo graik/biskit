@@ -148,10 +148,13 @@ class Test:
     Test class
     """
     
-    def run( self, run=0, align_testRoot=0 ):
+    def run( self, local=0, run=0, align_testRoot=0 ):
         """
         run function test
         
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0        
         @param run: run the full test (call external application) or not
         @type  run: 1|0
         @param align_testRoot: align the full validation project in testRoot
@@ -168,12 +171,15 @@ class Test:
             projRoot =  T.testRoot()+'/Mod/project'
             projects = glob.glob( projRoot + '/validation/*' )
 
-            self.master = AlignerMaster(folders = projects,
+            master = AlignerMaster(folders = projects,
                                    ferror = projRoot+'/AlignErrors.out',
                                    hosts = hosts.cpus_all[ : 10 ],
                                    show_output = 1)
             
-            self.r = self.master.calculateResult()
+            r = self.master.calculateResult()
+
+            if local:
+                globals().update( locals() )
             
             return 1
 
@@ -194,17 +200,18 @@ class Test:
         shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
                      outfolder  )
 
-        self.master = AlignerMaster(folders=[outfolder],
+        master = AlignerMaster(folders=[outfolder],
                                ferror=outfolder+'/AlignErrors.out',
                                hosts=hosts.cpus_all[ : 5 ],
                                show_output=1)
 
         if run:
-
-            self.r = self.master.calculateResult()
-
+            r = master.calculateResult()
             print 'The alignment result can be found in %s/t_coffee'%outfolder
-
+            
+        if local:
+                globals().update( locals() )
+                
         return 1
 
 
@@ -222,7 +229,7 @@ if __name__ == '__main__':
 
     test = Test()
     
-    assert test.run( run=1 ) ==  test.expected_result()
+    assert test.run( run=1, local=1 ) ==  test.expected_result()
 
 
 

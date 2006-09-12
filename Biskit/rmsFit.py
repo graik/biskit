@@ -173,10 +173,14 @@ class Test:
     """
 
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: rotation matrix
         @rtype: array
         """
@@ -185,8 +189,10 @@ class Test:
         traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
 
         rt, rmsdLst = match( traj.ref.xyz, traj[-1].xyz)
-        
-        print 'RMSD: %.2f'%rmsdLst[0][1]
+
+        if local:
+            print 'RMSD: %.2f'%rmsdLst[0][1]
+            globals().update( locals() )
         
         # return rotation matrix
         return rt[0]
@@ -208,7 +214,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert abs( N.sum( N.ravel( test.run()- test.expected_result() ) ) ) < 1e-6
+    assert abs( N.sum( N.ravel( test.run( local=1 )- test.expected_result() ) ) ) < 1e-6
 
 
 

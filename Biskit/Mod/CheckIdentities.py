@@ -388,10 +388,13 @@ class Test:
     Test class
     """
     
-    def run( self, validate_testRoot=0 ):
+    def run( self, local=0, validate_testRoot=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
         @param validate_testRoot: check a validation project residing in
                                      the test root (default: 0)
         @type  validate_testRoot: 1|0
@@ -413,6 +416,9 @@ class Test:
                 self.m = Check_Identities( outFolder = val_root + '/' + f )
                 self.m.go()
 
+            if local:
+                globals().update( locals() )
+
         else:
             ## collect the input files needed
             outfolder = tempfile.mkdtemp( '_test_CheckIdentities' )
@@ -424,10 +430,14 @@ class Test:
             self.m = Check_Identities( outfolder )
             self.m.go()
 
-            print """
+            if local:
+                globals().update( locals() )
+                print """
 The result from the template comparison can be found in the three files %s, %s and %s that reside in the folder %s"""\
-            %(self.m.F_OUTPUT_IDENTITIES[1:], self.m.F_OUTPUT_IDENTITIES_INF[1:],
-              self.m.F_OUTPUT_IDENTITIES_COV[1:], outfolder )
+                %(self.m.F_OUTPUT_IDENTITIES[1:],
+                  self.m.F_OUTPUT_IDENTITIES_INF[1:],
+                  self.m.F_OUTPUT_IDENTITIES_COV[1:],
+                  outfolder )
 
         return 1
 
@@ -446,6 +456,6 @@ if __name__ == '__main__':
 
     test = Test()
     
-    assert test.run() ==  test.expected_result()
+    assert test.run( local=1 ) ==  test.expected_result()
 
 

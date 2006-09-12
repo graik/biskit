@@ -119,6 +119,7 @@ class PDBDope:
                               comment='residues with any atom > 40% exposed',
                               version= T.dateString() + ' ' + self.version() )
 
+
     def addSecondaryStructure( self ):
         """
         Adds a residue profile with the secondary structure as
@@ -295,20 +296,24 @@ class Test:
     """
     Test class
     """
-    from Biskit import PDBModel
-    
 
-    def run( self, show=0 ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 1
         @rtype:  int
         """
+        from Biskit import PDBModel
+        
         print "Loading PDB..."
         # f = T.testRoot() + '/lig/1A19.pdb'
         f = T.testRoot() + '/com/1BGS.pdb'
-        mdl = self.PDBModel(f)
+        mdl = PDBModel(f)
 
         mdl = mdl.compress( mdl.maskProtein() )
 
@@ -345,22 +350,22 @@ class Test:
         self.d.addDensity()
         print 'Done.'
 
+        if local:
 
-        print self.d.m.info
+            print self.d.m.info
 
-        ## check that nothing has changed
-        print '\nChecking that models are unchanged by doping ...'
-        m_ref = self.PDBModel(f)
-        m_ref = m_ref.compress( m_ref.maskProtein() )
-        for k in m_ref.atoms[0].keys():
-            ref = [ m_ref.atoms[i][k] for i in range( m_ref.lenAtoms() ) ]
-            mod = [ mdl.atoms[i][k] for i in range( mdl.lenAtoms() ) ]
-            if not ref == mod:
-                print 'CHANGED!! ', k
-            if ref == mod:
-                print 'Unchanged ', k
-
-        if show:
+            ## check that nothing has changed
+            print '\nChecking that models are unchanged by doping ...'
+            m_ref = PDBModel(f)
+            m_ref = m_ref.compress( m_ref.maskProtein() )
+            for k in m_ref.atoms[0].keys():
+                ref = [ m_ref.atoms[i][k] for i in range( m_ref.lenAtoms() ) ]
+                mod = [ mdl.atoms[i][k] for i in range( mdl.lenAtoms() ) ]
+                if not ref == mod:
+                    print 'CHANGED!! ', k
+                if ref == mod:
+                    print 'Unchanged ', k
+                
             ## display in Pymol
             print "Starting PyMol..."
             from Biskit.Pymoler import Pymoler
@@ -369,7 +374,9 @@ class Test:
             pm.addPdb( mdl, 'm' )
             pm.colorAtoms( 'm', N.clip(mdl.profile('relAS'), 0.0, 100.0) )
             pm.show()
-
+            
+            globals().update( locals() )
+            
         return 1
 
     
@@ -388,6 +395,6 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( show=1 ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
 

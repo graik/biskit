@@ -259,10 +259,14 @@ class Test:
     Test class
     """
     
-    def run( self, verbose=0 ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 1
         @rtype: int
         """
@@ -279,10 +283,9 @@ class Test:
         rec = PCRModel( rec_psf, rec_pdb )
         lig = PCRModel( lig_psf, lig_pdb )
 
+        self.cr = ComplexRandomizer( rec, lig, debug=0 )
 
-        self.cr = ComplexRandomizer( rec, lig, debug=1 )
-
-        if verbose:
+        if local:
             inp_copy = tempfile.mktemp( '_test_randomizer_xplor.inp')
             self.cs = [ self.cr.random_complex( inp_mirror=inp_copy ) for i in range(5) ]
             print 'Wrote copy of xplor inp file to: %s'%inp_copy
@@ -292,13 +295,15 @@ class Test:
 
         self.traj = Trajectory( [ c.model() for c in self.cs ] )
 
-        if verbose:
+        if local:
             f_pfb = tempfile.mktemp('_test.pdb')
             f_crd = tempfile.mktemp('_test.crd')
             self.traj.ref.writePdb( f_pfb )
             self.traj.writeCrd( f_crd )
             print 'Wrote pdb file to: %s'%f_pfb
             print 'Wrote crd file to: %s'%f_crd
+            
+            globals().update( locals() )
             
         return len(self.traj)
 
@@ -317,6 +322,6 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( verbose=1 ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
 

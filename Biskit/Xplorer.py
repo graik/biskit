@@ -345,10 +345,14 @@ write coor output= $lig_out end
 stop
 """
     
-    def run( self, verbose=0 ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 
         @rtype:  
         """
@@ -366,17 +370,19 @@ stop
         pdb_in = t.testRoot() + '/lig/1A19.pdb' 
         psf_in = t.testRoot() + '/lig/1A19.psf'
         
-        x= Xplorer( dir_out +'/test.inp',
-                    xout = log_out,
-                    verbose = verbose,
-                    lig_psf = psf_in,
-                    lig_pdb = pdb_in,
-                    param19 = param,
-                    lig_out = pdb_out )
+        x = Xplorer( dir_out +'/test.inp',
+                     xout = log_out,
+                     verbose = local,
+                     lig_psf = psf_in,
+                     lig_pdb = pdb_in,
+                     param19 = param,
+                     lig_out = pdb_out )
 
         x.run()
-        
-        print 'The minimized structure and the X-Plor log file has been written to %s and %s, respectively'%(pdb_out, log_out)
+
+        if local:
+            print 'The minimized structure and the X-Plor log file has been written to %s and %s, respectively'%(pdb_out, log_out)
+            globals().update( locals() )
         
         return 1
 
@@ -396,7 +402,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( verbose=1 ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
 
 

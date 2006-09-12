@@ -81,15 +81,19 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 1
         @rtype:  int
         """
         import time
-        from Biskit.PVM.ExampleMaster import Master #as Master
+        from Biskit.PVM.ExampleMaster import Master
 
         hosts = cpus_all[:8]
 
@@ -106,17 +110,20 @@ class Test:
         ## in the end get results from master.result
         ## -> dictionary of some_id : result_object pairs
 
-        self.master = Master(data, 10, hosts, niceness, Master.slave_script,
-                        show_output=1, redistribute=1 )
+        master = Master(data, 10, hosts, niceness, Master.slave_script,
+                        show_output=local, redistribute=1 )
 
         ## blocking call
-        self.r = self.master.calculateResult()
+        r = master.calculateResult()
 
         ## Example for non-blocking call with saving of restart info
         ##     master.start()
         ##     time.sleep( 10 )
         ##     rst = master.getRst()
-
+        
+        if local:
+            globals().update( locals() )
+            
         return 1
 
 
@@ -134,4 +141,4 @@ if __name__ == '__main__':
 
     test = Test()
     
-    assert test.run() ==  test.expected_result()
+    assert test.run( local=1 ) ==  test.expected_result()

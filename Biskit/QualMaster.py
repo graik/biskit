@@ -81,22 +81,29 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 1
         @rtype: int
         """
         ## a minimal list of trajectories
         traj_list = [ T.testRoot() + '/lig_pcr_00/traj.dat' ]
 
-        master = QualMaster( traj_list )
+        master = QualMaster( traj_list,
+                             show_output=local)
         
         master.start()
-
-        print 'A RMSD plot is writen to: %s/rms_traj.eps'%traj_list[0]
-
+        
+        if local:
+            print 'A RMSD plot is writen to: %s/rms_traj.eps'%traj_list[0]
+            globals().update( locals() )
+        
         return 1
 
 
@@ -114,5 +121,5 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 

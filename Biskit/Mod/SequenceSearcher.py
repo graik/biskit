@@ -809,10 +809,13 @@ class Test:
     Test class
     """
     
-    def run( self, flavour='blastp' ):
+    def run( self, local=0, flavour='blastp' ):
         """
         run function test
 
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
         @param flavour: flavour of blast to test, blastp for localBlast
                           OR blastpgp for localPSIBlast (default: blastp)
         @type  flavour: str
@@ -822,33 +825,41 @@ class Test:
         """
         import tempfile
         import shutil
-
+        from Biskit.LogFile import LogFile
+        
         query = T.testRoot() + '/Mod/project/target.fasta'
-        f_out = tempfile.mkdtemp( '_test_SequenceSearcher' )
-        shutil.copy( query, f_out )
+        outfolder = tempfile.mkdtemp( '_test_SequenceSearcher' )
+        shutil.copy( query, outfolder )
 
-        self.searcher = SequenceSearcher( outFolder=f_out, verbose=1 )
+        ## log file
+        f_out = outfolder+'/SequenceSearcher.log'
+        l = LogFile( f_out, mode='w')
+
+        searcher = SequenceSearcher( outFolder=outfolder, verbose=1, log=l )
 
         ## blast db has to be built with -o potion
         ## e.g. cat db1.dat db2.dat | formatdb -i stdin -o T -n indexed_db
         db = 'swissprot'
 
-        f_target = self.searcher.outFolder + self.searcher.F_FASTA_TARGET
+        f_target = searcher.outFolder + searcher.F_FASTA_TARGET
 
         ## skipp remote blast for now
         # self.searcher.remoteBlast( f_target, 'nr', 'blastp', alignments=50 )
 
         if flavour == 'blastpgp':
-            self.searcher.localPSIBlast( f_target, db, 'blastpgp', npasses=2 )
+            searcher.localPSIBlast( f_target, db, 'blastpgp', npasses=2 )
         else:
-            self.searcher.localBlast( f_target, db, 'blastp', alignments=500, e=0.01 )
+            searcher.localBlast( f_target, db, 'blastp', alignments=500, e=0.01 )
 
-        self.searcher.clusterFasta()  ## expects all.fasta
+        searcher.clusterFasta()  ## expects all.fasta
 
-        self.searcher.writeFastaClustered()
+        searcher.writeFastaClustered()
 
-        print '\nThe clustered result from the search can be found in %s'%f_out
-
+        if local:
+            print '\nThe clustered result from the search can be found in %s'%f_out
+            print '\nSequenceSearche log file written to: %s'%f_out
+            globals().update( locals() )
+        
         return 1
 
 
@@ -868,10 +879,10 @@ if __name__ == '__main__':
     test = Test()
     
     ## test localBlast
-    assert test.run() ==  test.expected_result()
+    assert test.run( local=1 ) ==  test.expected_result()
     
     ## test localPSIBlast
-    assert test.run( flavour='blastpgp') ==  test.expected_result()
+    assert test.run( local=1, flavour='blastpgp') ==  test.expected_result()
 
 
 

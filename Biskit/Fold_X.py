@@ -50,27 +50,43 @@ class Fold_X( Executor ):
 
       Energy terms (kcal/mol)
       -----------------------
+      This is the order of the energy terms in the output file. There
+      are two additional values that are unlabeled in the output
+      (version 2.5.2). The first is the entropy cost of making a complex.
+      This is zero if not 'AnalyseComplex' is run. The final value are
+      the number of residues.
+      
+      We'll try to keep the energy labels of Fold-X version 1 of possible.
       ::
-        DDG  - deltaG 
-        vwcl - Van der Waals clash
-        mc   - Main chain entropy
-        sc   - Side chain entropy
-        vw   - Van der Waals interaction
-        hb   - Hydrogen bond energy
-        hyd  - Hydrophobic desolvation
-        ene  - Total energy
-        wtbr - Water Bridge Energy
-        pol  - Polar desolvation
-        el   - Electrostatic energy
+        ene    - total energy	
+	bb_hb  - Backbone Hbond	
+	sc_hb  - Sidechain Hbond	   
+	vw     - Van der Waals	
+	el     - Electrostatics	
+	sol_p  - Solvation Polar	   
+	sol_h  - Solvation Hydrophobic	
+	vwcl   - Van de Waals clashes	
+	sc     - entropy side chain	
+	mc     - entropy main chain	
+	sloop  - sloop_entropy	
+	mloop  - mloop_entropy	
+	cis    - cis_bond	
+	tcl    - torsional clash	   
+	bbcl   - backbone clash	
+	dip    - helix dipole	
+	wtbr   - water bridge	
+	disu   - disulfide	
+	el_kon - electrostatic kon	
+        p_cov  - partial covalent bonds
+             ( - complex entropy )
+             ( - number of residues )        
     
       Reference
       ---------
         U{http://foldx.embl.de} for more info
    
-    @note: August 23 - 2005: 
-      Documentation is sparse here as a new wersion of FoldX is in the
-      works and the old version is unavaliable for download. The new
-      version seems to have quite som changes to the interface
+    @note: September 11 - 2006: 
+      Tested with Fold-X 2.5.2
     """
 
     def __init__(self, model, **kw ):
@@ -88,10 +104,18 @@ class Fold_X( Executor ):
           nice     - int, nice level (default: 0)
           log      - Biskit.LogFile, program log (None->STOUT) (default: None)
         """
-        temp_pdb = tempfile.mktemp('_foldx_.pdb')
+        temp_pdb     = tempfile.mktemp('_foldx_.pdb')
+        temp_command = tempfile.mktemp('_foldx_.command')
+        temp_option  = tempfile.mktemp('_foldx_.option')
+        temp_result  = tempfile.mktemp('_foldx_.result')
 
-        Executor.__init__( self, 'fold_X', args='-b -u %s'%temp_pdb,
-                           f_in=temp_pdb, **kw )
+        self.temp_command = temp_command
+        self.temp_option = temp_option
+        self.temp_result = temp_result
+        self.temp_pdb = temp_pdb
+        
+        Executor.__init__( self, 'fold_X', args='-manual %s %s %s'\
+                           %(temp_pdb, temp_option, temp_command), **kw )
 
         self.model = model.clone( deepcopy=1 )
 
@@ -137,21 +161,11 @@ class Fold_X( Executor ):
                     (res, a1['residue_number'], a1['name'], a2['name'] )
                 raise Fold_XError( s )
 
-        ## make a copy
- #       model = model.take( range(model.lenAtoms()), deepcopy=1  )
-
         ## mask for all heavy atoms, H and H3
         heavy_mask = model.maskHeavy()
- #       HN_mask = model.mask( lambda a: a['name'] == 'H' )
- #       H3_mask = model.mask( lambda a: a['name'] == 'H3' )
-
-        ## rename H and H3 -> HN
- #       atm_dic = model.getAtoms()
- #       for i in N.nonzero( HN_mask + H3_mask ):
- #           atm_dic[i]['name'] = 'HN'
 
         ## remove all none backbone hydrogens
-        keep_mask = heavy_mask #+ HN_mask + H3_mask
+        keep_mask = heavy_mask 
         model = model.compress( keep_mask )
 
         ## consecutive residue numbering
@@ -169,7 +183,16 @@ class Fold_X( Executor ):
         
         @note: Overrides Executor method.
         """
-        self.__prepareModel( self.model, self.f_in )
+        self.__prepareModel( self.model, self.temp_pdb )#f_in )
+
+        f_com = open( self.temp_command, 'w')
+        f_com.writelines(['<TITLE>FOLDX_commandfile;\n',
+                          '<Stability>%s;\n'%self.temp_result])
+        f_com.close()
+        
+        f_opt = open( self.temp_option, 'w')
+        f_opt.writelines(['<TITLE> FOLDX_optionfile;\n'])
+        f_opt.close()
 
 
     def cleanup( self ):
@@ -179,8 +202,10 @@ class Fold_X( Executor ):
         Executor.cleanup( self )
 
         if not self.debug:
-            T.tryRemove( self.f_in )
-            T.tryRemove( 'foldx_results' )
+            T.tryRemove( self.temp_pdb )
+            T.tryRemove( self.temp_command )
+            T.tryRemove( self.temp_option )
+            T.tryRemove( self.temp_result )
 
 
     def parse_foldx( self, output ):
@@ -190,33 +215,41 @@ class Fold_X( Executor ):
         @param output: Fold-X uotput file
         @type  output: str
         
-        @return: dictionary with energy terma as keys
+        @return: dictionary with energy terms as keys
         @rtype: dict
         """
         energy = {}
 
         ## extract energy terms from output
-        l= open(self.f_out).readlines()
+        l= open(self.temp_result).readlines()
 
         if len(l) == 0:
-            raise Fold_XError, 'ERROR: fold_X Segmentation fault (core dumped)'
+            raise Fold_XError, 'ERROR: fold_X Segmentation fault'
 
-        if re.match('^.+nbhb.+vw', l[-2]):
-            E = string.split( l[-2])[2:]
-            E = [ string.split( e, ':') for e in E ]
+        if re.match('^%s'%self.temp_pdb, l[-1]):
+
+            ## get the energies
+            E = string.split( l[-1])[1:]
+
+            ## energy labels can't be parsed from file, so
+            ## we'll have to use this list (and lets hope
+            ## they don't change the order of the items).
+            keys = [ 'ene',  'bb_hb', 'sc_hb',  'vw',  
+                     'el',   'sol_p', 'sol_h',  'vwcl',
+                     'sc',   'mc',    'sloop',  'mloop',
+                     'cis',  'tcl',   'bbcl',   'dip',
+                     'wtbr', 'disu',  'el_kon', 'p_cov' ]
+            
             ## add energies to dictionary
-            for i in range( len(E) ):
-                ## change nan to 0.0
-                if E[i][1] == 'nan':
-                    E[i][1] = 0.0
-                energy[str(E[i][0])] = float( E[i][1] )
+            for i in range( len( keys ) ):
+                energy[ keys[i] ] = float( E[i] )
         else:
             print 'No fold_X energy to extract'
             energy = 0
 
         return energy
 
-
+        
     def isFailed( self ):
         """
         @note: Overrides Executor method
@@ -232,10 +265,6 @@ class Fold_X( Executor ):
         self.result = self.parse_foldx( self.output )
 
 
-#############
-##  TESTING        
-#############
-        
 class Test:
     """
     Test class
@@ -280,9 +309,9 @@ class Test:
         @return: dictionary with foldx energy terms
         @rtype:  dict
         """
-        return {'el': -9.0299999999999994, 'hyd': -145.41999999999999, 'wtbr': -0.10000000000000001, 'mc': 44.640000000000001, 'DDG': -8.0099999999999998, 'hb': -44.079999999999998, 'pol': 192.72, 'nbhb': 0.0, 'vw': -85.859999999999999, 'sc': 39.109999999999999, 'vwcl': 0.0, 'ene': -8.0099999999999998}
+        return {'el': -13.766400000000001, 'wtbr': -4.8059700000000003, 'ene': -18.475000000000001, 'mc': 160.28800000000001, 'sloop': 0.0, 'dip': 0.00177626, 'sol_p': 167.71100000000001, 'disu': 0.0, 'tcl': 0.72696700000000003, 'cis': 0.0, 'p_cov': 0.0, 'sol_h': -134.613, 'bb_hb': -87.362499999999997, 'sc_hb': -48.350000000000001, 'vw': -116.67100000000001, 'sc': 58.089300000000001, 'el_kon': 0.0, 'mloop': 0.0, 'vwcl': 0.27728599999999998, 'bbcl': 0.37019200000000002}
 
-        
+
 
 if __name__ == '__main__':
 
@@ -290,7 +319,6 @@ if __name__ == '__main__':
 
     assert test.run( local=1 ) == test.expected_result()
 
-    
 
 
 

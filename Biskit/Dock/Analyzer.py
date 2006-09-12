@@ -315,10 +315,14 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0  ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: shape of ramdom contact matrix
         @rtype:  tuple
         """
@@ -333,16 +337,19 @@ class Test:
         ## load a complex list
         cl = t.Load( t.testRoot() + '/dock/hex/complexes.cl')
 
-        self.a= Analyzer( rec = f_out,
-                          lig = t.testRoot()+'/lig_pcr_00/traj.dat',
-                          ref = t.testRoot()+'/com/ref.complex' )
+        a= Analyzer( rec = f_out,
+                     lig = t.testRoot()+'/lig_pcr_00/traj.dat',
+                     ref = t.testRoot()+'/com/ref.complex' )
 
         ## shuffle this lsit five times
-        shuff_lst = self.a.shuffledLists( 5, range(8) )
+        shuff_lst = a.shuffledLists( 5, range(8) )
 
         ## create two random contact matrices
-        rand_mat = self.a.random_contacts( cl[0].atomContacts(), 2 )
-
+        rand_mat = a.random_contacts( cl[0].atomContacts(), 2 )
+        
+        if local:
+            globals().update( locals() )
+            
         return N.shape(rand_mat[1])
 
 
@@ -361,5 +368,5 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 

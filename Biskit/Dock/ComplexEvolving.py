@@ -268,9 +268,13 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
 
         @return: list of comment strings
         @rtype: [str]
@@ -282,7 +286,7 @@ class Test:
         c = t.Load( t.testRoot() + '/com/ref.complex' )
 
         ce= ComplexEvolving( c.rec_model, c.lig(), c,
-                                  info={'comment':'test'} )
+                             info={'comment':'test'} )
 
         time.sleep( 2 )
 
@@ -290,8 +294,13 @@ class Test:
         self.ce2 = ComplexEvolving( ce.rec_model, lig, ce,
                                     info={'comment':'test2'})
 
-        for x in self.ce2:
-            print x['date']
+        if local:
+            for x in self.ce2:
+                print x['date']
+
+            print test.ce2.valuesOf('comment')
+             
+            globals().update( locals() )
 
         return self.ce2.valuesOf('comment')
 
@@ -310,7 +319,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
 
-    print test.ce2.valuesOf('comment')
+   

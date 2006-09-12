@@ -360,39 +360,45 @@ class Test:
     """
     Test class
     """
-    from Biskit import PDBModel
-    import Biskit.mathUtils as MA
     
-    
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: sum of relMS, relAS and curvature for atoms 10 to 20
         @rtype:  float, float, float
         """
-        print "Loading PDB..."
-
+        from Biskit import PDBModel
+        import Biskit.mathUtils as MA
+        
+        ## Loading PDB...
         f = T.testRoot()+'/lig/1A19.pdb'
-        m = self.PDBModel(f)
+        m = PDBModel(f)
         m = m.compress( m.maskProtein() )
 
-        print "Starting SurfaceRacer"
-        self.x = SurfaceRacer( m, 1.4, vdw_set=1, debug=1, verbose=1 )
+        ## Starting SurfaceRacer
+        x = SurfaceRacer( m, 1.4, vdw_set=1, debug=0, verbose=0 )
 
-        print "Running"
-        r = self.x.run()
-
-        print "Result: "
+        ##Running
+        r = x.run()
 
         c= r['curvature']
         ms= r['MS']
-        print "Curvature: weighted mean %.6f and standard deviation %.3f"\
-              %(self.MA.wMean(c,ms), self.MA.wSD(c,ms))
+    
+        if local:
+            print "Curvature: weighted mean %.6f and standard deviation %.3f"\
+              %(MA.wMean(c,ms), MA.wSD(c,ms))
 
-        print 'Relative MS of atoms 10 to 20 atoms:', r['relMS'][10:20]
+            print 'Relative MS of atoms 10 to 20 atoms:', r['relMS'][10:20]
 
-        print 'Relative AS of atoms 10 to 20 atoms:', r['relAS'][10:20]
+            print 'Relative AS of atoms 10 to 20 atoms:', r['relAS'][10:20]
+            
+            globals().update( locals() )
+        
 
         return N.sum(r['relMS'][10:20]), N.sum(r['relAS'][10:20]), N.sum(r['curvature'][10:20])
 
@@ -407,13 +413,12 @@ class Test:
         
         return 570.47829086283639, 356.81939295543083, 0.80000000000000004
 
-
     
 if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run() == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
 
 

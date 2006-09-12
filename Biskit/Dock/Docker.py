@@ -532,10 +532,14 @@ class Test:
     Test class
     """
 
-    def run( self, run=0 ):
+    def run( self, run=0, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 1
         @rtype:  int
         """
@@ -561,22 +565,25 @@ class Test:
             
         recDic = t.Load( t.testRoot() + '/multidock/rec/1A2P_model.dic' )
 
-        self.d = Docker( recDic, ligDic, out = out_folder )
+        d = Docker( recDic, ligDic, out = out_folder )
 
         # dock rec 1 vs. lig 2 on localhost
-        fmac1, fout = self.d.createHexInp( 1, 2 )
+        fmac1, fout = d.createHexInp( 1, 2 )
         if run:
-            self.d.runHex( fmac1, log=1, ncpu=2 )
+            d.runHex( fmac1, log=1, ncpu=2 )
 
-            while not os.path.exists( self.d.out + '/1A2P_1-1A19_2_hex.out'):
+            while not os.path.exists( d.out + '/1A2P_1-1A19_2_hex.out'):
                 time.sleep(5)
 
         ## dock receptor 1 vs. ligand one on remote host
-        #fmac2, fout2= d.createHexInp( 1, 1 )
-        #d.runHex( fmac2, log=0, ncpu=2, host='remote_host_name' )
+        # fmac2, fout2= d.createHexInp( 1, 1 )
+        # d.runHex( fmac2, log=0, ncpu=2, host='remote_host_name' )
 
         print "ALL jobs submitted."
-
+        
+        if local:
+            globals().update( locals() )
+            
         return 1
 
 
@@ -594,6 +601,6 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( run=1 ) ==  test.expected_result() 
+    assert test.run( run=0, local=1 ) ==  test.expected_result() 
 
 

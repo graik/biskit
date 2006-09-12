@@ -542,10 +542,14 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 1
         @rtype: int
         """
@@ -562,10 +566,14 @@ class Test:
         add_box( p, 3.5, 3, 4, 3.5, fillfunc=line_fill,
                  color='grey', size=5 )
 
+##         ## example of how to write an eps plot to disc
 ##         p.write_eps(T.absfile('~/test.eps'), width='10cm', height='8.7cm')
         
         p.show()
-
+        
+        if local:
+            globals().update( locals() )
+                              
         return 1
 
 
@@ -583,7 +591,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
 
 

@@ -602,10 +602,13 @@ class Test:
     Test class
     """
     
-    def run( self, analyse_testRoot=0 ):
+    def run( self, local=0, analyse_testRoot=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
         @param analyse_testRoot: analyse the full project in testRoot
         @type  analyse_testRoot: 1|0
 
@@ -659,8 +662,11 @@ class Test:
         self.a = Analyse( outFolder = outfolder )
         self.a.go()
 
-        print 'The result from the analysis can be found in %s/analyse'%outfolder
 
+        if local:
+            print 'The result from the analysis can be found in %s/analyse'%outfolder
+            globals().update( locals() )
+        
         return 1
 
 
@@ -678,5 +684,5 @@ if __name__ == '__main__':
 
     test = Test()
     
-    assert test.run(analyse_testRoot=1) ==  test.expected_result()
+    assert test.run(analyse_testRoot=1, local=1) ==  test.expected_result()
 

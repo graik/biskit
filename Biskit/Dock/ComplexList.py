@@ -701,9 +701,13 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
+
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
 
         @return: 1
         @rtype: int
@@ -712,27 +716,35 @@ class Test:
 
         cl = t.Load( t.testRoot() + "/dock/hex/complexes.cl" )
 
-        p = cl.plot( 'rms', 'hex_eshape', 'hex_etotal' )
-
-        p.show()
-
-        return 1
+        ## number of clusters among the 100 best (lowest rmsd) solutions
+        cl_sorted = cl.sortBy( 'rms' )
+        hex_clst = cl_sorted.valuesOf( 'hex_clst',
+                                       indices=range(100),
+                                       unique=1 )
+            
+        if local:
+            p = cl.plot( 'rms', 'hex_eshape', 'hex_etotal' )
+            p.show()
+            
+            globals().update( locals() )
+            
+        return len( hex_clst )
 
 
     def expected_result( self ):
         """
         Precalculated result to check for consistent performance.
 
-        @return: 1
+        @return: numbet of hex clusters
         @rtype:  int
         """
-        return 1
+        return 36
     
         
 if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
 

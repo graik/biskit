@@ -357,10 +357,14 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 1
         @rtype: int
         """
@@ -376,16 +380,26 @@ class Test:
 
         traj.fit( aMask )
 
-        self.tc = TrajCluster( traj )
+        tc = TrajCluster( traj )
 
         ## check how many clusters that are needed with the given criteria
-        self.n_clusters = self.tc.calcClusterNumber( min_clst=3,
-                                                     max_clst=15,
-                                                     rmsLimit=0.7,
-                                                     aMask=aMask )
+        n_clusters = tc.calcClusterNumber( min_clst=3, max_clst=15,
+                                           rmsLimit=0.7, aMask=aMask )
+        
         ## cluster
-        self.tc.cluster( self.n_clusters, aMask=aMask )
+        tc.cluster( n_clusters, aMask=aMask )
 
+        if local:
+            member_frames = tc.memberFrames()
+
+            print 'There are %i clusters where the members are:'%n_clusters
+            for i in range(n_clusters):
+                print 'Cluster %i (%i members): %s'%( i+1,
+                                                      len(member_frames[i]),
+                                                      member_frames[i] )
+
+            globals().update( locals() )
+            
         return 1
 
 
@@ -404,12 +418,6 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
 
-    member_frames = test.tc.memberFrames()
-
-    print 'There are %i clusters where the members are:'%test.n_clusters
-    for i in range(test.n_clusters):
-        print 'Cluster %i (%i members): %s'%( i+1, len(member_frames[i]),
-                                              member_frames[i] )
