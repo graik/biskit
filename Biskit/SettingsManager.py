@@ -108,7 +108,7 @@ class SettingsManager:
         self.createmissing = createmissing
         self.fusermissing = not os.path.exists( T.absfile(fuser) )
 
-        self.settings = []
+        self.settings = []  #: will hold extracted Setting's 
 
     def __update( self, cfg_default, cfg_user ):
         """
@@ -212,7 +212,7 @@ class SettingsManager:
         except OSError, e:
             raise WriteCfgError, e
         
-    def __settings2dict( self ):
+    def settings2dict( self ):
         """
         Create dictionary from settings.
         @return: dictionary of parameter names (keys) and values
@@ -238,7 +238,7 @@ class SettingsManager:
                                % self.fuser, trace=0, error=0)
             self.writeUserSettings( errorsonly=True )
 
-        d = self.__settings2dict()
+        d = self.settings2dict()
 
         ns.update( d )
 
@@ -275,7 +275,9 @@ class Test:
 
         T.tryRemove( T.tempDir() + '/settings.cfg' )  ## clean up
 
-        return testparam          ## from 'int-testparam = 42' in settings.cfg
+        r = m.settings2dict()['testparam']
+
+        return r          ## from 'int-testparam = 42' in settings.cfg
 
 
     def expected_result( self ):
@@ -293,4 +295,4 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
