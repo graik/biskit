@@ -3,7 +3,7 @@
 comment= Fold_X http://foldx.embl.de
 
 ## binary
-bin=fold_x_linux
+bin=foldx_2.5.2.linux
 
 ## working directory
 cwd=
