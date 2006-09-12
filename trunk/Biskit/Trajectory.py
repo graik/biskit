@@ -1593,10 +1593,14 @@ class Test:
     """
     
 
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: sum of all residue rmsd values
         @rtype:  float
         """
@@ -1613,26 +1617,28 @@ class Test:
 ##         ref = pdbs[0]
 ##         traj = Trajectory( pdbs[:3], ref, rmwat=0 )
 
-        print "Loading"
-        self.traj = T.Load(T.testRoot() + '/lig_pcr_00/traj.dat')
+        ## Loading
+        traj = T.Load(T.testRoot() + '/lig_pcr_00/traj.dat')
 
         ## sort frames after frameNames
-        self.traj.sortFrames()
+        traj.sortFrames()
 
         ## sort atoms 
-        self.traj.sortAtoms()
+        traj.sortAtoms()
 
         ## remove waters
-        self.traj = self.traj.compressAtoms( \
-            N.logical_not( self.traj.ref.maskH2O()) )
+        traj = traj.compressAtoms( N.logical_not( traj.ref.maskH2O()) )
 
         ## get fluctuation on a residue level
-        r1 = self.traj.getFluct_local()
+        r1 = traj.getFluct_local()
 
         ## fit backbone of frames to reference structure
-        self.traj.fit( ref=self.traj.ref, mask=self.traj.ref.maskBB() )
-
-        return N.sum( self.traj.profile('rms') )
+        traj.fit( ref=traj.ref, mask=traj.ref.maskBB() )
+        
+        if local:
+            globals().update( locals() )
+            
+        return N.sum( traj.profile('rms') )
 
 
     def expected_result( self ):
@@ -1649,7 +1655,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert abs( test.run() - test.expected_result() ) < 1e-6
+    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-6
 
 
 

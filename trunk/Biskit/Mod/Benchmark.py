@@ -396,12 +396,13 @@ class Test:
     Test class
     """
     
-    def run( self, show=0 ):
+    def run( self, local=0):
         """
         run function test
 
-        @param pdb_list: show in PyMol
-        @type  pdb_list: 1|0
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
 
         @return: 1
         @rtype:  int
@@ -421,13 +422,13 @@ class Test:
         shutil.copy( T.testRoot() + dir + '/reference.pdb',
                      outfolder )
 
-        self.b = Benchmark( outfolder )
+        b = Benchmark( outfolder )
 
-        self.b.go()
+        b.go()
 
         pdb = T.Load( outfolder + "/modeller/PDBModels.list" )[0]
 
-        reference  =  PDBModel(outfolder  + "/reference.pdb" )
+        reference = PDBModel(outfolder  + "/reference.pdb" )
         tmp_model = pdb.clone()
 
         reference = reference.compress( reference.maskCA() )
@@ -438,7 +439,7 @@ class Test:
                                        profname="rms_outliers")
         pdb = pdb.transform( tm )
 
-        if show:
+        if local:
             pm = Pymoler()
             pm.addPdb( pdb, "m" )
             pm.addPdb( reference, "r" )
@@ -447,8 +448,9 @@ class Test:
             pm.add('show ribbon')
             pm.show()
 
-        print 'The result from the benchmarking can be found in %s/benchmark'%outfolder
-
+            print 'The result from the benchmarking can be found in %s/benchmark'%outfolder
+            globals().update( locals() )
+                  
         return 1
 
 
@@ -466,4 +468,4 @@ if __name__ == '__main__':
 
     test = Test()
     
-    assert test.run(show=1) ==  test.expected_result()
+    assert test.run( local=1 ) ==  test.expected_result()

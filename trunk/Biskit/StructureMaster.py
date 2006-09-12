@@ -94,10 +94,14 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 1
         @rtype: int
         """
@@ -112,11 +116,13 @@ class Test:
                                2,
                                hosts=hosts.cpus_all,
                                outFolder=out_folder,
-                               show_output=0,
+                               show_output=local,
                                add_hosts=1 )
         master.start()
 
-        print 'The converted pdb files has been written to %s'%out_folder
+        if local:
+            print 'The converted pdb files has been written to %s'%out_folder
+            globals().update( locals() )
 
         return 1
 
@@ -135,5 +141,5 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 

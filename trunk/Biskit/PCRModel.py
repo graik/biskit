@@ -97,15 +97,18 @@ class Test:
     """
     
 
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: rmsd value
         @rtype:  float
         """
-        print "Loading PDB..."
-
+        ## Loading PDB...
         m_com = PCRModel( t.testRoot() + "/com/1BGS.psf",
                           t.testRoot() + "/com/1BGS.pdb" )
 
@@ -122,9 +125,11 @@ class Test:
         ## calculate the rmsd between the original complex and the
         ## one fitted to the free receptor
         rms = m_com_fit.rms(m_com, fit=0)
-
-        print 'Rmsd between the two complex structures: %.2f Angstrom'%rms
-    
+        
+        if local:
+            print 'Rmsd between the two complex structures: %.2f Angstrom'%rms
+            globals().update( locals() )
+        
         return rms
 
 
@@ -142,7 +147,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert abs( test.run() - test.expected_result() ) < 1e-8
+    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
 
 
 

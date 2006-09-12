@@ -364,10 +364,14 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: atoms after reduction
         @rtype: int
         """
@@ -379,9 +383,11 @@ class Test:
         red = ReduceCoordinates( m, 4 )
 
         mred = red.reduceToModel()
-
-        print 'Atoms before reduction %i'%m.lenAtoms()
-        print 'Atoms After reduction %i'%mred.lenAtoms()
+        
+        if local:
+            print 'Atoms before reduction %i'%m.lenAtoms()
+            print 'Atoms After reduction %i'%mred.lenAtoms()
+            globals().update( locals() )
 
         return mred.lenAtoms()
 
@@ -402,6 +408,6 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run() == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
     

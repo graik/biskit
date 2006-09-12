@@ -263,7 +263,7 @@ class TemplateSearcher( SequenceSearcher ):
         return lines, infos
 
 
-    def retrievePDBs( self,  outFolder=None, pdbCodes=None ):
+    def retrievePDBs( self, outFolder=None, pdbCodes=None ):
         """
         Get PDB from local database if it exists, if not try to
         download the coordinartes drom the RSCB.
@@ -433,39 +433,51 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 1
         @rtype:  int
         """
         import tempfile
         import shutil
-
+        from Biskit.LogFile import LogFile
+        
         query = T.testRoot() + '/Mod/project/target.fasta'
         outfolder = tempfile.mkdtemp( '_test_TemplateSearcher' )
         shutil.copy( query, outfolder )
 
+        ## log file
+        f_out = outfolder + '/TemplateSearcher.log'
+        l = LogFile( f_out, mode='w')
+
         f_target = outfolder + '/target.fasta'
 
-        self.searcher = TemplateSearcher(outFolder=outfolder, verbose=1 )
+        searcher = TemplateSearcher( outFolder=outfolder, verbose=1, log=l )
 
         db = 'pdbaa'
-        self.searcher.localBlast( f_target, db, 'blastp', alignments=200, e=0.0001)
+        searcher.localBlast( f_target, db, 'blastp', alignments=200, e=0.0001)
 
         ## first tries to collect the pdb files from a local db and if
         ## that fails it tries to collect them remotely
-        self.searcher.retrievePDBs()
+        searcher.retrievePDBs()
 
-        self.searcher.clusterFasta()  ## expects all.fasta
+        searcher.clusterFasta()  ## expects all.fasta
 
-        self.searcher.writeFastaClustered()
+        searcher.writeFastaClustered()
 
-        fn = self.searcher.saveClustered()
-
-        print '\nThe set of clustered template files from the search'
-        print '    can be found in %s/templates'%outfolder
+        fn = searcher.saveClustered()
+        
+        if local:
+            print '\nThe set of clustered template files from the search'
+            print '    can be found in %s/templates'%outfolder
+            print '\nTemplateSearcher log file written to: %s'%f_out
+            globals().update( locals() )
 
         return 1
 
@@ -485,7 +497,7 @@ if __name__ == '__main__':
 
     test = Test()
     
-    assert test.run() ==  test.expected_result()
+    assert test.run( local=1 ) ==  test.expected_result()
 
 
 

@@ -175,10 +175,14 @@ class Test:
     Test class
     """
     
-    def run( self, show=0 ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 1
         @rtype: int
         """
@@ -201,9 +205,11 @@ class Test:
 
         ca = logArea( x, alpha, beta )
 
-        if show:
+        if local:
             gnuplot.plot( H.density( N.array(cr) - ca, 100 ) )
-
+            
+            globals().update( locals() )
+                              
         return ca
 
 
@@ -222,6 +228,6 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert abs( test.run( show=1 ) - test.expected_result() ) < 1e-8
+    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
 
 

@@ -611,30 +611,35 @@ class Test:
     Test class
     """
     
-    def run( self, quit=1 ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 1
         @rtype: int
         """
         traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
 
-        self.pm = Pymoler( )
-        mname = self.pm.addMovie( [ traj[i] for i in range(0,100,20) ] )
+        pm = Pymoler( )
+        mname = pm.addMovie( [ traj[i] for i in range(0,100,20) ] )
 
-        sel = self.pm.makeSel({'residue':29})
-        self.pm.add('show stick, %s'%sel)
+        sel = pm.makeSel({'residue':29})
+        pm.add('show stick, %s'%sel)
 
-        self.pm.add('mplay')
+        pm.add('mplay')
         
-        if quit:
-            self.pm.add('quit')
-
-        self.pm.show()
+        if local:
+            globals().update( locals() )
+        else:
+            pm.add('quit')
+            
+        pm.show()
 
         return 1
-
 
 
     def expected_result( self ):
@@ -652,7 +657,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( quit=0 ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
 
 

@@ -1387,10 +1387,14 @@ class Test:
     Test class
     """
     
-    def run( self, show=0 ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: total number of interatomic contacts
         @rtype:  int
         """
@@ -1419,7 +1423,7 @@ class Test:
         dope.addSurfaceRacer( probe=1.4 )
         lig_surf = c.lig_model.profile2mask( 'MS', 0.0000001, 1000 )
 
-        if show:
+        if local:           
             from Biskit import Pymoler
 
             pm = Pymoler()
@@ -1449,6 +1453,8 @@ class Test:
             pm.add( 'zoom all' )
 
             pm.show()
+            
+            globals().update( locals() )
 
         return N.sum(contProfile_lig) + N.sum(contProfile_rec)
 
@@ -1467,6 +1473,6 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( show=1 ) ==  test.expected_result()
+    assert test.run( local=1 ) ==  test.expected_result()
 
 

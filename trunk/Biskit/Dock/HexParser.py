@@ -197,10 +197,14 @@ class Test:
     Test class
     """
 
-    def run( self, run=0 ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: complex info dic keys
         @rtype:  [str]
         """
@@ -212,7 +216,11 @@ class Test:
         
         c_lst = self.h.parseHex()
 
-        print c_lst[1].info
+        if local:
+            print c_lst[1].info
+            
+            globals().update( locals() )
+        
 
         return c_lst[1].info.keys()
 
@@ -232,7 +240,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( run=1 ) ==  test.expected_result() 
+    assert test.run( local=1 ) ==  test.expected_result() 
 
 
 

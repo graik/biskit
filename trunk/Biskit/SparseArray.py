@@ -728,7 +728,7 @@ class Test:
     """
 
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
 
@@ -737,9 +737,9 @@ class Test:
         """
         a = N.zeros( (6,), 'f' )
 
-        self.sa = SparseArray( a.shape )
-        self.sa[3] = 1.
-        self.sa[5] = 2.
+        sa = SparseArray( a.shape )
+        sa[3] = 1.
+        sa[5] = 2.
 
         b = N.zeros( (5, 6), 'f' )
         b[0,1] = 3.
@@ -747,11 +747,14 @@ class Test:
         b[4,2] = 5
         b[3,0] = 6
 
-        self.sb = SparseArray( b )
+        sb = SparseArray( b )
 
-        self.sb.append( self.sa )
-
-        return self.sb.toarray()
+        sb.append( sa )
+        
+        if local:
+            globals().update( locals() )
+            
+        return sb.toarray()
 
 
     def expected_result( self ):
@@ -773,7 +776,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run() == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
     
 

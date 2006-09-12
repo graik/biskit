@@ -273,17 +273,16 @@ class Test:
 
         cleaner = ChainCleaner( ChainSeparator(fname, outPath) )
 
-        print cleaner.next()
-
-        print 'Wrote log: %s'%(cleaner.log.fname)
+        cleaner.next()
+        
+        if local:
+            print 'Wrote log: %s'%(cleaner.log.fname)            
+            globals().update( locals() )
 
         ## return logfile contents
         f= open( cleaner.log.fname, 'r')
         result = f.readlines()
         f.close()
-
-        if local:
-            globals().update( locals() )
             
         return result
 

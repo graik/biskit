@@ -90,9 +90,13 @@ class Test:
     Test class
     """
     
-    def run( self, raiseErr=0 ):
+    def run( self, local=0, raiseErr=0 ):
         """
         run function test
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
 
         @return: something
         @rtype:  float
@@ -105,7 +109,10 @@ class Test:
         
         if raiseErr:
             f.append(6)
-                
+            
+        if local:
+            globals().update( locals() )                
+
         return 1
 
 
@@ -123,5 +130,5 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert  test.run( raiseErr=1 ) == test.expected_result()
+    assert  test.run( raiseErr=1, local=1 ) == test.expected_result()
     

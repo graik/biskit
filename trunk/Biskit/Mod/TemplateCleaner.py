@@ -291,29 +291,43 @@ class Test:
     Test class
     """
     
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: 1
         @rtype:  int
         """
         import tempfile
         import shutil
+        from Biskit.LogFile import LogFile
 
+        ## temp output directory
         outfolder = tempfile.mkdtemp( '_test_TemplateCleaner' )
         os.mkdir( outfolder +'/templates' )
+
+        ## log file
+        f_out = outfolder + '/TemplateCleaner.log'
+        l = LogFile( f_out, mode='w')
 
         shutil.copytree( T.testRoot() + '/Mod/project/templates/nr',
                          outfolder + '/templates/nr' )
 
-        self.c = TemplateCleaner( outfolder )
+        c = TemplateCleaner( outfolder, log=l)
 
         inp_dic = modUtils.parse_tabbed_file(
             T.absfile( outfolder + '/templates/nr/chain_index.txt' ) )
 
-        self.c.process_all( inp_dic )
-
+        c.process_all( inp_dic )
+        
+        if local:
+            print 'TemplateCleaner log file written to: %s'%f_out
+            globals().update( locals() )
+            
         return 1
 
 
@@ -332,7 +346,7 @@ if __name__ == '__main__':
 
     test = Test()
     
-    assert test.run() ==  test.expected_result()
+    assert test.run( local=1 ) ==  test.expected_result()
 
 
 

@@ -280,18 +280,34 @@ class Test:
     """
     
 
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: molecular mass 
         @rtype:  float
         """
-        print "Loading PDB..."
+        from Biskit.LogFile import LogFile
+        import tempfile
 
-        self.c = PDBCleaner( t.testRoot() + '/rec/1A2P_rec_original.pdb'  )
-        m = self.c.process()
-    
+        f_out = tempfile.mktemp( '_test_PDBCleaner' )
+        
+        l = LogFile( f_out, mode='w')
+        
+        ## Loading PDB...
+        c = PDBCleaner( t.testRoot() + '/rec/1A2P_rec_original.pdb',
+                        log=l )
+        
+        m = c.process()
+
+        if local:
+            print 'PDBCleaner log file written to: %s'%f_out
+            globals().update( locals() )
+            
         return N.sum( m.masses())
 
 
@@ -309,4 +325,4 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert abs( test.run() - test.expected_result() ) < 1e-8
+    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8

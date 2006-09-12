@@ -323,16 +323,20 @@ class Test:
     Test class
     """
     
-    def run( self, show=0 ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: sum of the total ASA for each residue
         @rtype:  float
         """
         from Biskit import PDBModel
 
-        print "Loading PDB..."
+        ## Loading PDB...
 
         f = T.testRoot()+"/com/1BGS.pdb"
         m = PDBModel(f)
@@ -340,15 +344,14 @@ class Test:
         m = m.compress( m.maskProtein() )
         m = m.compress( m.maskHeavy() )
 
-        print "Starting WhatIf"
-        self.x = WhatIf( m, debug=0, verbose=1 )
+        ## Starting WhatIf
+        x = WhatIf( m, debug=0, verbose=0 )
 
-        print "Running"
-        self.atomAcc, self.resAcc, self.resMask = self.x.run()
+        ## Running
+        atomAcc, resAcc, resMask = x.run()
 
-
-        ## check that model hasn't changed
-        if 0:
+        if local:
+            ## check that model hasn't changed
             m_ref = PDBModel(f)
             m_ref = m.compress( m.maskProtein() )
             for k in m_ref.atoms[0].keys():
@@ -359,18 +362,24 @@ class Test:
                 else:
                     print 'Equal ', k
 
-        if show:
             ## display exposed residues in PyMol
             from Pymoler import Pymoler
             pm = Pymoler()
-
             model = pm.addPdb( m, '1' )
-            pm.colorRes( '1', self.resAcc[:,0] )
-
+            pm.colorRes( '1', resAcc[:,0] )
             pm.show()
 
+            print "\nResult for first 10 atoms/residues: "
+            print '\nAccessability (A^2):\n', atomAcc[:10]
+            print '\nResidue accessability (A^2)'
+            print '[total, backbone, sidechain]:\n', resAcc[:10]
+            print '\nExposed residue mask:\n',resMask[:10]
+            print '\nTotal atom    accessability (A^2): %.2f'%sum(atomAcc) 
+            print '      residue accessability (A^2): %.2f'%sum(resAcc)[0]
 
-        return N.sum(self.resAcc[:,0])
+            globals().update( locals() )
+                              
+        return N.sum(resAcc[:,0])
 
 
     def expected_result( self ):
@@ -387,16 +396,10 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert abs( test.run( show=1 ) - test.expected_result() ) < 1e-8
+    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
 
 
-    print "\nResult for first 10 atoms/residues: "
-    print '\nAccessability (A^2):\n', test.atomAcc[:10]
-    print '\nResidue accessability (A^2)'
-    print '[total, backbone, sidechain]:\n', test.resAcc[:10]
-    print '\nExposed residue mask:\n',test.resMask[:10]
-    print '\nTotal atom    accessability (A^2): %.2f'%sum(test.atomAcc) 
-    print '      residue accessability (A^2): %.2f'%sum(test.resAcc)[0]
+
 
 
 

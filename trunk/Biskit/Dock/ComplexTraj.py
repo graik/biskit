@@ -329,10 +329,14 @@ class Test:
     """
     
 
-    def run( self ):
+    def run( self, local=0 ):
         """
         run function test
-
+        
+        @param local: transfer local variables to global and perform
+                      other tasks only when run locally
+        @type  local: 1|0
+        
         @return: number of contacts in first frame
         @rtype:  int
         """
@@ -343,15 +347,15 @@ class Test:
         f =  [ T.testRoot()+ '/com/1BGS.pdb' ] * 5
         t = Trajectory( f )
 
-        #    t = T.Load( T.testRoot()+'/com_pcr_00/traj.dat' )
+    ## t = T.Load( T.testRoot()+'/com_pcr_00/traj.dat' )
 
         t = ComplexTraj( t, recChains=[0] )
 
-    ##    t.plotContactDensity( step=2 )
+    ## t.plotContactDensity( step=2 )
         for i in range( 1093+98, 1968 ):
             t.ref.atoms[i]['chain_id'] = 'B'
 
-        print 'Receptor chains: %s    Ligand chains: %s'%(t.cr, t.cl)
+        
 
         t.cl = [1,2]
 
@@ -360,7 +364,12 @@ class Test:
         tt = t.takeAtoms( r )
 
         contactMat = tt.atomContacts( 1 )
-
+        
+        if local:
+            print 'Receptor chains: %s    Ligand chains: %s'%(t.cr, t.cl)
+            
+            globals().update( locals() )
+            
         return N.sum(N.ravel(contactMat))
 
 
