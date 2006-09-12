@@ -81,6 +81,7 @@ except Exception, why:
 python_bin = sys.executable
 xterm_bin  = T.absbinary('xterm')
 
+pymol_scripts = T.projectRoot() + '/external/pymol/'
 
 ###################################
 ## required environment variables.
