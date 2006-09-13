@@ -128,8 +128,9 @@ class Executor:
     """
 
     def __init__( self, name, args='', template=None, f_in=None, f_out=None,
-                  strict=1, catch_out=1, push_inp=1, node=None, nice=0,
-                  cwd=None, log=None, debug=0, verbose=0, **kw ):
+                  f_err=None, strict=1, catch_out=1, push_inp=1, catch_err=0,
+                  node=None, nice=0, cwd=None, log=None, debug=0,
+                  verbose=0, **kw ):
 
         """
         Create Executor. *name* must point to an existing program configuration
@@ -184,9 +185,15 @@ class Executor:
         self.f_out = t.absfile( f_out )
         if not f_out and catch_out:
             self.f_out = tempfile.mktemp( '.out' )
-        self.keep_out = f_out is not None
-        self.catch_out= catch_out
 
+        self.f_err = t.absfile( f_err )
+        if not f_err and catch_err:
+            self.f_err = tempfile.mktemp( '.err' )
+                
+        self.keep_out  = f_out is not None
+        self.catch_out = catch_out
+        self.catch_err = catch_err
+        
         self.f_in  = f_in  ## will be overridden by self.run()
         self.keep_inp = f_in is not None
         self.push_inp = push_inp
@@ -218,8 +225,8 @@ class Executor:
 
 
     def communicate( self, cmd, inp, bufsize=-1, executable=None,
-                     stdin=None, stdout=None, shell=0, env=None,
-                     cwd=None ):
+                     stdin=None, stdout=None, stderr=None,
+                     shell=0, env=None, cwd=None ):
         """
         Start and communicate with the new process. Called by execute().
         See subprocess.Popen() for a detailed description of the parameters!
@@ -254,7 +261,7 @@ class Executor:
         try:
             p = subprocess.Popen( cmd.split(),
                                   bufsize=bufsize, executable=executable,
-                                  stdin=stdin, stdout=stdout,
+                                  stdin=stdin, stdout=stdout, stderr=stderr,
                                   shell=self.exe.shell,
                                   env=self.environment(), cwd=self.cwd )
 
@@ -288,7 +295,7 @@ class Executor:
         start_time = time.time()
 
         cmd = self.command()
-
+        
         shellexe = None
         if self.exe.shell and self.exe.shellexe:
             shellexe = self.exe.shellexe
@@ -305,13 +312,15 @@ class Executor:
                 stdin = open( self.f_in )
             if self.f_out and self.catch_out:
                 stdout= open( self.f_out, 'w' )
-            stderr= None
-
+            if self.f_err and self.catch_err:    
+                stderr= open( self.f_err, 'w' )
+        
         if self.verbose:
             self.log.add('executing: %s' % cmd)
             self.log.add('in folder: %s' % self.cwd ) 
             self.log.add('input:  %r' % stdin )
             self.log.add('output: %r' % stdout )
+            self.log.add('errors: %r' % stderr )
             self.log.add('wrapped: %r'% self.exe.shell )
             self.log.add('shell: %r'  % shellexe )
             self.log.add('environment: %r' % self.environment() )
@@ -320,7 +329,8 @@ class Executor:
 
         self.output, self.error = self.communicate( cmd, inp,
                             bufsize=-1, executable=shellexe, stdin=stdin,
-                            stdout=stdout, shell=self.exe.shell,
+                            stdout=stdout, stderr=stderr,
+                            shell=self.exe.shell,
                             env=self.environment(), cwd=self.cwd )
 
         if self.exe.pipes and self.f_out:
@@ -379,7 +389,7 @@ class Executor:
         @return: the command to execute
         @rtype: str
         """
-        exe  = t.absbinary( self.exe.bin )
+        exe = t.absbinary( self.exe.bin )
 
         if self.args:
             exe = exe + ' ' + self.args
@@ -429,6 +439,9 @@ class Executor:
         if not self.keep_inp and not self.debug:
             t.tryRemove( self.f_in )
 
+        if self.f_err and not self.debug:
+            t.tryRemove( self.f_err )
+
 
     def failed( self ):
         """
@@ -463,10 +476,8 @@ class Executor:
         inp = self.template
 
         try:
-
             if os.path.isfile( inp ):
                 inp = open( inp, 'r' ).read()
-
             return inp % self.__dict__
 
         except KeyError, why:
@@ -489,13 +500,15 @@ class Executor:
         if self.exe.pipes:
 
             ## convert file to string
-            if not inp and os.path.exists( self.f_in or '' ):    
-                return open( self.f_in, 'r' ).read()
+            if not inp and os.path.exists( self.f_in or '' ):
 
+                return open( self.f_in, 'r' ).read()
+            print '########', inp
             return inp
 
         ## no pipes and no input string
         if inp is None:
+
             return inp
 
         ## put input string into file
@@ -557,16 +570,16 @@ class Test:
         x = ExeConfigCache.get( 'emacs', strict=0 )
         x.pipes = 1
 
-        if not local:
-            e = Executor( 'emacs', args='-kill .zshenv', strict=0,
+        if local:
+            e = Executor( 'emacs', args='.zshenv', strict=0,
                           f_in=None,
                           f_out=t.absfile('~/test.out'),
                           verbose=1, cwd=t.absfile('~') )
         else:
-            e = Executor( 'emacs', args='.zshenv', strict=0,
+            e = Executor( 'emacs', args='-kill .zshenv', strict=0,
                           f_in=None,
                           f_out=t.absfile('~/test.out'),
-                          verbose=1, cwd=t.absfile('~') )            
+                          verbose=0, cwd=t.absfile('~') )            
         
         r = e.run()
 
