@@ -36,14 +36,16 @@ class Master(TrackingJobMaster):
     ## Slave script that ges with this master
     slave_script =  projectRoot() + '/Biskit/PVM/ExampleSlave.py'
 
-
-    def __init__(self, *args, **kw):
+    
+    def __init__(self, verbose=1, *args, **kw):
         """
         Parameters nedded by master and/or slave.
         """
-        TrackingJobMaster.__init__(self, *args, **kw)
+        self.verbose = verbose
 
+        TrackingJobMaster.__init__(self, verbose=verbose, *args, **kw)
 
+                         
     def getInitParameters(self, slave_tid):
         """
         Hand over parameters to slave once.
@@ -61,14 +63,14 @@ class Master(TrackingJobMaster):
         """
         Tidy up tasks.
         """
-        print "Cleaning up..."
+        if self.verbose: print "Cleaning up..."
 
 
     def done( self ):
         """
         Called when master is done.
         """
-        print "Now we are done."
+        if self.verbose: print "Now we are done."
 
 
 
@@ -109,9 +111,12 @@ class Test:
         ## slave_script - name of slave.py
         ## in the end get results from master.result
         ## -> dictionary of some_id : result_object pairs
-
-        master = Master(data, 10, hosts, niceness, Master.slave_script,
-                        show_output=local, redistribute=1 )
+        
+        master = Master( data=data, chunk_size=10,
+                         hosts=hosts, niceness=niceness,
+                         slave_script=Master.slave_script,
+                         show_output=local, redistribute=1,
+                         verbose=local )
 
         ## blocking call
         r = master.calculateResult()

@@ -73,7 +73,8 @@ class Trajectory:
     ## used by __cmpFileNames()
     ex_numbers = re.compile('\D*([0-9]+)\D*')
 
-    def __init__( self, pdbs=None, refpdb=None, rmwat=1, castAll=0 ):
+    def __init__( self, pdbs=None, refpdb=None, rmwat=1,
+                  castAll=0, verbose=1 ):
         """
         Collect coordinates into Numpy array. By default, the atom content
         of the first PDB is compared to the reference PDB to look for atoms
@@ -90,6 +91,8 @@ class Trajectory:
         @type  rmwat: 0|1
         @param castAll: re-analyze atom content of each frame (default: 0)
         @type  castAll: 0|1
+        @param verbose: verbosity level (default: 1)
+        @type  verbose: 1|0
         """
         self.ref = None
         self.frames = None
@@ -97,6 +100,7 @@ class Trajectory:
         self.frameNames = None
         self.pc = None
         self.profiles = TrajProfiles()
+        self.verbose= verbose
 
         if pdbs != None:
             refpdb = refpdb or pdbs[0]
@@ -258,7 +262,7 @@ class Trajectory:
         i = 0
         atomCast = None
 
-        T.errWrite('reading %i pdbs...' % len(pdbs) )
+        if self.verbose: T.errWrite('reading %i pdbs...' % len(pdbs) )
 
         refNames = self.ref.atomNames()  ## cache for atom checking
 
@@ -279,7 +283,7 @@ class Trajectory:
                 if atomCast == range( len( m ) ):
                     atomCast = None   ## no casting necessary
                 else:
-                    T.errWrite(' casting ')
+                    if self.verbose: T.errWrite(' casting ')
 
             ## assert that frame fits reference
             if atomCast:
@@ -292,10 +296,10 @@ class Trajectory:
             frameList.append( m.xyz )
 
             i += 1
-            if i%10 == 0:
+            if i%10 == 0 and self.verbose:
                 T.errWrite('#')
 
-        T.errWrite( 'done\n' )
+        if self.verbose: T.errWrite( 'done\n' )
 
         ## convert to 3-D Numpy Array
         return N.array(frameList).astype('f')
@@ -1125,7 +1129,7 @@ class Trajectory:
 
 
     def getFluct_local( self, mask=None, border_res=1,
-                        left_atoms=['C'], right_atoms=['N'] ):
+                        left_atoms=['C'], right_atoms=['N'], verbose=1 ):
         """
         Get mean displacement of each atom from it's average position after
         fitting of each residue to the reference backbone coordinates of itself
@@ -1147,7 +1151,7 @@ class Trajectory:
         if mask == None:
             mask = N.ones( len( self.frames[0] ), 'i' )
 
-        T.errWrite( "rmsd fitting per residue..." )
+        if verbose: T.errWrite( "rmsd fitting per residue..." )
 
         residues = N.nonzero( self.ref.atom2resMask( mask ) )
 
@@ -1184,13 +1188,13 @@ class Trajectory:
 
                 result.extend( rmsd )
 
-                T.errWrite('#')
+                if verbose: T.errWrite('#')
 
             except ZeroDivisionError:
                 result.extend( N.zeros( len(i_res), 'f' ) )
                 T.errWrite('?' + str( res ))
 
-        T.errWriteln( "done" )
+        if verbose: T.errWriteln( "done" )
 
         return result
 
@@ -1630,10 +1634,10 @@ class Test:
         traj = traj.compressAtoms( N.logical_not( traj.ref.maskH2O()) )
 
         ## get fluctuation on a residue level
-        r1 = traj.getFluct_local()
+        r1 = traj.getFluct_local( verbose=local )
 
         ## fit backbone of frames to reference structure
-        traj.fit( ref=traj.ref, mask=traj.ref.maskBB() )
+        traj.fit( ref=traj.ref, mask=traj.ref.maskBB(), verbose=local )
         
         if local:
             globals().update( locals() )

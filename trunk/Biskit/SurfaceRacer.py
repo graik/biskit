@@ -139,7 +139,7 @@ class SurfaceRacer( Executor ):
                 raise SurfaceRacer_Error, 'Cannot find SurfaceRacer directory. Set your path in ~/.biskit/settings.dat as surfaceracer_bin'
 
         Executor.__init__( self, 'surfaceracer', template=self.inp,\
-                           f_out='/dev/null', cwd=dir, **kw )
+                           cwd=dir, **kw )
 
         self.model = model.clone( deepcopy=1 )
         self.model = self.model.compress( self.model.maskHeavy() )
@@ -318,7 +318,8 @@ class SurfaceRacer( Executor ):
         if not os.path.exists(self.f_out_name):
             T.flushPrint( '\nSurfaceRacer result file %s does not exist. You have probably encountered a very rare SurfaceRacer round off error that have caused the program to terminate. Will now try to recalculate the surface with a slightly increased surface probe radii: increasing radii from %.3f to %.3f.\n'%(self.f_out_name, self.probe,self.probe+0.001))
             return 1
-        return not self.error is None 
+        
+        return self.error is None 
 
 
     def finish( self ):
@@ -375,15 +376,15 @@ class Test:
         from Biskit import PDBModel
         import Biskit.mathUtils as MA
         
-        ## Loading PDB...
+        if local: print 'Loading PDB...'
         f = T.testRoot()+'/lig/1A19.pdb'
         m = PDBModel(f)
         m = m.compress( m.maskProtein() )
 
-        ## Starting SurfaceRacer
+        if local: print 'Starting SurfaceRacer'
         x = SurfaceRacer( m, 1.4, vdw_set=1, debug=0, verbose=0 )
 
-        ##Running
+        if local: print 'Running'
         r = x.run()
 
         c= r['curvature']

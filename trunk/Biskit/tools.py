@@ -1057,22 +1057,27 @@ class Test:
         from Biskit import PDBModel
         from Biskit import Trajectory
 
-        print "\nTEST info:"
         m = PDBModel( testRoot()+'/rec/1A2P.pdb')
-        info(m)
+        
+        if local:
+            print "\nTEST info:"    
+            info(m)
 
-        print "\nTEST Exception:"
-        try:
-            i = 1/0
-        except:
-            print lastErrorTrace()
+        if local:
+            print "\nTEST Exception:"
+            try:
+                i = 1/0
+            except:
+                print lastErrorTrace()
 
-        print "\nTEST ensure"
+        if local: print "\nTEST ensure"
         ensure( m, PDBModel )
         #ensure( m, Trajectory ) # should fail
         
         if local:
             globals().update( locals() )
+
+        absfile('~')
             
         return 1
 

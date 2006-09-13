@@ -92,17 +92,27 @@ class Test:
         @return: 1
         @rtype: int
         """
+        import os.path
+        
         ## a minimal list of trajectories
         traj_list = [ T.testRoot() + '/lig_pcr_00/traj.dat' ]
 
         master = QualMaster( traj_list,
-                             show_output=local)
-        
-        master.start()
+                             show_output=local,
+                             verbose=local )
+
+        ## run and wait for result
+        r = master.calculateResult()
+        #master.start()
+
+        f_plot = '%s/rms_traj.eps'%os.path.dirname(r[0])
         
         if local:
-            print 'A RMSD plot is writen to: %s/rms_traj.eps'%traj_list[0]
+            print 'A RMSD plot is writen to: %s'%f_plot
             globals().update( locals() )
+            
+        ## cleanup
+        T.tryRemove( f_plot )
         
         return 1
 

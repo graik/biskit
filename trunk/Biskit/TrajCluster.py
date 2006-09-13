@@ -40,7 +40,7 @@ class ClusterError( BiskitError ):
 
 class TrajCluster:
 
-    def __init__( self, traj ):
+    def __init__( self, traj, verbose=1 ):
         """
         @param traj: Trajectory to cluster (has to be fitted before hand)
         @type  traj: Trajectory
@@ -58,6 +58,9 @@ class TrajCluster:
         self.fc = None 
         self.fcCenters = None
 
+        ## by default prints clustering status to stdout
+        self.verbose = verbose
+
 
     def __raveled( self ):
         """
@@ -67,8 +70,8 @@ class TrajCluster:
         return N.array( map( N.ravel, t.frames ) )
 
 
-    def cluster( self, n_clusters, weight=1.13, converged=1e-11, aMask=None,
-                 force=0 ):
+    def cluster( self, n_clusters, weight=1.13, converged=1e-11,
+                 aMask=None, force=0 ):
         """
         Calculate new clusters.
     
@@ -99,8 +102,9 @@ class TrajCluster:
             self.fc = FuzzyCluster( self.__raveled(), self.n_clusters,
                                        self.fcWeight )
 
-            self.fcCenters = self.fc.go(self.fcConverged,
-                                                    1000, nstep=1)
+            self.fcCenters = self.fc.go( self.fcConverged,
+                                         1000, nstep=10,
+                                         verbose=self.verbose )
 
 
     def calcClusterNumber( self, min_clst=5, max_clst=30, rmsLimit=1.0,
@@ -143,11 +147,13 @@ class TrajCluster:
                 pos[1] = clst
 
             if pos[1]-pos[0] == 1:
-                T.flushPrint('Converged at %i clusters, current average cluster rmsd %.2f\n'%( clst, N.average( rmsLst ) ))
+                if self.verbose:
+                    T.flushPrint('Converged at %i clusters, current average cluster rmsd %.2f\n'%( clst, N.average( rmsLst ) ))
                 return pos[1]
 
             if pos[1]-pos[0] != 1:
-                T.flushPrint('Current cluster setting %i, current average cluster rmsd %.2f\n'%( clst, N.average( rmsLst ) ))
+                if self.verbose:
+                    T.flushPrint('Current cluster setting %i, current average cluster rmsd %.2f\n'%( clst, N.average( rmsLst ) ))
 
             if pos[1]-pos[0]<= 0 or pos[0]<min_clst or pos[1]>max_clst:
                 raise ClusterError, "Error determining number of clusters"
@@ -378,9 +384,12 @@ class Test:
 
         traj = traj.thin( 1 )
 
-        traj.fit( aMask )
-
-        tc = TrajCluster( traj )
+        if local:
+            traj.fit( aMask )
+            tc = TrajCluster( traj )
+        else:
+            traj.fit( aMask, verbose=0 )
+            tc = TrajCluster( traj, verbose=0 )
 
         ## check how many clusters that are needed with the given criteria
         n_clusters = tc.calcClusterNumber( min_clst=3, max_clst=15,

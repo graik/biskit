@@ -93,7 +93,6 @@ class TrajFlexMaster(TrackingJobMaster):
                                   (default: 0)
         @type  only_cross_member: 0|1
         """
-
         ## create temporary folder accessible to all slaves
         tmp = tempfile.tempdir
         tempfile.tempdir = settings.tempDirShared
@@ -128,7 +127,7 @@ class TrajFlexMaster(TrackingJobMaster):
         chunk_size = 1
         TrackingJobMaster.__init__(self, self.tasks, chunk_size,
                                    hosts, niceness, self.slave_script,
-                                   show_output=show_output,
+                                   show_output=show_output, verbose=verbose,
                                    add_hosts=add_hosts)
 
 
@@ -465,11 +464,12 @@ class Test:
 
         master = TrajFlexMaster( traj_1, traj_2,
                                  hosts=hosts.cpus_all,
-                                 show_output=0,
+                                 show_output=local,
                                  add_hosts=1,
-                                 log=None, slaveLog=None,
-                                 verbose=0,
-                                 only_cross_member=0)
+                                 log=None,
+                                 slaveLog=None,
+                                 verbose=local,
+                                 only_cross_member=0 )
 
         r = master.calculateResult( mirror=0 )
 

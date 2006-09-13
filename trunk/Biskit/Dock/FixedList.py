@@ -101,11 +101,11 @@ class Test:
         @return: something
         @rtype:  float
         """
-        list = range(10)
+        lst = range(10)
 
-        f = FixedList( list )
+        f = FixedList( lst )
 
-        print 'f.fixed() is %i for a FixedList'% f.fixed()
+        if local: print 'f.fixed() is %i for a FixedList'% f.fixed()
         
         if raiseErr:
             f.append(6)

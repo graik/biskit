@@ -86,7 +86,7 @@ class TrackingJobMaster( JobMaster ):
 
     def __init__(self, data={}, chunk_size=5,
                  hosts=[], niceness={'default':20},
-                 slave_script='',
+                 slave_script='', verbose=1,
                  show_output=0, add_hosts=1, redistribute=1 ):
         """
         @param data: dict of items to be processed
@@ -99,6 +99,8 @@ class TrackingJobMaster( JobMaster ):
         @type  niceness: {str:int}
         @param slave_script: absolute path to slave-script
         @type  slave_script: str
+        @param verbose: verbosity level (default: 1)
+        @type  verbose: 1|0
         @param show_output: display one xterm per slave (default: 0)
         @type  show_output: 1|0
         @param add_hosts: add hosts to PVM before starting (default: 1)
@@ -108,19 +110,21 @@ class TrackingJobMaster( JobMaster ):
         @type  redistribute: 1|0
         """
         if add_hosts:
-            T.errWrite('adding %i hosts to pvm...' % len(hosts) )
+            if verbose: T.errWrite('adding %i hosts to pvm...' % len(hosts) )
             pvm.addHosts( hosts=hosts )
-            T.errWriteln('done')
+            if verbose: T.errWriteln('done')
 
         JobMaster.__init__( self, data, chunk_size, hosts, niceness,
                             slave_script, show_output=show_output,
-                            redistribute=redistribute )
+                            redistribute=redistribute, verbose=verbose )
 
         self.progress = {}
 
         self.disabled_hosts = []
         self.slow_hosts = {}
-
+        
+        self.verbose = verbose
+        
         ## end of calculation is signalled on lockMsg
         self.lock = RLock()
         self.lockMsg = Condition( self.lock )
@@ -200,12 +204,13 @@ class TrackingJobMaster( JobMaster ):
         """
         Report how many jobs were processed in what time per host.
         """
-        print 'host                     \tgiven\tdone\t  time'
-        for host in self.progress:
+        if self.verbose:
+            print 'host                     \tgiven\tdone\t  time'
+            for host in self.progress:
 
-            d = self.progress[host]
-            print '%-25s\t%i\t%i\t%6.2f s' %\
-                  (host, d['given'], d['done'], d['time'])
+                d = self.progress[host]
+                print '%-25s\t%i\t%i\t%6.2f s' %\
+                      (host, d['given'], d['done'], d['time'])
 
 
     def setCallback( self, funct ):

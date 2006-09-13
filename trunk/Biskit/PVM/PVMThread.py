@@ -364,8 +364,10 @@ class PVMThread(Thread):
 
 class PVMMasterSlave(PVMThread):
 
-    def __init__(self, *arg, **kw):
+    def __init__(self, verbose=1, *arg, **kw):
         PVMThread.__init__(self, *arg, **kw)
+
+        self.verbose= verbose
 
         ## bind messages
 
@@ -454,7 +456,7 @@ class PVMMasterSlave(PVMThread):
                 if tid != self.getTID():
 
                     self.send(nickname, MSG_EXIT, None)
-                    print nickname, 'shutting down...'
+                    if self.verbose: print nickname, 'shutting down...'
         else:
             pvm.kill(self.getTID())
 

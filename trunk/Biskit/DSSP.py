@@ -92,7 +92,8 @@ class Dssp( Executor ):
         
         Executor.__init__( self, 'dsspcmbi',
 #                           f_out=self.f_out,
-                           args='-na %s'%self.f_pdb, **kw )
+                           args='-na %s'%self.f_pdb,
+                           catch_err=1, **kw )
 
         
     def prepare( self ):
@@ -266,15 +267,15 @@ class Test:
         """
         from Biskit import PDBModel
         
-        ## Loading PDB...
+        if local: print 'Loading PDB...'
         f = T.testRoot()+"/com/1BGS.pdb"
         m = PDBModel(f)
         m = m.compress( m.maskProtein() )
 
-        ## Starting DSSP
+        if local: print 'Starting DSSP'
         dssp = Dssp( m )
 
-        ## Running DSSP
+        if local: print 'Running DSSP'
         result = dssp.run()
 
         if local:

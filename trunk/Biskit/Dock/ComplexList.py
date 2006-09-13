@@ -712,8 +712,6 @@ class Test:
         @return: 1
         @rtype: int
         """
-        print "DOING something"
-
         cl = t.Load( t.testRoot() + "/dock/hex/complexes.cl" )
 
         ## number of clusters among the 100 best (lowest rmsd) solutions

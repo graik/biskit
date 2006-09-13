@@ -497,7 +497,8 @@ class Test:
         i=1
         all_chains = []
         while chain <> None:
-            print 'Chain %i:'%i, ''.join( singleAA( chain.sequence() ) )
+            if local:
+                print 'Chain %i:'%i, ''.join( singleAA( chain.sequence() ) )
             all_chains += chain.sequence()
             chain = sep.next()
             i += 1
@@ -505,6 +506,9 @@ class Test:
         if local:
             print 'ChainSeparator log file written to: %s'%sep.log.fname
             globals().update( locals() )
+
+        ## cleanup
+        T.tryRemove( sep.log.fname ) 
             
         return ''.join( singleAA( all_chains ) )
 

@@ -76,7 +76,8 @@ class TemplateSearcher( SequenceSearcher ):
     F_CHAIN_INDEX = '/chain_index.txt'
 
 
-    def __init__( self, outFolder='.', clusterLimit=20,  verbose=1, log=None ):
+    def __init__( self, outFolder='.', clusterLimit=20, verbose=1,
+                  log=None, silent=0 ):
         """
         @param outFolder: project folder (results are put into subfolder) ['.']
         @type  outFolder: str
@@ -86,9 +87,11 @@ class TemplateSearcher( SequenceSearcher ):
         @param verbose: keep temporary files (default: 1)
         @type  verbose: 1|0
         @param log: log file instance, if None, STDOUT is used (default: None)
-        @type  log: LogFile        
+        @type  log: LogFile
+        @param silent: don't print messages to STDOUT is used (default: 0)
+        @type  silent: 1|0
         """
-        SequenceSearcher.__init__( self, outFolder, verbose=verbose )
+        SequenceSearcher.__init__( self, outFolder=outFolder, verbose=1 )
 
         self.ex_pdb   = re.compile( 'pdb\|([A-Z0-9]{4})\|([A-Z]*)' )
 
@@ -96,6 +99,9 @@ class TemplateSearcher( SequenceSearcher ):
              'REMARK   2 RESOLUTION\. *([0-9\.]+|NOT APPLICABLE)' )
 
         self.prepareFolders()
+
+        self.verbose = verbose
+        self.silent = silent
 
         self.log = log or StdLog()
 
@@ -284,11 +290,12 @@ class TemplateSearcher( SequenceSearcher ):
         pdbCodes = pdbCodes or self.record_dic.keys()
         result = []
         i = 0
-        T.flushPrint("retrieving %i PDBs..." % len( pdbCodes ) )
+        if not self.silent:
+            T.flushPrint("retrieving %i PDBs..." % len( pdbCodes ) )
         for c in pdbCodes:
 
             i += 1
-            if i%10 == 0:
+            if i%10 == 0 and not self.silent:
                 T.flushPrint('#')
 
             fname = '%s/%s.pdb' % (outFolder, c)
@@ -324,7 +331,8 @@ class TemplateSearcher( SequenceSearcher ):
             except IOError, why:
                 raise BlastError( "Can't write file "+fname )
 
-        T.flushPrint('\n%i files written to %s\n' %(i,outFolder) )
+        if not self.silent:
+            T.flushPrint('\n%i files written to %s\n' %(i,outFolder) )
 
         return result
 
@@ -458,7 +466,12 @@ class Test:
 
         f_target = outfolder + '/target.fasta'
 
-        searcher = TemplateSearcher( outFolder=outfolder, verbose=1, log=l )
+        silent = 1
+        if local: silent=0
+
+        searcher = TemplateSearcher( outFolder=outfolder,
+                                     verbose=1, log=l,
+                                     silent=silent )
 
         db = 'pdbaa'
         searcher.localBlast( f_target, db, 'blastp', alignments=200, e=0.0001)
@@ -478,7 +491,10 @@ class Test:
             print '    can be found in %s/templates'%outfolder
             print '\nTemplateSearcher log file written to: %s'%f_out
             globals().update( locals() )
-
+            
+        ## cleanup
+        T.tryRemove( outfolder, tree=1 )
+        
         return 1
 
 

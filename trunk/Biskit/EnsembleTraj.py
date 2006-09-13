@@ -501,7 +501,7 @@ class EnsembleTraj( Trajectory ):
 
 
     def fitMembers( self, refIndex=None, refModel=None, mask=None, n_it=1,
-             prof='rms', **profInfos ):
+                    prof='rms', verbose=1, **profInfos ):
         """
         RMSD-fit each member trajectory seperately onto one of its frames
         or its average structure.
@@ -535,7 +535,8 @@ class EnsembleTraj( Trajectory ):
             else:
                 ref = m[ refIndex ]
 
-            m.fit( ref=ref, mask=mask, n_it=n_it, prof=prof, **profInfos )
+            m.fit( ref=ref, mask=mask, n_it=n_it, prof=prof,
+                   verbose=verbose, **profInfos )
 
         ## ToDo for memory efficiency: replace frame chunks on the fly
 
@@ -654,13 +655,16 @@ class Test:
 
         self.tr.fit( ref=self.tr.ref,
                      mask=self.tr.ref.maskCA(),
-                     prof='rms_CA_ref' )
+                     prof='rms_CA_ref',
+                     verbose=local )
 
-        self.tr.fitMembers(mask=self.tr.ref.maskCA(),
-                           prof='rms_CA_0', refIndex=0)
+        self.tr.fitMembers( mask=self.tr.ref.maskCA(),
+                            prof='rms_CA_0', refIndex=0,
+                            verbose=local )
         
-        self.tr.fitMembers(mask=self.tr.ref.maskCA(),
-                           prof='rms_CA_av')
+        self.tr.fitMembers( mask=self.tr.ref.maskCA(),
+                            prof='rms_CA_av',
+                            verbose=local )
 
         p = self.tr.plotMemberProfiles( 'rms_CA_av', 'rms_CA_0',
                                         'rms_CA_ref', xlabel='frame' )

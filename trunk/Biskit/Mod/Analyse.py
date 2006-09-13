@@ -662,10 +662,12 @@ class Test:
         self.a = Analyse( outFolder = outfolder )
         self.a.go()
 
-
         if local:
             print 'The result from the analysis can be found in %s/analyse'%outfolder
             globals().update( locals() )
+            
+        ## cleanup
+        T.tryRemove( outfolder, tree=1 )
         
         return 1
 
@@ -684,5 +686,5 @@ if __name__ == '__main__':
 
     test = Test()
     
-    assert test.run(analyse_testRoot=1, local=1) ==  test.expected_result()
+    assert test.run(analyse_testRoot=0, local=1) ==  test.expected_result()
 

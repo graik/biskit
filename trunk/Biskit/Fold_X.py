@@ -25,7 +25,8 @@ Get binding energy from fold_X
 """
 
 from Biskit import Executor, TemplateError
-## import Biskit.settings as S
+from Biskit import BiskitError
+
 import Biskit.tools as T
 
 import re, string, tempfile
@@ -33,7 +34,7 @@ import re, string, tempfile
 import Biskit.molUtils as molUtils
 
 
-class Fold_XError( Exception ):
+class Fold_XError( BiskitError ):
     pass
 
 
@@ -104,25 +105,24 @@ class Fold_X( Executor ):
           nice     - int, nice level (default: 0)
           log      - Biskit.LogFile, program log (None->STOUT) (default: None)
         """
-        temp_pdb     = tempfile.mktemp('_foldx_.pdb')
-        temp_command = tempfile.mktemp('_foldx_.command')
-        temp_option  = tempfile.mktemp('_foldx_.option')
-        temp_result  = tempfile.mktemp('_foldx_.result')
-
-        self.temp_command = temp_command
-        self.temp_option = temp_option
-        self.temp_result = temp_result
-        self.temp_pdb = temp_pdb
+        self.temp_pdb     = tempfile.mktemp('_foldx_.pdb')
+        self.temp_command = tempfile.mktemp('_foldx_.command')
+        self.temp_option  = tempfile.mktemp('_foldx_.option')
+        self.temp_result  = tempfile.mktemp('_foldx_.result')
+        self.temp_runlog  = tempfile.mktemp('_foldx_.log')
+        self.temp_errlog  = tempfile.mktemp('_foldx_.err')
         
         Executor.__init__( self, 'fold_X', args='-manual %s %s %s'\
-                           %(temp_pdb, temp_option, temp_command), **kw )
+                           %(self.temp_pdb, self.temp_option,
+                             self.temp_command), **kw )
 
         self.model = model.clone( deepcopy=1 )
 
         ## fold-X-allowed atoms for each res in standard order
         self.aminoAcidDict = molUtils.aaAtoms
         for k in self.aminoAcidDict:
-            self.aminoAcidDict[ k ] += ['HN']
+            if 'HN' not in self.aminoAcidDict[ k ]:
+                self.aminoAcidDict[ k ] += ['HN']
 
 
     def __prepareModel( self, model, f_pdb_out ):
@@ -161,11 +161,21 @@ class Fold_X( Executor ):
                     (res, a1['residue_number'], a1['name'], a2['name'] )
                 raise Fold_XError( s )
 
+        ## make a copy
+ #       model = model.take( range(model.lenAtoms()), deepcopy=1  )
+ 
         ## mask for all heavy atoms, H and H3
         heavy_mask = model.maskHeavy()
+ #       HN_mask = model.mask( lambda a: a['name'] == 'H' )
+ #       H3_mask = model.mask( lambda a: a['name'] == 'H3' )
 
+         ## rename H and H3 -> HN
+ #       atm_dic = model.getAtoms()
+ #       for i in N.nonzero( HN_mask + H3_mask ):
+ #           atm_dic[i]['name'] = 'HN'
+ 
         ## remove all none backbone hydrogens
-        keep_mask = heavy_mask 
+        keep_mask = heavy_mask #+ HN_mask + H3_mask
         model = model.compress( keep_mask )
 
         ## consecutive residue numbering
@@ -183,7 +193,7 @@ class Fold_X( Executor ):
         
         @note: Overrides Executor method.
         """
-        self.__prepareModel( self.model, self.temp_pdb )#f_in )
+        self.__prepareModel( self.model, self.temp_pdb )
 
         f_com = open( self.temp_command, 'w')
         f_com.writelines(['<TITLE>FOLDX_commandfile;\n',
@@ -191,7 +201,9 @@ class Fold_X( Executor ):
         f_com.close()
         
         f_opt = open( self.temp_option, 'w')
-        f_opt.writelines(['<TITLE> FOLDX_optionfile;\n'])
+        f_opt.writelines(['<TITLE> FOLDX_optionfile;\n',
+                          '<logfile_name> %s;'%self.temp_runlog,
+                          '<errorfile_name> %s;'%self.temp_errlog])
         f_opt.close()
 
 
@@ -206,8 +218,17 @@ class Fold_X( Executor ):
             T.tryRemove( self.temp_command )
             T.tryRemove( self.temp_option )
             T.tryRemove( self.temp_result )
+            T.tryRemove( self.temp_runlog )
+            T.tryRemove( self.temp_errlog )
+            ## Fold-X writes a file called "runlog.txt"
+            ## to local directory. Try to remove it.
+            T.tryRemove( 'runlog.txt' )
+            ## and even though the error log is supposed
+            ## to be written to self.temp_errlog, I get a
+            ## 'errorfile.txt' in the local directory. Remove.
+            T.tryRemove( 'errorfile.txt' )
 
-
+            
     def parse_foldx( self, output ):
         """
         Extract energies from output.

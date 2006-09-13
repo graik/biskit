@@ -84,8 +84,8 @@ class Aligner:
 
         fn = self.outFolder + self.F_RESULT_FOLDER
         if not os.path.exists( fn ):
-            self.logWrite( 'Creating new output folder '+ fn )
             os.mkdir( fn )
+            if verbose: self.logWrite( 'Creating new output folder '+ fn )
 
 
     def logWrite( self, msg, force=1 ):
@@ -469,7 +469,7 @@ class Test:
         shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
                      outfolder  )
 
-        a = Aligner( outFolder=outfolder )
+        a = Aligner( outFolder=outfolder, verbose=local )
 
         a.align_for_modeller_inp()
 
@@ -480,6 +480,9 @@ class Test:
         if local:
             globals().update( locals() )
             
+        ## cleanup
+        T.tryRemove( outfolder, tree=1 )
+        
         return 1
 
 

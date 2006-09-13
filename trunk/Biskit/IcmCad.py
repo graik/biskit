@@ -178,7 +178,7 @@ copy a_ \"mol2\" delete
         """
         Overrides Executor method
         """
-        return not self.error is None 
+        return self.error is None 
 
 
     def finish( self ):
@@ -243,7 +243,7 @@ class Test:
         @return: icmCad values
         @rtype: [float]
         """
-        ## Loading PDB...
+        if local: print 'Loading PDB...'
         f = T.testRoot() + '/lig/1A19.pdb'
         m1 = self.PDBModel(f)
         m1 = m1.compress( m1.maskProtein() )
@@ -255,10 +255,10 @@ class Test:
             m = m.compress( m.maskProtein() )
             ms.append(m)
 
-        ## Starting ICM
+        if local: print 'Starting ICM'
         x = IcmCad( m1, ms, debug=0, verbose=0 )
 
-        ## Running
+        if local: print 'Running'
         r = x.run()
 
         if local:

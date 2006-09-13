@@ -153,6 +153,9 @@ class Test:
         if local:
             print 'A log file was written to %s'%f_out
             globals().update( locals() )
+            
+        ## cleanup
+        T.tryRemove( f_out )
         
         return  1
 

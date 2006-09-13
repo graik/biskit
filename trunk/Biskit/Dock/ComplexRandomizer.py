@@ -175,7 +175,7 @@ class ComplexRandomizer:
         """
         self.cm = ComplexMinimizer( self.random_complex_remote(),
                                     debug=self.debug )
-        self.cm.run( inp_mirror=inp_mirror)
+        self.cm.run( inp_mirror=inp_mirror )
 
         com = Complex( self.rec, self.lig )
 
@@ -267,7 +267,7 @@ class Test:
                       other tasks only when run locally
         @type  local: 1|0
         
-        @return: 1
+        @return: number of random complexes
         @rtype: int
         """
         from Biskit import Trajectory
@@ -283,39 +283,38 @@ class Test:
         rec = PCRModel( rec_psf, rec_pdb )
         lig = PCRModel( lig_psf, lig_pdb )
 
-        self.cr = ComplexRandomizer( rec, lig, debug=0 )
+        cr = ComplexRandomizer( rec, lig, debug=0 )
 
-        if local:
-            inp_copy = tempfile.mktemp( '_test_randomizer_xplor.inp')
-            self.cs = [ self.cr.random_complex( inp_mirror=inp_copy ) for i in range(5) ]
-            print 'Wrote copy of xplor inp file to: %s'%inp_copy
+        ## create 3 random complexes
+        cs = [ cr.random_complex() for i in range(3) ]
 
-        else:
-            self.cs = [ self.cr.random_complex( ) for i in range(5) ]
-
-        self.traj = Trajectory( [ c.model() for c in self.cs ] )
+        traj = Trajectory( [ c.model() for c in cs ] )
 
         if local:
             f_pfb = tempfile.mktemp('_test.pdb')
             f_crd = tempfile.mktemp('_test.crd')
-            self.traj.ref.writePdb( f_pfb )
-            self.traj.writeCrd( f_crd )
-            print 'Wrote pdb file to: %s'%f_pfb
+            traj.ref.writePdb( f_pfb )
+            traj.writeCrd( f_crd )
+            print 'Wrote reference pdb file to: %s'%f_pfb
             print 'Wrote crd file to: %s'%f_crd
             
             globals().update( locals() )
-            
-        return len(self.traj)
+
+        ## cleanup
+        t.tryRemove( f_pfb )
+        t.tryRemove( f_crd )
+          
+        return len(traj)
 
 
     def expected_result( self ):
         """
         Precalculated result to check for consistent performance.
 
-        @return: 1
+        @return: number of random complexes
         @rtype:  int
         """
-        return 5
+        return 3
     
         
 if __name__ == '__main__':

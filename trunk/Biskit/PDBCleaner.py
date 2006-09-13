@@ -307,6 +307,9 @@ class Test:
         if local:
             print 'PDBCleaner log file written to: %s'%f_out
             globals().update( locals() )
+
+        ## cleanup
+        t.tryRemove( f_out )    
             
         return N.sum( m.masses())
 

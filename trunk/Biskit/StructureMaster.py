@@ -117,12 +117,18 @@ class Test:
                                hosts=hosts.cpus_all,
                                outFolder=out_folder,
                                show_output=local,
+                               verbose=local,
                                add_hosts=1 )
-        master.start()
+
+        ## run and wait for result
+        r = master.calculateResult()
 
         if local:
             print 'The converted pdb files has been written to %s'%out_folder
             globals().update( locals() )
+
+        ## cleanup
+        T.tryRemove( out_folder, tree=1 )
 
         return 1
 
@@ -141,5 +147,5 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( local=1 ) == test.expected_result()
+    assert test.run( local=0 ) == test.expected_result()
 

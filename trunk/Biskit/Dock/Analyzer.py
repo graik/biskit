@@ -40,8 +40,10 @@ class AnalyzeError( Exception ):
 
 class Analyzer:
 
-    def __init__( self, **options ):
+    def __init__( self, verbose=1, **options ):
         """
+        @param verbose: verbosity level (default: 1)
+        @type  verbose: 1|0        
         @param options: needs::
                          rec,lig - file name, receptor, ligand trajectories
                          ref     - file name, pickled reference complex
@@ -51,7 +53,7 @@ class Analyzer:
         """
         self.options = options
 
-        t.flushPrint("\nLoading...")
+        if verbose: t.flushPrint("\nLoading...")
         self.t_lig = t.Load( options['lig'] )
         self.t_rec = t.Load( options['rec'] )
         self.com= t.Load( options['ref'] )
@@ -65,7 +67,7 @@ class Analyzer:
         self.com.lig_transformed = None
 
         ## equalize atom content of free (trajectory) and bound models
-        t.flushPrint('\nCasting...')
+        if verbose: t.flushPrint('\nCasting...')
 
         bnd_rec = self.com.rec()
         bnd_lig = self.com.lig_model
@@ -331,7 +333,7 @@ class Test:
 
         ## create a minimal receptor trajectory from a pdb file
         f_out = tempfile.mktemp( '_test_rec.traj' )
-        t_rec = Trajectory( [t.testRoot() + '/rec/1A2P.pdb'] )
+        t_rec = Trajectory( [t.testRoot() + '/rec/1A2P.pdb'], verbose=local )
         t.Dump( t_rec, f_out )
 
         ## load a complex list
@@ -339,7 +341,8 @@ class Test:
 
         a= Analyzer( rec = f_out,
                      lig = t.testRoot()+'/lig_pcr_00/traj.dat',
-                     ref = t.testRoot()+'/com/ref.complex' )
+                     ref = t.testRoot()+'/com/ref.complex',
+                     verbose = local)
 
         ## shuffle this lsit five times
         shuff_lst = a.shuffledLists( 5, range(8) )
@@ -350,6 +353,9 @@ class Test:
         if local:
             globals().update( locals() )
             
+        ## cleanup
+        t.tryRemove( f_out )
+        
         return N.shape(rand_mat[1])
 
 
@@ -369,4 +375,3 @@ if __name__ == '__main__':
     test = Test()
 
     assert test.run( local=1 ) == test.expected_result()
-

@@ -438,7 +438,10 @@ The result from the template comparison can be found in the three files %s, %s a
                   self.m.F_OUTPUT_IDENTITIES_INF[1:],
                   self.m.F_OUTPUT_IDENTITIES_COV[1:],
                   outfolder )
-
+                
+            ## cleanup
+            T.tryRemove( outfolder, tree=1 )
+        
         return 1
 
 

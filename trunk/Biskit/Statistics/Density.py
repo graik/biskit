@@ -288,7 +288,7 @@ class Test:
 
             R = [ random.lognormvariate( alpha, beta ) for i in range( 10000 ) ]
 
-            print logConfidence( 6.0, R )[0]#, area(6.0, alpha, beta)
+            if local: print logConfidence( 6.0, R )[0]#, area(6.0, alpha, beta)
             
         if local:
             globals().update( locals() )

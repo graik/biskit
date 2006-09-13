@@ -859,6 +859,9 @@ class Test:
             print '\nThe clustered result from the search can be found in %s'%f_out
             print '\nSequenceSearche log file written to: %s'%f_out
             globals().update( locals() )
+
+        ## cleanup
+        T.tryRemove( outfolder, tree=1 )
         
         return 1
 
