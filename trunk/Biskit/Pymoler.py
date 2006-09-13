@@ -30,6 +30,7 @@ import tools as T
 import os
 import tempfile
 import settings
+from Biskit import Executor, TemplateError
 
 # =============== SETUP PYMOL ENVIRONMENT =========================
 
@@ -151,22 +152,42 @@ class PymolModel:
 
 
 ## ========================= Pymoler ============================
-## create Pymol input script and display Pymol ##
+## create Pymol input script and display in Pymol ##
 
-class Pymoler:
+class Pymoler( Executor ):
     """
-    Create PyMol script (.pml) file.
+    Run Pymol
+    =========
+    Create a pymol script file (.pml) and execule it using Pymol.
+
+    Example usage
+    -------------
+        >>> pm = Pymoler()
+        >>> pm.addPdb( model )
+        >>> pm.run()
+
+    References
+    ----------
+       - U{http://pymol.sourceforge.net/}
     
     @note: the file is only flushed to disc when the object
            is destructed, or the flush() method is called!
+    @note: since version 2.6 Pymoler is using Biskit.Executor
     """
 
-    def __init__(self, mode='w'):
+    def __init__(self, full=0, mode='w', verbose=1, **kw ):
         """
         @param mode: open file with this mode, w=override, a=append
         @type  mode: str
+        @param full: dispaly pymol structures in fill screen mode::
+                       0 - normal mode
+                       1 - full screen mode
+                       2 - full screen and no menues
+        @type  full: 0|1|2        
         """
-        #self.foutName = os.path.abspath(outName)    # name of new .pml file
+        self.verbose = verbose
+        
+        # name of .pml file
 	self.foutName = tempfile.mktemp() + '.pml'
 
         # open for <appending|writing|reading>
@@ -178,7 +199,16 @@ class Pymoler:
         ## add startup commands
         self.initPymol()
 
-
+        ## set arguments for display options (normal, full, all)
+        arg = args='-q %s'%self.foutName
+        if full == 1:
+            arg = args='-qe %s'%self.foutName
+        if full == 2:
+            arg = args='-qei %s'%self.foutName
+            
+        Executor.__init__( self, 'pymol', args=arg,
+                           catch_err=1, catch_out=1, **kw )
+        
     def __del__(self):
         self.fgenerate.close()
 
@@ -371,7 +401,8 @@ class Pymoler:
             for model in self.dic[ key ]:
 
                 n = model.writeIfNeeded()
-                print n
+                
+                if self.verbose: print n
 
 
     def addDeleteScript(self):
@@ -538,8 +569,9 @@ class Pymoler:
         if os.path.isdir( settings.pymol_scripts ):
             for script in os.listdir( settings.pymol_scripts ):
                 if not os.path.isdir( script ):
-                    print 'Adding %s script as a PyMol command'%script
                     self.add( 'run ' + settings.pymol_scripts + script )
+                    if self.verbose:
+                        print 'Adding %s script as a PyMol command'%script
         else:
             print '\n\nWARNING: No external PyMol scripts added\n\n'
 
@@ -551,15 +583,10 @@ class Pymoler:
 ##         self.add('select none')
 
 
-    def show(self, cleanUp=1 ):
-	"""
-	Takes a structure object.
-	Dispays it in PyMol, files are only temporarily created.
-
-        @param cleanUp: remove temporary pdb files and the pml script
-                        (default: 1)
-        @type  cleanUp: 1|0
-	"""
+    def prepare( self, cleanUp=1 ):
+        """
+        Overrides Executor method.
+        """
 	# clean up files from disc
         if cleanUp:
             self.addDeletePdbs()
@@ -570,37 +597,13 @@ class Pymoler:
         ## Write PDB's to disc if needed
 	self.writeStructures()
 
-        ## -q for quiet mode
-	os.spawnlpe(os.P_NOWAIT, settings.pymol_bin,
-                    settings.pymol_bin , '-q', self.foutName, os.environ )
 
+    def show( self ):
+        """
+        Backward compatability with old scripts.
+        """
+        self.run()
 
-    def fshow(self, cleanUp=1, sideMenu=1 ):
-	"""
-	Dispays all added Pdbs full-screen in PyMol,
-        files are only temporarily created.
-        
-        @param cleanUp: remove temporary files (default: 1)
-        @type  cleanUp: 0|1
-        @param sideMenu: show PyMol side menu (default: 1)
-        @type  sideMenu: 0|1
-	"""
-	# clean up files from disc
-        if cleanUp:
-            self.addDeletePdbs()
-            self.addDeleteScript()
-
-	self.flush()
-
-        ## Write PDB's to disc if needed
-	self.writeStructures()
-
-        options = '-qex'
-        if not sideMenu:
-            options += 'i'
-
-  	os.spawnlpe(os.P_NOWAIT, settings.pymol_bin, settings.pymol_bin,
-                    options, self.foutName, os.environ )
 
 #############
 ##  TESTING        
@@ -624,7 +627,8 @@ class Test:
         """
         traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
 
-        pm = Pymoler( )
+        pm = Pymoler( full=0, verbose=local )
+        
         mname = pm.addMovie( [ traj[i] for i in range(0,100,20) ] )
 
         sel = pm.makeSel({'residue':29})
@@ -637,7 +641,7 @@ class Test:
         else:
             pm.add('quit')
             
-        pm.show()
+        pm.run() ## old style call "pm.show()" also works
 
         return 1
 
@@ -651,7 +655,6 @@ class Test:
         """
         return 1
     
-        
 
 if __name__ == '__main__':
 
