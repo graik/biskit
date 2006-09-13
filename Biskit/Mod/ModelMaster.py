@@ -37,7 +37,7 @@ class ModelMaster(TrackingJobMaster):
 
     def __init__(self, hosts, folders, fastaTarget=None, f_pir=None,
                  template_folder=None, fout=None, starting_model=1,
-                 ending_model=10, ferror=None, **kw):
+                 ending_model=10, ferror=None, verbose=1, **kw):
         """
         @param hosts: list of host-names
         @type  hosts: [str]
@@ -57,6 +57,8 @@ class ModelMaster(TrackingJobMaster):
         @type  ending_model: int
         @param ferror: filename to output errors from the Slave
         @type  ferror: str
+        @param verbose: verbosity level (default: 1)
+        @type  verbose: 1|0
         @param kw: additional TrackingJobMaster arguments::
             chunk_size   - int, number of items that are processed per job
             niceness     - {str_host-name: int_niceness}
@@ -65,7 +67,7 @@ class ModelMaster(TrackingJobMaster):
             add_hosts    - 1|0, add hosts to PVM before starting [1]
         @type kw: param=value
         """
-
+        self.verbose = verbose
         self.folders = folders
         self.fastaTarget = fastaTarget
         self.f_pir = f_pir
@@ -79,7 +81,9 @@ class ModelMaster(TrackingJobMaster):
         data = self.setupJobs()
 
 
-        TrackingJobMaster.__init__(self, data=data, chunk_size=1, hosts=hosts, slave_script = self.slave_script, redistribute=0, **kw)
+        TrackingJobMaster.__init__(self, data=data, chunk_size=1, hosts=hosts,
+                                   slave_script = self.slave_script,
+                                   redistribute=0, verbose=verbose, **kw)
 
 
     def __dir_or_none( self, folder, filename ):
@@ -127,11 +131,11 @@ class ModelMaster(TrackingJobMaster):
 
 
     def cleanup( self ):
-        print "Cleaning up..."
+        if self.verbose: print "Cleaning up..."
 
 
     def done( self ):
-        print "Done modeling."
+        if self.verbose: print "Done modeling."
 
 
 
@@ -195,15 +199,19 @@ class Test:
 
         master = ModelMaster(folders = [outfolder],
                              hosts=hosts.cpus_all[ : 10 ],
-                             show_output = 1)
+                             show_output = local,
+                             verbose = local )
 
         if run:
             r = master.calculateResult()
-            print 'The models result can be found in %s/modeller'%outfolder
+            if local: print 'The models result can be found in %s/modeller'%outfolder
             
         if local:
             globals().update( locals() )
             
+        ## cleanup
+        T.tryRemove( outfolder, tree=1 )
+        
         return 1
 
 

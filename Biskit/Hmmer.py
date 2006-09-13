@@ -94,12 +94,15 @@ class Hmmer:
     Search Hmmer Pfam database and retrieve conservation score for model
     """
 
-    def __init__(self, hmmdb = hmmDatabase ): 
+    def __init__(self, hmmdb = hmmDatabase, verbose=1 ): 
         """
         @param hmmdb: Pfam hmm database
         @type  hmmdb: str
+        @param verbose: verbosity level (default: 1)
+        @type  verbose: 1|0
         """
         self.hmmdb = hmmdb
+        self.verbose = verbose
         self.tempDir = settings.tempDirShared
 
         self.fastaID = ''
@@ -116,7 +119,8 @@ class Hmmer:
         if not indexing will be done.
         """
         if not os.path.exists(self.hmmdb+'.ssi'):
-            print 'HMMINDEX: Indexing hmm database. This will take a while'
+            if self.verbose:
+                print 'HMMINDEX: Indexing hmm database. This will take a while'
             os.system(hmmindexExe + ' ' + self.hmmdb)
 
 
@@ -186,12 +190,14 @@ class Hmmer:
                 fName = target
 
         if noSearch:
-            print 'Profiles provided - No search will be performed.'
+            if self.verbose:
+                print 'Profiles provided - No search will be performed.'
             return None
 
         else:
             ## find matching hmm profiles
-            print '\nSearching hmm database, this will take a while...'
+            if self.verbose:
+                print '\nSearching hmm database, this will take a while...'
             out = os.popen( hmmpfamExe + ' ' + self.hmmdb + ' ' + fName )
 
             matches = {}
@@ -239,19 +245,20 @@ class Hmmer:
         """
         ## Print list of matching profiles
         if len(matches) == 0:
-            print '\nNo matching profiles found'
+            if self.verbose: print '\nNo matching profiles found'
             return None
         if len(matches) == 1:
-            print '\nFound only one matching profile.'
+            if self.verbose: print '\nFound only one matching profile.'
         if len(matches) > 1:
-            print '\nFound more than one hit.\n'
+            if self.verbose: print '\nFound more than one hit.\n'
 
         try:
-            print '\tName -- Nr hits -- Score -- E-value -- Description'
-            for k in matches.keys():
-                print '\t', k, ' --', matches[k][-1], ' -- ',\
-                      matches[k][-3], ' -- ', matches[k][-2],' -- ',\
-                      string.join(matches[k][0:-3])
+            if self.verbose:
+                print '\tName -- Nr hits -- Score -- E-value -- Description'
+                for k in matches.keys():
+                    print '\t', k, ' --', matches[k][-1], ' -- ',\
+                          matches[k][-3], ' -- ', matches[k][-2],' -- ',\
+                          string.join(matches[k][0:-3])
         except:
             pass
 
@@ -265,7 +272,7 @@ class Hmmer:
             eValue = float( hits[h][-1] )
 
             ## print warning message if profile doesn't meet criteria
-            if score < score_cutoff and eValue > eValue_cutoff:
+            if score < score_cutoff and eValue > eValue_cutoff and self.verbose:
                 print '\nWARNING: Bad scores! Profile NOT used.'
                 print '\t Name: %s - Score: %f E-value: %f ' \
                       %( hmmName, score, eValue )
@@ -280,7 +287,8 @@ class Hmmer:
                 else:
                     hmmHits[hmmName] = [ [ seqStart, seqEnd ] ]
 
-        print '\nWill use profile(s):\n ', str( hmmHits ), '\n'
+        if self.verbose:
+            print '\nWill use profile(s):\n ', str( hmmHits ), '\n'
 
         return hmmHits
 
@@ -630,7 +638,8 @@ class Hmmer:
         for name in hmmNames.keys():
             ## retrieve hmm model
             hmmDic = self.getHmmProfile( name )
-            print 'Hmm profile ' + str(name) + ' with accession number ' \
+            if self.verbose:
+                print 'Hmm profile ' + str(name) + ' with accession number ' \
                   + str(hmmDic['accession']) + ' retrieved'
 
             ## align sequence with model
@@ -735,12 +744,12 @@ class Test:
         from Biskit import PDBModel
         import Biskit.tools as T
     
-        print "Loading PDB..."
+        if local: print "Loading PDB..."
         m = PDBModel( T.testRoot()+'/lig/1A19.pdb')
         model = m.compress( m.maskProtein() )
 
         ## initiate and check database status
-        hmmer = Hmmer( hmmdb = settings.hmm_db )
+        hmmer = Hmmer( hmmdb = settings.hmm_db, verbose=local )
         hmmer.checkHmmdbIndex()
 
         ## scoring methods to use
@@ -801,7 +810,7 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( local=1 ) == test.expected_result()
+    assert test.run( local=0 ) == test.expected_result()
 
 
 

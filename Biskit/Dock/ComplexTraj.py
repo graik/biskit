@@ -345,7 +345,7 @@ class Test:
         ## there is no complex trajectori in the test folder so will have
         ## to create a fake trajectory with a complex
         f =  [ T.testRoot()+ '/com/1BGS.pdb' ] * 5
-        t = Trajectory( f )
+        t = Trajectory( f, verbose=local )
 
     ## t = T.Load( T.testRoot()+'/com_pcr_00/traj.dat' )
 
@@ -355,7 +355,6 @@ class Test:
         for i in range( 1093+98, 1968 ):
             t.ref.atoms[i]['chain_id'] = 'B'
 
-        
 
         t.cl = [1,2]
 
@@ -387,5 +386,5 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run() ==  test.expected_result() 
+    assert test.run( local=1 ) ==  test.expected_result() 
 

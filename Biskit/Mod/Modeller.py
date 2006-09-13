@@ -91,17 +91,21 @@ CALL ROUTINE = 'model'             # do homology modelling
     F_SCORE_OUT = F_RESULT_FOLDER + '/Modeller_Score.out'
 
 
-    def __init__( self, outFolder='.', log=None ):
+    def __init__( self, outFolder='.', log=None, verbose=1 ):
         """
         @param outFolder: base folder for Modeller output 
                           (default: L{F_RESULT_FOLDER})
         @type  outFolder: str
         @param log: log file instance, if None, STDOUT is used (default: None)
-        @type  log: LogFile        
+        @type  log: LogFile
+        @param verbose: verbosity level (default: 1)
+        @type  verbose: 1|0
         """
         self.outFolder = T.absfile( outFolder )
         self.log = log
 
+        self.verbose = verbose
+        
         self.prepareFolders()
 
         self.f_inp = None
@@ -115,8 +119,9 @@ CALL ROUTINE = 'model'             # do homology modelling
         Create needed output folders if they don't exist.
         """
         if not os.path.exists( self.outFolder + self.F_RESULT_FOLDER ):
-            self.logWrite( 'Creating '+self.outFolder + self.F_RESULT_FOLDER)
             os.mkdir( self.outFolder + self.F_RESULT_FOLDER )
+            if self.verbose:
+                self.logWrite( 'Creating '+self.outFolder + self.F_RESULT_FOLDER)
 
 
     def logWrite( self, msg, force=1 ):
@@ -564,8 +569,7 @@ class Test:
         shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
                      outfolder  )
 
-
-        m = Modeller( outfolder )
+        m = Modeller( outfolder, verbose=local )
 
         r = m.prepare_modeller( )
 
@@ -576,6 +580,9 @@ class Test:
 
         if local:
             globals().update( locals() )
+            
+        ## cleanup
+        T.tryRemove( outfolder, tree=1 )
 
         return 1
 

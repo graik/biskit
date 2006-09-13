@@ -310,49 +310,56 @@ class Test:
         """
         from Biskit import PDBModel
         
-        print "Loading PDB..."
+        if local: print "Loading PDB..."
         # f = T.testRoot() + '/lig/1A19.pdb'
         f = T.testRoot() + '/com/1BGS.pdb'
         mdl = PDBModel(f)
 
         mdl = mdl.compress( mdl.maskProtein() )
 
-        print "Initiating PDBDope...",
+        if local: print "Initiating PDBDope...",
         self.d = PDBDope( mdl )
-        print 'Done.\n'
+        if local: print 'Done.'
 
-        print "Adding FoldX energy...",
+        if local: print "Adding FoldX energy...",
         self.d.addFoldX()
-        print 'Done.'
+        if local: print 'Done.'
 
-    #    print "Adding WhatIf ASA...",
+    #    if local: print "Adding WhatIf ASA...",
     #    self.d.addASA()
-    #    print 'Done.'
+    #    if local: print 'Done.'
 
-        print "Adding SurfaceRacer curvature...",
+        if local: print "Adding SurfaceRacer curvature...",
         self.d.addSurfaceRacer( probe=1.4 )
-        print 'Done.'
+        if local: print 'Done.'
 
-        print "Adding surface mask...",
+        if local: print "Adding surface mask...",
         self.d.addSurfaceMask()
-        print 'Done.'
+        if local: print 'Done.'
 
-        print "Adding secondary structure profile...",
+        if local: print "Adding secondary structure profile...",
         self.d.addSecondaryStructure()
-        print 'Done.'
+        if local: print 'Done.'
 
         ## skipped in test as it takes long time to calculate
-    #    print "Adding conservation data...",
+    #    if local: print "Adding conservation data...",
     #    self.d.addConservation()
-    #    print 'Done.'
+    #    if local: print 'Done.'
 
-        print "Adding surface density...",
+        if local: print "Adding surface density...",
         self.d.addDensity()
-        print 'Done.'
+        if local: print 'Done.'
 
         if local:
-
-            print self.d.m.info
+            print '\nData added to info record of model (key -- value):'
+            for k in self.d.m.info.keys():
+                print '%s -- %s'%(k, self.d.m.info[k])
+                
+            print '\nAdded atom profiles:'
+            print mdl.aProfiles
+            
+            print '\nAdded residue  profiles:'
+            print mdl.rProfiles
 
             ## check that nothing has changed
             print '\nChecking that models are unchanged by doping ...'

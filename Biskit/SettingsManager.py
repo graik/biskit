@@ -94,7 +94,7 @@ class SettingsManager:
 
 """
 
-    def __init__( self, fdefault, fuser, createmissing=False):
+    def __init__( self, fdefault, fuser, createmissing=False, verbose=1):
         """
         @param fdefault: default configuration file
         @type  fdedault: str
@@ -102,7 +102,10 @@ class SettingsManager:
         @type  fuser: str
         @param createmissing: create user config file if missing
         @type  createmissing: bool
+        @param verbose: verbosity level (default: 1)
+        @type  verbose: 1|0
         """
+        self.verbose = verbose
         self.fdefault = fdefault
         self.fuser = fuser
         self.createmissing = createmissing
@@ -131,7 +134,7 @@ class SettingsManager:
 
             if next.error > default.error:
 
-                B.EHandler.warning(\
+                if self.verbose: B.EHandler.warning(\
                     'User setting %s is reset to default (%r),\n\treason: %s'\
                     % (name, default.value, next.error)\
                     + '\n\tPlease check %s!' % self.fuser )
@@ -156,7 +159,7 @@ class SettingsManager:
                 cuser = puser.parse()
 
             except IOError, e:
-                B.EHandler.warning(
+                if self.verbose: B.EHandler.warning(
                     'Could not find file with user-defined settings in %s' \
                     % self.fuser, trace=0, error=0)
 
@@ -178,7 +181,8 @@ class SettingsManager:
 
             fpath = os.path.dirname(self.fuser)
             if not os.path.exists( fpath ):
-                B.EHandler.warning('Creating folder %s for Biskit settings.'\
+                if self.verbose:
+                    B.EHandler.warning('Creating folder %s for Biskit settings.'\
                                    %fpath )
                 os.mkdir( fpath )
 
@@ -234,7 +238,8 @@ class SettingsManager:
         self.collectSettings()
 
         if self.fusermissing and self.createmissing:
-            B.EHandler.warning('Creating new user configuration file %s.' \
+            if self.verbose:
+                B.EHandler.warning('Creating new user configuration file %s.' \
                                % self.fuser, trace=0, error=0)
             self.writeUserSettings( errorsonly=True )
 
@@ -264,7 +269,8 @@ class Test:
         """
         m = SettingsManager( T.projectRoot()+'/external/defaults/settings.cfg',
                              T.tempDir() + '/settings.cfg',
-                             createmissing=True)
+                             createmissing=True,
+                             verbose=local )
 
         ns = locals()             ## fetch local namespace
 

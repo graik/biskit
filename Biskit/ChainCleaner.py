@@ -283,6 +283,9 @@ class Test:
         f= open( cleaner.log.fname, 'r')
         result = f.readlines()
         f.close()
+
+        ## cleanup
+        T.tryRemove( cleaner.log.fname )
             
         return result
 

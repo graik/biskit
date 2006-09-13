@@ -38,7 +38,7 @@ import Numeric as N
 
 class Ramachandran:
 
-    def __init__( self, models, name=None, profileName='relAS'):
+    def __init__( self, models, name=None, profileName='relAS', verbose=1 ):
         """
         @param models: List of models display a Ramachandran plot for
         @type  models: [ PDBModel ] OR PDBModel
@@ -47,6 +47,8 @@ class Ramachandran:
         @param profileName: name of profile to use for coloring
                             (default: 'relAS')
         @type  profileName: str
+        @param verbose: verbosity level (default: 1)
+        @type  verbose: 1|0
         """
         if type(models) != type([]):
             models = [ models ]
@@ -61,6 +63,8 @@ class Ramachandran:
         self.profileName =  profileName
 
         self.name=name
+
+        self.verbose = verbose
 
         # calculate angles, profiles ...
         self.calc( models )
@@ -104,34 +108,34 @@ class Ramachandran:
         @param m: PDBModel to calculate data for
         @type  m: PDBModel
         """
-        print "Initiating PDBDope..."
+        if self.verbose: print "Initiating PDBDope..."
         d = PDBDope( m )
                 
         if not self.profileName in m.aProfiles.keys():
             
             if self.profileName in ['MS', 'AS', 'curvature', 'relAS', 'relMS']:
-                print "Adding SurfaceRacer profile...",
+                if self.verbose: print "Adding SurfaceRacer profile...",
                 d.addSurfaceRacer()
                             
             if self.profileName in ['relASA']:
-                print "Adding WhatIf ASA...",
+                if self.verbose: print "Adding WhatIf ASA...",
                 d.addASA()
                         
             if self.profileName in ['density']:
-                print "Adding surface density...",
+                if self.verbose: print "Adding surface density...",
                 d.addDensity()
                                      
         if not self.profileName in m.rProfiles.keys():
                     
             if self.profileName in ['cons_abs', 'cons_max', 'cons_ent']:
-                print "Adding conservation data...",
+                if self.verbose: print "Adding conservation data...",
                 d.addConservation()
                                                
             if self.profileName in ['ASA_total', 'ASA_sc', 'ASA_bb']:
-                print "Adding WhatIf ASA...",
+                if self.verbose: print "Adding WhatIf ASA...",
                 d.addASA()
       
-        print 'Done.'
+        if self.verbose: print 'Done.'
 
         ## convert atom profiles to average residue profile
         if self.profileName in m.aProfiles.keys():
@@ -350,7 +354,7 @@ class Test:
         mdl = [ traj[0], traj[11] ]
         mdl = [ md.compress( md.maskProtein() ) for md in mdl ]
 
-        rama = Ramachandran( mdl , name='test')
+        rama = Ramachandran( mdl , name='test', verbose=local)
 
         psi = N.array( rama.psi )
 

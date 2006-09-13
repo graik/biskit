@@ -136,20 +136,24 @@ class Test:
 
         outPath = T.tempDir()
 
-        cleaner = ChainCleaner( ChainSeparator( fname, outPath) )
+        cleaner = ChainCleaner( ChainSeparator( fname, outPath ) )
 
         writer = ChainWriter( outPath )
         
         all_msg = []
-        print 'Writing separated, cleaned chains to disk...'
         for i in range(3):
             msg = writer.writeChain( cleaner.next() )
-            print msg
+            if local:
+                print 'Writing separated, cleaned chain to disk...%i'%msg
             all_msg += [ msg ]
             
         if local:
             globals().update( locals() )
-            
+
+        ## cleanup
+        T.tryRemove( outPath + '/1A2P_waters.pdb' )
+        T.tryRemove( outPath + '/1A2A_seg.PDB' )
+                     
         return all_msg
         
         

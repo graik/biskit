@@ -149,7 +149,7 @@ class FuzzyCluster:
         return N.transpose(r / N.sum(r))
 
 
-    def go(self, errorthreshold, n_iterations=1e10, nstep=10):
+    def go(self, errorthreshold, n_iterations=1e10, nstep=10, verbose=1):
         """
         Start the cluestering. Run until the error is below the error
         treshold or the max number of iterations have been run.
@@ -178,7 +178,7 @@ class FuzzyCluster:
             error = self.error(msm, d2)
             rel_err = abs(1. - error/old_error)
             iteration = iteration+1
-            if not iteration % nstep:
+            if not iteration % nstep and verbose:
                 tools.errWrite( "%i %f\n" % (iteration, error) )
 
         self.centers = centers
@@ -259,10 +259,12 @@ class Test:
 
 	fuzzy = FuzzyCluster(x, n_cluster = 5, weight = 1.5)
 
-	centers = fuzzy.go(1.e-30, n_iterations=50, nstep=10)
-        
         if local:
+            centers = fuzzy.go(1.e-30, n_iterations=50, nstep=10)
             globals().update( locals() )
+            
+        else:
+            centers = fuzzy.go(1.e-30, n_iterations=50, nstep=10, verbose=0)
                               
         return centers
 

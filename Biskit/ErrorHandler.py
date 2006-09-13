@@ -25,7 +25,7 @@
 Default Error Handler for Biskit classes.
 """
     
-import Biskit.tools as tools
+import Biskit.tools as T
 from Biskit.LogFile import ErrLog
 from Biskit.Errors import HandledError, NormalError, FatalError
 
@@ -52,8 +52,8 @@ class ErrorHandler( object ):
         @raise FatalError: 
         """
         s = '\nFatal Error: '+str(message)
-        s += '\n\t' + tools.lastError() + '\n'
-        s += 'TraceBack: \n' + tools.lastErrorTrace() + '\n'
+        s += '\n\t' + T.lastError() + '\n'
+        s += 'TraceBack: \n' + T.lastErrorTrace() + '\n'
 
         self.log.add(s)
         raise FatalError
@@ -70,8 +70,8 @@ class ErrorHandler( object ):
         @raise NormalError: 
         """
         s = '\nError: '+str(message)
-        s += '\n\t' + tools.lastError()
-        s += '\nTraceBack: \n' + tools.lastErrorTrace() + '\n'
+        s += '\n\t' + T.lastError()
+        s += '\nTraceBack: \n' + T.lastErrorTrace() + '\n'
 
         self.log.add(s)
         raise NormalError
@@ -92,9 +92,9 @@ class ErrorHandler( object ):
         try:
             if trace: error = 1
             if error:
-                s += '\n\t' + tools.lastError() + '\n'
+                s += '\n\t' + T.lastError() + '\n'
             if trace:
-                s += '\nTraceBack: \n' + tools.lastErrorTrace() + '\n'
+                s += '\nTraceBack: \n' + T.lastErrorTrace() + '\n'
         except:
             pass
 
@@ -111,7 +111,7 @@ class Test:
     Test class
     """
     
-    def run( self, local=0  ):
+    def run( self, local=0 ):
         """
         run function test
         
@@ -136,6 +136,9 @@ class Test:
         if local:
             print 'An error log file was written to %s'%f_out
             globals().update( locals() )
+
+        ## cleanup
+        T.tryRemove( f_out )
             
         return  1
 

@@ -40,16 +40,11 @@
 ## !! AmberRstParser.py      |
 
 ##  settings.py          |
-##  settings_default.py  |
 ##  BisList.py           |
 ##  default_hosts.py     |- Nothing to test
 ##  Errors.py            |
 ##  hosts.py             |
 ##  __init__.py          |
-
-####  These should be tested via the master but it resides in ...
-## QualSlave.py       -- ../scripts/analysis/a_trajQuality.py!
-## StructureSlave.py  -- ../scripts/Biskit/pdb2model.py!
 
 ## difflib_old.py          |
 ## Table.py -- outdated -- |- Not our modules or should be removed
@@ -57,11 +52,9 @@
 
 ############################# DOCK ############################
 ## Dock/__init__.py
-## Dock/settings_default.py
 ## Dock/settings.py
 
 ############################# MOD #############################
-## Mod/settings_default.py
 ## Mod/settings.py
 ## Mod/__init__.py
 
@@ -87,6 +80,11 @@
 ##                                                         ##
 #############################################################
 
+## (V) - verbose module, try to fix
+## (P) - displays plot also when not executed localy
+## (D) - depends on another module calling an external application
+## (E) - is not using the Executor
+
 ###### BISKIT ########
 ## SettingsManager.py     None
 ## Blast2Seq.py           None
@@ -104,9 +102,9 @@
 ## Executor.py            None
 ## Fold_X.py              /rec/1A2P.pdb
 ## FuzzyCluster.py        None
-## gnuplot.py             None
+## gnuplot.py (P)         None
 ## hist.py                None
-## Hmmer.py               lig/1A19.pdb
+## Hmmer.py (E)           lig/1A19.pdb
 ## IcmCad.py              lig/1A19.pdb, lig_pcr_00/traj.dat
 ## LocalPath.py           None
 ## LogFile.py             None
@@ -121,24 +119,24 @@
 ## PDBCleaner.py          rec/1A2P_rec_original.pdb
 ## PDBDope.py (D)         com/1BGS.pdb
 ## PDBModel.py            rec/1A2P.pdb
-## plotUtils.py (D)       None
+## plotUtils.py (P)       None
 ## ProfileCollection.py   None
 ## Prosa2003.py           lig/1A19.pdb + rec/2A2P.pdb
-## Pymoler.py (D)         lig_pcr_00/traj.dat
-## Ramachandran.py        lig_pcr_00/traj.dat
+## Pymoler.py (D,V,E)     lig_pcr_00/traj.dat
+## Ramachandran.py (D)    lig_pcr_00/traj.dat
 ## ReduceCoordinates.py   com/1BGS.pdb
 ## rmsFit.py              lig_pcr_00/traj.dat
 ## SparseArray.py         None
 ## SurfaceRacer.py        lig/1A19.pdb
 ## surfaceRacerTools.py   lig/1A19.pdb
-## tools.py               rec/1A2P.pdb
+## tools.py (V)           rec/1A2P.pdb
 ## TrajCluster.py         lig_pcr_00/traj.dat
 ## Trajectory.py          lig_pcr_00/traj.dat
 ## TrajFlexMaster.py      lig_pcr_00/traj.dat
 ## TrajFlexSlave.py       -- tested via the master --
 ## WhatIf.py              com/1BGS.pdb
 ## XplorInput.py          None
-## Xplorer.py             lig/1A19.pdb, lig/1A19.psf
+## Xplorer.py (E)         lig/1A19.pdb, lig/1A19.psf
 ## StructureMaster.py     lig/1A19.pdb, rec/1A2P.pdb, com/1BGS.pdb
 ## StructureSlave.py      -- tested via the master --
 ## QualMaster.py          lig_pcr_00/traj.dat
@@ -153,13 +151,13 @@
 ## Dock/ComplexEvolvingList.py    dock/hex/complexes.cl
 ## Dock/ComplexEvolving.py        com/ref.complex
 ## Dock/ComplexList.py            dock/hex/complexes.cl
-## Dock/Complex.py                com/1BGS.psf com/lig.model com/rec.model
+## Dock/Complex.py (D)            com/1BGS.psf com/lig.model com/rec.model
 ## Dock/ComplexRandomizer.py      rec/1A2P.pdb, lig/1A19.pdb,
 ##                                  rec/1A2P.psf, lig/1A19.psf
 ## Dock/ComplexTraj.py            com/1BGS.pdb
-## Dock/ContactMaster.py          dock/hex/complexes.cl  com/ref.complex
+## Dock/ContactMaster.py (D)      dock/hex/complexes.cl  com/ref.complex
 ## Dock/ContactSlave.py           -- tested via the master --
-## Dock/Docker.py                 multidock/lig/1A19_models.dic,
+## Dock/Docker.py (E)             multidock/lig/1A19_models.dic,
 ##                                  multidock/rec/1A2P_model.dic
 ##                                  multidock/lig/1A19_15_7.model
 ##                                  multidock/lig/1A19_45_8.mod
@@ -170,7 +168,7 @@
 ## Dock/FixedList.py              None
 
 ############################# MOD #############################
-## Mod/Aligner.py              Mod/project/templates/t_coffe/*
+## Mod/Aligner.py (E)          Mod/project/templates/t_coffe/*
 ##                               (1DT7_A.alpha, 1K8U_A.alpha, 1MHO_.alpha,
 ##                                1NSH_A.alpha, 1J55_A.alpha, 1KSO_A.alpha,
 ##                                1MQ1_A.alpha, 1K2H_A.alpha, 1M31_A.alpha,
@@ -178,7 +176,7 @@
 ##                                Mod/project/templates/templates.fasta,
 ##                                Mod/project/sequences/nr.fasta,
 ##                                Mod/project/target.fasta
-## Mod/Modeller.py             Mod/project/templates/modeller/*
+## Mod/Modeller.py (E)        Mod/project/templates/modeller/*
 ##                                (1DT7_A.pdb, 1K2H_A.pdb, 1KSO_A.pdb,
 ##                                 1MHO_.pdb, 1MWN_A.pdb, 1J55_A.pdb,
 ##                                 1K8U_A.pdb, 1M31_A.pdb, 1MQ1_A.pdb,
@@ -215,9 +213,9 @@
 ##                                   target.B99990007.pdb, target.B99990008.pdb
 ##                                   target.B99990009.pdb, target.B99990010.pdb)
 ## Mod/CheckIdentities.py      Mod/project/t_coffee/final.pir_aln
-## Mod/AlignerMaster.py        same as Aligner.py
+## Mod/AlignerMaster.py (E)    same as Aligner.py
 ## Mod/AlignerSlave.py         -- tested via the master --
-## Mod/ModelMaster.py          same as Modell.py
+## Mod/ModelMaster.py (E)      same as Modell.py
 ## Mod/ModelSlave.py           -- tested via the master --
 ## Mod/modUtils.py             Mod/project/target.fasta
 ## Mod/SequenceSearcher.py     Mod/project/target.fasta
@@ -321,6 +319,7 @@ import unittest
 import Numeric as N
 import Biskit.tools as T
 
+import string
 
 #############################################################
 
@@ -339,9 +338,10 @@ class Biskit( unittest.TestCase ):
         Testing L{Biskit.SettingsManager}
         
         No testing done. Just let run trough
-        """       
+        """
         from Biskit.SettingsManager import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
         
 
@@ -351,6 +351,7 @@ class Biskit( unittest.TestCase ):
         """         
         from Biskit.FuzzyCluster import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( N.shape(t.run()), t.expected_result() )
 
         
@@ -360,6 +361,7 @@ class Biskit( unittest.TestCase ):
         """           
         from Biskit.Ramachandran import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( t.run(), t.expected_result(), 2 )
 
 
@@ -369,6 +371,7 @@ class Biskit( unittest.TestCase ):
         """    
         from Biskit.ColorSpectrum import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -378,6 +381,7 @@ class Biskit( unittest.TestCase ):
         """    
         from Biskit.ChainCleaner import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
         
@@ -387,6 +391,7 @@ class Biskit( unittest.TestCase ):
         """    
         from Biskit.ChainSeparator import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -396,6 +401,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.ChainWriter import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -405,6 +411,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.Blast2Seq import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )        
 
 
@@ -414,6 +421,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.decorators import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -423,6 +431,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.ReduceCoordinates import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
             
 
@@ -432,6 +441,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.rmsFit import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( N.sum(N.ravel(t.run())),
                                  N.sum(N.ravel(t.expected_result())),
                                  4 )
@@ -442,6 +452,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.SparseArray import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -451,6 +462,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.match2seq import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -460,6 +472,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.Trajectory import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
 
 
@@ -469,6 +482,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.EnsembleTraj import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
 
 
@@ -479,6 +493,7 @@ class Biskit( unittest.TestCase ):
         """      
         from Biskit.ErrorHandler import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
             
@@ -489,6 +504,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.MatrixPlot import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -498,6 +514,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.ModelList import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -507,6 +524,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.molTools import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( t.run(), t.expected_result(), 8 )
 
 
@@ -516,6 +534,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.molUtils import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )      
 
 
@@ -525,6 +544,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.PCRModel import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( t.run(), t.expected_result(), 8 )
 
 
@@ -534,6 +554,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.PDBCleaner import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( t.run(), t.expected_result(), 8 )
 
 
@@ -543,6 +564,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.PDBModel import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
 
 
@@ -553,6 +575,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.plotUtils import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -562,6 +585,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.ProfileCollection import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
         
 
@@ -572,6 +596,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.gnuplot import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -582,6 +607,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.tools import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -592,6 +618,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.surfaceRacerTools import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
         
 
@@ -602,6 +629,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.TrajCluster import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -612,6 +640,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.XplorInput import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )        
 
 
@@ -622,6 +651,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.DictList import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -632,6 +662,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.LocalPath import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -642,6 +673,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.LogFile import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -652,6 +684,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.ExeConfigCache import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
         
@@ -662,6 +695,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.ExeConfig import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -671,6 +705,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.hist import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
         
 
@@ -680,6 +715,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.mathUtils import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
 
 
@@ -690,6 +726,7 @@ class Biskit( unittest.TestCase ):
         """
         from Biskit.Xplorer import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -710,6 +747,7 @@ class Biskit_Applications( unittest.TestCase ):
         """
         from Biskit.DSSP import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -719,6 +757,7 @@ class Biskit_Applications( unittest.TestCase ):
         """
         from Biskit.Prosa2003 import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( N.sum(t.run()),
                                  N.sum(t.expected_result()),
                                  2 )
@@ -729,6 +768,7 @@ class Biskit_Applications( unittest.TestCase ):
         """
         from Biskit.Hmmer import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( N.sum(t.run()),
                                  N.sum(t.expected_result()),
                                  2 )
@@ -739,6 +779,7 @@ class Biskit_Applications( unittest.TestCase ):
         """
         from Biskit.Fold_X import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -748,6 +789,7 @@ class Biskit_Applications( unittest.TestCase ):
         """
         from Biskit.IcmCad import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( N.sum(t.run()),
                                  N.sum(t.expected_result()),
                                  2  )
@@ -759,6 +801,7 @@ class Biskit_Applications( unittest.TestCase ):
         """
         from Biskit.SurfaceRacer import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( N.sum(t.run()),
                                  N.sum(t.expected_result()),
                                  4 )
@@ -770,6 +813,7 @@ class Biskit_Applications( unittest.TestCase ):
         """
         from Biskit.Pymoler import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )        
 
 
@@ -779,6 +823,7 @@ class Biskit_Applications( unittest.TestCase ):
         """
         from Biskit.msms import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( t.run(), t.expected_result(), 8 )
 
 
@@ -789,6 +834,7 @@ class Biskit_Applications( unittest.TestCase ):
         """
         from Biskit.PDBDope import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -798,6 +844,7 @@ class Biskit_Applications( unittest.TestCase ):
         """        
         from Biskit.WhatIf import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( t.run(), t.expected_result(), 8 )
 
 
@@ -808,6 +855,7 @@ class Biskit_Applications( unittest.TestCase ):
         """
         from Biskit.Executor import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -831,6 +879,7 @@ class Biskit_Pvm( unittest.TestCase ):
         """
         from Biskit.TrajFlexMaster import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -841,6 +890,7 @@ class Biskit_Pvm( unittest.TestCase ):
         """       
         from Biskit.StructureMaster import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -851,6 +901,7 @@ class Biskit_Pvm( unittest.TestCase ):
         """       
         from Biskit.QualMaster import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
     
@@ -872,6 +923,7 @@ class Dock( unittest.TestCase ):
         """
         from Biskit.Dock.Complex import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -882,6 +934,7 @@ class Dock( unittest.TestCase ):
         """
         from Biskit.Dock.ComplexList import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
         
 
@@ -891,6 +944,7 @@ class Dock( unittest.TestCase ):
         """
         from Biskit.Dock.ComplexEvolving import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
         
@@ -900,6 +954,7 @@ class Dock( unittest.TestCase ):
         """
         from Biskit.Dock.ComplexEvolvingList import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -909,6 +964,7 @@ class Dock( unittest.TestCase ):
         """
         from Biskit.Dock.ComplexTraj import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
         
 
@@ -919,6 +975,7 @@ class Dock( unittest.TestCase ):
         """      
         from Biskit.Dock.ComplexModelRegistry import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -928,6 +985,7 @@ class Dock( unittest.TestCase ):
         """
         from Biskit.Dock.HexParser import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
         
 
@@ -937,6 +995,7 @@ class Dock( unittest.TestCase ):
         """
         from Biskit.Dock.hexTools import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
 
         
@@ -947,6 +1006,7 @@ class Dock( unittest.TestCase ):
         """    
         from Biskit.Dock.FixedList import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )   
 
 
@@ -956,6 +1016,7 @@ class Dock( unittest.TestCase ):
         """
         from Biskit.Dock.Analyzer import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
         
 
@@ -976,6 +1037,7 @@ class Dock_Applications( unittest.TestCase ):
         """        
         from Biskit.Dock.ComplexRandomizer import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -987,6 +1049,7 @@ class Dock_Applications( unittest.TestCase ):
         """
         from Biskit.Dock.Docker import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run( run=0 ), t.expected_result() )
 
 
@@ -1009,6 +1072,7 @@ class Dock_Applications_Long( unittest.TestCase ):
         """
         from Biskit.Dock.Docker import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run( run=1 ), t.expected_result() )
 
         
@@ -1030,6 +1094,7 @@ class Dock_Pvm( unittest.TestCase ):
         """           
         from Biskit.Dock.ContactMaster import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
 
 
@@ -1051,6 +1116,7 @@ class Mod( unittest.TestCase ):
         """
         from Biskit.Mod.SequenceSearcher import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(flavour='blastp'), t.expected_result() )
         self.assertEquals( t.run(flavour='blastpgp'), t.expected_result() )
 
@@ -1062,6 +1128,7 @@ class Mod( unittest.TestCase ):
         """       
         from Biskit.Mod.TemplateSearcher import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
         
@@ -1072,6 +1139,7 @@ class Mod( unittest.TestCase ):
         """       
         from Biskit.Mod.TemplateCleaner import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -1082,6 +1150,7 @@ class Mod( unittest.TestCase ):
         """       
         from Biskit.Mod.Aligner import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
         
 
@@ -1092,6 +1161,7 @@ class Mod( unittest.TestCase ):
         """       
         from Biskit.Mod.Modeller import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -1101,6 +1171,7 @@ class Mod( unittest.TestCase ):
         """           
         from Biskit.Mod.modUtils import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -1111,6 +1182,7 @@ class Mod( unittest.TestCase ):
         """       
         from Biskit.Mod.ValidationSetup import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -1121,6 +1193,7 @@ class Mod( unittest.TestCase ):
         """       
         from Biskit.Mod.CheckIdentities import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -1131,6 +1204,7 @@ class Mod( unittest.TestCase ):
         """       
         from Biskit.Mod.Benchmark import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )       
 
 
@@ -1141,6 +1215,7 @@ class Mod( unittest.TestCase ):
         """       
         from Biskit.Mod.Analyse import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
         
 
@@ -1164,6 +1239,7 @@ class Mod_Long( unittest.TestCase ):
         """       
         from Biskit.Mod.Aligner import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(run=1), t.expected_result() )
         
 
@@ -1175,6 +1251,7 @@ class Mod_Long( unittest.TestCase ):
         """       
         from Biskit.Mod.Modeller import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(run=1), t.expected_result() )
 
         
@@ -1197,6 +1274,7 @@ class Mod_Pvm( unittest.TestCase ):
         """       
         from Biskit.Mod.AlignerMaster import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
         
@@ -1208,6 +1286,7 @@ class Mod_Pvm( unittest.TestCase ):
         """       
         from Biskit.Mod.ModelMaster import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -1230,6 +1309,7 @@ class Mod_Pvm_Long( unittest.TestCase ):
         """       
         from Biskit.Mod.AlignerMaster import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run( run=1 ), t.expected_result() )
 
         
@@ -1241,6 +1321,7 @@ class Mod_Pvm_Long( unittest.TestCase ):
         """       
         from Biskit.Mod.ModelMaster import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run( run=1 ), t.expected_result() )
 
 
@@ -1258,6 +1339,7 @@ class Statistics( unittest.TestCase ):
         """
         from Biskit.Statistics.Density import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
 
 
@@ -1268,6 +1350,7 @@ class Statistics( unittest.TestCase ):
         """
         from Biskit.Statistics.lognormal import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertAlmostEquals( t.run(), t.expected_result(), 8 )
 
         
@@ -1288,6 +1371,7 @@ class Pvm( unittest.TestCase ):
         """       
         from Biskit.PVM.ExampleMaster import Test
         t = Test()
+        print 'Testing: ', t.__module__
         self.assertEquals( t.run(), t.expected_result() )
         
 

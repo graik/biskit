@@ -307,10 +307,7 @@ class Test:
             d = {'random':random.random(), 'name':'A'}
             l += [ d ]
 
-
         p = l.plotArray( 'index', 'random', 'random' )
-
-        
 
         if local:
             p.show()

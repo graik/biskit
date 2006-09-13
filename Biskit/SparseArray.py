@@ -752,6 +752,7 @@ class Test:
         sb.append( sa )
         
         if local:
+            print sa.toarray()
             globals().update( locals() )
             
         return sb.toarray()

@@ -55,7 +55,7 @@ class ContactMaster(TrackingJobMaster):
     def __init__(self, complexLst, chunks=5, hosts=cpus_all, refComplex=None,
                  updateOnly=0, niceness = nice_dic, force = [],
                  outFile = 'complexes_cont.cl', com_version=-1,
-                 show_output = 0, add_hosts=0 ):
+                 show_output = 0, add_hosts=0, verbose=1 ):
         """
         @param complexLst: input list
         @type  complexLst: ComplexList
@@ -81,12 +81,16 @@ class ContactMaster(TrackingJobMaster):
         @type  add_hosts: 1|0
         @param force: force update of given info keys
         @type  force: [str]
-
+        @param verbose: print progress infos (default: 1)
+        @type  verbose: 0|1
+        
         @raise BiskitError: if attempting to extract version from list
                             that is not of type ComplexEvolvingList.
         """
         self.outFile = outFile
 
+        self.verbose = verbose
+        
         ## set name for error log file
         self.ferror = os.path.dirname(
             t.absfile(self.outFile)) + '/contacting_errors.log'
@@ -126,9 +130,10 @@ class ContactMaster(TrackingJobMaster):
 
         complexDic, self.remainLst = self.__complexDic( complexLst )
 
-        t.flushPrint( '%i complexes total in list\n'%len(complexLst) )
-        t.flushPrint( '\tof which %i need updating,\n'%len(complexDic) )
-        t.flushPrint( '\tand %i are complete\n'%len(self.remainLst) )
+        if verbose:
+            t.flushPrint( '%i complexes total in list\n'%len(complexLst) )
+            t.flushPrint( '\tof which %i need updating,\n'%len(complexDic) )
+            t.flushPrint( '\tand %i are complete\n'%len(self.remainLst) )
 
         self.__check_models( complexLst )
 
@@ -158,9 +163,9 @@ class ContactMaster(TrackingJobMaster):
 
         TrackingJobMaster.__init__( self, complexDic, chunks,
                hosts, niceness, slave_path, show_output=show_output,
-               add_hosts=add_hosts )
+               add_hosts=add_hosts, verbose=verbose )
 
-        print "JobMaster initialized."
+        if verbose: print "JobMaster initialized."
 
 
     def __check_models( self, cl ):
@@ -262,7 +267,7 @@ class ContactMaster(TrackingJobMaster):
                           the sections that are identical in both complexes
         @type  normalCom: Complex
         """
-        t.flushPrint( 'Analyzing reference complex ... ')
+        if self.verbose: t.flushPrint( 'Analyzing reference complex ... ')
 
         NC = normalCom; RC = refCom
 
@@ -313,7 +318,7 @@ class ContactMaster(TrackingJobMaster):
         self.mask_rec = MU.packBinaryMatrix( self.mask_rec )
         self.mask_lig = MU.packBinaryMatrix( self.mask_lig )
 
-        t.flushPrint('done\n')
+        if self.verbose: t.flushPrint('done\n')
 
 
     def __ref_interface( self, RC, NC, res_contacts, mask_rec, mask_lig, bb=0):
@@ -370,12 +375,12 @@ class ContactMaster(TrackingJobMaster):
         """
         calculate contact mask of atom-reduced reference complex.
         """
-        t.flushPrint("get reduced reference contacts...")
+        if self.verbose: t.flushPrint("get reduced reference contacts...")
 
         c = self.reduced_refCom.atomContacts( 10, cache=1, map_back=0)
         self.c_ref_ratom_10 = MU.packBinaryMatrix( c )
 
-        t.flushPrint(' done\n')
+        if self.verbose: t.flushPrint(' done\n')
 
 
     def __toBeUpdated( self, com ):
@@ -413,7 +418,7 @@ class ContactMaster(TrackingJobMaster):
         update = {}
         remain = ComplexList()
 
-        t.flushPrint('setting up task list ')
+        if self.verbose: t.flushPrint('setting up task list ')
         for i in range( len( cl ) ):
 
             c = cl[i]
@@ -423,7 +428,7 @@ class ContactMaster(TrackingJobMaster):
             else:
                 remain += [c]
 
-        t.flushPrint(' done\n')
+        if self.verbose: t.flushPrint(' done\n')
 
         return update, remain
 
@@ -442,7 +447,8 @@ class ContactMaster(TrackingJobMaster):
         @param refCom: reference complex
         @type  refCom: Complex        
         """
-        t.flushPrint('preparing/saving coarse models of receptors&ligands...')
+        if self.verbose:
+            t.flushPrint('preparing/saving coarse models of receptors&ligands...')
 
         rec_models = cl.recModels()
         lig_models = cl.ligModels()
@@ -508,7 +514,7 @@ class ContactMaster(TrackingJobMaster):
 
         tempfile.tempdir = oldTemp
 
-        t.flushPrint(' done\n')
+        if self.verbose: t.flushPrint(' done\n')
 
 
     def getInitParameters(self, slave_tid):
@@ -548,7 +554,7 @@ class ContactMaster(TrackingJobMaster):
         Remove temporary files.
         Overrides TrackingJobMaster method
         """
-        print "Deleting temporary coarse rec/lig models..."
+        if self.verbose: print "Deleting temporary coarse rec/lig models..."
 
         for m in self.reduced_recs.values() + self.reduced_ligs.values():
             if not t.tryRemove( str( m.source ) ):
@@ -571,7 +577,7 @@ class ContactMaster(TrackingJobMaster):
 
         @raise BiskitError: if Complex version mixup
         """
-        print "Assembling new ComplexList...",
+        if self.verbose: print "Assembling new ComplexList...",
         self.complexLst = self.list_class( self.result.values() )
         self.result.clear()
 
@@ -580,7 +586,8 @@ class ContactMaster(TrackingJobMaster):
         ## update complexes in ComplexEvolvingList 
         if self.complexLst_original is not None:
 
-            print "Copying values into version %i ..." % self.com_version,
+            if self.verbose:
+                print "Copying values into version %i ..." % self.com_version,
 
             for cev, c in zip( self.complexLst_original, self.complexLst ):
 
@@ -596,7 +603,7 @@ class ContactMaster(TrackingJobMaster):
 
             self.complexLst = self.complexLst_original
 
-        print "\nSaving result to %s..." % self.outFile
+        if self.verbose: print "\nSaving result to %s..." % self.outFile
         t.Dump( self.complexLst, self.outFile )
 
         self.finished = 1
@@ -635,23 +642,24 @@ class Test:
         master = ContactMaster( lst, chunks = 3, hosts = hosts,
                                 niceness = niceness,
                                 show_output = local,
+                                verbose = local,
                                 refComplex = refcom,
                                 outFile = cl_out )
-
-        master.start()
-
-        ## wait for calculation to finish, then load contacted list
-        while not master.isFinished():
-            time.sleep(5)
         
-        cl_cont = master.getResult()
+        ## wait for calculation to finish, then load contacted list
+        cl_cont = master.calculateResult()
 
         if local:
+            print 'Any error are written to: %s'%master.ferror
             ## plot atom and residue contacts vs. rmsd
             p=cl_cont.plot( 'rms', 'fnac_10','fnarc_10' )
             p.show()
             
             globals().update( locals() )
+            
+        ## cleanup
+        t.tryRemove( master.outFile )
+        t.tryRemove( master.ferror )
         
         return N.sum(cl_cont.valuesOf('fnac_10'))
 

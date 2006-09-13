@@ -717,11 +717,11 @@ class Test:
         p.set( 't3', l, comment='masked test', option='z',
                mask=mask, default=99, asarray=0 )
 
-        print repr( p['t3'] )
+        if local: print repr( p['t3'] )
 
         p = p.take( range(0,10,2) )
 
-        print repr( p['t3'] )
+        if local: print repr( p['t3'] )
 
         p2 = ProfileCollection()
         p2.set( 't1', p['t1'], comment='overridden', changed=1 )

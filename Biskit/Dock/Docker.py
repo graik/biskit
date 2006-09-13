@@ -64,7 +64,7 @@ class Docker:
     def __init__( self, recDic, ligDic, recPdb=None, ligPdb=None,
                   comPdb=None, out='hex_%s', soln=512,
                   recChainId=None, ligChainId=None, macDock=None,
-                  bin=settings.hex_bin ):
+                  bin=settings.hex_bin, verbose=1 ):
         """
         @param recDic: receptor dictionary
         @type  recDic: dict
@@ -88,6 +88,8 @@ class Docker:
         @type  macDock: 1|0
         @param bin: path to HEX binary
         @type  bin: str
+        @param verbose: verbosity level (default: 1)
+        @type  verbose: 1|0
         """
         self.lock = RLock()
         self.lockMsg = Condition( self.lock )
@@ -96,6 +98,8 @@ class Docker:
         t.ensure( recDic, dict, )
         t.ensure( ligDic, dict, )
 
+        self.verbose = verbose
+        
         self.recDic = recDic
         self.ligDic = ligDic
 
@@ -223,7 +227,7 @@ class Docker:
             m = modelDic[k].clone()
 
             fhex = self.out + '/%s/%s_%03d_hex.pdb' % (subDir, m.pdbCode, k)
-            if os.path.exists( fhex ):
+            if os.path.exists( fhex ) and self.verbose:
                 print "using old ", os.path.split( fhex )[1]
 
             else:
@@ -232,7 +236,7 @@ class Docker:
                 self.__setChainID( m, idList )
 
                 hexTools.createHexPdb_single( m, fhex )
-                print "created ", fhex
+                if self.verbose: print "created ", fhex
 
             result[ k ] = fhex
 
@@ -263,15 +267,19 @@ class Docker:
         fout_base = self.out+'/%s_%i-%s_%i' % (rec.pdbCode, nRec,
                                                lig.pdbCode, nLig)
 
-        if os.path.exists( t.absfile( fout_base + '_hex.mac' ) ):
+        if os.path.exists( t.absfile( fout_base + '_hex.mac' ) ) and self.verbose:
             fmac = t.absfile( fout_base + '_hex.mac' )
             fout = t.absfile( fout_base + '_hex.out' )
             macro = self.macroDock
             print "Dock setup: using old ", os.path.split( fmac )[1]
         else:
+            silent=1
+            if self.verbose: silent=0
+            
             fmac, fout, macro = hexTools.createHexInp(recPdb,rec, ligPdb,lig,
                                    self.comPdb, outFile=fout_base,
-                                   macDock=self.macroDock, sol=self.soln)
+                                   macDock=self.macroDock, sol=self.soln,
+                                   silent=silent)
 
         if self.macroDock == None:
             self.macroDock = macro
@@ -306,7 +314,8 @@ class Docker:
 
         cmd = "ssh %s %s" % (host, cmd)
 
-        runner = RunThread( cmd, self, finp=finp, host=host, log=log )
+        runner = RunThread( cmd, self, finp=finp, host=host,
+                            log=log, verbose=self.verbose )
 
         self.lock.acquire()
 
@@ -429,6 +438,7 @@ class RunThread( Thread ):
         self.output = None
         self.status = 0
         self.result = None
+        self.verbose = verbose
 
 
     def run( self ):
@@ -440,7 +450,7 @@ class RunThread( Thread ):
         try:
             if not os.path.exists( self.fout ):
 
-                print "Executing: ", self.host, ' ', t.stripFilename(self.finp)
+                if self.verbose: print "Executing: ", self.host, ' ', t.stripFilename(self.finp)
 
                 cmd_lst = self.cmd.split()
 
@@ -565,7 +575,7 @@ class Test:
             
         recDic = t.Load( t.testRoot() + '/multidock/rec/1A2P_model.dic' )
 
-        d = Docker( recDic, ligDic, out = out_folder )
+        d = Docker( recDic, ligDic, out = out_folder, verbose=local )
 
         # dock rec 1 vs. lig 2 on localhost
         fmac1, fout = d.createHexInp( 1, 2 )
@@ -579,11 +589,14 @@ class Test:
         # fmac2, fout2= d.createHexInp( 1, 1 )
         # d.runHex( fmac2, log=0, ncpu=2, host='remote_host_name' )
 
-        print "ALL jobs submitted."
+        if local: print "ALL jobs submitted."
         
         if local:
             globals().update( locals() )
-            
+
+        ## cleanup
+        t.tryRemove( d.out, tree=1 )
+        
         return 1
 
 

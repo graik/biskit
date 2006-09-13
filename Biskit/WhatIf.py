@@ -144,7 +144,7 @@ NOLOG"""
         """
         Overrides Executor method
         """
-        return not self.error is None 
+        return self.error is None 
 
 
     def finish( self ):

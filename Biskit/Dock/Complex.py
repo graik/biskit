@@ -750,7 +750,7 @@ class Complex:
         # compare the two sequences
         seqdiff = SequenceMatcher(None, thisSeq, castSeq)
         seqDiff = seqdiff.get_opcodes()
-        print seqDiff
+        ## print seqDiff
 
         # decide which dimension to work on
         if not axis:
@@ -1173,8 +1173,11 @@ class Complex:
         if not 'foldX' in lig.info or lig.isChanged()[0]:
             d = PDBDope( lig )
             d.addFoldX()
-            self.lig_transformed.info = lig.info
-
+            try:
+                self.lig_transformed.info = lig.info
+            except:
+                pass
+            
         m = self.model()
 
         d = PDBDope( m )
@@ -1186,7 +1189,7 @@ class Complex:
 
         r = {}
         for key in e_com:
-            e = e_com[key] - (  e_lig[key] +  e_rec[key] )
+            e = e_com[key] - ( e_lig[key] + e_rec[key] )
             r[key] = e
 
         return r

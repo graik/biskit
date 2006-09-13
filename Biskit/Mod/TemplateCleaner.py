@@ -328,6 +328,9 @@ class Test:
             print 'TemplateCleaner log file written to: %s'%f_out
             globals().update( locals() )
             
+        ## cleanup
+        T.tryRemove( outfolder, tree=1 )
+        
         return 1
 
 
@@ -341,7 +344,6 @@ class Test:
         return 1
     
         
-
 if __name__ == '__main__':
 
     test = Test()

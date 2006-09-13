@@ -3149,11 +3149,11 @@ class Test:
         @rtype:  array
         """
         ## loading output file from X-plor
-        print 'Loading pdb file ..'
+        if local: print 'Loading pdb file ..'
         m = PDBModel( t.testRoot()+'/rec/1A2P.pdb')#"/com_wet/1BGS.pdb")
 
         ## remove solvent
-        print "removing waters.."
+        if local: print "removing waters.."
         m.removeRes(['TIP3', 'HOH'])
 
         ## X-plor doesn't write chainIds, so during the simulation
@@ -3165,25 +3165,27 @@ class Test:
         chainIdx = m.chainIndex()
 
         ## print some chain info
-        print 'The molecule consists of %i chains'% m.lenChains()
-        print '\tChainId \tFirst atom'
-        for i in chainIdx:
-            print '\t%s \t\t%i'%(m.atoms[i]['chain_id'], i)
+        if local:
+            print 'The molecule consists of %i chains'% m.lenChains()
+            print '\tChainId \tFirst atom'
+            for i in chainIdx:
+                print '\t%s \t\t%i'%(m.atoms[i]['chain_id'], i)
 
         ## iterate over all chains
         for c in range( 0, len( chainIdx ) ):
 
-            print "chain ", c, " starts with ", 
-            print m.atoms[ chainIdx[c] ]['residue_name'],
+            if local:
+                print "chain ", c, " starts with ", 
+                print m.atoms[ chainIdx[c] ]['residue_name'],
 
-            print " and has sequence: "
+                print " and has sequence: "
 
             ## mask out atoms of all other chains
             chainMask  = N.equal( m.chainMap( breaks=1 ), c )
-            print m.sequence( chainMask )
+            if local: print m.sequence( chainMask )
 
         ## test sorting
-        print "sorting atoms alphabetically..."
+        if local: print "sorting atoms alphabetically..."
         sort = m.argsort()
         m2 = m.sort( sort )
 

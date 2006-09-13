@@ -153,8 +153,8 @@ exit\n
         ## check the path to the potential files
         self.checkPotentials()
 
-        Executor.__init__( self, 'prosa2003', 
-                           template=self.inp, f_in=prosaInput, **kw )
+        Executor.__init__( self, 'prosa2003', template=self.inp,
+                           f_in=prosaInput, **kw )
 
 
     def execute( self, inp=None ):
@@ -189,13 +189,15 @@ exit\n
                 stdin = open( self.f_in )
             if self.f_out:
                 stdout= open( self.f_out, 'w' )
-            stderr= None
+            if self.f_err and self.catch_err:    
+                stderr= open( self.f_err, 'w' )                
 
         if self.verbose:
             self.log.add('executing: %s' % cmd)
             self.log.add('in folder: %s' % self.cwd ) 
             self.log.add('input:  %r' % stdin )
             self.log.add('output: %r' % stdout )
+            self.log.add('errors: %r' % stderr )
             self.log.add('wrapped: %r'% self.exe.shell )
             self.log.add('shell: %r'  % shellexe )
             self.log.add('environment: %r' % self.environment() )
@@ -203,7 +205,9 @@ exit\n
                 self.log.add('%i byte of input pipe' % len(str(inp)))
 
         try:
-            retcode = subprocess.call(self.exe.bin +' ' +self.f_in, shell=True)
+            retcode = subprocess.call( '%s %s > %s'\
+                                       %(self.exe.bin, self.f_in, self.f_out),
+                                       shell=True)
             if retcode < 0:
                 raise Prosa2003_Error, "Child was terminated by signal" \
                       + str(retcode)

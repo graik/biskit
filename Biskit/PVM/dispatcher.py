@@ -37,7 +37,7 @@ MSG_JOB_DONE = 2
 class JobMaster(PVMMasterSlave):
 
     def __init__(self, data, chunk_size, hosts, niceness, slave_script,
-                 show_output = 0, result = None, redistribute=1 ):
+                 show_output = 0, result = None, redistribute=1, verbose=1 ):
         """
         @param data: dict of items to be proessed {id:object}.
         @type  data: dict
@@ -56,8 +56,10 @@ class JobMaster(PVMMasterSlave):
         @param redistribute: at the end, send same job out several times
                              (default: 1)
         @type  redistribute: 1|0
+        @param verbose: verbosity level (default: 1)
+        @type  verbose: 1|0
         """
-        PVMMasterSlave.__init__(self)
+        PVMMasterSlave.__init__(self, verbose=verbose)
 
         ## change names of multiple hosts
         d = {}
@@ -95,7 +97,8 @@ class JobMaster(PVMMasterSlave):
         self.current_pos = 0
         self.show_output = show_output
 
-
+        self.verbose = verbose
+        
         if result is None:
             result = {}
 
@@ -112,7 +115,7 @@ class JobMaster(PVMMasterSlave):
 
         self.__finished = 0
 
-        print 'Processing %d items ...' % len(items)
+        if verbose: print 'Processing %d items ...' % len(items)
 
 
     def start(self):
@@ -229,7 +232,7 @@ class JobMaster(PVMMasterSlave):
             else:
                 self.bindMessages(slave_tid)
                 self.slaves[slave_tid] = d
-                print slave_tid, nickname, 'spawned.'
+                if self.verbose: print slave_tid, nickname, 'spawned.'
 
 
     def initializationDone(self, slave_tid):
@@ -291,7 +294,8 @@ class JobMaster(PVMMasterSlave):
             return
 
         nickname = self.slaves[slave_tid]['nickname']
-        print '%d (%s) %d items left' % (slave_tid, nickname, n_left)
+        if self.verbose:
+            print '%d (%s) %d items left'%(slave_tid, nickname, n_left)
 
         chunk = self.get_slave_chunk( queue )
 

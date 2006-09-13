@@ -120,6 +120,7 @@ class pdb2xyzrn( Executor ):
         @rtype: array, array
         """
         lines = output.split('\n')
+
         ## convert into lists that mslib will like
         xyzr = []
         r = []
@@ -147,7 +148,7 @@ class pdb2xyzrn( Executor ):
         """
         Overrides Executor method
         """
-        return not self.error is None 
+        return self.error is None 
 
 
     def finish( self ):
@@ -298,7 +299,7 @@ class MSMS( Executor ):
     """
 
 
-    def __init__( self, model, **kw ): 
+    def __init__( self, model, verbose=1, debug=1, **kw ): 
         """
         @param model: PDBModel
         @type  model:
@@ -331,11 +332,11 @@ class MSMS( Executor ):
         Overrides Executor method.
         """
         ## get radiia and name array
-        p2x = pdb2xyzrn(self.model)
+        p2x = pdb2xyzrn(self.model )
         r, n = p2x.run()
 
         xyz = self.model.xyz  
-        xyzr = N.concatenate(  ( xyz, N.transpose([r]) ) ,axis=1 )
+        xyzr = N.concatenate( ( xyz, N.transpose([r]) ) ,axis=1 )
 
         f = open( self.f_xyzrn, 'w' )
         i = 0
@@ -437,14 +438,14 @@ class Test:
         """
         from Biskit import PDBModel
 
-        ## Loading PDB...
+        if local: 'Loading PDB...'
         m = PDBModel( T.testRoot() + '/lig/1A19.pdb' )
         m = m.compress( m.maskProtein() )
 
-        ## get surfaces via the MSMS executable
-        ms = MSMS( m, debug=0, verbose=0 )
+        if local: 'Getting surfaces via the MSMS executable'
+        ms = MSMS( m, debug=1, verbose=1 )
 
-        ## Running
+        if local: 'Running'
         out, sesList, sasList, atmList = ms.run()
         
         if local:

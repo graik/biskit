@@ -36,7 +36,8 @@ class AlignerMaster(TrackingJobMaster):
     slave_script =  projectRoot() + '/Biskit/Mod/AlignerSlave.py'
 
     def __init__(self, hosts, folders, pdbFolder=None, fastaTemplates=None,
-                 fastaSequences=None, fastaTarget=None, ferror=None, **kw):
+                 fastaSequences=None, fastaTarget=None, ferror=None,
+                 verbose=1, **kw):
         """
         @param hosts: list of host-names
         @type  hosts: [str]
@@ -52,6 +53,8 @@ class AlignerMaster(TrackingJobMaster):
         @type  fastaTarget: str
         @param ferror: filename to output errors from the Slave
         @type  ferror: str
+        @param verbose: verbosity level (default: 1)
+        @type  verbose: 1|0 
         @param kw: additional TrackingJobMaster arguments::
             chunk_size   - int, number of items that are processed per job
             niceness     - {str_host-name: int_niceness}
@@ -60,7 +63,7 @@ class AlignerMaster(TrackingJobMaster):
             add_hosts    - 1|0, add hosts to PVM before starting [1]
         @type kw: param=value
         """
-
+        self.verbose = verbose
         self.folders = folders
         self.pdbFolder = pdbFolder 
         self.fastaTemplates = fastaTemplates 
@@ -73,7 +76,8 @@ class AlignerMaster(TrackingJobMaster):
         TrackingJobMaster.__init__(self, data=data, chunk_size=1,
                                    hosts=hosts,
                                    slave_script=self.slave_script,
-                                   redistribute=0, **kw)
+                                   redistribute=0,
+                                   verbose=verbose, **kw)
 
 
     def __dir_or_none( self, folder, filename ):
@@ -200,18 +204,22 @@ class Test:
         shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
                      outfolder  )
 
-        master = AlignerMaster(folders=[outfolder],
-                               ferror=outfolder+'/AlignErrors.out',
-                               hosts=hosts.cpus_all[ : 5 ],
-                               show_output=1)
+        master = AlignerMaster( folders=[outfolder],
+                                ferror=outfolder+'/AlignErrors.out',
+                                hosts=hosts.cpus_all[ : 5 ],
+                                show_output=local,
+                                verbose=local )
 
         if run:
             r = master.calculateResult()
-            print 'The alignment result can be found in %s/t_coffee'%outfolder
+            if local: print 'The alignment result can be found in %s/t_coffee'%outfolder
             
         if local:
-                globals().update( locals() )
+            globals().update( locals() )
                 
+        ## cleanup
+        T.tryRemove( outfolder, tree=1 )
+        
         return 1
 
 
