@@ -29,124 +29,89 @@ Return sequence identity
 @note: argely obsolete - use BioPython instead
 """
 
-import tools as T       # errWriteln()
-import commands         # getstatusoutput
-import re               # reg. Expressions
-import os		# os.remove()
-import settings
+from Biskit import Executor, TemplateError
+import tools as T          
+import tempfile, re
+import os.path
+from Biskit import BiskitError
 
-##################################################
-# methods
 
-class Blast2Seq:
+class Blast2SeqError( BiskitError ):
+    pass
+
+
+class Blast2Seq( Executor ):
     """
     Determine sequence identity between 2 protein sequences
     """
 
-    def __init__(self):
-        self._definePatterns()
-        if self._fileInPath('bl2seq'):
-            self.blastBin = 'bl2seq'
-        else:
-            self.blastBin = settings.bl2seq_bin
-        self.blastout = ''
-        self.inp1 = '/tmp/seq1.fasta'
-        self.inp2 = '/tmp/seq2.fasta'
-
-
-    def _fileInPath(self, fname):
+    def __init__(self, seq1, seq2, **kw ):
         """
-        Check if fname exists anywhere in system path.
-
-        @param fname: filename
-        @type  fname: str
-
-	@return: file status
-	@rtype: 1|0
-        """
-        paths = os.environ['PATH'].split( ":" )
-
-        for p in paths:
-            if os.path.exists( p + '/'+fname ):
-                return 1
-
-        return 0
-
-
-    def _storeSequences(self, seq1, seq2):
-        """
-        create temporary files for bl2seq
-
-	@param seq1: sequence string
+        @param seq1: sequence string
 	@type  seq1: str
 	@param seq2: sequence string
-	@type  seq2: str	
+	@type  seq2: str
+        """
+        self.seq1 = seq1
+        self.seq2 = seq2
+        
+        self.inp1 = tempfile.mktemp('_seq1.fasta')
+        self.inp2 = tempfile.mktemp('_seq2.fasta')
+
+        # Blast Identities and Expext value
+        self.ex_identity = re.compile('.+ Identities = (\d+)/(\d+) ') 
+        self.ex_expect = re.compile('.+ Expect = ([\d\-e\.]+)')
+
+        blastcmd = '-i %s -j %s  -M BLOSUM62 -p blastp -F F'\
+                   %(self.inp1, self.inp2)
+
+        Executor.__init__( self, 'bl2seq', blastcmd, catch_out=1, **kw )
+
+
+    def prepare( self ):
+        """
+        create temporary fasta files for bl2seq	
         """
         f1 = open(self.inp1, 'w')
         f2 = open(self.inp2, 'w')
-        f1.write(">Sequence 1\n"+seq1)
-        f2.write(">Sequence 2\n"+seq2)
+        f1.write(">Sequence 1\n"+self.seq1)
+        f2.write(">Sequence 2\n"+self.seq2)
         f1.close()
         f2.close()
 
 
-    def _cleanup(self):
+    def cleanup(self):
         """
         remove temporary files
         """
-        try:
-            os.remove(self.inp1)
-            os.remove(self.inp2)
-        except:
-            T.errWriteln("Blast2Seq._cleanup(): Error while removing temporary files.")
+        Executor.cleanup( self )
+        
+        if not self.debug:
+            T.tryRemove( self.inp1 )
+            T.tryRemove( self.inp2 )
 
 
-    def runBlast(self, seq1, seq2):
-        """
-        Perform Blast search of seq against other sequence.
-
-	@param seq1: sequence string
-	@type  seq1: str
-	@param seq2: sequence string
-	@type  seq2: str
-
-	@return: blast results, e.g. {'aln_id':1.0, 'aln_len':120}
-	@rtype: dict
-        """
-	# create temp files
-        self._storeSequences(seq1, seq2)
-	
-        # IDENTITY matrix supplied externally
-        blastcmd = self.blastBin + ' -i ' + self.inp1 + ' -j ' + self.inp2 +\
-                   ' -M BLOSUM62 -p blastp -F F '
-        (status, blastout) = commands.getstatusoutput(blastcmd)
-	
-	# remove temp files
-        self._cleanup()
-	
-        return  self.filterBlastHit(blastout)
-
-
-    def _definePatterns(self):
-        """
-        Pre-compile RegEx patterns 
-        """
-	# Blast Identities and Expext value
-        self.ex_identity = re.compile('.+ Identities = (\d+)/(\d+) ') 
-        self.ex_expect = re.compile('.+ Expect = ([\d\-e\.]+)')
-
-
-    def filterBlastHit( self, hitStr):
+    def filterBlastHit( self ):
         """
         Extract sequence identity and overlap length from one single
         bl2seq hit
 
-	@param hitStr: blast result file
-	@type  hitStr: str
-
 	@return: blast results, e.g. {'aln_id':1.0, 'aln_len':120}
 	@rtype: dict
 	"""
+        ## check that the outfut file is there and seems valid
+        if not os.path.exists( self.f_out ):
+            raise Blast2SeqError,\
+                  'Hmmersearch result file %s does not exist.'%self.f_out
+        
+        if T.fileLength( self.f_out ) < 10:
+            raise Blast2SeqError,\
+                  'Hmmersearch result file %s seems incomplete.'%self.f_out
+        
+        out = open( self.f_out, 'r' )
+        hitStr = out.read()
+        out.close()
+        
 	# get rid of line breaks
         hitStr = hitStr.replace( '\n', '#' )
 	
@@ -163,6 +128,14 @@ class Blast2Seq:
             return {}
 
 
+    def finish( self ):
+        """
+        Overrides Executor method
+        """
+        Executor.finish( self )
+        self.result = self.filterBlastHit( )
+
+        
 #############
 ##  TESTING        
 #############
@@ -172,7 +145,6 @@ class Test:
     Test class
     """
 
-    
     def run( self, local=0 ):
         """
         run function test
@@ -184,11 +156,11 @@ class Test:
         @return: balast alignment result
         @rtype: dict
         """
-        blaster = Blast2Seq()
+        blaster = Blast2Seq("AAAFDASEFFGIGHHSFKKEL",
+                            "AAAFDASEFFGIGHHSAKK") 
 
-        result = blaster.runBlast("AAAFDASEFFGIGHHSFKKEL",
-                                  "AAAFDASEFFGIGHHSAKK")
-
+        result = blaster.run()
+        
         if local:
             print result
             globals().update( locals() )
