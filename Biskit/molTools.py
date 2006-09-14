@@ -158,6 +158,39 @@ def xyzOfNearestCovalentNeighbour( i, model ):
     return resModel.xyz[ pos_shortest ]
 
 
+def fasta( m , start=0, stop=None ):
+    """
+    Extract fasta sequence from model.
+
+    @param m: model
+    @type  m: PDBModel
+    @param start: first residue
+    @type  start: int
+    @param stop: last residue
+    @type  stop: int
+
+    @return: fasta formated sequence and PDB code
+    @rtype: string
+    """
+    if not stop:
+        stop = m.lenResidues()
+
+    s = m.sequence()[start:stop]
+
+    n_chunks = len( s ) / 80
+
+    result = ">%s \n" % m.pdbCode
+
+    for i in range(0, n_chunks+1):
+
+        if i * 80 + 80 < len( s ):
+            chunk = s[i * 80 : i * 80 + 80]
+        else:
+            chunk = s[i * 80 :]
+
+        result += chunk
+    return  result, m.pdbCode
+
 
 #############
 ##  TESTING        
