@@ -1,9 +1,9 @@
 [BINARY]
 
-comment= awk script (thet comes with msms) pdb_to_xyzrn to extract names and radii.
+comment=Hmmer http://hmmer.janelia.org/
 
 ## binary
-bin=gpdb_to_xyzrn
+bin=hmmpfam
 
 ## working directory
 cwd=
