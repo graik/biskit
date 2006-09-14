@@ -28,13 +28,17 @@ Search Hmmer Pfam database and retrieve conservation data.
 
 import tempfile
 import os, re, string
-import types
+import types, os.path
 import mathUtils as math
 import Numeric as N
 import molUtils
 import settings
 import Biskit.Mod.modUtils as MU
 from Biskit import BiskitError
+import Biskit.tools as T
+import Biskit.molTools as MT
+from Biskit import Executor, TemplateError
+
 
 ## executables
 hmmpfamExe = settings.hmmpfam_bin
@@ -44,51 +48,405 @@ hmmindexExe = settings.hmmindex_bin
 hmmDatabase = settings.hmm_db
 
 
-def hmmEmm2Prob( nullEmm, emmScore ):
-    """
-    Convert HMM profile emmisiion scores into emmission probabilities
-
-    @param nullEmm: null scores
-    @type  nullEmm: array
-    @param emmScore: emmission scores
-    @type  emmScore: array
-
-    @return: null and emmission probabilities, for each amino acid
-             in each position
-    @rtype:  array( len_seq x 20 ), array( 1 x 20 )    
-    """
-    ## Null probabilities: prob = 2 ^ (nullEmm / 1000) * 1/len(alphabet)
-    nullProb = N.power( 2, N.array( nullEmm )/1000.0 )*(1./20)
-
-    ## Emmission probabilities: prob = nullProb 2 ^ (nullEmm / 1000)
-    emmProb = nullProb * N.power( 2, ( emmScore/1000.0) )
-
-    return emmProb, nullProb
 
 
-def entropy( emmProb, nullProb ):
-    """
-    calculate entropy for normalized probabilities scaled by aa freq.
-    emmProb & nullProb is shape 1,len(alphabet)
-
-    @param emmProb: emmission probabilities
-    @type  emmProb: array
-    @param nullProb: null probabilities
-    @type  nullProb: array
-
-    @return: entropy value
-    @rtype:  float
-    """
-    ## remove zeros to avoid log error
-    emmProb = N.clip(emmProb, 1.e-10, 1.)
-
-    return N.sum( emmProb * N.log(emmProb/nullProb) )
 
 
 class HmmerError( BiskitError ):
     pass
 
 
+class HmmerdbIndex( Executor ):
+    """
+    Checks if the hmm database has been indexed or not,
+    if not indexing will be done.
+    """
+    
+    def __init__( self, hmmdb, verbose=1, **kw ):
+        """
+        @param hmmdb: Pfam hmm database
+        @type  hmmdb: str
+        """
+        self.verbose = verbose
+        
+        if not os.path.exists(hmmdb+'.ssi'):
+            if self.verbose:
+                print 'HMMINDEX: Indexing hmm database. This will take a while'
+
+            Executor.__init__( self, 'hmmindex', args='%s'%hmmdb, **kw )
+            
+            self.run()
+
+
+class HmmerSearch( Executor ):
+    """
+    Search hmm database (using the hmmpfam program) with a sequence
+    in fasta format.
+    If the profile names have been provided - skip the search and
+    only write the temporary sequence files.
+    """
+
+    def __init__( self, target, hmmdb, noSearch=None, verbose=1, **kw ):
+        """
+        @param target: sequence 
+        @type  target: PDBModel or fasta file
+        @param hmmdb: Pfam hmm database
+        @type  hmmdb: str
+        @param noSearch: don't perform a seach
+        @type  noSearch: 1 OR None
+        """
+        self.hmmdb = hmmdb
+        self.target = target
+        
+        self.fastaID = ''
+        self.fName = tempfile.mktemp('.fasta')
+        self.verbose = verbose
+        
+        noSearch = 0
+        if noSearch:
+            if self.verbose:
+                print 'Profiles provided - No search will be performed.'
+            return None
+        
+        ## find matching hmm profiles
+        if self.verbose:
+            print '\nSearching hmm database, this will take a while...'
+
+        Executor.__init__( self, 'hmmpfam', catch_out=1,
+                           args=' %s %s'%(hmmdb, self.fName), **kw )
+
+           
+    def prepare( self ):
+        """
+        If the target id a PDBModel its sequence will be written
+        to disc as a fasta file.
+        If it is a fasta file the path to the file will be passed on.
+        """
+        ## if target is a PDBModel
+        if type(self.target) == types.InstanceType:
+            fastaSeq, self.fastaID = MT.fasta( self.target )
+            ## write fasta sequence file
+            seq = open( self.fName, 'w' )
+            seq.write( fastaSeq )
+            seq.close()
+
+        ## else assume it is a fasta sequence file   
+        else:
+            if MU.verify_fasta(self.target):
+                self.fName = self.target
+
+
+    def parse_result( self ):
+        """
+        Parse the output from hmmpfam.
+        
+        @return: dictionary witn profile names as keys and a list of
+                 lists containing information about the range where the
+                 profile matches the sequence
+        @rtype: dict, [list]
+        """
+        matches = {}
+        hits = []
+
+        ## check that the outfut file is there and seems valid
+        if not os.path.exists( self.f_out ):
+            raise HmmerError,\
+                  'Hmmersearch result file %s does not exist.'%self.f_out
+        
+        if T.fileLength( self.f_out ) < 10:
+            raise HmmerError,\
+                  'Hmmersearch result file %s seems incomplete.'%self.f_out 
+
+        try:
+            out = open( self.f_out, 'r' )
+            while 1:
+                l = out.readline()
+                ## get names and descriptions of matching profiles
+                if re.match('^-{8}\s{7,8}-{11}.+-{3}$', l):
+                    m = string.split( out.readline() )
+                    while len(m) != 0:
+                        matches[m[0]] =  m[1:] 
+                        m = string.split( out .readline() )
+
+                ## get hits, scores and alignment positions
+                if re.match('^-{8}\s{7,8}-{7}\s-{5}\s-{5}.+-{7}$', l):
+                    h = string.split( out.readline() )
+                    while len(h) != 0:
+                        hits += [ h ] 
+                        h = string.split( out.readline() )
+                    break
+                
+        except:
+            raise HmmerError,\
+                  'ERROR parsing hmmpfam search result: %s'%self.f_out
+        
+        out.close() 
+
+        return matches, hits
+        
+
+    def finish( self ):
+        """
+        Overrides Executor method
+        """
+        Executor.finish( self )
+        self.result = self.parse_result( )
+
+
+
+class HmmerProfile( Executor ):
+    """
+    Get the hmm profile with name hmmName from hmm databse
+    (using the program hmmfetch).
+    """
+    
+    def __init__( self, hmmName, hmmdb, verbose=1, **kw ):
+        """
+        @param hmmName: hmm profile name
+        @type  hmmName: str
+        @param hmmdb: Pfam hmm database
+        @type  hmmdb: str
+        """
+        self.hmmName = hmmName
+
+        self.f_out = tempfile.mktemp('.hmm')
+
+        self.verbose = verbose
+        
+        Executor.__init__( self, 'hmmfetch',
+                           args=' %s %s'%(hmmdb, hmmName), **kw )
+
+        
+    def parse_result( self ):
+        """
+        Extract some information about the profile as well as the
+        match state emmission scores. Keys of the returned dictionary::
+          'AA', 'name', 'NrSeq', 'emmScore', 'accession',
+          'maxAllScale', 'seqNr', 'profLength', 'ent', 'absSum'
+          
+        @return: dictionary with warious information about the profile
+        @rtype: dict
+        """
+        ## check that the outfut file is there and seems valid
+        if not os.path.exists( self.f_out ):
+            raise HmmerError,\
+                  'Hmmerfetch result file %s does not exist.'%self.f_out
+        
+        if T.fileLength( self.f_out ) < 10:
+            raise HmmerError,\
+                  'Hmmerfetch result file %s seems incomplete.'%self.f_out
+        
+        profileDic = {}
+
+        ## read result
+        hmm = open( self.f_out, 'r')
+        out = hmm.read()
+        hmm.close()
+
+        ## collect some data about the hmm profile
+        profileDic['name'] =  self.hmmName 
+        profileDic['profLength'] = \
+                  int( string.split(re.findall('LENG\s+[0-9]+', out)[0])[1] )
+        profileDic['accession'] = \
+                  string.split(re.findall('ACC\s+PF[0-9]+', out)[0])[1] 
+        profileDic['NrSeq'] = \
+                  int( string.split(re.findall('NSEQ\s+[0-9]+', out)[0])[1] )
+        profileDic['AA'] = \
+              string.split(re.findall('HMM[ ]+' + '[A-Y][ ]+'*20, out)[0] )[1:]
+
+        ## collect null emmission scores
+        pattern = 'NULE[ ]+' + '[-0-9]+[ ]+'*20
+        nullEmm = [ float(j) for j in string.split(re.findall(pattern, out)[0])[1:] ]
+
+        ## get emmision scores
+        prob=[]
+        for i in range(1, profileDic['profLength']+1):
+            pattern = "[ ]+%i"%i + "[ ]+[-0-9]+"*20
+            e = [ float(j) for j in string.split(re.findall(pattern, out)[0]) ]
+            prob += [ e ]
+
+        profileDic['seqNr'] = N.transpose( N.take( prob, (0,),1 ) )
+        profileDic['emmScore'] = N.array(prob)[:,1:]
+
+        ## calculate emission probablitities
+        emmProb, nullProb = self.hmmEmm2Prob( nullEmm, profileDic['emmScore'])
+
+        ent = [ N.resize( self.entropy(e, nullProb), (1,20) )[0] for e in emmProb ]
+        profileDic['ent'] = N.array(ent)
+
+        profileDic['ent'] = N.array(ent)
+
+        ###### TEST #####
+
+        proba = N.array(prob)[:,1:]
+
+##         # test set all to max score
+##         p = proba
+##         p1 = []
+##         for i in range( len(p) ):
+##             p1 += [ N.resize( p[i][N.argmax( N.array( p[i] ) )] , N.shape( p[i] ) ) ]
+##         profileDic['maxAll'] = p1
+
+        # test set all to N.sum( abs( probabilities ) )
+        p = proba
+        p2 = []
+        for i in range( len(p) ) :
+            p2 += [ N.resize( N.sum( N.absolute( p[i] )), N.shape( p[i] ) ) ]
+        profileDic['absSum'] = p2
+
+        # set all to normalized max score 
+        p = proba
+        p4 = []
+        for i in range( len(p) ) :
+            p_scale = (p[i] - N.average(p[i]) )/ math.SD(p[i])
+            p4 += [ N.resize( p_scale[N.argmax( N.array(p_scale) )] ,
+                              N.shape( p[i] ) ) ]
+        profileDic['maxAllScale'] = p4
+
+        return self.f_out, profileDic
+
+
+    def hmmEmm2Prob( self, nullEmm, emmScore ):
+        """
+        Convert HMM profile emmisiion scores into emmission probabilities
+
+        @param nullEmm: null scores
+        @type  nullEmm: array
+        @param emmScore: emmission scores
+        @type  emmScore: array
+
+        @return: null and emmission probabilities, for each amino acid
+                 in each position
+        @rtype:  array( len_seq x 20 ), array( 1 x 20 )    
+        """
+        ## Null probabilities: prob = 2 ^ (nullEmm / 1000) * 1/len(alphabet)
+        nullProb = N.power( 2, N.array( nullEmm )/1000.0 )*(1./20)
+
+        ## Emmission probabilities: prob = nullProb 2 ^ (nullEmm / 1000)
+        emmProb = nullProb * N.power( 2, ( emmScore/1000.0) )
+
+        return emmProb, nullProb
+
+
+    def entropy( self, emmProb, nullProb ):
+        """
+        calculate entropy for normalized probabilities scaled by aa freq.
+        emmProb & nullProb is shape 1,len(alphabet)
+
+        @param emmProb: emmission probabilities
+        @type  emmProb: array
+        @param nullProb: null probabilities
+        @type  nullProb: array
+
+        @return: entropy value
+        @rtype:  float
+        """
+        ## remove zeros to avoid log error
+        emmProb = N.clip(emmProb, 1.e-10, 1.)
+
+        return N.sum( emmProb * N.log(emmProb/nullProb) )
+
+
+    def cleanup( self ):
+        """
+        Clean up after external program has finished (failed or not).
+        Override, but call in child method!
+        """
+        if not self.keep_inp and not self.debug:
+            T.tryRemove( self.f_in )
+
+        if self.f_err and not self.debug:
+            T.tryRemove( self.f_err )
+
+            
+    def failed( self ):
+        """
+        Called if external program failed, override! 
+        """
+        raise HmmerError,\
+              'Hmmerfetch failed retrieving profile: %s'%self.hmmName
+
+        
+    def finish( self ):
+        """
+        Overrides Executor method
+        """
+        Executor.finish( self )
+        self.result = self.parse_result( )
+
+
+
+class HmmerAlign( Executor ):
+    """
+    Align fasta formated sequence to hmm profile (using hmmalign).
+    """
+    
+    def __init__( self, hmmFile, fastaFile, fastaID, verbose=1, **kw ):
+        """
+        @param hmmFile: path to hmm file (profile)
+        @type  hmmFile: str
+        @param fastaFile: path to fasta search sequence
+        @type  fastaFile: str
+        @param fastaID: fasta id of search sequence
+        @type  fastaID: str     
+        """
+        self.fastaID = fastaID
+        
+        self.verbose = verbose
+        
+        Executor.__init__( self, 'hmmalign',
+                           args=' -q %s %s'%(hmmFile, fastaFile), **kw )
+
+        
+    def parse_result( self ):
+        """
+        Align fasta formated sequence to hmm profile.
+        
+        @return: alignment and  matching hmm positions with gaps
+        @rtype: str, str
+        """
+        ## check that the outfut file is there and seems valid
+        if not os.path.exists( self.f_out ):
+            raise HmmerError,\
+                  'Hmmeralign result file %s does not exist.'%self.f_out
+        
+        if T.fileLength( self.f_out ) < 1:
+            raise HmmerError,\
+                  'Hmmeralign result file %s seems incomplete.'%self.f_out
+        
+        ## read result
+        hmm = open( self.f_out, 'r')
+        out = hmm.read()
+        hmm.close()
+        
+        ## extract search sequence
+        fastaSeq = re.findall( self.fastaID + '[ ]+[-a-yA-Y]+', out )
+        fastaSeq = string.join([ string.split(i)[1] for i in fastaSeq ], '')
+
+        ## extract hmm sequence
+        hmmSeq = re.findall( '#=[A-Z]{2}\s[A-Z]{2}\s+[.x]+', out )
+        hmmSeq = string.join([ string.strip( string.split(i)[2] ) for i in hmmSeq ], '')
+
+        return fastaSeq, hmmSeq
+
+
+    def failed( self ):
+        """
+        Called if external program failed, override! 
+        """
+        raise HmmerError,\
+              'hmmeralign failed aligning sequence file %s with profile %s'\
+              %(fastaFile ,self.hmmFile)
+    
+
+    def finish( self ):
+        """
+        Overrides Executor method
+        """
+        Executor.finish( self )
+        self.result = self.parse_result( )
+
+        
 class Hmmer:
     """
     Search Hmmer Pfam database and retrieve conservation score for model
@@ -108,7 +466,7 @@ class Hmmer:
         self.fastaID = ''
 
         tempfile.tempdir = self.tempDir
-        self.hmmFile = tempfile.mktemp('.hmm')
+        self.hmmFile = ''
         self.fastaFile = tempfile.mktemp('.fasta')
         self.sub_fastaFile = tempfile.mktemp('_sub.fasta')
 
@@ -118,44 +476,7 @@ class Hmmer:
         Checks if the hmm database has been indexed or not,
         if not indexing will be done.
         """
-        if not os.path.exists(self.hmmdb+'.ssi'):
-            if self.verbose:
-                print 'HMMINDEX: Indexing hmm database. This will take a while'
-            os.system(hmmindexExe + ' ' + self.hmmdb)
-
-
-    def fasta( self, m , start=0, stop=None ):
-        """
-        Extract fasta sequence from model.
-
-        @param m: model
-        @type  m: PDBModel
-        @param start: first residue
-        @type  start: int
-        @param stop: last residue
-        @type  stop: int
-        
-        @return: fasta formated sequence and PDB code
-        @rtype: string
-        """
-        if not stop:
-            stop = m.lenResidues()
-
-        s = m.sequence()[start:stop]
-
-        n_chunks = len( s ) / 80
-
-        result = ">%s \n" % m.pdbCode
-
-        for i in range(0, n_chunks+1):
-
-            if i * 80 + 80 < len( s ):
-                chunk = s[i * 80 : i * 80 + 80]
-            else:
-                chunk = s[i * 80 :]
-
-            result += chunk
-        return  result, m.pdbCode
+        idx = HmmerdbIndex( self.hmmdb, verbose=self.verbose )
 
 
     def searchHmmdb( self, target, noSearch=None ):
@@ -174,57 +495,11 @@ class Hmmer:
                  profile matches the sequence
         @rtype: dict, [list]
         """
-        ## if target is a PDBModel
-        if type(target) == types.InstanceType:
-            fastaSeq, self.fastaID = self.fasta( target )
-
-            ## write fasta sequence file
-            fName = self.fastaFile
-            seq = open( fName, 'w' )
-            seq.write( fastaSeq )
-            seq.close()
-
-        ## else assume it is a fasta sequence file   
-        else:
-            if MU.verify_fasta(target):
-                fName = target
-
-        if noSearch:
-            if self.verbose:
-                print 'Profiles provided - No search will be performed.'
-            return None
-
-        else:
-            ## find matching hmm profiles
-            if self.verbose:
-                print '\nSearching hmm database, this will take a while...'
-            out = os.popen( hmmpfamExe + ' ' + self.hmmdb + ' ' + fName )
-
-            matches = {}
-            hits = []
-            try:
-                while 1:
-                    l = out.readline()
-                    ## get names and descriptions of matching profiles
-                    if re.match('^-{8}\s{7,8}-{11}.+-{3}$', l):
-                        m = string.split( out.readline() )
-                        while len(m) != 0:
-                            matches[m[0]] =  m[1:] 
-                            m = string.split( out.readline() )
-
-                    ## get hits, scores and alignment positions
-                    if re.match('^-{8}\s{7,8}-{7}\s-{5}\s-{5}.+-{7}$', l):
-                        h = string.split( out.readline() )
-                        while len(h) != 0:
-                            hits += [ h ] 
-                            h = string.split( out.readline() )
-                        break
-
-            except:
-                print '\nERROR parsing hmmpfam search result.'
-
-            return matches, hits
-
+        search = HmmerSearch( target, self.hmmdb, verbose=self.verbose )
+        matches, hits = search.run()
+        
+        return matches, hits
+        
 
     def selectMatches( self, matches, hits, score_cutoff=60 ,
                        eValue_cutoff = 1e-8 ):
@@ -307,78 +582,8 @@ class Hmmer:
         @return: dictionary with warious information about the profile
         @rtype: dict
         """
-        profileDic = {}
-        ## get hmm profile
-        try:
-            out = os.popen( hmmfetchExe + ' ' + self.hmmdb \
-                            + ' ' + hmmName ).read()
-        except:
-            print 'ERROR getting profile ' + hmmName
-
-        ## write hmm profile to disc (to be used by hmmalign)
-        fName = self.hmmFile
-        hmm = open( fName, 'w' )
-        hmm.write(out)
-        hmm.close()
-
-        ## collect some data about the hmm profile
-        profileDic['name'] =   hmmName 
-        profileDic['profLength'] = \
-                  int( string.split(re.findall('LENG\s+[0-9]+', out)[0])[1] )
-        profileDic['accession'] = \
-                  string.split(re.findall('ACC\s+PF[0-9]+', out)[0])[1] 
-        profileDic['NrSeq'] = \
-                  int( string.split(re.findall('NSEQ\s+[0-9]+', out)[0])[1] )
-        profileDic['AA'] = \
-              string.split(re.findall('HMM[ ]+' + '[A-Y][ ]+'*20, out)[0] )[1:]
-
-        ## collect null emmission scores
-        pattern = 'NULE[ ]+' + '[-0-9]+[ ]+'*20
-        nullEmm = [ float(j) for j in string.split(re.findall(pattern, out)[0])[1:] ]
-
-        ## get emmision scores
-        prob=[]
-        for i in range(1, profileDic['profLength']+1):
-            pattern = "[ ]+%i"%i + "[ ]+[-0-9]+"*20
-            e = [ float(j) for j in string.split(re.findall(pattern, out)[0]) ]
-            prob += [ e ]
-
-        profileDic['seqNr'] = N.transpose( N.take( prob, (0,),1 ) )
-        profileDic['emmScore'] = N.array(prob)[:,1:]
-
-        ## calculate emission probablitities
-        emmProb, nullProb = hmmEmm2Prob( nullEmm, profileDic['emmScore'])
-
-        ent = [ N.resize( entropy(e, nullProb), (1,20) )[0] for e in emmProb ]
-        profileDic['ent'] = N.array(ent)
-
-
-        ###### TEST #####
-
-        proba = N.array(prob)[:,1:]
-
-##         # test set all to max score
-##         p = proba
-##         p1 = []
-##         for i in range( len(p) ):
-##             p1 += [ N.resize( p[i][N.argmax( N.array( p[i] ) )] , N.shape( p[i] ) ) ]
-##         profileDic['maxAll'] = p1
-
-        # test set all to N.sum( abs( probabilities ) )
-        p = proba
-        p2 = []
-        for i in range( len(p) ) :
-            p2 += [ N.resize( N.sum( N.absolute( p[i] )), N.shape( p[i] ) ) ]
-        profileDic['absSum'] = p2
-
-        # set all to normalized max score 
-        p = proba
-        p4 = []
-        for i in range( len(p) ) :
-            p_scale = (p[i] - N.average(p[i]) )/ math.SD(p[i])
-            p4 += [ N.resize( p_scale[N.argmax( N.array(p_scale) )] ,
-                              N.shape( p[i] ) ) ]
-        profileDic['maxAllScale'] = p4
+        profile = HmmerProfile( hmmName, self.hmmdb, verbose=self.verbose )
+        self.hmmFile, profileDic = profile.run()
 
         return profileDic
 
@@ -403,7 +608,7 @@ class Hmmer:
                             each repete
         @rtype: str, str, int, [int]
         """
-        fastaSeq, self.fastaID = self.fasta( model )
+        fastaSeq, self.fastaID = MT.fasta( model )
         fastaSeq = fastaSeq.split()[1]
         l = len(fastaSeq)
 
@@ -415,7 +620,7 @@ class Hmmer:
         for h in hits:
             start = h[0]-1
             stop = h[1]
-            sub_fastaSeq, self.fastaID = self.fasta( model, start, stop )
+            sub_fastaSeq, self.fastaID = MT.fasta( model, start, stop )
 
             ## write sub-fasta sequence file
             fName = self.sub_fastaFile
@@ -424,7 +629,10 @@ class Hmmer:
             sub_seq.close()
 
             ## get sub-alignmnet
-            sub_fastaSeq, sub_hmmSeq = self.subAlign( self.sub_fastaFile)
+            align = HmmerAlign( self.hmmFile, self.sub_fastaFile,
+                                self.fastaID, verbose=self.verbose)
+                  
+            sub_fastaSeq, sub_hmmSeq = align.run()
 
             ## remove position scorresponding to insertions in search sequence
             sub_fastaSeq, sub_hmmSeq, del_hmm  = \
@@ -758,7 +966,8 @@ class Test:
         ## search
         searchMatches, searchHits = hmmer.searchHmmdb( model )
         hmmNames = hmmer.selectMatches( searchMatches, searchHits )
-
+  ##      hmmNames = {'Barstar': [[1, 89]]}
+        
         cons = []
         result = None
 
@@ -810,56 +1019,8 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( local=0 ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
 
 
 
-## ####################################
-## ## Testing
-
-## if __name__ == '__main__':
-
-##     import tools as T
-##     from PDBModel import PDBModel
-
-##     print "Loading PDB..."
-##     m = PDBModel( T.testRoot()+'/lig/1A19.pdb')
-##     model = m.compress( m.maskProtein() )
-
-##     ## initiate and check database status
-##     a = Hmmer( hmmdb = settings.hmm_db )
-##     a.checkHmmdbIndex()
-
-##     ## scoring methods to use
-##     method = [ 'emmScore', 'ent', 'maxAll', 'absSum', 'maxAllScale' ]
-
-##     ## search
-##     searchMatches, searchHits = a.searchHmmdb( model )
-##     hmmNames = a.selectMatches( searchMatches, searchHits )
-
-##     cons = []
-##     result = None
-
-##     for name in hmmNames.keys():
-
-##         ## retrieve hmm model
-##         hmmDic = a.getHmmProfile( name )
-
-##         ## align sequence with model
-##         fastaSeq, hmmSeq, repete, hmmGap = a.align( model, hmmNames[ name ] )
-
-##         ## cast hmm model
-##         hmmDic_cast = a.castHmmDic( hmmDic, repete, hmmGap, method[0] )
-
-##         ## Hmmer profile match scores for sequence
-##         cons = a.matchScore( fastaSeq, hmmSeq, hmmDic_cast, method[0] )
-
-##         ## If there are more than one profile in the model, merge to one. 
-##         if result:
-##             result = a.mergeProfiles( result, cons )
-##         else:
-##             result = cons
-
-##     ## cleanup
-##     a.cleanup()
