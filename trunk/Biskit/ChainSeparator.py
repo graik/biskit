@@ -172,7 +172,6 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
         """
         chainCount = len(self.chains)
         matrix = 1.0 * N.zeros((chainCount,chainCount))
-        blast = Blast2Seq()
         chain_ids = []
 
         ## create identity matrix for all chains against all chains
@@ -185,7 +184,8 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
                 seq2 = ''.join( singleAA( self.chains[j].sequence() ) )
 
                 # compare the 2 sequences
-                id = blast.runBlast(seq1, seq2)
+                blast = Blast2Seq( seq1, seq2 )
+                id = blast.run()
                 if len(seq1) > len(seq2):           # take shorter sequence
                     # aln length at least half the length of the shortest sequenc
                     alnCutoff = len(seq2) * 0.5     
