@@ -139,7 +139,7 @@ exit\n
         ## temp files for prosa pdb file and prosa output file
         self.prosaPdbFile = tempfile.mktemp('_prosa2003.pdb')
         self.prosaOutput = tempfile.mktemp('_prosa2003.out')
-        self.temp_dir = tempfile.tempdir
+        self.temp_dir = T.tempDir()
 
         prosaInput = tempfile.mktemp('_prosa2003.inp')
 

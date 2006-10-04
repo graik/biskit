@@ -94,11 +94,8 @@ class TrajFlexMaster(TrackingJobMaster):
         @type  only_cross_member: 0|1
         """
         ## create temporary folder accessible to all slaves
-        tmp = tempfile.tempdir
-        tempfile.tempdir = settings.tempDirShared
-
-        self.outFolder = tempfile.mktemp('trajFlex_')
-        tempfile.tempdir = tmp
+        self.outFolder = tempfile.mktemp('trajFlex_',
+                                         dir=settings.tempDirShared )
         os.mkdir( self.outFolder )
 
         self.log      = log or ErrLog()

@@ -136,7 +136,7 @@ class AmberEntropist( AmberCrdEntropist ):
           nice     - int, nice level (default: 0)
           log      - Biskit.LogFile, program log (None->STOUT) (default: None)
         """
-        tempfile.tempdir = '/work'
+##         tempfile.tempdir = '/work'
 
         f_crd = crd or tempfile.mktemp('.crd')
         self.keep_crd = crd is not None
