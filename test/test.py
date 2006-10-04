@@ -22,15 +22,16 @@
 ## last $Date  $
 ## $Revision$
 
-import Biskit.Test as Test
-
 import unittest
 import re, sys
+
+import Biskit.Test as Test
 import Biskit.tools as T
+from Biskit import EHandler
 
 
 o = {'log':T.projectRoot()+'/test/test.log',
-     'verb':2,
+     'v':2,
      'tests': ['all', 'exclude_long'] }
 
 
@@ -38,8 +39,10 @@ def _use():
     print """
     Run unittest tests for biskit.
 
+    test.py [-tests |test1 test2 ..| -log |logfile| -v |verbosity|]
+
     log   - str, path to logfile that will be written
-    verb  - int, verbosity level
+    v     - int, verbosity level
     tests - [str], list of the test suits to be run, one or more of::
     
                biskit         - most Biskit modules
@@ -211,7 +214,7 @@ if __name__ == '__main__':
 ##          'tests': ['stat','biskit'] }
 
     log = T.absfile( o['log'] )
-    verb = T.toInt( o['verb'] )
+    verb = T.toInt( o['v'] )
 
 
     ################################
@@ -331,7 +334,7 @@ if __name__ == '__main__':
     
     ## print a summary
     print '\nSUMMARY:\n=======\n'
-    print 'A total of %i tests were run.'%passed
+    print 'A total of %i tests were run.' % (passed + len(failed) )
     print '   - %i passed'%passed    
     print '   - %i failed'%len(failed)
 
@@ -339,16 +342,20 @@ if __name__ == '__main__':
     if len(failed) > 0:
         for f in failed:
 
-            l = f.split()
-            m = l[1].strip('()').split('.')[-1] # strip off "Biskit.Test"
-            
-            # get failed test doc string
-            doc_str = vars()['Test'].__dict__[m].__dict__[l[0]].__doc__
+            try:
+                l = f.split()
+                m = l[1].strip('()').split('.')[-1] # strip off "Biskit.Test"
 
-            # parse module info from doc string
-            module = re.findall( 'L\{(Biskit[A-Za-z\._\s]*)\}', doc_str.strip() )
-            
-            print '      - test in module %s failed'%module[0]
+                # get failed test doc string
+                doc_str = vars()['Test'].__dict__[m].__dict__[l[0]].__doc__
+
+                # parse module info from doc string
+                module = re.findall( 'L\{(Biskit[A-Za-z\._\s0-9]*)\}', doc_str.strip() )
+
+                print '      - test in module %s failed'%module[0]
+
+            except IndexError, error:
+                EHandler.warning('cannot extract module name from docstring %s' % doc_str )
 
 
     
