@@ -160,7 +160,7 @@ class ExeConfig( object ):
         self.shell = 0
         self.shellexe = None
         self.pipes = 0
-        self.cwd = None#'./'
+        self.cwd = None   #'./'
 
         self.replaceEnv = 0
         self.env = None

@@ -465,10 +465,10 @@ class Hmmer:
 
         self.fastaID = ''
 
-        tempfile.tempdir = self.tempDir
+##         tempfile.tempdir = self.tempDir ## No! interferes with other modules
         self.hmmFile = ''
-        self.fastaFile = tempfile.mktemp('.fasta')
-        self.sub_fastaFile = tempfile.mktemp('_sub.fasta')
+        self.fastaFile = tempfile.mktemp('.fasta', dir=self.tempDir)
+        self.sub_fastaFile = tempfile.mktemp('_sub.fasta', dir=self.tempDir)
 
 
     def checkHmmdbIndex( self ):

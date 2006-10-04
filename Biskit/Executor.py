@@ -503,7 +503,7 @@ class Executor:
             if not inp and os.path.exists( self.f_in or '' ):
 
                 return open( self.f_in, 'r' ).read()
-            print '########', inp
+
             return inp
 
         ## no pipes and no input string
