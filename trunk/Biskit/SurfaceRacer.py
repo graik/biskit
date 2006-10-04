@@ -127,31 +127,17 @@ class SurfaceRacer( Executor ):
           log      - Biskit.LogFile, program log (None->STOUT) (default: None)
         """
 
-        ## FastSurf have to be run i the local directory where
-        ##   the application resides. Look for the application folder.
-        try:
-            if os.path.exists( S.surfaceracer_bin ):
-                dir = os.path.split(S.surfaceracer_bin)[0] +'/'
-        except:
-            if os.path.exists( T.projectRoot() +'/external/surface_racer_3'):
-                dir =  T.projectRoot() +'/external/surface_racer_3/'
-            else:
-                raise SurfaceRacer_Error, 'Cannot find SurfaceRacer directory. Set your path in ~/.biskit/settings.dat as surfaceracer_bin'
-
         Executor.__init__( self, 'surfaceracer', template=self.inp,\
-                           cwd=dir, **kw )
+                           **kw )
 
         self.model = model.clone( deepcopy=1 )
         self.model = self.model.compress( self.model.maskHeavy() )
 
-        ## temporary pdb-file
-        self.f_pdb = tempfile.mktemp( '_surfaceracer.pdb', self.cwd )
-        self.f_pdb_name = os.path.split(self.f_pdb)[1]
-
-        ## The SurfRace output file has the same name as the input
-        ## pdb, but with a txt extension.
-        self.f_out_name = self.f_pdb[:-3]+'txt'
-
+        ## will be filled in by self.prepare() after the temp folder is ready
+        self.f_pdb = None
+        self.f_pdb_name = None
+        self.f_out_name = None
+        
         ## parameters that can be changed
         self.probe = probe
         self.vdw_set = vdw_set
@@ -165,11 +151,64 @@ class SurfaceRacer( Executor ):
         self.ranMS_Cter = SRT.ranMS_C
         self.ranAS_Cter = SRT.ranAS_C
 
+        ## count failures
+        self.i_failed = 0
+
+
     def prepare( self ):
         """
         Overrides Executor method.
+        - link surfaceracer binary to temporary folder
+        - put cleaned up pdb into same folder
+        - adapt working directory and output names to same folder
+        (changes self.cwd, f_pdb, f_pdb_names, f_out_name)
         """
-        self.__prepareModel( self.model, self.f_pdb ) 
+        self.cwd = self.__prepareFolder()
+
+        self.f_pdb = tempfile.mktemp( '_surfaceracer.pdb', self.cwd )
+        self.f_pdb_name = os.path.split(self.f_pdb)[1]
+
+        ## The SurfRace output file has the same name as the input
+        ## pdb, but with a txt extension.
+        self.f_out_name = self.f_pdb[:-3]+'txt'
+
+        self.__prepareModel( self.model, self.f_pdb )
+
+
+    def __prepareFolder( self ):
+        """
+        The surfrace binary, radii files and the PDB have to be in the
+        current working directory. Otherwise we get a pretty silent
+        segmentation fault.
+
+        @return temp folder
+        @rtype str
+        """
+        try:
+            folder = T.tempDir()
+            binlnk = os.path.join( folder, self.exe.name )
+
+            if not os.path.exists( binlnk ):
+                os.symlink( self.exe.bin, binlnk )
+
+            radii_txt = T.projectRoot() + '/external/surface_racer_3/radii.txt'
+
+            target = os.path.join(folder, 'radii.txt')
+            if not os.path.exists( target ):
+                os.symlink( radii_txt, target )
+
+            self.exe.bin = binlnk
+
+            return folder + '/'
+
+        except OSError, error:
+            raise SurfaceRacer_Error, \
+                  'Error preparing temporary folder for SurfaceRacer\n'+\
+                  'Error: %r\n' % error +\
+                  'folder: %r\n' % folder +\
+                  'binary: %r\n' % self.exe.bin +\
+                  'binary link: %r' % binlnk 
+                                    
 
 
     def __prepareModel( self, model, f_pdb_out ):
@@ -349,9 +388,13 @@ class SurfaceRacer( Executor ):
         to terminate. The simplest remedy to this problem is to increase the
         probe radii with a very small number and rerun the calculation.
         """
-        self.probe = self.probe + 0.001
-        self.run()
-        
+        self.i_failed += 1
+
+        if self.i_failed < 2:
+            self.probe = self.probe + 0.001
+            self.run()
+
+        Executor.failed( self )
     
 #############
 ##  TESTING        
@@ -382,9 +425,13 @@ class Test:
         m = m.compress( m.maskProtein() )
 
         if local: print 'Starting SurfaceRacer'
+            
         x = SurfaceRacer( m, 1.4, vdw_set=1, debug=0, verbose=0 )
 
-        if local: print 'Running'
+        if local:
+            print 'Running (adding SurfaceRacer to local namespace as x)'
+            globals().update( locals() )
+            
         r = x.run()
 
         c= r['curvature']
