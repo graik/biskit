@@ -116,7 +116,7 @@ class Runner:
         self.__dict__.update( options )
 
         ## XPlor binary
-        self.xbin  = settings.xplor_bin
+        self.xbin  = settings.xplorpcr_bin
 
         ## will hold PID of xplor job
         self.pid = 0

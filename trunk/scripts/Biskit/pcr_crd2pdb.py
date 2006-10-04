@@ -75,7 +75,7 @@ class Runner:
         self.pdbCode = '"%s"' % self.getPdbCode()
 
         ## XPlor binary
-        self.xbin  = settings.xplor_bin
+        self.xbin  = settings.xplorpcr_bin
 
         ## template for xplor input
         self.ftemplate = absfile( projectRoot()+
