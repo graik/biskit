@@ -150,11 +150,11 @@ exit\n
         self.pot_lb = 0.
         self.pot_ub = 15.
 
-        ## check the path to the potential files
-        self.checkPotentials()
-
         Executor.__init__( self, 'prosa2003', template=self.inp,
                            f_in=prosaInput, **kw )
+
+        ## check the path to the potential files
+        self.checkPotentials()
 
 
     def execute( self, inp=None ):
