@@ -25,3 +25,5 @@ replaceEnv=0
 ## Empty entries mark variables that have to be specified from outside
 ##
 [ENVIRONMENT]
+
+MOLBROWSERPROHOME=
