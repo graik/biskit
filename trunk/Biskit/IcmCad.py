@@ -258,7 +258,9 @@ class Test:
         if local: print 'Starting ICM'
         x = IcmCad( m1, ms, debug=0, verbose=0 )
 
-        if local: print 'Running'
+        if local:
+            print 'Running'
+            globals().update( locals() )
         r = x.run()
 
         if local:
