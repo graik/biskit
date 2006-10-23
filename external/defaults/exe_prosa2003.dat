@@ -25,4 +25,4 @@ replaceEnv=1
 ## Empty entries mark variables that have to be specified from outside
 ##
 [ENVIRONMENT]
-PROSA_BASE = /Bis/shared/centos-3/prosa2003/ProSaData/
+PROSA_BASE =
