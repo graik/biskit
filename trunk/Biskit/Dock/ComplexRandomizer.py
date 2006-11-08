@@ -300,9 +300,9 @@ class Test:
             
             globals().update( locals() )
 
-        ## cleanup
-        t.tryRemove( f_pfb )
-        t.tryRemove( f_crd )
+            ## cleanup
+            t.tryRemove( f_pfb )
+            t.tryRemove( f_crd )
           
         return len(traj)
 
@@ -321,6 +321,6 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( local=1 ) == test.expected_result()
+    assert test.run( local=0 ) == test.expected_result()
 
 
