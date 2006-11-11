@@ -161,6 +161,10 @@ except:
     bigges = 0
     EHandler.warning('Missing biggles module -- MatrixPlot is not available.')
 
+    class MatrixPlot:
+        def __init__(self,matrix, mesh = 0, palette = "plasma", legend = 0):
+            raise ImportError, 'MatrixPlot depends on biggles module'
+
 
 #############
 ##  TESTING        
