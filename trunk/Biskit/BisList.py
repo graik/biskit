@@ -27,13 +27,19 @@ S{->} abstract base class (aka interface)
 
 import Numeric as N
 import types
-import biggles
 import copy
 import random
 
 import Biskit.tools as t
 from Biskit import EHandler
 from Errors import BiskitError
+
+try:
+    import biggles
+except:
+    bigges = 0
+    EHandler.warning('Missing biggles module -- plotting is not available.')
+
 
 class BisListError( BiskitError ):
     pass
@@ -540,6 +546,9 @@ class BisList:
         @return: Biggles.FramedPlot, display with show() !
         @rtype:  Biggles.FramedPlot
         """
+        if not biggles:
+            raise ImportError, 'biggles module could not be imported.'
+        
         if len(ykey) == 0:
             xkey, ykey = 'index', [ xkey ]
 
@@ -587,6 +596,9 @@ class BisList:
         @return: Biggles.FramedArray, display with show()
         @rtype: Biggles.FramedArray
         """
+        if not biggles:
+            raise ImportError, 'biggles module could not be imported.'
+        
         if len(ykey) == 0:
             xkey, ykey = 'index', [ xkey ]
 
