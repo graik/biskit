@@ -28,6 +28,7 @@ the same atom contents.
 from Biskit import ColorSpectrum as CS
 from Biskit.MatrixPlot import Legend
 from Biskit.PDBDope import PDBDope 
+from Biskit import EHandler
 
 import Biskit.mathUtils as MU
 import Biskit.tools as T
