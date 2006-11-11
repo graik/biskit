@@ -34,7 +34,12 @@ import Biskit.mathUtils as M
 import types
 import Numeric as N
 import Biskit.tools as T
-import biggles
+
+try:
+    import biggles
+except:
+    bigges = 0
+    EHandler.warning('Missing biggles module -- plotting is not available.')
 
 
 def traj2ensemble( traj, members=10 ):
@@ -457,6 +462,9 @@ class EnsembleTraj( Trajectory ):
         @return: biggles plot object
         @rtype: biggles.FramedArray()   
         """
+        if not biggles:
+            raise ImportError, 'biggles module could not be imported.'
+        
         rows = self.n_members / 2 + self.n_members % 2
         page = biggles.FramedArray( rows , 2)
 

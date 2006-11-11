@@ -23,10 +23,15 @@
 Plot a 2D matrix (up to 100 x 100)
 """
 
-import biggles
 import Numeric as N
 
 from Biskit import ColorSpectrum 
+
+try:
+    import biggles
+except:
+    bigges = 0
+    EHandler.warning('Missing biggles module -- MatrixPlot is not available.')
 
 
 class Legend(biggles.FramedPlot):
@@ -39,6 +44,9 @@ class Legend(biggles.FramedPlot):
         @param values: color mapping for each color used
         @type  values: [(float, int)]
         """
+        if not biggles:
+            raise ImportError, 'biggles module could not be imported.'
+        
         biggles.FramedPlot.__init__(self)
 
         values = N.array(values)

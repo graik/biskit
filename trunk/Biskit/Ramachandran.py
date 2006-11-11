@@ -27,13 +27,18 @@ the same atom contents.
 
 from Biskit import ColorSpectrum as CS
 from Biskit.MatrixPlot import Legend
-import biggles
 from Biskit.PDBDope import PDBDope 
 
 import Biskit.mathUtils as MU
 import Biskit.tools as T
 
 import Numeric as N
+
+try:
+    import biggles
+except:
+    bigges = 0
+    EHandler.warning('Missing biggles module -- biggles is not available.')
 
 
 class Ramachandran:
@@ -50,6 +55,9 @@ class Ramachandran:
         @param verbose: verbosity level (default: 1)
         @type  verbose: 1|0
         """
+        if not biggles:
+            raise ImportError, 'biggles module could not be imported.'
+
         if type(models) != type([]):
             models = [ models ]
 
