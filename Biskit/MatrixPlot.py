@@ -165,6 +165,10 @@ except:
         def __init__(self,matrix, mesh = 0, palette = "plasma", legend = 0):
             raise ImportError, 'MatrixPlot depends on biggles module'
 
+    class Legend:
+        def __init__(self, values):
+            raise ImportError, 'Legend depends on biggles module'
+
 
 #############
 ##  TESTING        
