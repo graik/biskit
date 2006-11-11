@@ -25,7 +25,7 @@ Plot a 2D matrix (up to 100 x 100)
 
 import Numeric as N
 
-from Biskit import ColorSpectrum 
+from Biskit import ColorSpectrum, EHandler
 
 try:
     import biggles
