@@ -31,7 +31,13 @@ import mathUtils as M
 from Biskit import EHandler
 
 import copy
-import biggles
+
+try:
+    import biggles
+except:
+    biggles = 0
+    EHandler.warning('Could not import module biggles.')
+
 
 class ProfileError(Exception):
     pass
@@ -639,8 +645,13 @@ class ProfileCollection:
         @raise TypeError: if profile contains non-number items
 
         @return: plot, view using plot.show() 
-        @rtype: biggles.FramedPlot          
+        @rtype: biggles.FramedPlot
+
+        @raise ImportError: If biggles module could not be imported
         """
+        if not biggles:
+            raise ImportError, 'module biggles could not be imported'
+
         plot = biggles.FramedPlot()
 
         colors = T.colorSpectrum( len( name ) , '00FF00', 'FF00FF') 
