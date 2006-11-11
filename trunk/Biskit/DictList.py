@@ -28,14 +28,12 @@ organise, sort, and filter list of dictionaries or similar objects
 import sys
 import Numeric as N
 import types
-import biggles 
 import copy
 import random
 
 import Biskit.tools as t
 from Biskit import EHandler, BisList, ConditionError, AmbiguousMatch,\
      ItemNotFound, BisListError
-
 
 class DictList( BisList, list ):
     """
