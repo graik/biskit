@@ -39,7 +39,7 @@ try:
     import biggles
 except:
     bigges = 0
-    EHandler.warning('Missing biggles module -- biggles is not available.')
+    EHandler.warning('Missing biggles module -- plotting is not available.')
 
 
 class Ramachandran:
