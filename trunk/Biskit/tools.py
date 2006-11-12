@@ -1034,6 +1034,46 @@ def info( item, short=1 ):
             print clipStr( s, 79 )
 
 
+class PseudoClass(object):
+    """
+    Empty class that raises an ImportError upon creation.
+    """
+    def __new__(cls, *args, **kw):
+        raise ImportError, \
+              'Class %r is not available because of missing modules: %r' \
+              % (cls.__name__, str(cls.error))
+    
+from new import classobj
+
+def tryImport( module, cls, as=None, namespace=None ):
+    """
+    Try to import a class from a module. If that fails, 'import' a
+    default class of the same name that raises an exception when used.
+    
+    @param module: name of the module
+    @type  module: str
+    @param cls  : name of the class
+    @type  cls  : str
+    @param namespace: namespace for the import [default: globals() ]
+    @type  namespace: dict
+    
+    @return: True if import succeeded, False otherwise
+    @rtype: bool
+    """
+    as = as or cls
+    g = namespace or globals()
+    try:
+        exec 'from %s import %s as %s' % (module, cls, as) in g
+        return True
+    
+    except ImportError, e:
+
+        Cls = classobj( cls,(PseudoClass,),{'error':e} )
+        g.update( {as: Cls} )
+
+    return False
+
+
 #############
 ##  TESTING        
 #############
@@ -1055,7 +1095,6 @@ class Test:
         @rtype: int
         """
         from Biskit import PDBModel
-        from Biskit import Trajectory
 
         m = PDBModel( testRoot()+'/rec/1A2P.pdb')
         
@@ -1072,7 +1111,6 @@ class Test:
 
         if local: print "\nTEST ensure"
         ensure( m, PDBModel )
-        #ensure( m, Trajectory ) # should fail
         
         if local:
             globals().update( locals() )

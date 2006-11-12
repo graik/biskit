@@ -28,7 +28,8 @@ Parallizes calculation and plotting of ensemble trajectory RMSDs
 
 from Biskit.hosts import cpus_all, nice_dic, nodes_all
 import Biskit.tools as T
-from Biskit.PVM.TrackingJobMaster import TrackingJobMaster
+## from Biskit.PVM.TrackingJobMaster import TrackingJobMaster
+from Biskit.PVM import TrackingJobMaster
 
 
 class QualMaster(TrackingJobMaster):
