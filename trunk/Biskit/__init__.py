@@ -71,11 +71,7 @@ try:
     from ModelList import ModelList
     from Ramachandran import Ramachandran
 
-except Exception, why:
-    EHandler.warning('Could not import all biskit modules:', trace=1 )
-
 ## PVM-dependent modules
-try:
 
     from QualMaster import QualMaster
     from StructureMaster import StructMaster
@@ -83,4 +79,10 @@ try:
     from TrajFlexMaster import TrajFlexMaster, FlexError
 
 except Exception, why:
-    EHandler.warning('Could not import PVM-dependent biskit modules.',trace=1)
+    EHandler.warning('Could not import all biskit modules:', trace=1 )
+
+try:
+    import biggles
+    del biggles
+except:
+    EHandler.warning('Could not import biggles module -- plotting is not available.')

@@ -1043,7 +1043,7 @@ class PseudoClass(object):
               'Class %r is not available because of missing modules: %r' \
               % (cls.__name__, str(cls.error))
     
-from new import classobj
+import new
 
 def tryImport( module, cls, as=None, namespace=None ):
     """
@@ -1068,8 +1068,36 @@ def tryImport( module, cls, as=None, namespace=None ):
     
     except ImportError, e:
 
-        Cls = classobj( cls,(PseudoClass,),{'error':e} )
+        Cls = new.classobj( cls,(PseudoClass,),{'error':e} )
         g.update( {as: Cls} )
+
+    return False
+
+def tryImportModule( module, as=None, namespace=None ):
+    """
+    Try to import a class from a module. If that fails, 'import' a
+    default class of the same name that raises an exception when used.
+    
+    @param module: name of the module
+    @type  module: str
+    @param namespace: namespace for the import [default: globals() ]
+    @type  namespace: dict
+    
+    @return: True if import succeeded, False otherwise
+    @rtype: bool
+    """
+    as = as or module
+    g = namespace or globals()
+    try:
+        exec 'import %s as %s' % (module, as) in g
+        return True
+    
+    except ImportError, e:
+
+        m = new.module( as, doc='Pseudo module. Import of real one failed.' )
+        m.error = str(e)
+        
+        g.update( {as: m} )
 
     return False
 

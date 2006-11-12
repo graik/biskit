@@ -28,8 +28,6 @@ try:
     import biggles as B
 except:
     B = 0
-    EHandler.warning('Missing biggles module -- plotting is not available.')
-
 
 
 ##############################
