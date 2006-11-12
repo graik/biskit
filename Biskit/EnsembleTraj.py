@@ -39,7 +39,6 @@ try:
     import biggles
 except:
     bigges = 0
-    EHandler.warning('Missing biggles module -- plotting is not available.')
 
 
 def traj2ensemble( traj, members=10 ):

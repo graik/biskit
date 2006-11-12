@@ -36,7 +36,6 @@ try:
     import biggles
 except:
     biggles = 0
-    EHandler.warning('Missing biggles module -- plotting is not available.')
 
 
 class ProfileError(Exception):

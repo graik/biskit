@@ -38,7 +38,6 @@ try:
     import biggles
 except:
     bigges = 0
-    EHandler.warning('Missing biggles module -- plotting is not available.')
 
 
 class BisListError( BiskitError ):
