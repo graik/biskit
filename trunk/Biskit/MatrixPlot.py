@@ -34,7 +34,7 @@ try:
 except:
     biggles = False
 
-class Legend(biggles.FramedPlot):
+class Legend(FramedPlot):
     """
     Class to create a legend to use with a Matrix plot.
     """
