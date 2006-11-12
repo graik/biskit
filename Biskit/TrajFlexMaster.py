@@ -39,7 +39,8 @@ import Numeric as N
 import os, time
 
 ## PVM imports
-from Biskit.PVM.TrackingJobMaster import TrackingJobMaster
+## from Biskit.PVM.TrackingJobMaster import TrackingJobMaster
+from Biskit.PVM import TrackingJobMaster
 
 
 class FlexError( BiskitError ):

@@ -32,7 +32,8 @@ from PDBModel import PDBModel
 import tools as T
 
 ## PVM imports
-from PVM.dispatcher import JobSlave
+## from PVM.dispatcher import JobSlave
+from Biskit.PVM import JobSlave
 
 
 class StructureSlave(JobSlave):

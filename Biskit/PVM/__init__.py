@@ -30,6 +30,12 @@ compilations can be placed in subfolders. The name of this folder should
 be assembled from: 'py' + version + '_' + platform.machine()
 Where platform is a python module available since Python 2.3.
 See Biskit.tools.platformFolder!
+
+The compilation of pypvm_core can be tricky on some architectures. In order
+to support installations that don't need parallelisation, only a warning is
+issued if pypvm_core is missing and the public classes are exported as
+Pseudo-classes. Pseudo classes are empty and raise an ImportError when you
+try to initialize them. See also L{Biskit.tools.tryImport}.
 """
 
 ##
@@ -45,7 +51,20 @@ except ImportError, why:
     pass
 
 ##
-## export public classes
+## error-tolerant export of public classes
 ##
-from TrackingJobMaster import TrackingJobMaster
-from dispatcher import JobSlave
+from Biskit import EHandler
+r = True
+
+r = T.tryImport( 'TrackingJobMaster', 'TrackingJobMaster', namespace=globals())
+r = T.tryImport( 'dispatcher', 'JobSlave', namespace=globals() ) and r
+
+if not r:
+    EHandler.warning('Could not import PVM modules.'+
+        ' Please check that the pypvm_core library is compiled!\n'+
+        '\tParallelisation is not available.')
+
+##
+## clean up
+##
+del r, EHandler
