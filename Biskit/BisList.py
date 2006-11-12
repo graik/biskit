@@ -56,12 +56,16 @@ class ItemNotFound( ConditionError):
 class BisList:
     """
     An *abstract* base class that lays out the basic interface for
-    collections of dictionary-like objects. To the outside, it
-    behaves like a list. However, no assumptions are yet made as to
-    the internal data structure.
+    collections of dictionary-like objects. To the outside, it behaves
+    like a list, albeit one with a second dimension addressed by
+    'keys'. You could think of BisList as a kind of two-dimensional
+    array or a dictionary of lists. However, no assumptions are yet
+    made as to the internal data structure. BisList provides uniform
+    methods for sorting, filtering, extraction and combination of
+    sub-lists (take, compress), and plotting.
 
-    Classes derived from AbstractDictList have to override several
-    methods to be functional (a NotImplementedError is raised otherwise)::
+    Classes derived from BisList have to override several
+    methods to be functional (a NotImplementedError is raised otherwise):
 
      getValue, extend, append, take, keys,
      __len__, __setitem__, __getslice__
@@ -73,7 +77,7 @@ class BisList:
 
     That means there are two ways of implementing BisList.
       1. via multiple inheritence from BisList (first!) and list
-         -> only getValue, extend, append, take need to be overriden.
+         -> only getValue, extend, append and take need to be overriden.
       2. inheritence from BisList only
          -> the __xxx__ methods have to be implemented too.
 
