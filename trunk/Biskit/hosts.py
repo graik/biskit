@@ -8,7 +8,7 @@ List of cluster computers.
 Each host must be accessible via ssh w/o password::
 
   nodes_* .. lists with one entry per computer
-  cpus_*  .. lists with one entry per CPU (usuallly that's the one used)
+  cpus_*  .. lists with one entry per CPU (usually that's the one used)
 
   nodes/cpus_own   .. computers reserved for own use, highest priority
   nodes/cpus_shared.. computers shared with others, medium priority

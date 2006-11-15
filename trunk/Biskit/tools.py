@@ -42,6 +42,8 @@ import subprocess
 class ToolsError( Exception ):
     pass
 
+class PickleError( ToolsError ):
+    pass
 
 def errWriteln(s):
     """
@@ -464,6 +466,8 @@ def Load(filename, gzip = 0):
 
     @return: loaded object
     @rtype: any
+
+    @raise cPickle.UnpicklingError, if the pickle format is not recognized
     """
     filename = osp.expanduser(filename)
 
