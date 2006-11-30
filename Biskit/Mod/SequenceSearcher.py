@@ -113,7 +113,9 @@ class SequenceSearcher:
 
         self.ex_gi    = re.compile( '^>(?P<db>ref|gb|ngb|emb|dbj|prf)\|{1,2}(?P<id>[A-Z_0-9.]{4,9})\|' )
         self.ex_swiss = re.compile( '^>sp\|(?P<id>[A-Z0-9_]{5,7})\|' )
+        self.ex_swiss2= re.compile( '^>.*swiss.*\|(?P<id>[A-Z0-9_]{5,7})\|' )
         self.ex_pdb   = re.compile( '^>pdb\|(?P<id>[A-Z0-9]{4})\|' )
+        self.ex_all   = re.compile( '^>.*\|(?P<id>[A-Z0-9_]{4,10})\|' )
         
         ##
         ##      RegExp for the remoteBlast searches. Somehow the
@@ -281,8 +283,8 @@ class SequenceSearcher:
 
         parsed = p.parse( blast_result )
 
-        self.__remote_blast2dict( parsed, db )
-
+##        self.__remote_blast2dict( parsed, db )
+        self.__blast2dict( parsed, db )
 
     def localBlast( self, seqFile, db, method='blastp',
                     resultOut=None, e=0.01, **kw ):
@@ -345,12 +347,17 @@ class SequenceSearcher:
 
             p = NCBIStandalone.BlastParser()
 
+##             print "Kicking out"
+##             raise Exception, 'kick out to recover full result file'
+        
             parsed = p.parse( results )
 
             self.__blast2dict( parsed, db )
 
         except Exception, why:
-            self.error = { 'results':results,'err':err.read(), 'parser':p,
+            self.error = { 'results':results,
+##                           'err':err.read(),
+                           'parser':p,
                            'blast_bin':settings.blast_bin, 'seqFile':seqFile,
                            'method':method, 'db':db,'kw':kw,
                            'exception':str(why) }
@@ -450,7 +457,8 @@ class SequenceSearcher:
         result = []
 
         for a in blast_records.alignments:
-            for pattern in [self.ex_gi,  self.ex_swiss,  self.ex_pdb,
+            for pattern in [self.ex_gi,  self.ex_swiss, self.ex_swiss2,
+                            self.ex_pdb, self.ex_all,
                             self.ex_Rgi_1, self.ex_Rgi_2,
                             self.ex_Rswiss, self.ex_Rpdb]:
 
@@ -459,8 +467,9 @@ class SequenceSearcher:
                 if match:
                     break
 
-            if not match.group('id'):
-                raise BlastError( "Couldn't find ID in " + a.title )
+            if (not match) or (not match.group('id')):
+                raise BlastError( "Couldn't find ID in " + a.title +\
+                                  "with pattern " + str(pattern))
 
             result += [ match.group('id') ]
 
@@ -485,6 +494,7 @@ class SequenceSearcher:
 
         err, o = commands.getstatusoutput( cmd )
         if err:
+            EHandler.warning('%s returned error: %r' % (cmd, err) )
             raise BlastError( err )
 
         frecord = Fasta.Record()
@@ -524,7 +534,7 @@ class SequenceSearcher:
                 r = self.fastaRecordFromId( db, i )
                 result[i] = r
             except BlastError, why:
-                T.errWriteln("ERROR (ignored): couldn't fetch %s"%str(i) )
+                EHandler.warning("couldn't fetch %s"%str(i),trace=0 )
 
         return result
 
@@ -839,9 +849,12 @@ class Test:
 
         ## blast db has to be built with -o potion
         ## e.g. cat db1.dat db2.dat | formatdb -i stdin -o T -n indexed_db
-        db = 'swissprot'
+        db = settings.db_nr
 
         f_target = searcher.outFolder + searcher.F_FASTA_TARGET
+
+        if local:
+            globals().update( locals() )
 
         ## skipp remote blast for now
         # self.searcher.remoteBlast( f_target, 'nr', 'blastp', alignments=50 )
@@ -886,6 +899,5 @@ if __name__ == '__main__':
     
     ## test localPSIBlast
     assert test.run( local=1, flavour='blastpgp') ==  test.expected_result()
-
 
 
