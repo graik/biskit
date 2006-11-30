@@ -192,8 +192,8 @@ class ProfileCollection:
 
         @param prof: profile
         @type  prof: list OR array
-        @param asarray: option, convert to array
-        @type  asarray: 1|0
+        @param asarray: 1.. autodetect type, 0.. force list, 2.. force array
+        @type  asarray: 2|1|0
         
         @return: profile
         @rtype: list OR array
