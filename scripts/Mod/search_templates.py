@@ -64,7 +64,7 @@ Default options:
 def defaultOptions():
     return {'q':None,
             'o':'.',
-            'db' : 'pdbaa',
+            'db' : settings.db_pdbaa,
             'log': None,
             'e':0.001,
             'limit':20,
