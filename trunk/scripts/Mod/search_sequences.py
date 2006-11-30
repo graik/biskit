@@ -69,7 +69,7 @@ Default options:
 def defaultOptions():
     return {'q':None,
             'o':'.',
-            'db' : 'swissprot',
+            'db' : settings.db_swiss,
             'log': None,
             'limit':50,
             'e':0.01,
