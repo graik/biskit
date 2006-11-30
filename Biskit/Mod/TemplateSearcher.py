@@ -473,7 +473,7 @@ class Test:
                                      verbose=1, log=l,
                                      silent=silent )
 
-        db = 'pdbaa'
+        db = settings.db_pdbaa
         searcher.localBlast( f_target, db, 'blastp', alignments=200, e=0.0001)
 
         ## first tries to collect the pdb files from a local db and if
