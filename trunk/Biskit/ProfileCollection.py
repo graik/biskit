@@ -602,7 +602,7 @@ class ProfileCollection:
           clone() -> ProfileCollection (or sub-class, actually a deepcopy)
 
         @return: profile
-        @rtype: profileCollection          
+        @rtype: ProfileCollection          
         """
         return copy.deepcopy( self )
 
