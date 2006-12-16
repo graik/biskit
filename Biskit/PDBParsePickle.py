@@ -78,7 +78,7 @@ class PDBParsePickle( PDBParseModel ):
 
                 s = T.Load( source )
 
-                super( self, PDBParsePickle ).update(
+                super( PDBParsePickle, self ).update(
                     model, s, skipRes=skipRes, lookHarder=lookHarder)
                               
         except Exception, why:
