@@ -34,10 +34,10 @@ from LocalPath import LocalPath
 from Errors import BiskitError
 from Biskit import EHandler
 from ProfileCollection import ProfileCollection, ProfileError
+from PDBParserFactory import PDBParserFactory
 
 import Numeric as N
 import MLab
-from Scientific.IO.PDB import PDBFile
 import os, sys
 import copy
 import time
@@ -86,6 +86,7 @@ class PDBModel:
 
     @todo: clean up, re-organize parsing
     @todo: clean up, rename returnPdb()
+    @todo: clean up the __terAtoms mess
     @todo: use Profiles instead of space consuming atom dictionaries ?
     """
 
@@ -106,7 +107,7 @@ class PDBModel:
         @param noxyz: 0 (default) || 1, create without coordinates
         @type  noxyz: 0||1
 
-        @raise PDBError: if file can't be read
+        @raise PDBError: if file exists but can't be read
         """
         self.source = source
         if type( self.source ) is str:
@@ -257,96 +258,10 @@ class PDBModel:
         if source is None:
             return
 
-        isPdb = type( source ) == str and\
-                (source[-4:].upper() == '.PDB' or
-                 source[-7:].upper() == '.PDB.GZ')
-
-        try:
-            ## updating from PDBModel (pickled or not)
-            if not isPdb:
-
-                if type( source ) == str:
-                    s = t.Load( source )
-                else:
-                    s = source
-
-                self.fileName = self.fileName or s.fileName
-
-                self.pdbCode = self.pdbCode or s.pdbCode
-
-                self.atoms = self.atoms or s.getAtoms()
-
-                self.xyz = self.xyz or s.getXyz()
-
-                self.__terAtoms = getattr(self, '_PDBModel__terAtoms',[]) or \
-                                  getattr(s,'_PDBModel__terAtoms',[])
-
-                self.rProfiles.updateMissing( s.rProfiles,
-                                              copyMissing=lookHarder)
-                self.aProfiles.updateMissing( s.aProfiles,
-                                              copyMissing=lookHarder)
-
-                if skipRes:
-                    self.removeRes( skipRes )
-
-                return
-
-        except ProfileError, why:
-            EHandler.warning("Cannot read/update profiles from source.")
-        except Exception, why:
-            EHandler.warning("Cannot unpickle source model from %s, "\
-                   % str(source) +
-                   "Reason:\n" + str(why) + "\n" +
-                   "I try opening file as ordinary PDB -- fingers crossed.",
-                    error=0 ) 
-            ## try again as PDB
-            isPdb = 1
-
-        try:
-            ## atoms and/or coordinates need to be updated from PDB
-            if (self.atoms==None or self.xyz==None) and isPdb:
-
-                atoms, xyz = self.__collectAll( source, skipRes )
-
-                self.atoms = self.atoms or atoms
-
-                self.xyz = self.xyz or xyz
-
-                self.__terAtoms = self.__pdbTer()
-
-                self.fileName = self.fileName or source
-
-                self.pdbCode = self.pdbCode or \
-                               os.path.basename( self.fileName )[:4]
-        except:
-            msg = self.__xplorAtomIndicesTest( source ) or ' '
-            raise PDBError('Cannot read ' + str(source) + ' as PDB\n'\
-                           '\ERROR: ' + t.lastError() + msg)
-
-
-    def __xplorAtomIndicesTest( self, source ):
-        """
-        In some cases the setup with parallell xplor trajectories
-        run out of atom indices when writing the pdb files to disc.
-        When this happens (usualy for the TIP3 waters in the later
-        of the 10 parallell trajectories) the atom indices get
-        replaced with ***** which will cause the parsing to fail.
-        The error message recieved is quite cryptic - this function
-        is here to give a more comprehensible message.
+        parser = PDBParserFactory.getParser( source )
+        parser.update(self, source, skipRes=skipRes, lookHarder=lookHarder )
         
-        @param source: file that failed to be parsed
-        @type  source: str
-        """
-        import re
-        f = open( source, 'r' )
-        lines = f.readlines()
-        f.close()
-        for i in range( len(lines) ):
-            if re.match( '^ATOM\s{2}\*{5}', lines[i]):
-                msg = '\n\nLine %i to %i of the file %s contains invalid atom indices! \nIn some cases the setup with parallell xplor trajectories run out of atom indices when writing the pdb files to disc. When this happens (usualy for the TIP3 waters in the later of the 10 parallell trajectories) the atom indices get replaced with ***** which will cause the parsing to fail.\nREMEDY: run the script fixAtomIndices.py\n'%(i, len(lines), source)
-                return msg
-
-
+        
     def __pdbTer( self, rmOld=0 ):
         """
         @param rmOld: 1, remove after_ter=0 flags from all atoms
@@ -852,115 +767,6 @@ class PDBModel:
         self.pdbCode = code
 
 
-    def __firstLetter( self, aName ):
-        """
-        Return first letter in a string (e.g. atom mane)
-
-        @param aName: atom name
-        @type  aName: str
-
-        @return: first letter (i.e. not a number) from a string.
-        @rtype: letter
-        """
-        try:
-            i = int( aName[0] )
-            return self.__firstLetter( aName[1:] )
-        except:
-            return  aName[0]
-
-
-    def __collectAll( self, fname, skipRes=None ):
-        """
-        Parse ATOM/HETATM lines from PDB. Collect coordinates plus
-        dictionaries with the other pdb records of each atom.
-        REMARK, HEADER, etc. lines are ignored.
-
-        Some changes are made to the dictionary from PDBFile.readline()::
-            - the 'position' entry (with the coordinates) is removed
-            - leading and trailing spaces are removed from 'name' ..
-            - .. but a 'name_original' entry keeps the old name with spaces
-            - a 'type' entry is added. Its value is 'ATOM' or 'HETATM'
-            - a 'after_ter' entry is added. Its value is 1, if atom is
-              preceeded by a 'TER' line, otherwise 0
-            - empty 'element' entries are filled with the first non-number
-              letter from the atom 'name'
-
-        @param fname: name of pdb file
-        @type  fname: str
-        @param skipRes: list with residue names that should be skipped
-        @type  skipRes: list of str
-
-        @return: tuple of list of dictionaries from PDBFile.readline()
-                 and xyz array N x 3
-        @rtype: ( list, array )
-        """
-        items = []
-        xyz   = []
-
-        f = PDBFile( fname )
-
-        try:
-            line, i = ('',''), 0
-
-            while line[0] <> 'END' and line[0] <> 'ENDMDL':
-
-                i += 1
-                try:
-                    line = f.readLine()
-                except ValueError, what:
-                    t.errWriteln('Warning: Error parsing line %i of %s' %
-                               (i, t.stripFilename( fname )) )
-                    t.errWriteln('\tError: '+str(what) )
-                    continue
-
-                ## preserve position of TER records
-                newChain = line[0] == 'TER'
-                if newChain:
-                    line = f.readLine()
-
-                if (line[0] in ['ATOM','HETATM'] ):
-
-                    a = line[1]
-
-                    if skipRes and a['residue_name'] in skipRes:
-                        continue
-
-                    a['name_original'] = a['name']
-                    a['name'] = a['name'].strip()
-
-                    a['type'] = line[0]
-                    if newChain: a['after_ter'] = 1
-
-                    if a['element'] == '':
-                        a['element'] = self.__firstLetter( a['name'] )
-
-                    if a['position'].is_vector:
-                        lst = [ a['position'][0],
-                                a['position'][1],
-                                a['position'][2]]
-                        xyz.append( lst )
-                    else:
-                        xyz.append( a['position'] )
-
-                    del a['position']
-
-                    items += [ a ]
-
-        except:
-            raise PDBError("Error parsing file "+fname+": " + t.lastError() )
-
-        try:
-            f.close()
-        except:
-            pass
-
-        if len( xyz ) == 0:
-            raise PDBError("Error parsing file "+fname+": "+
-                            "Couldn't find any atoms.")
-
-        return items, N.array( xyz, 'f' )
-
-
     def sequence(self, mask=None, xtable=molUtils.xxDic ):
         """
         Amino acid sequence in one letter code.
@@ -1256,8 +1062,8 @@ class PDBModel:
 
             ## fall-back solution: assign 0 to all entries that raise
             ## exception
-            t.errWriteln("Warning mask(): Error while mapping funtion "+
-                       "to all atoms: " + t.lastError() )
+            EHandler.warning("mask(): Error while mapping funtion "+
+                       "to all atoms.")
             result = []
 
             for a in self.getAtoms():
@@ -1265,12 +1071,11 @@ class PDBModel:
                    result.append( atomFunction( a ) )
                 ## put 0 if something goes wrong
                 except :
-                    t.errWriteln("Warning mask(): Error while save-mapping "+
-                               t.lastError() )
+                    EHandler.warning("mask(): Error while save-mapping ")
                     result.append(0)
 
         if numpy:
-            return N.array( result, 'i' )
+            return N.array( result )
         return result
 
 
@@ -1285,7 +1090,7 @@ class PDBModel:
         @rtype: array
         """
         if self.caMask == None or force:
-            self.caMask = self.mask( lambda a: a['name'] == 'CA' )
+            self.caMask = self.maskF( lambda a: a['name'] == 'CA' )
 
         return self.caMask
 
@@ -1301,7 +1106,7 @@ class PDBModel:
         @rtype: array
         """
         if self.bbMask == None or force:
-            self.bbMask = self.mask( 
+            self.bbMask = self.maskF( 
                 lambda a: a['name'] in ['CA', 'C', 'N', 'O', 'H','OXT'] )
 
         return self.bbMask
@@ -1318,7 +1123,7 @@ class PDBModel:
         @rtype: array
         """
         if self.heavyMask == None or force:
-            self.heavyMask = self.mask( lambda a: a.get('element','') <> 'H' )
+            self.heavyMask = self.maskF( lambda a: a.get('element','') <> 'H' )
 
         return self.heavyMask
 
@@ -1342,7 +1147,7 @@ class PDBModel:
         f = lambda a: a['name'] == 'CB' or\
             a['residue_name'] == 'GLY' and a['name'] == 'CA' 
 
-        return self.mask( f )
+        return self.maskF( f )
 
 
     def maskH2O( self ):
@@ -1352,7 +1157,7 @@ class PDBModel:
         @return: N.array( 1 x N_atoms ) of 0||1
         @rtype: array
         """
-        return self.mask( lambda a: a['residue_name'] in ['TIP3','HOH','WAT'] )
+        return self.maskF( lambda a: a['residue_name'] in ['TIP3','HOH','WAT'])
 
     def maskSolvent( self ):
         """
@@ -1362,7 +1167,7 @@ class PDBModel:
         @return: N.array( 1 x N_atoms ) of 0||1
         @rtype: array
         """
-        return self.mask( lambda a: a['residue_name'] in ['TIP3','HOH','WAT',
+        return self.maskF( lambda a: a['residue_name'] in ['TIP3','HOH','WAT',
                                                           'Na+', 'Cl-'] )
     def maskHetatm( self ):
         """
@@ -1872,7 +1677,7 @@ class PDBModel:
         @type  i: 
         """
         if len(i)==self.lenAtoms() and max(i)<2:
-            t.errWriteln('WARNING: dont use PDBModel.keep() with mask.') 
+            EHandler.warning('dont use PDBModel.keep() with mask.', trace=0) 
 
         r = self.take( i )
 
@@ -1980,8 +1785,7 @@ class PDBModel:
                 a['chain_id'] = a['segment_id'][-1]
             except:
                 if verbose:
-                    t.errWriteln("Warning addChainId(): Problem with atom "\
-                                 +str(a)+"Error: " + t.lastError() )
+                    EHandler.warning("addChainId(): Problem with atom "+str(a))
 
         self.atomsChanged = 1
 
@@ -2687,7 +2491,7 @@ class PDBModel:
 
         @raise PDBError: if the model contains elements of unknown mass
         """
-        return N.sum( self.masses )
+        return N.sum( self.masses() )
 
 
     def residusMaximus( self, atomValues, mask=None ):
@@ -2825,7 +2629,7 @@ class PDBModel:
         ## By default return list of all atoms
         start = start or 0
 
-        if stop == None:    ## don't use "stop = stop or ..", stop might be 0!
+        if stop is None:    ## don't use "stop = stop or ..", stop might be 0!
             stop = self.lenResidues()-1
 
         ## first get atom indexes of residues
@@ -3162,14 +2966,14 @@ class Test:
         m.addChainFromSegid()
 
         ## start positions of all chains
-        chainIdx = m.chainIndex()
+        chainIdx = m.chainIndex().tolist()
 
         ## print some chain info
         if local:
             print 'The molecule consists of %i chains'% m.lenChains()
             print '\tChainId \tFirst atom'
             for i in chainIdx:
-                print '\t%s \t\t%i'%(m.atoms[i]['chain_id'], i)
+                print '\t%s \t\t%i'%(m.atoms[i]['chain_id'], int(i))
 
         ## iterate over all chains
         for c in range( 0, len( chainIdx ) ):
@@ -3190,13 +2994,6 @@ class Test:
         m2 = m.sort( sort )
 
         if local:
-            ## add accessibility and curvature
-            print 'Adding surface information ...'
-            from PDBDope import PDBDope
-            m = m.compress( N.logical_not(m.maskSolvent() ) )
-            d = PDBDope( m )
-            d.addSurfaceRacer()
-
             globals().update( locals() )
 
         return N.sum( m2.centerOfMass() )
@@ -3219,4 +3016,4 @@ if __name__ == '__main__':
 
     assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
 
-
+## last line count:: 3229
