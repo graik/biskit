@@ -105,15 +105,17 @@ class PDBCleaner:
             self.logWrite('No atoms with multiple occupancies to remove' )
 
 
-    def replace_non_standard_AA( self, amber=0 ):
+    def replace_non_standard_AA( self, amber=0, keep=[] ):
         """
         Replace amino acids with none standard names with standard
         amino acids according to L{MU.nonStandardAA}
         
         @param amber: don't rename HID, HIE, HIP, CYX, NME, ACE [0]
         @type  amber: 1||0
+        @param keep: names of residues to keep
+        @type keep:  [ str ]
         """
-        standard = MU.atomDic.keys()
+        standard = MU.atomDic.keys() + keep
 
         if amber:
             standard.extend( ['HID', 'HIE', 'HIP', 'CYX', 'NME', 'ACE'] )
@@ -231,7 +233,7 @@ class PDBCleaner:
         return N.sum( mask )
 
 
-    def process( self, keep_hetatoms=0, amber=0 ):
+    def process( self, keep_hetatoms=0, amber=0, keep_xaa=[] ):
         """
         Remove Hetatoms, waters. Replace non-standard names.
         Remove non-standard atoms.
@@ -240,6 +242,8 @@ class PDBCleaner:
         @type  keep_hetatoms: 0||1
         @param amber: don't rename amber residue names (HIE, HID, CYX,..)
         @type  amber: 0||1
+        @param keep_xaa: names of non-standard residues to be kept
+        @type  keep_xaa: [ str ]
         
         @return: PDBModel (reference to internal)
         @rtype: PDBModel
@@ -256,7 +260,7 @@ class PDBCleaner:
 
             self.remove_multi_occupancies()
 
-            self.replace_non_standard_AA( amber=amber )
+            self.replace_non_standard_AA( amber=amber, keep=keep_xaa )
 
             self.remove_non_standard_atoms()
 
@@ -264,7 +268,7 @@ class PDBCleaner:
         except KeyboardInterrupt, why:
             raise KeyboardInterrupt( why )
         except Exception, why:
-            raise CleanerError( t.lastError() )
+            raise CleanerError( 'Error cleaning model: %r' % why )
 
         return self.model
 
