@@ -43,6 +43,7 @@ import copy
 import time
 import string
 import types
+import Scientific.IO.PDB as IO
 
 from multiarray import arraytype
 
@@ -84,10 +85,9 @@ class PDBModel:
 
     Additional infos about the model can be put into a dictionary 'info'.
 
-    @todo: clean up, re-organize parsing
     @todo: clean up, rename returnPdb()
     @todo: clean up the __terAtoms mess
-    @todo: use Profiles instead of space consuming atom dictionaries ?
+    @todo: use Profiles instead of space consuming atom dictionaries
     """
 
     def __init__( self, source=None, pdbCode=None, noxyz=0, skipRes=None ):
@@ -876,7 +876,7 @@ class PDBModel:
         @type  taillines: list of tuples 
         """
         try:
-            f = PDBFile( fname, mode='w' )
+            f = IO.PDBFile( fname, mode='w' )
 
             numbers = map( str, range(10) )
 
@@ -1977,7 +1977,7 @@ class PDBModel:
 
     def __calcResMap( self, mask=None ):
         """
-        Cereate a map of residue residue for atoms in model.
+        Create a map of residue residue for atoms in model.
 
         @param mask: atom mask
         @type  mask: list of int (1||0)
