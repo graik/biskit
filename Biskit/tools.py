@@ -471,27 +471,31 @@ def Load(filename, gzip = 0):
     """
     filename = osp.expanduser(filename)
 
-    f = open(filename)
+    try:
+        f = open(filename)
 
-    objects = []
+        objects = []
 
-    eof = 0
-    n = 0
+        eof = 0
+        n = 0
 
-    while not eof:
-        try:
-            this = cPickle.load(f)
-            objects.append(this)
-            n += 1
-        except EOFError:
-            eof = 1
+        while not eof:
+            try:
+                this = cPickle.load(f)
+                objects.append(this)
+                n += 1
+            except EOFError:
+                eof = 1
 
-    f.close()
+        f.close()
 
-    if n == 1:
-        return objects[0]
-    else:
-        return tuple(objects)
+        if n == 1:
+            return objects[0]
+        else:
+            return tuple(objects)
+
+    except ValueError, why:
+        raise PickleError, 'Python pickle %s is corrupted.' % filename
 
 
 ## obsolete
