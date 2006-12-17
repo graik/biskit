@@ -80,8 +80,10 @@ except Exception, why:
 ##
 python_bin = sys.executable
 xterm_bin  = T.absbinary('xterm')
+projectRoot= T.projectRoot()
 
-pymol_scripts = T.projectRoot() + '/external/pymol/'
+pymol_scripts = projectRoot + '/external/pymol/'
+
 
 ###################################
 ## required environment variables.
@@ -91,23 +93,13 @@ pymol_scripts = T.projectRoot() + '/external/pymol/'
 
 env = {}
 
-pymol_env = {'PYMOL_PATH':'/home/Bis/shared/rh73/pymol-cvs-20021115',
-             'PYMOL_EXTLIBPATH':'/home/Bis/shared/rh73/lib/'}
-
-pvm_env = {'PVM_ROOT':'~/pvm3',
-           'PVM_RSH':'/usr/bin/ssh'}
-
 blast_env = {'BLASTDB':'/home/Bis/raik/data/prog/blast/db',
              'BLASTMA':'/home/Bis/johan/APPLICATIONS/blast'}
 
 amber_env = {'AMBERHOME_8':'/Bis/shared/rh73/amber8_intel-7.1'}
 
-prosaII_env = {'PROSA_BASE':'/home/Bis/shared/rh73/prosa/prosabase/'}
-
-env.update(pvm_env)
 env.update(blast_env)
 env.update(amber_env)
-env.update(prosaII_env)
 
 ######################
 ## clean up name space

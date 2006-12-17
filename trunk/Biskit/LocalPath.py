@@ -26,6 +26,7 @@ Path handling.
 """
 
 import Biskit.tools as t
+import Biskit.settings as S
 from Biskit import EHandler
 from Biskit.Errors import BiskitError
 
@@ -39,14 +40,27 @@ class LocalPathError( BiskitError ):
 class LocalPath( object ):
     """
     Encapsulate a file name that might look differently in different
-    environments depending on environment settings.
-    The file name has an absolute (original) variant but parts of it
-    can be looked up from environment variables if the original path
-    doesn't exist in the current environment.
+    environments depending on environment settings.  The file name has
+    an absolute (original) variant but parts of it can be looked up
+    from environment or Biskit settings variables (if the original path
+    doesn't exist in the current environment).
 
-    Environment variable values must be at least 3 char long and contain
-    at least one '/'. That's perhaps too restrictive? Just want to avoid
-    substitution of single letters or '/a' etc.
+    Creating a LocalPath:
+
+    Creating a LocalPath is simple. By default, LocalPath takes a
+    normal filename and browses the local Biskit.settings and run-time
+    environment for variables that can replace part of that path.
+    
+    Variable values must be at least 3 char long and contain at least
+    one '/' in order to avoid substitution of single letters or '/a'
+    etc. $PYTHONPATH, $PATH and $PWD are ignored.
+
+    Variables from Biskit.settings (thus also .biskit/settings.cfg)
+    have priority over normal environment variables both during the
+    construction of LocalPath instances and during the reconstruction
+    of a locally valid path.
+
+    Using a LocalPath:
 
     LocalPath tries behaving like the simple absolute path string when it
     comes to slicing etc::
@@ -57,15 +71,15 @@ class LocalPath( object ):
 
       l.formatted() == '{/home/raik|$USER}/data/x.txt'
 
-    @todo: - simple-minded implementation, could be made more intelligent
-    @todo: - creation from formatted string not yet implemented, e.g.::
-             input:  allow multiple or overlapping substitutions
-             input:  restrict allowed environment variables
+    @todo:   input:  allow multiple or overlapping substitutions
              output: only substitute what is necessary until path exists
     """
 
-    ex_fragment = re.compile('\{([a-zA-Z0-9_/ ]+)\|\$([a-zA-Z0-9_/ ]+)\}')
+    ## pattern for formatted string input
+    ex_fragment = re.compile('\{([a-zA-Z0-9_~/ ]+)\|\$([a-zA-Z0-9_/ ]+)\}')
 
+    ## never use these variables
+    exclude_vars = ['PWD','OLDPWD','PYTHONPATH','PATH']
 
     def __init__( self, path=None, checkEnv=1, minLen=3, **vars ):
         """
@@ -91,6 +105,7 @@ class LocalPath( object ):
             self.set( path, checkEnv=checkEnv, minLen=minLen, **vars )
 
         self.__hash = None
+        self.__cache = None
 
 
     def __setstate__(self, state ):
@@ -100,9 +115,10 @@ class LocalPath( object ):
         self.__dict__ = state
         ## backwards compability
         self.__hash = getattr( self, '_LocalPath__hash', None )
+        self.__cache = None
 
 
-    def local( self, existing=0 ):
+    def get_local( self, existing=0 ):
         """
         Return a valid, absolute path. Either the existing original or with
         all substitutions for which environment variables exist.
@@ -123,10 +139,11 @@ class LocalPath( object ):
         if os.path.exists( result ):
             return result
 
+        substitutions = self.get_substitution_dict()
         result = ''
         for abs, env  in self.fragments:
             if env:
-                result += os.environ.get( env, abs )
+                result += substitutions.get( env, abs )
             else:
                 result += abs
 
@@ -138,6 +155,37 @@ class LocalPath( object ):
 
         return result
 
+
+    def local( self, existing=0, force=1 ):
+        """
+        Cached variant of get_local.
+        Return a valid, absolute path. Either the existing original or with
+        all substitutions for which environment variables exist.
+        This function is time consuming (absfile - os.realpath is the culprit).
+                         
+        @param existing: don't return a non-existing path [0]
+        @type  existing: 0|1
+
+        @param force: override cached value [0]
+        @type  force: 0|1
+        
+        @return: valid absolute (not necessarily existing) path in current environment
+        @rtype: str
+        
+        @raise LocalPathError: if existing==1 and no existing path can be
+                               constructed via environment variables
+        """
+
+        if not existing and self.__cache and not force:
+            return self.__cache
+
+        r = self.get_local( existing=existing )
+        
+        if not existing:
+            self.__cache = r
+
+        return r
+    
 
     def formatted( self ):
         """
@@ -158,8 +206,9 @@ class LocalPath( object ):
 
     def original( self ):
         """
-        Get the original path (also non-absolute) that is used if there are
-        no environment variables for any of the substitutions.
+        Get the original path (also non-absolute) that is used if the file
+        exists or if there are no environment variables for any of the
+        substitutions.
         
         @return: original path
         @rtype: str
@@ -172,27 +221,28 @@ class LocalPath( object ):
         """
         Assign a new file name
         
-        @param v: fragment tuples or path
+        @param v: fragment tuples or path or custom-formatted string
         @type  v: [ (str,str) ] OR str
-        @param checkEnv: look for possible substitutions in environment
+        @param checkEnv: look for possible substitutions in environment [1]
+                         (ignored if v is already formatted like '{/x/y|$xy}/z.txt' )
         @type  checkEnv: 0|1
-        @param minLen: mininal length of environment variables to consider
+        @param minLen: mininal length of environment variables to consider [3]
+                       (ignored if v is already formatted like '{/x/y|$xy}/z.txt' )
         @type  minLen: int
         """
         if type( v ) == list:
-            self.set_fragments( v )
-        else:
+            return self.set_fragments( v )
 
-            if type( v ) == str and (checkEnv or vars):
-                self.set_path( v, minLen=minLen, **vars )
-            else:
+        if type( v ) == str and '{' in v:
+            return self.set_string( v )
 
-                if type( v ) == str:
-                    self.set_string( v )
-                else:
-                    raise PathError, 'incompatible value for PathLink' + str(v)
+        if type( v ) == str and (checkEnv or vars):
+            return self.set_path( v, minLen=minLen, **vars )
+        
+        raise PathError, 'incompatible value for LocalPath' + str(v)
 
         self.__hash = None
+        self.__cache = None
 
 
     def set_fragments( self, *fragments ):
@@ -206,6 +256,7 @@ class LocalPath( object ):
         """
         self.fragments = fragments
         self.__hash = None
+        self.__cache = None
 
 
     def set_string( self, s ):
@@ -245,7 +296,7 @@ class LocalPath( object ):
         @param vars: alternative param=value pairs with suggested substitutors
         @type  vars: param=value
         """
-        env_items = self.__paths_in_env( minLen=minLen, vars=vars )
+        env_items =  self.get_substitution_pairs( minLen=minLen, vars=vars )
 
         fragments = [ ( fname, None ) ] ## default result
 
@@ -255,6 +306,7 @@ class LocalPath( object ):
         self.fragments = fragments
 
         self.__hash = None
+        self.__cache = None
 
 
     def exists( self ):
@@ -360,7 +412,8 @@ class LocalPath( object ):
         @return: 1|0
         @rtype: int
         """
-        r = ( type( o ) == str and o.find('/') != -1 and len(o) >= minLen )
+        r = ( type( o ) == str and o.find('/') != -1 and len(o) >= minLen\
+              and o.find(':') == -1 )
         if r:
             try:
                 s = t.absfile( o )
@@ -370,10 +423,12 @@ class LocalPath( object ):
         return 0
 
 
-    def __paths_in_env( self, minLen=3, vars={} ):
+    def __paths_in_settings( self, minLen=3, vars={}, exclude=[]):
         """
-        Get all environment variables with at least one '/' sorted by length.
-        
+        Get all setting variables looking like a path, sorted by length
+
+        @param minLen: minimal path length [3]
+        @type  minLen: int
         @param vars: alternative param=value pairs to consider
                      instead of environment
         @type  vars: param=value
@@ -381,18 +436,62 @@ class LocalPath( object ):
         @return: [ (variable name, value) ] sorted by length of value
         @rtype: [ (str,str) ]
         """
-        vars = vars or os.environ
+        items = vars.items() or S.__dict__.items()
+        exclude = exclude + self.exclude_vars
+
+        items = [ (k,v) for (k,v) in items if self.__is_path(v) ]
+
+        pairs = [ (len(v[1]), v) for v in items if not v[0] in self.exclude_vars ]
+        pairs.sort()
+
+        return [ x[1] for x in pairs ]
+
+        
+    def __paths_in_env( self, minLen=3, vars={}, exclude=[] ):
+        """
+        Get all environment variables with at least one '/' sorted by length.
+
+        @param minLen: minimal path length [3]
+        @type  minLen: int
+        @param vars: alternative param=value pairs to consider
+                     instead of environment
+        @type  vars: param=value
+        
+        @return: [ (variable name, value) ] sorted by length of value
+        @rtype: [ (str,str) ]
+        """
+        items = vars.items() or os.environ.items()
+        exclude = exclude + self.exclude_vars
 
         ## all environment values with at least one '/' sorted by length
-        items = vars.items()
-
         pairs = [ (len(v[1]), v) for v in items
-                  if self.__is_path(v[1]) and v[0]!= 'PWD' and v[0]!= 'OLDPWD']
+                  if self.__is_path(v[1]) and not v[0] in exclude ]
 
         pairs.sort()
         pairs.reverse()
 
         return [ x[1] for x in pairs ]
+
+
+    def get_substitution_pairs( self, minLen=3, vars={}, exclude=[] ):
+        """
+        Get all variable/value pairs that are available for path substitutions.
+
+        @param minLen: minimal path length [3]
+        @type  minLen: int
+        @param vars: alternative param=value pairs to consider instead of environment
+        @type  vars: param=value
+        
+        @return: [ (variable name, value) ] sorted by priority (mostly length of value)
+        @rtype: [ (str,str) ]
+        """
+        r = self.__paths_in_settings( minLen=minLen, vars=vars, exclude=exclude )
+        r +=self.__paths_in_env(      minLen=minLen, vars=vars, exclude=exclude )
+        return r
+
+
+    def get_substitution_dict( self, minLen=3, vars={}, exclude=[] ):
+        return dict(self.get_substitution_pairs(minLen=minLen,vars=vars,exclude=exclude))
 
 
     def __str__( self ):
@@ -456,7 +555,7 @@ class LocalPath( object ):
         @return: int
         @rtype: 
         """
-        if self.__hash == None:
+        if self.__hash is None:
             self.__hash = self.formatted().__hash__()
 
         return self.__hash
@@ -504,13 +603,16 @@ class Test:
         l.set_path( '/home/Bis/raik/data/tb/interfaces/c11/com_wet/ref.com' )
         path += [ 'Example 3:\n %s : %s \n'%(l.formatted(), l.local()) ]
 
+        ## Example 4
+        l.set_path( t.projectRoot() + '/test/com' )
+        path += [ 'Example 4:\n %s : %s \n'%(l.formatted(), l.local()) ]
+
         if local:
             for p in path:
                 print p
             globals().update( locals() )
 
-        return 1
-
+        return l.fragments[0][1]
 
 
     def expected_result( self ):
@@ -520,7 +622,7 @@ class Test:
         @return: 1
         @rtype:  int
         """
-        return 1
+        return 'projectRoot'
     
         
 
