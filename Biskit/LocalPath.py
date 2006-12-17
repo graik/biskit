@@ -31,6 +31,7 @@ from Biskit.Errors import BiskitError
 
 import os.path
 import string
+import re
 
 class LocalPathError( BiskitError ):
     pass
@@ -62,6 +63,9 @@ class LocalPath( object ):
              input:  restrict allowed environment variables
              output: only substitute what is necessary until path exists
     """
+
+    ex_fragment = re.compile('\{([a-zA-Z0-9_/ ]+)\|\$([a-zA-Z0-9_/ ]+)\}')
+
 
     def __init__( self, path=None, checkEnv=1, minLen=3, **vars ):
         """
@@ -213,7 +217,22 @@ class LocalPath( object ):
 
         @raise PathError: formatted input is not yet implemented
         """
-        raise PathError, 'formatted input is not yet implemented'
+        fragments = []
+        pos = 0
+
+        for m in self.ex_fragment.finditer( s ):
+
+            if m.start() > pos:
+                fragments += [ ( s[pos:m.start()], None ) ]
+
+            fragments += [ m.groups() ]
+
+            pos = m.end()
+
+        if len( s ) > pos:
+            fragments += [ ( s[pos:len(s)], None ) ]
+
+        self.set_fragments( *fragments )
 
 
     def set_path( self, fname, minLen=3, **vars ):
