@@ -3,7 +3,7 @@
 comment=PyMol http://pymol.sf.net
 
 ## binary
-bin=pymol.com
+bin=pymol
 
 ## working directory
 cwd=
