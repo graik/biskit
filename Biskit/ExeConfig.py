@@ -302,14 +302,14 @@ class Test:
         @return: 1
         @rtype: int
         """
-        x = ExeConfig( 'xplor', strict=1 )
+        x = ExeConfig( 'xclock', strict=1 )
         x.validate()
 
         if local:
             print x.bin
             globals().update( locals() )
                               
-        return 1
+        return 'xclock' in x.bin
 
 
 
@@ -320,7 +320,7 @@ class Test:
         @return: 1
         @rtype:  int
         """
-        return 1
+        return True
     
         
 if __name__ == '__main__':
