@@ -39,7 +39,7 @@ class PDBParserError( Exception ):
     """Error while parsing a structure file or object"""
     pass
 
-class PDBParser:
+class PDBParser(object):
     """
     **Abstract** base class for parsers that generate PDBModel objects from
     different source formats.
