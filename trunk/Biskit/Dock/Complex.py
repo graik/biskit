@@ -1418,13 +1418,16 @@ class Test:
         contProfile_lig = N.sum( cont )
         contProfile_rec = N.sum( cont, 1 )
 
-        dope = PDBDope( c.rec_model )
-        dope.addSurfaceRacer( probe=1.4 )
-        rec_surf = c.rec_model.profile2mask( 'MS', 0.0000001, 1000 )
+        try:
+            dope = PDBDope( c.rec_model )
+            dope.addSurfaceRacer( probe=1.4 )
+            rec_surf = c.rec_model.profile2mask( 'MS', 0.0000001, 1000 )
 
-        dope = PDBDope( c.lig_model )
-        dope.addSurfaceRacer( probe=1.4 )
-        lig_surf = c.lig_model.profile2mask( 'MS', 0.0000001, 1000 )
+            dope = PDBDope( c.lig_model )
+            dope.addSurfaceRacer( probe=1.4 )
+            lig_surf = c.lig_model.profile2mask( 'MS', 0.0000001, 1000 )
+        except:
+            pass
 
         if local:           
             from Biskit import Pymoler
@@ -1452,6 +1455,7 @@ class Test:
 
             pm.add( 'color grey, (b=0)' )
             pm.add( 'show stick, (rec or lig)' )
+            pm.add( 'show surf, rec_sphere')
 
             pm.add( 'zoom all' )
 
