@@ -158,6 +158,7 @@ def absfile( filename, resolveLinks=1 ):
     r = osp.abspath( osp.expanduser( filename ) )
     if resolveLinks:
         r = osp.realpath( r )
+    r = osp.normpath(r)
     return r
 
 
@@ -550,7 +551,7 @@ def projectRoot():
     @rtype: string
     """
     ## import this module
-    import tools
+    from Biskit import tools
     ## get location of this module
     f = absfile(tools.__file__)
     ## extract path and assume it is 'project_root/Biskit'
