@@ -139,14 +139,6 @@ class PDBModel:
             ## trick update to leave xyz untouched
             self.xyz = 0
 
-        if source <> None:
-
-            self.update( skipRes=skipRes, lookHarder=1 )
-
-        if noxyz:
-            ## discard coordinates, even when read from PDB file
-            self.xyz = None
-
         ## monitor changes of coordinates and atoms
         self.xyzChanged = 0
         self.atomsChanged = 0
@@ -158,6 +150,14 @@ class PDBModel:
 
         ## to collect further informations
         self.info = { 'date':t.dateSortString() }
+
+        if source <> None:
+
+            self.update( skipRes=skipRes, lookHarder=1 )
+
+        if noxyz:
+            ## discard coordinates, even when read from PDB file
+            self.xyz = None
 
 
     def version( self ):
