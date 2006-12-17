@@ -72,7 +72,7 @@ class PDBParseModel( PDBParser ):
         Override!
         @param model: existing model
         @type  model: PDBModel
-        @param source: source PDB file or pickled PDBModel or PDBModel object
+        @param source: PDBModel object
         @type  source: str | file | PDBModel
         @param skipRes: list residue names that should not be parsed
         @type  skipRes: [ str ]
@@ -87,9 +87,9 @@ class PDBParseModel( PDBParser ):
 
                 model.pdbCode  = model.pdbCode or s.pdbCode
 
-                model.setAtoms( model.atoms or s.getAtoms() )
+                model.atoms = model.atoms or s.getAtoms()
 
-                model.setXyz( model.xyz or s.getXyz() )
+                model.xyz = model.xyz or s.getXyz()
 
                 model.__terAtoms = getattr(model, '_PDBModel__terAtoms',[])or \
                                    getattr(s,'_PDBModel__terAtoms',[])
