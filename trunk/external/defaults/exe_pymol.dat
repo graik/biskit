@@ -25,3 +25,7 @@ replaceEnv=0
 ## Empty entries mark variables that have to be specified from outside
 ##
 [ENVIRONMENT]
+
+# PYMOL_PATH=
+# PYMOL_EXTLIBPATH=
+
