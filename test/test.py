@@ -32,7 +32,7 @@ from Biskit import EHandler
 
 o = {'log':T.projectRoot()+'/test/test.log',
      'v':2,
-     'tests': ['all', 'exclude_long'] }
+     'tests': ['all', 'no_long'] }
 
 
 def _use():
@@ -71,8 +71,8 @@ def _use():
 
             To exclude tests::
             
-               exclude_long  - don't run time-consuming tests
-               exclude_pvm   - dont run tests using PVM
+               no_long  - don't run time-consuming tests
+               no_pvm   - dont run tests using PVM
 
         
 Default options:
@@ -237,12 +237,12 @@ if __name__ == '__main__':
         tests += ['dock', 'dock_app', 'dock_app_long', 'dock_pvm']
         tests.remove('all_dock')
         
-    if 'exclude_long' in tests:
+    if 'no_long' in tests:
         for t in tests:
             if re.match('.*long.*', t):
                 tests.remove(t)
         
-    if 'exclude_pvm' in tests:
+    if 'no_pvm' in tests:
         for t in tests:
             if re.match('.*pvm.*', t):
                 tests.remove(t)        
