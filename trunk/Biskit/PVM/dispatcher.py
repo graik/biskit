@@ -29,6 +29,7 @@ Manage Master/Slave tasks.
 from PVMThread import PVMMasterSlave
 import Biskit.settings as settings
 from Status import Status
+from Biskit.PVM import pvmTools
 import pvm, socket
 
 MSG_JOB_START = 1
@@ -227,7 +228,10 @@ class JobMaster(PVMMasterSlave):
 
             if slave_tid <= 0:
                 print 'error spawning', host
-                print 'return code:', slave_tid
+                try:
+                    print '\t', pvmTools.pvmerrors[ slave_tid ]
+                except Exception, error:
+                    print 'unknown error', error
 
             else:
                 self.bindMessages(slave_tid)
