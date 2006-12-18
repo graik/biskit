@@ -25,7 +25,7 @@
 Path handling.
 """
 
-import Biskit.tools as t
+import Biskit.tools as T
 import Biskit.settings as S
 from Biskit import EHandler
 from Biskit.Errors import BiskitError
@@ -76,12 +76,16 @@ class LocalPath( object ):
     """
 
     ## pattern for formatted string input
-    ex_fragment = re.compile('\{([a-zA-Z0-9_~/ ]+)\|\$([a-zA-Z0-9_/ ]+)\}')
+    ex_fragment = re.compile('\{([a-zA-Z0-9_~/ ]+)\|\$([a-zA-Z0-9_]+)\}')
+
+    ## pattern for minimal path fragment that can be substituted
+    ex_minpath  = re.compile( '/|~[a-zA-Z0-9_~/ ]+' )
 
     ## never use these variables
     exclude_vars = ['PWD','OLDPWD','PYTHONPATH','PATH']
 
-    def __init__( self, path=None, checkEnv=1, minLen=3, **vars ):
+    def __init__( self, path=None, checkEnv=1, minLen=3, maxSub=1,
+                  absolute=1, resolveLinks=0,  **vars ):
         """
         Create a new environment-dependent path from either a list of
         fragments and their substitution variable names or from a path or
@@ -95,14 +99,21 @@ class LocalPath( object ):
         @param checkEnv: look for substitution values among environment
                          variables (default 1)
         @type  checkEnv: 1|0
-        @param vars: alternative envVar=value pairs, to be used instead of
-                      environment variables
-        @type  vars: envVar=value
+        @param absolute: normalize file name [1]
+        @type  absolute: 1|0
+        @param resolveLinks: resolve symbolic links [0]
+        @type  resolveLinks: 1|0
+        @param maxSub: maximal number of substitutions [1]
+        @type  maxSub: int
+        @param vars: additional param=value pairs with suggested substitutors
+        @type  vars: param=value
         """
 
         self.fragments = [] ## list of tuples (absolut,variable_name)
         if path:
-            self.set( path, checkEnv=checkEnv, minLen=minLen, **vars )
+            self.set( path, checkEnv=checkEnv, minLen=minLen,
+                      absolute=absolute, resolveLinks=resolveLinks,
+                      maxSub=maxSub, **vars )
 
         self.__hash = None
         self.__cache = None
@@ -134,7 +145,7 @@ class LocalPath( object ):
                                constructed via environment variables
         """
         result = string.join( [ f[0] for f in self.fragments ], '' )
-        result = t.absfile( result )
+        result = T.absfile( result )
 
         if os.path.exists( result ):
             return result
@@ -147,7 +158,7 @@ class LocalPath( object ):
             else:
                 result += abs
 
-        result = t.absfile( result )
+        result = T.absfile( result )
 
         if existing and not os.path.exists( result ):
             raise LocalPathError, "Can't construct existing path from %s."%\
@@ -169,7 +180,8 @@ class LocalPath( object ):
         @param force: override cached value [0]
         @type  force: 0|1
         
-        @return: valid absolute (not necessarily existing) path in current environment
+        @return: valid absolute (not necessarily existing) path in current
+                 environment
         @rtype: str
         
         @raise LocalPathError: if existing==1 and no existing path can be
@@ -217,18 +229,27 @@ class LocalPath( object ):
         return string.join( result, '' )
 
 
-    def set( self, v, checkEnv=1, minLen=3, **vars ):
+    def set( self, v, checkEnv=1, minLen=3, maxSub=1,
+             absolute=1, resolveLinks=0, **vars ):
         """
-        Assign a new file name
+        Assign a new file name. checkEnv, minLen, resolve*, maxSub are
+        only considered for path name input.
         
         @param v: fragment tuples or path or custom-formatted string
         @type  v: [ (str,str) ] OR str
         @param checkEnv: look for possible substitutions in environment [1]
-                         (ignored if v is already formatted like '{/x/y|$xy}/z.txt' )
+              (iggnored if v is already formatted like '{/x/y|$xy}/z.txt' )
         @type  checkEnv: 0|1
         @param minLen: mininal length of environment variables to consider [3]
-                       (ignored if v is already formatted like '{/x/y|$xy}/z.txt' )
         @type  minLen: int
+        @param absolute: normalize file name [1]
+        @type  absolute: 1|0
+        @param resolveLinks: resolve symbolic links [0]
+        @type  resolveLinks: 1|0
+        @param maxSub: maximal number of substitutions [1]
+        @type  maxSub: int
+        @param vars: additional param=value pairs with suggested substitutors
+        @type  vars: param=value
         """
         if type( v ) == list:
             return self.set_fragments( v )
@@ -237,7 +258,9 @@ class LocalPath( object ):
             return self.set_string( v )
 
         if type( v ) == str and (checkEnv or vars):
-            return self.set_path( v, minLen=minLen, **vars )
+            return self.set_path( v, minLen=minLen, absolute=absolute,
+                                  maxSub=maxSub,
+                                  resolveLinks=resolveLinks, **vars )
         
         raise PathError, 'incompatible value for LocalPath' + str(v)
 
@@ -286,22 +309,45 @@ class LocalPath( object ):
         self.set_fragments( *fragments )
 
 
-    def set_path( self, fname, minLen=3, **vars ):
+    def absfile( self, fname, resolveLinks=0 ):
+        return T.absfile( fname, resolveLinks=resolveLinks )
+
+
+    def set_path( self, fname, minLen=3, absolute=1, resolveLinks=0,
+                  maxSub=1, **vars ):
         """
-        Set a new path and try to identify environment variables that could
-        substitute parts of it. If vars is given, env. variables are ignored.
+        Set a new path and try to identify settings/environment
+        variables that could substitute parts of it.
         
         @param fname: relative or absolute file name
         @type  fname: str
-        @param vars: alternative param=value pairs with suggested substitutors
+        @param minLen: minimal length of string o to be counted as path
+        @type  minLen: int
+        @param absolute: normalize file name [1]
+        @type  absolute: 1|0
+        @param resolveLinks: resolve symbolic links [0]
+        @type  resolveLinks: 1|0
+        @param maxSub: maximal number of substitutions [1]
+        @type  maxSub: int
+        @param vars: additional param=value pairs with suggested substitutors
         @type  vars: param=value
         """
         env_items =  self.get_substitution_pairs( minLen=minLen, vars=vars )
 
+        if absolute:
+            fname = self.absfile( fname, resolveLinks=resolveLinks )
+        
         fragments = [ ( fname, None ) ] ## default result
 
+        substitutions=0
+
         for name, value in env_items:
+            old = fragments
             fragments = self.__substitute( fragments, name, value )
+
+            substitutions += (old != fragments)
+            if substitutions == maxSub:
+                break
 
         self.fragments = fragments
 
@@ -329,7 +375,7 @@ class LocalPath( object ):
         @raise IOError: if file can not be found
         """
         try:
-            return t.Load( self.local( existing=1 ) )
+            return T.Load( self.local( existing=1 ) )
         except LocalPathError, why:
             raise IOError, "Cannot find file %s (constructed from %s)" %\
                   self.local(), str( self )
@@ -344,13 +390,27 @@ class LocalPath( object ):
         """
         try:
             f = self.local()
-            t.Dump( f, o )
+            T.Dump( f, o )
             return f
         except:
-            t.errWriteln("Couldn't dump to %s (constructed from %s)" %\
+            T.errWriteln("Couldn't dump to %s (constructed from %s)" %\
                          self.formatted(), self.local() )
             raise
 
+    def __find_subpath( self, path, subpath ):
+        """
+        
+        """
+        seps = [ i for i in range( len(path) ) if path[i]==os.path.sep ]
+        seps += [ len( path ) ]
+
+        pos = path.find( subpath )
+
+        if pos in seps and pos+len(subpath) in seps:
+            return pos
+
+        return -1
+    
 
     def __substitute( self, fragments, name, value ):
         """
@@ -374,15 +434,13 @@ class LocalPath( object ):
 
                 if not subst:   ## unsubstituted fragment
 
-                    v = t.absfile( value )
-                    a = t.absfile( abs )
-
-                    pos = a.find( v )
+##                     pos = abs.find( value )
+                    pos = self.__find_subpath( abs, value )
 
                     if pos != -1:
-                        end = pos + len( v )
+                        end = pos + len( value )
 
-                        f1, f2, f3 = a[0:pos], a[pos:end], a[end:]
+                        f1, f2, f3 = abs[0:pos], abs[pos:end], abs[end:]
 
                         if f1:
                             result += [ (f1, None) ] ## unsubstituted head
@@ -416,12 +474,34 @@ class LocalPath( object ):
               and o.find(':') == -1 )
         if r:
             try:
-                s = t.absfile( o )
+                s = T.absfile( o )
                 return 1
             except:
                 return 0
         return 0
 
+
+    def __path_vars( self, d, minLen=3, vars={}, exclude=[] ):
+        """
+        @see L{__paths_in_settings} and L{__paths_in_env}
+
+        @return: [ (variable name, path) ] sorted by length of value
+        @rtype: [ (str,str) ]
+        """
+
+        items = vars.items() + d.items()
+        exclude = exclude
+
+        items = [ (k,v) for (k,v) in items if self.__is_path(v) ]
+
+        pairs = [ (len(v[1]), v) for v in items
+                  if not v[0] in self.exclude_vars ]
+
+        pairs.sort()
+        pairs.reverse()
+
+        return [ x[1] for x in pairs ]
+        
 
     def __paths_in_settings( self, minLen=3, vars={}, exclude=[]):
         """
@@ -436,15 +516,8 @@ class LocalPath( object ):
         @return: [ (variable name, value) ] sorted by length of value
         @rtype: [ (str,str) ]
         """
-        items = vars.items() or S.__dict__.items()
-        exclude = exclude + self.exclude_vars
-
-        items = [ (k,v) for (k,v) in items if self.__is_path(v) ]
-
-        pairs = [ (len(v[1]), v) for v in items if not v[0] in self.exclude_vars ]
-        pairs.sort()
-
-        return [ x[1] for x in pairs ]
+        return self.__path_vars( S.__dict__, minLen=minLen, vars=vars,
+                                 exclude=(exclude + self.exclude_vars ) )
 
         
     def __paths_in_env( self, minLen=3, vars={}, exclude=[] ):
@@ -460,17 +533,8 @@ class LocalPath( object ):
         @return: [ (variable name, value) ] sorted by length of value
         @rtype: [ (str,str) ]
         """
-        items = vars.items() or os.environ.items()
-        exclude = exclude + self.exclude_vars
-
-        ## all environment values with at least one '/' sorted by length
-        pairs = [ (len(v[1]), v) for v in items
-                  if self.__is_path(v[1]) and not v[0] in exclude ]
-
-        pairs.sort()
-        pairs.reverse()
-
-        return [ x[1] for x in pairs ]
+        return self.__path_vars( os.environ, minLen=minLen, vars=vars,
+                                 exclude=(exclude + self.exclude_vars ) )
 
 
     def get_substitution_pairs( self, minLen=3, vars={}, exclude=[] ):
@@ -479,19 +543,21 @@ class LocalPath( object ):
 
         @param minLen: minimal path length [3]
         @type  minLen: int
-        @param vars: alternative param=value pairs to consider instead of environment
+        @param vars: additional param=value pairs to consider
         @type  vars: param=value
         
-        @return: [ (variable name, value) ] sorted by priority (mostly length of value)
+        @return: [ (variable name, value) ] sorted by priority
+                 (mostly length of value)
         @rtype: [ (str,str) ]
         """
-        r = self.__paths_in_settings( minLen=minLen, vars=vars, exclude=exclude )
-        r +=self.__paths_in_env(      minLen=minLen, vars=vars, exclude=exclude )
+        r = self.__paths_in_settings(minLen=minLen,vars=vars, exclude=exclude )
+        r +=self.__paths_in_env(     minLen=minLen,vars=vars, exclude=exclude )
         return r
 
 
     def get_substitution_dict( self, minLen=3, vars={}, exclude=[] ):
-        return dict(self.get_substitution_pairs(minLen=minLen,vars=vars,exclude=exclude))
+        return dict(self.get_substitution_pairs(minLen=minLen,vars=vars,
+                                                exclude=exclude))
 
 
     def __str__( self ):
@@ -588,24 +654,28 @@ class Test:
 
         l = LocalPath()
 
-        ## Example 1
+        ## Example 1; create from fragments
         l.set_fragments(
             ('/home/Bis/johan/data/tb/interfaces','PRJ_INTERFACES'),
             ('/c11/com_wet/ref.com', None) )
         path += [ 'Example 1:\n %s : %s \n'%(l.formatted(), l.local()) ]
 
-        ## Example 2
+        ## Example 2; create from path with custom variable
         l.set_path( '/home/Bis/raik/data/tb/interfaces/c11/com_wet/ref.com',
                     USER='/home/Bis/raik' )
         path +=  [ 'Example 2:\n %s : %s \n'%(l.formatted(), l.local()) ]
 
-        ## Example 3
-        l.set_path( '/home/Bis/raik/data/tb/interfaces/c11/com_wet/ref.com' )
+        ## Example 3; create from non-existing path
+        l.set_path( '/home/xyz/data/tb/interfaces/c11/com_wet/ref.com' )
         path += [ 'Example 3:\n %s : %s \n'%(l.formatted(), l.local()) ]
 
-        ## Example 4
-        l.set_path( t.projectRoot() + '/test/com' )
+        ## Example 4; create from existing path with automatic substitution
+        l.set_path( T.projectRoot() + '/test/com' )
         path += [ 'Example 4:\n %s : %s \n'%(l.formatted(), l.local()) ]
+
+        ## Example 5; rule out stray substitutions
+        l.set_path( T.projectRoot() + '/tmp/com', maxSub=1, TMP='/tmp' )
+        path += [ 'Example 5:\n %s : %s \n'%(l.formatted(), l.local()) ]
 
         if local:
             for p in path:
