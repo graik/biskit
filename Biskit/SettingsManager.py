@@ -63,8 +63,8 @@ class SettingsManager:
 ##     this file are overriding the default parameters given in
 ##     %(fdefault)s.
 ##     If missing, Biskit creates a new user configuration file with
-##     only those parameters for which the default value seems
-##     invalid. See the default file for the complete set of parameters.
+##     those parameters for which the default value seems
+##     invalid. The remaining parameters are commented out.
 
 ##     Parameters in this file will be accessible from within python as
 ##     fields of Biskit.settings. For example::
@@ -208,6 +208,8 @@ class SettingsManager:
 
                     if (not errorsonly) or param.error:
                         f.write( param.formatted() + '\n')
+                    else:
+                        f.write( '## ' + param.formatted() + '\n') 
 
                 f.write('\n')
 
