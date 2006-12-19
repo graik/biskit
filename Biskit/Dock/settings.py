@@ -95,3 +95,4 @@ env.update(prosaII_env)
 ## clean up name space
 
 del B, T, M, user, sys
+del __CFG_DEFAULT, __CFG_USER, m
