@@ -164,7 +164,8 @@ class Complex:
 
     def values( self, keys=[], default=None ):
         """
-        values( keys=None, default=None ) -> list of info dict values
+        Use::
+           values( keys=None, default=None ) -> list of info dict values
         
         @param keys: give only values of these keys
         @type  keys: [str]
@@ -181,8 +182,9 @@ class Complex:
 
     def get( self, key, default=None):
         """
-        C.get(k[,default]) -> C.info[k] if C.info.has_key(k), else default.
-        default defaults to None.
+        Use::
+           C.get(k[,default]) -> C.info[k] if C.info.has_key(k), else
+                                 default defaults to None.
 
         @param key: key to call
         @type  key: str

@@ -34,7 +34,8 @@ import copy
 import random
 
 import Biskit.tools as t
-from Biskit import BiskitError, PDBError, EHandler
+from Biskit import PDBError, EHandler
+from Biskit.Errors import BiskitError
 
 from Biskit.Dock.Complex import Complex
 from ComplexModelRegistry import ComplexModelRegistry
@@ -288,7 +289,8 @@ class ComplexList( list ):
 
     def argsortRandom( self ):
         """
-        argsortRandom() -> [ int ], indices in random order.
+        Indices for key in random order::
+          argsortRandom() -> [ int ], indices in random order.
 
         @return: indices in random order
         @rtype: [int]
@@ -300,7 +302,11 @@ class ComplexList( list ):
 
     def argsort( self, sortKey ):
         """
-        argsort( str_sortKey ) -> [ int ], indices after sorting
+        Indices sort order for values of key::
+          argsort( str_sortKey ) -> [ int ], indices after sorting
+
+        @param sortKey: key to use for sorting
+        @type  sortKey: str       
 
         @return: indices after sorting
         @rtype: [int]
@@ -312,8 +318,12 @@ class ComplexList( list ):
 
     def sortBy( self, sortKey ):
         """
-        sortBy( str_sortKey ) -> ComplexList (or sub-class) sorted by
-        info[ str_sortKey ]
+        Sort ComplexList by key::
+          sortBy( str_sortKey ) -> ComplexList (or sub-class)
+                                   sorted by info[ str_sortKey ]
+
+        @param sortKey: key to use for sorting
+        @type  sortKey: str
 
         @return: sorted ComplexList
         @rtype: ComplexList
@@ -353,8 +363,10 @@ class ComplexList( list ):
 
     def filterRange( self, infoKey, vLow, vHigh ):
         """
-        filterRange( str_infoKey, vLow, vHigh )
         Get indices of Complexes where vLow <= c.info[ infoKey ] <= vHigh.
+        
+        Use::
+           filterRange( str_infoKey, vLow, vHigh )
 
         @param infoKey: key for info dict
         @type  infoKey: str
@@ -376,8 +388,10 @@ class ComplexList( list ):
 
     def filterEqual( self, infoKey, lst ):
         """
-        filterEqual( infoKey, lst )
         Get indices of Complexes where c.info[ infoKey ] in lst.
+        
+        Use::
+           filterEqual( infoKey, lst )
 
         @param infoKey: key for info dict
         @type  infoKey: str
@@ -393,9 +407,11 @@ class ComplexList( list ):
 
     def filterFunct( self, f ):
         """
-        filterFunct( f )
         Get indices of Complexes where f( c ) == 1.
 
+        Use::
+           filterFunct( f )
+           
         @param f: filterFunct
         @type  f: function
         
@@ -422,7 +438,7 @@ class ComplexList( list ):
         @return: ComplexList (or sub-class)
         @rtype: ComplexList
         
-        @raise ConditionError if cond is neither list nor tuple nor function: 
+        @raise ConditionError: if cond is neither list nor tuple nor function 
         """
         indices = None
 
