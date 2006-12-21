@@ -40,10 +40,10 @@ class SettingsManager:
     configuration file into a python module where they are published as
     normal fields. The general flow is like this::
 
-    default.cfg ---[SettingsParser]---\
-                                       [SettingsManager]--->[settings]
-                                             /
-              user.cfg---[SettingsParser]---/
+      default.cfg ---[SettingsParser]---\
+                                         [SettingsManager]--->[settings]
+                                               /
+                user.cfg---[SettingsParser]---/
 
     See L{P.SettingsParser}
     See L{B.settings}
@@ -94,7 +94,7 @@ class SettingsManager:
 
 """
 
-    def __init__( self, fdefault, fuser, createmissing=False, verbose=1):
+    def __init__( self, fdefault, fuser, createmissing=False, verbose=1 ):
         """
         @param fdefault: default configuration file
         @type  fdedault: str

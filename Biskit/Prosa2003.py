@@ -32,9 +32,10 @@ import tempfile
 
 import Biskit.tools as T
 
-from Biskit import Executor, TemplateError
+from Biskit import Executor
+from Biskit import  TemplateError
 ## import Biskit.settings as S
-from Biskit import BiskitError
+from Biskit.Errors import BiskitError
 import time
 import subprocess
 
@@ -238,8 +239,8 @@ exit\n
     def prepare( self ):
         """
         Make and write a PROSA compatible pdb file.
-        - consecutive residue numbering
-        - same chainId troughout the model
+          - consecutive residue numbering
+          - same chainId troughout the model
 
         @note: Overrides Executor method.
         """

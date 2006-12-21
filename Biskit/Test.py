@@ -104,7 +104,7 @@
 ## FuzzyCluster.py        None
 ## gnuplot.py (P)         None
 ## hist.py                None
-## Hmmer.py (E)           lig/1A19.pdb
+## Hmmer.py               lig/1A19.pdb
 ## IcmCad.py              lig/1A19.pdb, lig_pcr_00/traj.dat
 ## LocalPath.py           None
 ## LogFile.py             None
@@ -122,14 +122,14 @@
 ## plotUtils.py (P)       None
 ## ProfileCollection.py   None
 ## Prosa2003.py           lig/1A19.pdb + rec/2A2P.pdb
-## Pymoler.py (D,V,E)     lig_pcr_00/traj.dat
+## Pymoler.py             lig_pcr_00/traj.dat
 ## Ramachandran.py (D)    lig_pcr_00/traj.dat
 ## ReduceCoordinates.py   com/1BGS.pdb
 ## rmsFit.py              lig_pcr_00/traj.dat
 ## SparseArray.py         None
 ## SurfaceRacer.py        lig/1A19.pdb
 ## surfaceRacerTools.py   lig/1A19.pdb
-## tools.py (V)           rec/1A2P.pdb
+## tools.py               rec/1A2P.pdb
 ## TrajCluster.py         lig_pcr_00/traj.dat
 ## Trajectory.py          lig_pcr_00/traj.dat
 ## TrajFlexMaster.py      lig_pcr_00/traj.dat
@@ -168,7 +168,7 @@
 ## Dock/FixedList.py              None
 
 ############################# MOD #############################
-## Mod/Aligner.py (E)          Mod/project/templates/t_coffe/*
+## Mod/Aligner.py              Mod/project/templates/t_coffe/*
 ##                               (1DT7_A.alpha, 1K8U_A.alpha, 1MHO_.alpha,
 ##                                1NSH_A.alpha, 1J55_A.alpha, 1KSO_A.alpha,
 ##                                1MQ1_A.alpha, 1K2H_A.alpha, 1M31_A.alpha,
@@ -213,9 +213,9 @@
 ##                                   target.B99990007.pdb, target.B99990008.pdb
 ##                                   target.B99990009.pdb, target.B99990010.pdb)
 ## Mod/CheckIdentities.py      Mod/project/t_coffee/final.pir_aln
-## Mod/AlignerMaster.py (E)    same as Aligner.py
+## Mod/AlignerMaster.py        same as Aligner.py
 ## Mod/AlignerSlave.py         -- tested via the master --
-## Mod/ModelMaster.py (E)      same as Modell.py
+## Mod/ModelMaster.py          same as Modell.py
 ## Mod/ModelSlave.py           -- tested via the master --
 ## Mod/modUtils.py             Mod/project/target.fasta
 ## Mod/SequenceSearcher.py     Mod/project/target.fasta
@@ -1045,7 +1045,7 @@ class Dock_Applications( unittest.TestCase ):
         """
         Testing L{Biskit.Dock.Docker} 
         No testing done. Just let run trough
-        @note This test takes 15 minutes if run=1 (a HEX run)!!
+        @note: This test takes 15 minutes if run=1 (a HEX run)!!
         """
         from Biskit.Dock.Docker import Test
         t = Test()
@@ -1068,7 +1068,7 @@ class Dock_Applications_Long( unittest.TestCase ):
         """
         Testing L{Biskit.Dock.Docker} 
         No testing done. Just let run trough
-        @note This test takes 15 minutes if run=1 (a HEX run)!!
+        @note: This test takes 15 minutes if run=1 (a HEX run)!!
         """
         from Biskit.Dock.Docker import Test
         t = Test()
@@ -1282,7 +1282,7 @@ class Mod_Pvm( unittest.TestCase ):
         """
         Testing L{Biskit.Mod.ModelMaster}
         No testing done. Just let run trough
-        @note This test takes 10 minutes
+        @note: This test takes 10 minutes
         """       
         from Biskit.Mod.ModelMaster import Test
         t = Test()
@@ -1317,7 +1317,7 @@ class Mod_Pvm_Long( unittest.TestCase ):
         """
         Testing L{Biskit.Mod.ModelMaster}
         No testing done. Just let run trough
-        @note This test takes 10 minutes
+        @note: This test takes 10 minutes
         """       
         from Biskit.Mod.ModelMaster import Test
         t = Test()

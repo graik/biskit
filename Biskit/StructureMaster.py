@@ -148,5 +148,5 @@ if __name__ == '__main__':
 
     test = Test()
 
-    assert test.run( local=0 ) == test.expected_result()
+    assert test.run( local=1 ) == test.expected_result()
 
