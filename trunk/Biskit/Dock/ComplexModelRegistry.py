@@ -26,7 +26,7 @@ This is a helper class for ComplexList.
 """
 
 from Biskit.Dock import Complex
-from Biskit import BiskitError
+from Biskit.Errors import BiskitError
 from Biskit import LocalPath
 
 import Biskit.tools as T
