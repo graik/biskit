@@ -149,7 +149,8 @@ class TemplateSearcher( SequenceSearcher ):
 
     def fastaFromIds( self, db, id_lst, fastaOut=None ):
         """
-        fastaFromIds( id_lst, fastaOut ) -> { str: Bio.Fasta.Record }
+        Use::
+           fastaFromIds( id_lst, fastaOut ) -> { str: Bio.Fasta.Record }
         
         @param db: database name
         @type  db: str
