@@ -45,13 +45,22 @@ def parse_tabbed_file( fname ):
     result = {}
     for l in f:
         if not l[0] == '#':
-
+            
             try:
                 fname, chain_id = l.split()
+
+                if not os.path.exists(fname):
+                    fname = '%s/%s'%(T.testRoot(), fname)
+                    
                 if not len(fname) == 0:
                     result[ fname ] = chain_id
+                    
             except:
                 fname = l.strip()
+                
+                if not os.path.exists(fname):
+                    fname = '%s/%s'%(T.testRoot(), fname)                
+                    
                 result[ fname ] = ''
 
     f.close()
