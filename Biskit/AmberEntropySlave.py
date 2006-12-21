@@ -46,7 +46,7 @@ class AmberEntropySlave( JobSlave ):
           {'nice':int, 'ferror':str, .. }
 
         @param params: initialisation parameters passed from the master
-        @type: dict
+        @type  params: dict
         """
         self.__dict__.update( params )
         self.errorLog = LogFile( self.ferror, mode='a' )

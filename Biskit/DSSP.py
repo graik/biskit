@@ -30,10 +30,9 @@ import os.path
 import string
 import Numeric as N
 from Biskit import Executor, TemplateError
-## import Biskit.settings as S
 import Biskit.tools as T
 import Biskit.molUtils as MU
-from Biskit import BiskitError
+from Errors import BiskitError
 
 class Dssp_Error( BiskitError ):
     pass
@@ -91,7 +90,6 @@ class Dssp( Executor ):
         self.f_out = tempfile.mktemp( '_dssp.out')
         
         Executor.__init__( self, 'dsspcmbi',
-#                           f_out=self.f_out,
                            args='-na %s'%self.f_pdb,
                            catch_err=1, **kw )
 

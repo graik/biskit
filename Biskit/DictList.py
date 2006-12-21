@@ -219,7 +219,10 @@ class DictList( BisList, list ):
 
     def extend( self, lst ):
         """
-        extend( list ). Add all items to (the end of) this instance
+        Add all items to (the end of) this instance.
+        
+        Use::
+           extend( list ). 
 
         @param lst: list of new items
         @type  lst: [ any ]
@@ -230,7 +233,10 @@ class DictList( BisList, list ):
 
     def append( self, v ):
         """
-        append( dict ). Append item to the end of this list.
+        Append item to the end of this list.
+        
+        Use::
+          append( dict ).
 
         @param v: value
         @type  v: any

@@ -449,7 +449,8 @@ class PDBModel:
 
     def resProfile( self, name, default=None ):
         """
-        resProfile( profile_name ) -> array 1 x N_res with residue values
+        Use::
+           resProfile( profile_name ) -> array 1 x N_res with residue values
 
         @param name: name to access profile
         @type  name: str
@@ -464,7 +465,8 @@ class PDBModel:
 
     def atomProfile(self, name, default=None ):
         """
-        atomProfile( profile_name ) -> array 1 x N_atoms with atom values
+        Use::
+           atomProfile( profile_name ) -> array 1 x N_atoms with atom values
 
         @param name: name to access profile
         @type  name: str
@@ -479,7 +481,8 @@ class PDBModel:
 
     def profile( self, name, default=None, lookHarder=0 ):
         """
-        profile( name, lookHarder=0) -> atom or residue profile
+        Use::
+           profile( name, lookHarder=0) -> atom or residue profile
 
         @param name: name to access profile
         @type  name: str        
@@ -504,7 +507,8 @@ class PDBModel:
 
     def profileInfo( self, name, lookHarder=0 ):
         """
-        profileInfo( name ) -> dict with infos about profile
+        Use::
+           profileInfo( name ) -> dict with infos about profile
 
         @param name: name to access profile
         @type  name: str       
@@ -548,7 +552,9 @@ class PDBModel:
     def removeProfile( self, *names ):
         """
         Remove residue or atom profile(s)
-        removeProfile( str_name [,name2, name3] ) -> 1|0,
+        
+        Use::
+           removeProfile( str_name [,name2, name3] ) -> 1|0,
 
         @param names: name or list of residue or atom profiles
         @type  names: str OR list of str

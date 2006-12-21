@@ -33,7 +33,7 @@ from Biskit import Executor, TemplateError
 import tools as T          
 import tempfile, re
 import os.path
-from Biskit import BiskitError
+from Biskit.Errors import BiskitError
 
 
 class Blast2SeqError( BiskitError ):

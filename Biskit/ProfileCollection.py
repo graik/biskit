@@ -391,8 +391,10 @@ class ProfileCollection:
 
     def getInfo( self, name ):
         """
-        getInfo( name ) -> dict with infos about profile::
-          Guaranteed infos: 'version'->str, 'comment'->str, 'changed'->1|0
+        Use::
+           getInfo( name ) -> dict with infos about profile::
+           
+        Guaranteed infos: 'version'->str, 'comment'->str, 'changed'->1|0
 
         @param name: profile name
         @type  name: str
