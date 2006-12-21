@@ -746,6 +746,29 @@ def toList( o ):
     return o
 
 
+def toStr( o ):
+    """
+    Make a string from a list or interger.
+    Stripping of any flanking witespaces.  
+    
+    @param o: value(s)
+    @type  o: any or [any]
+
+    @return: list
+    @rtype: [any]
+    """
+    if type( o ) == type( 1 ):
+        return str(o)
+    
+    if type( o ) == type( [] ):
+        s = ''
+        for item in o:
+            s += string.strip( str(item) ) 
+        return s
+    
+    return o
+
+
 def toInt( o, default=None ):
     """
     Convert to intereg if possible::
