@@ -27,7 +27,6 @@ Sequence Alignment
 import re, os
 import commands
 
-import settings
 import modUtils
 from TemplateCleaner import TemplateCleaner as TC
 from SequenceSearcher import SequenceSearcher as SS
@@ -35,8 +34,29 @@ from SequenceSearcher import SequenceSearcher as SS
 import Biskit.tools as T
 from Biskit.Errors import *
 
+from Biskit import Executor, TemplateError
+
+
 class AlignerError( BiskitError ):
     pass
+
+
+class TCoffee( Executor ):
+    """
+    Execute a t_coffee command
+    """
+    
+    def __init__(self, cmd, host=None, **kw ):
+        """
+        @param cmd: command sequence
+        @type  cmd: str
+        @param host: host name for remote execution
+                     (default: None=local execution)
+        @type  host: str
+        """
+        Executor.__init__( self, 't_coffee', cmd, catch_out=1,
+                           node=host, **kw )
+
 
 class Aligner:
     """
@@ -141,7 +161,7 @@ class Aligner:
         @return: t_coffee command
         @rtype: str
         """
-        r = settings.t_coffee_bin
+        r = ''
 
         input = [ self.__add_type_code( i ) for i in T.toList(input) ]
 
@@ -376,7 +396,7 @@ class Aligner:
             fout = open( fname, 'w' )
             fin = open( bak_fname )
 
-            l0 = fin.readline()
+            l0 = fin.readline() #skipp header line
 
             fout.write( '>target\n' )
 
@@ -401,6 +421,7 @@ class Aligner:
 
         @raise AlignerError: if T_Coffee execution failed
         """
+        print self.commands
         try:
             self.logWrite('\nALIGNING...\n')
             for cmd in self.commands:
@@ -411,21 +432,25 @@ class Aligner:
                 else:
 
                     if host:
-                        cmd = "ssh %s '%s'" % (host, cmd)
+                        tc = TCoffee( cmd, host )
+                    else:
+                        tc = TCoffee( cmd )
 
                     self.logWrite( 'Running t_coffee .. ')
                     self.logWrite( cmd )
 
-                    status, output = commands.getstatusoutput( cmd )
+                    ## run t_coffee
+                    output, error, returncod = tc.run()
 
                     self.logWrite( '..done: ' + str( output ) + '\n' )
 
         except EnvironmentError, why:
-            self.logWrite("ERROR: Can't run t_coffee: "+ str( why ) )
-            raise AlignerError( "Can't run t_coffee: " + str( why ) )
+            self.logWrite("ERROR: Can't run t_coffee: %s Error: %s"\
+                          %( why, error ) )
+            raise AlignerError( "Can't run t_coffee: %s Error: %"\
+                                %( why, error ) )
 
-
-
+        
 #############
 ##  TESTING        
 #############
