@@ -65,6 +65,7 @@ try:
     from Fold_X import Fold_X, Fold_XError
     from WhatIf import WhatIf, WhatIf_Error
     from SurfaceRacer import SurfaceRacer, SurfaceRacer_Error
+    from DSSP import Dssp, Dssp_Error
     from FuzzyCluster import FuzzyCluster
     from PDBDope import PDBDope
     

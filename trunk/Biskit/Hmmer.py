@@ -34,7 +34,7 @@ import Numeric as N
 import molUtils
 import settings
 import Biskit.Mod.modUtils as MU
-from Biskit import BiskitError
+from Biskit.Errors import BiskitError
 import Biskit.tools as T
 import Biskit.molTools as MT
 from Biskit import Executor, TemplateError
@@ -46,10 +46,6 @@ hmmfetchExe = settings.hmmfetch_bin
 hmmalignExe = settings.hmmalign_bin
 hmmindexExe = settings.hmmindex_bin
 hmmDatabase = settings.hmm_db
-
-
-
-
 
 
 class HmmerError( BiskitError ):

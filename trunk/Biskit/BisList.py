@@ -174,10 +174,7 @@ class BisList:
         B{Override!}
 
         @param other: other instance
-        @type  other: instance
-        
-        @param other: AbstractDictList (left to the implementing class)
-        @type  other: any
+        @type  other: instance        
         """
         raise NotImplementedError
 
@@ -252,7 +249,8 @@ class BisList:
 
     def sortBy( self, sortKey, cmpfunc=cmp ):
         """
-        sortBy( sortKey ) -> new instance sorted by item[ sortKey ]
+        Use::
+          sortBy( sortKey ) -> new instance sorted by item[ sortKey ]
 
         @param sortKey: key for item attribute
         @type  sortKey: any

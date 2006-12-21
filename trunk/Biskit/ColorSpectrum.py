@@ -28,7 +28,7 @@ Create color scales.
 
 import Numeric as N
 
-from Biskit import BiskitError
+from Errors import BiskitError
 
 class ColorError( BiskitError ):
     pass

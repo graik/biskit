@@ -268,7 +268,7 @@ class Executor:
             self.pid = p.pid
 
             output, error = p.communicate( inp )
-
+        
             self.returncode = p.returncode
 
         except OSError, e:
