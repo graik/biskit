@@ -31,7 +31,7 @@ import os
 
 import settings
 import Biskit.tools as t
-from Biskit import BiskitError
+from Biskit.Errors import BiskitError
 from Biskit import StdLog
 
 class XplorerError( BiskitError ):

@@ -36,10 +36,10 @@ class QualMaster(TrackingJobMaster):
 
     def __init__(self, trajFiles, n_hosts=20, **kw):
         """
-        @param dat: data dictionary
-        @type  dat: dict
-        @param hosts: list of host-names
-        @type  hosts: [str]
+        @param trajFiles: list of trajectory filed
+        @type  trajFiles: [ str ]
+        @param n_hosts: number of hosts to use
+        @type  n_hosts: int
         """
         dat = {}
         i = 0

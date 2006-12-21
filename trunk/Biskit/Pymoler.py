@@ -32,30 +32,6 @@ import tempfile
 import settings
 from Biskit import Executor, TemplateError
 
-# =============== SETUP PYMOL ENVIRONMENT =========================
-
-## check the pymol.com file for path settings
-
-## # dynamic linking 
-## try:
-##     os.environ['LD_LIBRARY_PATH'] = os.environ['LD_LIBRARY_PATH'] + ':' \
-## 					+ os.environ['PYMOL_EXTLIBPATH']
-## except:
-##     os.environ['LD_LIBRARY_PATH'] = os.environ['PYMOL_EXTLIBPATH']
-
-## # python modules
-## try: 
-##     os.environ['PYTHONPATH'] = os.environ['PYMOL_PATH'] + ':' \
-## 				   + os.environ['PYMOL_EXTLIBPATH'] \
-## 				   + 'python2.2' \
-## 				   + ':' +os.environ['PYTHONPATH']
-## except:
-##     os.environ['PYTHONPATH'] = os.environ['PYMOL_PATH'] + ':' \
-## 				   + os.environ['PYMOL_EXTLIBPATH'] \
-## 				   + 'python2.2'        
-## # temp directory path
-os.environ['TMPDIR'] = settings.tempDirShared
-
 
 ## ================= single Pymol model ===========================
 

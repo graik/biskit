@@ -32,7 +32,7 @@ import rmsFit
 
 import tools as T
 import mathUtils as MU
-from Errors import BiskitError
+from Biskit.Errors import BiskitError
 from Biskit import EHandler
 from PDBModel import PDBModel
 from ProfileCollection import ProfileCollection
