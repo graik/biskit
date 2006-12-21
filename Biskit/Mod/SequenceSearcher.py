@@ -115,7 +115,7 @@ class SequenceSearcher:
         self.ex_swiss = re.compile( '^>sp\|(?P<id>[A-Z0-9_]{5,7})\|' )
         self.ex_swiss2= re.compile( '^>.*swiss.*\|(?P<id>[A-Z0-9_]{5,7})\|' )
         self.ex_pdb   = re.compile( '^>pdb\|(?P<id>[A-Z0-9]{4})\|' )
-        self.ex_all   = re.compile( '^>.*\|(?P<id>[A-Z0-9_]{4,10})\|' )
+        self.ex_all   = re.compile( '^>.*\|(?P<id>[A-Z0-9_.]{4,14})\|' )
         
         ##
         ##      RegExp for the remoteBlast searches. Somehow the
@@ -253,24 +253,19 @@ class SequenceSearcher:
                something like in Biopython). Otherwise something like this
                will also work::
 
-               ## collect the entry with gi 87047648
-               url = 'http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?CMD=text&db=protein&dopt=FASTA&dispmax=20&uid=87047648'
-
-               import urllib
-               handle = urllib.urlopen(url)
-
-               lines = handle.readlines()
-
-               seq = ''
-               for i in range(len(lines)):
-                   if re.match( "[<]pre[>][<]div class='recordbody'[>]{2}gi", l[i] ):
-
-                       i+= 1
-                       while not re.match( "^[<]/pre[>][<]/div[>]", l[i]):
-                           seq += l[i][:-1]
-                           i+= 1
-
-               print seq       
+                 ## collect the entry with gi 87047648
+                 url = 'http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?CMD=text&db=protein&dopt=FASTA&dispmax=20&uid=87047648'
+                 import urllib
+                 handle = urllib.urlopen(url)
+                 lines = handle.readlines()
+                 seq = ''
+                 for i in range(len(lines)):
+                     if re.match( "[<]pre[>][<]div class='recordbody'[>]{2}gi", l[i] ):
+                         i+= 1
+                         while not re.match( "^[<]/pre[>][<]/div[>]", l[i]):
+                             seq += l[i][:-1]
+                             i+= 1
+                 print seq       
         """
         fasta = Fasta.Iterator( open(seqFile) )
         query = fasta.next()
@@ -443,9 +438,11 @@ class SequenceSearcher:
 
     def getSequenceIDs( self, blast_records ):
         """
-        getSequenceIDs( Bio.Blast.Record.Blast ) -> [ str ]
-        extract sequence ids from BlastParser result.
+        Extract sequence ids from BlastParser result.
 
+        Use::
+           getSequenceIDs( Bio.Blast.Record.Blast ) -> [ str ]
+        
         @param blast_records: blast search result
         @type  blast_records: Bio.Blast.Record.Blast
 
@@ -478,7 +475,8 @@ class SequenceSearcher:
 
     def fastaRecordFromId( self, db, id ):
         """
-        fastaRecordFromId( db, id ) -> Bio.Fasta.Record
+        Use::
+           fastaRecordFromId( db, id ) -> Bio.Fasta.Record
 
         @param db: database
         @type  db: str
@@ -516,7 +514,8 @@ class SequenceSearcher:
 
     def fastaFromIds( self, db, id_lst, fastaOut=None ):
         """
-        fastaFromIds( id_lst, fastaOut ) -> { str: Bio.Fasta.Record }
+        Use::
+           fastaFromIds( id_lst, fastaOut ) -> { str: Bio.Fasta.Record }
 
         @param db: database
         @type  db: str
@@ -849,7 +848,7 @@ class Test:
 
         ## blast db has to be built with -o potion
         ## e.g. cat db1.dat db2.dat | formatdb -i stdin -o T -n indexed_db
-        db = settings.db_nr
+        db = settings.db_swiss
 
         f_target = searcher.outFolder + searcher.F_FASTA_TARGET
 
