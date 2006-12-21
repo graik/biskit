@@ -51,9 +51,10 @@ class ComplexTraj( EnsembleTraj ):
     ignored by the complex-specific functions.
     """
 
-    def __init__(self, traj=None, recChains=[0], n_members=10, rec=None ):
+    def __init__(self, traj=None, recChains=[0], n_members=10, rec=None):
         """
-        ComplexTraj( traj, recChains=[0], n_members=10 )
+        Use::
+           ComplexTraj( traj, recChains=[0], n_members=10 )
         
         @param traj: Trajectory (default: 0)
         @type  traj: Trajectory
@@ -142,7 +143,8 @@ class ComplexTraj( EnsembleTraj ):
 
     def getComplex( self, index ):
         """
-        getComplex( frame_index ) -> Complex
+        Use::
+          getComplex( frame_index ) -> Complex
 
         @param index: frame index
         @type  index: int
@@ -270,7 +272,8 @@ class ComplexTraj( EnsembleTraj ):
 
     def atomContacts( self, index, cutoff=4.5, rec_mask=None, lig_mask=None ):
         """
-        atomContacts( frame_index ) -> array len_rec x len_lig of 0||1
+        Use::
+          atomContacts( frame_index ) -> array len_rec x len_lig of 0||1
 
         @param index: frame index
         @type  index: [int]
@@ -289,7 +292,8 @@ class ComplexTraj( EnsembleTraj ):
 
     def averageContacts( self, step=10, cutoff=4.5 ):
         """
-        averageContacts( step=1, cutoff=4.5 )
+        Use::
+          averageContacts( step=1, cutoff=4.5 )
         
         @param step: take only each |step|th frame (default: 10)
         @type  step: int
