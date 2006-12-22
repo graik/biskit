@@ -359,10 +359,13 @@ class Test:
         """       
         traj = T.Load( T.testRoot()+'/lig_pcr_00/traj.dat' )
 
+        traj.ref.setAtomProfile('mass', traj.ref.masses() ) 
+
         mdl = [ traj[0], traj[11] ]
         mdl = [ md.compress( md.maskProtein() ) for md in mdl ]
 
-        rama = Ramachandran( mdl , name='test', verbose=local)
+        rama = Ramachandran( mdl , name='test', profileName='mass',
+                             verbose=local)
 
         psi = N.array( rama.psi )
 
