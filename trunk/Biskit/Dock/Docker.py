@@ -568,10 +568,16 @@ class Test:
         com_dir = t.testRoot() + '/multidock/com'
         
         if not os.path.exists( rec_dir ):
+            ## remove old invalid links
+            if os.path.lexists( rec_dir ):
+                os.unlink( rec_dir )
             os.symlink( t.testRoot() + '/dock/rec', rec_dir )
             
-        if not os.path.exists( rec_dir ):
-            os.symlink( t.testRoot() + '/dock/com', rec_dir )
+        if not os.path.exists( com_dir ):
+            ## remove old invalid links
+            if os.path.lexists( com_dir ):
+                os.unlink( com_dir )
+            os.symlink( t.testRoot() + '/dock/com', com_dir )
             
         recDic = t.Load( t.testRoot() + '/multidock/rec/1A2P_model.dic' )
 
