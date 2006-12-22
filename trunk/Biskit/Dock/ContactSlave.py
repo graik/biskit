@@ -25,7 +25,7 @@
 Calculate contact matrix and some scores for complexes.
 """
 
-from Biskit.PVM.dispatcher import JobSlave
+from Biskit.PVM import JobSlave
 import Biskit.tools as T
 from Biskit import mathUtils as MU
 import Numeric as N
