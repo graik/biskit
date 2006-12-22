@@ -24,7 +24,7 @@
 Parallelise Sequence Alignment
 """
 
-from Biskit.PVM.dispatcher import JobSlave
+from Biskit.PVM import JobSlave
 import Biskit.tools as T
 
 from Biskit.Mod.Aligner import Aligner

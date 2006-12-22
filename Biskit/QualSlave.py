@@ -31,7 +31,7 @@ import tools as T
 from Biskit import Trajectory, EHandler
 from Biskit.EnsembleTraj import traj2ensemble, EnsembleTraj
 
-from PVM.dispatcher import JobSlave
+from PVM import JobSlave
 
 class QualSlave(JobSlave):
     """
