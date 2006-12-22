@@ -22,11 +22,15 @@
 ## last $Author$
 """
 Fill in missing atoms, and report low occupancies
+
+Vintage code used by pdb2xplor script -- use L{Biskit.PDBCleaner} for
+new implementations.
 """
 
 from ChainSeparator import ChainSeparator
 from Scientific.IO.PDB import *
 import tools as T
+import re
 
 class ChainCleaner:
     """
