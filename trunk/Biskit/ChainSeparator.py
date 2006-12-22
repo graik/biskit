@@ -26,13 +26,14 @@
 Seperate PDB into continuous peptide chains for XPlor. Remove duplicate
 peptide chains. Required by pdb2xplor.py
 
-@todo: Use biopython insted of Blast2Seq, making the latter obsolete
+This is vintage code. See L{Biskit.PDBCleaner} for a more recent
+version (though yet lacking some functions).
 
 @todo: Create an override for the chain comparison if one wants
           to keep identical chains (i.e homodimers)
 """
 
-from Blast2Seq import *   # compare 2 sequences
+## from Blast2Seq import *   # compare 2 sequences
 from molUtils import singleAA
 import Biskit.tools as T
 from LogFile import LogFile
@@ -40,11 +41,20 @@ from LogFile import LogFile
 from Scientific.IO.PDB import *
 import Numeric as N
 import string
+from difflib import SequenceMatcher
+import re
 
 class ChainSeparator:
     """
     Open PDB file; give back one chain whenever next() is
-    called.
+    called. This class is used by the pdb2xplor script.
+
+    This class constitutes vintage code. See
+    L{Biskit.PDBCleaner} and L{Biskit.Mod.TemplateCleaner} for a more
+    recent implementation of PDB cleaning.
+
+    @todo: The removal of duplicate chains should be transferred to
+    the PDBCleaner so that this class can be retired
     """
 
     def __init__(self, fname, outPath='', chainIdOffset=0,
@@ -159,6 +169,22 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
         pdb.close()
 
 
+    def _compareSequences( self, seq1, seq2 ):
+        """
+        @param seq1: sequence 1 to compare
+        @type  seq1: str
+        @param seq2: sequence 1 to compare
+        @type  seq2: str
+        @return: identity (0.0 - 1.0) between the two sequences
+        @rtype : float
+        """
+        # compare the 2 sequences
+##        blast = Blast2Seq( seq1, seq2 )
+##        id = blast.run()
+        matcher = SequenceMatcher( None, ''.join(seq1) , ''.join(seq2) )
+        return matcher.ratio()
+
+
     def _removeDuplicateChains(self, chainMask=None):
         """
         Get rid of identical chains by comparing all chains with Blast2seq.
@@ -180,21 +206,20 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
             for j in range(i, len(self.chains)):
 
                 # convert 3-letter-code res list into 1-letter-code String
-                seq1 = ''.join( singleAA( self.chains[i].sequence() ) )
-                seq2 = ''.join( singleAA( self.chains[j].sequence() ) )
+                seq1 = singleAA( self.chains[i].sequence() )
+                seq2 = singleAA( self.chains[j].sequence() )
 
-                # compare the 2 sequences
-                blast = Blast2Seq( seq1, seq2 )
-                id = blast.run()
-                if len(seq1) > len(seq2):           # take shorter sequence
-                    # aln length at least half the length of the shortest sequenc
-                    alnCutoff = len(seq2) * 0.5     
-                else:
-                    alnCutoff = len(seq1) * 0.5
-                if id['aln_len'] > alnCutoff:
-                    matrix[i,j] = id['aln_id']
-                else:                           # aln length too short, ignore
-                    matrix[i,j] = 0
+##                 if len(seq1) > len(seq2):           # take shorter sequence
+##                 # aln len at least half the len of the shortest sequence
+##                     alnCutoff = len(seq2) * 0.5     
+##                 else:
+##                     alnCutoff = len(seq1) * 0.5
+##                 if id['aln_len'] > alnCutoff:
+##                     matrix[i,j] = id['aln_id']
+##                 else:                           # aln length too short, ignore
+##                     matrix[i,j] = 0
+
+                matrix[i,j] = self._compareSequences( seq1, seq2 )
 
         ## report activity
         self.log.add("\n  Chain ID's of compared chains: "+str(chain_ids))

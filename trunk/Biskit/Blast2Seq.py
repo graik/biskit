@@ -26,7 +26,7 @@
 Blast 2 sequences against each other,
 Return sequence identity
 
-@note: argely obsolete - use BioPython instead
+@note: argueably obsolete - use BioPython instead
 """
 
 from Biskit import Executor, TemplateError

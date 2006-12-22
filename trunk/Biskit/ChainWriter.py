@@ -23,10 +23,16 @@
 
 """
 Write cleaned peptide_chains as PDB for import into XPlor
+
+This is vintage code. See L{Biskit.PDBCleaner} for a more recent
+version. The writing of single chains could easily be done with PDBModel.
+
+@todo: re-implement pdb2xplor with PDBCleaner / PDBModel
 """
 from Scientific.IO.PDB import *
 import commands, os
 import os.path
+import re
 
 import tools as T
 
