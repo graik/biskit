@@ -525,7 +525,7 @@ class Biskit( unittest.TestCase ):
         from Biskit.molTools import Test
         t = Test()
         print 'Testing: ', t.__module__
-        self.assertAlmostEquals( t.run(), t.expected_result(), 8 )
+        self.assertAlmostEquals( t.run(), t.expected_result(), 3 )
 
 
     def test_molUtils( self ):
@@ -719,17 +719,6 @@ class Biskit( unittest.TestCase ):
         self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
 
 
-    def test_Xplorer( self ):
-        """
-        Testing L{Biskit.Xplorer}
-        No testing done. Just let run trough
-        """
-        from Biskit.Xplorer import Test
-        t = Test()
-        print 'Testing: ', t.__module__
-        self.assertEquals( t.run(), t.expected_result() )
-
-
 #############################################################
 
 class Biskit_Applications( unittest.TestCase ):
@@ -741,6 +730,17 @@ class Biskit_Applications( unittest.TestCase ):
     and can be found in L{Biskit_Pvm}.    
     """
     
+##     def test_Xplorer( self ):
+##         """
+##         Testing L{Biskit.Xplorer}
+##         No testing done. Just let run trough
+##         """
+##         from Biskit.Xplorer import Test
+##         t = Test()
+##         print 'Testing: ', t.__module__
+##         self.assertEquals( t.run(), t.expected_result() )
+
+
     def test_Dssp( self ):
         """
         Testing L{Biskit.DSSP} 
