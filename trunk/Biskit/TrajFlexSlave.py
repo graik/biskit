@@ -26,7 +26,7 @@
 Parallize calculation of pairwise rmsd between the frames of a trajectory.
 """
 
-from Biskit.PVM.dispatcher import JobSlave
+from Biskit.PVM import JobSlave
 import Biskit.tools as T
 import Biskit.rmsFit as rmsFit
 import Numeric as N

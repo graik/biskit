@@ -25,7 +25,7 @@
 Parallellized AmberEntropist calculation.
 """
 
-from Biskit.PVM.dispatcher import JobSlave
+from Biskit.PVM import JobSlave
 import Biskit.tools as T
 import Biskit.settings as settings
 
