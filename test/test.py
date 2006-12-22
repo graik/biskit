@@ -72,7 +72,8 @@ def _use():
             To exclude tests::
             
                no_long  - don't run time-consuming tests
-               no_pvm   - dont run tests using PVM
+               no_pvm   - don't run tests using PVM
+               no_app   - don't run tests calling helper applications
 
         
 Default options:
@@ -245,8 +246,13 @@ if __name__ == '__main__':
     if 'no_pvm' in tests:
         for t in tests:
             if re.match('.*pvm.*', t):
-                tests.remove(t)        
-
+                tests.remove(t)
+                
+    if 'no_app' in tests:
+        for t in tests:
+            if re.match('.*app.*', t):
+                tests.remove(t)
+                
     for t in tests:
         if re.match('pvm', t):
             print '\nNOTE:\n=====\n Tests involving modules that depend on the PVM deamon have been selected. Make sure that PVM is running.\n'
