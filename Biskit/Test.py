@@ -405,16 +405,6 @@ class Biskit( unittest.TestCase ):
         self.assertEquals( t.run(), t.expected_result() )
 
 
-    def test_Blast2Seq( self ):
-        """
-        Testing L{Biskit.Blast2Seq}
-        """
-        from Biskit.Blast2Seq import Test
-        t = Test()
-        print 'Testing: ', t.__module__
-        self.assertEquals( t.run(), t.expected_result() )        
-
-
     def test_decorators( self ):
         """
         Testing L{Biskit.decorators}
@@ -699,6 +689,17 @@ class Biskit( unittest.TestCase ):
         self.assertEquals( t.run(), t.expected_result() )
 
 
+    def test_Executor( self ):
+        """
+        Testing L{Biskit.Executor} 
+        No testing done. Will open emacs briefly.
+        """
+        from Biskit.Executor import Test
+        t = Test()
+        print 'Testing: ', t.__module__
+        self.assertEquals( t.run(), t.expected_result() )
+
+
     def test_hist( self ):
         """
         Testing L{Biskit.hist} 
@@ -730,15 +731,25 @@ class Biskit_Applications( unittest.TestCase ):
     and can be found in L{Biskit_Pvm}.    
     """
     
-##     def test_Xplorer( self ):
-##         """
-##         Testing L{Biskit.Xplorer}
-##         No testing done. Just let run trough
-##         """
-##         from Biskit.Xplorer import Test
-##         t = Test()
-##         print 'Testing: ', t.__module__
-##         self.assertEquals( t.run(), t.expected_result() )
+    def test_Blast2Seq( self ):
+        """
+        Testing L{Biskit.Blast2Seq}
+        """
+        from Biskit.Blast2Seq import Test
+        t = Test()
+        print 'Testing: ', t.__module__
+        self.assertEquals( t.run(), t.expected_result() )        
+
+
+    def test_Xplorer( self ):
+        """
+        Testing L{Biskit.Xplorer}
+        No testing done. Just let run trough
+        """
+        from Biskit.Xplorer import Test
+        t = Test()
+        print 'Testing: ', t.__module__
+        self.assertEquals( t.run(), t.expected_result() )
 
 
     def test_Dssp( self ):
@@ -847,16 +858,6 @@ class Biskit_Applications( unittest.TestCase ):
         print 'Testing: ', t.__module__
         self.assertAlmostEquals( t.run(), t.expected_result(), 8 )
 
-
-    def test_Executor( self ):
-        """
-        Testing L{Biskit.Executor} 
-        No testing done. Will open emacs breifly.
-        """
-        from Biskit.Executor import Test
-        t = Test()
-        print 'Testing: ', t.__module__
-        self.assertEquals( t.run(), t.expected_result() )
 
 
 #############################################################
