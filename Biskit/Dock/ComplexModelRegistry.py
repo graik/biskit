@@ -376,7 +376,9 @@ class Test:
         @return: 1
         @rtype: int
         """
-        cl = T.Load( T.testRoot() +'/dock/hex/complexes.cl' )
+        from Biskit.Dock import ComplexList
+        
+        cl = ComplexList( T.Load( T.testRoot() +'/dock/hex/complexes.lst' ) )
         cl = cl.toList()
         
         r = ComplexModelRegistry()
