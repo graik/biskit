@@ -26,7 +26,7 @@ Distribute calculation of contact matrices for many complexes
 over many nodes.
 """
 
-from Biskit.PVM.TrackingJobMaster import TrackingJobMaster
+from Biskit.PVM import TrackingJobMaster
 from Biskit.ReduceCoordinates import ReduceCoordinates
 from Biskit.hosts import cpus_all, nice_dic
 import Biskit.tools as t
