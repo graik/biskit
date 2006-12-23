@@ -354,14 +354,14 @@ class PDBModel:
         @param mask: atom mask
         @type  mask: list of int OR array of 1||0
 
-        @return: xyz-coordinates, N.array( 3 x N_atoms, 'f' )
+        @return: xyz-coordinates, N.array( 3 x N_atoms, N.Float )
         @rtype: array 
         """
         if self.xyz is None:
             self.update( force=1 )
 
         if self.xyz is None:
-            return N.array( [], 'f' )
+            return N.array( [], N.Float )
 
         if mask is None:
             return self.xyz
@@ -675,7 +675,7 @@ class PDBModel:
                 self.xyz = None
 
             if type( self.xyz ) == arraytype and self.xyz.typecode() != 'f':
-                self.xyz = self.xyz.astype('f')
+                self.xyz = self.xyz.astype(N.Float)
 
             if not aChanged:
                 self.atoms = None
@@ -786,7 +786,7 @@ class PDBModel:
         @return: 1-letter-code AA sequence (based on first atom of each res).
         @rtype: str
         """
-        mask = mask or N.ones( self.lenAtoms(), 'i' )
+        mask = mask or N.ones( self.lenAtoms(), N.Int )
 
         firstAtm = N.zeros( self.lenAtoms() )
         N.put( firstAtm, self.resIndex(), 1 )
@@ -1059,7 +1059,7 @@ class PDBModel:
         @param numpy: 1(default)||0, convert result to Numpy array of int
         @type  numpy: int
 
-        @return: Numpy N.array( [0,1,1,0,0,0,1,0,..], 'i') or list
+        @return: Numpy N.array( [0,1,1,0,0,0,1,0,..], N.Int) or list
         @rtype: array or list
         """
         try:
@@ -1242,7 +1242,7 @@ class PDBModel:
 
         ## single index
         if type( what ) == int:
-            return N.array( [what], 'i' )
+            return N.array( [what], N.Int )
 
         raise PDBError("PDBModel.indices(): Could not interpret condition ")
 
@@ -1282,7 +1282,7 @@ class PDBModel:
                     return what
                 ## list of indices
                 else:
-                    r = N.zeros( self.lenAtoms(),'i' )
+                    r = N.zeros( self.lenAtoms(),N.Int )
                     N.put( r, what, 1 )
                     return r
 
@@ -1303,7 +1303,7 @@ class PDBModel:
         @return: 1 x N_residues (0||1 )
         @rtype: array of int
         """
-        result = N.zeros( self.lenResidues(), 'i' )
+        result = N.zeros( self.lenResidues(), N.Int )
 
         resMap = self.resMap()
 
@@ -1356,7 +1356,7 @@ class PDBModel:
         @return: 1 x N_atoms
         @rtype: array of int
         """
-        result = N.zeros( self.lenAtoms(), 'i')
+        result = N.zeros( self.lenAtoms(), N.Int)
 
         resMap = self.resMap()
 
@@ -1975,10 +1975,10 @@ class PDBModel:
             result.append( a['residue_number'] )
 
         ## by default take all atoms
-        mask = mask or N.ones( len(self.getAtoms() ) , 'i' )
+        mask = mask or N.ones( len(self.getAtoms() ) , N.Int )
 
         ## apply mask to this list
-        return N.compress( mask, N.array(result, 'i') )
+        return N.compress( mask, N.array(result, N.Int) )
 
 
     def __calcResMap( self, mask=None ):
@@ -2017,7 +2017,7 @@ class PDBModel:
 
             result.append( index )
 
-        return N.array(result, 'i')        
+        return N.array(result, N.Int)        
 
 
     def resMap(  self, mask=None, force=0, cache=1 ):
@@ -2150,7 +2150,7 @@ class PDBModel:
             lastSegID = a.get( 'segment_id', None )
             i += 1
 
-        return N.array( result, 'i' )
+        return N.array( result, N.Int )
 
 
     def chainIndex( self, breaks=0, maxDist=None ):
@@ -2176,7 +2176,7 @@ class PDBModel:
         except IndexError:   ## empty chainMap -> empty model?
             pass
 
-        return N.array( result, 'i' )
+        return N.array( result, N.Int )
 
 
     def chainBreaks( self, breaks_only=1, maxDist=None ):
@@ -2463,7 +2463,7 @@ class PDBModel:
         """
         Center of mass of PDBModel.
 
-        @return: array('f')
+        @return: array(N.Float)
         @rtype: (float, float, float)
         """
         M = self.masses()
@@ -2533,7 +2533,7 @@ class PDBModel:
 
             result += resAtoms * 0.0 + masterValue
 
-        return N.array( result, 'f' )
+        return N.array( result, N.Float )
 
 
     def argsort( self, cmpfunc=None ):
