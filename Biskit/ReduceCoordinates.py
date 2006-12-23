@@ -153,7 +153,7 @@ class ReduceCoordinates:
             n_centers += 1
 
         ## how many items/atoms go into each group?
-        nAtoms = N.ones(n_centers, 'i') * int(len( a_indices ) / n_centers)
+        nAtoms = N.ones(n_centers, N.Int) * int(len( a_indices ) / n_centers)
         i=0
         while N.sum(nAtoms) != len( a_indices ):
             nAtoms[i] += 1

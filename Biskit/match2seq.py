@@ -432,8 +432,8 @@ def compareModels( model_1, model_2 ):
     seqNr_2 = range( len( seqAA_2 ) )
 
     # get mask
-    mask_1 = N.zeros( len( seqNr_1 ), 'i' )
-    mask_2 = N.zeros( len( seqNr_2 ), 'i' )
+    mask_1 = N.zeros( len( seqNr_1 ), N.Int )
+    mask_2 = N.zeros( len( seqNr_2 ), N.Int )
 
     # compare sequences
     seqDiff = getOpCodes( seqAA_1, seqAA_2)
@@ -510,12 +510,12 @@ class Test:
                         1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1,
                         1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1,
-                        1, 1, 1, 1],'i'),\
+                        1, 1, 1, 1],N.Int),\
                N.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],'i')
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],N.Int)
 
 
 

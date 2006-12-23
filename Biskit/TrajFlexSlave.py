@@ -120,7 +120,7 @@ class TrajFlexSlave( JobSlave ):
             i_start, i_stop = window[0]
             j_start, j_stop = window[1]
 
-            a = N.zeros( (i_stop-i_start, j_stop-j_start), 'f' )
+            a = N.zeros( (i_stop-i_start, j_stop-j_start), N.Float )
 
             i = j = -1
 

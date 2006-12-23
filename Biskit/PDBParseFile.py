@@ -263,7 +263,7 @@ REMEDY: run the script fixAtomIndices.py
             raise PDBParserError("Error parsing file "+fname+": "+
                             "Couldn't find any atoms.")
 
-        return items, N.array( xyz, 'f' )
+        return items, N.array( xyz, N.Float32 )
     
 
 class Test:

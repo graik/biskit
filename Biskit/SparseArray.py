@@ -735,13 +735,13 @@ class Test:
         @return: reconstructed full array
         @rtype: array
         """
-        a = N.zeros( (6,), 'f' )
+        a = N.zeros( (6,), N.Float32 )
 
         sa = SparseArray( a.shape )
         sa[3] = 1.
         sa[5] = 2.
 
-        b = N.zeros( (5, 6), 'f' )
+        b = N.zeros( (5, 6), N.Float32 )
         b[0,1] = 3.
         b[0,2] = 4
         b[4,2] = 5

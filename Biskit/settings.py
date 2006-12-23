@@ -67,6 +67,8 @@ import user, sys
 __CFG_DEFAULT = T.projectRoot() + '/external/defaults/settings.cfg'
 __CFG_USER    = user.home + '/.biskit/settings.cfg'
 
+## BISKIT_PATH = T.projectRoot()  ## Hack to make test suite path independent
+
 try:
     m = M.SettingsManager(__CFG_DEFAULT, __CFG_USER, createmissing=True  )
 

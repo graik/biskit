@@ -223,7 +223,7 @@ class Trajectory:
         try:
             if type( self.frames ) == list or self.frames.typecode() == 'd':
                 EHandler.warning("Converting coordinates to float array.")
-                self.frames = N.array( self.frames ).astype('f')
+                self.frames = N.array( self.frames ).astype(N.Float32)
         except:
             EHandler.warning('Could not convert frames to float array.', 1)
 
@@ -302,7 +302,7 @@ class Trajectory:
         if self.verbose: T.errWrite( 'done\n' )
 
         ## convert to 3-D Numpy Array
-        return N.array(frameList).astype('f')
+        return N.array(frameList).astype(N.Float32)
 
 
     def getRef( self ):
@@ -724,7 +724,7 @@ class Trajectory:
                 rms += [ N.sqrt( N.average(d**2) ) ]
 
             if fit:
-                self.frames[i] = xyz_transformed.astype('f')
+                self.frames[i] = xyz_transformed.astype(N.Float32)
 
             if verbose and i%100 == 0:
                 T.errWrite( '#' )
@@ -753,8 +753,8 @@ class Trajectory:
             r, t = (rt[0:3,0:3], rt[0:3, 3])
 
         r = N.transpose( r )
-        r = r.astype('f')
-        t = t.astype('f')
+        r = r.astype(N.Float32)
+        t = t.astype(N.Float32)
 
         for i in range( len( self.frames ) ):
             self.frames[ i ] = N.array( N.dot( self.frames[i], r ) ) + t 
@@ -1037,7 +1037,7 @@ class Trajectory:
         if aMask != None:
             frames = N.compress( aMask, frames, 1 )
 
-        result = N.zeros( (len( frames ), len( frames )), 'f' )
+        result = N.zeros( (len( frames ), len( frames )), N.Float32 )
 
         for i in range(0, len( frames ) ):
 
@@ -1149,7 +1149,7 @@ class Trajectory:
         @rtype: array
         """
         if mask == None:
-            mask = N.ones( len( self.frames[0] ), 'i' )
+            mask = N.ones( len( self.frames[0] ), N.Int )
 
         if verbose: T.errWrite( "rmsd fitting per residue..." )
 
@@ -1191,7 +1191,7 @@ class Trajectory:
                 if verbose: T.errWrite('#')
 
             except ZeroDivisionError:
-                result.extend( N.zeros( len(i_res), 'f' ) )
+                result.extend( N.zeros( len(i_res), N.Float32 ) )
                 T.errWrite('?' + str( res ))
 
         if verbose: T.errWriteln( "done" )
@@ -1214,7 +1214,7 @@ class Trajectory:
         @rtype: array
         """
         if mask == None:
-            mask = N.ones( len( self.frames[0] ), 'i' )
+            mask = N.ones( len( self.frames[0] ), N.Int )
 
         ## eliminate all values that do not belong to the selected atoms
         masked = atomValues * mask

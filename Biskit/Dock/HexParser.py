@@ -137,7 +137,7 @@ class HexParser:
                         for j in range(0,4):
                             matrix.append( numbers[4*j:4*(j+1)] )
                         ## create 4 by 4 Numeric array from 4 by 4 list
-                        matrix = Numeric.array(matrix, 'f')
+                        matrix = Numeric.array(matrix, N.Float32)
             except AttributeError:
                 print "HexParser.nextComplex(): ",t.lastError()
 

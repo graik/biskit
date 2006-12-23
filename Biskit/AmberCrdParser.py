@@ -167,7 +167,7 @@ class AmberCrdParser:
 
             i += 1
 
-        return N.reshape( xyz, ( len(xyz) / 3, 3 ) ).astype('f')
+        return N.reshape( xyz, ( len(xyz) / 3, 3 ) ).astype(N.Float32)
 
 
     def crd2traj( self ):
@@ -199,7 +199,7 @@ class AmberCrdParser:
 
         t = Trajectory( refpdb=self.ref )
 
-        t.frames = N.array( xyz ).astype('f')
+        t.frames = N.array( xyz ).astype(N.Float32)
 
         t.setRef( self.ref )
         t.ref.disconnect()

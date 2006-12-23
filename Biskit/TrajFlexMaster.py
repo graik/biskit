@@ -297,7 +297,7 @@ class TrajFlexMaster(TrackingJobMaster):
         if not isinstance( traj, EnsembleTraj ):
             return None
 
-        r = N.zeros( len(traj), 'i' )
+        r = N.zeros( len(traj), N.Int )
 
         for i in range( traj.n_members ):
 
@@ -326,7 +326,7 @@ class TrajFlexMaster(TrackingJobMaster):
         if self.traj_2 is not None:
             n2 = len( self.traj_2 )
 
-        a  = N.zeros( (n1,n2), 'f' )
+        a  = N.zeros( (n1,n2), N.Float32 )
 
         if self.verbose: self.log.add_nobreak('#')
 
@@ -335,7 +335,7 @@ class TrajFlexMaster(TrackingJobMaster):
             j_start, j_stop = key[1]
 
             window = N.reshape( value, (i_stop-i_start, j_stop-j_start) )
-            window = window.astype('f')
+            window = window.astype(N.Float32)
 
             a[i_start:i_stop, j_start:j_stop] = window
 
@@ -452,7 +452,7 @@ class Test:
         frames = []
         for i in range( len( traj_1 ) ):
             f = traj_1.frames[i]
-            d = N.zeros( N.shape( f ), 'f')
+            d = N.zeros( N.shape( f ), N.Float32)
             if i > 0:
                 d = random( N.shape( f ) ) * ((i / 10) + 1) 
             frames += [f + d]

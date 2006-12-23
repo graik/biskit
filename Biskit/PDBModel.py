@@ -354,14 +354,14 @@ class PDBModel:
         @param mask: atom mask
         @type  mask: list of int OR array of 1||0
 
-        @return: xyz-coordinates, N.array( 3 x N_atoms, N.Float )
+        @return: xyz-coordinates, N.array( 3 x N_atoms, N.Float32 )
         @rtype: array 
         """
         if self.xyz is None:
             self.update( force=1 )
 
         if self.xyz is None:
-            return N.array( [], N.Float )
+            return N.array( [], N.Float32 )
 
         if mask is None:
             return self.xyz
@@ -675,7 +675,7 @@ class PDBModel:
                 self.xyz = None
 
             if type( self.xyz ) == arraytype and self.xyz.typecode() != 'f':
-                self.xyz = self.xyz.astype(N.Float)
+                self.xyz = self.xyz.astype(N.Float32)
 
             if not aChanged:
                 self.atoms = None
@@ -2463,7 +2463,7 @@ class PDBModel:
         """
         Center of mass of PDBModel.
 
-        @return: array(N.Float)
+        @return: array(N.Float32)
         @rtype: (float, float, float)
         """
         M = self.masses()
@@ -2533,7 +2533,7 @@ class PDBModel:
 
             result += resAtoms * 0.0 + masterValue
 
-        return N.array( result, N.Float )
+        return N.array( result, N.Float32 )
 
 
     def argsort( self, cmpfunc=None ):
