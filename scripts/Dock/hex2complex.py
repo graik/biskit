@@ -88,11 +88,12 @@ def test():
     
 
 if __name__ == '__main__':
- #   if len(sys.argv) < 4:
- #       _use()
+
+    if len(sys.argv) < 4:
+        _use()
     
-    options = test()
-#    options = cmdDict( defOptions() )
+##     options = test()
+    options = cmdDict( defOptions() )
     
     complex_lst = main( options )
     
