@@ -71,7 +71,7 @@ class Density:
                     of bin (default: None)
         @type  val: array        
         """
-        self.val = N.array(val, N.Float)
+        self.val = N.array(val, N.Float32)
         self.x = self.val[:,0]
         self.p = self.val[:,1]
 

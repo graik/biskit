@@ -75,7 +75,7 @@ class Complex:
             self.ligandMatrix = N.array([ [1,  0,  0, 0],
                                         [0,  1,  0, 0],
                                         [0,  0,  1, 0],
-                                        [0,  0,  0, 1],],'f')
+                                        [0,  0,  0, 1],], N.Float32)
 
         ## compressed by slim
         self.contacts = None
@@ -127,7 +127,7 @@ class Complex:
         called for unpickling the object.
         """
         self.__dict__ = state
-        self.ligandMatrix = N.array( self.ligandMatrix,'f' )
+        self.ligandMatrix = N.array( self.ligandMatrix,N.Float32 )
         ## backwards compability
         self.__defaults() 
 
@@ -934,7 +934,7 @@ class Complex:
         ligInd = N.concatenate((self.lig_model.resIndex(),
                               [ self.lig_model.lenAtoms() ] ))
 
-        residueMatrix = N.zeros(( len(recInd)-1, len(ligInd)-1 ),'i')
+        residueMatrix = N.zeros(( len(recInd)-1, len(ligInd)-1 ), N.Int)
 
         for r in range( len(recInd)-1 ):
 
@@ -1270,9 +1270,9 @@ class Complex:
         ## create 3 x 4 matrix: 0:3, 0:3 contains rot; 3,0:3 contains trans
         result = N.concatenate( (r, N.transpose( [ t.tolist() ] )), 1)
         ## make it square
-        result = N.concatenate( (result, N.array([[0,0,0,1]],'f')), 0)
+        result = N.concatenate( (result, N.array([[0,0,0,1]],N.Float32)), 0)
 
-        return result.astype('f')
+        return result.astype(N.Float32)
 
 
     def extractLigandMatrix( self, lig):

@@ -140,7 +140,7 @@ class ComplexRandomizer:
         result = N.concatenate( (r, N.transpose( [ t.tolist() ] )), 1)
 
         ## make it square
-        result = N.concatenate( (result, N.array([[0,0,0,1]],'f')), 0 )
+        result = N.concatenate( (result, N.array([[0,0,0,1]], N.Float32)), 0 )
 
         return result
 

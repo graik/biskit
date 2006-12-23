@@ -188,4 +188,4 @@ def parse_ANA_output(prosa_output):
 
     t = Table.fromFile(prosa_output)
 
-    return N.array(t[2:]).astype(N.Float)
+    return N.array(t[2:]).astype(N.Float32)

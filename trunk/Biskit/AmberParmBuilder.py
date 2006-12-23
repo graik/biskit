@@ -519,7 +519,7 @@ class AmberParmBuilder:
         @return: remaining atom indices of m that are NOT in i_atoms
         @rtype: [int]
         """
-        mask = N.zeros( len( model ),'i' )
+        mask = N.zeros( len( model ),N.Int )
         N.put( mask, i_atoms, 1 )
         return N.nonzero( N.logical_not( mask ) )
 

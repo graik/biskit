@@ -718,7 +718,7 @@ class AmberEntropist( AmberCrdEntropist ):
                     all += [ ( lst[i], lst[j], lst[k] ) ]
 
         ## calculate pairwise "distance" between tripples
-        pw = N.zeros( (len(all), len(all)), 'f' )
+        pw = N.zeros( (len(all), len(all)), N.Float32 )
         for i in range( len( all ) ):
             for j in range( i, len(all) ):
                 pw[i,j] = pw[j,i] = len( MU.intersection(all[i],all[j]) )**2

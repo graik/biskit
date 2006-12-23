@@ -3267,7 +3267,7 @@ Returns: t-value, two-tailed p-value
     v2 = avar(b,dimension)
     n = a.shape[dimension]
     df = float(n-1)
-    d = (a-b).astype('d')
+    d = (a-b).astype(N.Float64)
 
     denom = N.sqrt((n*N.add.reduce(d*d,dimension) - N.add.reduce(d,dimension)**2) /df)
     zerodivproblem = N.equal(denom,0)

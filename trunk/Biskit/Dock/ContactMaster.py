@@ -281,9 +281,9 @@ class ContactMaster(TrackingJobMaster):
         RC = RC.take( i_rec_ref, i_lig_ref )
 
         ## convert casting indices for normalCom to mask
-        m_rec = N.zeros( len( NC.rec_model ), 'i' )
+        m_rec = N.zeros( len( NC.rec_model ), N.Int )
         N.put( m_rec, i_rec, 1 )
-        m_lig = N.zeros( len( NC.lig_model ), 'i')
+        m_lig = N.zeros( len( NC.lig_model ), N.Int )
         N.put( m_lig, i_lig, 1 )
 
         self.mask_rec = m_rec * NC.rec_model.maskHeavy()
