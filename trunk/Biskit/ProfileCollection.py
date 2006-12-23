@@ -75,6 +75,12 @@ class ProfileCollection:
       p['prof1','date']   -> date of creation of profile named 'prof1'
       p.getInfo('prof1')  -> returns all info records
       p['prof1','comment'] = 'first prof'  -> add/change single info value
+
+    Note: Profile arrays of float or int are automatically converted
+    to arrays of type Float32 or Int32. This is a savety measure
+    because we have stumbled accross problems when transferring
+    pickled objects between 32 and 64 bit machines.
+    @see L{ProfileCollection.__picklesave_array}
     """
 
     def __init__( self, version=None, profiles=None, infos=None ):
@@ -185,6 +191,29 @@ class ProfileCollection:
         """
         return self.profiles.items()
 
+    def __picklesave_array( self, prof ):
+        """
+        Convert integer arrays to Int32 and float arrays to
+        Float32. This function is needed because of Numeric issues
+        when pickles are transferred between 64 and 32 bit
+        platforms. Rather than letting Numeric.array select a
+        platform-dependent default type, it is saver to assign an
+        explicit Float32, or Int32.
+
+        @param prof: the profile array to recast
+        @type  prof: Numeric.array
+
+        @return: recast array or unchanged original
+        @rtype:  Numeric.array
+        """
+        if prof.typecode() in ['i','l']:
+            return prof.astype( N.Int32 )
+
+        if prof.typecode() in ['f','d']:
+            return prof.astype( N.Float32 )
+
+        return prof
+
 
     def __array_or_list( self, prof, asarray ):
         """
@@ -203,9 +232,9 @@ class ProfileCollection:
         ## autodetect type
         if asarray == 1:
             if isinstance( prof, N.arraytype ):
-                return prof
+                return self.__picklesave_array( prof )
 
-            p = N.array( prof )
+            p = self.__picklesave_array( N.array( prof ) )
             if p.typecode() not in ['O','c']:  ## no char or object arrays!
                 return p
             return prof
@@ -219,8 +248,8 @@ class ProfileCollection:
         ## force array
         if asarray == 2:
             if isinstance( prof, N.arraytype ):
-                return prof
-            return N.array( prof )
+                return self.__picklesave_array( prof )
+            return self.__picklesave_array( N.array( prof ) )
 
         raise ProfileError, "%r not allowed as value for asarray" % asarray
 

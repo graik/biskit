@@ -29,6 +29,7 @@ Analyze HEX docking result.
 import Biskit.tools as t
 from Biskit import Trajectory, mathUtils,  molUtils
 
+
 import Numeric as N
 import RandomArray
 import copy
@@ -330,6 +331,7 @@ class Test:
         """
         import tempfile
         from Biskit import Trajectory
+        from Biskit.Dock import ComplexList
 
         ## create a minimal receptor trajectory from a pdb file
         f_out = tempfile.mktemp( '_test_rec.traj' )
@@ -337,7 +339,7 @@ class Test:
         t.Dump( t_rec, f_out )
 
         ## load a complex list
-        cl = t.Load( t.testRoot() + '/dock/hex/complexes.cl')
+        cl = ComplexList( t.Load( t.testRoot() + '/dock/hex/complexes.lst') )
 
         a= Analyzer( rec = f_out,
                      lig = t.testRoot()+'/lig_pcr_00/traj.dat',

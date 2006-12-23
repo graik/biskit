@@ -190,7 +190,7 @@ class Test:
         from Biskit.Dock import ComplexEvolvingList
     
         ## original complex
-        cl = t.Load(  t.testRoot() + "/dock/hex/complexes.cl" )
+        cl = ComplexList( t.Load(  t.testRoot() + "/dock/hex/complexes.lst" ))
 
         ## first evolution step
         c = ComplexEvolving( cl[0].rec(), cl[0].lig(), cl[0],

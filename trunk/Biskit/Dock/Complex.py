@@ -347,7 +347,7 @@ class Complex:
             m = self.contacts['result']
             self.contacts['shape'] = N.shape( m )
 
-            self.contacts['result'] = N.nonzero( N.ravel( m ) )
+            self.contacts['result'] = N.nonzero( N.ravel( m ) ).astype(N.Int32)
 
 
     def contactsOverlap(self, ref, cutoff=None):
