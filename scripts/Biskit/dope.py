@@ -35,8 +35,9 @@ import Biskit.LocalPath
 def _use( options ):
     print """
 
-Syntax:	   dope.py -s sourceModel -i otherModels
+Syntax:	   dope.py -s sourceModel -i otherModels [-p [fx surf dens cons]]
                   [-so sourceOut -o othersPrefix -dic old_model_dic ]
+                  [-nosort -nowat]
 
 Add conservation, accessibility profiles and foldX energies to a reference
 model and models linking to this reference.
@@ -58,9 +59,23 @@ dope.py -s ../../rec_wet/dry.model \
 -i *.model -dic 1B39_model.dic
 -> source already there, update model.dic
 
+Options:
 
+   -s      source input PDB or pickled PDBModel
+   -p      profiles to be calculated:
+             fx   ... foldx energies from FoldX (not a real profile)
+             surf ... surfrace accessibilities and curvature fom surfrace
+             dens ... atomic densities
+             cons ... sequence conservation from HMM
+             dssp ... secondary structure from DSSP
+   -so     filename of updated (source) model pickle
+   -i      PDBModels that should be linked to updated source
+   -o      pickle updated -i models with this file name prefix
+   -dic    file name of pickled model dict to be updated
+   -nosort do not sort atoms within residues
+   -wat    keep waters
                      
-Options:   
+Default options:   
            
 """
     for key, value in options.items():
@@ -68,31 +83,44 @@ Options:
     
     sys.exit(0)
 
+
 class ConvertError(Exception):
     pass
 
 
-def prepareSource( inFile, outFile ):
+def prepareSource( inFile, outFile, wat=1, sort=1,
+                   foldx=1, surf=1, dens=1, cons=1, dssp=1 ):
     """
     Strip waters, add profiles and save as doped source model.
     """
     
     source = PDBModel( inFile )
     
-    source.remove( lambda a: a['residue_name'] in ['HOH','WAT','TIP3'] )
+    if wat:
+        source.remove( lambda a: a['residue_name'] in ['HOH','WAT','TIP3'] )
     
-    source = source.sort()
+    if sort:
+        source = source.sort()
     
     doper = PDBDope( source )
 
-    doper.addASA()
-    doper.addSurfaceRacer( probe=1.4 )
-    doper.addSurfaceMask()
-    doper.addFoldX()
-    doper.addDensity()
+    if surf:
+##         doper.addASA()
+##         doper.addSurfaceMask()
+        doper.addSurfaceRacer( probe=1.4 )
+
+    if foldx:
+        doper.addFoldX()
+
+    if dens:
+        doper.addDensity()
+
+    if dssp:
+        doper.addSecondaryStructure()
     
     try:
-        doper.addConservation( )
+        if cons:
+            doper.addConservation( )
     except:
         errWriteln('\n ERROR: Conservation profile could not be added to '\
                    + str(sourceOut) + '\n' )
@@ -120,19 +148,22 @@ def changeModel( inFile, prefix, sourceModel ):
     model.setSource( sourceModel.validSource() )
 
     model.atomsChanged = 0
-    model.xyzChanged = 1
+    model.xyzChanged = ( 0 != N.sum( N.ravel( model.xyz - sourceModel.xyz)) )
 
     model.update( lookHarder=1 )
 
-    ## accessib. could have changed from source
-    doper = PDBDope( model )
-    doper.addASA()
-    doper.addSurfaceMask()
-    doper.addSurfaceRacer( probe=1.4 )
-    doper.addDensity()
-    
-    ## foldX energies change with coordinates, too
-    doper.addFoldX()
+    if model.xyzChanged:
+        
+        doper = PDBDope( model )
+
+        if 'MS' in sourceModel.aProfiles.keys():
+            doper.addSurfaceRacer( probe=1.4 )
+
+        if 'density' in sourceModel.aProfiles.keys():
+            doper.addDensity()
+
+        if 'foldX' in sourceModel.info.keys():
+            doper.addFoldX()
 
     outFile = os.path.dirname( inFile ) + '/' + prefix +\
               T.stripFilename( inFile ) + '.model' 
@@ -158,7 +189,7 @@ def updateModelDic( f ):
 ##########
 ## MAIN ##
 
-default = {'o':'' }
+default = {'o':'', 'p':'surf dens'}
 
 if len (sys.argv) < 2:
     _use( default )
@@ -183,7 +214,14 @@ print 'Preparing source ' + str(os.path.basename(sourceIn))\
       + ' -> ' + str(sourceOut)
 
 if sourceOut:
-    source = prepareSource( sourceIn, sourceOut )
+    source = prepareSource( sourceIn, sourceOut,
+                            wat  =('nowat'  not in options),
+                            sort =('nosort' not in options),
+                            foldx=('fx'   in options['p']),
+                            surf =('surf' in options['p']),
+                            dens =('dens' in options['p']),
+                            cons =('cons' in options['p']),
+                            dssp =('dssp' in options['p']) )
 else:
     try:
         source = T.Load( sourceIn )
