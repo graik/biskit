@@ -22,12 +22,20 @@ Check that you have all 4 required starting structures in your
 Run the test:
 ------------
 
-There are two options to running the test. You can execute the shell script 
-test_docking.zsh in the ~biskit/test folder:
+There are three options to running the test. 
 
-  ./test_docking.zsh
+(1) You can execute the shell script test_docking.zsh in the
+    ~biskit/test folder::
 
-Or you can run the commands one by one (see commands and comments below).
+    ./test_docking.zsh
+
+(2) You can use the following variant for a quick 'dry run' that does
+    not depend on external applications (mainly intended for debugging
+    and re-creating pickles for various test cases)::
+
+    ./test_docking.zsh dry clean
+
+(3) Or you can run the commands one by one (see commands and comments below).
 
 
 Manual test:
