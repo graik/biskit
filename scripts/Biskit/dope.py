@@ -25,6 +25,7 @@
 
 import os.path
 import sys
+import Numeric as N
 
 import Biskit.tools as T
 from Biskit.PDBModel import PDBModel
