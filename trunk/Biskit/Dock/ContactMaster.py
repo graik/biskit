@@ -633,7 +633,7 @@ class Test:
         niceness = {'default': 0}
         hosts = cpus_all[:4]
 
-        lst = ComplexList( t.Load( t.testRoot() + "/dock/hex/complexes.lst"))
+        lst = t.Load( t.testRoot() + "/dock/hex/complexes.cl")
         lst = lst[:9]
 
         refcom = t.Load( t.testRoot() + "/com/ref.complex")

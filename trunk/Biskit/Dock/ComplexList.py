@@ -728,7 +728,7 @@ class Test:
         @return: 1
         @rtype: int
         """
-        cl = ComplexList( t.Load( t.testRoot() + "/dock/hex/complexes.lst" ))
+        cl = t.Load( t.testRoot() + "/dock/hex/complexes.cl" )
 
         ## number of clusters among the 100 best (lowest rmsd) solutions
         cl_sorted = cl.sortBy( 'rms' )

@@ -339,7 +339,7 @@ class Test:
         t.Dump( t_rec, f_out )
 
         ## load a complex list
-        cl = ComplexList( t.Load( t.testRoot() + '/dock/hex/complexes.lst') )
+        cl = t.Load( t.testRoot() + '/dock/hex/complexes.cl')
 
         a= Analyzer( rec = f_out,
                      lig = t.testRoot()+'/lig_pcr_00/traj.dat',
