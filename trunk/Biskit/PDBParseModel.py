@@ -103,7 +103,7 @@ class PDBParseModel( PDBParser ):
                     model.removeRes( skipRes )
                                
         except B.ProfileError, why:
-            EHandler.warning("Cannot read/update profiles from source: %r"\
+            B.EHandler.warning("Cannot read/update profiles from source: %r"\
                              %why)
 
         model.setSource( source )
