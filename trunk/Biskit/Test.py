@@ -463,7 +463,7 @@ class Biskit( unittest.TestCase ):
         from Biskit.Trajectory import Test
         t = Test()
         print 'Testing: ', t.__module__
-        self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
+        self.assertAlmostEquals( t.run(), t.expected_result(), 4 )
 
 
     def test_EnsembleTraj( self ):
@@ -473,7 +473,7 @@ class Biskit( unittest.TestCase ):
         from Biskit.EnsembleTraj import Test
         t = Test()
         print 'Testing: ', t.__module__
-        self.assertAlmostEquals( t.run(), t.expected_result(), 6 )
+        self.assertAlmostEquals( t.run(), t.expected_result(), 5 )
 
 
     def test_ErrorHandler( self ):
