@@ -1,0 +1,30 @@
+[BINARY]
+
+comment=T-Coffee (http://igs-server.cnrs-mrs.fr/~cnotred/Projects_home_page/t_coffee_home_page.html)
+
+## binary
+bin=t_coffee
+
+## working directory
+cwd=
+
+## wrap process in shell
+shell=0
+
+## use non-default shell
+shellexe=
+
+## communicate with process via STDIN and STDOUT
+pipes=0
+
+## Use new environment containing only variables given below
+replaceEnv=0
+
+##
+## run time environment settings
+## Empty entries mark variables that have to be specified from outside
+##
+[ENVIRONMENT]
+ 
+CLUSTALW_4_TCOFFEE=
+SAP_4_TCOFFEE=
