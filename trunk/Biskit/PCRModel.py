@@ -33,6 +33,7 @@ import os.path
 
 import tools as t
 from PDBModel import PDBModel
+from LocalPath import LocalPath
 
 
 class PCRModel( PDBModel ):
@@ -52,7 +53,8 @@ class PCRModel( PDBModel ):
         """
         PDBModel.__init__( self, source=source, pdbCode=pdbCode, **params )
 
-        if fPsf: fPsf = t.absfile( fPsf )
+        if fPsf and not isinstance( fPsf, LocalPath):
+            fPsf = LocalPath( fPsf )
 
         ## in case given fPDB is already a PCRModel, keep psfFileName
         self.psfFileName = fPsf or getattr( source, 'psfFileName', None)
