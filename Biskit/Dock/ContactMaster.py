@@ -249,11 +249,11 @@ class ContactMaster(TrackingJobMaster):
         @param m: model
         @type  m: PDBModel       
         """
-        if m.profile('relASA', 0) != 0:
+        if m.profile('relAS', 0) != 0:
             return 
 
         d = PDBDope( m )
-        d.addASA()
+        d.addSurfaceRacer()
 
 
     def __refMasks( self, refCom, normalCom ):
