@@ -18,10 +18,13 @@ echo "installed and configured."
 echo "RUNNING CALCULATIONS  will take approximately 40 minutes\n"
 echo "Use option 'dry' to skip any calls to external applications:"
 echo "   test_docking.zsh dry"
-echo "This will only re-create pickled objects.\n"
+echo
+echo "This will only re-create pickled objects, except that it still calls"
+echo "the surfrace application (if available) to add surface profiles."
+echo "The Biskit/Dock/ContactMaster.py test case depends on these profiles."
 
 echo "Use option 'clean' to remove intermediate files that are not"
-echo "needed by the Biskit test cases and not part of the repository.\n"
+echo "needed by the Biskit test cases and are not part of the repository.\n"
 
 ##############
 ## Preparation
@@ -85,21 +88,21 @@ echo " ============= Writing receptor files to be used for docking =============
 mkdir $root/dock/rec
 cd $root/dock/rec
 PCR2hex.py -psf ../../rec/1A2P.psf -pdb ../../rec/1A2P.pdb
-dope.py -s ../../rec/1A2P.pdb -so ../../rec/1A2P_dry.model -i 1A2P.model -dic 1A2P_model.dic -p dens
+dope.py -s ../../rec/1A2P.pdb -so ../../rec/1A2P_dry.model -i 1A2P.model -dic 1A2P_model.dic -p dens surf
 echo "DONE\n"
 
 echo " ============= Writing ligand files to be used for docking ============= "
 mkdir $root/dock/lig
 cd $root/dock/lig
 PCR2hex.py -psf ../../lig/1A19.psf -pdb ../../lig/1A19.pdb
-dope.py -s ../../lig/1A19.pdb  -so ../../lig/1A19_dry.model -i 1A19.model  -dic 1A19_model.dic -p dens
+dope.py -s ../../lig/1A19.pdb  -so ../../lig/1A19_dry.model -i 1A19.model  -dic 1A19_model.dic -p dens surf
 echo "DONE\n"
 
 echo " ============= Writing reference complex pdb file ============= "
 mkdir $root/dock/com
 cd ../com
 PCR2hex.py -psf ../../com/1BGS.psf -pdb ../../com/1BGS.pdb
-dope.py -s ../../com/1BGS.pdb  -so ../../com/1BGS_dry.model -i 1BGS.model  -dic 1BGS_model.dic
+dope.py -s ../../com/1BGS.pdb  -so ../../com/1BGS_dry.model -i 1BGS.model  -dic 1BGS_model.dic -p dens surf
 echo "DONE\n"
 
 echo " ========= Creating reference complex to be used for docking ========= "
