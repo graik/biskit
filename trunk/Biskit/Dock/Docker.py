@@ -413,7 +413,7 @@ class RunThread( Thread ):
     """
 
     def __init__( self, cmd, owner, finp=None, log=0,
-                  host=None, **kw ):
+                  host=None, verbose=1, **kw ):
         """
         @param cmd: command to execute
         @type  cmd: str
