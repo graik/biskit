@@ -492,9 +492,9 @@ class ContactMaster(TrackingJobMaster):
         ## keep only (average) surface atoms
         ## play around with cutoff: lower- more atoms, better correl. to fnac
         i_r_surf = N.nonzero( r[ rec_models[0].source ].\
-                              profile2mask( 'relASA', 30 ) )
+                              profile2mask( 'relAS', 30 ) )
         i_l_surf = N.nonzero( l[ lig_models[0].source ].\
-                              profile2mask( 'relASA', 30 ) )
+                              profile2mask( 'relAS', 30 ) )
 
         for m in r.values(): m.keep( i_r_surf )
         for m in l.values(): m.keep( i_l_surf )
