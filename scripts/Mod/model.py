@@ -68,16 +68,28 @@ Default options:
 def defaultOptions():
     return {'o':'.',
             'log': None,
-            'h':None,
-            's':''
+            'h':None
             }
 
+def __printMatrix( matrix ):
+    """
+    Print the part right of the diagonal in a matrix
+    """
+    nr = len( matrix )
+    for i in range(nr): print '%5i'%(i+1),
+    for i in range(nr):
+        print '\n%2i'%(i+1),
+        for k in range(i):
+            print ' '*5,
+        for j in range(i, nr):
+            print '%5.2f'%matrix[i,j],
+            
 ### MAIN ###
 
 options   = tools.cmdDict( defaultOptions() )
 outFolder = tools.absfile( options['o'] )
 
-## Test, comment out for test
+## Test, comment in for testing
 # outFolder = tools.testRoot() + '/Mod/project'
 
 host = options['h']
@@ -106,7 +118,7 @@ try:
    
     r = m8.prepare_modeller( )
 
-#    m8.go(host)
+    m8.go(host)  ## comment out for testing
 
     m8.postProcess()
     
@@ -117,19 +129,6 @@ except:
 #####################
 ## Show output
 
-def __printMatrix( matrix ):
-    """
-    Print the part right of the diagonal in a matrix
-    """
-    nr = len( matrix )
-    for i in range(nr): print '%5i'%(i+1),
-    for i in range(nr):
-        print '\n%2i'%(i+1),
-        for k in range(i):
-            print ' '*5,
-        for j in range(i, nr):
-            print '%5.2f'%matrix[i,j],
-            
 ## show result in PyMol
 if options.has_key('s'):
     names = []
