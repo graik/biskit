@@ -72,9 +72,11 @@ class PDBParsePickle( PDBParseModel ):
         @type  source: str || file || PDBModel
         @param skipRes: list residue names that should not be parsed
         @type  skipRes: [ str ]
+        @param lookHarder: check source for additional profiles [0] 
+        @type  lookHarder: 1|0
         """
         try:
-            if self.needsUpdate( model ):
+            if self.needsUpdate( model ) or lookHarder:
 
                 s = T.Load( source )
 
