@@ -174,18 +174,18 @@ def createHexInp( recPdb, recModel, ligPdb, ligModel, comPdb=None,
     outName_clust = t.absfile( outFile + '_hex_cluster.out')
 
     ## add surface profiles if not there
-    if not recModel.aProfiles.has_key('relASA'):
+    if not recModel.aProfiles.has_key('relAS'):
         #t.flushPrint('\nCalculating receptor surface profile')
         rec_asa = PDBDope( recModel )
-        rec_asa.addASA()
-    if not ligModel.aProfiles.has_key('relASA'):
+        rec_asa.addSurfaceRacer()
+    if not ligModel.aProfiles.has_key('relAS'):
         #t.flushPrint('\nCalculating ligand surface profile')
         lig_asa = PDBDope( ligModel )
-        lig_asa.addASA()
+        lig_asa.addSurfaceRacer()
 
     ## surface masks, > 95% exposed
-    rec_surf_mask = N.greater( recModel.profile('relASA'), 95 )
-    lig_surf_mask = N.greater( ligModel.profile('relASA'), 95 )
+    rec_surf_mask = N.greater( recModel.profile('relAS'), 95 )
+    lig_surf_mask = N.greater( ligModel.profile('relAS'), 95 )
 
     ## maximun and medisn distance from centre of mass to any surface atom
     recMax, recMin = centerSurfDist( recModel, rec_surf_mask )
