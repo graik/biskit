@@ -133,6 +133,8 @@ class PDBDope:
           T = hydrogen bonded turn
           S = bend
           . = loop or irregular
+
+        @raise ExeConfigError: if external application is missing
         """
         dssp = Dssp( self.m )
         ss = dssp.run()
@@ -155,6 +157,7 @@ class PDBDope:
                              - startPos, endPos as reported by hmmPfam
                                for PDB sequence generated from this model
         @type  pfamEntries: [{dict}]           
+        @raise ExeConfigError: if external application is missing
         """
         ## mask with normal AA also used for HMM search
         mask = self.m.maskCA()
@@ -222,6 +225,7 @@ class PDBDope:
         """
         Adds dict with fold-X energies to PDBModel's info dict.
         See L{Biskit.Fold_X}
+        @raise ExeConfigError: if external application is missing
         """
         x = Fold_X( self.m )
         self.m.info['foldX'] = x.run()
@@ -247,6 +251,8 @@ class PDBDope:
         @type  vdw_set: 1|2
         @param probe_suffix: append probe radius to profile names
         @type  probe_suffix: 1|0
+
+        @raise ExeConfigError: if external application is missing
         """
         name_MS   = 'MS' + probe_suffix * ('_%3.1f' % probe)
         name_AS   = 'AS' + probe_suffix * ('_%3.1f' % probe)
@@ -308,10 +314,10 @@ class Test:
         @return: 1
         @rtype:  int
         """
-        from Biskit import PDBModel
+        from Biskit import PDBModel, EHandler
+        from Biskit.ExeConfig import ExeConfigError
         
         if local: print "Loading PDB..."
-        # f = T.testRoot() + '/lig/1A19.pdb'
         f = T.testRoot() + '/com/1BGS.pdb'
         mdl = PDBModel(f)
 
@@ -321,25 +327,34 @@ class Test:
         self.d = PDBDope( mdl )
         if local: print 'Done.'
 
-        if local: print "Adding FoldX energy...",
-        self.d.addFoldX()
-        if local: print 'Done.'
+        try:
+            if local: print "Adding FoldX energy...",
+            self.d.addFoldX()
+            if local: print 'Done.'
+        except ExeConfigError, why:
+            EHandler.warning('Problem with foldx: %r' % why)
 
     #    if local: print "Adding WhatIf ASA...",
     #    self.d.addASA()
     #    if local: print 'Done.'
 
-        if local: print "Adding SurfaceRacer curvature...",
-        self.d.addSurfaceRacer( probe=1.4 )
-        if local: print 'Done.'
+        try:
+            if local: print "Adding SurfaceRacer curvature...",
+            self.d.addSurfaceRacer( probe=1.4 )
+            if local: print 'Done.'
 
-        if local: print "Adding surface mask...",
-        self.d.addSurfaceMask()
-        if local: print 'Done.'
+            if local: print "Adding surface mask...",
+            self.d.addSurfaceMask()
+            if local: print 'Done.'
+        except ExeConfigError, why:
+            EHandler.warning('Problem with SurfaceRacer: %r' % why)
 
-        if local: print "Adding secondary structure profile...",
-        self.d.addSecondaryStructure()
-        if local: print 'Done.'
+        try:
+            if local: print "Adding secondary structure profile...",
+            self.d.addSecondaryStructure()
+            if local: print 'Done.'
+        except ExeConfigError, why:
+            EHandler.warning('Problem with SurfaceRacer: %r' % why)
 
         ## skipped in test as it takes long time to calculate
     #    if local: print "Adding conservation data...",
