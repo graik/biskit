@@ -16,7 +16,7 @@
 ## license.txt along with this program; if not, write to the Free
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-## Contributions: Olivier PERIN
+## Contributions: Olivier PERIN (first version)
 ## last $Author$
 ## last $Date$
 ## $Revision$
@@ -35,9 +35,9 @@ import Biskit.tools as T
 from Biskit import StdLog, EHandler
 
 
-class Check_Identities:
+class CheckIdentities:
     """
-    This class regroups the different methods to prevent
+    This class provides different methods to prevent
     the use of templates with a too high percentage of identities
     """
     # standard directory for input
@@ -406,14 +406,14 @@ class Test:
         import shutil
         
         if validate_testRoot:
-            self.m = Check_Identities( T.testRoot() + '/Mod/project')
+            self.m = CheckIdentities( T.testRoot() + '/Mod/project')
             self.m.go()
 
             val_root =  T.testRoot() + '/Mod/project/validation'
             folders = os.listdir( val_root )
 
             for f in folders:
-                self.m = Check_Identities( outFolder = val_root + '/' + f )
+                self.m = CheckIdentities( outFolder = val_root + '/' + f )
                 self.m.go()
 
             if local:
@@ -427,7 +427,7 @@ class Test:
             shutil.copy( T.testRoot() + '/Mod/project/t_coffee/final.pir_aln',
                          outfolder + '/t_coffee' )    
 
-            self.m = Check_Identities( outfolder )
+            self.m = CheckIdentities( outfolder )
             self.m.go()
 
             if local:
