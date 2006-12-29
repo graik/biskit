@@ -76,10 +76,12 @@ class PDBParseModel( PDBParser ):
         @type  source: str | file | PDBModel
         @param skipRes: list residue names that should not be parsed
         @type  skipRes: [ str ]
+        @param lookHarder: check source for additional profiles [0] 
+        @type  lookHarder: 1|0
         """
         try:
             ## atoms and/or coordinates need to be updated from PDB
-            if self.needsUpdate( model ):
+            if self.needsUpdate( model ) or lookHarder:
 
                 s = source
 
