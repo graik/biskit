@@ -24,7 +24,6 @@ import re
 import tempfile
 import Biskit.settings as settings
 
-tempfile.tempdir = settings.tempDirShared
 from Biskit import AmberRstParser 
 
 def _use():
@@ -181,7 +180,7 @@ def concatMany( fout, n_atoms, box, precission, rst, f1, *fn ):
     """
     Hack: Use Concater to concat more than 2 files.
     """
-    current_out = tempfile.mktemp('_concat.crd')
+    current_out = tempfile.mktemp('_concat.crd', dir=settings.tempDirShared)
     rst.reverse()
     fin = f1
     for f in fn:
@@ -189,7 +188,7 @@ def concatMany( fout, n_atoms, box, precission, rst, f1, *fn ):
         if f == fn[-1]:
             current_out = fout
         else:
-            current_out = tempfile.mktemp('_concat.crd')
+            current_out = tempfile.mktemp('_concat.crd', dir=settings.tempDirShared)
 
         r = None
         if len( rst ) > 0:

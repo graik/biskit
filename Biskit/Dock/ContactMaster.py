@@ -506,13 +506,9 @@ class ContactMaster(TrackingJobMaster):
         ## save changed models
         self.reduced_recs, self.reduced_ligs = r,l
 
-        oldTemp, tempfile.tempdir = tempfile.tempdir, settings.tempDirShared
-
         for m in l.values() + r.values():
-            f = tempfile.mktemp( '_reduced.model' )
+            f = tempfile.mktemp( '_reduced.model', dir=settings.tempDirShared )
             m.saveAs(f)
-
-        tempfile.tempdir = oldTemp
 
         if self.verbose: t.flushPrint(' done\n')
 
