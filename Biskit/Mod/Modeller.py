@@ -37,7 +37,7 @@ import Biskit.tools as T
 
 from Biskit.Mod.TemplateCleaner import TemplateCleaner as TC
 from Biskit.Mod.SequenceSearcher import SequenceSearcher as SS
-from Biskit.Mod.CheckIdentities import Check_Identities as CI
+from Biskit.Mod.CheckIdentities import CheckIdentities as CI
 from Aligner import Aligner
 from Biskit.ModelList import ModelList
 from Biskit.DictList import DictList
@@ -56,6 +56,8 @@ class Modeller:
     """
     Take Alignment from t_coffee and template PDBs.
     Creates a modeller-script and runs modeller.
+
+    @todo: convert this to Executor child.
     """
 
     MODELLER_TEMPLATE = """
@@ -491,7 +493,11 @@ CALL ROUTINE = 'model'             # do homology modelling
         @type  pdb_list: ModelList
         @param model_folder: ouput folder (default: None -> L{F_PDBModels})
         @type  model_folder: str
-        """    
+        """
+        ## cut connection to target.Bxxxxx.pdb
+        for m in pdb_list:
+            m.disconnect()
+            
         T.Dump(pdb_list, '%s'%(model_folder + self.F_PDBModels))
 
 
@@ -516,6 +522,7 @@ CALL ROUTINE = 'model'             # do homology modelling
 
             model.info["mod_score"] = self.extract_modeller_score(
                 model.validSource(), model)
+            model.info['mod_pdb'] = model.source
 
         pdb_list = pdb_list.sortBy("mod_score")
 
