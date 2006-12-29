@@ -14,4 +14,4 @@ This requires that you have installed
 - SAP
 - Modeller
 
-For a more thorough introduction of Biskit.Mod see ~biskit/dock/mod.howto.
+For a more thorough introduction of Biskit.Mod see ~biskit/doc/mod.howto.
