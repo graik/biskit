@@ -21,6 +21,9 @@
 .. last $Date$
 .. $Revision$
 .. ===================================================================
+.. More up-to-date instructions covering more programs are online:
+..       http://biskit.pasteur.fr/install/applist/
+..       http://biskit.pasteur.fr/install/install/applications
 
 
 ========
