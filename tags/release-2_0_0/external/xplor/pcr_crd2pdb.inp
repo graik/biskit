@@ -1,0 +1,119 @@
+! sort out file names and segment id's
+
+! folder containing crd files, must end with "/"
+evaluate ($data_root = %(pcr_folder)s )
+evaluate ($topo_root = %(topo_folder)s )
+
+evaluate ($structureid = %(pdbCode)s )
+
+evaluate ($trajoutfile = "traj.temp")
+evaluate ($result_root  = %(out_folder)s )
+
+evaluate ($tmp = $data_root + "nstep" )
+!evaluate ($nstep = @@$tmp )
+evaluate ($nstep = 500)
+
+! number of PCR-iterations, usually 50 (x 1 ps)
+evaluate ($n_iteration = %(n_iteration)i )
+! step between frames (1->each 2fs frame is written, 250->0.5ps stepping)
+evaluate ($skip = %(skip)i )
+
+
+! get first character from structureid
+for $letter in ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9") loop test
+   evaluate ($tttt = $letter + ($structureid - $letter))
+   if ($tttt eq $structureid) then exit loop test end if
+end loop test
+
+evaluate ($structurefile = $topo_root + $structureid + ".psf")
+structure @@$structurefile end
+evaluate ($startpdbfile  = $topo_root + $structureid + ".pdb")
+coor @@$startpdbfile
+
+! modify water segids so that copy generation works
+evaluate ($xwatsegid = $letter + "XWW")
+evaluate ($watsegid  = $letter + "WWW")
+
+vector do (segid = $watsegid)  (segid 1WWW)
+vector do (segid = $watsegid)  (segid W000)
+vector do (segid = $xwatsegid) (segid 1XWW)
+
+evaluate ($atomselection = $data_root + "atomselection")
+vector ident (store9)  @@$atomselection 
+coor select @@$atomselection  end
+evaluate ($Nresidues = $select)
+evaluate ($Nmodes = 3*$Nresidues)
+
+! get all segids
+evaluate ($ssss = "    ")
+evaluate ($index = 0)
+for $id in id (tag) loop segi
+   vector show element (segid) (id $id)
+   if ($result ne $ssss) then 
+      evaluate ($ssss = $result)
+      evaluate ($index = $index + 1)
+      evaluate ($s_$index = $result)
+   end if
+end loop segi
+
+evaluate ($sc = 0)
+while ($sc lt $index) loop dup1
+   evaluate ($sc = $sc + 1)
+   evaluate ($dc = 1)
+   evaluate ($newSegid = encode($dc-1) + ($s_$sc - $letter))
+   evaluate ($firstSegid = $newSegid)
+   vector do (segid = $newSegid) (segid $s_$sc)
+   evaluate ($segid_$sc_$dc = $newSegid)
+   while ($dc lt 10) loop dup2
+      evaluate ($dc = $dc + 1)
+      evaluate ($newSegid = encode($dc-1) + ($s_$sc - $letter))
+      duplicate selection = (segid $firstSegid) segid = $newSegid end
+      evaluate ($segid_$sc_$dc = $newSegid)
+   end loop dup2
+end loop dup1
+
+evaluate ($trajCount = 0)
+evaluate ($dc = 0)
+while ($dc lt 10) loop dup1
+   evaluate ($dc = $dc + 1)
+   evaluate ($mCount_$dc = 0)
+   display $segid_1_$dc
+end loop dup1
+
+while ($trajCount lt $n_iteration) loop tra1
+   evaluate ($trajCount = $trajCount + 1)
+   evaluate ($trajfile  = $data_root  
+             + $structureid + "_" + encode($trajCount) + "_ens.crd")
+   evaluate ($status = "START")
+   evaluate ($count = 0)
+   while ($status # "COMPLETE") loop tra2
+      if ($status = "START") then
+         read trajectory
+	    ascii = true 
+	    input = $trajfile
+	    begin = $skip 
+            skip = $skip  
+            stop = $nstep
+         end
+      else
+         read trajectory next end
+      end if
+
+      evaluate ($dc = 0)
+      while ($dc lt 10) loop dup1
+         evaluate ($dc = $dc + 1)
+         evaluate ($mCount_$dc = $mCount_$dc + 1)
+         evaluate ($pdbOUTfile = $structureid + "_" + encode($mCount_$dc) + "_" 
+                   + encode($dc-1) + ".pdb")
+	 evaluate ($pdbOUTfile = $result_root + $pdbOUTfile)
+         vector ident (store1) (not all)
+         evaluate ($sc = 0)
+         while ($sc lt $index) loop segi
+             evaluate ($sc = $sc + 1)
+             vector ident (store1) ((store1 or segid $segid_$sc_$dc))
+         end loop segi
+         write coor output = $pdbOUTfile selection= (store1 and not segid *WWW) end
+      end loop dup1
+   end loop tra2
+end loop tra1
+stop
