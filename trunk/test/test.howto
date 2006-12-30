@@ -95,12 +95,12 @@ Results in something like::
 
 	  To exclude tests::
 
-	     exclude_long  - don't run time-consuming tests
-	     exclude_pvm   - dont run tests using PVM
+	     no_long  - don't run time-consuming tests
+	     no_pvm   - dont run tests using PVM
 
 
   Default options:
 
-        - tests         ['all', 'exclude_long']
+        - tests         ['all', 'no_long']
         - verb  2
         - log   /mnt/data/shared_bin/biskit/test/test.log
