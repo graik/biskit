@@ -21,6 +21,8 @@
 .. last $Date$
 .. $Revision$
 .. ===================================================================
+.. A more up-to-date version can be found online:
+..        http://biskit.pasteur.fr/install
 
 
 =============================
