@@ -78,7 +78,7 @@ if __name__ == '__main__':
     options = T.cmdDict()
     f = os.getcwd()
     
-    if '?' in options or 'help' in options:
+    if '?' in options or 'help' in options or 'h' in options:
         _use( options )
 
     if not os.path.exists( f + B.F_INPUT_FOLDER ) and not options.has_key('d'):
