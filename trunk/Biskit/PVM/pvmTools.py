@@ -25,7 +25,7 @@ low-level tools for PVM
 """
 
 import pvm
-import pypvm_core
+import pypvm
 import os
 import Biskit.hosts as H
 
@@ -74,7 +74,7 @@ def countHosts():
     @return: number of hosts registered with PVM
     @rtype: int
     """
-    return PVM.pypvm_core.config()[0]
+    return PVM.pypvm.config()[0]
 
 ## Error codes returned by pvmlib
 pvmerrors = {
