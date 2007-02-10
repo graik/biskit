@@ -27,7 +27,8 @@ PVM interface.
 
 ## MAX_RECURSION_LIMIT = 100000
 
-from Biskit.PVM.pypvm_core import *
+## from Biskit.PVM.pypvm_core import *
+from pypvm import *
 
 from cPickle import dumps # as _dumps
 from cPickle import loads # as _loads
