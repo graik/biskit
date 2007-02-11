@@ -24,6 +24,7 @@
 Binding incoming pvm-messages to methods.
 """
 
+import pypvm as P
 from Biskit.PVM import pvm
 from threading import Thread
 
@@ -82,11 +83,11 @@ class PVMThread(Thread):
 
         Thread.__init__(self)
 
-        self.__mytid = pvm.mytid()
+        self.__mytid = P.mytid()
 
         try:
             ## get process ID of parent
-            self.__parent = pvm.parent()
+            self.__parent = P.parent()
         except:
             self.__parent = None
 
@@ -184,7 +185,7 @@ class PVMThread(Thread):
 
 
     def spawn(self, pvm_task, nickname = None):
-        child_tid = pvm.spawn(*pvm_task)[0]
+        child_tid = P.spawn(*pvm_task)[0]
 
         if child_tid > 0:
 
@@ -253,9 +254,9 @@ class PVMThread(Thread):
 
             for tid, message in bindings.keys():
 
-                if pvm.probe(tid, message):
+                if P.probe(tid, message):
 
-                    pvm.recv(tid, message)
+                    P.recv(tid, message)
 
                     ## parameters must be tuple
 
@@ -308,7 +309,7 @@ class PVMThread(Thread):
 
         tid = self.getTasks()[nickname]
 
-        result = pvm.trecv(self.getPingTimeout(), MSG_PING, tid)
+        result = P.trecv(self.getPingTimeout(), MSG_PING, tid)
 
 	try:
 	    pvm.unpack()
@@ -458,7 +459,7 @@ class PVMMasterSlave(PVMThread):
                     self.send(nickname, MSG_EXIT, None)
                     if self.verbose: print nickname, 'shutting down...'
         else:
-            pvm.kill(self.getTID())
+            P.kill(self.getTID())
 
         ## stop message-loop
 

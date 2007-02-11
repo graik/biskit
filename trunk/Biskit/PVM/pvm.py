@@ -22,86 +22,45 @@
 ## last $Author$
 
 """
-PVM interface.
+Low-level utility functions for PVM.
 """
 
-## MAX_RECURSION_LIMIT = 100000
-
-## from Biskit.PVM.pypvm_core import *
-from pypvm import *
+import pypvm as P
 
 from cPickle import dumps # as _dumps
 from cPickle import loads # as _loads
+import os
 
-
-## def dumps(object):
-##     import sys
-
-##     limit = sys.getrecursionlimit()
-
-##     while limit < MAX_RECURSION_LIMIT:
-
-##         try:
-##             s = _dumps(object)
-
-##             o = _loads(s)
-
-##             if not type(o) == type(object):
-##                 print 'dumps: inconsistency; %s, %s' % \
-##                       (`type(o)`, `type(object)`)
-
-##             return s
-
-##         except RuntimeError:
-##             limit += 1000
-##             sys.setrecursionlimit(limit)
-
-##     raise RuntimeError, "Maximum recursion depth exceeded."
-
-## def loads(object):
-##     import sys
-
-##     limit = sys.getrecursionlimit()
-
-##     while limit < MAX_RECURSION_LIMIT:
-
-##         try:
-##             return _loads(object)
-
-##         except RuntimeError:
-##             limit += 1000
-##             sys.setrecursionlimit(limit)
-
-##     raise RuntimeError, "Maximum recursion depth exceeded."
+import Biskit.hosts as H
 
 
 def pack(object):
-    return pkstr(dumps(object))
+    return P.pkstr(dumps(object))
 
 
 def unpack():
-    return loads(upkstr())
+    return loads( P.upkstr())
 
 
 def pack_and_send(tid, msg_tag, object, encoding = None):
     if encoding is None:
         encoding = data['default']
 
-    return psend_str(encoding, tid, msg_tag, dumps(object))
+    return P.psend_str(encoding, tid, msg_tag, dumps(object))
 
 
-def addHosts(hosts):
-    """
-    Add hosts to PVM.
+## def addHosts(hosts):
+##     """
+##     Add hosts to PVM.
     
-    @param hosts: list of hostnames
-    @type  hosts: [str]
-    """
-    for host in hosts:
-        try:
-            result = addhosts([host])
-        except:
-            print host,'failed'
+##     @param hosts: list of hostnames
+##     @type  hosts: [str]
+##     """
+##     for host in hosts:
+##         try:
+##             result = P.addhosts([host])
+##         except:
+##             print host,'failed'
 
 
 def delHosts(hosts):
@@ -111,4 +70,95 @@ def delHosts(hosts):
     @param hosts: list of hostnames
     @type  hosts: [str]
     """
-    return delhosts( hosts )
+    return P.delhosts( hosts )
+
+
+
+def expandLocal( host ):
+    """
+    Expand name of local(!) host.
+    For example, turn 'myhost' into 'myhost.mydomain.com'
+
+    @param host: host name
+    @type  host: str
+
+    @return: full host name
+    @rtype:  str
+    """
+    if os.uname()[1].split('.')[0] == host:
+        return os.uname()[1]
+
+    return host
+
+
+def addHosts( number=None, hosts=H.nodes_all, expand=1 ):
+    """
+    Add hosts to PVM.
+    
+    @param number: number of requested nodes
+                   if number == 0, nothing happens
+                   if number == None, all hosts are added (default)
+    @type  number: int
+    @param hosts: list of host names (default: Biskit.hosts.nodes_all)
+    @type  hosts: [str]
+    @param expand: add full address to local node
+    @type  expand: [1|0]
+    """
+    if expand:
+        hosts = [ expandLocal( h ) for h in hosts ]
+
+    try:
+
+        number = number or len( hosts )
+
+        if number > 0:
+            P.addhosts( hosts[:number+1] )
+
+    except IndexError, error:
+        raise PVMError, 'Error adding hosts: %r' % error
+
+
+def countHosts():
+    """
+    @return: number of hosts registered with PVM
+    @rtype: int
+    """
+    return P.config()[0]
+
+## Error codes returned by pvmlib
+pvmerrors = {
+    0  : 'PvmOk	     Success',
+    -2 : 'PvmBadParam     Bad parameter',
+    -3 : 'PvmMismatch     Parameter mismatch',
+    -4 : 'PvmOverflow     Value too large',
+    -5 : 'PvmNoData       End of buffer',
+    -6 : 'PvmNoHost       No such host',
+    -7 : 'PvmNoFile       No such file',
+    -8 : 'PvmDenied       Permission denied',
+    -10: 'PvmNoMem        Malloc failed',
+    -12: "PvmBadMsg       Can't decode message",
+    -14: "PvmSysErr       Can't contact local daemon",
+    -15: 'PvmNoBuf        No current buffer',
+    -16: 'PvmNoSuchBuf    No such buffer',
+    -17: 'PvmNullGroup    Null group name',
+    -18: 'PvmDupGroup     Already in group',
+    -19: 'PvmNoGroup      No such group',
+    -20: 'PvmNotInGroup   Not in group',
+    -21: 'PvmNoInst       No such instance',
+    -22: 'PvmHostFail     Host failed',
+    -23: 'PvmNoParent     No parent task',
+    -24: 'PvmNotImpl      Not implemented',
+    -25: 'PvmDSysErr      Pvmd system error',
+    -26: 'PvmBadVersion   Version mismatch',
+    -27: 'PvmOutOfRes     Out of resources',
+    -28: 'PvmDupHost      Duplicate host',
+    -29: "PvmCantStart    Can't start pvmd",
+    -30: 'PvmAlready      Already in progress',
+    -31: 'PvmNoTask       No such task',
+    -32: 'PvmNotFound     Not Found',
+    -33: 'PvmExists       Already exists',
+    -34: 'PvmHostrNMstr   Hoster run on non-master host',
+    -35: 'PvmParentNotSet Spawning parent set PvmNoSpawnParent',
+    -36: "PvmIPLoopback   Master Host's IP is Loopback"
+}
+    

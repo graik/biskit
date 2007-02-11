@@ -26,7 +26,7 @@ Add some extra functionality to JobMaster
 """
 
 from Biskit.PVM.dispatcher import JobMaster
-import pvmTools as pvm
+import pvm
 from Biskit.PVM.Status import Status
 import Biskit.tools as T
 
