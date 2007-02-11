@@ -93,43 +93,6 @@ def format_fasta(seq, width=60):
     return fasta_sequence
 
 
-def verify_fasta( target ):
-    """
-    Verify that a given file or string is in Fasta format.
-    The definition used for a fasta file here is that:
-     - first line starts with '>'
-     - the following sequence lines are not longer that 80 characters
-     - the characters has to belong to the standard amino acid codes
-
-    @param target: name of fasta file OR file contents as list of strings
-    @type  target: str OR [str]
-    
-    @return: conforms to the fsata format
-    @rtype: True/False
-    """
-    if not type(target) == types.ListType:
-        if os.path.exists( target ):
-            f = open( target, 'r' )
-            target = f.readlines()
-
-    if not target[0][0] == '>':
-        print 'Fasta format does not contain description line.'
-        return False
-
-    for i in range( 1, len(target) ):
-        if len( target[i] ) >= 80:
-            print 'Fasta sequence lines longer that 80 characters'
-            return False
-
-        for j in target[i]:
-            aa_codes = MU.aaDicStandard.values() + [ '\n' ]
-            if not j.upper() in aa_codes:
-                print 'Invalid amino acid code: %s'%j.upper()
-                return False
-
-    return True
-
-
 
 
 #############
@@ -152,7 +115,7 @@ class Test:
         @return: 1
         @rtype:  int
         """
-        vf = verify_fasta( T.testRoot() + '/Mod/project/target.fasta')
+        vf = format_fasta( 'ABC'*100 )
 
         if local:
             globals().update( locals() )
