@@ -24,6 +24,8 @@
 
 """
 Search Hmmer Pfam database and retrieve conservation data.
+
+@todo: use LogFile instead of print statements
 """
 
 import tempfile
@@ -33,11 +35,11 @@ import mathUtils as math
 import Numeric as N
 import molUtils
 import settings
-import Biskit.Mod.modUtils as MU
+
 from Biskit.Errors import BiskitError
 import Biskit.tools as T
 import Biskit.molTools as MT
-from Biskit import Executor, TemplateError
+from Biskit import Executor, TemplateError, PDBModel
 
 
 ## executables
@@ -111,6 +113,43 @@ class HmmerSearch( Executor ):
         Executor.__init__( self, 'hmmpfam', catch_out=1,
                            args=' %s %s'%(hmmdb, self.fName), **kw )
 
+
+    def __verify_fasta(self, target ):
+        """
+        Verify that a given file or string is in Fasta format.
+        The definition used for a fasta file here is that:
+         - first line starts with '>'
+         - the following sequence lines are not longer that 80 characters
+         - the characters has to belong to the standard amino acid codes
+
+        @param target: name of fasta file OR file contents as list of strings
+        @type  target: str OR [str]
+
+        @return: conforms to the fsata format
+        @rtype: True/False
+        """
+        if not type(target) == types.ListType:
+            if os.path.exists( target ):
+                f = open( target, 'r' )
+                target = f.readlines()
+
+        if not target[0][0] == '>':
+            print 'Fasta format does not contain description line.'
+            return False
+
+        for i in range( 1, len(target) ):
+            if len( target[i] ) >= 80:
+                print 'Fasta sequence lines longer that 80 characters'
+                return False
+
+            for j in target[i]:
+                aa_codes = MU.aaDicStandard.values() + [ '\n' ]
+                if not j.upper() in aa_codes:
+                    print 'Invalid amino acid code: %s'%j.upper()
+                    return False
+
+        return True
+
            
     def prepare( self ):
         """
@@ -119,7 +158,7 @@ class HmmerSearch( Executor ):
         If it is a fasta file the path to the file will be passed on.
         """
         ## if target is a PDBModel
-        if type(self.target) == types.InstanceType:
+        if isinstance( self.target, PDBModel):
             fastaSeq, self.fastaID = MT.fasta( self.target )
             ## write fasta sequence file
             seq = open( self.fName, 'w' )
@@ -128,7 +167,7 @@ class HmmerSearch( Executor ):
 
         ## else assume it is a fasta sequence file   
         else:
-            if MU.verify_fasta(self.target):
+            if self.__verify_fasta(self.target):
                 self.fName = self.target
 
 
@@ -461,7 +500,6 @@ class Hmmer:
 
         self.fastaID = ''
 
-##         tempfile.tempdir = self.tempDir ## No! interferes with other modules
         self.hmmFile = ''
         self.fastaFile = tempfile.mktemp('.fasta', dir=self.tempDir)
         self.sub_fastaFile = tempfile.mktemp('_sub.fasta', dir=self.tempDir)
@@ -604,49 +642,57 @@ class Hmmer:
                             each repete
         @rtype: str, str, int, [int]
         """
-        fastaSeq, self.fastaID = MT.fasta( model )
-        fastaSeq = fastaSeq.split()[1]
-        l = len(fastaSeq)
+        try:
 
-        ## sub sequence alignment
-        j = 0
-        repete = 0
-        hmmGap = []
+            fastaSeq, self.fastaID = MT.fasta( model )
+            fastaSeq = fastaSeq.split()[1]
+            l = len(fastaSeq)
 
-        for h in hits:
-            start = h[0]-1
-            stop = h[1]
-            sub_fastaSeq, self.fastaID = MT.fasta( model, start, stop )
+            ## sub sequence alignment
+            j = 0
+            repete = 0
+            hmmGap = []
 
-            ## write sub-fasta sequence file
-            fName = self.sub_fastaFile
-            sub_seq = open( fName, 'w' )
-            sub_seq.write( sub_fastaSeq )
-            sub_seq.close()
+            for h in hits:
+                start = h[0]-1
+                stop = h[1]
+                sub_fastaSeq, self.fastaID = MT.fasta( model, start, stop )
 
-            ## get sub-alignmnet
-            align = HmmerAlign( self.hmmFile, self.sub_fastaFile,
-                                self.fastaID, verbose=self.verbose)
-                  
-            sub_fastaSeq, sub_hmmSeq = align.run()
+                ## write sub-fasta sequence file
+                fName = self.sub_fastaFile
+                sub_seq = open( fName, 'w' )
+                sub_seq.write( sub_fastaSeq )
+                sub_seq.close()
 
-            ## remove position scorresponding to insertions in search sequence
-            sub_fastaSeq, sub_hmmSeq, del_hmm  = \
-                          self.removeGapInSeq( sub_fastaSeq, sub_hmmSeq )
-            hmmGap += [ del_hmm ]
+                ## get sub-alignmnet
+                align = HmmerAlign( self.hmmFile, self.sub_fastaFile,
+                                    self.fastaID, verbose=self.verbose)
 
-            ## rebuild full lenght hmmSeq from sub_hmmSeq
-            sub_hmmSeq = '.'*start + sub_hmmSeq + '.'*(l-stop)
+                sub_fastaSeq, sub_hmmSeq = align.run()
 
-            if j == 0:
-                hmmSeq = sub_hmmSeq
-            if j != 0:
-                hmmSeq  = self.mergeHmmSeq( hmmSeq, sub_hmmSeq )
+                ## remove positions corresponding to insertions in
+                ## search sequence
+                sub_fastaSeq, sub_hmmSeq, del_hmm  = \
+                              self.removeGapInSeq( sub_fastaSeq, sub_hmmSeq )
+                hmmGap += [ del_hmm ]
 
-            j+= 1
-            repete += 1
+                ## rebuild full lenght hmmSeq from sub_hmmSeq
+                sub_hmmSeq = '.'*start + sub_hmmSeq + '.'*(l-stop)
 
-        return fastaSeq, hmmSeq, repete, hmmGap
+                if j == 0:
+                    hmmSeq = sub_hmmSeq
+                if j != 0:
+                    hmmSeq  = self.mergeHmmSeq( hmmSeq, sub_hmmSeq )
+
+                j+= 1
+                repete += 1
+
+            return fastaSeq, hmmSeq, repete, hmmGap
+
+        except IOError, e:
+            raise HmmerError, "Error creating temporary file %r. "%e.filename+\
+                  "Check that Biskit.settings.temDirShared is accessible!\n"+\
+                  "See also .biskit/settings.cfg!"
 
 
     def removeGapInSeq( self, fasta, hmm ):
