@@ -29,7 +29,8 @@ Manage Master/Slave tasks.
 from PVMThread import PVMMasterSlave
 import Biskit.settings as settings
 from Status import Status
-import pvm, socket
+import socket, pvm
+import pypvm
 
 MSG_JOB_START = 1
 MSG_JOB_DONE = 2
@@ -200,7 +201,7 @@ class JobMaster(PVMMasterSlave):
             command = settings.python_bin
             argv = ['-i', self.slave_script, str(niceness)]
 
-        args = (command, argv, pvm.spawnOpts['TaskHost'], host, 1)
+        args = (command, argv, pypvm.spawnOpts['TaskHost'], host, 1)
 
         return PVMMasterSlave.spawn(self, args, nickname)
 
