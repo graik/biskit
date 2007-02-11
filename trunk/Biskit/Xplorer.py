@@ -32,7 +32,7 @@ import os
 import settings
 import Biskit.tools as t
 from Biskit.Errors import BiskitError
-from Biskit import StdLog
+from Biskit import StdLog, ExeConfigCache
 
 class XplorerError( BiskitError ):
     pass
@@ -51,7 +51,7 @@ class Xplorer:
             to do is to subclass Executor and delete redundant parts 
     """
 
-    def __init__( self, inpFile, xout=None, bin=settings.xplor_bin,
+    def __init__( self, inpFile, xout=None, bin=None,
                   node=None, nice=0, log=None, debug=0, verbose=None,
                   **params ):
         """
@@ -60,7 +60,7 @@ class Xplorer:
         @param xout: file name of xplor log file (None->discard)
                      (default: None)
         @type  xout: str
-        @param bin: file name of xplor binary (default: settings.xplor_bin)
+        @param bin: file name of xplor binary (None: take from exe_xplor.dat)
         @type  bin: str
         @param node: host for calculation (None->local) (default: None)
         @type  node: str
@@ -77,7 +77,10 @@ class Xplorer:
         """
         self.__dict__.update( params )
 
-        self.bin = t.absfile( bin ) or settings.xplor_bin
+        self.exe = ExeConfigCache.get( 'xplor', strict=1 )
+        self.exe.bin = bin or self.exe.bin
+        self.exe.validate()
+
         self.inp = t.absfile( inpFile )
         self.xout = t.absfile( xout ) or tempfile.mktemp('_xplor.log')
         self.finp = None
@@ -131,7 +134,7 @@ class Xplorer:
         str_ssh = "%s %s" % ( settings.ssh_bin, self.node )
 
         cmd = "%s %s %s < %s > %s"\
-              %(str_ssh, str_nice, self.bin, finp, self.xout)
+              %(str_ssh, str_nice, self.exe.bin, finp, self.xout)
 
         if self.verbose: self.log.add_nobreak("executes: "+cmd+"..")
 
