@@ -789,6 +789,26 @@ def toInt( o, default=None ):
     except:
         return default
 
+def hex2int( shex ):
+    """
+    Convert hex-code string into float number.
+    @param s: hex-code, e.g. 'FF0B99'
+    @type  s: str
+    @return: float
+    @rtype: float
+    """
+    shex = shex.replace('0x','')
+
+    factors = [ 16**(i) for i in range(len(shex)) ]
+    factors.reverse()
+    factors = Numeric.array( factors )
+
+    table   = dict( zip('0123456789abcdef',range(16)) )
+
+    components = [ table[s]*f for s,f in  zip( shex.lower(), factors ) ]
+
+    return Numeric.sum( components )
+    
 
 def colorSpectrum( nColors, firstColor='FF0000', lastColor='FF00FF' ):
     """
@@ -813,7 +833,7 @@ def colorSpectrum( nColors, firstColor='FF0000', lastColor='FF00FF' ):
                     ' ' + str(firstColor) + ' ' +  str(lastColor) ).readlines()
 
     for s in out:    
-        spec += [ int( float( '0x' + str( string.strip( s  ) ) ) ) ]
+        spec += [ hex2int( str( string.strip( s  ) ) ) ]
 
     return spec
 
