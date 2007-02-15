@@ -607,7 +607,7 @@ class BisList:
 
         plot.xlabel = xkey
 
-        colors = t.colorSpectrum( len( ykey ) )
+        colors = t.colorRange( len( ykey ) )
 
         if not 'size' in arg:
             arg['size'] = 1
