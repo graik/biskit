@@ -39,6 +39,8 @@ import types
 import glob
 import subprocess
 
+from ColorSpectrum import ColorSpectrum
+
 class ToolsError( Exception ):
     pass
 
@@ -788,6 +790,16 @@ def toInt( o, default=None ):
         return int( o )
     except:
         return default
+
+
+def colorRange( nColors, palette='plasma2' ):
+    
+    c = ColorSpectrum( palette=palette, vmin=0, vmax=1. )
+
+    r = 1. * Numeric.arange( 0, nColors ) / nColors
+
+    return c.colors( r )
+
 
 def hex2int( shex ):
     """

@@ -30,6 +30,7 @@ import Numeric as N
 
 from Errors import BiskitError
 
+
 class ColorError( BiskitError ):
     pass
 
@@ -142,8 +143,8 @@ class ColorSpectrum:
         @rtype: [int]
         """
         if resetLimits:
-            self.vmax = max( values )
-            self.vmin = min( values )
+            self.vmax = max( values ) * 1.
+            self.vmin = min( values ) * 1.
 
         return [ self.color(v) for v in values ]
 
@@ -288,6 +289,7 @@ class Test:
         @rtype:  [ int ]
         """
         import biggles as B
+        import tools
         
         c_grey    = ColorSpectrum( 'grey', 0, 100 )
         c_sausage = ColorSpectrum( 'sausage', 0, 100 )
@@ -295,6 +297,8 @@ class Test:
         c_plasma2 = ColorSpectrum( 'plasma2', 0, 100 )
 
         p = B.FramedPlot()
+
+        old_spectrum = tools.colorSpectrum( 100 )
         
         result = []
         for i in range( 100 ):
@@ -310,6 +314,9 @@ class Test:
                                 color = c_plasma.color( i ) ) )
             p.add( B.FillBelow( x, (0.25, 0.25),
                                 color = c_plasma2.color( i ) ) )
+
+            p.add( B.FillBelow( x, (0., 0.),
+                                color = old_spectrum[i] ))
 
         p.add( B.Curve( (0,100), (1.,1.)) )
         p.add( B.Curve( (0,100), (.75,.75)) )
