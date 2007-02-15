@@ -148,7 +148,7 @@ class DictList( BisList, list ):
         Called before an item is added to the list. Override but call.
         
         @param v: value
-        @type  v: dict
+        @type  v: dict or similar
         @param i: anticipated index (ignored in this implementation)
         @type  i: int
 
@@ -288,52 +288,51 @@ class DictList( BisList, list ):
 #############
 ##  TESTING        
 #############
-        
-class Test:
+
+import Biskit.BiskitTest as BT
+import unittest as UT
+import string
+import inspect
+
+class Test(BT.BiskitTest):
     """
-    Test class
+    Test DictList
     """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
-        l = DictList()
+
+    GROUPS = [ BT.NORMAL ]
+
+    def test_append( self ):
+        """DictList.__append__ test """
+
+        self.l1 = DictList()
 
         for i in range( 10 ):
             d = {'random':random.random(), 'name':'A'}
-            l += [ d ]
+            self.l1 += [ d ]
 
-        p = l.plotArray( 'index', 'random', 'random' )
-
-        if local:
-            p.show()
-            globals().update( locals() )
-            
-        return 1
+        self.assertEqual( len(self.l1), 10, '%r != 10' % len(self.l1) )
 
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
+    def test_plotArray( self ):
+        """BisList.plotArray test"""
 
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-       
+        self.l2 = DictList()
+
+        for i in range( 50 ):
+            d = {'random':random.random(),
+                 'name':string.letters[random.randint(0,50)] }
+            self.l2 += [ d ]
+
+        self.p = None
+        self.p = self.l2.plotArray( 'index', 'random', 'random' )
+
+        if self.local:
+            self.p.show()
+
+        self.assertNotEqual( self.p, None )
+   
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
-
+    suite = UT.TestLoader().loadTestsFromTestCase( Test )
+    suite.run( UT.TestResult() )
