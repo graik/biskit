@@ -15,17 +15,16 @@
 ## You find a copy of the GNU General Public License in the file
 ## license.txt along with this program; if not, write to the Free
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-##
-##
 
 ## last $Author$
 ## last $Date$
 ## $Revision$
 
 import unittest as U
-import glob
+import glob, types
 import os.path
 
+import Biskit
 from Biskit.LogFile import StdLog
 import Biskit.tools as T
 
@@ -49,14 +48,13 @@ class BiskitTest( U.TestCase):
     BiskitTest adds some functionality over the standard L{unittest.TestCase}:
 
     * self.local reflects whether the Test is performed in the __main__ scope
-      of the module it belongs to -- rather than as part of the whole
-      test suite. 
+      of the module it belongs to -- or as part of the whole test suite. 
 
-    * Each test case should be classified by assigning flags to
-      its static GROUPS field -- this will be used by the test runner
-      to filter out, e.g. very long tests or tests that require PVM.
+    * Each test case can be classified by assigning flags to its
+      static GROUPS field -- this will be used by the test runner to
+      filter out, e.g. very long tests or tests that require PVM.
 
-    * self.log should capture all the output, by default to the TESTLOG
+    * self.log should capture all the output, by default it should go to the TESTLOG
       instance defined at the module level.
 
     Usage:
@@ -65,7 +63,7 @@ class BiskitTest( U.TestCase):
        be overriden but should be called in the overriding method.
     """
     ## categories for which this test case qualifies
-    GROUPS = [ NORMAL, CORE ] 
+    TAGS = [ NORMAL, CORE ] 
 
     def setUp( self ):
         self.local =  self.__module__ == '__main__'
@@ -79,7 +77,7 @@ class BiskitTest( U.TestCase):
 
 class FilteredTestSuite( U.TestSuite ):
     """
-    Collection of BiskitTests filtered by categories.
+    Collection of BiskitTests filtered by category tags.
 
     FilteredTestSuite silently ignores Test cases that are either
 
@@ -97,14 +95,14 @@ class FilteredTestSuite( U.TestSuite ):
         """
         @param tests: iterable of TestCases
         @type  tests: ( BiskitTest, )
-        @param allowed: list of allowed groups
+        @param allowed: list of allowed tags
         @type  allowed: [ int ]
-        @param forbidden : list of forbidden groups
+        @param forbidden : list of forbidden tags
         @type  forbidden : [ int ]
         """
         self._allowed   = allowed
         self._forbidden = forbidden
-        super(self.__class__).__init__( self, tests=tests )
+        U.TestSuite.__init__( self, tests=tests )
 
 
     def addTest( self, test ):
@@ -114,17 +112,17 @@ class FilteredTestSuite( U.TestSuite ):
         @param test: test case
         @type  test: BiskitTest
         """
-        assert isinstance( test, BiskitTest ), \
-               'FilteredTestSuite only accepts BiskitTest instances'
+        assert isinstance( test, Biskit.BiskitTest.BiskitTest ), \
+               'FilteredTestSuite only accepts BiskitTest instances not %r' % test
 
-        matches = [ g for g in test.GROUPS if g in self._forbidden ]
+        matches = [ g for g in test.TAGS if g in self._forbidden ]
         if len( matches ) > 0:
             return
 
-        matches = [ g for g in test.GROUPS if g in self._allowed ]
+        matches = [ g for g in test.TAGS if g in self._allowed ]
 
         if not self._allowed or (self._allowed and len(matches) > 0):
-            super(self.__class__).addTest( test )
+            U.TestSuite.addTest( self, test )
             
 
 class BiskitTestLoader( object ):
@@ -133,7 +131,7 @@ class BiskitTestLoader( object ):
     collects all BiskitTests from a whole package (that means a
     folder with python files) rather than a single module.
     """
-
+    
     def collectModules( self, path=T.projectRoot(), module='Biskit' ):
         """
         Import all python files of a package as modules. Sub-packages
@@ -155,13 +153,43 @@ class BiskitTestLoader( object ):
 
         for f in files:
             try:
-                r += [ __import__( '.'.join([module, f]), fromlist=[module]) ]
+                r += [ __import__( '.'.join([module, f]), globals(), None, [module]) ]
             except:
                 pass  ## temporary // remove after testing
 
         return r
 
-    def collectTests( self, modules ):
-        pass
+    def collectTests( self, modules, allowed=[], forbidden=[] ):
+        """
+        @param modules: list of modules to be checked for BiskitTest classes
+        @type  modules: [ module ]
+        @param allowed: tags required for test cases to be considered, default: []
+        @type  allowed: [ int ]
+        @param forbidden: tags leading to the exclusion of test cases, default: []
+        @type  forbidden: [ int ]
+        @return: a suite of test cases
+        @rtype:  FilteredTestSuite
+        """
+        r = FilteredTestSuite(  allowed=allowed, forbidden=forbidden )
+
+        for m in modules:
+            for i in m.__dict__.values():
+
+                if type(i) is type and issubclass( i, Biskit.BiskitTest.BiskitTest ) and\
+                        i.__name__ != 'BiskitTest':
+                    
+                    suite = U.defaultTestLoader.loadTestsFromTestCase( i )
+                    r.addTests( suite )
+
+        return r
 
 
+if __name__ == '__main__':
+
+    l = BiskitTestLoader()
+    ms = l.collectModules()
+    suite = l.collectTests( ms )
+
+    runner = U.TextTestRunner(verbosity=2)
+    r = runner.run( suite )
+    print "DONE"
