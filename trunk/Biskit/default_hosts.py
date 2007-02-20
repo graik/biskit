@@ -75,7 +75,7 @@ def getHosts( section, option ):
 	for host in string.split( setting[0], ' ' ):
     		hosts += [ string.strip( host ) ] 
 	return hosts
-    return None
+    return []
 
 
 def getDict( section, option ):
