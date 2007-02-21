@@ -21,25 +21,21 @@
 ## $Revision$
 
 import unittest as U
-import glob, types
+import glob, types, re
 import os.path
 
 import Biskit
-from Biskit.LogFile import StdLog
+from Biskit.LogFile import StdLog, LogFile
 import Biskit.tools as T
 
-## system-wide log file
+## System-wide test log 
 TESTLOG = StdLog()
 
 ## categories
-NORMAL = 0
-LONG   = 1
-PVM    = 2
-EXE    = 3
-
-CORE   = 10
-DOCK   = 11
-MOD    = 12
+NORMAL = 0  ## standard test case
+LONG   = 1  ## long running test case
+PVM    = 2  ## depends on PVM
+EXE    = 3  ## depends on external application
 
 
 class BiskitTest( U.TestCase):
@@ -51,7 +47,7 @@ class BiskitTest( U.TestCase):
       of the module it belongs to -- or as part of the whole test suite. 
 
     * Each test case can be classified by assigning flags to its
-      static GROUPS field -- this will be used by the test runner to
+      static TAGS field -- this will be used by the test runner to
       filter out, e.g. very long tests or tests that require PVM.
 
     * self.log should capture all the output, by default it should go to the TESTLOG
@@ -62,8 +58,8 @@ class BiskitTest( U.TestCase):
        adding one or more test_* methods. setUp and tearDown can optionally
        be overriden but should be called in the overriding method.
     """
-    ## categories for which this test case qualifies
-    TAGS = [ NORMAL, CORE ] 
+    ## categories for which this test case qualifies (class-wide)
+    TAGS = [ NORMAL ]
 
     def setUp( self ):
         self.local =  self.__module__ == '__main__'
@@ -78,7 +74,6 @@ class BiskitTest( U.TestCase):
 class FilteredTestSuite( U.TestSuite ):
     """
     Collection of BiskitTests filtered by category tags.
-
     FilteredTestSuite silently ignores Test cases that are either
 
     * classified into any of the forbidden groups
@@ -131,8 +126,18 @@ class BiskitTestLoader( object ):
     collects all BiskitTests from a whole package (that means a
     folder with python files) rather than a single module.
     """
-    
-    def collectModules( self, path=T.projectRoot(), module='Biskit' ):
+
+    def __init__( self, log=StdLog(),
+                  allowed=[], forbidden=[], verbosity=2 ):
+
+        self.allowed  = allowed
+        self.forbidden= forbidden
+        self.log = log
+        self.verbosity = verbosity
+        self.suite =  FilteredTestSuite( allowed=allowed, forbidden=forbidden )
+
+
+    def modulesFromPath( self, path=T.projectRoot(), module='Biskit' ):
         """
         Import all python files of a package as modules. Sub-packages
         are ignored and have to be collected separately.
@@ -140,6 +145,8 @@ class BiskitTestLoader( object ):
         @type  path:  str
         @param module: name of the python package
         @type  module: str
+        @return: list of imported python modules, see also L{__import__}
+        @rtype : [ module ]
         @raise ImportError, if a python file cannot be imported
         """
         module_folder = module.replace('.', os.path.sep)
@@ -159,24 +166,27 @@ class BiskitTestLoader( object ):
 
         return r
 
-    def collectTests( self, modules, allowed=[], forbidden=[] ):
+
+    def testsFromModules( self, modules ):
         """
+        Extract all test cases from a list of python modules and add them to
+        the internal test suite.
         @param modules: list of modules to be checked for BiskitTest classes
         @type  modules: [ module ]
         @param allowed: tags required for test cases to be considered, default: []
         @type  allowed: [ int ]
         @param forbidden: tags leading to the exclusion of test cases, default: []
         @type  forbidden: [ int ]
-        @return: a suite of test cases
-        @rtype:  FilteredTestSuite
+        @return: a suite of test cases (subject to the allowed and forbidden tags)
+        @rtype: FilteredTestSuite
         """
-        r = FilteredTestSuite(  allowed=allowed, forbidden=forbidden )
+        r = FilteredTestSuite( allowed=self.allowed, forbidden=self.forbidden )
 
         for m in modules:
             for i in m.__dict__.values():
 
-                if type(i) is type and issubclass( i, Biskit.BiskitTest.BiskitTest ) and\
-                        i.__name__ != 'BiskitTest':
+                if type(i) is type and issubclass( i, Biskit.BiskitTest.BiskitTest )\
+                       and i.__name__ != 'BiskitTest':
                     
                     suite = U.defaultTestLoader.loadTestsFromTestCase( i )
                     r.addTests( suite )
@@ -184,12 +194,56 @@ class BiskitTestLoader( object ):
         return r
 
 
+    def collectTests( self, path=T.projectRoot(), module='Biskit' ):
+
+        modules = self.modulesFromPath( path=path, module=module )
+        self.suite.addTests( self.testsFromModules( modules ) )
+
+
+    def report( self ):
+        """
+        Report how things went to stdout.
+        """
+        print '\nThe test log file has been saved to: %r'% self.log.fname
+        total  = self.result.testsRun
+        failed = len(self.result.failures) + len(self.result.errors)
+
+        ## print a summary
+        print '\nSUMMARY:\n=======\n'
+        print 'A total of %i tests were run.' % total
+        print '   - %i passed'% (total - failed)
+        print '   - %i failed'% failed
+
+        ## and a better message about which module failed 
+        if failed:
+
+            for test, ftrace in self.result.failures:
+                print '      - failed: %s'% test.id()
+
+            for test, ftrace in self.result.errors:
+                print '      - error : %s'% test.id()
+
+
+
+    def run( self ):
+
+        assert self.suite, 'no tests collected yet'
+        
+        runner = U.TextTestRunner( self.log.f(), verbosity=self.verbosity)
+        self.result = runner.run( self.suite )
+        
+
 if __name__ == '__main__':
 
-    l = BiskitTestLoader()
-    ms = l.collectModules()
-    suite = l.collectTests( ms )
+    flog = LogFile( T.projectRoot()+'/test/test.log')
 
-    runner = U.TextTestRunner(verbosity=2)
-    r = runner.run( suite )
+    l = BiskitTestLoader( allowed=[NORMAL],
+                          forbidden=[PVM] )
+
+    l.collectTests( module='Biskit')
+    l.collectTests( module='Biskit.Mod' )
+    l.run()
+    l.report()
+
+
     print "DONE"
