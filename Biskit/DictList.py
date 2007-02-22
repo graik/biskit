@@ -290,16 +290,12 @@ class DictList( BisList, list ):
 #############
 
 import Biskit.BiskitTest as BT
-import unittest as UT
 import string
-import inspect
 
 class Test(BT.BiskitTest):
     """
     Test DictList
     """
-
-    GROUPS = [ BT.NORMAL ]
 
     def test_append( self ):
         """DictList.__append__ test """
@@ -309,6 +305,9 @@ class Test(BT.BiskitTest):
         for i in range( 10 ):
             d = {'random':random.random(), 'name':'A'}
             self.l1 += [ d ]
+
+        x = 0
+        x = 10./x
 
         self.assertEqual( len(self.l1), 10, '%r != 10' % len(self.l1) )
 
@@ -334,5 +333,5 @@ class Test(BT.BiskitTest):
 
 if __name__ == '__main__':
 
-    suite = UT.TestLoader().loadTestsFromTestCase( Test )
-    suite.run( UT.TestResult() )
+    ## run Test and push self.* fields into global namespace
+    BT.localTest( )

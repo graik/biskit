@@ -38,6 +38,9 @@ PVM    = 2  ## depends on PVM
 EXE    = 3  ## depends on external application
 
 
+class BiskitTestError( Exception ):
+    pass
+
 class BiskitTest( U.TestCase):
     """
     Base class for Biskit test cases.
@@ -50,8 +53,8 @@ class BiskitTest( U.TestCase):
       static TAGS field -- this will be used by the test runner to
       filter out, e.g. very long tests or tests that require PVM.
 
-    * self.log should capture all the output, by default it should go to the TESTLOG
-      instance defined at the module level.
+    * self.log should capture all the output, by default it should go to the
+      TESTLOG instance defined at the module level.
 
     Usage:
        Biskit test cases should be created by sub-classing BiskitTest and
@@ -108,7 +111,8 @@ class FilteredTestSuite( U.TestSuite ):
         @type  test: BiskitTest
         """
         assert isinstance( test, Biskit.BiskitTest.BiskitTest ), \
-               'FilteredTestSuite only accepts BiskitTest instances not %r' % test
+               'FilteredTestSuite only accepts BiskitTest instances not %r' \
+               % test
 
         matches = [ g for g in test.TAGS if g in self._forbidden ]
         if len( matches ) > 0:
@@ -160,7 +164,8 @@ class BiskitTestLoader( object ):
 
         for f in files:
             try:
-                r += [ __import__( '.'.join([module, f]), globals(), None, [module]) ]
+                r += [ __import__( '.'.join([module, f]), globals(),
+                                   None, [module]) ]
             except:
                 pass  ## temporary // remove after testing
 
@@ -173,11 +178,11 @@ class BiskitTestLoader( object ):
         the internal test suite.
         @param modules: list of modules to be checked for BiskitTest classes
         @type  modules: [ module ]
-        @param allowed: tags required for test cases to be considered, default: []
+        @param allowed: tags required for test to be considered, default: []
         @type  allowed: [ int ]
-        @param forbidden: tags leading to the exclusion of test cases, default: []
+        @param forbidden: tags leading to the exclusion of test, default: []
         @type  forbidden: [ int ]
-        @return: a suite of test cases (subject to the allowed and forbidden tags)
+        @return: test cases (subject to the allowed and forbidden tags)
         @rtype: FilteredTestSuite
         """
         r = FilteredTestSuite( allowed=self.allowed, forbidden=self.forbidden )
@@ -185,7 +190,8 @@ class BiskitTestLoader( object ):
         for m in modules:
             for i in m.__dict__.values():
 
-                if type(i) is type and issubclass( i, Biskit.BiskitTest.BiskitTest )\
+                if type(i) is type \
+                       and issubclass( i, Biskit.BiskitTest.BiskitTest )\
                        and i.__name__ != 'BiskitTest':
                     
                     suite = U.defaultTestLoader.loadTestsFromTestCase( i )
@@ -195,7 +201,13 @@ class BiskitTestLoader( object ):
 
 
     def collectTests( self, path=T.projectRoot(), module='Biskit' ):
-
+        """
+        Add all BiskitTests found in a given module to the internal test suite.
+        @param path:  single search path for a package
+        @type  path:  str
+        @param module: name of the python package
+        @type  module: str
+        """
         modules = self.modulesFromPath( path=path, module=module )
         self.suite.addTests( self.testsFromModules( modules ) )
 
@@ -227,11 +239,76 @@ class BiskitTestLoader( object ):
 
     def run( self ):
 
-        assert self.suite, 'no tests collected yet'
-        
         runner = U.TextTestRunner( self.log.f(), verbosity=self.verbosity)
         self.result = runner.run( self.suite )
-        
+
+#########################
+### Helper functions ####
+
+
+def getOuterNamespace():
+    """
+    Fetch the namespace of the module/script running as __main__.
+    @return: the namespace of the outermost calling stack frame
+    @rtype: dict
+    """
+    import inspect
+
+    try:
+        frames = inspect.stack()
+        f = frames[-1][0]   ## isolate outer-most calling frame
+        r = f.f_globals
+    finally:
+        del frames, f
+
+    return r
+
+
+def extractTestCase( namespace ):
+    """
+    @return: first BisktTest found in given namespace
+    @rtype: class
+    """
+
+    for i in namespace.values():
+
+        if type(i) is type \
+               and issubclass( i, Biskit.BiskitTest.BiskitTest )\
+               and i.__name__ != 'BiskitTest':
+
+            return i
+
+    raise BiskitTestError, 'no BiskitTest class found in namespace'
+
+
+def localTest( testclass=None, verbosity=2 ):
+    """
+    Perform the BiskitTest found in the scope of the calling module.
+    After the test run, all fields of the BiskitTest instance are
+    pushed into the global namespace so that they can be inspected in the
+    interactive interpreter.
+    
+    @param testclass: BiskitTest-derived class [default: first one found]
+    @type  testclass: class
+    @param verbosity: verbosity level of TextTestRunner
+    @type  verbosity: int
+
+    @return: the test result object
+    @rtype:  unittest.TestResult
+
+    @raise BiskitTestError: if there is no BiskitTest-derived class defined
+    """
+    outer = getOuterNamespace()
+    testclass = testclass or extractTestCase( outer )
+
+    suite = U.TestLoader().loadTestsFromTestCase( testclass )
+    runner= U.TextTestRunner(verbosity=verbosity)
+    r = runner.run( suite )
+    
+    for t in suite._tests:
+        outer.update( t.__dict__ )
+
+
 
 if __name__ == '__main__':
 
