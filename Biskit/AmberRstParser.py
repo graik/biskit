@@ -20,9 +20,8 @@
 ## $Revision$
 ## last $Date$
 ## last $Author$
-
 """
-Convert Amber restart file to array, PDBModel or Amber crd file.
+Parse Amber restart files.
 """
     
 import re
@@ -31,34 +30,28 @@ import sys
 import os.path
 
 from AmberCrdParser import AmberCrdParser, ParseError
+from PDBModel import PDBModel
 import tools as T
 
-class AmberRstParser( AmberCrdParser ):
-    """
-    Convert Amber restart file to array, PDBModel or Amber crd file.
+class AmberRstParser:
+    """Convert an Amber restart file to array, PDBModel or a Amber crd file.
+
+    Note: AmberRstParser is currently ignoring both the velocity and
+    boxinfo record (although this could be easily changed).
     """
 
-    def __init__( self, frst, rnAmber=0 ):
+    def __init__( self, frst ):
         """
         @param frst: input restart file
         @type  frst: str
-        @param rnAmber: rename Amber to standard residues (HIE, HID, HIP, CYX)
-        @type  rnAmber: 1|0
         """
         self.frst = T.absfile( frst )
         self.crd  = open( self.frst )
 
-        ## number of atoms, number of lines
-        self.n = 0
+        self.n = 0       #: number of atoms
         self.lines_per_frame = 0
-        self.xyz = None
-
-        if rnAmber:
-            self.renameAmberRes( self.ref )
-
-        ## fields that are not needed by RstParser
-        self.ref  = None
-        self.box = 0
+        self.xyz = None  #: will hold coordinate array
+	self.box = None  #: will hold box array if any
 
         ## pre-compile pattern for line2numbers
         xnumber = "-*\d+\.\d+"              # optionally negtive number
@@ -66,16 +59,40 @@ class AmberRstParser( AmberCrdParser ):
         self.xnumbers = re.compile('('+xspace+xnumber+')')
 
 
-    def crd2traj( self ):
+    def __del__(self):
+	try:
+	    self.crd.close()
+	except:
+	    pass
+
+
+    def __nextLine( self ):
+        """Extract next line of coordinates from crd file
+
+        @return: coordinates
+        @rtype: [float]    
         """
-        @raise ParseError: Not supported for AmberRstParser
+        l = self.crd.readline()
+        if l == '':
+            raise EOFError('EOF')
+
+        match = self.xnumbers.findall( l )
+        return [ round( float(strCrd),7) for strCrd in match ] 
+
+
+    def __frame( self ):
+        """Collect next complete coordinate frame
+
+        @return: coordinate frame
+        @rtype: array
         """
-        raise ParseError("Not supported for AmberRstParser")
+        self.xyz = [ self.__nextLine() for i in range(self.lines_per_frame) ]
+
+        return N.reshape(self.xyz, ( self.n, 3 ) ).astype(N.Float32)
 
 
     def getXyz( self ):
-        """
-        Get coordinate array.
+        """Get coordinate array.
         
         @return: coordinates, N.array( N x 3, 'f')
         @rtype: array
@@ -88,27 +105,30 @@ class AmberRstParser( AmberCrdParser ):
             self.crd.readline()
 
             try:
-                self.n = self.crd.readline().split()[0]
+                self.n, self.time = self.crd.readline().split()
                 self.n = int( self.n )
+		self.time = float( self.time )
             except:
                 raise ParseError("Can't interprete second line of "+self.frst)
 
             ## pre-compute lines expected per frame
-            self.lines_per_frame = self.n * 3 / 6
+            self.lines_per_frame = self.n / 2
+            if self.n % 2 != 0:
+		self.lines_per_frame += 1
 
-            if self.n % 6 != 0:  self.lines_per_frame += 1
-
-            self.xyz = self.nextFrame()
+            self.xyz = self.__frame()
 
         return self.xyz
 
 
-    def getModel( self, ref ):
+    def getModel( self, ref, rnAmber=0 ):
         """
         Get model.
         
         @param ref: reference with same number and order of atoms
         @type  ref: PDBModel
+        @param rnAmber: rename Amber to standard residues (HIE, HID, HIP, CYX)
+        @type  rnAmber: 1|0
         
         @return: PDBModel
         @rtype: PDBModel
@@ -118,6 +138,8 @@ class AmberRstParser( AmberCrdParser ):
 
         result = ref.clone()
         result.setXyz( self.xyz )
+	if rnAmber:
+	    result.renameAmberRes()
 
         return result
 
@@ -186,13 +208,34 @@ class AmberRstParser( AmberCrdParser ):
             ## don't close file that was already given
             f.close()
 
+######################
+### Module testing ###
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Test AmberRstParser"""
+
+    def prepare(self):
+	self.f    = T.testRoot()+'/amber/sim.rst'
+	self.fref = T.testRoot()+'/amber/1HPT_0.pdb'
+	
+	self.p = AmberRstParser( self.f )
+
+    def test_getXyz( self ):
+	"""AmberRstParser.getXyz test"""
+	self.xyz = self.p.getXyz()
+	self.assertEqual( N.shape(self.xyz), (11200,3) )
+
+    def test_getModel(self):
+	"""AmberRstParser.getModel test"""
+	self.ref = PDBModel( self.fref )
+	self.model = self.p.getModel( self.ref )
+	self.assertEqual( len(self.model), 11200 )
 
 if __name__ == '__main__':
 
-    f='/home/Bis/raik/interfaces/a11/com_pme_ensemble/1b_eq_solvent_voV/sim.rst'
+    ## run Test and push self.* fields into global namespace
+    BT.localTest( )
 
-    p = AmberRstParser( f )
-
-    x = p.getXyz()
 
 
