@@ -59,6 +59,20 @@ class LogFile:
         return self._f
 
 
+    def write(self, s):
+	"""Synonym for add_nobreak.
+        @param s: line
+        @type  s: str
+	"""
+	self.add_nobreak( s )
+
+    def writeln(self, s):
+	"""Synonym for add.
+        @param s: line
+        @type  s: str
+	"""
+	self.add(s)
+
     def add(self, s):
         """
         Add new line to logfile and flush
@@ -121,58 +135,46 @@ class StdLog( LogFile ):
 #############
 ##  TESTING        
 #############
-        
-class Test:
-    """
-    Test class
-    """
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
     
-    def run( self, local=0 ):
-        """
-        run function test
+    def prepare(self):
+	import tempfile
+        self.f_out = tempfile.mktemp( '_test_LogFile' )
+
+    def cleanUp(self):
+        if T.tryRemove( self.f_out ) and self.local:
+	    print 'log file removed.'
         
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
+    def test_LogFile( self ):
+        """LogFile test """
         
-        @return: something
-        @rtype:  float
-        """
-        import tempfile
+        self.l = LogFile( self.f_out, mode='w')
 
-        f_out = tempfile.mktemp( '_test_LogFile' )
-        
-        l = LogFile( f_out, mode='w')
+        self.l.writeln('1')
+        self.l.write('2')
+        self.l.writeln('3')
 
-        l.add('A line')
+        if self.local:
+            print 'log file written to %s'%self.f_out
 
-        l.add_nobreak('A nonbreakling line')
-
-        l.add('... more text.')
-
-        if local:
-            print 'A log file was written to %s'%f_out
-            globals().update( locals() )
+	lines = open(self.f_out).readlines()
+	self.assertEqual( lines, ['1\n','23\n'] )
             
-        ## cleanup
-        T.tryRemove( f_out )
-        
-        return  1
+    def test_StdLog(self):
+	 """StdLog test (only in interactive mode)"""
+	 if self.local:
+	     self.l = StdLog()
+	     self.l.write(' test message ... ')
 
+    def test_ErrLog(self):
+	 """ErrLog test"""
+	 self.l = ErrLog()
+	 self.l.write(' test message ... ')
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: something
-        @rtype:  float
-        """
-        return 1
         
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert  test.run( local=1 ) == test.expected_result() 
-
+    BT.localTest()
 
