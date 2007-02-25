@@ -850,6 +850,18 @@ class PDBModel:
 
         return atoms
 
+    def renameAmberRes( self ):
+        """
+        Rename special residue names from Amber back into standard names
+        (i.e CYX S{->} CYS )
+        """
+        for a in self.getAtoms():
+            if a['residue_name'] == 'CYX':
+                a['residue_name'] = 'CYS'
+            if a['residue_name'] in ['HIE','HID','HIP']:
+                a['residue_name'] = 'HIS'
+
+
 
     def writePdb( self, fname, ter=1, amber=0, original=0, left=0, wrap=0,
                   headlines=None, taillines=None):
@@ -866,7 +878,7 @@ class PDBModel:
                     3, as 2 but also detect and split discontinuous chains
         @type  ter: 0, 1, 2 or 3
         @param amber: amber formatted atom names
-                      (ter=3, left=1, wrap=0) (default 0)
+                      (implies ter=3, left=1, wrap=0) (default 0)
         @type  amber: 1||0
         @param original: revert atom names to the ones parsed in from PDB
                          (default 0)
