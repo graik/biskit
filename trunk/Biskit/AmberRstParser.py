@@ -226,11 +226,16 @@ class Test(BT.BiskitTest):
 	self.xyz = self.p.getXyz()
 	self.assertEqual( N.shape(self.xyz), (11200,3) )
 
+class TestLong(Test):
+    """long AmberRstParser test"""
+    TAGS = [BT.LONG]
+
     def test_getModel(self):
 	"""AmberRstParser.getModel test"""
 	self.ref = PDBModel( self.fref )
 	self.model = self.p.getModel( self.ref )
 	self.assertEqual( len(self.model), 11200 )
+
 
 if __name__ == '__main__':
 
