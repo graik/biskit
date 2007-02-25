@@ -209,7 +209,7 @@ class Test( BT.BiskitTest ):
 
     def prepare(self):
 	root = T.testRoot() + '/amber/'
-	self.finp = root + 'sim.crd'
+	self.finp = root + 'sim.crd.gz'
 	self.fref = root + '1HPT_0.pdb'
 	self.fout = tempfile.mktemp('traj','dat')
 
