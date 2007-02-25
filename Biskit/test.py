@@ -394,12 +394,13 @@ def getOuterNamespace():
     return r
 
 
-def extractTestCase( namespace ):
+def extractTestCases( namespace ):
     """
-    @return: first BisktTest found in given namespace
-    @rtype: class
+    @return: all BisktTest child classes found in given namespace
+    @rtype: [ class ]
     @raise BiskitTestError: if there is no BiskitTest child
     """
+    r =[]
 
     for i in namespace.values():
 
@@ -407,9 +408,12 @@ def extractTestCase( namespace ):
                and issubclass( i, Biskit.test.BiskitTest )\
                and i.__name__ != 'BiskitTest':
 
-            return i
+            r += [i]
 
-    raise BiskitTestError, 'no BiskitTest class found in namespace'
+    if not r:
+	raise BiskitTestError, 'no BiskitTest class found in namespace'
+
+    return r
 
 
 def localTest( testclass=None, verbosity=2 ):
@@ -430,9 +434,14 @@ def localTest( testclass=None, verbosity=2 ):
     @raise BiskitTestError: if there is no BiskitTest-derived class defined
     """
     outer = getOuterNamespace()
-    testclass = testclass or extractTestCase( outer )
+    if testclass:
+	testclasses = [testclass]
+    else:
+	testclasses = extractTestCases( outer )
 
-    suite = U.TestLoader().loadTestsFromTestCase( testclass )
+    for test in testclasses:
+	suite = U.TestLoader().loadTestsFromTestCase( test )
+
     runner= U.TextTestRunner(verbosity=verbosity)
     r = runner.run( suite )
     
