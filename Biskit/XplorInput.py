@@ -25,6 +25,7 @@ Create Xplor input files.
 """
 
 import Biskit.tools as T
+from Biskit import EHandler
 import os
 
 class XplorInputError(Exception):
@@ -73,10 +74,8 @@ class XplorInput:
         try:
             self.fgenerate.write(str + '\n')
         except (IOError):
-            T.errWriteln(
-                "XPlorInput.append(): Error adding string to xplor input file.")
-            T.errWriteln( T.lastError() )
-
+            EHandler.error(
+                "XPlorInput.append(): Error adding str to xplor input file.")
 
     def _singleParam(self, param, value, indent):
         """
@@ -365,81 +364,65 @@ class XplorInput:
 #############
 ##  TESTING        
 #############
-        
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
-        import tempfile
 
-        ## create an temporery input template
-        f_inp = tempfile.mktemp('_test.inp')
-        f = open(f_inp, 'w')
-        f.write('Test Template with %(number)i values:\n')
-        f.write('\n')
-        f.write('%(value)s\n')
-        f.close()
+import Biskit.test as BT
+import tempfile
 
-        ## temporery outpot template
-        f_out_inp = tempfile.mktemp('_test_out.inp')
+class Test( BT.BiskitTest ):
+    """
+    XPlorer Test
+    """
+
+    def prepare(self):
+        ## create an temporary input template
+        self.f_inp = tempfile.mktemp('_test.inp')
+        self.f = open( self.f_inp, 'w')
+        self.f.write('Test Template with %(number)i values:\n')
+        self.f.write('\n')
+        self.f.write('%(value)s\n')
+        self.f.close()
+
+        ## temporary output template
+        self.f_out_inp = tempfile.mktemp('_test_out.inp')
+
+    def test_XplorInput( self ):
+	"""XplorInput test"""
 
         ## write to output
-        t = XplorInput( f_out_inp )
-        t.add("\nremarks test generate.inp\n")
+        self.t = XplorInput( self.f_out_inp )
+        self.t.add("\nremarks test generate.inp\n")
 
-        t.addBlockFromDic("minimize powell",{"nsteps":100,"npr":5})
-        t.addAmberSegment("id_1", "/home/Bis/super.pdb")
-        t.patchSS({'res':23, 'id':'id_1'},{'res':44, 'id':'id_1'} )
-        t.hbuild("hydrogen and not known")
+        self.t.addBlockFromDic("minimize powell",{"nsteps":100,"npr":5})
+        self.t.addAmberSegment("id_1", "/home/Bis/super.pdb")
+        self.t.patchSS({'res':23, 'id':'id_1'},{'res':44, 'id':'id_1'} )
+        self.t.hbuild("hydrogen and not known")
 
-        t.renameRes("CYS", "CYX")
-        t.renameAtom("ARG","HG1","HG2")
-        t.addFromTemplate(f_inp, {'value':'TEST','number':10})
-        t.flush()
+        self.t.renameRes("CYS", "CYX")
+        self.t.renameAtom("ARG","HG1","HG2")
+        self.t.addFromTemplate( self.f_inp, {'value':'TEST','number':10})
+        self.t.flush()
 
-        if local:
-            ## check result
-            f = open(f_out_inp, 'r')
-            for line in f.readlines():
-                print line[:-1]
-            f.close()
-            
-            globals().update( locals() )
+	self.__dict__.update( locals() )
+	
+        ## check result
+        f = open( self.f_out_inp, 'r')
+	self.lines = f.readlines()
 
-        ## cleanup
-        T.tryRemove( f_inp )
-        T.tryRemove( f_out_inp )
-        
-        return 1
+        if self.local:
+            for l in self.lines:
+                print l[:-1]
+        f.close()
 
+	self.assertEqual( self.lines[-3], 'Test Template with 10 values:\n' )
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
+    def cleanUp(self):
+	T.tryRemove( self.f_inp )
+	T.tryRemove( self.f_out_inp )
 
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
-        
+      
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
+    BT.localTest()
 
 
 
