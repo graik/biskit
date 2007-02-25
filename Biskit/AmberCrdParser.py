@@ -31,6 +31,7 @@ import sys
 import tools as T
 from Trajectory import Trajectory
 from PDBModel import PDBModel
+from LogFile import StdLog
 
 def _use():
 
@@ -59,7 +60,8 @@ class AmberCrdParser:
     Convert an Amber-generated crd file into a Trajectory object.
     """
 
-    def __init__( self, fcrd, fref, box=0, rnAmber=0, pdbCode=None ):
+    def __init__( self, fcrd, fref, box=0, rnAmber=0, pdbCode=None,
+		  log=StdLog(), verbose=0 ):
         """
         @param fcrd: path to input coordinate file
         @type  fcrd: str
@@ -72,17 +74,24 @@ class AmberCrdParser:
         @type  rnAmber: 1|0
         @param pdbCode: pdb code to be put into the model (default: None)
         @type  pdbCode: str
+	@param log: LogFile instance [Biskit.StdLog]
+	@type  log: Biskit.LogFile
+	@param verbose: print progress to log [0]
+	@type  verbose: int
         """
         self.fcrd = T.absfile( fcrd )
-        self.crd  = open( self.fcrd )
+        self.crd  = T.gzopen( self.fcrd )
 
         self.ref  = PDBModel( T.absfile(fref), pdbCode=pdbCode )
         self.box  = box
 
         self.n = self.ref.lenAtoms()
 
+	self.log = log
+	self.verbose = verbose
+
         if rnAmber:
-            self.renameAmberRes( self.ref )
+            self.ref.renameAmberRes()
 
         ## pre-compile pattern for line2numbers
         xnumber = "-*\d+\.\d+"              # optionally negtive number
@@ -99,20 +108,6 @@ class AmberCrdParser:
         if not self.ref.getAtoms()[0].get('chain_id',''):
             self.ref.addChainId()
 
-
-    def renameAmberRes( self, model ):
-        """
-        Rename special residue names from Amber back into standard names
-        (i.e CYX S{->} CYS )
-        
-        @param model: model, will be modified in-place
-        @type  model: PDBModel
-        """
-        for a in model.getAtoms():
-            if a['residue_name'] == 'CYX':
-                a['residue_name'] = 'CYS'
-            if a['residue_name'] in ['HIE','HID','HIP']:
-                a['residue_name'] = 'HIS'
 
 
     def line2numbers( self, l ):
@@ -183,7 +178,7 @@ class AmberCrdParser:
         xyz = []
         i = 0
 
-        T.flushPrint( "Reading frames .." )
+	if self.verbose: self.log.write( "Reading frames .." )
 
         try:
             while 1==1:
@@ -191,11 +186,11 @@ class AmberCrdParser:
                 xyz += [ self.nextFrame() ]
                 i += 1
 
-                if i % 100 == 0:
-                    T.flushPrint( '#' )
+                if i % 100 == 0 and self.verbose:
+                    self.log.write( '#' )
 
         except EOFError:
-            print "Read %i frames." % i
+	    if self.verbose: self.log.add("Read %i frames." % i)
 
         t = Trajectory( refpdb=self.ref )
 
@@ -206,32 +201,45 @@ class AmberCrdParser:
 
         return t
 
+import Biskit.test as BT
+import tempfile
+
+class Test( BT.BiskitTest ):
+    """Test AmberCrdParser"""
+
+    def prepare(self):
+	root = T.testRoot() + '/amber/'
+	self.finp = root + 'sim.crd'
+	self.fref = root + '1HPT_0.pdb'
+	self.fout = tempfile.mktemp('traj','dat')
+
+    def cleanUp(self):
+	T.tryRemove( self.fout )
+	
+
+    def test_AmberCrdParser(self):
+	"""AmberCrdParser test"""
+	
+	self.p = AmberCrdParser( self.finp, self.fref, box=True, rnAmber=True,
+				 log=self.log, verbose=self.local )
+	self.t = self.p.crd2traj()
+
+	self.t.removeAtoms(lambda a: a['residue_name'] in ['WAT','Na+','Cl-'] )
+	self.t.removeAtoms(lambda a: a['element'] == 'H' )
+
+	if self.local:
+	    print "Dumping result to ", self.fout
+
+	T.Dump( self.t, T.absfile(self.fout) )
+
+	if self.local:
+	    print "Dumped Trajectory with %i frames and %i atoms." % \
+		  (len(self.t), self.t.lenAtoms() )
+
+	self.assertEqual( len(self.t), 10 )
+	self.assertEqual( self.t.lenAtoms(), 440 )
+	
 
 if __name__ == '__main__':
 
-    if len( sys.argv ) < 2:
-        _use()
-
-    o = T.cmdDict( {'o':'traj_0.dat', 'i':'sim.crd'} )
-    fcrd = o['i']
-    fpdb = o['r']
-    fout = o['o']
-    box  = o.has_key( 'b' )
-    wat  = o.has_key('wat')
-    hyd  = o.has_key('hyd')
-    rnres  = o.has_key('rnres')
-    code = o.get('code', None)
-
-    p = AmberCrdParser( fcrd, fpdb, box, rnres, pdbCode=code )
-    t = p.crd2traj()
-
-    if wat:
-        t.removeAtoms( lambda a: a['residue_name'] in ['WAT', 'Na+', 'Cl-'] )
-
-    if hyd:
-        t.removeAtoms( lambda a: a['element'] == 'H' )
-
-    print "Dumping result to ", fout
-    T.Dump( t, T.absfile(fout) )
-
-    print "Done"
+    BT.localTest()
