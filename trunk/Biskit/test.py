@@ -418,7 +418,7 @@ def extractTestCases( namespace ):
 
 def localTest( testclass=None, verbosity=2 ):
     """
-    Perform the BiskitTest found in the scope of the calling module.
+    Perform the BiskitTest(s) found in the scope of the calling module.
     After the test run, all fields of the BiskitTest instance are
     pushed into the global namespace so that they can be inspected in the
     interactive interpreter.
@@ -447,6 +447,8 @@ def localTest( testclass=None, verbosity=2 ):
     
     for t in suite._tests:
         outer.update( t.__dict__ )
+
+    return r
 
 ########################
 ### Script functions ###
