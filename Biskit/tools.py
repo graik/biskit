@@ -38,6 +38,7 @@ import Numeric
 import types
 import glob
 import subprocess
+import gzip
 
 from ColorSpectrum import ColorSpectrum
 
@@ -1172,6 +1173,24 @@ def tryImportModule( module, as=None, namespace=None ):
 
     return False
 
+def gzopen( fname, mode='r' ):
+    """
+    Open a normal or a gzipped file.
+    @param fname: file name (can contain ~, .. etc.)
+    @type  fname: str
+    @param mode: read/write mode ['r']
+    @type  mode: str
+    
+    @return: file handle
+    @rtype: file or GZipFile
+    """
+    fname = absfile( fname )
+
+    if fname[-2:] == 'gz':
+	return gzip.open( fname, mode )
+
+    return open( fname, mode )
+	
 
 #############
 ##  TESTING        
