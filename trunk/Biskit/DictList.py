@@ -289,13 +289,11 @@ class DictList( BisList, list ):
 ##  TESTING        
 #############
 
-import Biskit.BiskitTest as BT
+import Biskit.test as BT
 import string
 
 class Test(BT.BiskitTest):
-    """
-    Test DictList
-    """
+    """Test DictList """
 
     def test_append( self ):
         """DictList.__append__ test """
@@ -305,9 +303,6 @@ class Test(BT.BiskitTest):
         for i in range( 10 ):
             d = {'random':random.random(), 'name':'A'}
             self.l1 += [ d ]
-
-        x = 0
-        x = 10./x
 
         self.assertEqual( len(self.l1), 10, '%r != 10' % len(self.l1) )
 

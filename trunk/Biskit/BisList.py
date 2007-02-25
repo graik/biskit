@@ -66,13 +66,13 @@ class BisList:
     Classes derived from BisList have to override several
     methods to be functional (a NotImplementedError is raised otherwise):
 
-     getValue, extend, append, take, keys,
-     __len__, __setitem__, __getslice__
+      * getValue, extend, append, take, keys,
+      * __len__, __setitem__, __getslice__
 
     The latter 3 are not yet defined in BisList (no
     NotImplementedError) but are nevertheless required. They can also
-    be provided from the built-in list type via multiple inheritence (see
-    DictList, for an example).
+    be provided from the python built-in list type via multiple
+    inheritence (see L{Biskit.DictList}, for an example).
 
     That means there are two ways of implementing BisList.
       1. via multiple inheritence from BisList (first!) and list
