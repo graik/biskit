@@ -95,8 +95,8 @@ import glob, types, re
 import os.path
 
 import Biskit
-from Biskit.LogFile import StdLog, LogFile
-import Biskit.tools as T
+from LogFile import StdLog, LogFile
+import tools as T
 
 ## categories
 NORMAL = 0  ## standard test case
@@ -152,6 +152,9 @@ class BiskitTest( U.TestCase):
     #: System-wide test log
     TESTLOG = StdLog()
 
+    #: System-wide verbosity level
+    VERBOSITY= 2
+
     def prepare(self):
 	"""Hook for test setup."""
 	pass
@@ -162,11 +165,12 @@ class BiskitTest( U.TestCase):
 
     def setUp( self ):
         self.local =  self.__module__ == '__main__'
-        self.log = self.TESTLOG
+        self.log = BiskitTest.TESTLOG
+	self.verbosity = BiskitTest.VERBOSITY
 	self.prepare()
 
     def tearDown( self ):
-	if not self.DEBUG:
+	if not BiskitTest.DEBUG:
 	    self.cleanUp()
 
 
@@ -248,6 +252,7 @@ class BiskitTestLoader( object ):
 	self.result = U.TestResult() #: will hold test result after run()
 
 	BiskitTest.DEBUG = debug
+	BiskitTest.VERBOSITY = verbosity
 
     def modulesFromPath( self, path=T.projectRoot(), module='Biskit' ):
         """
@@ -416,39 +421,55 @@ def extractTestCases( namespace ):
     return r
 
 
-def localTest( testclass=None, verbosity=2 ):
+def localTest( testclass=None, verbosity=2, debug=0 ):
     """
     Perform the BiskitTest(s) found in the scope of the calling module.
     After the test run, all fields of the BiskitTest instance are
     pushed into the global namespace so that they can be inspected in the
-    interactive interpreter.
+    interactive interpreter. The BiskitTest instance itself is also
+    put into the calling namespace as variable 'self', so that test code
+    fragments referring to it can be executed interactively.
     
     @param testclass: BiskitTest-derived class [default: first one found]
     @type  testclass: class
     @param verbosity: verbosity level of TextTestRunner
     @type  verbosity: int
+    @param debug: don't delete temporary files (skipp cleanUp) [0]
+    @type  debug: int
 
     @return: the test result object
     @rtype:  unittest.TestResult
 
     @raise BiskitTestError: if there is no BiskitTest-derived class defined
     """
+    ## get calling namespace
     outer = getOuterNamespace()
     if testclass:
 	testclasses = [testclass]
     else:
 	testclasses = extractTestCases( outer )
 
+    BiskitTest.DEBUG = debug
+
+    suite = U.TestSuite()
     for test in testclasses:
-	suite = U.TestLoader().loadTestsFromTestCase( test )
+	suite.addTests( U.TestLoader().loadTestsFromTestCase( test ) )
 
     runner= U.TextTestRunner(verbosity=verbosity)
     r = runner.run( suite )
-    
+
     for t in suite._tests:
         outer.update( t.__dict__ )
+	outer.update( {'self':t })
 
     return r
+
+###############
+## Mock test ##
+
+class Test(BiskitTest):
+    """Mock test, test doesn't test itself"""
+    pass
 
 ########################
 ### Script functions ###
@@ -514,7 +535,7 @@ def _convertOptions( o ):
 	o['log'] = LogFile( o['log'] )
     else:
 	o['log'] = StdLog()
-
+    o['p'] = T.toList( o['p'] )
 
 if __name__ == '__main__':
 
@@ -537,10 +558,14 @@ if __name__ == '__main__':
 	
     _convertOptions( o )
 
+    BiskitTest.VERBOSITY = o['v']
+    
     l = BiskitTestLoader( allowed=o['i'], forbidden=o['e'],
 			  verbosity=o['v'], log=o['log'], debug=o['debug'])
 
+
     for package in o['p']:
+	print 'collecting ', repr( package )
 	l.collectTests( module=package )
 
     l.run( dry=o['dry'] )
