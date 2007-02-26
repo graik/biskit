@@ -128,14 +128,23 @@ class Xplorer:
         """
         start_time = time()
 
-        str_nice = "%s -%i" % (settings.nice_bin, self.nice)
+	if self.nice != 0:
+	    str_nice = "%s -%i" % (settings.nice_bin, self.nice)
+	else:
+	    str_nice = ''
 
-        lead_cmd = settings.ssh_bin
-        str_ssh = "%s %s" % ( settings.ssh_bin, self.node )
+	if self.node !=  os.uname()[1]:
+	    str_ssh = "%s %s" % ( settings.ssh_bin, self.node )
+	else:
+	    str_ssh = ''
 
         cmd = "%s %s %s < %s > %s"\
               %(str_ssh, str_nice, self.exe.bin, finp, self.xout)
 
+	cmd = cmd.strip()
+
+	lead_cmd = cmd.split()[0]
+	
         if self.verbose: self.log.add_nobreak("executes: "+cmd+"..")
 
         if os.spawnvp(os.P_WAIT, lead_cmd, cmd.split() ) <> 0:
@@ -303,11 +312,12 @@ class Xplorer:
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
+class Test(BT.BiskitTest):
+    """Test"""
+
+    TAGS = [ BT.EXE ]
 
     inp = """
 !! short test  minimzation 
@@ -347,65 +357,49 @@ minimize powell nstep=10            end
 write coor output= $lig_out end
 stop
 """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 
-        @rtype:  
-        """
-        dir_out = tempfile.mkdtemp( '_test_Xplorer' )
+    def prepare(self):
+	self.dir_out = tempfile.mkdtemp( '_test_Xplorer' )
 
         ## write a test template inp file to disc
-        f = open( dir_out +'/test.inp', 'w')
+        f = open( self.dir_out +'/test.inp', 'w')
         f.writelines( self.inp )
         f.close()
 
+
+    def test_Xplorer( self ):
+	"""Xplorer test"""
+
         ## input template variables
         param = t.projectRoot() + '/external/xplor/toppar/param19.pro'
-        pdb_out = dir_out +'/lig.pdb'
-        log_out = dir_out +'/test.out'
+        pdb_out = self.dir_out +'/lig.pdb'
+        log_out = self.dir_out +'/test.out'
         pdb_in = t.testRoot() + '/lig/1A19.pdb' 
         psf_in = t.testRoot() + '/lig/1A19.psf'
         
-        x = Xplorer( dir_out +'/test.inp',
+        self.x = Xplorer( self.dir_out +'/test.inp',
                      xout = log_out,
-                     verbose = local,
+                     verbose = self.local,
                      lig_psf = psf_in,
                      lig_pdb = pdb_in,
                      param19 = param,
                      lig_out = pdb_out )
 
-        x.run()
+        self.x.run()
 
-        if local:
-            print 'The minimized structure and the X-Plor log file has been written to %s and %s, respectively'%(pdb_out, log_out)
-            globals().update( locals() )
+        if self.local:
+            print """
+The minimized structure and the X-Plor log file
+have been written to %s and %s, respectively
+	    """ % (pdb_out, log_out)
+
+	    print """See x.logLines for the complete xplor log file!"""
         
-        return 1
 
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 
-        @rtype: 
-        """
-        return 1
-
-        
+    def cleanUp(self):
+	t.tryRemove( self.dir_out, tree=1 )
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
 
 
