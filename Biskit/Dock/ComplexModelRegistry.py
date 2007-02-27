@@ -27,7 +27,7 @@ This is a helper class for ComplexList.
 
 from Biskit.Dock import Complex
 from Biskit.Errors import BiskitError
-from Biskit import LocalPath
+from Biskit import LocalPath, PDBModel
 
 import Biskit.tools as T
 import Numeric as N
@@ -267,7 +267,7 @@ class ComplexModelRegistry:
         @return: list of Complexes
         @rtype: [Complex]
         """
-        return self.__getComplexes( self.lig_f2com )
+        return self.__getComplexes( model, self.lig_f2com )
 
 
     def __getComplexes( self, model, f2com ):
@@ -290,10 +290,11 @@ class ComplexModelRegistry:
         try:
             if isinstance( model, PDBModel ):
                 f = model.source
-        except:
-            raise RegistryError( 'Model has no source file.' )
 
-        return f2com[ f ]
+	    return f2com[ f ]
+
+        except KeyError, why:
+            raise RegistryError( "Model with source '%r' is unknown" % f )
 
 
     def __sync_model( self, m, f2model ):
@@ -359,52 +360,28 @@ class ComplexModelRegistry:
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
+class Test(BT.BiskitTest):
+    """Test case"""
 
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
+    def test_ComplexModelRegistry(self):
+	"""Dock.CompelxModelRegistry test"""
         from Biskit.Dock import ComplexList
         
-        cl = T.Load( T.testRoot() +'/dock/hex/complexes.cl' )
-        cl = cl.toList()
+        self.cl = T.Load( T.testRoot() +'/dock/hex/complexes.cl' )
+        self.cl = self.cl.toList()
         
-        r = ComplexModelRegistry()
+        self.r = ComplexModelRegistry()
 
-        for c in cl[:500]:
-            r.addComplex( c )
+        for c in self.cl[:500]:
+            self.r.addComplex( c )
 
-        if local:
-            globals().update( locals() )
-            
-        return 1
+	check = self.r.getLigComplexes( self.r.ligModels()[0] )
 
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
+	self.assertEqual( len(check), 500 )
     
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
