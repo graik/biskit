@@ -119,66 +119,43 @@ class ChainWriter:
 #############
 ##  TESTING        
 #############
-        
-class Test:
-    """
-    Test class
-    """   
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: message
-        @rtype: str
-        """
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Test ChainWriter"""   
+
+    def prepare(self):
+        self.fname =   T.testRoot() + '/rec/1A2P_rec_original.pdb'
+        self.outPath = T.tempDir()
+
+    def test_ChainWriter( self ):
+        """ChainWriter test"""
+
         from ChainCleaner import ChainCleaner
         from ChainSeparator import ChainSeparator
     
-        fname =   T.testRoot() + '/rec/1A2P_rec_original.pdb'
+        self.cleaner = ChainCleaner( ChainSeparator( self.fname,
+						     self.outPath ) )
 
-        outPath = T.tempDir()
-
-        cleaner = ChainCleaner( ChainSeparator( fname, outPath ) )
-
-        writer = ChainWriter( outPath )
+        self.writer = ChainWriter( self.outPath )
         
         all_msg = []
         for i in range(3):
-            msg = writer.writeChain( cleaner.next() )
-            if local:
+            msg = self.writer.writeChain( self.cleaner.next() )
+            if self.local:
                 print 'Writing separated, cleaned chain to disk...%i'%msg
             all_msg += [ msg ]
-            
-        if local:
-            globals().update( locals() )
 
-        ## cleanup
-        T.tryRemove( outPath + '/1A2P_waters.pdb' )
-        T.tryRemove( outPath + '/1A2A_seg.PDB' )
+	self.assertEquals( all_msg, [1, 0, 0] )
+        
+    def cleanUp(self):
+        T.tryRemove( self.outPath + '/1A2P_waters.pdb' )
+        T.tryRemove( self.outPath + '/1A2A_seg.PDB' )
                      
-        return all_msg
-        
-        
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: message
-        @rtype:  str
-        """
-        return [1, 0, 0]
     
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
-
+    BT.localTest()
 
 

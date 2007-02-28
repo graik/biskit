@@ -358,56 +358,30 @@ class ReduceCoordinates:
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
+class Test(BT.BiskitTest):
+    """Test"""
+
+    def test_ReduceCoordinates(self):
+	"""ReduceCoordinates test"""
+
+        self.m = PDBModel( T.testRoot()+'/com/1BGS.pdb' )
+        self.m = self.m.compress( N.logical_not( self.m.maskH2O() ) )
+
+        self.m.setAtomProfile('test', range(len(self.m)))
+
+        self.red = ReduceCoordinates( self.m, 4 )
+
+        self.mred = self.red.reduceToModel()
         
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: atoms after reduction
-        @rtype: int
-        """
-        m = PDBModel( T.testRoot()+'/com/1BGS.pdb' )
-        m = m.compress( N.logical_not( m.maskH2O() ) )
+        if self.local:
+            print '\nAtoms before reduction %i'% self.m.lenAtoms()
+            print 'Atoms After reduction %i'% self.mred.lenAtoms()
 
-        m.setAtomProfile('test', range(len(m)))
-
-        red = ReduceCoordinates( m, 4 )
-
-        mred = red.reduceToModel()
-        
-        if local:
-            print 'Atoms before reduction %i'%m.lenAtoms()
-            print 'Atoms After reduction %i'%mred.lenAtoms()
-            globals().update( locals() )
-
-        return mred.lenAtoms()
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: atoms after reduction
-        @rtype:  int
-        """
-        return 445
-
-        
-        
+        self.assertEqual( self.mred.lenAtoms(), 445 )
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
     

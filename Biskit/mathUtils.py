@@ -740,50 +740,25 @@ def projectOnSphere( xyz, radius=None, center=None ):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: something
-        @rtype:  float
-        """
+class Test(BT.BiskitTest):
+    """Test case"""
+
+    def test_mathUtils(self):
+	"""mathUtils test"""
         ## Calculating something ..
-        d = N.array([[20.,30.,40.],[23., 31., 50.]])
+        self.d = N.array([[20.,30.,40.],[23., 31., 50.]])
 
-        a = polarToCartesian( cartesianToPolar( d ) )
+        self.a = polarToCartesian( cartesianToPolar( self.d ) )
 
-        t = eulerRotation( a[0][0], a[0][1], a[0][2]  )
+        self.t = eulerRotation( self.a[0][0], self.a[0][1], self.a[0][2]  )
 
-        if local:
-            globals().update( locals() )
-            
-        return  N.sum( SD(a) )
+        self.assertAlmostEqual( N.sum( SD(self.a) ), self.EXPECT )
 
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: something
-        @rtype:  float
-        """
-        return N.sum( N.array([ 2.12132034,  0.70710678,  7.07106781]) )
+    EXPECT = N.sum( N.array([ 2.12132034,  0.70710678,  7.07106781]) )
     
-        
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
-
+    BT.localTest()
 

@@ -285,63 +285,44 @@ class Fold_X( Executor ):
         Executor.finish( self )
         self.result = self.parse_foldx( self.output )
 
+#############
+##  TESTING        
+#############
+import Biskit.test as BT
 
-class Test:
-    """
-    Test class
-    """
-    
-    
-    def run( self, local=0 ):
-        """
-        run function test
+class Test(BT.BiskitTest):
+    """Fold_X test"""
 
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: dictionary with foldx energy terms
-        @rtype: dict
-        """
+    TAGS = [ BT.EXE ]
+    
+    def test_Fold_X( self):
+        """Fold_X test"""
         from Biskit import PDBModel
         
         ## Loading PDB...
-        f = T.testRoot() + '/rec/1A2P.pdb'
-        m = PDBModel(f)
-        m = m.compress( m.maskProtein() )
+        self.m = PDBModel( T.testRoot() + '/rec/1A2P.pdb' )
+        self.m = self.m.compress( self.m.maskProtein() )
 
         ## Starting fold_X
-        x = Fold_X( m, debug=0, verbose=0 )
+        self.x = Fold_X( self.m, debug=self.DEBUG,
+			 verbose=(self.VERBOSITY>2) )
 
         ## Running
-        r = x.run()
+        self.r = self.x.run()
 
-        if local:
-            print "Result: ", r
-            globals().update( locals() )
-        
-        return r
+        if self.local:
+            print "Result: ", self.r
+
+	self.assertEqual(self.r, self.EXPECTED)
 
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: dictionary with foldx energy terms
-        @rtype:  dict
-        """
-        return {'el': -13.766400000000001, 'wtbr': -4.8059700000000003, 'ene': -18.475000000000001, 'mc': 160.28800000000001, 'sloop': 0.0, 'dip': 0.00177626, 'sol_p': 167.71100000000001, 'disu': 0.0, 'tcl': 0.72696700000000003, 'cis': 0.0, 'p_cov': 0.0, 'sol_h': -134.613, 'bb_hb': -87.362499999999997, 'sc_hb': -48.350000000000001, 'vw': -116.67100000000001, 'sc': 58.089300000000001, 'el_kon': 0.0, 'mloop': 0.0, 'vwcl': 0.27728599999999998, 'bbcl': 0.37019200000000002}
+    EXPECTED = {'el': -13.766400000000001, 'wtbr': -4.8059700000000003, 'ene': -18.475000000000001, 'mc': 160.28800000000001, 'sloop': 0.0, 'dip': 0.00177626, 'sol_p': 167.71100000000001, 'disu': 0.0, 'tcl': 0.72696700000000003, 'cis': 0.0, 'p_cov': 0.0, 'sol_h': -134.613, 'bb_hb': -87.362499999999997, 'sc_hb': -48.350000000000001, 'vw': -116.67100000000001, 'sc': 58.089300000000001, 'el_kon': 0.0, 'mloop': 0.0, 'vwcl': 0.27728599999999998, 'bbcl': 0.37019200000000002}
 
 
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
-
-
+    BT.localTest()
 
 
 

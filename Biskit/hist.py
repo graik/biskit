@@ -104,56 +104,28 @@ def density(x, nBins, range = None, steps = 1, hist = 0):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
+class Test(BT.BiskitTest):
+    """Test case"""
 
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: histogram data
-        @rtype:  array
-        """
-        x = Numeric.arange( 4, 12, 1.2 )
-        data = density( x, 3, hist=1 )
+    def test_hist( self ):
+        """hist test"""
+        self.x = Numeric.arange( 4, 12, 1.2 )
+        self.data = density( self.x, 3, hist=1 )
 
-        if local:
-            globals().update( locals() )
-            
-        return data
+        self.assert_( self.data, self.EXPECT )
 
+    EXPECT= Numeric.array([[  4. ,   0. ],
+			   [  4. ,   2. ],
+			   [  6.4,   2. ],
+			   [  6.4,   2. ],
+			   [  8.8,   2. ],
+			   [  8.8,   3. ],
+			   [ 11.2,   3. ],
+			   [ 11.2,   0. ]])
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: histogram data
-        @rtype:  array
-        """
-        return Numeric.array([[  4. ,   0. ],
-                              [  4. ,   2. ],
-                              [  6.4,   2. ],
-                              [  6.4,   2. ],
-                              [  8.8,   2. ],
-                              [  8.8,   3. ],
-                              [ 11.2,   3. ],
-                              [ 11.2,   0. ]])
-
-    
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
-
-
-
+    BT.localTest()

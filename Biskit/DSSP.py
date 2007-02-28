@@ -246,64 +246,42 @@ class Dssp( Executor ):
 #############
 ##  TESTING        
 #############
-        
-class Test:
-    """
-    Test class
-    """
+
+import Biskit.test as BT
+class Test(BT.BiskitTest):
+    """DSSP test"""
+
+    TAGS = [BT.EXE]
     
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: secondary structure assignment
-        @rtype: str
-        """
+    def prepare(self):
+        self.f = T.testRoot()+"/com/1BGS.pdb"
+	
+
+    def test_DSSP( self ):
+        """DSSP test"""
+
         from Biskit import PDBModel
-        
-        if local: print 'Loading PDB...'
-        f = T.testRoot()+"/com/1BGS.pdb"
-        m = PDBModel(f)
-        m = m.compress( m.maskProtein() )
 
-        if local: print 'Starting DSSP'
-        dssp = Dssp( m )
+        if self.local: print 'Loading PDB...'
+        self.m = PDBModel(self.f)
+        self.m = self.m.compress( self.m.maskProtein() )
 
-        if local: print 'Running DSSP'
-        result = dssp.run()
+        if self.local:  print 'Starting DSSP'
+        self.dssp = Dssp( self.m )
 
-        if local:
-            print "Sequence :", m.sequence()
-            print "Secondary:", result            
-            globals().update( locals() )
+        if self.local: print 'Running DSSP'
 
-        return result
+        self.result = self.dssp.run()
+
+        if self.local:
+            print "Sequence :", self.m.sequence()
+            print "Secondary:", self.result            
+
+        self.assertEquals( self.result, self.EXPECTED)
 
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: secondary structure assignment
-        @rtype:  str
-        """
-        return '.....SHHHHHHHHHHHSS..TTEE.HHHHHHHT..GGGT.HHHHSTT.EEEEEEE..TT..S...TT..EEEEE.S..SSS..S.EEEEETT..EEEESSSSSS.EE...EEEEETTT..SHHHHHHHHHHHHT..TT..SSHHHHHHHHHHT..SSEEEEEE.HHHHHHHTTTTHHHHHHHHHHHHHHT..EEEEE.'
-
-        
-        
+    EXPECTED =  '.....SHHHHHHHHHHHSS..TTEE.HHHHHHHT..GGGT.HHHHSTT.EEEEEEE..TT..S...TT..EEEEE.S..SSS..S.EEEEETT..EEEESSSSSS.EE...EEEEETTT..SHHHHHHHHHHHHT..TT..SSHHHHHHHHHHT..SSEEEEEE.HHHHHHHTTTTHHHHHHHHHHHHHHT..EEEEE.'
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
-    
-
-
-
-
+    BT.localTest()

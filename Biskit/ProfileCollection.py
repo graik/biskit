@@ -728,71 +728,47 @@ class ProfileCollection:
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
+class Test(BT.BiskitTest):
+    """Test"""
+
+    def test_ProfileCollection( self ):
+        """ProfileCollection test"""
         import string
 
-        p = ProfileCollection()
+        self.p = ProfileCollection()
 
-        p.set( 't1', range(10), comment='test 1', option='x' )
-        p.set( 't2', range(12,22), comment='second test', option='y' )
+        self.p.set( 't1', range(10), comment='test 1', option='x' )
+        self.p.set( 't2', range(12,22), comment='second test', option='y' )
 
         mask = N.zeros( 10 )
         mask[0:10:2] = 1
         l = [ s for s in string.letters[:5] ] ## list of letters
-        p.set( 't3', l, comment='masked test', option='z',
-               mask=mask, default=99, asarray=0 )
+        self.p.set( 't3', l, comment='masked test', option='z',
+		    mask=mask, default=99, asarray=0 )
 
-        if local: print repr( p['t3'] )
+        if self.local:
+	    print '\nmasked profile: ', repr( self.p['t3'] )
 
-        p = p.take( range(0,10,2) )
+        self.p = self.p.take( range(0,10,2) )
 
-        if local: print repr( p['t3'] )
+        if self.local:
+	    print 'unmasked profile: ', repr( self.p['t3'] )
 
-        p2 = ProfileCollection()
-        p2.set( 't1', p['t1'], comment='overridden', changed=1 )
-        p2.set( 't4', range(30, 35), comment='added' )
+        self.p2 = ProfileCollection()
+        self.p2.set( 't1', self.p['t1'], comment='overridden', changed=1 )
+        self.p2.set( 't4', range(30, 35), comment='added' )
 
-        r = p.concat( p, p )  ## concatenate 3 copies of p
+        self.r = self.p.concat( self.p, self.p )  ## concatenate 3 copies of p
 
-        p.update( p2, stickyChanged=1 )
+        self.p.update( self.p2, stickyChanged=1 )
 
-        if local:
-            globals().update( locals() )
-            
-        return r['t1']
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return N.array([0, 2, 4, 6, 8, 0, 2, 4, 6, 8, 0, 2, 4, 6, 8])
+        self.assertEqual( self.r['t1'],
+		      N.array([0, 2, 4, 6, 8, 0, 2, 4, 6, 8, 0, 2, 4, 6, 8]))
     
-        
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+	BT.localTest()
 

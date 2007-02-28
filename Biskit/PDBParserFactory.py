@@ -65,3 +65,11 @@ class PDBParserFactory:
             
         raise PDBParserError, 'Format of %r is not recognized.' % source
 
+#############
+##  TESTING        
+#############
+import Biskit.test as BT
+        
+class Test(BT.BiskitTest):
+    """nothing to test"""
+    pass

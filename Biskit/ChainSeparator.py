@@ -495,67 +495,47 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: amino acid sequence
-        @rtype: str
-        """
-        fname =   T.testRoot() + '/com/1BGS_original.pdb'
-        outPath = T.tempDir()
+class Test(BT.BiskitTest):
+    """Test ChainSeparator """
 
-        sep = ChainSeparator( fname, outPath, 1)  
+    def prepare(self):
+	self.fname =   T.testRoot() + '/com/1BGS_original.pdb'
+        self.outPath = T.tempDir()
 
-        chain = sep.next()
-        c = chain
+    def cleanUp(self):
+        T.tryRemove( self.sep.log.fname ) 
+
+    def test_ChainSeparator( self ):
+        """ChainSeparator test"""
+        self.sep = ChainSeparator( self.fname, self.outPath, 1)  
+
+        self.chain = self.sep.next()
 
         i=1
         all_chains = []
-        while chain <> None:
-            if local:
-                print 'Chain %i:'%i, ''.join( singleAA( chain.sequence() ) )
-            all_chains += chain.sequence()
-            chain = sep.next()
+        while self.chain <> None:
+            if self.local:
+                print 'Chain %i:'%i, ''.join(singleAA(self.chain.sequence() ) )
+            all_chains += self.chain.sequence()
+            self.chain = self.sep.next()
             i += 1
 
-        if local:
-            print 'ChainSeparator log file written to: %s'%sep.log.fname
-            globals().update( locals() )
+        if self.local:
+            print 'ChainSeparator log file written to: %s'%self.sep.log.fname
 
-        ## cleanup
-        T.tryRemove( sep.log.fname ) 
-            
-        return ''.join( singleAA( all_chains ) )
+	r = ''.join( singleAA( all_chains ) )
+	self.assertEqual(r, self.EXPECTED)
 
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: amino acid sequence
-        @rtype:  str
-        """
-        return 'AQVINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIRAQVINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIRAQVINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIRKKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDALTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILSKKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDALTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILSKKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDALTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILS'
+    EXPECTED='AQVINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIRAQVINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIRAQVINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIRKKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDALTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILSKKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDALTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILSKKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDALTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILS'
 
         
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
-
+    BT.localTest()
 
 
 

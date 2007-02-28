@@ -424,23 +424,15 @@ class TrajFlexMaster(TrackingJobMaster):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
+class Test(BT.BiskitTest):
+    """Test Adaptive clustering"""
+
+    TAGS = [ BT.PVM ]
+
+    def test_FlexMaster(self):
+	"""TrajCluster test"""
         from Biskit.MatrixPlot import MatrixPlot
         from RandomArray import random
 
@@ -460,39 +452,23 @@ class Test:
         traj_2 = traj_1.clone()
         traj_2.frames = frames
 
+	self.assert_( len(hosts.cpus_all) > 0, '0 pvm nodes' )
+
         master = TrajFlexMaster( traj_1, traj_2,
                                  hosts=hosts.cpus_all,
-                                 show_output=local,
+                                 show_output= self.local,
                                  add_hosts=1,
                                  log=None,
                                  slaveLog=None,
-                                 verbose=local,
+                                 verbose= self.local,
                                  only_cross_member=0 )
 
         r = master.calculateResult( mirror=0 )
 
-        if local:
+        if self.local:
             p = MatrixPlot( r, palette='plasma2', legend=1 )
             p.show()            
-            globals().update( locals() )
-            
-        return 1
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
-        
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()

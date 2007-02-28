@@ -31,6 +31,7 @@ import copy
 import random
 
 import Biskit.tools as t
+import ColorSpectrum as C
 from Biskit import EHandler
 from Errors import BiskitError
 
@@ -76,9 +77,10 @@ class BisList:
 
     That means there are two ways of implementing BisList.
       1. via multiple inheritence from BisList (first!) and list
-         -> only getValue, extend, append and take need to be overriden.
+         -> only L{getValue}, L{extend}, L{append} and L{take} need to be
+	 overriden.
       2. inheritence from BisList only
-         -> the __xxx__ methods have to be implemented too.
+         -> the __xxx__ methods have to be implemented, too.
 
     See L{DictList} for an example of strategy 1.
     """
@@ -557,7 +559,7 @@ class BisList:
 
         plot.xlabel = xkey
 
-        colors = t.colorSpectrum( len( ykey ) )
+        colors = C.colorRange( len( ykey ) )
 
         if not 'size' in arg:
             arg['size'] = 1
@@ -607,7 +609,7 @@ class BisList:
 
         plot.xlabel = xkey
 
-        colors = t.colorRange( len( ykey ) )
+        colors = C.colorRange( len( ykey ) )
 
         if not 'size' in arg:
             arg['size'] = 1
@@ -629,3 +631,11 @@ class BisList:
 
         return plot
 
+##############
+## empty test
+##############
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Mock test, the BisList is tested in L{Biskit.DictList}"""
+    pass

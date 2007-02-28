@@ -139,52 +139,31 @@ class Blast2Seq( Executor ):
 #############
 ##  TESTING        
 #############
+
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Test Blast2Seq"""
+
+    TAGS = [BT.EXE]
+
+    def test_all( self ):
+        """Blast2Seq test """
+        self.blaster = Blast2Seq("AAAFDASEFFGIGHHSFKKEL",
+				 "AAAFDASEFFGIGHHSAKK") 
+
+        self.r = self.blaster.run()
         
-class Test:
-    """
-    Test class
-    """
-
-    def run( self, local=0 ):
-        """
-        run function test
+        if self.local:
+            print self.r
         
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
+        self.assertEqual( self.r,{'aln_len': 19, 'aln_id': 0.94736842105263153,
+				  'res_id': 18} )
 
-        @return: balast alignment result
-        @rtype: dict
-        """
-        blaster = Blast2Seq("AAAFDASEFFGIGHHSFKKEL",
-                            "AAAFDASEFFGIGHHSAKK") 
-
-        result = blaster.run()
-        
-        if local:
-            print result
-            globals().update( locals() )
-        
-        return result
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: alignment data
-        @rtype:  str
-        """
-        return {'aln_len': 19, 'aln_id': 0.94736842105263153, 'res_id': 18}
-
-            
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
 
 
 

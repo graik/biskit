@@ -297,126 +297,136 @@ class PDBDope:
 #############
 ##  TESTING        
 #############
-        
-class Test:
-    """
-    Test class
-    """
+import Biskit.test as BT 
 
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype:  int
-        """
-        from Biskit import PDBModel, EHandler
-        from Biskit.ExeConfig import ExeConfigError
-        
-        if local: print "Loading PDB..."
-        f = T.testRoot() + '/com/1BGS.pdb'
-        mdl = PDBModel(f)
+class Test(BT.BiskitTest):
+    """Test class """
 
-        mdl = mdl.compress( mdl.maskProtein() )
+    TAGS = [ BT.EXE ]
+    
+    M     = None #: cache processed PDB between tests
 
-        if local: print "Initiating PDBDope...",
-        self.d = PDBDope( mdl )
-        if local: print 'Done.'
+    def prepare(self):
+	from Biskit import PDBModel
+	self.f = T.testRoot() + '/com/1BGS.pdb'
 
-        try:
-            if local: print "Adding FoldX energy...",
-            self.d.addFoldX()
-            if local: print 'Done.'
-        except ExeConfigError, why:
-            EHandler.warning('Problem with foldx: %r' % why)
+	if not Test.M:
+	    if self.local: print "Loading PDB...",
+	    Test.M = PDBModel( self.f )
+	    Test.M = self.M.compress( Test.M.maskProtein() )
 
-    #    if local: print "Adding WhatIf ASA...",
-    #    self.d.addASA()
-    #    if local: print 'Done.'
+	    if self.local: print "Done"
+	
+        self.d = PDBDope( self.M )
 
-        try:
-            if local: print "Adding SurfaceRacer curvature...",
-            self.d.addSurfaceRacer( probe=1.4 )
-            if local: print 'Done.'
+    def test_addFoldX( self ):
+	"""PDBDope.addFoldX test"""
+	self.d.addFoldX()
 
-            if local: print "Adding surface mask...",
-            self.d.addSurfaceMask()
-            if local: print 'Done.'
-        except ExeConfigError, why:
-            EHandler.warning('Problem with SurfaceRacer: %r' % why)
+    def test_addSurfaceRacer(self):
+	"""PDBDope.addSurfaceRacer/addSurfaceMask test"""
+	if self.local: print "Adding SurfaceRacer curvature...",
+	self.d.addSurfaceRacer( probe=1.4 )
+	if self.local: print 'Done.'
 
-        try:
-            if local: print "Adding secondary structure profile...",
-            self.d.addSecondaryStructure()
-            if local: print 'Done.'
-        except ExeConfigError, why:
-            EHandler.warning('Problem with SurfaceRacer: %r' % why)
+	if self.local: print "Adding surface mask...",
+	self.d.addSurfaceMask()
+	if self.local: print 'Done.'
 
-        ## skipped in test as it takes long time to calculate
-    #    if local: print "Adding conservation data...",
-    #    self.d.addConservation()
-    #    if local: print 'Done.'
+    def test_addSecondaryStructure(self):
+	"""PDBDope.addSecondaryStructure test"""
+	self.d.addSecondaryStructure()
 
-        if local: print "Adding surface density...",
+    def test_addDensity(self):
+	"""PDBDope.addDensity test"""
         self.d.addDensity()
-        if local: print 'Done.'
 
-        if local:
+    def test_model(self):
+	"""PDBModel test final model"""
+	from Biskit import PDBModel
+
+        if self.local:
             print '\nData added to info record of model (key -- value):'
             for k in self.d.m.info.keys():
                 print '%s -- %s'%(k, self.d.m.info[k])
                 
             print '\nAdded atom profiles:'
-            print mdl.aProfiles
+            print self.M.aProfiles
             
             print '\nAdded residue  profiles:'
-            print mdl.rProfiles
+            print self.M.rProfiles
 
             ## check that nothing has changed
             print '\nChecking that models are unchanged by doping ...'
-            m_ref = PDBModel(f)
-            m_ref = m_ref.compress( m_ref.maskProtein() )
-            for k in m_ref.atoms[0].keys():
-                ref = [ m_ref.atoms[i][k] for i in range( m_ref.lenAtoms() ) ]
-                mod = [ mdl.atoms[i][k] for i in range( mdl.lenAtoms() ) ]
-                if not ref == mod:
-                    print 'CHANGED!! ', k
-                if ref == mod:
-                    print 'Unchanged ', k
+
+	m_ref = PDBModel( self.f )
+	m_ref = m_ref.compress( m_ref.maskProtein() )
+	for k in m_ref.atoms[0].keys():
+	    ref = [ m_ref.atoms[i][k] for i in range( m_ref.lenAtoms() ) ]
+	    mod = [ self.M.atoms[i][k] for i in range(self.M.lenAtoms()) ]
+	    self.assert_(ref == mod)
                 
-            ## display in Pymol
-            print "Starting PyMol..."
-            from Biskit.Pymoler import Pymoler
+	## display in Pymol
+	if self.local:
+	    print "Starting PyMol..."
+	    from Biskit.Pymoler import Pymoler
 
-            pm = Pymoler()
-            pm.addPdb( mdl, 'm' )
-            pm.colorAtoms( 'm', N.clip(mdl.profile('relAS'), 0.0, 100.0) )
-            pm.show()
+	    pm = Pymoler()
+	    pm.addPdb( self.M, 'm' )
+	    pm.colorAtoms( 'm', N.clip(self.M.profile('relAS'), 0.0, 100.0) )
+	    pm.show()
             
-            globals().update( locals() )
-            
-        return 1
 
-    
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
+class LongTest( BT.BiskitTest ):
 
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
-        
+    TAGS = [ BT.EXE, BT.LONG ]
 
+
+    def prepare(self):
+	from Biskit import PDBModel
+	self.f = T.testRoot() + '/com/1BGS.pdb'
+
+	self.M = PDBModel( self.f )
+	self.M = self.M.compress( self.M.maskProtein() )
+	
+        self.d = PDBDope( self.M )
+
+    def test_conservation(self):
+	"""PDBDope.addConservation (Hmmer) test"""
+	if self.local: print "Adding conservation data...",
+	self.d.addConservation()
+	if self.local: print 'Done.'
+
+	## display in Pymol
+	if self.local:
+	    print "Starting PyMol..."
+	    from Biskit.Pymoler import Pymoler
+
+	    pm = Pymoler()
+	    pm.addPdb( self.M, 'm' )
+	    pm.colorAtoms( 'm', N.clip(self.M.profile('cons_ent'), 0.0, 100.0) )
+	    pm.show()
+
+
+class OldTest( BT.BiskitTest ):
+
+    TAGS = [ BT.EXE, BT.OLD ]
+
+    def prepare(self):
+	from Biskit import PDBModel
+	self.f = T.testRoot() + '/com/1BGS.pdb'
+
+	self.M = PDBModel( self.f )
+	self.M = self.M.compress( self.M.maskProtein() )
+
+        self.d = PDBDope( self.M )
+
+    def test_addAsa(self):
+	"""PDBDope.addAsa (Whatif, obsolete) test"""
+	self.d.addASA()
+
+
+  
 if __name__ == '__main__':
-
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
 

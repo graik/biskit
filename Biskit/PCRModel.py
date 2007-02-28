@@ -92,65 +92,40 @@ class PCRModel( PDBModel ):
 #############
 ##  TESTING        
 #############
-        
-class Test:
-    """
-    Test class
-    """
-    
+import Biskit.test as BT
 
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: rmsd value
-        @rtype:  float
-        """
+class Test(BT.BiskitTest):
+    """Test class """
+
+    def test_PCRModel( self ):
+        """PCRModel test"""
         ## Loading PDB...
-        m_com = PCRModel( t.testRoot() + "/com/1BGS.psf",
+        self.m_com = PCRModel( t.testRoot() + "/com/1BGS.psf",
                           t.testRoot() + "/com/1BGS.pdb" )
 
-        m_rec = PCRModel( t.testRoot() + "/rec/1A2P.psf",
+        self.m_rec = PCRModel( t.testRoot() + "/rec/1A2P.psf",
                           t.testRoot() + "/rec/1A2P.pdb" )
 
         ## remove waters
-        m_com = m_com.compress( m_com.maskProtein() )
-        m_rec = m_rec.compress( m_rec.maskProtein() )
+        self.m_com = self.m_com.compress( self.m_com.maskProtein() )
+        self.m_rec = self.m_rec.compress( self.m_rec.maskProtein() )
 
         ## fit the complex structure to the free receptor
-        m_com_fit = m_com.magicFit( m_rec )
+        m_com_fit = self.m_com.magicFit( self.m_rec )
 
         ## calculate the rmsd between the original complex and the
         ## one fitted to the free receptor
-        rms = m_com_fit.rms(m_com, fit=0)
+        rms = m_com_fit.rms(self.m_com, fit=0)
         
-        if local:
+        if self.local:
             print 'Rmsd between the two complex structures: %.2f Angstrom'%rms
-            globals().update( locals() )
-        
-        return rms
 
+	self.assertAlmostEqual(rms, 58.784401345508634, 6)
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: rmsd value
-        @rtype:  float
-        """
-        return 58.784401345508634
     
-        
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
-
+    BT.localTest()
 
 
 

@@ -262,64 +262,40 @@ class ComplexEvolving( ProtComplex ):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
+class Test(BT.BiskitTest):
+    """Test case"""
 
-        @return: list of comment strings
-        @rtype: [str]
-        """
+    def test_ComplexEvolving(self):
+	"""Dock.ComplexEvolving test"""
         import time
 
         from Biskit.Dock import ComplexEvolving
 
         c = t.Load( t.testRoot() + '/com/ref.complex' )
 
-        ce= ComplexEvolving( c.rec_model, c.lig(), c,
-                             info={'comment':'test'} )
+        self.ce= ComplexEvolving( c.rec_model, c.lig(), c,
+				  info={'comment':'test'} )
 
         time.sleep( 2 )
 
-        lig = ce.lig().transform( MU.randomRotation(), [0,0,0] )
-        self.ce2 = ComplexEvolving( ce.rec_model, lig, ce,
+        lig = self.ce.lig().transform( MU.randomRotation(), [0,0,0] )
+        self.ce2 = ComplexEvolving( self.ce.rec_model, lig, self.ce,
                                     info={'comment':'test2'})
 
-        if local:
+        if self.local:
+	    print '\nGenerations: '
             for x in self.ce2:
                 print x['date']
 
-            print test.ce2.valuesOf('comment')
+            print 'Comments: ', self.ce2.valuesOf('comment')
              
-            globals().update( locals() )
+        self.assertEqual( self.ce2.valuesOf('comment'),
+			  [None, 'test', 'test2'])
 
-        return self.ce2.valuesOf('comment')
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: list of comment strings
-        @rtype:  [str]
-        """
-        return [None, 'test', 'test2']
-    
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
-
+    BT.localTest()
    

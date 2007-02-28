@@ -72,6 +72,14 @@ def getType( o ):
 class SparseArray:
     """
     Memory - saving representation of a sparse array.
+
+    Most positions of a sparse array should have a certain default
+    value (e.g. 0) so that it is more efficient to store the
+    non-default values and their positions rather than storing
+    all the repeating zeros.
+
+    A typical application example are atom contact matrices that are
+    large (N_atoms x N_atoms) but consist mostly of zeros.
     """
 
     def __init__( self, array_or_shape=0, typecode='f', default=0. ):
@@ -721,25 +729,19 @@ class SparseArray:
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
+class Test(BT.BiskitTest):
+    """Test"""
 
-    
-    def run( self, local=0 ):
-        """
-        run function test
+    def test_SparseArray(self):
+	"""SparseArray test"""
 
-        @return: reconstructed full array
-        @rtype: array
-        """
         a = N.zeros( (6,), N.Float32 )
 
-        sa = SparseArray( a.shape )
-        sa[3] = 1.
-        sa[5] = 2.
+        self.sa = SparseArray( a.shape )
+        self.sa[3] = 1.
+        self.sa[5] = 2.
 
         b = N.zeros( (5, 6), N.Float32 )
         b[0,1] = 3.
@@ -747,25 +749,17 @@ class Test:
         b[4,2] = 5
         b[3,0] = 6
 
-        sb = SparseArray( b )
+        self.sb = SparseArray( b )
 
-        sb.append( sa )
+        self.sb.append( self.sa )
         
-        if local:
-            print sa.toarray()
-            globals().update( locals() )
+        if self.local:
+            print self.sa.toarray()
             
-        return sb.toarray()
+	self.assertEqual( self.sb.toarray(), self.EXPECTED )
 
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: full array representation
-        @rtype:  array
-        """
-        return N.array([[ 0.,  3.,  4.,  0.,  0.,  0.],
+    EXPECTED = N.array([[ 0.,  3.,  4.,  0.,  0.,  0.],
                         [ 0.,  0.,  0.,  0.,  0.,  0.],
                         [ 0.,  0.,  0.,  0.,  0.,  0.],
                         [ 6.,  0.,  0.,  0.,  0.,  0.],
@@ -775,10 +769,7 @@ class Test:
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
     
 
 

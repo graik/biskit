@@ -539,62 +539,36 @@ def prepare_plot( xlabel='', ylabel='', yrange=None, xrange=None,
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
-        p = prepare_plot(xlabel='', ylabel='flex $\langle{x}\rangle$',
-                         xrange=(0,5), yrange=(0,4) )
+class Test(BT.BiskitTest):
+    """Test case"""
 
-        add_bars( p, [ 1, 2.5, 1.25, 0.3 ], fillfunc=diagonal_fill,
+    def test_plotUtils(self):
+	"""plotUtils test"""
+        self.p = prepare_plot(xlabel='', ylabel='flex $\langle{x}\rangle$',
+			      xrange=(0,5), yrange=(0,4) )
+
+        add_bars( self.p, [ 1, 2.5, 1.25, 0.3 ], fillfunc=diagonal_fill,
                   color='grey', size=0.1, invert=1,
                   lcolor='black', lwidth=1  )
 
-        add_bars( p, [0.4, 1.5, 2., 0.6], x0=0.5,
+        add_bars( self.p, [0.4, 1.5, 2., 0.6], x0=0.5,
                   fillfunc=solid_fill, lcolor='blue', lwidth=2 )
 
-        add_box( p, 3.5, 3, 4, 3.5, fillfunc=line_fill,
+        add_box( self.p, 3.5, 3, 4, 3.5, fillfunc=line_fill,
                  color='grey', size=5 )
 
 ##         ## example of how to write an eps plot to disc
 ##         p.write_eps(T.absfile('~/test.eps'), width='10cm', height='8.7cm')
         
-        p.show()
+	if self.local or self.VERBOSITY > 2:
+	    self.p.show()
         
-        if local:
-            globals().update( locals() )
-                              
-        return 1
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-          
+       
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
 
 

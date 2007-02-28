@@ -105,58 +105,35 @@ class ErrorHandler( object ):
 #############
 ##  TESTING        
 #############
-        
-class Test:
-    """
-    Test class
-    """
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """ErrorHandler test"""
     
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: something
-        @rtype:  float
-        """
+    def prepare(self):
         import tempfile
+	self.f_out = tempfile.mktemp( '_test_ErrorHandler' )
+
+    def cleanUp(self):
+        T.tryRemove( self.f_out )
+            
+    def test_ErrorHandler( self ):
+        """ErrorHandler test"""
         from Biskit.LogFile import LogFile
         
-        f_out = tempfile.mktemp( '_test_ErrorHandler' )
-        err_log = LogFile( f_out )
+        self.err_log = LogFile( self.f_out )
         
-        
-        self.e = ErrorHandler( log=err_log )
-
+        self.e = ErrorHandler( log=self.err_log )
         self.e.warning( 'A warning' )
 
-        if local:
-            print 'An error log file was written to %s'%f_out
-            globals().update( locals() )
+        if self.local:
+            print 'An error log file was written to %s'%self.f_out
 
-        ## cleanup
-        T.tryRemove( f_out )
-            
-        return  1
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: something
-        @rtype:  float
-        """
-        return 1
-
+	lines = open(self.err_log.fname).readlines()
+	self.assertEquals(lines[-1],'Warning (ignored): A warning\n')
         
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert  test.run( local=1 ) == test.expected_result()
+    BT.localTest(debug=0)
     
 

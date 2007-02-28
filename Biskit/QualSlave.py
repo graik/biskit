@@ -46,7 +46,7 @@ class QualSlave(JobSlave):
         @param params: defined in Master
         @type  params: dict
         """
-        pass
+        self.verbose=params.get('verbose',1)
 
 
     def go( self, dict ):
@@ -64,7 +64,8 @@ class QualSlave(JobSlave):
             fout = dirname( f )+'/'+'%s'+ T.stripFilename(f)+'.eps'
             fshort = dirname( f )[-15:]
 
-            print fshort
+	    if self.verbose:
+		print fshort
 
             t = self.loadTraj( f )
 
@@ -73,7 +74,8 @@ class QualSlave(JobSlave):
             p = self.plotRmsdRef(t, fshort )
             p.write_eps( fout % 'rms_', width="18cm", height="29cm" )
 
-            print "Done"
+	    if self.verbose:
+		print "Done"
 
         return dict
 
@@ -103,12 +105,15 @@ class QualSlave(JobSlave):
         """
         mCA = t.ref.maskCA()
 
-        t.fit( ref=t.ref, prof='rms_all_ref', comment='all heavy')
+        t.fit( ref=t.ref, prof='rms_all_ref', comment='all heavy',
+	       verbose=self.verbose )
 
-        t.fitMembers( mask=mCA, prof='rms_CA_av', comment='CA to member avg')
+        t.fitMembers( mask=mCA, prof='rms_CA_av', comment='CA to member avg',
+		      verbose=self.verbose )
 
         t.fitMembers( refIndex=-1, mask=mCA, prof='rms_CA_last',
-                      comment='all CA to last member frame')
+                      comment='all CA to last member frame',
+		      verbose=self.verbose)
 
 
     def plotRmsdRef( self, t, title ):
@@ -129,8 +134,39 @@ class QualSlave(JobSlave):
         p.ylabel= 'RMSD [A]'
         return p
 
+#############
+##  TESTING        
+#############
+import Biskit.test as BT
+        
+class Test(BT.BiskitTest):
+    """Test QualSlave without the master."""
+
+    TAGS = [ BT.PVM ]
+
+    def test_QualSlave(self):
+	"""QualSlave test"""
+	import os
+
+	jobs = {0: T.testRoot() + '/lig_pcr_00/traj.dat'}
+
+	self.feps = '%s/rms_traj.eps' % os.path.dirname( jobs[0] )
+
+	slave = QualSlave()
+	slave.initialize( {'verbose':0} )
+	r = slave.go( jobs )
+
+	if self.verbosity > 2:
+	    self.log.write('eps written to ' + self.feps )
+
+	self.assert_( os.path.exists( self.feps ) )
+
+    def cleanUp(self):
+	T.tryRemove( self.feps )
 
 if __name__ == '__main__':
+
+##     BT.localTest()  ## for interactive debugging only
 
     import os, sys
 

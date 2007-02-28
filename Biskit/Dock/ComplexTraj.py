@@ -326,39 +326,31 @@ class ComplexTraj( EnsembleTraj ):
 #############
 ##  TESTING        
 #############
-    
-class Test:
-    """
-    Test class
-    """
-    
+import Biskit.test as BT
+        
+class Test(BT.BiskitTest):
+    """Test case"""
 
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: number of contacts in first frame
-        @rtype:  int
-        """
+    TAGS = [ BT.LONG ]
+
+    def test_ComplexTraj(self):
+	"""Dock.ComplexTraj test"""
+
         import Biskit.tools as T
 
         ## there is no complex trajectori in the test folder so will have
         ## to create a fake trajectory with a complex
         f =  [ T.testRoot()+ '/com/1BGS.pdb' ] * 5
-        t = Trajectory( f, verbose=local )
-
-    ## t = T.Load( T.testRoot()+'/com_pcr_00/traj.dat' )
+        t = Trajectory( f, verbose=self.local )
 
         t = ComplexTraj( t, recChains=[0] )
 
-    ## t.plotContactDensity( step=2 )
+## 	if self.local:
+## 	    print 'plotting contact density...'
+## 	    t.plotContactDensity( step=2 )
+
         for i in range( 1093+98, 1968 ):
             t.ref.atoms[i]['chain_id'] = 'B'
-
 
         t.cl = [1,2]
 
@@ -368,27 +360,11 @@ class Test:
 
         contactMat = tt.atomContacts( 1 )
         
-        if local:
+        if self.local:
             print 'Receptor chains: %s    Ligand chains: %s'%(t.cr, t.cl)
             
-            globals().update( locals() )
-            
-        return N.sum(N.ravel(contactMat))
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: number of contacts in first frame
-        @rtype:  int
-        """
-        return 308
-
+        self.assertEqual( N.sum(N.ravel(contactMat)), 308 )
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) ==  test.expected_result() 
-
+    BT.localTest()

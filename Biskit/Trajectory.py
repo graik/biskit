@@ -1590,24 +1590,14 @@ class Trajectory:
 #############
 ##  TESTING        
 #############
-    
-class Test:
-    """
-    Test class
-    """
-    
+import Biskit.test as BT
+        
+class Test(BT.BiskitTest):
+    """Test Adaptive clustering"""
 
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: sum of all residue rmsd values
-        @rtype:  float
-        """
+
+    def test_Trajectory(self):
+	"""Trajectory test"""
 ##         f = T.testRoot() + '/lig_pc2_00/pdb/'
 ##         allfiles = os.listdir( f )
 ##         pdbs = []
@@ -1622,44 +1612,31 @@ class Test:
 ##         traj = Trajectory( pdbs[:3], ref, rmwat=0 )
 
         ## Loading
-        traj = T.Load(T.testRoot() + '/lig_pcr_00/traj.dat')
+        self.traj = T.Load(T.testRoot() + '/lig_pcr_00/traj.dat')
 
         ## sort frames after frameNames
-        traj.sortFrames()
+        self.traj.sortFrames()
 
         ## sort atoms 
-        traj.sortAtoms()
+        self.traj.sortAtoms()
 
         ## remove waters
-        traj = traj.compressAtoms( N.logical_not( traj.ref.maskH2O()) )
+        self.traj = self.traj.compressAtoms(
+	    N.logical_not( self.traj.ref.maskH2O()) )
 
         ## get fluctuation on a residue level
-        r1 = traj.getFluct_local( verbose=local )
+        r1 = self.traj.getFluct_local( verbose=self.local )
 
         ## fit backbone of frames to reference structure
-        traj.fit( ref=traj.ref, mask=traj.ref.maskBB(), verbose=local )
+        self.traj.fit( ref=self.traj.ref,
+		       mask=self.traj.ref.maskBB(), verbose=self.local )
         
-        if local:
-            globals().update( locals() )
-            
-        return N.sum( traj.profile('rms') )
+        self.assertAlmostEqual( N.sum( self.traj.profile('rms') ),
+				58.101235746353879, 2 )
 
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: sum of all residue rmsd values
-        @rtype:  float
-        """
-        return 58.101235746353879
 
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-6
-
-
+    BT.localTest()
 

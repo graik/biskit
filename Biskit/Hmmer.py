@@ -39,7 +39,7 @@ import settings
 from Biskit.Errors import BiskitError
 import Biskit.tools as T
 import Biskit.molTools as MT
-from Biskit import Executor, TemplateError, PDBModel
+from Biskit import Executor, TemplateError, PDBModel, StdLog
 
 
 ## executables
@@ -60,7 +60,7 @@ class HmmerdbIndex( Executor ):
     if not indexing will be done.
     """
     
-    def __init__( self, hmmdb, verbose=1, **kw ):
+    def __init__( self, hmmdb, verbose=1, log=StdLog(), **kw ):
         """
         @param hmmdb: Pfam hmm database
         @type  hmmdb: str
@@ -69,7 +69,8 @@ class HmmerdbIndex( Executor ):
         
         if not os.path.exists(hmmdb+'.ssi'):
             if self.verbose:
-                print 'HMMINDEX: Indexing hmm database. This will take a while'
+                self.log.writeln(
+		    'HMMINDEX: Indexing hmm database. This will take a while')
 
             Executor.__init__( self, 'hmmindex', args='%s'%hmmdb, **kw )
             
@@ -103,12 +104,10 @@ class HmmerSearch( Executor ):
         noSearch = 0
         if noSearch:
             if self.verbose:
-                print 'Profiles provided - No search will be performed.'
+                self.log.writeln(
+		    'Profiles provided - No search will be performed.')
             return None
         
-        ## find matching hmm profiles
-        if self.verbose:
-            print '\nSearching hmm database, this will take a while...'
 
         Executor.__init__( self, 'hmmpfam', catch_out=1,
                            args=' %s %s'%(hmmdb, self.fName), **kw )
@@ -134,18 +133,19 @@ class HmmerSearch( Executor ):
                 target = f.readlines()
 
         if not target[0][0] == '>':
-            print 'Fasta format does not contain description line.'
+            self.log.writeln('Fasta format does not contain description line.')
             return False
 
         for i in range( 1, len(target) ):
             if len( target[i] ) >= 80:
-                print 'Fasta sequence lines longer that 80 characters'
+                self.log.writeln(
+		    'Fasta sequence lines longer that 80 characters')
                 return False
 
             for j in target[i]:
                 aa_codes = MU.aaDicStandard.values() + [ '\n' ]
                 if not j.upper() in aa_codes:
-                    print 'Invalid amino acid code: %s'%j.upper()
+                    self.log.writeln('Invalid amino acid code: %s'%j.upper())
                     return False
 
         return True
@@ -487,15 +487,18 @@ class Hmmer:
     Search Hmmer Pfam database and retrieve conservation score for model
     """
 
-    def __init__(self, hmmdb = hmmDatabase, verbose=1 ): 
+    def __init__(self, hmmdb = hmmDatabase, verbose=1, log=StdLog() ): 
         """
         @param hmmdb: Pfam hmm database
         @type  hmmdb: str
         @param verbose: verbosity level (default: 1)
         @type  verbose: 1|0
+	@param log: Log file for messages [STDOUT]
+	@type  log: Biskit.LogFile
         """
         self.hmmdb = hmmdb
         self.verbose = verbose
+	self.log = log
         self.tempDir = settings.tempDirShared
 
         self.fastaID = ''
@@ -510,7 +513,7 @@ class Hmmer:
         Checks if the hmm database has been indexed or not,
         if not indexing will be done.
         """
-        idx = HmmerdbIndex( self.hmmdb, verbose=self.verbose )
+        idx = HmmerdbIndex( self.hmmdb, verbose=self.verbose, log=self.log )
 
 
     def searchHmmdb( self, target, noSearch=None ):
@@ -529,7 +532,12 @@ class Hmmer:
                  profile matches the sequence
         @rtype: dict, [list]
         """
-        search = HmmerSearch( target, self.hmmdb, verbose=self.verbose )
+        if self.verbose:
+            self.log.writeln(
+		'\nSearching hmm database, this will take a while...')
+
+        search = HmmerSearch( target, self.hmmdb, verbose=self.verbose,
+			      log=self.log )
         matches, hits = search.run()
         
         return matches, hits
@@ -554,20 +562,22 @@ class Hmmer:
         """
         ## Print list of matching profiles
         if len(matches) == 0:
-            if self.verbose: print '\nNo matching profiles found'
+            if self.verbose: self.log.writeln('\nNo matching profiles found')
             return None
         if len(matches) == 1:
-            if self.verbose: print '\nFound only one matching profile.'
+            if self.verbose:
+		self.log.writeln('\nFound only one matching profile.')
         if len(matches) > 1:
-            if self.verbose: print '\nFound more than one hit.\n'
+            if self.verbose: self.log.writeln('\nFound more than one hit.\n')
 
         try:
             if self.verbose:
-                print '\tName -- Nr hits -- Score -- E-value -- Description'
+                self.log.writeln(
+		    '\tName -- Nr hits -- Score -- E-value -- Description')
                 for k in matches.keys():
-                    print '\t', k, ' --', matches[k][-1], ' -- ',\
-                          matches[k][-3], ' -- ', matches[k][-2],' -- ',\
-                          string.join(matches[k][0:-3])
+                    self.log.writeln( '\t'+k+' --'+matches[k][-1] +' -- '+\
+                          matches[k][-3]+ ' -- '+ matches[k][-2]+' -- '+\
+                          string.join(matches[k][0:-3]))
         except:
             pass
 
@@ -581,10 +591,11 @@ class Hmmer:
             eValue = float( hits[h][-1] )
 
             ## print warning message if profile doesn't meet criteria
-            if score < score_cutoff and eValue > eValue_cutoff and self.verbose:
-                print '\nWARNING: Bad scores! Profile NOT used.'
-                print '\t Name: %s - Score: %f E-value: %f ' \
-                      %( hmmName, score, eValue )
+            if score < score_cutoff and eValue > eValue_cutoff \
+		   and self.verbose:
+                self.log.writeln('\nWARNING: Bad scores! Profile NOT used.')
+                self.log.writeln('\t Name: %s - Score: %f E-value: %f ' \
+                      %( hmmName, score, eValue ) )
 
             ## add profile to list of profiles to use
             else:
@@ -597,7 +608,7 @@ class Hmmer:
                     hmmHits[hmmName] = [ [ seqStart, seqEnd ] ]
 
         if self.verbose:
-            print '\nWill use profile(s):\n ', str( hmmHits ), '\n'
+            self.log.writeln( '\nWill use profile(s):\n '+str( hmmHits ))
 
         return hmmHits
 
@@ -616,7 +627,8 @@ class Hmmer:
         @return: dictionary with warious information about the profile
         @rtype: dict
         """
-        profile = HmmerProfile( hmmName, self.hmmdb, verbose=self.verbose )
+        profile = HmmerProfile( hmmName, self.hmmdb, verbose=self.verbose,
+				log=self.log)
         self.hmmFile, profileDic = profile.run()
 
         return profileDic
@@ -666,7 +678,8 @@ class Hmmer:
 
                 ## get sub-alignmnet
                 align = HmmerAlign( self.hmmFile, self.sub_fastaFile,
-                                    self.fastaID, verbose=self.verbose)
+                                    self.fastaID, verbose=self.verbose,
+				    log=self.log)
 
                 sub_fastaSeq, sub_hmmSeq = align.run()
 
@@ -781,7 +794,8 @@ class Hmmer:
 
         ## extract hmm sequence
         hmmSeq = re.findall( '#=[A-Z]{2}\s[A-Z]{2}\s+[.x]+', out )
-        hmmSeq = string.join([ string.strip( string.split(i)[2] ) for i in hmmSeq ], '')
+        hmmSeq = string.join(
+	    [ string.strip( string.split(i)[2] ) for i in hmmSeq ], '')
 
         return fastaSeq, hmmSeq
 
@@ -974,95 +988,74 @@ class Hmmer:
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
+class Test(BT.BiskitTest):
+    """Hmmer test"""
 
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: Hmmer emission scores
-        @rtype:  [ float ]
-        """
+    TAGS = [ BT.EXE, BT.LONG ]
+    
+    def test_Hmmer( self):
+        """Hmmer test """
+	
         from Biskit import PDBModel
         import Biskit.tools as T
     
-        if local: print "Loading PDB..."
-        m = PDBModel( T.testRoot()+'/lig/1A19.pdb')
-        model = m.compress( m.maskProtein() )
+        if self.local: print "Loading PDB..."
+        self.m = PDBModel( T.testRoot()+'/lig/1A19.pdb')
+        self.model = self.m.compress( self.m.maskProtein() )
 
         ## initiate and check database status
-        hmmer = Hmmer( hmmdb = settings.hmm_db, verbose=local )
-        hmmer.checkHmmdbIndex()
+        self.hmmer = Hmmer( hmmdb=settings.hmm_db, verbose=self.local,
+			    log=self.log )
+        self.hmmer.checkHmmdbIndex()
 
         ## scoring methods to use
         method = [ 'emmScore', 'ent', 'maxAll', 'absSum', 'maxAllScale' ]
 
         ## search
-        searchMatches, searchHits = hmmer.searchHmmdb( model )
-        hmmNames = hmmer.selectMatches( searchMatches, searchHits )
+        searchMatches, searchHits = self.hmmer.searchHmmdb( self.model )
+        hmmNames = self.hmmer.selectMatches( searchMatches, searchHits )
   ##      hmmNames = {'Barstar': [[1, 89]]}
         
-        cons = []
-        result = None
+        self.cons = []
+        self.result = None
 
         for name in hmmNames.keys():
 
             ## retrieve hmm model
-            hmmDic = hmmer.getHmmProfile( name )
+            hmmDic = self.hmmer.getHmmProfile( name )
 
             ## align sequence with model
             fastaSeq, hmmSeq, repete, hmmGap = \
-                  hmmer.align( model, hmmNames[ name ] )
+                  self.hmmer.align( self.model, hmmNames[ name ] )
 
             ## cast hmm model
             hmmDic_cast = \
-                  hmmer.castHmmDic( hmmDic, repete, hmmGap, method[0] )
+                  self.hmmer.castHmmDic( hmmDic, repete, hmmGap, method[0] )
 
             ## Hmmer profile match scores for sequence
-            cons = hmmer.matchScore( fastaSeq, hmmSeq,
-                                     hmmDic_cast, method[0] )
+            self.cons = self.hmmer.matchScore( fastaSeq, hmmSeq,
+					  hmmDic_cast, method[0] )
 
             ## If there are more than one profile in the model, merge to one. 
-            if result:
-                result = hmmer.mergeProfiles( result, cons )
+            if self.result:
+                result = hmmer.mergeProfiles( self.result, self.cons )
             else:
-                result = cons
+                self.result = self.cons
 
-        ## cleanup
-        hmmer.cleanup()
+	    self.hmmer.cleanup()
 
-        if local:
-            globals().update( locals() )
-                              
-        return result
+	self.assertEqual( self.result, self.EXPECTED )
 
 
+    #: Hmmer emission scores
+    EXPECTED = [2581.0, 3583.0, 1804.0, 2596.0, 3474.0, 2699.0, 3650.0, 2087.0, 2729.0, 2450.0, 2412.0, 2041.0, 3474.0, 1861.0, 2342.0, 2976.0, 5124.0, 2729.0, 2202.0, 2976.0, 3583.0, 2202.0, 2103.0, 2976.0, 1922.0, 2132.0, 4122.0, 2403.0, 4561.0, 4561.0, 3650.0, 2087.0, 4001.0, 2976.0, 3860.0, 3260.0, 2976.0, 6081.0, 3860.0, 5611.0, 2976.0, 3609.0, 3650.0, 6081.0, 3343.0, 2403.0, 3288.0, 4122.0, 2976.0, 2322.0, 2976.0, 1995.0, 4378.0, 2706.0, 2665.0, 4186.0, 3539.0, 2692.0, 3270.0, 2302.0, 2604.0, 2132.0, 2118.0, 2380.0, 2614.0, 2170.0, 3260.0, 2403.0, 1964.0, 3343.0, 2976.0, 2643.0, 3343.0, 2714.0, 2591.0, 3539.0, 3260.0, 2410.0, 1809.0, 3539.0, 2111.0, -774.0, 3860.0, 2450.0, 2063.0, 3474.0, 3474.0, 2057.0, 1861.0]
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: Hmmer emission scores
-        @rtype:  [ float ]
-        """
-        return [2581.0, 3583.0, 1804.0, 2596.0, 3474.0, 2699.0, 3650.0, 2087.0, 2729.0, 2450.0, 2412.0, 2041.0, 3474.0, 1861.0, 2342.0, 2976.0, 5124.0, 2729.0, 2202.0, 2976.0, 3583.0, 2202.0, 2103.0, 2976.0, 1922.0, 2132.0, 4122.0, 2403.0, 4561.0, 4561.0, 3650.0, 2087.0, 4001.0, 2976.0, 3860.0, 3260.0, 2976.0, 6081.0, 3860.0, 5611.0, 2976.0, 3609.0, 3650.0, 6081.0, 3343.0, 2403.0, 3288.0, 4122.0, 2976.0, 2322.0, 2976.0, 1995.0, 4378.0, 2706.0, 2665.0, 4186.0, 3539.0, 2692.0, 3270.0, 2302.0, 2604.0, 2132.0, 2118.0, 2380.0, 2614.0, 2170.0, 3260.0, 2403.0, 1964.0, 3343.0, 2976.0, 2643.0, 3343.0, 2714.0, 2591.0, 3539.0, 3260.0, 2410.0, 1809.0, 3539.0, 2111.0, -774.0, 3860.0, 2450.0, 2063.0, 3474.0, 3474.0, 2057.0, 1861.0]
-
-        
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
 
 
 

@@ -35,6 +35,7 @@ import Biskit.settings as settings
 from Biskit.PDBDope import PDBDope
 from Biskit.PDBModel import PDBProfiles
 from Biskit.Errors import BiskitError
+from Biskit.LogFile import StdLog
 
 from Complex import Complex
 from ComplexList import ComplexList
@@ -55,7 +56,7 @@ class ContactMaster(TrackingJobMaster):
     def __init__(self, complexLst, chunks=5, hosts=cpus_all, refComplex=None,
                  updateOnly=0, niceness = nice_dic, force = [],
                  outFile = 'complexes_cont.cl', com_version=-1,
-                 show_output = 0, add_hosts=0, verbose=1 ):
+                 show_output = 0, add_hosts=0, verbose=1, log=StdLog() ):
         """
         @param complexLst: input list
         @type  complexLst: ComplexList
@@ -90,6 +91,7 @@ class ContactMaster(TrackingJobMaster):
         self.outFile = outFile
 
         self.verbose = verbose
+	self.log = log
         
         ## set name for error log file
         self.ferror = os.path.dirname(
@@ -131,9 +133,9 @@ class ContactMaster(TrackingJobMaster):
         complexDic, self.remainLst = self.__complexDic( complexLst )
 
         if verbose:
-            t.flushPrint( '%i complexes total in list\n'%len(complexLst) )
-            t.flushPrint( '\tof which %i need updating,\n'%len(complexDic) )
-            t.flushPrint( '\tand %i are complete\n'%len(self.remainLst) )
+            self.log.write( '%i complexes total in list\n'%len(complexLst) )
+            self.log.write( '\tof which %i need updating,\n'%len(complexDic) )
+            self.log.write( '\tand %i are complete\n'%len(self.remainLst) )
 
         self.__check_models( complexLst )
 
@@ -193,11 +195,11 @@ class ContactMaster(TrackingJobMaster):
         ## If the profiles are used by the ContactSlave you should do the
         ## opposite, so that the slave doesn't need to unpickle the source
         ## model
-##         t.flushPrint("synchronizing models with source ...")
+##         self.log.write("synchronizing models with source ...")
 ##         for m in cl.recModels() + cl.ligModels():
 ##             m.update()
 ##             m.slim()
-##         t.flushPrint("done\n")
+##         self.log.write("done\n")
 
 
     def __extractVersion( self, cel, com_version=-1 ):
@@ -267,7 +269,7 @@ class ContactMaster(TrackingJobMaster):
                           the sections that are identical in both complexes
         @type  normalCom: Complex
         """
-        if self.verbose: t.flushPrint( 'Analyzing reference complex ... ')
+        if self.verbose: self.log.write( 'Analyzing reference complex ... ')
 
         NC = normalCom; RC = refCom
 
@@ -318,7 +320,7 @@ class ContactMaster(TrackingJobMaster):
         self.mask_rec = MU.packBinaryMatrix( self.mask_rec )
         self.mask_lig = MU.packBinaryMatrix( self.mask_lig )
 
-        if self.verbose: t.flushPrint('done\n')
+        if self.verbose: self.log.write('done\n')
 
 
     def __ref_interface( self, RC, NC, res_contacts, mask_rec, mask_lig, bb=0):
@@ -375,12 +377,12 @@ class ContactMaster(TrackingJobMaster):
         """
         calculate contact mask of atom-reduced reference complex.
         """
-        if self.verbose: t.flushPrint("get reduced reference contacts...")
+        if self.verbose: self.log.write("get reduced reference contacts...")
 
         c = self.reduced_refCom.atomContacts( 10, cache=1, map_back=0)
         self.c_ref_ratom_10 = MU.packBinaryMatrix( c )
 
-        if self.verbose: t.flushPrint(' done\n')
+        if self.verbose: self.log.write(' done\n')
 
 
     def __toBeUpdated( self, com ):
@@ -418,7 +420,7 @@ class ContactMaster(TrackingJobMaster):
         update = {}
         remain = ComplexList()
 
-        if self.verbose: t.flushPrint('setting up task list ')
+        if self.verbose: self.log.write('setting up task list ')
         for i in range( len( cl ) ):
 
             c = cl[i]
@@ -428,7 +430,7 @@ class ContactMaster(TrackingJobMaster):
             else:
                 remain += [c]
 
-        if self.verbose: t.flushPrint(' done\n')
+        if self.verbose: self.log.write(' done\n')
 
         return update, remain
 
@@ -448,7 +450,7 @@ class ContactMaster(TrackingJobMaster):
         @type  refCom: Complex        
         """
         if self.verbose:
-            t.flushPrint('preparing/saving coarse models of receptors&ligands...')
+            self.log.write('preparing/saving coarse models of receptors&ligands...')
 
         rec_models = cl.recModels()
         lig_models = cl.ligModels()
@@ -510,7 +512,7 @@ class ContactMaster(TrackingJobMaster):
             f = tempfile.mktemp( '_reduced.model', dir=settings.tempDirShared )
             m.saveAs(f)
 
-        if self.verbose: t.flushPrint(' done\n')
+        if self.verbose: self.log.write(' done\n')
 
 
     def getInitParameters(self, slave_tid):
@@ -535,7 +537,9 @@ class ContactMaster(TrackingJobMaster):
              'mask_interface_bb': self.mask_interface_bb,
              'reduced_recs' : self.reduced_recs,
              'reduced_ligs' : self.reduced_ligs,
-             'c_ref_ratom_10'  : self.c_ref_ratom_10
+             'c_ref_ratom_10'  : self.c_ref_ratom_10,
+	     'log':self.log.fname,
+	     'verbose':self.verbose
              }
 
         return r
@@ -608,74 +612,61 @@ class ContactMaster(TrackingJobMaster):
 #############
 ##  TESTING        
 #############
-    
-class Test:
-    """
-    Test class
-    """
-    
+import Biskit.test as BT
+        
+class Test(BT.BiskitTest):
+    """Test case
 
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: sum of fnac values
-        @rtype:  floal
-        """        
+    Requires PVM installed and running and at least one (non-master) node.
+    """
+
+    TAGS = [ BT.PVM ]
+
+    def prepare(self):
+        self.cl_out = tempfile.mktemp('_test.cl')
+	
+
+    def cleanUp(self):
+        t.tryRemove( self.master.outFile )
+        t.tryRemove( self.master.ferror )
+
+
+    def test_ContactMaster(self):
+	"""Dock.ContactMaster test"""
         niceness = {'default': 0}
-        hosts = cpus_all[:4]
+        self.hosts = cpus_all[:4]
 
         lst = t.Load( t.testRoot() + "/dock/hex/complexes.cl")
         lst = lst[:9]
 
         refcom = t.Load( t.testRoot() + "/com/ref.complex")
 
-        cl_out = tempfile.mktemp('_test.cl')
-        master = ContactMaster( lst, chunks = 3, hosts = hosts,
-                                niceness = niceness,
-                                show_output = local,
-                                verbose = local,
-                                refComplex = refcom,
-                                outFile = cl_out )
+        self.master = ContactMaster( lst, chunks = 3, hosts = self.hosts,
+				     niceness = niceness,
+				     show_output = self.local,
+				     verbose = self.local,
+				     refComplex = refcom,
+				     outFile = self.cl_out )
         
+	self.assert_( len(self.hosts) > 0,
+		      'master needs at least one pvm node for calculations' )
+
+	if len(self.hosts) > 0:
         ## wait for calculation to finish, then load contacted list
-        cl_cont = master.calculateResult()
+	    self.cl_cont = self.master.calculateResult()
 
-        if local:
-            print 'Any error are written to: %s'%master.ferror
-            ## plot atom and residue contacts vs. rmsd
-            p=cl_cont.plot( 'rms', 'fnac_10','fnarc_10' )
-            p.show()
+	    if self.local:
+		print 'Any error are written to: %s'%master.ferror
+		## plot atom and residue contacts vs. rmsd
+		self.p = self.cl_cont.plot( 'rms', 'fnac_10','fnarc_10' )
+		self.p.show()
             
-            globals().update( locals() )
-            
-        ## cleanup
-        t.tryRemove( master.outFile )
-        t.tryRemove( master.ferror )
-        
-        return N.sum(cl_cont.valuesOf('fnac_10'))
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: sum of fnac values
-        @rtype:  float
-        """
-        return 0.50811038550663579
+	    self.assertAlmostEqual(N.sum(self.cl_cont.valuesOf('fnac_10')),
+				   0.50811038550663579, 5 )
 
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-6
-
-
+    BT.localTest()
 
 

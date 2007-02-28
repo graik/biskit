@@ -28,6 +28,7 @@ Calculate contact matrix and some scores for complexes.
 from Biskit.PVM import JobSlave
 import Biskit.tools as T
 from Biskit import mathUtils as MU
+from Biskit.LogFile import StdLog
 import Numeric as N
 from Complex import Complex
 import os, os.path
@@ -59,7 +60,11 @@ class ContactSlave(JobSlave):
         @type  params: dict
         """
         self.ferror = params['ferror']
-
+	self.log    = StdLog()
+	if params['log']:        ## log to same file as master
+	    self.log = LogFile( self.flog )
+	self.verbose = params['verbose']
+	
         ## reference complex data
         self.c_ref_res_4_5 = self.c_ref_atom_4_5 = None
         self.c_ref_atom_10 = None
@@ -149,8 +154,8 @@ class ContactSlave(JobSlave):
 
     def requested( self, c, *keys ):
         """
-        Determine what keys in info dictionary of a complex that
-        needs to be calculated or updated
+        Determine the keys in an info dictionary of a complex that
+        need to be calculated or updated
         
         @param c: Complex
         @type  c: Complex
@@ -358,7 +363,8 @@ class ContactSlave(JobSlave):
         """
         if self.requested( c,'ePairScore'):
             try:
-                pairScore = c.contPairScore(cutoff=6.0)
+                pairScore = c.contPairScore(cutoff=6.0, log=self.log,
+					    verbose=self.verbose )
                 c['ePairScore'] = pairScore
             except:
                 c['ePairScore'] = None
@@ -378,7 +384,8 @@ class ContactSlave(JobSlave):
         """
         if self.requested( c, method):
             try:
-                c[method] = c.conservationScore( method )
+                c[method] = c.conservationScore( method, log=self.log,
+						 verbose=self.verbose )
             except:
                 self.reportError('Conservation score Error', soln)
 
@@ -458,6 +465,64 @@ class ContactSlave(JobSlave):
         return result
 
 
+import Biskit.test as BT
+        
+class Test(BT.BiskitTest):
+    """Test ContactSlave locally without running the master.
+
+    This allows to test the master and slave without using
+    external nodes. The master still requires a running PVM
+    though.
+    """
+
+    TAGS = [ BT.PVM ]
+
+    def prepare(self):
+	import tempfile
+        self.cl_out = tempfile.mktemp('_test.cl')
+
+    def test_QualSlave(self):
+	"""StrucureSlave test (local)"""
+	import os
+	from Biskit.Dock.ContactMaster import ContactMaster
+
+	## load complex list (docking result) and reference complex
+        lst = T.Load( T.testRoot() + "/dock/hex/complexes.cl")
+        lst = lst[:3]
+        refcom = T.Load( T.testRoot() + "/com/ref.complex")
+
+	## let ContactMaster prepare everything but don't run it
+        self.master = ContactMaster( lst, verbose = self.local,
+				     log=self.log,
+				     refComplex = refcom,
+				     outFile = self.cl_out )
+
+	jobs = self.master.data
+
+	self.slave = ContactSlave()
+	self.slave.initialize( self.master.getInitParameters(1) )
+
+	if self.local or self.verbosity > 2:
+	    self.log.writeln("Currently available info records (from hex):")
+	    self.log.writeln( repr(jobs[0].info.keys()) )
+	    self.log.writeln( "Calculating all scores for %i complexes..." \
+			      % len(jobs) )
+
+	self.result = self.slave.go( jobs )
+
+	if self.local or self.verbosity > 2:
+	    self.log.writeln("info records after contacting: ")
+	    self.log.writeln( repr(jobs[0].info.keys()) )
+	if self.local:
+	    print "new scores are available in 'result[0-2].info'"
+
+	## verify fraction of native atom contacts for third complex
+	self.assertAlmostEqual( self.result[2]['fnac_10'],
+				0.11533600168527491, 7 )
+
+    def cleanUp(self):
+	T.tryRemove(  self.cl_out )
+
 ## ## PROFILING:
 ## in slave window:
 ##     slave.stop()
@@ -478,12 +543,14 @@ class ContactSlave(JobSlave):
 
 if __name__ == '__main__':
 
-    import os, sys
+    BT.localTest()
 
-    if len(sys.argv) == 2:
+##     import os, sys
 
-        niceness = int(sys.argv[1])
-        os.nice(niceness)
+##     if len(sys.argv) == 2:
 
-    slave = ContactSlave()
-    slave.start()
+##         niceness = int(sys.argv[1])
+##         os.nice(niceness)
+
+##     slave = ContactSlave()
+##     slave.start()

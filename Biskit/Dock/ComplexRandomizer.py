@@ -22,9 +22,8 @@
 ## $Revision$
 ## last $Author$
 ## last $Date$
-
 """
-Create Complexes with random orientation
+Create Complexes with random orientation from a receptor and ligand structure.
 """
     
 from Biskit.Dock.Complex import Complex
@@ -253,27 +252,34 @@ class ComplexMinimizer( Xplorer ):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
+class Test(BT.BiskitTest):
+    """Test case
     
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: number of random complexes
-        @rtype: int
-        """
-        from Biskit import Trajectory
-        import tempfile
+    The test generates 3 random complexes. In interactive mode,
+    the 3 complexes are displayed as movie in Pymol. They are
+    written out as Amber trajectory if debug=True.
+    """
 
-        ## read in rec and lig files
+    TAGS = [ BT.EXE, BT.LONG ]
+
+    def prepare(self):
+        import tempfile
+	self.f_pfb = tempfile.mktemp('_test.pdb')
+	self.f_crd = tempfile.mktemp('_test.crd')
+	
+    def cleanUp(self):
+	t.tryRemove( self.f_pfb )
+	t.tryRemove( self.f_crd )
+
+    def test_ComplexRandomizer(self):
+	"""Dock.ComplexRandomizer test"""
+        from Biskit import Trajectory
+
+	if self.local:
+	    print "\nLoading Rec and Lig files ...",
+
         rec_pdb = t.testRoot() + '/rec/1A2P.pdb' 
         lig_pdb = t.testRoot() + '/lig/1A19.pdb' 
 
@@ -283,44 +289,51 @@ class Test:
         rec = PCRModel( rec_psf, rec_pdb )
         lig = PCRModel( lig_psf, lig_pdb )
 
-        cr = ComplexRandomizer( rec, lig, debug=0 )
+	if self.local:
+	    print "Initializing Randomizer..."
 
-        ## create 3 random complexes
-        cs = [ cr.random_complex() for i in range(3) ]
+        self.cr = ComplexRandomizer( rec, lig, debug=self.DEBUG )
 
-        traj = Trajectory( [ c.model() for c in cs ] )
+	if self.local:
+	    print "Creating 3 random complexes..."
 
-        if local:
-            f_pfb = tempfile.mktemp('_test.pdb')
-            f_crd = tempfile.mktemp('_test.crd')
-            traj.ref.writePdb( f_pfb )
-            traj.writeCrd( f_crd )
-            print 'Wrote reference pdb file to: %s'%f_pfb
-            print 'Wrote crd file to: %s'%f_crd
-            
+        cs = [ self.cr.random_complex() for i in range(3) ]
+
+        self.traj = Trajectory( [ c.model() for c in cs ] )
+
+        if self.local:
+	    self.display( self.traj )
             globals().update( locals() )
 
-            ## cleanup
-            t.tryRemove( f_pfb )
-            t.tryRemove( f_crd )
-          
-        return len(traj)
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: number of random complexes
-        @rtype:  int
-        """
-        return 3
+        self.assertEqual( len(self.traj), 3 )
     
-        
+
+    def display(self, traj ):
+	"""Display random complexes as trajectory in Pymol.
+	Only run in local interactive mode.
+	"""
+	from Biskit import Pymoler
+
+	print "activate debug switch to get random complexes written to disc!"
+	if self.DEBUG:
+	    print "writing random complex as trajectory to file..."
+	    traj.ref.writePdb( self.f_pfb )
+	    traj.writeCrd( self.f_crd )
+	    print 'Wrote reference pdb file to: %s' % self.f_pfb
+	    print 'Wrote crd file to: %s' % self.f_crd
+
+	self.pm = Pymoler( full=0 )
+
+	mname = self.pm.addMovie( [ traj[i] for i in range(len(traj)) ] )
+	self.pm.add('hide all')
+	self.pm.add('show cartoon')
+	self.pm.add('spectrum')
+	self.pm.add('mplay')
+
+	self.pm.run()
+
+
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
 

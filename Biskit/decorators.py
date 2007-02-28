@@ -129,38 +129,25 @@ def synchronized( f ):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: count
-        @rtype: int
-        """
+class Test(BT.BiskitTest):
+    """Test case"""
+
+    def test_decorators( self ):
+        """decorators test"""
         import time
         from Biskit import PDBModel
 
         class A:
 
             def __init__( self, id=1 ):
-
                 self.id = id
 
             @accept( int, model=PDBModel, x=str )
             def simple( self, i, model=None, **arg ):
-
                 i += 1
                 return i
-
 
             @synchronized
             def report( self, j, i=1, **arg ):
@@ -177,29 +164,14 @@ class Test:
             result += a.simple( 8, x='a' )
 
         
-        if local:
-            print time.clock() - t
+        if self.local:
+            print 'timing: ', time.clock() - t
             globals().update( locals() )
                               
-        return result
-
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: count
-        @rtype:  int
-        """
-        return 90000
-
+        self.assertEqual( result, 90000 )
         
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
     

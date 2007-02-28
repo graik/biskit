@@ -143,3 +143,12 @@ class PDBParser(object):
         if disconnect: m.disconnect()
 
         return m
+
+##############
+# Empty test #
+##############
+
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    pass

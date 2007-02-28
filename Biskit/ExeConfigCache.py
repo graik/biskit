@@ -101,46 +101,24 @@ class ExeConfigCache:
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
+class Test(BT.BiskitTest):
+    """Test"""
+
     
-    def run( self, local=0 ):
-        """
-        run function test
+    def test_Hmmer( self):
+        """ExeConfigCache test """
+	import os
+
+        self.x = ExeConfigCache.get( 'xplor' )
         
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
+        if self.local:
+            print self.x
 
-        @return: 1
-        @rtype: int
-        """
-        x = ExeConfigCache.get( 'xplor' )
-        
-        if local:
-            print x
-            globals().update( locals() )
-            
-        return 1
-
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
+	self.assert_( self.x.dat_found )
         
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
+    BT.localTest()

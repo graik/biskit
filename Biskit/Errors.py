@@ -61,3 +61,15 @@ class XplorInputError( BiskitError ):
     Errors raised while generating xplor input script
     """
     pass
+
+##################
+##  (FAKE) TESTING        
+###################
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Error test"""
+    
+    def test_Errors( self ):
+        """Errors test (empty test)"""
+	pass

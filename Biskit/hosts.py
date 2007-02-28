@@ -180,3 +180,12 @@ if REMOVE:
                nodes_shared, cpus_shared, nodes_other, cpus_other ]:
 
         MU.removeFromList( l, nodes_exclude, all=1 )
+
+##############
+## empty test
+##############
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Mock test, hosts only contains data"""
+    pass

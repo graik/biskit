@@ -122,63 +122,38 @@ class ModelList( DictList ):
 #############
 ##  TESTING        
 #############
-        
-class Test:
-    """
-    Test class
-    """
-    
+import Biskit.test as BT
 
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: list with sequences of models
-        @rtype: [str]
-        """
+class Test(BT.BiskitTest):
+    """Test class """
+
+    def test_ModelList( self ):
+        """ModelList test"""
         import random
         
-        f_lst = [ T.testRoot() + '/rec/1A2P.pdb',
-                  T.testRoot() + '/lig/1A19.pdb',
-                  T.testRoot() + '/com/1BGS.pdb' ]
+        self.f_lst = [ T.testRoot() + '/rec/1A2P.pdb',
+		       T.testRoot() + '/lig/1A19.pdb',
+		       T.testRoot() + '/com/1BGS.pdb' ]
 
         ## Loading PDBs...
-        self.l = ModelList( f_lst )
+        self.l = ModelList( self.f_lst )
 
-        seq = []
+        self.seq = []
         for m in self.l:
             m.info['score'] = random.random()
-            seq += [ m.compress( m.maskProtein() ).sequence() ]
+            self.seq += [ m.compress( m.maskProtein() ).sequence() ]
 
-        p = self.l.plot( 'score' )
+        self.p = self.l.plot( 'score' )
 
-        if local:
+        if self.local:
             print self.l.valuesOf('score')
-            p.show()
-            globals().update( locals() )
-            
-        return seq
+            self.p.show()
 
+	self.assertEqual( self.seq, self.EXPECTED )
 
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: list with sequences of models
-        @rtype:  [str]
-        """
-        return ['VINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIR', 'KKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDCLTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILS', 'AQVINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIRKKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDALTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILS']
+    #: expected result
+    EXPECTED = ['VINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIR', 'KKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDCLTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILS', 'AQVINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIRKKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDALTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILS']
     
-        
-
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()

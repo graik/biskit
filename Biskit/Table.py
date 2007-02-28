@@ -170,3 +170,12 @@ def asTable(list):
 
 
 
+################
+## empty test ##
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Mock test"""
+
+    TAGS = [BT.EXE, BT.OLD]
+

@@ -417,38 +417,28 @@ class MSMS( Executor ):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    from Biskit import PDBModel
+class Test(BT.BiskitTest):
+    """Test case"""
+
+    TAGS = [ BT.OLD, BT.EXE ]  ## msms is superseeded by SurfaceRacer
     
-
-    def run( self, local=0 ):
-        """
-        run function test
-
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-
-        @return: sum of SAS and SES areas
-        @rtype:  float
-        """
+    def test_msms(self):
+	"""msms test"""
         from Biskit import PDBModel
 
-        if local: 'Loading PDB...'
-        m = PDBModel( T.testRoot() + '/lig/1A19.pdb' )
-        m = m.compress( m.maskProtein() )
+        if self.local: print 'Loading PDB...'
+        self.m = PDBModel( T.testRoot() + '/lig/1A19.pdb' )
+        self.m = self.m.compress( self.m.maskProtein() )
 
-        if local: 'Getting surfaces via the MSMS executable'
-        ms = MSMS( m, debug=1, verbose=1 )
+        if self.local: 'Getting surfaces via the MSMS executable'
+        self.ms = MSMS( self.m, debug=1, verbose=1 )
 
-        if local: 'Running'
-        out, sesList, sasList, atmList = ms.run()
+        if self.local: 'Running'
+        out, sesList, sasList, atmList = self.ms.run()
         
-        if local:
+        if self.local:
             print out
             print '\nResult from MSMS (first 5 lines): '
             print 'SES \tSAS \tAtom name'
@@ -460,26 +450,13 @@ class Test:
             globals().update( locals() )
 
             
-        return out['sas'] + out['ses']
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: sum of SAS and SES areas
-        @rtype:  float
-        """
-        return 5085.1580000000004 + 4208.7389999999996
-
+        self.assertAlmostEqual( out['sas'] + out['ses'],
+				5085.1580000000004 + 4208.7389999999996, 8 )
     
         
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
-
+    BT.localTest()
 
 ## ####################################
 ## ## Testing

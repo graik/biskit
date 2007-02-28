@@ -584,60 +584,37 @@ class Pymoler( Executor ):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
-        traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
+class Test(BT.BiskitTest):
+    """Test"""
 
-        pm = Pymoler( full=0, verbose=local )
-        
-        mname = pm.addMovie( [ traj[i] for i in range(0,100,20) ] )
+    TAGS = [ BT.EXE ]
 
-        sel = pm.makeSel({'residue':29})
-        pm.add('show stick, %s'%sel)
+    def test_Pymoler(self):
+	"""Pymoler test"""
+        self.traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
 
-        pm.add('mplay')
+        self.pm = Pymoler( full=0, verbose=self.local )
         
-        if local:
-            globals().update( locals() )
-        else:
-            pm.add('quit')
+        mname = self.pm.addMovie( [ self.traj[i] for i in range(0,100,20) ] )
+
+        sel = self.pm.makeSel({'residue':29})
+##         self.pm.add('show stick, %s' % sel)
+	self.pm.add('show surface, %s' % sel)
+
+        self.pm.add('mplay')
+        
+        if not self.local:
+            self.pm.add('quit')
             
-        pm.run() ## old style call "pm.show()" also works
-
-        return 1
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
+        self.pm.run() ## old style call "pm.show()" also works
     
-
+	self.assert_( self.pm.pid is not None )
+	
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
 
 
 

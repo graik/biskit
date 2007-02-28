@@ -168,23 +168,14 @@ class ComplexEvolvingList( ComplexList ):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: list of comment strings
-        @rtype: [str]
-        """
+class Test(BT.BiskitTest):
+    """Test case"""
+
+    def test_ComplexEvolvingList(self):
+	"""Dock.ComplexEvolvingList test"""
+
         import Biskit.tools as t
         from Biskit.Dock import ComplexEvolving
         from Biskit.Dock import ComplexEvolvingList
@@ -203,7 +194,7 @@ class Test:
         ## create an evolving complex list
         cl = ComplexEvolvingList( [c, c] )
         
-        if local:
+        if self.local:
             ## last version of all complexes in list
             print cl.valuesOf('comment')
 
@@ -215,24 +206,11 @@ class Test:
     
             globals().update( locals() )
             
-        return cl.valuesOf('comment'), cl[0].valuesOf('comment')
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: list of comment strings
-        @rtype:  [str]
-        """
-        return (['test2', 'test2'], [None, 'test1', 'test2'])
-    
+        self.assertEqual( (cl.valuesOf('comment'), cl[0].valuesOf('comment')),
+			  (['test2', 'test2'], [None, 'test1', 'test2']) )
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
     
 

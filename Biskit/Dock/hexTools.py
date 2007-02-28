@@ -315,49 +315,22 @@ save_docking %(output_all)s""" \
 #############
 ##  TESTING        
 #############
-    
-class Test:
-    """
-    Test class
-    """
+import Biskit.test as BT
+        
+class Test(BT.BiskitTest):
+    """Test case"""
 
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: distance
-        @rtype:  float
-        """
+    def test_hexTools(self):
+	"""Dock.hexTools test"""
         from Biskit import PDBModel
-        m = PDBModel( t.testRoot() + '/com/1BGS.pdb' )
-        dist = centerSurfDist( m , m.maskCA() )
+        self.m = PDBModel( t.testRoot() + '/com/1BGS.pdb' )
+        dist = centerSurfDist( self.m , self.m.maskCA() )
 
-        if local:
-            globals().update( locals() )
-            
-        return dist[0]
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: distance
-        @rtype:  float
-        """
-        return 26.880976894654744
+        self.assertAlmostEqual( dist[0], 26.880976894654744, 7)
 
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
-
-
+    BT.localTest()
 
 

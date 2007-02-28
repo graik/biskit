@@ -195,34 +195,24 @@ def fasta( m , start=0, stop=None ):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: icmCad values
-        @rtype: [float]
-        """
+class Test(BT.BiskitTest):
+    """Test case"""
+
+    def test_molTools(self):
+	"""molTools test"""
         from Biskit import PDBModel
         
         ## Loading PDB...
-        m = PDBModel( T.testRoot() + '/lig/1A19.pdb' )
-        m = m.compress( m.maskProtein() )
+        self.m = PDBModel( T.testRoot() + '/lig/1A19.pdb' )
+        self.m = self.m.compress( self.m.maskProtein() )
 
-        hb = hbonds( m )
+        hb = hbonds( self.m )
 
-        xyz = xyzOfNearestCovalentNeighbour( 40, m )
+        xyz = xyzOfNearestCovalentNeighbour( 40, self.m )
         
-        if local:
+        if self.local:
             print '\nThe nearest covalently attached atom to the'
             print '  atom with index 40 has the coordinates:'
             print xyz
@@ -234,26 +224,17 @@ class Test:
                 
             globals().update( locals() )
                               
-        return N.sum(N.ravel(hb[3:5])) + N.sum(xyz)
+        self.r = N.sum(N.ravel(hb[3:5])) + N.sum(xyz)
+
+	self.assertAlmostEqual( self.r, self.EXPECT, 5 )
+
+    EXPECT = 2025.8997840075292 + 152.687011719
 
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: icmCad values
-        @rtype:  [float]
-        """
-        return 2025.8997840075292 + 152.687011719
-
-    
         
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
-
+    BT.localTest()
 
 
 

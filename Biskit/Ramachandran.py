@@ -340,60 +340,35 @@ class Ramachandran:
 #############
 ##  TESTING        
 #############
-
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        Ramachandran function test
-
-        @param local: if this option is set, local variables
-                        will be transfered to global
-        @type  local: 1|0
-
-        @return: sum of all psi angles
-        @rtype: float      
-        """       
-        traj = T.Load( T.testRoot()+'/lig_pcr_00/traj.dat' )
-
-        traj.ref.setAtomProfile('mass', traj.ref.masses() ) 
-
-        mdl = [ traj[0], traj[11] ]
-        mdl = [ md.compress( md.maskProtein() ) for md in mdl ]
-
-        rama = Ramachandran( mdl , name='test', profileName='mass',
-                             verbose=local)
-
-        psi = N.array( rama.psi )
-
-        if local:
-            rama.show()
-            
-            globals().update( locals() )
-            
-        return N.sum( N.compress( psi != None, psi ) )
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: sum of all psi angles
-        @rtype: float     
-        """
-        # N.sum( N.compress(N.array(rama.psi) != None, N.array(rama.psi)))
-        return -11717.909796797909 
+import Biskit.test as BT
         
+class Test(BT.BiskitTest):
+    """Test"""
 
+    def test_Ramachandran(self):
+	"""Ramachandran test"""
+        self.traj = T.Load( T.testRoot()+'/lig_pcr_00/traj.dat' )
+
+        self.traj.ref.setAtomProfile('mass', self.traj.ref.masses() ) 
+
+        self.mdl = [ self.traj[0], self.traj[11] ]
+        self.mdl = [ md.compress( md.maskProtein() ) for md in self.mdl ]
+
+        self.rama = Ramachandran( self.mdl , name='test', profileName='mass',
+				  verbose=self.local)
+
+        self.psi = N.array( self.rama.psi )
+
+        if self.local:
+            self.rama.show()
+            
+        r = N.sum( N.compress( self.psi != None, self.psi ) )
+	self.assertEqual( r, -11717.909796797909 )
+
+ 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
     
     
 
