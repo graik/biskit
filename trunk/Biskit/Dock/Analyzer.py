@@ -312,68 +312,46 @@ class Analyzer:
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
+class Test(BT.BiskitTest):
+    """Hmmer test"""
+
     
-    def run( self, local=0  ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: shape of ramdom contact matrix
-        @rtype:  tuple
-        """
+    def prepare(self):
         import tempfile
+	self.f_out = tempfile.mktemp( '_test_rec.traj' )
+
+    def cleanUp(self):
+        t.tryRemove( self.f_out )
+
+    def test_Analyzer( self):
+        """Dock.Analyzer test """
         from Biskit import Trajectory
         from Biskit.Dock import ComplexList
 
-        ## create a minimal receptor trajectory from a pdb file
-        f_out = tempfile.mktemp( '_test_rec.traj' )
-        t_rec = Trajectory( [t.testRoot() + '/rec/1A2P.pdb'], verbose=local )
-        t.Dump( t_rec, f_out )
+        ## create a minimal 1-frame receptor trajectory from a pdb file
+        self.t_rec = Trajectory( [t.testRoot()+'/rec/1A2P.pdb'],
+				 verbose=self.local)
+        t.Dump( self.t_rec, self.f_out )
 
         ## load a complex list
         cl = t.Load( t.testRoot() + '/dock/hex/complexes.cl')
 
-        a= Analyzer( rec = f_out,
-                     lig = t.testRoot()+'/lig_pcr_00/traj.dat',
-                     ref = t.testRoot()+'/com/ref.complex',
-                     verbose = local)
+        self.a= Analyzer( rec = self.f_out,
+			  lig = t.testRoot()+'/lig_pcr_00/traj.dat',
+			  ref = t.testRoot()+'/com/ref.complex',
+			  verbose = self.local)
 
-        ## shuffle this lsit five times
-        shuff_lst = a.shuffledLists( 5, range(8) )
+        ## shuffle this list five times
+        shuff_lst = self.a.shuffledLists( 5, range(8) )
 
         ## create two random contact matrices
-        rand_mat = a.random_contacts( cl[0].atomContacts(), 2 )
+        rand_mat = self.a.random_contacts( cl[0].atomContacts(), 2 )
         
-        if local:
-            globals().update( locals() )
-            
-        ## cleanup
-        t.tryRemove( f_out )
-        
-        return N.shape(rand_mat[1])
-
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: shape of ramdom contact matrix
-        @rtype:  tuple
-        """
-        return (1075, 876)
+        self.assertEqual( N.shape(rand_mat[1]), (1075, 876) ) 
     
         
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
+    BT.localTest()

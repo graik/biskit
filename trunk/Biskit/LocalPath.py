@@ -631,74 +631,60 @@ class LocalPath( object ):
 #############
 ##  TESTING        
 #############
-        
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
+import Biskit.test as BT
 
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
+class Test(BT.BiskitTest):
+    """Test class"""
+    
+    def test_LocalPath( self ):
+        """LocalPath test"""
+
         os.environ['PRJ_INTERFACES'] = '~raik/data/tb/interfaces'
 
-        path = []
+	S = self
 
-        l = LocalPath()
+        S.path = []
+
+        S.l = LocalPath()
 
         ## Example 1; create from fragments
-        l.set_fragments(
+        S.l.set_fragments(
             ('/home/Bis/johan/data/tb/interfaces','PRJ_INTERFACES'),
             ('/c11/com_wet/ref.com', None) )
-        path += [ 'Example 1:\n %s : %s \n'%(l.formatted(), l.local()) ]
+        S.path += [ 'Example 1:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
+	S.assert_( 'johan' not in S.l.local() )
 
         ## Example 2; create from path with custom variable
-        l.set_path( '/home/Bis/raik/data/tb/interfaces/c11/com_wet/ref.com',
+        S.l.set_path( '/home/Bis/raik/data/tb/interfaces/c11/com_wet/ref.com',
                     USER='/home/Bis/raik' )
-        path +=  [ 'Example 2:\n %s : %s \n'%(l.formatted(), l.local()) ]
+        S.path +=  [ 'Example 2:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
+	S.assertEqual( S.l.formatted(),\
+	     '{/home/Bis/raik|$USER}/data/tb/interfaces/c11/com_wet/ref.com' )
 
         ## Example 3; create from non-existing path
-        l.set_path( '/home/xyz/data/tb/interfaces/c11/com_wet/ref.com' )
-        path += [ 'Example 3:\n %s : %s \n'%(l.formatted(), l.local()) ]
+        S.l.set_path( '/home/xyz/data/tb/interfaces/c11/com_wet/ref.com' )
+        S.path += [ 'Example 3:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
+	S.assert_( S.l.formatted() == S.l.local() )
 
         ## Example 4; create from existing path with automatic substitution
-        l.set_path( T.projectRoot() + '/test/com' )
-        path += [ 'Example 4:\n %s : %s \n'%(l.formatted(), l.local()) ]
+        S.l.set_path( T.projectRoot() + '/test/com' )
+        S.path += [ 'Example 4:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
+	S.assertEqual( S.l.formatted(),
+		       '{/data/raik/py/biskit|$projectRoot}/test/com')
 
         ## Example 5; rule out stray substitutions
-        l.set_path( T.projectRoot() + '/tmp/com', maxSub=1, TMP='/tmp' )
-        path += [ 'Example 5:\n %s : %s \n'%(l.formatted(), l.local()) ]
+        S.l.set_path( T.projectRoot() + '/tmp/com', maxSub=1, TMP='/tmp' )
+        S.path += [ 'Example 5:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
+	S.assertEqual( S.l.formatted(),
+		       '{/data/raik/py/biskit|$projectRoot}/tmp/com')
 
-        if local:
-            for p in path:
+        self.assertEqual( S.l.fragments[0][1], 'projectRoot' )
+
+        if S.local:
+            for p in S.path:
                 print p
-            globals().update( locals() )
-
-        return l.fragments[0][1]
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 'projectRoot'
-    
-        
+      
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()

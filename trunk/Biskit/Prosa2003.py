@@ -341,62 +341,39 @@ exit\n
 
 #############
 ##  TESTING        
-#############   
-
-class Test:
-    """
-    Test class
-    """
-
-    def run( self, local=0 ):
-        """
-        Prosa2003 function test
+#############
+import Biskit.test as BT
         
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: list of energies
-        @rtype: [ float ]
-        """
+class Test(BT.BiskitTest):
+    """Test"""
+
+    TAGS = [ BT.EXE ]
+
+    def test_Prosa2003(self):
+	"""Prosa2003 test"""
         from Biskit import PDBModel
         
         ## Loading PDB...
-        ml = PDBModel( T.testRoot()+'/lig/1A19.pdb' )
-        ml = ml.compress( ml.maskProtein() )
+        self.ml = PDBModel( T.testRoot()+'/lig/1A19.pdb' )
+        self.ml = self.ml.compress( self.ml.maskProtein() )
 
-        mr = PDBModel( T.testRoot()+'/rec/1A2P.pdb' )
-        mr = mr.compress( mr.maskProtein() )
+        self.mr = PDBModel( T.testRoot()+'/rec/1A2P.pdb' )
+        self.mr = self.mr.compress( self.mr.maskProtein() )
 
         ## Starting Prosa2003
-        prosa = Prosa2003( [ml, mr], debug=0, verbose=0 )
+        self.prosa = Prosa2003( [self.ml, self.mr], debug=0, verbose=0 )
 
         ## Running
-        ene = prosa.run()
+        self.ene = self.prosa.run()
 
-        result = prosa.prosaEnergy()
+        self.result = self.prosa.prosaEnergy()
 
-        if local:
-            print "Result: ", result
-            globals().update( locals() )    
-       
-        return result
+        if self.local:
+            print "Result: ", self.result
 
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-        
-        @return: list of energies
-        @rtype: [ float ]
-        """
-        return  [ -94.568,  -64.903, -159.463 ]
+        self.assertEqual( self.result, [ -94.568,  -64.903, -159.463 ] )
 
         
 if __name__ == '__main__':
 
-    test = Test( )
-
-    assert test.run( local=1 ) == test.expected_result()
-    
-
+    BT.localTest()

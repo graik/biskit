@@ -516,54 +516,32 @@ def __bulk( a, rel, absSurf, key, i ):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: something
-        @rtype:  float
-        """
+class Test(BT.BiskitTest):
+    """Test case"""
+
+    def test_surfaceRacerTools(self):
+	"""surfaceRacerTools test"""
         from Biskit import PDBModel
         import Biskit.tools as T
         
         ## load a structure
-        m = PDBModel( T.testRoot()+'/lig/1A19.pdb' )
-        m = m.compress( m.maskProtein() )
-        m = m.compress( m.maskHeavy() )
+        self.m = PDBModel( T.testRoot()+'/lig/1A19.pdb' )
+        self.m = self.m.compress( self.m.maskProtein() )
+        self.m = self.m.compress( self.m.maskHeavy() )
         
         ## some fake surface data
-        surf = Numeric.ones( m.lenAtoms()) * 10.0
+        surf = Numeric.ones( self.m.lenAtoms()) * 10.0
 
-        relExp = relExposure( m, surf )
+        relExp = relExposure( self.m, surf )
         
-        if local:
-            globals().update( locals() )
+##         if self.local:
+##             globals().update( locals() )
             
-        return  Numeric.sum(relExp)
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: something
-        @rtype:  float
-        """
-        return 44276.860852223857
+        self.assertEqual( Numeric.sum(relExp), 44276.860852223857 )
     
         
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert  test.run( local=1 ) == test.expected_result() 
+    BT.localTest()

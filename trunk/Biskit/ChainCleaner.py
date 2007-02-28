@@ -255,59 +255,39 @@ class ChainCleaner:
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """   
-    def run( self, local=0 ):
-        """
-        run function test
+class Test(BT.BiskitTest):
+    """ Test ChainCleaner"""   
+
+    def prepare(self):
+        self.fname =   T.testRoot() + '/rec/1A2P_rec_original.pdb'
+        self.outPath = T.tempDir()
+
+    def cleanUp(self):
+        T.tryRemove( self.cleaner.log.fname )
+            
+
+    def test_ChainCleaner( self):
+        """ChainCleaner test"""
+        self.cleaner = ChainCleaner( ChainSeparator(self.fname, self.outPath) )
+        self.cleaner.next()
         
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-
-        @return: log message
-        @rtype: str
-        """
-        fname =   T.testRoot() + '/rec/1A2P_rec_original.pdb'
-
-        outPath = T.tempDir()
-
-        cleaner = ChainCleaner( ChainSeparator(fname, outPath) )
-
-        cleaner.next()
-        
-        if local:
-            print 'Wrote log: %s'%(cleaner.log.fname)            
-            globals().update( locals() )
+        if self.local:
+            print 'Wrote log: %s'%(self.cleaner.log.fname)            
 
         ## return logfile contents
-        f= open( cleaner.log.fname, 'r')
-        result = f.readlines()
+        f= open( self.cleaner.log.fname, 'r')
+        self.result = f.readlines()
         f.close()
 
-        ## cleanup
-        T.tryRemove( cleaner.log.fname )
-            
-        return result
+        self.assertEqual(self.result, self.EXPECTED)
 
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: log message
-        @rtype:  str
-        """
-        return ['\n', 'WARNING! The PDB-file contains coordinates for none water HETATMs.\n', 'If you want to keep the HETATM -  prepare the file for Xplor manualy \n', '\n', 'String found in line(s): \n', '\n', 'HETATM             \n', 'HETATM  881 ZN    ZN A 112      33.898  42.301  55.562  0.30 41.80          ZN  \n', 'HETATM 1891 ZN    ZN B 112       8.869  30.194  74.011  0.35 32.13          ZN  \n', 'HETATM 2908 ZN    ZN C 112      39.324  15.495  56.124  1.00 12.86          ZN  \n', '\n', '--------------------------------------------------------------------------------\n', '\n', 'Separate chains: \n', '------------------\n', '\n', "  Chain ID's of compared chains: ['A', 'B', 'C']\n", '  Cross-Identity between chains:\n', '[[ 1.  1.  1.]\n', ' [ 0.  1.  1.]\n', ' [ 0.  0.  1.]]\n', '  Identity threshold used: 0.9\n', 'NOTE: Identity matrix will be used for removing identical chains.\n', '2 chains have been removed.\n', '\n', '0 breaks found in chain (108 residues) A: []\n', 'changed segment ID of chain A to 1A2A\n', '\n', 'Cleaning up chain 1A2A: \n', 'Checking atom occupancies of chain 1A2A\n', '\tOccupancy: 0.3 : CD2 : TYR 17\n', '\tOccupancy: 0.8 : CE2 : TYR 17\n', '\tOccupancy: 0.5 : CZ : TYR 17\n', '\tOccupancy: 0.5 : OH : TYR 17\n', '\tOccupancy: 0.5 : OD1 : ASP 22\n', '\tOccupancy: 0.5 : OD2 : ASP 22\n', '\tOccupancy: 0.5 : CB : SER 28\n', '\tOccupancy: 0.5 : OG : SER 28\n', '\tOccupancy: 0.5 : CB : GLN 31\n', '\tOccupancy: 0.5 : CG : GLN 31\n', '\tOccupancy: 0.5 : CD : GLN 31\n', '\tOccupancy: 0.5 : OE1 : GLN 31\n', '\tOccupancy: 0.5 : NE2 : GLN 31\n', '\tOccupancy: 0.5 : CB : SER 38\n', '\tOccupancy: 0.5 : OG : SER 38\n', '\tOccupancy: 0.5 : N : ARG 59\n', '\tOccupancy: 0.5 : CA : ARG 59\n', '\tOccupancy: 0.5 : C : ARG 59\n', '\tOccupancy: 0.5 : O : ARG 59\n', '\tOccupancy: 0.0 : CB : ARG 59\n', '\tOccupancy: 0.0 : CG : ARG 59\n', '\tOccupancy: 0.0 : CD : ARG 59\n', '\tOccupancy: 0.0 : NE : ARG 59\n', '\tOccupancy: 0.0 : CZ : ARG 59\n', '\tOccupancy: 0.0 : NH1 : ARG 59\n', '\tOccupancy: 0.0 : NH2 : ARG 59\n', '\tOccupancy: 0.5 : OE1 : GLU 60\n', '\tOccupancy: 0.5 : OE2 : GLU 60\n', '\tOccupancy: 0.5 : CE : LYS 66\n', '\tOccupancy: 0.5 : NZ : LYS 66\n', '\tOccupancy: 0.5 : CB : SER 85\n', '\tOccupancy: 0.5 : OG : SER 85\n', '\tOccupancy: 0.5 : CB : ILE 96\n', '\tOccupancy: 0.5 : CG1 : ILE 96\n', '\tOccupancy: 0.5 : CG2 : ILE 96\n', '\tOccupancy: 0.5 : CD1 : ILE 96\n', 'Checking atoms of chain 1A2A\n']
+    EXPECTED = ['\n', 'WARNING! The PDB-file contains coordinates for none water HETATMs.\n', 'If you want to keep the HETATM -  prepare the file for Xplor manualy \n', '\n', 'String found in line(s): \n', '\n', 'HETATM             \n', 'HETATM  881 ZN    ZN A 112      33.898  42.301  55.562  0.30 41.80          ZN  \n', 'HETATM 1891 ZN    ZN B 112       8.869  30.194  74.011  0.35 32.13          ZN  \n', 'HETATM 2908 ZN    ZN C 112      39.324  15.495  56.124  1.00 12.86          ZN  \n', '\n', '--------------------------------------------------------------------------------\n', '\n', 'Separate chains: \n', '------------------\n', '\n', "  Chain ID's of compared chains: ['A', 'B', 'C']\n", '  Cross-Identity between chains:\n', '[[ 1.  1.  1.]\n', ' [ 0.  1.  1.]\n', ' [ 0.  0.  1.]]\n', '  Identity threshold used: 0.9\n', 'NOTE: Identity matrix will be used for removing identical chains.\n', '2 chains have been removed.\n', '\n', '0 breaks found in chain (108 residues) A: []\n', 'changed segment ID of chain A to 1A2A\n', '\n', 'Cleaning up chain 1A2A: \n', 'Checking atom occupancies of chain 1A2A\n', '\tOccupancy: 0.3 : CD2 : TYR 17\n', '\tOccupancy: 0.8 : CE2 : TYR 17\n', '\tOccupancy: 0.5 : CZ : TYR 17\n', '\tOccupancy: 0.5 : OH : TYR 17\n', '\tOccupancy: 0.5 : OD1 : ASP 22\n', '\tOccupancy: 0.5 : OD2 : ASP 22\n', '\tOccupancy: 0.5 : CB : SER 28\n', '\tOccupancy: 0.5 : OG : SER 28\n', '\tOccupancy: 0.5 : CB : GLN 31\n', '\tOccupancy: 0.5 : CG : GLN 31\n', '\tOccupancy: 0.5 : CD : GLN 31\n', '\tOccupancy: 0.5 : OE1 : GLN 31\n', '\tOccupancy: 0.5 : NE2 : GLN 31\n', '\tOccupancy: 0.5 : CB : SER 38\n', '\tOccupancy: 0.5 : OG : SER 38\n', '\tOccupancy: 0.5 : N : ARG 59\n', '\tOccupancy: 0.5 : CA : ARG 59\n', '\tOccupancy: 0.5 : C : ARG 59\n', '\tOccupancy: 0.5 : O : ARG 59\n', '\tOccupancy: 0.0 : CB : ARG 59\n', '\tOccupancy: 0.0 : CG : ARG 59\n', '\tOccupancy: 0.0 : CD : ARG 59\n', '\tOccupancy: 0.0 : NE : ARG 59\n', '\tOccupancy: 0.0 : CZ : ARG 59\n', '\tOccupancy: 0.0 : NH1 : ARG 59\n', '\tOccupancy: 0.0 : NH2 : ARG 59\n', '\tOccupancy: 0.5 : OE1 : GLU 60\n', '\tOccupancy: 0.5 : OE2 : GLU 60\n', '\tOccupancy: 0.5 : CE : LYS 66\n', '\tOccupancy: 0.5 : NZ : LYS 66\n', '\tOccupancy: 0.5 : CB : SER 85\n', '\tOccupancy: 0.5 : OG : SER 85\n', '\tOccupancy: 0.5 : CB : ILE 96\n', '\tOccupancy: 0.5 : CG1 : ILE 96\n', '\tOccupancy: 0.5 : CG2 : ILE 96\n', '\tOccupancy: 0.5 : CD1 : ILE 96\n', 'Checking atoms of chain 1A2A\n']
     
 
 if __name__ == '__main__':
 
-    test = Test()
+    BT.localTest()
 
-    assert test.run( local=1 ) == test.expected_result()
-
-    

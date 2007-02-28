@@ -265,49 +265,27 @@ REMEDY: run the script fixAtomIndices.py
 
         return items, N.array( xyz, N.Float32 )
     
-
-class Test:
-    """
-    Test class
-    """
-
-    def run( self, local=0 ):
-        """
-        run function test
+#############
+##  TESTING        
+#############
+import Biskit.test as BT
         
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: coordinates of center of mass
-        @rtype:  array
-        """
+class Test(BT.BiskitTest):
+    """Test case"""
+
+    def test_PDBParseFile( self ):
+        """PDBParseFile test"""
 
         ## loading output file from X-plor
-        if local:
+        if self.local:
             print 'Loading pdb file ..'
 
-        p = PDBParseFile()
-        m = p.parse2new( T.testRoot()+'/rec/1A2P.pdb')
+        self.p = PDBParseFile()
+        self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P.pdb')
 
-        if local:
-            globals().update( locals() )
-
-        return N.sum( m.centerOfMass() )
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: coordinates of center of mass
-        @rtype:  array
-        """
-        return N.sum( N.array([ 29.53385022,  46.39655482,  37.75218589]))
-        
+        self.assertAlmostEqual( N.sum( self.m.centerOfMass() ),
+	       N.sum( N.array([ 29.53385022,  46.39655482,  37.75218589])))
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
+    BT.localTest()

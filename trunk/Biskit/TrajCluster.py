@@ -357,23 +357,13 @@ class TrajCluster:
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
+class Test(BT.BiskitTest):
+    """Test Adaptive clustering"""
+
+    def test_TrajCluster(self):
+	"""TrajCluster test"""
         from Biskit.EnsembleTraj import traj2ensemble
 
         traj = T.Load( T.testRoot()+'/lig_pcr_00/traj.dat')
@@ -384,22 +374,18 @@ class Test:
 
         traj = traj.thin( 1 )
 
-        if local:
-            traj.fit( aMask )
-            tc = TrajCluster( traj )
-        else:
-            traj.fit( aMask, verbose=0 )
-            tc = TrajCluster( traj, verbose=0 )
+	traj.fit( aMask, verbose=self.local )
+	self.tc = TrajCluster( traj, verbose=self.local )
 
         ## check how many clusters that are needed with the given criteria
-        n_clusters = tc.calcClusterNumber( min_clst=3, max_clst=15,
-                                           rmsLimit=0.7, aMask=aMask )
+        n_clusters = self.tc.calcClusterNumber( min_clst=3, max_clst=15,
+						rmsLimit=0.7, aMask=aMask )
         
         ## cluster
-        tc.cluster( n_clusters, aMask=aMask )
+        self.tc.cluster( n_clusters, aMask=aMask )
 
-        if local:
-            member_frames = tc.memberFrames()
+        if self.local:
+            member_frames = self.tc.memberFrames()
 
             print 'There are %i clusters where the members are:'%n_clusters
             for i in range(n_clusters):
@@ -407,26 +393,8 @@ class Test:
                                                       len(member_frames[i]),
                                                       member_frames[i] )
 
-            globals().update( locals() )
-            
-        return 1
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
-        
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
 

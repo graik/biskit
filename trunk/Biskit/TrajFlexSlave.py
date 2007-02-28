@@ -214,6 +214,15 @@ class TrajFlexSlave( JobSlave ):
                 pass
             f.close()
 
+##############
+## empty test
+##############
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Mock test, the Slave is tested in L{Biskit.TrajFlexMaster}"""
+    pass
+
 
 if __name__ == '__main__':
 

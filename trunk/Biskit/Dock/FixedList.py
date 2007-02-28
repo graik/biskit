@@ -84,51 +84,22 @@ class FixedList( list ):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0, raiseErr=0 ):
-        """
-        run function test
+class Test(BT.BiskitTest):
+    """Test case"""
+
+    def test_FixedList(self):
+	"""Dock.FixedList test"""
+        self.lst = range(10)
+
+        self.f = FixedList( self.lst )
+
+        if self.local: print 'f.fixed() is %i for a FixedList'% self.f.fixed()
         
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
+        self.assertRaises( FixedListError, self.f.append, 6 )
 
-        @return: something
-        @rtype:  float
-        """
-        lst = range(10)
-
-        f = FixedList( lst )
-
-        if local: print 'f.fixed() is %i for a FixedList'% f.fixed()
-        
-        if raiseErr:
-            f.append(6)
-            
-        if local:
-            globals().update( locals() )                
-
-        return 1
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: something
-        @rtype:  float
-        """
-        return 1
-    
         
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert  test.run( raiseErr=1, local=1 ) == test.expected_result()
-    
+    BT.localTest()

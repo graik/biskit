@@ -351,43 +351,24 @@ class SettingsParser(object):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self ):
-        """
-        run function test
+class Test(BT.BiskitTest):
+    """Test"""
 
-        @return: 1
-        @rtype: int
-        """
+    def test_SettingsParser(self):
+	"""SettingsManager test"""
         p = SettingsParser( T.projectRoot()+'/external/defaults/settings.cfg')
 
         p.parse()
 
         t = p.result.get('testparam', Setting())
 
-        globals().update( locals() )
+	self.assertEqual( (t.name, t.value), ('testparam', 42) )
 
         return t.name, t.value
 
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 'testparam', 42
-    
-        
-
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( ) == test.expected_result()
+    BT.localTest()

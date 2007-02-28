@@ -89,64 +89,45 @@ class StructMaster(TrackingJobMaster):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
-        import tempfile
-        out_folder = tempfile.mkdtemp( '_test_StructureMaster' )
-        
+class Test(BT.BiskitTest):
+    """Test"""
+
+    TAGS = [ BT.PVM ]
+
+    def prepare(self):
+	import tempfile
+        self.out_folder = tempfile.mkdtemp( '_test_StructureMaster' )
+
+    def test_StructureMaster(self):
+	"""StructureMaster test"""
+	import os
+
         pdbs = {T.testRoot() + '/lig/1A19.pdb':'',
                 T.testRoot() + '/rec/1A2P.pdb':'',
                 T.testRoot() + '/com/1BGS.pdb':''}
 
-        master = StructMaster( pdbs,
+        self.master = StructMaster( pdbs,
                                2,
                                hosts=hosts.cpus_all,
-                               outFolder=out_folder,
-                               show_output=local,
-                               verbose=local,
+                               outFolder= self.out_folder,
+                               show_output=self.local,
+                               verbose=self.local,
                                add_hosts=1 )
 
         ## run and wait for result
-        r = master.calculateResult()
+        self.r = self.master.calculateResult()
 
         if local:
-            print 'The converted pdb files has been written to %s'%out_folder
-            globals().update( locals() )
+            print 'The converted pdb files has been written to %s' \
+		  % self.out_folder
 
-        ## cleanup
-        T.tryRemove( out_folder, tree=1 )
+	self.assert_( os.path.exists( self.out_folder + '/1A19.model') )
 
-        return 1
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
+    def cleanUp(self):
+        T.tryRemove( self.out_folder, tree=1 )
         
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()

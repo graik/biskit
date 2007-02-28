@@ -352,62 +352,52 @@ def parallelAxesPlot(data, **keywords):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
-        if 0:
-            # List of (x, y) pairs
-            plot([(0.,1),(1.,5),(2.,3),(3.,4)])
+class Test(BT.BiskitTest):
+    """Test case"""
 
-            # List of y values, file output
-            plot([1, 5, 3, 4], file = 'junk.ps')
+    def prepare(self):
+	import tempfile
+	self.fout = tempfile.mktemp('ps','testgnuplot_')
 
-            # Two plots; each given by a 2d array
-            from Numeric import *
-            x = arange(10)
-            y1 = x**2
-            y2 = (10-x)**2
-            plot(transpose(array([x, y1])), transpose(array([x, y2])))
+    def cleanUp(self):
+	import Biskit.tools as T
+	T.tryRemove( self.fout )
 
-        if 1:
-            # Parallel-Axes plot
-            data = [[0., 1., 0.], [1., -1., 0.], [0.5, 0., 1.]]
-            parallelAxesPlot(data)
+    def test_plot2ps(self):
+	"""gnuplot.plot to file test"""
+	plot([1, 5, 3, 4], file = self.fout)
+	if self.local:
+	    print 'plot written to ', self.fout
 
-        if local:
-            globals().update( locals() )
-            
-        return 1
+    def test_scatter(self):
+	"""gnuplot.scatter test (interactive only)"""
+	from RandomArray import poisson
+	if self.local:
+	    self.p = scatter( poisson(50,(1000,2))  )
 
+    def test_plot( self ):
+        """gnuplot.plot test"""
+	# List of (x, y) pairs
+	# plot([(0.,1),(1.,5),(2.,3),(3.,4)])
+	# plot( zip( range(10), range(10) ) )
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
+	# Two plots; each given by a 2d array
+	from Numeric import *
+	x = arange(10)
+	y1 = x**2
+	y2 = (10-x)**2
+	plot(transpose(array([x, y1])), transpose(array([x, y2])))
 
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-        
+    def test_parallelAxesPlot(self):
+	"""gnuplot.parallelAxesPlot test (interactive only)"""
+	if self.local:
+	    data = [[0., 1., 0.], [1., -1., 0.], [0.5, 0., 1.]]
+	    parallelAxesPlot(data)
+
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
 

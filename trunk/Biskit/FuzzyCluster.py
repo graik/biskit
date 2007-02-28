@@ -234,57 +234,33 @@ class FuzzyCluster:
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
 
-class Test:
-    """
-    Test class
-    """    
+class Test(BT.BiskitTest):
+    """FuzzyCluster test"""    
     
-    def run( self, local=0 ):
-        """
-        FuzzyCluster function test
+    def test_FuzzyCluster( self):
+        """FuzzyCluster test"""
+	import gnuplot as G
 
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-
-        @return: array with cluster centers
-        @rtype: array('f')
-        """
 	x1 = random((500,2))
 	x2 = random((500,2)) + 1
 	x3 = random((500,2)) + 2
 
-	x = N.concatenate((x1, x2, x3))
+	self.x = N.concatenate((x1, x2, x3))
 
-	fuzzy = FuzzyCluster(x, n_cluster = 5, weight = 1.5)
+	self.fuzzy = FuzzyCluster(self.x, n_cluster=5, weight=1.5)
 
-        if local:
-            centers = fuzzy.go(1.e-30, n_iterations=50, nstep=10)
-            globals().update( locals() )
-            
-        else:
-            centers = fuzzy.go(1.e-30, n_iterations=50, nstep=10, verbose=0)
-                              
-        return centers
+	self.centers = self.fuzzy.go(1.e-30, n_iterations=50, nstep=10,
+				     verbose=self.local)
 
-
-    def expected_result( self ):
-        """      
-        fuzzy clustering -> the result is newer the same.
-        Therefore we will only check that the shape of the
-        output ids correct.
-
-        @return: shape of centers array
-        @rtype: tuple
-        """  
-        return (5, 2)
-
+	if self.local:
+	    print "cluster centers are displayed in green"
+	    G.scatter( self.x, self.centers )
+	    
+        self.assertEqual( N.shape(self.centers), (5, 2) )
           
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert N.shape(test.run( local=1 )) == test.expected_result()
-
+    BT.localTest()
 

@@ -110,48 +110,28 @@ class PDBParseModel( PDBParser ):
 
         model.setSource( source )
 
-class Test:
-    """
-    Test class
-    """
+#############
+##  TESTING        
+#############
+import Biskit.test as BT
+        
+class Test(BT.BiskitTest):
+    """Test"""
 
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: coordinates of center of mass
-        @rtype:  array
-        """
+    def test_PDBParseModel( self ):
+        """PDBParseModel test"""
 
         ## loading output file from X-plor
-        if local:
+        if self.local:
             print 'Loading pdb file ..'
 
-        p = PDBParseModel()
-        m = p.parse2new( B.PDBModel(T.testRoot()+'/rec/1A2P.pdb') )
+        self.p = PDBParseModel()
+        self.m = self.p.parse2new( B.PDBModel(T.testRoot()+'/rec/1A2P.pdb') )
 
-        if local:
-            globals().update( locals() )
-
-        return N.sum( m.centerOfMass() )
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: coordinates of center of mass
-        @rtype:  array
-        """
-        return N.sum( N.array([ 29.53385022,  46.39655482,  37.75218589]))
-        
+        self.assertAlmostEqual( N.sum( self.m.centerOfMass() ),
+               N.sum( N.array([ 29.53385022,  46.39655482,  37.75218589])), 7 )
+				
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
+    BT.localTest()

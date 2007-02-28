@@ -2953,85 +2953,69 @@ class PDBModel:
 #############
 ##  TESTING        
 #############
-        
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: coordinates of center of mass
-        @rtype:  array
-        """
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Test class """
+
+    #: load test PDB once into class rather than 3 times into new test instance
+    MODEL = PDBModel( t.testRoot()+'/com/1BGS.pdb')
+
+    def prepare(self):
         ## loading output file from X-plor
-        if local: print 'Loading pdb file ..'
-        m = PDBModel( t.testRoot()+'/rec/1A2P.pdb')#"/com_wet/1BGS.pdb")
+	self.m = self.MODEL
 
-        ## remove solvent
-        if local: print "removing waters.."
-        m.removeRes(['TIP3', 'HOH'])
+    def test_removeRes(self):
+	"""PDBModel.removeRes test"""
+        self.m.removeRes(['TIP3', 'HOH'])
+	self.assertEqual( len(self.m), 1968)
+	self.assertAlmostEqual( self.m.mass(), 21325.90004, 3 )
 
+    def test_chainMethods(self):
+	"""PDBModel chain methods test"""
         ## X-plor doesn't write chainIds, so during the simulation
         ## we store them in the last letter of the segId. Here we
         ## restore the chainId.
-        m.addChainFromSegid()
+        self.m.addChainFromSegid()
 
         ## start positions of all chains
-        chainIdx = m.chainIndex().tolist()
+        chainIdx = self.m.chainIndex().tolist()
 
         ## print some chain info
-        if local:
-            print 'The molecule consists of %i chains'% m.lenChains()
+        if self.local:
+            print 'The molecule consists of %i chains'% self.m.lenChains()
             print '\tChainId \tFirst atom'
             for i in chainIdx:
-                print '\t%s \t\t%i'%(m.atoms[i]['chain_id'], int(i))
+                print '\t%s \t\t%i'%(self.m.atoms[i]['chain_id'], int(i))
 
         ## iterate over all chains
         for c in range( 0, len( chainIdx ) ):
 
-            if local:
+            if self.local:
                 print "chain ", c, " starts with ", 
-                print m.atoms[ chainIdx[c] ]['residue_name'],
+                print self.m.atoms[ chainIdx[c] ]['residue_name'],
 
                 print " and has sequence: "
 
             ## mask out atoms of all other chains
-            chainMask  = N.equal( m.chainMap( breaks=1 ), c )
-            if local: print m.sequence( chainMask )
+            chainMask  = N.equal( self.m.chainMap( breaks=1 ), c )
+            if self.local:
+		print self.m.sequence( chainMask )
 
-        ## test sorting
-        if local: print "sorting atoms alphabetically..."
-        sort = m.argsort()
-        m2 = m.sort( sort )
-
-        if local:
-            globals().update( locals() )
-
-        return N.sum( m2.centerOfMass() )
+	self.assertEqual( self.m.lenChains(), 4)
 
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
+    def test_sorting(self):
+	"""PDBModel sorting test"""
+        if self.local:
+	    print "sorting atoms alphabetically..."
+	m2 = self.m.compress( self.m.maskProtein() )
+        sort = m2.argsort()
+        m2 = m2.sort( sort )
 
-        @return: coordinates of center of mass
-        @rtype:  array
-        """
-        return N.sum( N.array([ 29.13901386,  46.70021977,  38.34113311]) )
-    
-        
+        self.assertAlmostEqual( N.sum( m2.centerOfMass() ), 23.10322160875, 7 )
+
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
-
-## last line count:: 3229
+    BT.localTest()

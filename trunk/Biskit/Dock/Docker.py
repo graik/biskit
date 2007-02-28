@@ -536,27 +536,22 @@ class RunThread( Thread ):
 #############
 ##  TESTING        
 #############
-    
-class Test:
-    """
-    Test class
-    """
+import Biskit.test as BT
+        
+class TestCore(BT.BiskitTest):
+    """Base class for short and long Test case"""
 
-    def run( self, run=0, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype:  int
-        """
-        import tempfile, time, os
+    def prepare(self):
+        import tempfile
+        self.out_folder = tempfile.mktemp('_test_docker_%s')
+
+    def cleanUp(self):
+        t.tryRemove( self.out_folder, tree=1 )
+
+    def dry_or_wet_run( self, run=True ):
+        """ """
+	import time, os
         import os.path
-
-        out_folder = tempfile.mktemp('_test_docker_%s')
 
         ligDic = t.Load( t.testRoot() + '/multidock/lig/1A19_models.dic' )
 
@@ -581,45 +576,42 @@ class Test:
             
         recDic = t.Load( t.testRoot() + '/multidock/rec/1A2P_model.dic' )
 
-        d = Docker( recDic, ligDic, out = out_folder, verbose=local )
+        self.d = Docker( recDic, ligDic, out=self.out_folder,
+			 verbose=self.local )
 
         # dock rec 1 vs. lig 2 on localhost
-        fmac1, fout = d.createHexInp( 1, 2 )
+        fmac1, fout = self.d.createHexInp( 1, 2 )
         if run:
-            d.runHex( fmac1, log=1, ncpu=2 )
+            self.d.runHex( fmac1, log=1, ncpu=2 )
 
-            while not os.path.exists( d.out + '/1A2P_1-1A19_2_hex.out'):
-                time.sleep(5)
+	    self.d.waitForLastHex()
 
         ## dock receptor 1 vs. ligand one on remote host
         # fmac2, fout2= d.createHexInp( 1, 1 )
         # d.runHex( fmac2, log=0, ncpu=2, host='remote_host_name' )
 
-        if local: print "ALL jobs submitted."
-        
-        if local:
-            globals().update( locals() )
-
-        ## cleanup
-        t.tryRemove( d.out, tree=1 )
-        
-        return 1
+        if self.local: print "ALL jobs submitted."
 
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
+class TestLong(TestCore):
+    """Test case running a complete hex docking (ca. 30 min/CPU)"""
+    
+    TAGS = [ BT.EXE, BT.LONG ]
 
-        @return: 1
-        @rtype:  int
-        """
-        return 1
+    def test_DockerLong(self):
+	"""Dock.Docker real test (20-30min/CPU)"""
+	self.dry_or_wet_run( run=True )
 
+
+class TestShort(TestCore):
+
+    TAGS = [ BT.EXE ]
+
+    def test_DockerShort(self):
+	"""Dock.Docker dry run test"""
+	self.dry_or_wet_run( run=False )
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( run=0, local=1 ) ==  test.expected_result() 
-
+    BT.localTest()
 

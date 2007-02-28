@@ -30,6 +30,9 @@ from PDBParser import PDBParserError
 from PDBParseModel import PDBParseModel
 
 class PDBParsePickle( PDBParseModel ):
+    """
+    Parse a pickled PDBModel from disc into a new PDBModel instance 
+    """
 
     @staticmethod
     def supports( source ):
@@ -90,3 +93,29 @@ class PDBParsePickle( PDBParseModel ):
         model.setSource( source )
 
 
+#############
+##  TESTING        
+#############
+import Biskit.test as BT
+        
+class Test(BT.BiskitTest):
+    """Test case"""
+
+    def test_PDBParsePickle( self ):
+        """PDBParsePickle test"""
+
+	import Numeric as N
+
+        ## loading output file from X-plor
+        if self.local:
+            print 'Loading pickled model ..'
+
+        self.p = PDBParsePickle()
+        self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P_dry.model')
+
+        self.assertAlmostEqual( N.sum( self.m.centerOfMass() ),
+				 114.18036673321811, 7)
+
+if __name__ == '__main__':
+
+    BT.localTest()

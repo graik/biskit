@@ -23,7 +23,7 @@
 ## $Revision$
 
 """
-Multi copy trajectory
+Multi-copy trajectory
 """
 
 from Trajectory import Trajectory, TrajError
@@ -580,7 +580,7 @@ class EnsembleTraj( Trajectory ):
 
 
     def outliers( self, z=1.0, mask=None, prof='rmsCA_last', 
-                  last=10, step=1  ):
+                  last=10, step=1, verbose=1  ):
         """
         Identify outlier trajectories. First we calculate the CA-RMS of every
         |step|th frame to the last frame. Outliers are member trajectories for
@@ -609,7 +609,7 @@ class EnsembleTraj( Trajectory ):
             traj = traj.thin( step )
 
         if not prof in traj.profiles:
-            traj.fitMembers( refIndex=-1, prof=prof )
+            traj.fitMembers( refIndex=-1, prof=prof, verbose=verbose )
 
         p_all = traj.profiles[ prof ]
         n = traj.n_members
@@ -627,93 +627,65 @@ class EnsembleTraj( Trajectory ):
 #############
 ##  TESTING        
 #############
-    
-class Test:
-    """
-    Test class
-    """
-    
+import Biskit.test as BT
 
-    def run( self, local=0, traj=None ):
-        """
-        run function test
+class Test(BT.BiskitTest):
+    """EnsembleTraj test"""
 
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        @param traj: run test on a specified none slimed trajectory
-        @type  traj: str
-
-        @return: sum of 'rms_CA_av' profile
-        @rtype:  float
-        """
-        tr = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat')
-
+    def prepare(self):
+	self.tr = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat')
+		
+    def test_EnsembleTraj( self ):
+        """EnsembleTraj.fit/fitMembers/plotMembers test """
         ## The second part of the test will fail with the slimmed
         ## down test trajectory of T.testRoot(). To run the full
         ## test pease select a larger trajectory.    
 
-        if traj:
-            tr = T.Load( T.absfile(traj) )
-
-        self.tr = traj2ensemble( tr )
+        self.tr = traj2ensemble( self.tr )
 
         mask = self.tr.memberMask( 1 )
 
         self.tr.fit( ref=self.tr.ref,
                      mask=self.tr.ref.maskCA(),
                      prof='rms_CA_ref',
-                     verbose=local )
+                     verbose=self.local )
 
         self.tr.fitMembers( mask=self.tr.ref.maskCA(),
                             prof='rms_CA_0', refIndex=0,
-                            verbose=local )
+                            verbose=self.local )
         
         self.tr.fitMembers( mask=self.tr.ref.maskCA(),
                             prof='rms_CA_av',
-                            verbose=local )
+                            verbose=self.local )
 
-        p = self.tr.plotMemberProfiles( 'rms_CA_av', 'rms_CA_0',
+        self.p = self.tr.plotMemberProfiles( 'rms_CA_av', 'rms_CA_0',
                                         'rms_CA_ref', xlabel='frame' )
+	if self.local or self.VERBOSITY > 2:
+	    self.p.show()
 
-        p.show()
+        self.assertAlmostEqual( 26.19851,
+				 N.sum( self.tr.profile('rms_CA_av') ), 2 )
 
-        ## this only runs on an none slimmed traj
-        if traj:
+    def test_outliers(self, traj=None):
+	"""EnsembleTraj.outliers/concat test"""
 
-            print "Outliers..."
+	self.t2 = self.tr.concat( self.tr )
 
-            o = self.tr.outliers( z=1.2, mask=self.tr.ref.maskCA() )
-            print o
+	self.o = self.t2.outliers( z=1.2, mask=self.tr.ref.maskCA(),
+			      verbose=self.local )
+	if self.local:
+	    print self.o
 
-            self.t = self.tr.compressMembers( N.logical_not( o ) )
+	self.t = self.t2.compressMembers( N.logical_not( self.o ) )
 
-            p2 = self.t.plotMemberProfiles( 'rms_CA_av', 'rms_CA_0',
-                                            'rms_CA_ref', xlabel='frame' )
-            p2.show()
+	self.p2 = self.t.plotMemberProfiles( 'rms', xlabel='frame' )
 
+	if self.local or self.VERBOSITY > 2:
+	    self.p2.show()
 
-        if local:
-            globals().update( locals() )
-
-        return N.sum( self.tr.profile('rms_CA_av') )
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: sum of 'rms_CA_av' profile
-        @rtype:  float
-        """
-        return 26.19851451238333
+	self.assertEqual( self.o, 10 * [False] )
 
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-6
-
-    ## run a full test
-    # test.run( local=1, traj='~/interfaces/c11/lig_pcr_00/traj.dat')
+    BT.localTest()

@@ -317,23 +317,16 @@ NOLOG"""
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: sum of the total ASA for each residue
-        @rtype:  float
-        """
+class Test(BT.BiskitTest):
+    """Test Whatif interface"""
+
+    TAGS = [ BT.OLD, BT.EXE ]  ## whatif is not officially supported any longer
+
+    def test_Trajectory(self):
+	"""Whatif test"""
+
         from Biskit import PDBModel
 
         ## Loading PDB...
@@ -350,7 +343,7 @@ class Test:
         ## Running
         atomAcc, resAcc, resMask = x.run()
 
-        if local:
+        if self.local:
             ## check that model hasn't changed
             m_ref = PDBModel(f)
             m_ref = m.compress( m.maskProtein() )
@@ -377,27 +370,12 @@ class Test:
             print '\nTotal atom    accessability (A^2): %.2f'%sum(atomAcc) 
             print '      residue accessability (A^2): %.2f'%sum(resAcc)[0]
 
-            globals().update( locals() )
-                              
-        return N.sum(resAcc[:,0])
+        self.assertAlmostEqual( N.sum(resAcc[:,0]), 2814.6903, 7 ) 
 
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: sum of the total ASA for each residue
-        @rtype:  float
-        """
-        return 2814.6903
-    
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
-
+    BT.localTest()
 
 
 

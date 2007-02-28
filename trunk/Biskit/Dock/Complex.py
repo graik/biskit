@@ -25,7 +25,7 @@
 collect and manage information about a docking result
 """
 
-from Biskit import PCRModel, PDBModel, PDBDope, molUtils, mathUtils
+from Biskit import PCRModel, PDBModel, PDBDope, molUtils, mathUtils, StdLog
 ## from Biskit import ProsaII
 from Biskit.Prosa2003 import Prosa2003
 
@@ -1060,7 +1060,7 @@ class Complex:
         return score
 
 
-    def interfaceArea( self, profiles=0 ):
+    def interfaceArea( self, profiles=0, log=StdLog(), verbose=1 ):
         """
         Calculate the difference between the surface area of the
         complex vs. its free components in square angstrom.
@@ -1069,6 +1069,10 @@ class Complex:
                           rather than the value (both absolute and relative
                           values are returned)
         @type  profiles: 1|0 (default: 0)
+	@param log: log file [STDOUT]
+	@type  log: Biskit.LogFile
+	@param verbose: give progress report [1]
+	@type  verbose: bool | int
 
         @return: AS area, MS area OR
                  a dictionary of lig, rec and com profiles
@@ -1080,10 +1084,12 @@ class Complex:
         result = {}
 
         def getSurface( model, key ):
-            print "Calculating SurfaceRacer data for %s..."%key,
+	    if self.verbose:
+		self.log.write("Calculating SurfaceRacer data for %s..."%key)
             d = PDBDope( model )
             d.addSurfaceRacer( probe=1.4 )
-            print 'Done.'
+	    if self.verbose:
+		self.log.writeln('Done.')
             result['%s_AS'%key] = model.profile('AS')
             result['%s_MS'%key] = model.profile('MS')
             result['%s_relAS'%key] = model.profile('relAS')
@@ -1197,7 +1203,8 @@ class Complex:
         return r
 
 
-    def conservationScore( self, cons_type='cons_ent', ranNr=150 ):
+    def conservationScore( self, cons_type='cons_ent', ranNr=150,
+			   log=StdLog(), verbose=1 ):
         """
         Score of conserved residue pairs in the interaction surface.
         Optionally, normalized by radom surface contacts.
@@ -1207,6 +1214,10 @@ class Complex:
         @type  cons_type: str
         @param ranNr: number of random matricies to use (default: 150)
         @type  ranNr: int
+	@param log: log file [STDOUT]
+	@type  log: Biskit.LogFile
+	@param verbose: give progress report [1]
+	@type  verbose: bool | int
 
         @return: conservation score
         @rtype: float
@@ -1214,12 +1225,16 @@ class Complex:
         try:
             recCons = self.rec().profile( cons_type, lookHarder=1 )
         except:
-            print '\n'+'*'*30+'\nNO HHM PROFILE FOR RECEPTOR\n'+'*'*30+'\n'
+	    if self.verbose:
+		self.log.add(
+		    '\n'+'*'*30+'\nNO HHM PROFILE FOR RECEPTOR\n'+'*'*30+'\n')
             recCons = N.ones( self.rec().lenResidues() )
         try:
             ligCons = self.lig().profile( cons_type, lookHarder=1 )
         except:
-            print '\n'+'*'*30+'\nNO HHM PROFILE FOR LIGAND\n'+'*'*30+'\n'
+	    if self.verbose:
+		self.log.add(
+		    '\n'+'*'*30+'\nNO HHM PROFILE FOR LIGAND\n'+'*'*30+'\n')
             ligCons = N.ones( self.lig().lenResidues() )
 
         if self.rec().profile( 'surfMask' ):
@@ -1246,7 +1261,8 @@ class Complex:
 
         # get a random score
         if ranNr != 0:
-            t.flushPrint('.')
+	    if self.verbose:
+		self.log.write('.')
             ranMat =  mathUtils.random2DArray( cont, ranNr, mask=surfMask )
             random_score = N.sum(N.sum( ranMat * consMat ))/( ranNr*1.0 )
             return N.sum(N.sum(score))/random_score
@@ -1386,23 +1402,13 @@ class Complex:
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: total number of interatomic contacts
-        @rtype:  int
-        """
+class Test(BT.BiskitTest):
+    """Test case"""
+
+    def test_Complex(self):
+	"""Dock.Complex test"""
 
         lig = PCRModel( t.testRoot() + "/com/1BGS.psf",
                         t.testRoot() + "/com/lig.model")
@@ -1431,15 +1437,15 @@ class Test:
         except:
             pass
 
-        if local:           
+        if self.local:           
             from Biskit import Pymoler
 
-            pm = Pymoler()
-            pm.addPdb( c.rec(), 'rec' )
-            pm.addPdb( c.lig(), 'lig' )
+            self.pm = Pymoler()
+            self.pm.addPdb( c.rec(), 'rec' )
+            self.pm.addPdb( c.lig(), 'lig' )
 
-            pm.colorAtoms( 'rec', contProfile_rec )
-            pm.colorAtoms( 'lig', contProfile_lig )
+            self.pm.colorAtoms( 'rec', contProfile_rec )
+            self.pm.colorAtoms( 'lig', contProfile_lig )
 
             rec_sphere = c.rec().clone()
             rec_sphere.xyz = mathUtils.projectOnSphere( rec_sphere.xyz )
@@ -1447,41 +1453,29 @@ class Test:
             lig_sphere = c.lig().clone()
             lig_sphere.xyz = mathUtils.projectOnSphere( lig_sphere.xyz )
 
-            pm.addPdb( rec_sphere, 'rec_sphere' )
-            pm.addPdb( lig_sphere, 'lig_sphere' )
+            self.pm.addPdb( rec_sphere, 'rec_sphere' )
+            self.pm.addPdb( lig_sphere, 'lig_sphere' )
 
-            pm.colorAtoms( 'rec_sphere', contProfile_rec )
-            pm.colorAtoms( 'lig_sphere', contProfile_lig )
+            self.pm.colorAtoms( 'rec_sphere', contProfile_rec )
+            self.pm.colorAtoms( 'lig_sphere', contProfile_lig )
 
-            pm.add( 'hide all')
+            self.pm.add( 'hide all')
 
-            pm.add( 'color grey, (b=0)' )
-            pm.add( 'show stick, (rec or lig)' )
-            pm.add( 'show surf, rec_sphere')
+            self.pm.add( 'color grey, (b=0)' )
+            self.pm.add( 'show stick, (rec or lig)' )
+            self.pm.add( 'show surf, rec_sphere')
 
-            pm.add( 'zoom all' )
+            self.pm.add( 'zoom all' )
 
-            pm.show()
+            self.pm.show()
             
             globals().update( locals() )
 
-        return N.sum(contProfile_lig) + N.sum(contProfile_rec)
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: total number of interatomic contacts
-        @rtype:  int
-        """
-        return 2462
-    
+        self.assertEqual( N.sum(contProfile_lig) + N.sum(contProfile_rec),
+			  2462 )
+   
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) ==  test.expected_result()
-
+    BT.localTest()
 

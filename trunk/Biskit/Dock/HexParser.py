@@ -191,23 +191,14 @@ class HexParser:
 #############
 ##  TESTING        
 #############
-    
-class Test:
-    """
-    Test class
-    """
+import Biskit.test as BT
+        
+class Test(BT.BiskitTest):
+    """Test case"""
 
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: complex info dic keys
-        @rtype:  [str]
-        """
+    def test_hexParser(self):
+	"""Dock.hexParser test"""
+
         rec_dic = t.Load( t.testRoot() + "/dock/rec/1A2P_model.dic" )
         lig_dic = t.Load( t.testRoot() + "/dock/lig/1A19_model.dic" )
 
@@ -216,31 +207,18 @@ class Test:
         
         c_lst = self.h.parseHex()
 
-        if local:
+        if self.local:
             print c_lst[1].info
             
             globals().update( locals() )
         
 
-        return c_lst[1].info.keys()
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: complex info dic keys
-        @rtype:  [str]
-        """
-        return ['soln', 'rms', 'hex_clst', 'hex_eshape',
-                'model2', 'model1', 'hex_etotal', 'date']
-
+        self.assertEqual( c_lst[1].info.keys(),
+			  ['soln', 'rms', 'hex_clst', 'hex_eshape',
+			   'model2', 'model1', 'hex_etotal', 'date'] )
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) ==  test.expected_result() 
-
+    BT.localTest()
 
 

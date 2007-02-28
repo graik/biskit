@@ -1082,6 +1082,15 @@ def restore(delta, which):
         if line[:2] in prefixes:
             yield line[2:]
 
+################
+## empty test ##
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Mock test"""
+    pass
+
+
 def _test():
     import doctest, difflib
     return doctest.testmod(difflib)

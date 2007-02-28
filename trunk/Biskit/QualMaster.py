@@ -28,7 +28,6 @@ Parallizes calculation and plotting of ensemble trajectory RMSDs
 
 from Biskit.hosts import cpus_all, nice_dic, nodes_all
 import Biskit.tools as T
-## from Biskit.PVM.TrackingJobMaster import TrackingJobMaster
 from Biskit.PVM import TrackingJobMaster
 
 
@@ -36,7 +35,7 @@ class QualMaster(TrackingJobMaster):
 
     def __init__(self, trajFiles, n_hosts=20, **kw):
         """
-        @param trajFiles: list of trajectory filed
+        @param trajFiles: list of trajectory files
         @type  trajFiles: [ str ]
         @param n_hosts: number of hosts to use
         @type  n_hosts: int
@@ -66,7 +65,7 @@ class QualMaster(TrackingJobMaster):
         @return: dictionary with init parameters
         @rtype: {param:value}
         """
-        return 1
+	return {'verbose':self.verbose}
 
 
     def done(self):
@@ -76,61 +75,37 @@ class QualMaster(TrackingJobMaster):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
+class Test(BT.BiskitTest):
+    """Test"""
+
+    TAGS = [ BT.PVM ]
+
+    def test_QualMaster(self):
+	"""QualMaster test"""
         import os.path
         
         ## a minimal list of trajectories
         traj_list = [ T.testRoot() + '/lig_pcr_00/traj.dat' ]
 
-        master = QualMaster( traj_list,
-                             show_output=local,
-                             verbose=local )
+        self.master = QualMaster( traj_list,
+				  show_output=self.local,
+				  verbose=self.local )
 
         ## run and wait for result
-        r = master.calculateResult()
+        self.r = self.master.calculateResult()
         #master.start()
 
-        f_plot = '%s/rms_traj.eps'%os.path.dirname(r[0])
-        
-        if local:
-            print 'A RMSD plot is writen to: %s'%f_plot
-            globals().update( locals() )
+        self.f_plot = '%s/rms_traj.eps'%os.path.dirname( self.r[0] )
+
+        if self.local:
+            print 'A RMSD plot is writen to: %s'% self.f_plot
             
-        ## cleanup
-        T.tryRemove( f_plot )
-        
-        return 1
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
+    def cleanUp(self):
+        T.tryRemove( self.f_plot )
     
         
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()

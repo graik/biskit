@@ -253,54 +253,36 @@ class SettingsManager:
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
+class Test(BT.BiskitTest):
+    """Test"""
 
-        @return: 42
-        @rtype: int
-        """
-        m = SettingsManager( T.projectRoot()+'/external/defaults/settings.cfg',
-                             T.tempDir() + '/settings.cfg',
-                             createmissing=True,
-                             verbose=local )
+    def test_SettingsManager(self):
+	"""SettingsManager test"""
+
+	f_in = T.projectRoot()+'/external/defaults/settings.cfg'
+	self.f_out =  T.tempDir() + '/settings.cfg'
+	
+        self.m = SettingsManager( f_in, self.f_out,
+				  createmissing=True,
+				  verbose=self.local )
 
         ns = locals()             ## fetch local namespace
 
-        m.updateNamespace( ns )   ## parse and insert options into namespace
+        self.m.updateNamespace( ns ) ## parse and insert options into namespace
         
-        if local:
+        if self.local:
             globals().update( locals() ) ## publish namespace for debugging
 
-        T.tryRemove( T.tempDir() + '/settings.cfg' )  ## clean up
+        r = self.m.settings2dict()['testparam']
 
-        r = m.settings2dict()['testparam']
+        self.assertEqual( r, 42) ## from 'int-testparam = 42' in settings.cfg
 
-        return r          ## from 'int-testparam = 42' in settings.cfg
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 42
-        @rtype:  int
-        """
-        return 42
-    
+    def cleanUp(self):
+	T.tryRemove( self.f_out )
         
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
+    BT.localTest()

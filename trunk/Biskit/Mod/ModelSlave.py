@@ -116,17 +116,14 @@ class ModelSlave(JobSlave):
         return d
 
 #### Testing #####
-import Biskit.BiskitTest as BT
+import Biskit.test as BT
 
 class Test( BT.BiskitTest ):
 
-    TAGS = [ BT.NORMAL ]
+    TAGS = [ BT.PVM ]
 
     def test_go( self ):
-        """
-        ModelSlave.go
-        """
-        xyz = 1
+        """ModelSlave.go test (not implemented)"""
         self.assertEqual( 1, 1 )
 
 

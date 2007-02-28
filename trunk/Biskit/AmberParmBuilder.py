@@ -60,7 +60,7 @@ class AmberParmBuilder:
          both xplor and amber-formatted PDBs as input.
 
     Requires the amber programs C{tleap} and C{ambpdb}.
-    Requires leap template files in C{/external/amber/leap/}.
+    Requires leap template files in C{biskit/external/amber/leap/}.
 
     @note: The design of AmberParmBuilder is less than elegant. It
            would make more sense to split it into two classes that

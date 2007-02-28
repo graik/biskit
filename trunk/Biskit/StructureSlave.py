@@ -135,6 +135,15 @@ class StructureSlave(JobSlave):
         print "Done."
         return d
 
+##############
+## empty test
+##############
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Mock test, the Slave is tested in L{Biskit.StructureMaster}"""
+    pass
+
 if __name__ == '__main__':
 
     import os, sys

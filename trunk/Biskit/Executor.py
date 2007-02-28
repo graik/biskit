@@ -214,10 +214,11 @@ class Executor:
             self.verbose = (log is not None)
 
         ## these are set by self.run():
-        self.runTime = 0    ## time needed for last run
-        self.output = None  ## STDOUT returned by process
-        self.error = None   ## STDERR returned by process
-        self.returncode = None ## int status returned by process
+        self.runTime = 0    #: time needed for last run
+        self.output = None  #: STDOUT returned by process
+        self.error = None   #: STDERR returned by process
+        self.returncode = None #: int status returned by process
+	self.pid = None     #: process ID
 
         self.result = None  ## set by self.finish()
 
@@ -548,64 +549,48 @@ class Executor:
 #############
 ##  TESTING        
 #############
-        
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0  ):
-        """
-        run function test
+import Biskit.test as BT
 
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
+class Test(BT.BiskitTest):
+    """Executor test"""
+
+    TAGS = [ BT.EXE ]
+
+    def prepare(self):
+	import tempfile
+	self.fout = tempfile.mktemp('_testexecutor.out')
+
+    def cleanUp(self):
+	t.tryRemove(self.fout)
+    
+    def test_Executor( self ):
+	"""Executor test (run emacs ~/.biskit/settings.cfg)"""
         ExeConfigCache.reset()
 
-        x = ExeConfigCache.get( 'emacs', strict=0 )
-        x.pipes = 1
+        self.x = ExeConfigCache.get( 'emacs', strict=0 )
+        self.x.pipes = 1
 
-        if local:
-            e = Executor( 'emacs', args='.zshenv', strict=0,
-                          f_in=None,
-                          f_out=t.absfile('~/test.out'),
-                          verbose=1, cwd=t.absfile('~') )
+        if self.local:
+            self.e = Executor( 'emacs', args='.biskit/settings.cfg', strict=0,
+			       f_in=None,
+			       f_out=self.fout,
+			       verbose=1, cwd=t.absfile('~') )
         else:
-            e = Executor( 'emacs', args='-kill .zshenv', strict=0,
-                          f_in=None,
-                          f_out=t.absfile('~/test.out'),
-                          verbose=0, cwd=t.absfile('~') )            
+            self.e = Executor( 'emacs', args='-kill .biskit/settings.cfg',
+			       strict=0,
+			       f_in=None,
+			       f_out=self.fout,
+			       verbose=0, cwd=t.absfile('~') )            
         
-        r = e.run()
+        self.r = self.e.run()
 
-        if local:
-            print 'Emacs were running for %.2f seconds'%e.runTime
-            globals().update( locals() )
-            
-        return 1
+        if self.local:
+            print 'Emacs was running for %.2f seconds'%self.e.runTime
 
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
+	self.assert_( self.e.pid != None )
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
-    
+    BT.localTest()
 
 

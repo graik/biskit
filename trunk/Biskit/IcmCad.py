@@ -224,68 +224,48 @@ copy a_ \"mol2\" delete
 #############
 ##  TESTING        
 #############
-        
-class Test:
-    """
-    Test class
-    """
-    from Biskit import PDBModel
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Test class"""
     
+    TAGS = [ BT.EXE ]
 
-    def run( self, local=0 ):
-        """
-        run function test
+    def test_IcmCad( self ):
+        """IcmCad test"""
+	from Biskit import PDBModel
 
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: icmCad values
-        @rtype: [float]
-        """
-        if local: print 'Loading PDB...'
-        f = T.testRoot() + '/lig/1A19.pdb'
-        m1 = self.PDBModel(f)
-        m1 = m1.compress( m1.maskProtein() )
+        if self.local: print 'Loading PDB...'
 
-        ms = []
+        self.f = T.testRoot() + '/lig/1A19.pdb'
+        self.m1 = PDBModel(self.f)
+        self.m1 = self.m1.compress( self.m1.maskProtein() )
 
-        lig_traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
-        for m in lig_traj[:3]:
+        self.ms = []
+
+        self.lig_traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
+        for m in self.lig_traj[:3]:
             m = m.compress( m.maskProtein() )
-            ms.append(m)
+            self.ms.append(m)
 
-        if local: print 'Starting ICM'
-        x = IcmCad( m1, ms, debug=0, verbose=0 )
+        if self.local: print 'Starting ICM'
+        self.x = IcmCad( self.m1, self.ms, debug=self.DEBUG,
+			 verbose=self.local )
 
-        if local:
+        if self.local:
             print 'Running'
-            globals().update( locals() )
-        r = x.run()
 
-        if local:
-            print "Result: ", r
-            globals().update( locals() )
+        self.r = self.x.run()
+
+        if self.local:
+            print "Result: ", self.r
         
-        return r
+        self.assertEqual( self.r, [8.8603529999999999, 9.0315890000000003,
+				   8.5055429999999994] )
 
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: icmCad values
-        @rtype:  [float]
-        """
-        return [8.8603529999999999, 9.0315890000000003, 8.5055429999999994]
     
-        
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
 

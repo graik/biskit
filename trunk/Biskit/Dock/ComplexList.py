@@ -711,54 +711,28 @@ class ComplexList( list ):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
+class Test(BT.BiskitTest):
+    """Test case"""
 
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-
-        @return: 1
-        @rtype: int
-        """
-        cl = t.Load( t.testRoot() + "/dock/hex/complexes.cl" )
+    def test_ComplexList(self):
+	"""Dock.ComplexList test"""
+        self.cl = t.Load( t.testRoot() + "/dock/hex/complexes.cl" )
 
         ## number of clusters among the 100 best (lowest rmsd) solutions
-        cl_sorted = cl.sortBy( 'rms' )
-        hex_clst = cl_sorted.valuesOf( 'hex_clst',
-                                       indices=range(100),
-                                       unique=1 )
+        self.cl_sorted = self.cl.sortBy( 'rms' )
+        self.hex_clst = self.cl_sorted.valuesOf( 'hex_clst',
+						 indices=range(100),
+						 unique=1 )
             
-        if local:
-            p = cl.plot( 'rms', 'hex_eshape', 'hex_etotal' )
-            p.show()
+        if self.local:
+            self.p = self.cl.plot( 'rms', 'hex_eshape', 'hex_etotal' )
+            self.p.show()
             
-            globals().update( locals() )
-            
-        return len( hex_clst )
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: numbet of hex clusters
-        @rtype:  int
-        """
-        return 36
-    
+        self.assertEqual( len( self.hex_clst ), 36)
         
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
 

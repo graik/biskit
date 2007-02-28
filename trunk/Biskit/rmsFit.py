@@ -166,55 +166,37 @@ def rowDistances( x, y ):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
+class Test(BT.BiskitTest):
+    """Test case"""
 
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: rotation matrix
-        @rtype: array
-        """
+    def test_rmsFit( self ):
+        """rmsFit test"""
         import Biskit.tools as T
 
-        traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
+        self.traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
 
-        rt, rmsdLst = match( traj.ref.xyz, traj[-1].xyz)
+        rt, rmsdLst = match( self.traj.ref.xyz, self.traj[-1].xyz)
 
-        if local:
-            print 'RMSD: %.2f'%rmsdLst[0][1]
-            globals().update( locals() )
+        if self.local:
+            print 'RMSD: %.2f' % rmsdLst[0][1]
         
         # return rotation matrix
-        return rt[0]
+	r = abs( N.sum( N.ravel( rt[0] )))
+	e = abs( N.sum( N.ravel( self.EXPECT )))
+	    
+        self.assertAlmostEqual(r, e, 6)
 
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: rotation matrix
-        @rtype:  array
-        """
-        return N.array( [[ 0.9999011,   0.01311352,  0.00508244,],
-                         [-0.01310219,  0.99991162, -0.00225578,],
-                         [-0.00511157,  0.00218896,  0.99998454 ]] )
+    EXPECT = N.array( [[ 0.9999011,   0.01311352,  0.00508244,],
+		       [-0.01310219,  0.99991162, -0.00225578,],
+		       [-0.00511157,  0.00218896,  0.99998454 ]] )
         
 
 if __name__ == '__main__':
 
-    test = Test()
+    BT.localTest()
 
-    assert abs( N.sum( N.ravel( test.run( local=1 )- test.expected_result() ) ) ) < 1e-6
 
 
 

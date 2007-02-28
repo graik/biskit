@@ -624,64 +624,42 @@ def sortAtomsOfModel( model ):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: something
-        @rtype:  float
-        """
+class Test(BT.BiskitTest):
+    """Test case"""
+
+    def test_molUtils( self ):
+        """molUtils test"""
         from Biskit import PDBModel
+
+	S = self
         
         ## load a structure
-        m = PDBModel( t.testRoot()+'/lig/1A19.pdb' )
-        model_1 = m.compress( m.maskProtein() )
+        S.m = PDBModel( t.testRoot()+'/lig/1A19.pdb' )
+        S.model_1 = S.m.compress( S.m.maskProtein() )
 
         ## now sort in standard order
-        model_2 = sortAtomsOfModel( model_1)
+        S.model_2 = sortAtomsOfModel( S.model_1)
 
         ## compare the atom order
         cmp = []
-        for a in range( model_1.lenAtoms() ):
-            cmp += [ cmpAtoms( model_1.atoms[a], model_2.atoms[a] )]
+        for a in range( S.model_1.lenAtoms() ):
+            cmp += [ cmpAtoms( S.model_1.atoms[a], S.model_2.atoms[a] )]
+
+        self.assertEqual( N.sum(cmp), 159 )
 
         ## get the primaty sequence as a string
-        seq = model_1.sequence()
+        S.seq = S.model_1.sequence()
 
         ## convert it to a list of three letter code
-        seq=single2longAA(seq)
+        S.seq=single2longAA(S.seq)
 
         ## convert it to a list in one letter code
-        seq=singleAA(seq)
+        S.seq=singleAA(S.seq)
 
-        if local:
-            globals().update( locals() )        
-        
-        return  N.sum(cmp)
+	self.assertEqual( ''.join(S.seq), S.model_1.sequence() )
 
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: something
-        @rtype:  float
-        """
-        return 159
-    
-        
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert  test.run( local=1 ) == test.expected_result() 
+    BT.localTest()

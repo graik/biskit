@@ -277,59 +277,38 @@ class PDBCleaner:
 #############
 ##  TESTING        
 #############
-        
-class Test:
-    """
-    Test class
-    """
-    
+import Biskit.test as BT
 
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: molecular mass 
-        @rtype:  float
-        """
-        from Biskit.LogFile import LogFile
+class Test(BT.BiskitTest):
+    """Test class """
+
+    def prepare(self):
+	from Biskit.LogFile import LogFile
         import tempfile
 
-        f_out = tempfile.mktemp( '_test_PDBCleaner' )
+        self.f_out = tempfile.mktemp( '_test_PDBCleaner' )
         
-        l = LogFile( f_out, mode='w')
+        self.l = LogFile( self.f_out, mode='w')
+
+
+    def test_PDBCleaner( self ):
+        """PDBCleaner test"""
         
         ## Loading PDB...
-        c = PDBCleaner( t.testRoot() + '/rec/1A2P_rec_original.pdb',
-                        log=l )
+        self.c = PDBCleaner( t.testRoot() + '/rec/1A2P_rec_original.pdb',
+			     log=self.l )
         
-        m = c.process()
+        self.m = self.c.process()
 
-        if local:
-            print 'PDBCleaner log file written to: %s'%f_out
-            globals().update( locals() )
+        if self.local:
+            print 'PDBCleaner log file written to: %s'%self.f_out
 
-        ## cleanup
-        t.tryRemove( f_out )    
-            
-        return N.sum( m.masses())
+	self.assertAlmostEqual( N.sum( self.m.masses()), 34029.0115499993, 7 )
 
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: molecular mass
-        @rtype:  float
-        """
-        return 34029.0115499993
+    def cleanUp(self):
+        t.tryRemove( self.f_out )    
     
         
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
+    BT.localTest()

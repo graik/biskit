@@ -189,3 +189,15 @@ def parse_ANA_output(prosa_output):
     t = Table.fromFile(prosa_output)
 
     return N.array(t[2:]).astype(N.Float32)
+
+#############
+##  TESTING        
+#############
+import Biskit.test as BT
+        
+class Test(BT.BiskitTest):
+    """no test assigned"""
+
+    TAGS = [ BT.OLD, BT.EXE ]
+
+    pass

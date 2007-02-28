@@ -167,23 +167,13 @@ class MatrixPlot(FramedPlot):
 #############
 ##  TESTING        
 #############
-        
-class Test:
-    """
-    Test class
-    """
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Test class """
     
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
+    def test_MatrixPlot( self ):
+        """MatrixPlot test"""
         n = 30
 
         z = N.zeros((n,n), N.Float)
@@ -192,31 +182,16 @@ class Test:
             for j in range(N.shape(z)[1]):
                 z[i,j] = N.exp(-0.01*((i-n/2)**2+(j-n/2)**2))
             
-        p = MatrixPlot(z, palette='sausage', legend=1)
+        self.p = MatrixPlot(z, palette='sausage', legend=1)
 
-        p.show()
+	if self.local or self.VERBOSITY > 2:
+	    self.p.show()
         
-        if local:
-            globals().update( locals() )
-        
-        return 1
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
+	self.assert_( self.p is not None )
+ 
         
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()
 
