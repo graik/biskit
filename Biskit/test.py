@@ -165,12 +165,13 @@ class BiskitTest( U.TestCase):
 
     def setUp( self ):
         self.local =  self.__module__ == '__main__'
-        self.log = BiskitTest.TESTLOG
-	self.verbosity = BiskitTest.VERBOSITY
+        self.log =       getattr( self, 'log', BiskitTest.TESTLOG )
+## 	self.verbosity = getattr( self, 'verbosity', BiskitTest.VERBOSITY )
+## 	self.debugging = getattr( self, 'debugging', BiskitTest.DEBUG )
 	self.prepare()
 
     def tearDown( self ):
-	if not BiskitTest.DEBUG:
+	if not self.DEBUG:
 	    self.cleanUp()
 
 
@@ -220,7 +221,31 @@ class FilteredTestSuite( U.TestSuite ):
 
         if not self._allowed or (self._allowed and len(matches) > 0):
             U.TestSuite.addTest( self, test )
-            
+
+
+class Flushing_TextTestResult( U._TextTestResult ):
+    """
+    Helper class for (Flushing)TextTestRunner.
+    Customize _TextTestResult so that the reported test id is flushed
+    B{before} the test starts. Otherwise the 'sometest.id ...' is only
+    printed together with the '...ok' after the test is finished.
+    """
+
+    def startTest(self, test):
+	"""print id at start of test... and flush it"""
+	super( self.__class__, self ).startTest( test )
+	self.stream.flush()
+
+class FlushingTextTestRunner( U.TextTestRunner ):
+    """
+    Convince TextTestRunner to use the flushing text output rather
+    than the default one.
+    """
+
+    def _makeResult(self):
+        return Flushing_TextTestResult(self.stream, self.descriptions,
+				     self.verbosity)
+
 
 class BiskitTestLoader( object ):
     """
@@ -246,13 +271,12 @@ class BiskitTestLoader( object ):
         self.forbidden= forbidden
         self.log = log
         self.verbosity = verbosity
+	self.debugging = debug
         self.suite =  FilteredTestSuite( allowed=allowed, forbidden=forbidden )
 	self.modules_untested = []  #: list of modules without test cases
 	self.modules_tested = []    #: list of modules containing test cases
 	self.result = U.TestResult() #: will hold test result after run()
 
-	BiskitTest.DEBUG = debug
-	BiskitTest.VERBOSITY = verbosity
 
     def modulesFromPath( self, path=T.projectRoot(), module='Biskit' ):
         """
@@ -373,7 +397,13 @@ class BiskitTestLoader( object ):
 	@param dry: do not actually run the test but just set it up [False]
 	@type  dry: bool
 	"""
-        runner = U.TextTestRunner( self.log.f(), verbosity=self.verbosity)
+	## push global settings into test classes
+	for testclass in self.suite:
+	    testclass.DEBUG = self.debugging
+	    testclass.VERBOSITY = self.verbosity
+	    testclass.TESTLOG = self.log
+
+        runner = FlushingTextTestRunner(self.log.f(), verbosity=self.verbosity)
 	if not dry:
 	    self.result = runner.run( self.suite )
 
@@ -421,7 +451,8 @@ def extractTestCases( namespace ):
     return r
 
 
-def localTest( testclass=None, verbosity=2, debug=0 ):
+def localTest( testclass=None, verbosity=BiskitTest.VERBOSITY,
+	       debug=BiskitTest.DEBUG, log=BiskitTest.TESTLOG ):
     """
     Perform the BiskitTest(s) found in the scope of the calling module.
     After the test run, all fields of the BiskitTest instance are
@@ -449,11 +480,14 @@ def localTest( testclass=None, verbosity=2, debug=0 ):
     else:
 	testclasses = extractTestCases( outer )
 
-    BiskitTest.DEBUG = debug
-
     suite = U.TestSuite()
     for test in testclasses:
 	suite.addTests( U.TestLoader().loadTestsFromTestCase( test ) )
+
+    for test in suite:
+	test.DEBUG = debug
+	test.VERBOSITY = verbosity
+	test.TESTLOG = log
 
     runner= U.TextTestRunner(verbosity=verbosity)
     r = runner.run( suite )
@@ -559,6 +593,7 @@ if __name__ == '__main__':
     _convertOptions( o )
 
     BiskitTest.VERBOSITY = o['v']
+    BiskitTest.DEBUG = o['debug']
     
     l = BiskitTestLoader( allowed=o['i'], forbidden=o['e'],
 			  verbosity=o['v'], log=o['log'], debug=o['debug'])
