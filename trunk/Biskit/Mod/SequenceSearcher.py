@@ -32,7 +32,7 @@ from Bio.Blast import NCBIStandalone
 from Bio import Fasta
 
 import Biskit.tools as T
-from Biskit.Errors import *
+import Biskit.Errors as E
 from Biskit import StdLog, EHandler
 
 from Biskit.Mod import settings
@@ -42,11 +42,12 @@ import string, copy
 import commands
 import copy
 import sys
+import cStringIO
 
-class BlastError( BiskitError ):
+class BlastError( E.BiskitError ):
     pass
 
-class InternalError( BiskitError ):
+class InternalError( E.BiskitError ):
     pass
 
 class SequenceSearcher:
@@ -85,8 +86,11 @@ class SequenceSearcher:
     F_CLUSTER_LOG = F_RESULT_FOLDER + '/cluster_result.out'
 
     ## blast alignments
-    F_BLAST_OUT = F_RESULT_FOLDER + '/blast.out'
+    F_BLAST_OUT   = F_RESULT_FOLDER + '/blast.out'
     F_CLUSTER_BLAST_OUT = F_RESULT_FOLDER + '/cluster_blast.out'
+
+    F_BLAST_RAW_OUT =  F_RESULT_FOLDER + '/blast_raw.out'
+    F_BLAST_ERROR = F_RESULT_FOLDER + '/blast.error'
 
     ## default location of existing fasta file with target sequence
     F_FASTA_TARGET = '/target.fasta'
@@ -135,14 +139,14 @@ class SequenceSearcher:
         self.verbose = verbose
         self.log = log or StdLog()
 
-        self.record_dic = None ## dict ID - Bio.Fasta.Record
-        self.clusters = None ## list of lists of ids
-        self.bestOfCluster = None ## list of non-redundant ids
+        self.record_dic = None #: dict ID - Bio.Fasta.Record
+        self.clusters = None #: list of lists of ids
+        self.bestOfCluster = None #: list of non-redundant ids
 
-        ## the maximal number of clusters to return
+        #: the maximal number of clusters to return
         self.clusterLimit =  clusterLimit
 
-        self.clustersCurrent = None ## current number of clusters
+        self.clustersCurrent = None #: current number of clusters
 
         self.prepareFolders()
 
@@ -201,13 +205,33 @@ class SequenceSearcher:
         ids = self.getSequenceIDs( parsed_blast )
         self.record_dic = self.fastaFromIds( db, ids )
 
-        if self.verbose:
-            self.writeFasta( self.record_dic.values(),
-                             self.outFolder + self.F_FASTA_ALL )
+	self.writeFasta( self.record_dic.values(),
+			 self.outFolder + self.F_FASTA_ALL )
 
-            self.__writeBlastResult( parsed_blast,
-                                   self.outFolder + self.F_BLAST_OUT)
+	self.__writeBlastResult( parsed_blast,
+				 self.outFolder + self.F_BLAST_OUT)
 
+
+    def __copyFileHandle(self, result_handle, fname ):
+	"""
+	Copy the blast result to a file. The input file handle will be
+	empty afterwards! Use the returned string handle instead.
+
+	@param result_handle: file handle returned by NCBI* blast runners
+	@type  result_handle: file
+	@param fname : absolute path to output file
+	@type  fname : str
+
+	@return: a fresh 'file' (string) handle with the output
+	@rtype : cStringIO.StringI
+	"""
+	str_results = result_handle.read()
+	try:
+	    save_file = open( fname, 'w' )
+	    save_file.write( str_results )
+	    save_file.close()
+	finally:
+	    return cStringIO.StringIO( str_results )
 
 
     def remoteBlast( self, seqFile, db, method, e=0.01, **kw ):
@@ -267,19 +291,32 @@ class SequenceSearcher:
                              i+= 1
                  print seq       
         """
-        fasta = Fasta.Iterator( open(seqFile) )
-        query = fasta.next()
+	try:
+	    fasta = Fasta.Iterator( open(seqFile) )
+	    query = fasta.next()
 
-        blast_result = NCBIWWW.qblast( program=method, database=db,
-                                       sequence=query, expect=e,
-                                       ncbi_gi='FALSE', **kw )
+	    results = NCBIWWW.qblast( program=method, database=db,
+				     sequence=query, expect=e,
+				     ncbi_gi='FALSE', **kw )
 
-        p = NCBIXML.BlastParser()
+	    results = self.__copyFileHandle(results,
+					  self.outFolder+self.F_BLAST_RAW_OUT)
+	    if self.verbose:
+		self.log.writeln('Raw blast output copied to: ' +\
+				 self.outFolder + self.F_BLAST_RAW_OUT  )
 
-        parsed = p.parse( blast_result )
+	    p = NCBIXML.BlastParser()
 
-##        self.__remote_blast2dict( parsed, db )
-        self.__blast2dict( parsed, db )
+	    parsed = p.parse( results )[0]
+
+	    self.__blast2dict( parsed, db )
+
+        except Exception, why:
+            self.log.add( T.lastErrorTrace() )
+	    globals().update( locals() )
+	    self.log.writeln('local namespace is pushed into global ')
+            raise BlastError( str(why) ) 
+
 
     def localBlast( self, seqFile, db, method='blastp',
                     resultOut=None, e=0.01, **kw ):
@@ -329,36 +366,34 @@ class SequenceSearcher:
         """
         results = err = p = None
         try:
-            self.l = {"blast.bin":settings.blast_bin,
-                      "m":method,
-                      "db":db,
-                      "s":seqFile,
-                      "e":e,
-                      "k":kw}
-
+	    if self.verbose:
+		self.log.add('running blast...')
+		
             results, err = NCBIStandalone.blastall( settings.blast_bin,
                                                     method, db, seqFile,
-                                                    expectation=e, **kw)
+                                                    expectation=e,
+						    align_view=7, ## XML output
+						    **kw)
 
-            p = NCBIStandalone.BlastParser()
+	    results = self.__copyFileHandle(results,
+					  self.outFolder+ self.F_BLAST_RAW_OUT)
+	    err = self.__copyFileHandle(err, self.outFolder+self.F_BLAST_ERROR)
 
-##             print "Kicking out"
-##             raise Exception, 'kick out to recover full result file'
-        
-            parsed = p.parse( results )
+	    if self.verbose:
+		self.log.writeln('Raw blast output copied to: ' +\
+				 self.outFolder + self.F_BLAST_RAW_OUT  )
+	    
+	    p = NCBIXML.BlastParser()
+	    
+ 	    parsed = p.parse( results )[0]
 
             self.__blast2dict( parsed, db )
 
         except Exception, why:
-            self.error = { 'results':results,
-##                           'err':err.read(),
-                           'parser':p,
-                           'blast_bin':settings.blast_bin, 'seqFile':seqFile,
-                           'method':method, 'db':db,'kw':kw,
-                           'exception':str(why) }
-            print T.lastErrorTrace()
-            raise BlastError( str(why) + "\n" +
-                              str( self.error ) ) 
+            self.log.add( T.lastErrorTrace() )
+	    globals().update( locals() )
+	    self.log.writeln('local namespace is pushed into global ')
+            raise BlastError( str(why) ) 
 
 
     def localPSIBlast( self, seqFile, db, resultOut=None, e=0.01, **kw ):
@@ -417,23 +452,27 @@ class SequenceSearcher:
         try:
             results, err = NCBIStandalone.blastpgp( settings.psi_blast_bin,
                                                     db, seqFile,
+						    align_view=7, ## XML output
                                                     expectation=e, **kw)
 
-            p = NCBIStandalone.PSIBlastParser()
+	    results = self.__copyFileHandle(results,
+					  self.outFolder+ self.F_BLAST_RAW_OUT)
+	    err = self.__copyFileHandle(err, self.outFolder+self.F_BLAST_ERROR)
 
-            parsed = p.parse( results )
+	    if self.verbose:
+		self.log.writeln('Raw blast output copied to: ' +\
+				 self.outFolder + self.F_BLAST_RAW_OUT  )
 
-            self.__blast2dict( parsed.rounds[-1], db )
+	    p = NCBIXML.BlastParser()
+ 	    parsed = p.parse( results )[-1]
+
+            self.__blast2dict( parsed, db )
 
         except Exception, why:
-            self.error = { 'results':results,'err':err.read(), 'parser':p,
-                           'blast_bin':settings.blast_bin, 'seqFile':seqFile,
-                           'db':db,'kw':kw,'exception':str(why) }
-            T.errWriteln( "BlastError " + T.lastErrorTrace() )
-            print T.lastErrorTrace()
-            raise BlastError( str(why) + "\n" +
-                              str( self.error ) )
-        
+            self.log.add( T.lastErrorTrace() )
+	    globals().update( locals() )
+	    self.log.writeln('local namespace is pushed into global ')
+            raise BlastError( str(why) ) 
 
 
     def getSequenceIDs( self, blast_records ):
@@ -506,8 +545,8 @@ class SequenceSearcher:
                     frecord.sequence += line.strip()
 
         except IndexError:
-            raise InternalError, "Couldn't fetch fasta record %s from database %s" \
-                  % (id,db)
+            raise InternalError, \
+		  "Couldn't fetch fasta record %s from database %s" % (id,db)
 
         return frecord
 
@@ -543,7 +582,7 @@ class SequenceSearcher:
         Write clustering results to file.
 
         @param raw: write raw clustering result to disk (default: None)
-        @type  raw: 1|0        
+        @type  raw: str       
         """
         if self.verbose and raw:
             f = open( self.outFolder + self.F_CLUSTER_RAW, 'w', 1)
@@ -611,7 +650,8 @@ class SequenceSearcher:
         if T.fileLength( fastaIn ) < 1:
             raise IOError( "File %s empty. Nothing to cluster"%fastaIn )
 
-        self.log.add( "\nClustering sequences:\n%s"%('-'*20) )
+	if self.verbose:
+	    self.log.add( "\nClustering sequences:\n%s"%('-'*20) )
 
         cmd = settings.blastclust_bin + ' -i %s -S %f -L %f -a %i' %\
               (fastaIn, simCut, lenCut, ncpu)
@@ -744,32 +784,36 @@ class SequenceSearcher:
         @param outFile: file to write the blast result to
         @type  outFile: str
         """
-        f = open( T.absfile( outFile ), 'w' )
+	try:
+	    f = open( T.absfile( outFile ), 'w' )
 
-        i=1
-        for alignment in parsed_blast.alignments:
-            for hsp in alignment.hsps:
-                s = string.replace(alignment.title,'\n',' ')
-                s = string.replace(s, 'pdb|',  '\npdb|')
-                f.write('Sequence %i: %s\n'%(i,s))                
-                f.write('Length: %i \tScore: %3.1f \tE-value: %2.1e\n'\
-                        %(hsp.identities[1], hsp.score, hsp.expect))
-                f.write( 'Identities: %i \tPositives: %i \tGaps: %i\n'\
-                         %(hsp.identities[0], hsp.positives[0],
-                           hsp.gaps[0] or 0 ))
+	    i=1
+	    for alignment in parsed_blast.alignments:
+		for hsp in alignment.hsps:
+		    s = string.replace(alignment.title,'\n',' ')
+		    s = string.replace(s, 'pdb|',  '\npdb|')
+		    f.write('Sequence %i: %s\n'%(i,s))                
+		    f.write('Score: %3.1f \tE-value: %2.1e\n'\
+			    %(hsp.score, hsp.expect))
+		    f.write('Lenght/Identities: %r\tPositives: %r\tGaps: %r\n'\
+			     %(hsp.identities, hsp.positives, hsp.gaps))
 
-                f.write( '%s\n'%hsp.query  )
-                f.write( '%s\n'%hsp.match )
-                f.write( '%s\n\n'%hsp.sbjct )
-                i += 1
-        f.close()
+		    f.write( '%s\n'%hsp.query  )
+		    f.write( '%s\n'%hsp.match )
+		    f.write( '%s\n\n'%hsp.sbjct )
+		    i += 1
+	    f.close()
+	except Exception, why:
+	    EHandler.warning("Error while writing blast result to %s" %outFile)
+	    globals().update(locals())
+	    EHandler.warning("function namespace published to globals")
 
 
     def writeClusteredBlastResult( self, allFile, clustFile, selection ):
         """
         Reads the blast.out file and keeps only centers.
         
-        @param allFile: all blast results
+        @param allFile: c!all blast results
         @type  allFile: file
         @param clustFile: output file name
         @type  clustFile: str
@@ -812,91 +856,108 @@ class SequenceSearcher:
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0, flavour='blastp' ):
-        """
-        run function test
+class TestBase(BT.BiskitTest):
+    """Prepare all Test cases (without providing any itself)"""
 
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        @param flavour: flavour of blast to test, blastp for localBlast
-                          OR blastpgp for localPSIBlast (default: blastp)
-        @type  flavour: str
-
-        @return: 1
-        @rtype:  int
-        """
+    def prepareOutput(self, ident):
+	"""Set up an output folder for a blast run and point
+	self.outfolder and log files to the right location
+	"""
         import tempfile
         import shutil
         from Biskit.LogFile import LogFile
-        
-        query = T.testRoot() + '/Mod/project/target.fasta'
-        outfolder = tempfile.mkdtemp( '_test_SequenceSearcher' )
-        shutil.copy( query, outfolder )
+
+        self.outfolder = tempfile.mkdtemp( '_test_SequenceSearcher_%s'%ident )
+
+        shutil.copy( self.query, self.outfolder )
 
         ## log file
-        f_out = outfolder+'/SequenceSearcher.log'
-        l = LogFile( f_out, mode='w')
+        self.f_out = self.outfolder+'/SequenceSearcher.log'
+	
 
-        searcher = SequenceSearcher( outFolder=outfolder, verbose=1, log=l )
+    def prepare(self):
+        self.query = T.testRoot() + '/Mod/project/target.fasta'
+	
+    def cleanUp(self):
+        T.tryRemove( self.outfolder, tree=1 )
+
+    def searchLocalBlast(self):
+	self.searcher.localBlast( self.f_target, self.db, 'blastp',
+				  alignments=500, e=0.01 )
+
+    def searchLocalPsiBlast(self):
+	self.searcher.localPSIBlast( self.f_target, self.db,
+				     'blastpgp', npasses=2 )
+
+    def searchRemoteBlast(self):
+	self.searcher.remoteBlast( self.f_target, self.db, 'blastp',
+				   alignments=50)
+
+    def search(self, searchFunction ):
+	from Biskit import LogFile
+
+	self.prepareOutput( searchFunction.__name__ )
+
+	l = self.log
+	if self.local:
+	    l = None   ## use STDOUT
+
+        self.searcher = SequenceSearcher( outFolder=self.outfolder,
+					  verbose=self.local, log=l )
 
         ## blast db has to be built with -o potion
         ## e.g. cat db1.dat db2.dat | formatdb -i stdin -o T -n indexed_db
-        db = settings.db_swiss
+        self.db = settings.db_swiss
 
-        f_target = searcher.outFolder + searcher.F_FASTA_TARGET
+        self.f_target = self.searcher.outFolder + self.searcher.F_FASTA_TARGET
 
-        if local:
-            globals().update( locals() )
+        ## perform search variant
+	searchFunction()
+	
+        self.searcher.clusterFasta()  ## expects all.fasta
 
-        ## skipp remote blast for now
-        # self.searcher.remoteBlast( f_target, 'nr', 'blastp', alignments=50 )
+        self.searcher.writeFastaClustered()
 
-        if flavour == 'blastpgp':
-            searcher.localPSIBlast( f_target, db, 'blastpgp', npasses=2 )
-        else:
-            searcher.localBlast( f_target, db, 'blastp', alignments=500, e=0.01 )
+	if self.local and self.DEBUG:
+            print '\nThe clustered result from the search can be found in %s'%\
+		  self.outfolder
+            print '\nSequenceSearche log file written to: %s' % self.f_out
 
-        searcher.clusterFasta()  ## expects all.fasta
+	self.assert_( len(self.searcher.clusters) > 0 )
+	self.assertEqual( len(self.searcher.clusters),
+			  len(self.searcher.bestOfCluster) )
 
-        searcher.writeFastaClustered()
-
-        if local:
-            print '\nThe clustered result from the search can be found in %s'%f_out
-            print '\nSequenceSearche log file written to: %s'%f_out
-            globals().update( locals() )
-
-        ## cleanup
-        T.tryRemove( outfolder, tree=1 )
-        
-        return 1
+	## make sure we have a fasta record for each cluster center
+	for id in self.searcher.bestOfCluster:
+	    self.assert_( id in self.searcher.record_dic )
 
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
+class TestLocal( TestBase ):
+    """Test case for local Blast and PSI-Blast"""
 
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
-        
+    TAGS = [ BT.EXE ]
+
+    def test_blast(self):
+	"""Mod.SequenceSearcher.localBlast test"""
+	self.search( self.searchLocalBlast )
+
+    def test_psiblast(self):
+	"""Mod.SequenceSearcher.localPSIBlast test"""
+	self.search( self.searchLocalPsiBlast )
+
+
+class TestRemote( TestBase ):
+    """Test case for remote (WWW-)Blast""" 
+
+    TAGS = [ BT.LONG, BT.EXE ]
+
+    def test_remoteBlast(self):
+	"""Mod.SequenceSearcher.remoteBlast test"""
+	self.search( self.searchRemoteBlast )
+
 
 if __name__ == '__main__':
 
-    test = Test()
-    
-    ## test localBlast
-    assert test.run( local=1 ) ==  test.expected_result()
-    
-    ## test localPSIBlast
-    assert test.run( local=1, flavour='blastpgp') ==  test.expected_result()
-
-
+    BT.localTest(debug=0)
