@@ -40,8 +40,6 @@ import glob
 import subprocess
 import gzip
 
-from ColorSpectrum import ColorSpectrum
-
 class ToolsError( Exception ):
     pass
 
@@ -793,15 +791,6 @@ def toInt( o, default=None ):
         return default
 
 
-def colorRange( nColors, palette='plasma2' ):
-    
-    c = ColorSpectrum( palette=palette, vmin=0, vmax=1. )
-
-    r = 1. * Numeric.arange( 0, nColors ) / nColors
-
-    return c.colors( r )
-
-
 def hex2int( shex ):
     """
     Convert hex-code string into float number.
@@ -1195,64 +1184,35 @@ def gzopen( fname, mode='r' ):
 #############
 ##  TESTING        
 #############
+## import Biskit.test as BT
         
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
-        from Biskit import PDBModel
+## class Test(BT.BiskitTest):
+##     """Test case"""
 
-        m = PDBModel( testRoot()+'/rec/1A2P.pdb')
+##     def test_tools( self ):
+##         """tools test (very incomplete)"""
+##         from Biskit import PDBModel
+
+##         m = PDBModel( testRoot()+'/rec/1A2P.pdb')
         
-        if local:
-            print "\nTEST info:"    
-            info(m)
+##         if self.local:
+##             print "\nTEST info:"    
+##             info(m)
 
-        if local:
-            print "\nTEST Exception:"
-            try:
-                i = 1/0
-            except:
-                print lastErrorTrace()
+##         if self.local:
+##             print "\nTEST Exception:"
+##             try:
+##                 i = 1/0
+##             except:
+##                 print lastErrorTrace()
 
-        if local: print "\nTEST ensure"
-        ensure( m, PDBModel )
+##         if self.local: print "\nTEST ensure"
+##         ensure( m, PDBModel )
         
-        if local:
-            globals().update( locals() )
-
-        absfile('~')
+##         f = absfile('~')
             
-        return 1
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
-        
 
 if __name__ == '__main__':
-
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    pass
+##     BT.localTest()
 
