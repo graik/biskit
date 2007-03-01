@@ -165,6 +165,8 @@ class TemplateCleaner:
             for a in m_ca.atoms:
                 a['chain_id'] = 'A'
 
+	    chain_id = 'A'  ## for sequence record
+
         ## create SEQRES record
         n_res = m_ca.lenResidues()
 
@@ -285,71 +287,56 @@ class TemplateCleaner:
 #############
 ##  TESTING        
 #############
-        
-class Test:
+import Biskit.test as BT    
+
+class Test(BT.BiskitTest):
     """
     Test class
     """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype:  int
-        """
+
+    def prepare(self):
         import tempfile
         import shutil
         from Biskit.LogFile import LogFile
-
+	
         ## temp output directory
-        outfolder = tempfile.mkdtemp( '_test_TemplateCleaner' )
-        os.mkdir( outfolder +'/templates' )
+        self.outfolder = tempfile.mkdtemp( '_test_TemplateCleaner' )
+        os.mkdir( self.outfolder +'/templates' )
 
         ## log file
-        f_out = outfolder + '/TemplateCleaner.log'
-        l = LogFile( f_out, mode='w')
+        self.f_out = self.outfolder + '/TemplateCleaner.log'
+        self.l = LogFile( self.f_out, mode='w')
+    
+	shutil.copytree( T.testRoot() + '/Mod/project/templates/nr',
+                         self.outfolder + '/templates/nr' )
 
-        shutil.copytree( T.testRoot() + '/Mod/project/templates/nr',
-                         outfolder + '/templates/nr' )
+    def cleanUp(self):
+        T.tryRemove( self.outfolder, tree=1 )
 
-        c = TemplateCleaner( outfolder, log=l)
+
+    def test_TemplateCleaner(self):
+	"""Mod.TemplateCleaner test"""
+	import glob
+
+        self.c = TemplateCleaner( self.outfolder, log=self.l)
 
         inp_dic = modUtils.parse_tabbed_file(
-            T.absfile( outfolder + '/templates/nr/chain_index.txt' ) )
+            T.absfile( self.outfolder + '/templates/nr/chain_index.txt' ) )
 
-        c.process_all( inp_dic )
+        self.c.process_all( inp_dic )
         
-        if local:
-            print 'TemplateCleaner log file written to: %s'%f_out
+        if self.local:
+            print 'TemplateCleaner log file written to: %s'% self.f_out
             globals().update( locals() )
-            
-        ## cleanup
-        T.tryRemove( outfolder, tree=1 )
-        
-        return 1
 
+	## check that cleaned pdbs have been written
+	f_cleaned = glob.glob(self.outfolder+ '/templates/nr_cleaned/*pdb')
+	self.assert_( len(f_cleaned) > 0 )
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
         
 if __name__ == '__main__':
 
-    test = Test()
-    
-    assert test.run( local=1 ) ==  test.expected_result()
-
+    BT.localTest(debug=1)
 
 
 
