@@ -539,73 +539,74 @@ CALL ROUTINE = 'model'             # do homology modelling
 #############
 ##  TESTING        
 #############
-        
-class Test:
+import Biskit.test as BT
+    
+class TestBase(BT.BiskitTest):
     """
-    Test class
+    Test base class
     """
     
-    def run( self, local=0, run=0 ):
-        """
-        run function test
-
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @param run: run the full test (call external application) or not
-        @type  run: 1|0
-
-        @return: 1
-        @rtype:  int
-        """
+    def prepare(self):
         import tempfile
         import shutil
 
         ## collect the input files needed
-        outfolder = tempfile.mkdtemp( '_test_Modeller' )
-        os.mkdir( outfolder +'/templates' )
-        os.mkdir( outfolder +'/t_coffee' )
+        self.outfolder = tempfile.mkdtemp( '_test_Modeller' )
+        os.mkdir( self.outfolder +'/templates' )
+        os.mkdir( self.outfolder +'/t_coffee' )
 
         shutil.copytree( T.testRoot() + '/Mod/project/templates/modeller',
-                         outfolder + '/templates/modeller' )
+                         self.outfolder + '/templates/modeller' )
 
         shutil.copy( T.testRoot() + '/Mod/project/t_coffee/final.pir_aln',
-                     outfolder + '/t_coffee' )    
+                     self.outfolder + '/t_coffee' )    
 
         shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
-                     outfolder  )
+                     self.outfolder  )
+	
 
-        m = Modeller( outfolder, verbose=local )
+    def runmodeller( self, run=0 ):
+        """
+        @param run: run the full test (call external application) or not
+        @type  run: 1|0
+        """
 
-        r = m.prepare_modeller( )
+        self.m = Modeller( self.outfolder, verbose=self.local )
+
+        self.m.prepare_modeller( )
 
         if run:
-            m.go()
-            m.postProcess()
-            print 'The modelling result can be found in %s/modeller'%outfolder
+            self.m.go()
+            self.m.postProcess()
 
-        if local:
-            globals().update( locals() )
-            
-        ## cleanup
-        T.tryRemove( outfolder, tree=1 )
+	    if self.DEBUG and self.VERBOSITY > 2:
+		self.log.add('The modelling result id in %s/modeller'\
+			     %self.outfolder)
 
-        return 1
+	    result = T.Load( self.outfolder + '/modeller/PDBModels.list' )
+	    self.assertEqual( len(result), 10 )
+
+    def cleanUp(self):
+        T.tryRemove( self.outfolder, tree=1 )
 
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
+class TestDry( TestBase ):
+    """Incomplete test case without running Modeller"""
 
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
+    def test_modeller(self):
+	"""Mod.Modeller dry run"""
+	self.runmodeller(run=0)
+
+class Test( TestBase ):
+    """Complete test case running modeller"""
+
+    TAGS = [BT.EXE, BT.LONG]
+
+    def test_modeller(self):
+	"""Mod.Modeller complete test"""
+	self.runmodeller(run=1)
+
 
 if __name__ == '__main__':
 
-    test = Test()
-    
-    assert test.run( run=1, local=1 ) ==  test.expected_result()
+    BT.localTest(verbosity=3)

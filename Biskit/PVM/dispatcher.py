@@ -424,6 +424,14 @@ class JobSlave(PVMMasterSlave):
 
         self.send(self.getParent(), MSG_JOB_DONE, (my_tid, result))
 
+################
+## empty test ##
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Mock test, dispatcher is tested by other PVM tests."""
+    pass
+
 
 if __name__ == '__main__':
 

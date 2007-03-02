@@ -458,61 +458,43 @@ class ValidationSetup:
 #############
 ##  TESTING        
 #############
-        
-class Test:
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
     """
     Test class
     """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype:  int
-        """
-        import tempfile
+
+    def prepare(self):
+	import tempfile
         import shutil
 
         ## collect the input files needed
-        outfolder = tempfile.mkdtemp( '_test_ValidationSetup' )
-        os.mkdir( outfolder +'/templates' )
+        self.outfolder = tempfile.mkdtemp( '_test_ValidationSetup' )
+        os.mkdir( self.outfolder +'/templates' )
 
         shutil.copytree( T.testRoot() + '/Mod/project/templates/nr',
-                         outfolder + '/templates/nr' )
+                         self.outfolder + '/templates/nr' )
 
         shutil.copytree( T.testRoot() + '/Mod/project/templates/modeller',
-                         outfolder + '/templates/modeller' )    
-
-        v = ValidationSetup( outFolder = outfolder )    
-
-        v.go( validation_folder =outfolder )  
-
-        if local:
-            print 'The validation project can be found in %s/validation'%outfolder
-            globals().update( locals() )
-        
-
-        return 1
+                         self.outfolder + '/templates/modeller' )    
 
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
 
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
+    def test_ValidationSetup(self):
+	"""Mod.ValidationSetup test"""
+        v = ValidationSetup( outFolder = self.outfolder )    
+
+        v.go( validation_folder =self.outfolder )  
+
+        if self.local and self.DEBUG:
+            print 'The validation project can be found in %s/validation'%\
+		  self.outfolder
+
+
+    def cleanUp(self):
+	T.tryRemove( self.outfolder, tree=1)
 
 if __name__ == '__main__':
 
-    test = Test()
-    
-    assert test.run( local=1 ) ==  test.expected_result()
-
+    BT.localTest()

@@ -143,92 +143,57 @@ class ModelMaster(TrackingJobMaster):
 #############
 ##  TESTING        
 #############
-        
-class Test:
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
     """
     Test class
     """
-    
-    def run( self, local=0, run=0, model_testRoot=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0        
-        @param run: run the full test (call external application) or not
-        @type  run: 1|0
-        @param model_testRoot: align the full validation project in testRoot
-        @type  model_testRoot: 1|0
 
-        @return: 1
-        @rtype:  int
-        """
-        import tempfile
+    TAGS = [BT.PVM, BT.LONG, BT.EXE]
+    
+    def prepare(self):
+	import tempfile
         import shutil
 
-        if model_testRoot:
-            
-            projRoot =  T.testRoot()+'/Mod/project'
-            projects = glob.glob( projRoot + '/validation/*' )
-            
-            master = ModelMaster(folders = projects,
-                                 hosts=hosts.cpus_all[ : 10 ])
-            
-            r = master.calculateResult()
-            
-            if local:
-                globals().update( locals() )
-            
-            return 1
-
-
         ## collect the input files needed
-        outfolder = tempfile.mkdtemp( '_test_Modeller' )
-        os.mkdir( outfolder +'/templates' )
-        os.mkdir( outfolder +'/t_coffee' )
+        self.outfolder = tempfile.mkdtemp( '_test_Modeller' )
+        os.mkdir( self.outfolder +'/templates' )
+        os.mkdir( self.outfolder +'/t_coffee' )
 
         shutil.copytree( T.testRoot() + '/Mod/project/templates/modeller',
-                         outfolder + '/templates/modeller' )
+                         self.outfolder + '/templates/modeller' )
 
         shutil.copy( T.testRoot() + '/Mod/project/t_coffee/final.pir_aln',
-                     outfolder + '/t_coffee' )    
+                     self.outfolder + '/t_coffee' )    
 
         shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
-                         outfolder  )
+                         self.outfolder  )
 
-        master = ModelMaster(folders = [outfolder],
-                             hosts=hosts.cpus_all[ : 10 ],
-                             show_output = local,
-                             verbose = local )
+    
+    def test_ModelMaster( self):
+	"""Mod.ModelMaster test"""
 
-        if run:
-            r = master.calculateResult()
-            if local: print 'The models result can be found in %s/modeller'%outfolder
+	nodes = hosts.cpus_all[ : 10 ]
+
+        self.master = ModelMaster(folders = [self.outfolder],
+                             hosts=nodes,
+                             show_output = self.local,
+                             verbose = self.local )
+
+	assert len(nodes) > 0, 'master needs at least 1 pvm node.'
+
+	self.r = self.master.calculateResult()
+
+	if self.debug and self.local:
+	    print 'The models result can be found in %s/modeller'%\
+		  self.outfolder
             
-        if local:
-            globals().update( locals() )
-            
-        ## cleanup
-        T.tryRemove( outfolder, tree=1 )
-        
-        return 1
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
+    def cleanUp(self):
+        T.tryRemove( self.outfolder, tree=1 )
     
 
 if __name__ == '__main__':
 
-    test = Test()
-    
-    assert test.run( run=1, local=1 ) ==  test.expected_result()
-
+    BT.localTest()
 

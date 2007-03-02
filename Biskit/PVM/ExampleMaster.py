@@ -33,7 +33,7 @@ from Biskit.tools import projectRoot
 
 class Master(TrackingJobMaster):
 
-    ## Slave script that ges with this master
+    ## Slave script that goes with this master
     slave_script =  projectRoot() + '/Biskit/PVM/ExampleSlave.py'
 
     
@@ -77,25 +77,18 @@ class Master(TrackingJobMaster):
 #############
 ##  TESTING        
 #############
-        
-class Test:
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
     """
     Test class
     """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype:  int
-        """
-        import time
-        from Biskit.PVM.ExampleMaster import Master
+
+    TAGS = [BT.PVM]
+
+    def test_ExampleMaster(self):
+	"""PVM.ExampleMaster test"""
+	import time
 
         hosts = cpus_all[:8]
 
@@ -115,9 +108,11 @@ class Test:
         master = Master( data=data, chunk_size=10,
                          hosts=hosts, niceness=niceness,
                          slave_script=Master.slave_script,
-                         show_output=local, redistribute=1,
-                         verbose=local )
+                         show_output=self.local, redistribute=1,
+                         verbose=self.local )
 
+	assert len(hosts) > 0, 'master needs at least 1 PVM node.'
+	
         ## blocking call
         r = master.calculateResult()
 
@@ -129,21 +124,7 @@ class Test:
         if local:
             globals().update( locals() )
             
-        return 1
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
 
 if __name__ == '__main__':
 
-    test = Test()
-    
-    assert test.run( local=1 ) ==  test.expected_result()
+    BT.localTest()

@@ -62,6 +62,14 @@ class Slave(JobSlave):
         print "Done."
         return d
 
+################
+## empty test ##
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Mock test, Slave is tested by ExampleMaster."""
+    pass
+
 
 if __name__ == '__main__':
 

@@ -180,3 +180,10 @@ class Status:
 
     __repr__ = __str__
 
+################
+## empty test ##
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Mock test, Status is tested indirectly in other PVM applications."""
+    pass
