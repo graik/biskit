@@ -40,6 +40,7 @@ import string
 import gzip
 import subprocess
 import types
+import  cStringIO
 from Bio import File
 
 class TemplateSearcher( SequenceSearcher ):
@@ -168,12 +169,12 @@ class TemplateSearcher( SequenceSearcher ):
                 r.chain = i['chain']
                 result[ i['pdb'] ] = r
             except BlastError, why:
-                T.errWriteln("ERROR (ignored): couldn't fetch "+ str(i) )
+                EHandler.warning("ERROR (ignored): couldn't fetch "+ str(i) )
 
         return result
 
 
-    def getLocalPDB( self, id, db_path=settings.pdb_path ):
+    def getLocalPDBHandle( self, id, db_path=settings.pdb_path ):
         """
         Get the coordinate file from a local pdb database.
         
@@ -211,7 +212,7 @@ class TemplateSearcher( SequenceSearcher ):
         raise BlastError( "Couldn't find PDB file.")
 
 
-    def getRemotePDB( self, id, rcsb_url=settings.rcsb_url ):
+    def getRemotePDBHandle( self, id, rcsb_url=settings.rcsb_url ):
         """
         Get the coordinate file remotely from the RCSB.
         
@@ -236,38 +237,43 @@ class TemplateSearcher( SequenceSearcher ):
         return uhandle
 
 
-    def __extractPDBInfos( self, handle ):
-        """
-        Extract extra infos from PDB file.
-        NMR files get resolution 3.5.
-        
-        @param handle: open file handle OR string of file to examine
-        @type  handle: open file handle OR strings
-        
+    def parsePdbFromHandle(self, handle, first_model_only=True ):
+	"""
+	Parse PDB from file/socket or string handle into memory.
+
+	@param handle: fresh open file/socket handle to PDB ressource or string
+	@type  handle: open file-like object or str
+	@param first_model_only: only take first of many NMR models [True]
+	@type  first_model_only: bool
+
         @return: pdb file as list of strings, dictionary with resolution
         @rtype: [str], {'resolution':float }
+	@raise BlastError: if passed in string is too short
+	"""
+	lines = []
+	res_match = None
+	infos = {}
 
-        @raise BlastError: if couldn't extract PDB Info
-        """
-        infos = {}
-        if type( handle ) == types.FileType:
-            lines = handle.readlines()
-        elif type( handle ) == types.StringType and len(handle) > 5000:
-            lines = handle.splitlines( True )
-        elif type( handle ) == types.InstanceType:
-            lines = handle.readlines()
-        else:
-            raise BlastError( "Couldn't extract PDB Info." )
+	if type( handle ) is str:
+	    if len(handle) < 5000:
+		raise BlastError( "Couldn't extract PDB Info." )
+	    handle =  cStringIO.StringIO( handle )
 
-        for l in lines:
-            found = self.ex_resolution.findall( l )
+	for l in handle:
+	    lines += [ l ]
 
-            if found:
-                if found[0] == 'NOT APPLICABLE':
-                    infos['resolution'] = self.NMR_RESOLUTION
-                else:
-                    infos['resolution'] = float( found[0] )
-        return lines, infos
+	    res_match = res_match or self.ex_resolution.search( l )
+
+	    if first_model_only and l[:6] == 'ENDMDL':
+		break
+		
+	if res_match:
+	    if res_match.groups()[0] == 'NOT APPLICABLE':
+		infos['resolution'] = self.NMR_RESOLUTION
+	    else:
+		infos['resolution'] = float( res_match.groups()[0] )
+
+	return lines, infos
 
 
     def retrievePDBs( self, outFolder=None, pdbCodes=None ):
@@ -292,12 +298,11 @@ class TemplateSearcher( SequenceSearcher ):
         result = []
         i = 0
         if not self.silent:
-            T.flushPrint("retrieving %i PDBs..." % len( pdbCodes ) )
+            T.flushPrint("fetching %i PDBs..." % len( pdbCodes ) )
+
         for c in pdbCodes:
 
             i += 1
-            if i%10 == 0 and not self.silent:
-                T.flushPrint('#')
 
             fname = '%s/%s.pdb' % (outFolder, c)
 
@@ -305,20 +310,23 @@ class TemplateSearcher( SequenceSearcher ):
                 if os.path.exists( fname ):
                     h = open( fname, 'r' )
                 else:
-                    h = self.getLocalPDB( c )
+                    h = self.getLocalPDBHandle( c )
+		if not self.silent:
+		    T.flushPrint('l')
             except:
-                h = self.getRemotePDB( c )
+                h = self.getRemotePDBHandle( c )
+		if not self.silent:
+		    T.flushPrint('r')
 
             try:
-                lines, infos = self.__extractPDBInfos( h )
+                lines, infos = self.parsePdbFromHandle( h, first_model_only=1 )
                 infos['file'] = fname
 
                 if c in self.record_dic:
                     self.record_dic[ c ].__dict__.update( infos )
 
                 ## close if it is a handle
-                try:
-                    h.close()
+                try: h.close()
                 except:
                     pass
 
@@ -332,8 +340,8 @@ class TemplateSearcher( SequenceSearcher ):
             except IOError, why:
                 raise BlastError( "Can't write file "+fname )
 
-        if not self.silent:
-            T.flushPrint('\n%i files written to %s\n' %(i,outFolder) )
+        if self.verbose:
+            self.log.add('\n%i PDB files written to %s\n' %(i,outFolder) )
 
         return result
 
@@ -436,85 +444,67 @@ class TemplateSearcher( SequenceSearcher ):
 #############
 ##  TESTING        
 #############
-        
-class Test:
+import Biskit.test as BT
+     
+class Test(BT.BiskitTest):
     """
     Test class
     """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype:  int
-        """
-        import tempfile
+
+    TAGS = [ BT.EXE ]
+
+    def prepare(self):
+	import tempfile
         import shutil
         from Biskit.LogFile import LogFile
         
-        query = T.testRoot() + '/Mod/project/target.fasta'
-        outfolder = tempfile.mkdtemp( '_test_TemplateSearcher' )
-        shutil.copy( query, outfolder )
+        self.query = T.testRoot() + '/Mod/project/target.fasta'
+        self.outfolder = tempfile.mkdtemp( '_test_TemplateSearcher' )
+        shutil.copy( self.query, self.outfolder )
 
         ## log file
-        f_out = outfolder + '/TemplateSearcher.log'
-        l = LogFile( f_out, mode='w')
+        self.f_out = self.outfolder + '/TemplateSearcher.log'
 
-        f_target = outfolder + '/target.fasta'
+        self.l = LogFile( self.f_out, mode='w')
+	if self.local:  self.l = StdLog()
 
-        silent = 1
-        if local: silent=0
+        self.f_target = self.outfolder + '/target.fasta'
 
-        searcher = TemplateSearcher( outFolder=outfolder,
-                                     verbose=1, log=l,
-                                     silent=silent )
+
+    def test_TemplateSearcher(self):
+	"""Mod.TemplateSearcher test"""
+        silent = 0
+        if self.local: silent=0
+
+        self.searcher = TemplateSearcher( outFolder=self.outfolder,
+					  verbose=1, log=self.l,
+					  silent=silent )
 
         db = settings.db_pdbaa
-        searcher.localBlast( f_target, db, 'blastp', alignments=200, e=0.0001)
+        self.searcher.localBlast( self.f_target, db, 'blastp',
+				  alignments=200, e=0.0001)
 
         ## first tries to collect the pdb files from a local db and if
         ## that fails it tries to collect them remotely
-        searcher.retrievePDBs()
+        self.searcher.retrievePDBs()
 
-        searcher.clusterFasta()  ## expects all.fasta
+        self.searcher.clusterFasta()  ## expects all.fasta
 
-        searcher.writeFastaClustered()
+        self.searcher.writeFastaClustered()
 
-        fn = searcher.saveClustered()
+        fn = self.searcher.saveClustered()
         
-        if local:
-            print '\nThe set of clustered template files from the search'
-            print '    can be found in %s/templates'%outfolder
-            print '\nTemplateSearcher log file written to: %s'%f_out
-            globals().update( locals() )
-            
-        ## cleanup
-        T.tryRemove( outfolder, tree=1 )
-        
-        return 1
+        if self.local and self.DEBUG:
+            self.log.add(
+		'\nThe set of clustered template files from the search' +\
+		'    can be found in %s/templates' % self.outfolder +\
+		'\nTemplateSearcher log file written to: %s' % self.f_out)
 
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
+    def cleanUp(self):
+        T.tryRemove( self.outfolder, tree=1 )
         
 
 if __name__ == '__main__':
 
-    test = Test()
-    
-    assert test.run( local=1 ) ==  test.expected_result()
-
-
+    BT.localTest()
 
