@@ -36,71 +36,49 @@ Testing your Biskit setup
 
 - Many of the tests write an output to disc. The directory used for the 
   output is the folder given by *tempfile.tempdir*, normally */tmp*. 
-  The tests will not remove the files and directories written, you 
-  will have to do that yourself.
 
-
+- TAGS classify tests into categories that can be included or excluded
+  from a test run, currently these are: LONG, OLD, EXE, PVM
 
 Testing a single module:
 ========================
-To test a single module just execute the test code within the module. 
+To test a single module just execute the module, for example::
+
+  cd biskit/Biskit
+  python -i PDBModel.py
+
+...will run the PDBModel test case and release you into an interactive
+interpreter to inspect the result.
 
 
-
-Testing the full installation:
+Testing the full installation: 
 ==============================
+
 Testing of the full installation is facilitated by a script
-*~biskit/test/test.py*. This script accepts a few options. The most
-usfull option is *-tests* that decides what set of tests to run. The 
-default setting *all exclude_long* takes approximately 10 minutes to run. 
-To run *all* tests will probably take about 20 minutes 
-(depending on your system).
+*~biskit/Biskit/test.py* (in fact, test.py also is the module that
+defines the whole Biskit testing infrastructure ). This script accepts
+a few options. The most useful option may be -e to exclude tests by
+their tags and -p which allows you to narrow down testing to a Biskit
+sub-package
 
-To get some help from the script: 
+To get some help from the script, call it without arguments::
 
->>> ./test.py -HELP 
+  python test.py
 
+Example 1, test everything::
 
-Results in something like::
+  python test.py -v 2
 
-  Run unittest tests for biskit.
+(give any default option to prevent the printing of the help
+screen). After having typed that, going for lunch or a walk may be a
+good idea, especially if your docking and homology modeling
+installation is complete.
 
-  log	- str, path to logfile that will be written
-  verb  - int, verbosity level
-  tests - [str], list of the test suits to be run, one or more of::
+Example 2, only test core Biskit without external programs or
+pvm-dependent code::
 
-	     biskit	    - most Biskit modules
-	     biskit_app     - Biskit modules calling external applications
-	     biskit_pvm     - Biskit modules using PVM
-	     dock	    - most Biskit.Dock modules
-	     dock_app	    - Biskit.Dock modules calling
-				external applications
-	     dock_app_long  - time-consuming Biskit.Dock modules calling
-				external applications (full test)
-	     dock_pvm	    - Biskit.Dock modules using PVM
-	     mod	    - all Biskit.Mod modules
-	     mod_long	    - time-consuming Biskit.Mod modules (full test)
-	     dock_pvm	    - Biskit.Dock modules using PVM
-	     dock_pvm_long  - time-consuming Biskit.Dock modules
-				using PVM (full test)
-	     stat	    - Biskit.Statistics modules
-	     pvm	    - Biskit.PVM modules
+  python test.py -p Biskit -e exe pvm
 
-	  Or one or more of the groups::
+Example 3, only test docking and homology modeling external programs::
 
-	     all	 - all tests
-	     all_mod	 - all Biskit.Mod tests
-	     all_dock	 - all Biskit.Dock tests
-	     all_biskit  - all Biskit tests
-
-	  To exclude tests::
-
-	     no_long  - don't run time-consuming tests
-	     no_pvm   - dont run tests using PVM
-
-
-  Default options:
-
-        - tests         ['all', 'no_long']
-        - verb  2
-        - log   /mnt/data/shared_bin/biskit/test/test.log
+  python test.py -p Biskit.Mod Biskit.Dock -i exe
