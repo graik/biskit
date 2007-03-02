@@ -108,3 +108,11 @@ env.update(net_ncbi)
 
 del B, T, M, user, sys
 del __CFG_DEFAULT, __CFG_USER, m
+
+################
+## empty test ##
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Mock test, settings is always executed anyway."""
+    pass

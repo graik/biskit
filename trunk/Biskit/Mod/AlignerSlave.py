@@ -160,6 +160,14 @@ class AlignerSlave(JobSlave):
 
         return d
 
+##############
+## empty test
+##############
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Mock test, the Slave is tested in L{Biskit.Mod.AlignerMaster}"""
+    pass
 
 if __name__ == '__main__':
 

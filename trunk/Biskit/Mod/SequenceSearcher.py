@@ -861,6 +861,9 @@ import Biskit.test as BT
 class TestBase(BT.BiskitTest):
     """Prepare all Test cases (without providing any itself)"""
 
+    def prepare(self):
+        self.query = T.testRoot() + '/Mod/project/target.fasta'
+	
     def prepareOutput(self, ident):
 	"""Set up an output folder for a blast run and point
 	self.outfolder and log files to the right location
@@ -877,9 +880,6 @@ class TestBase(BT.BiskitTest):
         self.f_out = self.outfolder+'/SequenceSearcher.log'
 	
 
-    def prepare(self):
-        self.query = T.testRoot() + '/Mod/project/target.fasta'
-	
     def cleanUp(self):
         T.tryRemove( self.outfolder, tree=1 )
 

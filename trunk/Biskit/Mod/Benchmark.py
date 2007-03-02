@@ -390,45 +390,43 @@ class Benchmark:
 #############
 ##  TESTING        
 #############
-        
-class Test:
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
     """
     Test class
     """
-    
-    def run( self, local=0):
-        """
-        run function test
 
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-
-        @return: 1
-        @rtype:  int
-        """
+    def prepare(self):
         import tempfile
         import shutil
         from Biskit import PDBModel
         from Biskit import Pymoler
         
         ## collect the input files needed
-        outfolder = tempfile.mkdtemp( '_test_Benchmark' )
-        os.mkdir( outfolder +'/modeller' )
+        self.outfolder = tempfile.mkdtemp( '_test_Benchmark' )
+        os.mkdir( self.outfolder +'/modeller' )
         
         dir = '/Mod/project/validation/1DT7'
         shutil.copy( T.testRoot() + dir + '/modeller/PDBModels.list',
-                     outfolder + '/modeller' )    
+                     self.outfolder + '/modeller' )    
         shutil.copy( T.testRoot() + dir + '/reference.pdb',
-                     outfolder )
+                     self.outfolder )
 
-        b = Benchmark( outfolder )
 
-        b.go()
+    def cleanUp(self):
+	T.tryRemove( self.outfolder, tree=1 )
 
-        pdb = T.Load( outfolder + "/modeller/PDBModels.list" )[0]
+    def test_Benchmark(self):
+	"""Mod.Benchmark test"""
 
-        reference = PDBModel(outfolder  + "/reference.pdb" )
+        self.b = Benchmark( self.outfolder )
+
+        self.b.go()
+
+        pdb = T.Load( self.outfolder + "/modeller/PDBModels.list" )[0]
+
+        reference = PDBModel(self.outfolder  + "/reference.pdb" )
         tmp_model = pdb.clone()
 
         reference = reference.compress( reference.maskCA() )
@@ -439,7 +437,7 @@ class Test:
                                        profname="rms_outliers")
         pdb = pdb.transform( tm )
 
-        if local:
+        if self.local:
             pm = Pymoler()
             pm.addPdb( pdb, "m" )
             pm.addPdb( reference, "r" )
@@ -448,24 +446,14 @@ class Test:
             pm.add('show ribbon')
             pm.show()
 
-            print 'The result from the benchmarking can be found in %s/benchmark'%outfolder
-            globals().update( locals() )
-                  
-        return 1
+	    if self.DEBUG:
+		self.log.add(
+		    'The result from the benchmarking is in %s/benchmark'%\
+		    self.outfolder)
 
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
+	    globals().update( locals() )
     
 
 if __name__ == '__main__':
 
-    test = Test()
-    
-    assert test.run( local=1 ) ==  test.expected_result()
+    BT.localTest()
