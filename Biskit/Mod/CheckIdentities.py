@@ -382,83 +382,40 @@ class CheckIdentities:
 #############
 ##  TESTING        
 #############
-        
-class Test:
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
     """
     Test class
     """
     
-    def run( self, local=0, validate_testRoot=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        @param validate_testRoot: check a validation project residing in
-                                     the test root (default: 0)
-        @type  validate_testRoot: 1|0
-
-        @return: 1
-        @rtype:  int
-        """
+    def prepare(self):
         import tempfile
         import shutil
         
-        if validate_testRoot:
-            self.m = CheckIdentities( T.testRoot() + '/Mod/project')
-            self.m.go()
+	## collect the input files needed
+	self.outfolder = tempfile.mkdtemp( '_test_CheckIdentities' )
+	os.mkdir( self.outfolder +'/t_coffee' )
 
-            val_root =  T.testRoot() + '/Mod/project/validation'
-            folders = os.listdir( val_root )
+	shutil.copy( T.testRoot() + '/Mod/project/t_coffee/final.pir_aln',
+		     self.outfolder + '/t_coffee' )    
 
-            for f in folders:
-                self.m = CheckIdentities( outFolder = val_root + '/' + f )
-                self.m.go()
+    def test_CheckIdentities(self):
+	self.m = CheckIdentities( self.outfolder )
+	self.m.go()
 
-            if local:
-                globals().update( locals() )
+	if self.local and self.DEBUG:
+	    self.log.add("""The result from the template comparison can be found in the three files %s, %s and %s that reside in the folder %s"""\
+	    %(self.m.F_OUTPUT_IDENTITIES[1:],
+	      self.m.F_OUTPUT_IDENTITIES_INF[1:],
+	      self.m.F_OUTPUT_IDENTITIES_COV[1:],
+	      self.outfolder ) )
 
-        else:
-            ## collect the input files needed
-            outfolder = tempfile.mkdtemp( '_test_CheckIdentities' )
-            os.mkdir( outfolder +'/t_coffee' )
-
-            shutil.copy( T.testRoot() + '/Mod/project/t_coffee/final.pir_aln',
-                         outfolder + '/t_coffee' )    
-
-            self.m = CheckIdentities( outfolder )
-            self.m.go()
-
-            if local:
-                globals().update( locals() )
-                print """
-The result from the template comparison can be found in the three files %s, %s and %s that reside in the folder %s"""\
-                %(self.m.F_OUTPUT_IDENTITIES[1:],
-                  self.m.F_OUTPUT_IDENTITIES_INF[1:],
-                  self.m.F_OUTPUT_IDENTITIES_COV[1:],
-                  outfolder )
-                
-            ## cleanup
-            T.tryRemove( outfolder, tree=1 )
-        
-        return 1
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
+    def cleanUp(self):
+	T.tryRemove( self.outfolder, tree=1 )
     
 
 if __name__ == '__main__':
 
-    test = Test()
-    
-    assert test.run( local=1 ) ==  test.expected_result()
-
+    BT.localTest()
 

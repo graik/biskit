@@ -146,98 +146,97 @@ class AlignerMaster(TrackingJobMaster):
 #############
 ##  TESTING        
 #############
-        
-class Test:
-    """
-    Test class
-    """
-    
-    def run( self, local=0, run=0, align_testRoot=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0        
-        @param run: run the full test (call external application) or not
-        @type  run: 1|0
-        @param align_testRoot: align the full validation project in testRoot
-        @type  align_testRoot: 1|0
+import Biskit.test as BT
 
-        @return: 1
-        @rtype:  int
+class FullProjectTest(BT.BiskitTest):
+    """
+    Performs full cross-validation alignments on the test project.
+    Requires files that are not checked in but can be generated
+    from the sequence in test/Mod/project.
+    """
+
+    TAGS = [ BT.LONG, BT.PVM, BT.EXE ]
+
+    ## rename to test_fullProject to perform this test
+    def t_fullProject( self ):
         """
-        import tempfile
+	Mod.AlignerMaster full project test
+        """
+        ## a full test case that demands a valid testRoot project
+	projRoot =  T.testRoot()+'/Mod/project'
+	self.projects = glob.glob( projRoot + '/validation/*' )
+
+	self.master = AlignerMaster(folders = self.projects,
+			       ferror = projRoot+'/AlignErrors.out',
+			       hosts = hosts.cpus_all[ : 10 ],
+			       show_output = self.local)
+
+	self.r = self.master.calculateResult()
+
+
+class TestBase( BT.BiskitTest ):
+
+    def prepare(self):
+	import tempfile
         import shutil
 
-        ## a full test case that demands a valid testRoot project
-        if align_testRoot:
-            projRoot =  T.testRoot()+'/Mod/project'
-            projects = glob.glob( projRoot + '/validation/*' )
-
-            master = AlignerMaster(folders = projects,
-                                   ferror = projRoot+'/AlignErrors.out',
-                                   hosts = hosts.cpus_all[ : 10 ],
-                                   show_output = 1)
-            
-            r = self.master.calculateResult()
-
-            if local:
-                globals().update( locals() )
-            
-            return 1
-
         ## collect the input files needed
-        outfolder = tempfile.mkdtemp( '_test_AlignerMaster' )
-        os.mkdir( outfolder +'/templates' )
-        os.mkdir( outfolder +'/sequences' )
+        self.outfolder = tempfile.mkdtemp( '_test_AlignerMaster' )
+        os.mkdir( self.outfolder +'/templates' )
+        os.mkdir( self.outfolder +'/sequences' )
 
         shutil.copytree( T.testRoot() + '/Mod/project/templates/t_coffee',
-                         outfolder + '/templates/t_coffee' )
+                         self.outfolder + '/templates/t_coffee' )
 
         shutil.copy( T.testRoot() + '/Mod/project/templates/templates.fasta',
-                     outfolder + '/templates' )
+                     self.outfolder + '/templates' )
 
         shutil.copy( T.testRoot() + '/Mod/project/sequences/nr.fasta',
-                     outfolder + '/sequences/' )
+                     self.outfolder + '/sequences/' )
 
         shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
-                     outfolder  )
+                     self.outfolder  )
 
-        master = AlignerMaster( folders=[outfolder],
-                                ferror=outfolder+'/AlignErrors.out',
-                                hosts=hosts.cpus_all[ : 5 ],
-                                show_output=local,
-                                verbose=local )
+
+    def t_AlignerMaster(self, run=True):
+
+        self.master = AlignerMaster( folders=[self.outfolder],
+				     ferror=self.outfolder+'/AlignErrors.out',
+				     hosts=hosts.cpus_all[ : 5 ],
+				     show_output=self.local,
+				     verbose=self.local )
 
         if run:
-            r = master.calculateResult()
-            if local: print 'The alignment result can be found in %s/t_coffee'%outfolder
+            self.r = self.master.calculateResult()
+            if self.local and self.DEBUG:
+		self.log.add('The alignment result is in %s/t_coffee'%\
+			     self.outfolder)
             
-        if local:
-            globals().update( locals() )
-                
-        ## cleanup
-        T.tryRemove( outfolder, tree=1 )
+    def cleanUp(self):
+        T.tryRemove( self.outfolder, tree=1 )
         
-        return 1
 
+class TestDry( TestBase ):
+    """Dry run test case that does not actually run t-coffee"""
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
+    TAGS = [ BT.PVM ]
 
-        @return: 1
-        @rtype:  int
-        """
-        return 1
+    def test_AlignerMaster(self):
+	"""Mod.AlignerMaster limited dry run test"""
+	return self.t_AlignerMaster(run=False)
+
+class TestReal( TestBase ):
+    """Full AlignerMaster test case"""
+
+    TAGS = [BT.PVM, BT.EXE, BT.LONG]
+
+    def test_AlignerMaster(self):
+	"""Mod.AlignerMaster full test"""
+	return self.t_AlignerMaster(run=True)
     
 
 if __name__ == '__main__':
 
-    test = Test()
-    
-    assert test.run( run=1, local=1 ) ==  test.expected_result()
-
+    BT.localTest()
 
 

@@ -421,9 +421,11 @@ class Aligner:
 
         @raise AlignerError: if T_Coffee execution failed
         """
-        print self.commands
+	if self.verbose:
+	    self.logWrite( self.commands )
         try:
-            self.logWrite('\nALIGNING...\n')
+	    if self.verbose:
+		self.logWrite('\nALIGNING...\n')
             for cmd in self.commands:
 
                 if type( cmd ) == tuple:
@@ -454,77 +456,82 @@ class Aligner:
 #############
 ##  TESTING        
 #############
-        
-class Test:
+import Biskit.test as BT    
+
+class Test(BT.BiskitTest):
     """
-    Test class
+    Base Test class (does not actually run any test)
     """
-    
-    def run( self, local=0, run=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @param run: run the full test (call external application) or not
-        @type  run: 1|0
-        
-        @return: 1
-        @rtype:  int
-        """
+    def prepare(self):
         import tempfile
         import shutil
+	from Biskit import LogFile, StdLog
 
         ## collect the input files needed
-        outfolder = tempfile.mkdtemp( '_test_Aligner' )
-        os.mkdir( outfolder +'/templates' )
-        os.mkdir( outfolder +'/sequences/' )
+
+        self.outfolder = tempfile.mkdtemp( '_test_Aligner' )
+
+## 	self.outfolder = '/tmp/test_aligner'
+## 	try: os.mkdir(self.outfolder)
+## 	except: pass
+	
+        os.mkdir( self.outfolder +'/templates' )
+        os.mkdir( self.outfolder +'/sequences/' )
         
         shutil.copytree( T.testRoot() + '/Mod/project/templates/t_coffee',
-                         outfolder + '/templates/t_coffee' )
+                         self.outfolder + '/templates/t_coffee' )
         
         shutil.copy( T.testRoot() + '/Mod/project/templates/templates.fasta',
-                     outfolder + '/templates' )
+                     self.outfolder + '/templates' )
 
         shutil.copy( T.testRoot() + '/Mod/project/sequences/nr.fasta',
-                     outfolder + '/sequences/' )
+                     self.outfolder + '/sequences/' )
 
         shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
-                     outfolder  )
+                     self.outfolder  )
 
-        a = Aligner( outFolder=outfolder, verbose=local )
+	if not self.local:
+	    self.a_log = LogFile( self.outfolder + '/Aligner.log' )
+	else:
+	    self.a_log = StdLog()
 
-        a.align_for_modeller_inp()
+    
+    def t_Aligner(self, run=True ):
+
+        self.a = Aligner( outFolder=self.outfolder, verbose=self.local,
+			  log=self.a_log)
+
+        self.a.align_for_modeller_inp()
 
         if run:
-            a.go()
-            print 'The alignment result can be found in %s/t_coffee'%outfolder
+            self.a.go()
+	    if self.local:
+		self.log.add(
+		    'The alignment result is in %s/t_coffee' % self.outfolder)
 
-        if local:
-            globals().update( locals() )
-            
-        ## cleanup
-        T.tryRemove( outfolder, tree=1 )
-        
-        return 1
+    def cleanUp(self):
+        T.tryRemove( self.outfolder, tree=1 )
 
 
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
+class TestDry( Test ):
+    """Test case dry run -- only initialize without running t-coffee"""
 
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
+    TAGS = []
+
+    def test_AlignerDryRun(self):
+	"""Mod.Aligner dry run test"""
+	self.t_Aligner(run=False)
+
+
+class TestLong( Test ):
+    """Complete test case for Aligner"""
+
+    TAGS = [BT.EXE, BT.LONG]
+
+    def test_Aligner(self):
+	"""Mod.Aligner test"""
+	self.t_Aligner(run=True)
 
 if __name__ == '__main__':
 
-    test = Test()
-    
-    assert test.run( run=1, local=1 ) ==  test.expected_result()
-
-
+    BT.localTest(debug=0)

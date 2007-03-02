@@ -98,39 +98,20 @@ def format_fasta(seq, width=60):
 #############
 ##  TESTING        
 #############
-        
-class Test:
+import Biskit.test as BT    
+
+class Test(BT.BiskitTest):
     """
     Test class
     """
     
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype:  int
-        """
+    def test_modUtiles(self):
+	"""Mod.modUtils test"""
         vf = format_fasta( 'ABC'*100 )
 
-        if local:
-            globals().update( locals() )
+        self.assertEqual( vf, self.EXPECT )
 
-        return vf
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return """ABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABC
+    EXPECT = """ABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABC
 ABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABC
 ABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABC
 ABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABC
@@ -139,8 +120,5 @@ ABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABCABC"""
 
 if __name__ == '__main__':
 
-    test = Test()
-    
-    assert test.run( local=1 ) ==  test.expected_result()
-
+    BT.localTest()
 

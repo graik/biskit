@@ -596,95 +596,79 @@ class Analyse:
 #############
 ##  TESTING        
 #############
-        
-class Test:
+import Biskit.test as BT        
+
+class Test( BT.BiskitTest ):
     """
     Test class
     """
-    
-    def run( self, local=0, analyse_testRoot=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        @param analyse_testRoot: analyse the full project in testRoot
-        @type  analyse_testRoot: 1|0
 
-        @return: 1
-        @rtype:  int
-        """
+    def prepare(self):
         import tempfile
         import shutil
-
-        ## a full test case that demands a valid testRoot project
-        if analyse_testRoot:
-            outfolder = T.testRoot() + '/Mod/project'
-            
-            self.a = Analyse( outFolder = outfolder )
-            self.a.go()
-
-            print 'The result from the analysis can be found in %s/analyse'%outfolder
-            return 1
-
-        
+	
         ## collect the input files needed
-        outfolder = tempfile.mkdtemp( '_test_Analyse' )
+        self.outfolder = tempfile.mkdtemp( '_test_Analyse' )
 
         ## data from validation sub-projects
         dir = '/Mod/project/validation/'
         for v in ['1DT7', '1J55']:
 
-            os.makedirs( outfolder +'/validation/%s/modeller'%v )
-            shutil.copy( T.testRoot() + dir + '/%s/modeller/Modeller_Score.out'%v,
-                         outfolder + '/validation/%s/modeller'%v)
+            os.makedirs( self.outfolder +'/validation/%s/modeller'%v )
+            shutil.copy( T.testRoot() +dir+'/%s/modeller/Modeller_Score.out'%v,
+                         self.outfolder + '/validation/%s/modeller'%v)
 
             shutil.copy( T.testRoot() + dir + '/%s/identities_cov.out'%v,
-                         outfolder + '/validation/%s'%v )
+                         self.outfolder + '/validation/%s'%v )
 
-            os.mkdir( outfolder +'/validation/%s/benchmark'%v )
+            os.mkdir( self.outfolder +'/validation/%s/benchmark'%v )
             for f in [ 'rmsd_aa.out', 'rmsd_ca.out', 'PDBModels.list' ]:
                 shutil.copy( T.testRoot() + dir + '/%s/benchmark/%s'%(v,f),
-                             outfolder + '/validation/%s/benchmark'%v )
+                             self.outfolder + '/validation/%s/benchmark'%v )
 
 
         ## data from main project
-        os.mkdir( outfolder +'/modeller' )
+        os.mkdir( self.outfolder +'/modeller' )
         shutil.copy( T.testRoot() + '/Mod/project/modeller/PDBModels.list',
-                     outfolder + '/modeller' )  
+                     self.outfolder + '/modeller' )  
 
-        os.mkdir( outfolder +'/t_coffee' )
+        os.mkdir( self.outfolder +'/t_coffee' )
         shutil.copy( T.testRoot() + '/Mod/project/t_coffee/final.pir_aln',
-                     outfolder + '/t_coffee' )    
+                     self.outfolder + '/t_coffee' )    
 
-        ## now analyze!
-        self.a = Analyse( outFolder = outfolder )
+
+    def test_Analyzer(self):
+        """Mod.Analyzer test"""
+
+        self.a = Analyse( outFolder = self.outfolder )
         self.a.go()
 
-        if local:
-            print 'The result from the analysis can be found in %s/analyse'%outfolder
-            globals().update( locals() )
+        if self.local and self.DEBUG:
+            self.log.add(
+		'The result from the analysis is in %s/analyse'%self.outfolder)
             
-        ## cleanup
-        T.tryRemove( outfolder, tree=1 )
-        
-        return 1
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
+    def cleanUp(self):
+        T.tryRemove( self.outfolder, tree=1 )
     
+
+class ProjectAnalyzeTest( BT.BiskitTest ):
+    """
+    Test case for analyzing a complete modeling project in test/Mod/project
+    """
+
+    ## rename to test_Analyze to include this test
+    def t_Analyze( self ):
+        """
+        Mod.Analyze full test/Mod/project test
+        """
+	self.outfolder = T.testRoot() + '/Mod/project'
+
+	self.a = Analyse( outFolder = self.outfolder )
+	self.a.go()
+
+	if self.local:
+	    print 'The result from the analysis can be found in %s/analyse'%outfolder
 
 if __name__ == '__main__':
 
-    test = Test()
-    
-    assert test.run(analyse_testRoot=0, local=1) ==  test.expected_result()
-
+    BT.localTest()
