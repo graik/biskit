@@ -25,8 +25,8 @@
 Testing your Biskit setup
 *************************
 
-
-- Each *Biskit* module comes with its own test class. 
+- Each *Biskit* module comes with its own test class (derrived from
+  Biskit.test.BiskitTest).
 
 - All the input data needed to run the tests is checked into the 
   project and can be found in the folder *~biskit/test*. 
@@ -39,6 +39,7 @@ Testing your Biskit setup
 
 - TAGS classify tests into categories that can be included or excluded
   from a test run, currently these are: LONG, OLD, EXE, PVM
+
 
 Testing a single module:
 ========================
@@ -82,3 +83,12 @@ pvm-dependent code::
 Example 3, only test docking and homology modeling external programs::
 
   python test.py -p Biskit.Mod Biskit.Dock -i exe
+
+
+Writing your own test:
+======================
+
+Biskit.test automatically collects all BiskitTest-derrived test cases
+from all Biskit modules. The documentation in Biskit.test contains a
+ready-made template for your own test case and all the necessary (or
+maybe unnecessary) instructions.
