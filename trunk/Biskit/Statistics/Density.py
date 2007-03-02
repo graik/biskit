@@ -176,6 +176,8 @@ class Density:
         l = N.array(l)
         l = N.take(l, N.argsort(l))
 
+	globals().update( locals() )
+	
         break_points = N.nonzero(N.greater(l[1:] - l[:-1], 1))
 
         start = 0
@@ -257,58 +259,31 @@ def logConfidence( x, R, clip=1e-32 ):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
+class Test(BT.BiskitTest):
     """
     Test class
     """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
+
+    def test_Density(self):
+	"""Statistics.Density test"""
         import random
 
-        ## a proper lognormal density distribution the log of which has mean 1.0
+        ## a lognormal density distribution the log of which has mean 1.0
         ## and stdev 0.5
-        X = [ (x, p_lognormal(x, 1.0, 0.5)) for x in N.arange(0.00001, 50, 0.001)]
+        self.X = [ (x, p_lognormal(x, 1.0, 0.5))
+		   for x in N.arange(0.00001, 50, 0.001)]
 
-        for i in range( 5 ):
-            ## Some random values drawn from the same lognormal distribution 
+	alpha = 2.
+	beta = 0.6
 
-            alpha = 2.
-            beta = 0.6
+	self.R = [ random.lognormvariate( alpha, beta )
+		   for i in range( 10000 )]
 
-            R = [ random.lognormvariate( alpha, beta ) for i in range( 10000 ) ]
-
-            if local: print logConfidence( 6.0, R )[0]#, area(6.0, alpha, beta)
+	p = logConfidence( 6.0, self.R )[0]#, area(6.0, alpha, beta)
             
-        if local:
-            globals().update( locals() )
-
-        return 1
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 1
-    
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert test.run( local=1 ) == test.expected_result()
-
+    BT.localTest()

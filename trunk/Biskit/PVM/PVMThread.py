@@ -464,3 +464,11 @@ class PVMMasterSlave(PVMThread):
         ## stop message-loop
 
         self.stop()
+
+################
+## empty test ##
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Mock test, PVMThread is tested indirectly by other PVM tests."""
+    pass

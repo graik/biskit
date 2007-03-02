@@ -451,7 +451,7 @@ class Test(BT.BiskitTest):
     Test class
     """
 
-    TAGS = [ BT.EXE ]
+    TAGS = [ BT.EXE, BT.LONG ]
 
     def prepare(self):
 	import tempfile

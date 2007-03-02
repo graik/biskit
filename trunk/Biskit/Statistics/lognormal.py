@@ -169,23 +169,15 @@ def logConfidence( x, R, clip=0 ):
 #############
 ##  TESTING        
 #############
+import Biskit.test as BT
         
-class Test:
+class Test(BT.BiskitTest):
     """
     Test class
     """
-    
-    def run( self, local=0 ):
-        """
-        run function test
-        
-        @param local: transfer local variables to global and perform
-                      other tasks only when run locally
-        @type  local: 1|0
-        
-        @return: 1
-        @rtype: int
-        """
+
+    def test_Density(self):
+	"""Statistics.Density test"""
         import random
         import Biskit.gnuplot as gnuplot
         import Biskit.hist as H
@@ -198,36 +190,22 @@ class Test:
             beta = .7
             x = 10.
 
-            R = [ random.lognormvariate( alpha, beta ) for i in range( 10 ) ]
+            R = [ random.lognormvariate( alpha, beta ) for j in range( 10 ) ]
 
             cr += [ logConfidence( x, R )[0] ]
 
 
         ca = logArea( x, alpha, beta )
 
-        if local:
+        if self.local:
             gnuplot.plot( H.density( N.array(cr) - ca, 100 ) )
             
             globals().update( locals() )
                               
-        return ca
+        self.assertAlmostEqual( ca,  0.86877651432955771, 7)
 
-
-
-    def expected_result( self ):
-        """
-        Precalculated result to check for consistent performance.
-
-        @return: 1
-        @rtype:  int
-        """
-        return 0.86877651432955771
-    
 
 if __name__ == '__main__':
 
-    test = Test()
-
-    assert abs( test.run( local=1 ) - test.expected_result() ) < 1e-8
-
+    BT.localTest()
 

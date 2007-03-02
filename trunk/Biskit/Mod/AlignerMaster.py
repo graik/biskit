@@ -200,13 +200,17 @@ class TestBase( BT.BiskitTest ):
 
     def t_AlignerMaster(self, run=True):
 
+	nodes = hosts.cpus_all[ : 5 ]
+	
         self.master = AlignerMaster( folders=[self.outfolder],
 				     ferror=self.outfolder+'/AlignErrors.out',
-				     hosts=hosts.cpus_all[ : 5 ],
+				     hosts=nodes,
 				     show_output=self.local,
 				     verbose=self.local )
 
         if run:
+	    assert len(nodes) > 0, 'master needs at least 1 pvm node.'
+
             self.r = self.master.calculateResult()
             if self.local and self.DEBUG:
 		self.log.add('The alignment result is in %s/t_coffee'%\
