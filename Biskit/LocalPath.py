@@ -676,7 +676,7 @@ class Test(BT.BiskitTest):
         S.l.set_path( T.projectRoot() + '/tmp/com', maxSub=1, TMP='/tmp' )
         S.path += [ 'Example 5:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
 	S.assertEqual( S.l.formatted(),
-		       '{/data/raik/py/biskit|$projectRoot}/tmp/com')
+		       '{%s|$projectRoot}/tmp/com'% T.projectRoot())
 
         self.assertEqual( S.l.fragments[0][1], 'projectRoot' )
 
