@@ -510,7 +510,7 @@ class Test(BT.BiskitTest):
 
 	self.result = self.slave.go( jobs )
 
-	if self.local or self.verbosity > 2:
+	if self.local or self.VERBOSITY > 2:
 	    self.log.writeln("info records after contacting: ")
 	    self.log.writeln( repr(jobs[0].info.keys()) )
 	if self.local:
