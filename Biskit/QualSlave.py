@@ -156,7 +156,7 @@ class Test(BT.BiskitTest):
 	slave.initialize( {'verbose':0} )
 	r = slave.go( jobs )
 
-	if self.verbosity > 2:
+	if self.VERBOSITY > 2:
 	    self.log.write('eps written to ' + self.feps )
 
 	self.assert_( os.path.exists( self.feps ) )

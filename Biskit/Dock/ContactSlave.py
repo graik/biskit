@@ -502,7 +502,7 @@ class Test(BT.BiskitTest):
 	self.slave = ContactSlave()
 	self.slave.initialize( self.master.getInitParameters(1) )
 
-	if self.local or self.VERBOSTITY > 2:
+	if self.local or self.VERBOSITY > 2:
 	    self.log.writeln("Currently available info records (from hex):")
 	    self.log.writeln( repr(jobs[0].info.keys()) )
 	    self.log.writeln( "Calculating all scores for %i complexes..." \
