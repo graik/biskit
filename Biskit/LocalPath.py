@@ -670,7 +670,7 @@ class Test(BT.BiskitTest):
         S.l.set_path( T.projectRoot() + '/test/com' )
         S.path += [ 'Example 4:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
 	S.assertEqual( S.l.formatted(),
-		       '{/data/raik/py/biskit|$projectRoot}/test/com')
+		       '{%s|$projectRoot}/test/com' % T.projectRoot())
 
         ## Example 5; rule out stray substitutions
         S.l.set_path( T.projectRoot() + '/tmp/com', maxSub=1, TMP='/tmp' )

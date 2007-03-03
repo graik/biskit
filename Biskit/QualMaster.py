@@ -103,7 +103,10 @@ class Test(BT.BiskitTest):
             print 'A RMSD plot is writen to: %s'% self.f_plot
             
     def cleanUp(self):
-        T.tryRemove( self.f_plot )
+	try:
+	    T.tryRemove( self.f_plot )
+	except:
+	    pass
     
         
 if __name__ == '__main__':

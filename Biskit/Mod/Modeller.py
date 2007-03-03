@@ -346,13 +346,15 @@ CALL ROUTINE = 'model'             # do homology modelling
             if host:
                 cmd = "ssh %s '%s'" % (host, cmd)
 
-            self.logWrite( 'Running Modeller .. ')
-            self.logWrite( cmd )
+	    if self.verbose:
+		self.logWrite( 'Running Modeller. .. ')
+		self.logWrite( cmd )
 
             sp = subprocess.Popen(cmd, shell=True, env=os.environ)
             sp.wait()
 
-            ##self.logWrite( '..done: ' + str( output ) + '\n' )
+	    if self.verbose:
+		self.logWrite( '..done: ' + str( output ) + '\n' )
 
         except EnvironmentError, why:
             self.logWrite("ERROR: Can't run Modeller: "+ str( why ) )
@@ -603,7 +605,7 @@ class Test( TestBase ):
     TAGS = [BT.EXE, BT.LONG]
 
     def test_modeller(self):
-	"""Mod.Modeller complete test"""
+	"""Mod.Modeller complete test (ignore the 'import site' error!)"""
 	self.runmodeller(run=1)
 
 

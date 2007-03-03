@@ -432,7 +432,7 @@ class Test(BT.BiskitTest):
     TAGS = [ BT.PVM ]
 
     def test_FlexMaster(self):
-	"""TrajCluster test"""
+	"""TrajFlexMaster test"""
         from Biskit.MatrixPlot import MatrixPlot
         from RandomArray import random
 
@@ -451,8 +451,6 @@ class Test(BT.BiskitTest):
 
         traj_2 = traj_1.clone()
         traj_2.frames = frames
-
-	self.assert_( len(hosts.cpus_all) > 0, '0 pvm nodes' )
 
         master = TrajFlexMaster( traj_1, traj_2,
                                  hosts=hosts.cpus_all,
