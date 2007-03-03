@@ -35,9 +35,7 @@ import time
 import copy
 
 class TrackingJobMaster( JobMaster ):
-    """
-    TrackingJobMaster
-    
+    """    
     This class extends JobMaster with the following extras:
       - reporting of the average time each slave spends on a job
       - automatic adding of slave computers to PVM
@@ -383,3 +381,14 @@ def restart( rst_data, **params ):
     master.__dict__.update( rst_data )
 
     return master
+
+if __name__ == '__main__':
+
+    import pypvm
+    
+    try:
+	
+	pypvm.hostinfo()
+
+    except:
+	print T.lastError()

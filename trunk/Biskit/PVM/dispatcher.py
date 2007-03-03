@@ -123,6 +123,8 @@ class JobMaster(PVMMasterSlave):
         """
         Start slave job
         """
+	assert len(self.hosts) > 0,\
+	       'Master needs at least 1 pvm node to start calculations.'
         self.finished = 0
 
         PVMMasterSlave.start(self)
