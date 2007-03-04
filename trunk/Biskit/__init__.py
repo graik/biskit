@@ -31,7 +31,7 @@ try:
     from LogFile import LogFile, StdLog, ErrLog
     from Errors import BiskitError
 
-    from ExeConfig import ExeConfig
+    from ExeConfig import ExeConfig, ExeConfigError
     from ExeConfigCache import ExeConfigCache
     from Executor import Executor, TemplateError
 

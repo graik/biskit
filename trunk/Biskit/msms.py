@@ -38,14 +38,14 @@ import tempfile
 
 ## import Mslib
 
-from Biskit import Executor, TemplateError
+from Biskit import Executor, TemplateError, ExeConfigCache, ExeConfigError
 ## import Biskit.settings as S
 
 
-class pdb2xyzrnError( Exception ):
+class Pdb2xyzrnError( Exception ):
     pass
 
-class pdb2xyzrn( Executor ):
+class Pdb2xyzrn( Executor ):
     """
     MSMS - pdb2xyzrn
     ================
@@ -84,13 +84,20 @@ class pdb2xyzrn( Executor ):
         ## gpdb_to_xyzrn have to be run i the local directory where
         ##   it resides. Otherwise it will not find the data file 
         ##   called "atmtypenumbers".
-        if os.path.exists( T.projectRoot() +'/external/msms/'):
-            dir =  T.projectRoot() +'/external/msms/'
-        else:
-            raise pdb2xyzrnError_Error, 'Cannot find msms directory. This should reside in ~biskit/external/msms'
-      
+        if not os.path.exists( T.projectRoot() +'/external/msms/'):
+            raise Pdb2xyzrnError, 'Cannot find msms directory. This should reside in ~biskit/external/msms'
+	
+        fmsms =  T.projectRoot() +'/external/msms/'
+
+	## use biskit-version of pdb_to_xyzrn by default
+	exe = ExeConfigCache.get('pdb2xyzrn', strict=1)
+	try:
+	    exe.validate()
+	except ExeConfigError:
+	    exe.bin = fmsms + '/gpdb_to_xyzrn'
+
         Executor.__init__( self, 'pdb2xyzrn', f_in=self.f_pdb,
-                           cwd=dir, **kw )
+                           cwd=fmsms, **kw )
 
         self.model = model
 
@@ -299,7 +306,7 @@ class MSMS( Executor ):
     """
 
 
-    def __init__( self, model, verbose=1, debug=1, **kw ): 
+    def __init__( self, model, **kw ): 
         """
         @param model: PDBModel
         @type  model:
@@ -332,7 +339,7 @@ class MSMS( Executor ):
         Overrides Executor method.
         """
         ## get radiia and name array
-        p2x = pdb2xyzrn(self.model )
+        p2x = Pdb2xyzrn(self.model, verbose=self.verbose, debug=self.debug )
         r, n = p2x.run()
 
         xyz = self.model.xyz  
@@ -432,10 +439,10 @@ class Test(BT.BiskitTest):
         self.m = PDBModel( T.testRoot() + '/lig/1A19.pdb' )
         self.m = self.m.compress( self.m.maskProtein() )
 
-        if self.local: 'Getting surfaces via the MSMS executable'
-        self.ms = MSMS( self.m, debug=1, verbose=1 )
+        if self.local: print 'Getting surfaces via the MSMS executable'
+        self.ms = MSMS( self.m, debug=self.DEBUG, verbose=self.local )
 
-        if self.local: 'Running'
+        if self.local: print 'Running'
         out, sesList, sasList, atmList = self.ms.run()
         
         if self.local:
