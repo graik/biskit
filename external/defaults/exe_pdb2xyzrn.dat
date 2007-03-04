@@ -1,9 +1,10 @@
 [BINARY]
 
-comment= awk script (that comes with msms) pdb_to_xyzrn to extract names and radii.
+comment= modified awk script (that comes with msms) pdb_to_xyzrn to extract names and radii. gpdb_to_xyzrn uses gawk rather than nawk.
 
-## binary
-bin=pdb_to_xyzrn
+## Pdb2xyzrn will assign our modified biskit/external/msms/gpdb_to_xyzrn
+## (unless bin is not None, so your own configuration would override that)
+bin=
 
 ## working directory
 cwd=
