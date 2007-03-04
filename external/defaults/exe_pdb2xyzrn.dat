@@ -1,9 +1,9 @@
 [BINARY]
 
-comment= awk script (thet comes with msms) pdb_to_xyzrn to extract names and radii.
+comment= awk script (that comes with msms) pdb_to_xyzrn to extract names and radii.
 
 ## binary
-bin=gpdb_to_xyzrn
+bin=pdb_to_xyzrn
 
 ## working directory
 cwd=
