@@ -176,8 +176,8 @@ class Test(BT.BiskitTest):
     Test class
     """
 
-    def test_Density(self):
-	"""Statistics.Density test"""
+    def test_lognormal(self):
+	"""Statistics.lognormal test"""
         import random
         import Biskit.gnuplot as gnuplot
         import Biskit.hist as H

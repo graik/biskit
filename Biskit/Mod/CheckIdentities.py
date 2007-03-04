@@ -401,6 +401,7 @@ class Test(BT.BiskitTest):
 		     self.outfolder + '/t_coffee' )    
 
     def test_CheckIdentities(self):
+	"""Mod.CheckIdentities test"""
 	self.m = CheckIdentities( self.outfolder )
 	self.m.go()
 

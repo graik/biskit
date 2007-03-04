@@ -2958,7 +2958,7 @@ import Biskit.test as BT
 class Test(BT.BiskitTest):
     """Test class """
 
-    #: load test PDB once into class rather than 3 times into new test instance
+    #: load test PDB once into class rather than 3 times into every instance
     MODEL = PDBModel( t.testRoot()+'/com/1BGS.pdb')
 
     def prepare(self):
