@@ -58,19 +58,17 @@ class HmmerdbIndex( Executor ):
     if not indexing will be done.
     """
     
-    def __init__( self, hmmdb, verbose=1, log=StdLog(), **kw ):
+    def __init__( self, hmmdb, **kw ):
         """
         @param hmmdb: Pfam hmm database
         @type  hmmdb: str
         """
-        self.verbose = verbose
-        
+	Executor.__init__( self, 'hmmindex', args='%s'%hmmdb, **kw )
+
         if not os.path.exists(hmmdb+'.ssi'):
             if self.verbose:
                 self.log.writeln(
 		    'HMMINDEX: Indexing hmm database. This will take a while')
-
-            Executor.__init__( self, 'hmmindex', args='%s'%hmmdb, **kw )
             
             self.run()
 
@@ -83,7 +81,7 @@ class HmmerSearch( Executor ):
     only write the temporary sequence files.
     """
 
-    def __init__( self, target, hmmdb, noSearch=None, verbose=1, **kw ):
+    def __init__( self, target, hmmdb, noSearch=None, **kw ):
         """
         @param target: sequence 
         @type  target: PDBModel or fasta file
@@ -92,23 +90,21 @@ class HmmerSearch( Executor ):
         @param noSearch: don't perform a seach
         @type  noSearch: 1 OR None
         """
+        self.fName = tempfile.mktemp('.fasta')
         self.hmmdb = hmmdb
+
+        Executor.__init__( self, 'hmmpfam', catch_out=1,
+                           args=' %s %s'%(hmmdb, self.fName), **kw )
+
         self.target = target
         
         self.fastaID = ''
-        self.fName = tempfile.mktemp('.fasta')
-        self.verbose = verbose
         
         noSearch = 0
         if noSearch:
             if self.verbose:
                 self.log.writeln(
 		    'Profiles provided - No search will be performed.')
-            return None
-        
-
-        Executor.__init__( self, 'hmmpfam', catch_out=1,
-                           args=' %s %s'%(hmmdb, self.fName), **kw )
 
 
     def __verify_fasta(self, target ):
@@ -233,7 +229,7 @@ class HmmerProfile( Executor ):
     (using the program hmmfetch).
     """
     
-    def __init__( self, hmmName, hmmdb, verbose=1, **kw ):
+    def __init__( self, hmmName, hmmdb, **kw ):
         """
         @param hmmName: hmm profile name
         @type  hmmName: str
@@ -242,12 +238,10 @@ class HmmerProfile( Executor ):
         """
         self.hmmName = hmmName
 
-        self.f_out = tempfile.mktemp('.hmm')
-
-        self.verbose = verbose
-        
         Executor.__init__( self, 'hmmfetch',
                            args=' %s %s'%(hmmdb, hmmName), **kw )
+
+        self.f_out = tempfile.mktemp('.hmm')
 
         
     def parse_result( self ):
@@ -414,7 +408,7 @@ class HmmerAlign( Executor ):
     Align fasta formated sequence to hmm profile (using hmmalign).
     """
     
-    def __init__( self, hmmFile, fastaFile, fastaID, verbose=1, **kw ):
+    def __init__( self, hmmFile, fastaFile, fastaID, **kw ):
         """
         @param hmmFile: path to hmm file (profile)
         @type  hmmFile: str
@@ -424,8 +418,6 @@ class HmmerAlign( Executor ):
         @type  fastaID: str     
         """
         self.fastaID = fastaID
-        
-        self.verbose = verbose
         
         Executor.__init__( self, 'hmmalign',
                            args=' -q %s %s'%(hmmFile, fastaFile), **kw )
