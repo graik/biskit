@@ -24,8 +24,6 @@
 
 """
 Search Hmmer Pfam database and retrieve conservation data.
-
-@todo: use LogFile instead of print statements
 """
 
 import tempfile
