@@ -43,6 +43,19 @@ import types
 import  cStringIO
 from Bio import File
 
+class PickyURLopener(urllib.FancyURLopener):
+    """Override default urllib error handling -- always raise an exception."""
+
+    def http_error_default(self, url, fp, errcode, errmsg, headers):
+        """
+	Default error handling.
+	@raise IOError: if something went wrong
+	"""
+	raise IOError, 'Cannot open %r. Error %r (%s)' % (url,errcode,errmsg)
+	
+urllib._urlopener = PickyURLopener()
+
+
 class TemplateSearcher( SequenceSearcher ):
     """
     Take a sequence and return a list of files of nonredundant PDB homologues
@@ -259,6 +272,10 @@ class TemplateSearcher( SequenceSearcher ):
 		raise BlastError( "Couldn't extract PDB Info." )
 	    handle =  cStringIO.StringIO( handle )
 
+## 	if handle.peekline()[:6] != 'TITLE':
+## 	    raise BlastError, 'Ressource does not seem to be a PDB:\n%r' %\
+## 		  handle.peekline()
+
 	for l in handle:
 	    lines += [ l ]
 
@@ -272,6 +289,8 @@ class TemplateSearcher( SequenceSearcher ):
 		infos['resolution'] = self.NMR_RESOLUTION
 	    else:
 		infos['resolution'] = float( res_match.groups()[0] )
+	else:
+	    raise BlastError, 'No resolution record found in PDB.'
 
 	return lines, infos
 
