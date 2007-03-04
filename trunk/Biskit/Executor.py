@@ -41,9 +41,6 @@ class TemplateError( BiskitError ):
 
 class Executor:
     """
-    Executor
-    ========
-    
     All calls of external programs should be done via this class or subclasses.
 
     Executor gets the necessary information about a program (binary,
@@ -89,10 +86,10 @@ class Executor:
     Templates
     ---------
       Templates are files or strings that contain place holders like,
-      for example:
+      for example::
 
-      >>> file_in=%(f_in)s
-      >>> file_out=%(f_out)s      
+          file_in=%(f_in)s
+          file_out=%(f_out)s      
 
       At run time, Executor will create an input file or pipe from the
       template by replacing all place holders with values from its own
@@ -100,15 +97,15 @@ class Executor:
 
       >>> x = Executor( 'ls', template='in.template', f_in='in.dat')
 
-      ... will then pass the following input to the ls program:
+      ... will then pass the following input to the ls program::
     
-      >>> file_in=in.dat
-      >>> file_out=/tmp/tmp1HYOvO
+          file_in=in.dat
+          file_out=/tmp/tmp1HYOvO
 
-      However, the following input template will raise an error:
+      However, the following input template will raise an error::
     
-      >>> file_in=%(f_in)s
-      >>> seed=%(seed)i
+          file_in=%(f_in)s
+          seed=%(seed)i
     
       ...because Executor doesn't have a 'seed' field. You could provide
       one by overwriting Executor.__init__. Alternatively, you can
@@ -122,15 +119,16 @@ class Executor:
 
     References
     ----------
-      See also L{Biskit.IcmCad} for an Example of how to overwrite and
-      use Executor.
-      See also L{Biskit.ExeConfig} for a description of program configuration.
+      * See also L{Biskit.IcmCad} for an Example of how to overwrite and
+        use Executor.
+      * See also L{Biskit.ExeConfig} for a description of program
+        configuration.
     """
 
     def __init__( self, name, args='', template=None, f_in=None, f_out=None,
                   f_err=None, strict=1, catch_out=1, push_inp=1, catch_err=0,
                   node=None, nice=0, cwd=None, log=None, debug=0,
-                  verbose=0, **kw ):
+                  verbose=None, **kw ):
 
         """
         Create Executor. *name* must point to an existing program configuration
@@ -171,7 +169,7 @@ class Executor:
         @type  log: 
         @param debug: keep all temporary files (default: 0)
         @type  debug: 0|1
-        @param verbose: print progress messages to log (log != STDOUT)
+        @param verbose: print progress messages to log (default: log != STDOUT)
         @type  verbose: 0|1
         @param kw: key=value pairs with values for template file
         @type  kw: key=value
@@ -194,7 +192,7 @@ class Executor:
         self.catch_out = catch_out
         self.catch_err = catch_err
         
-        self.f_in  = f_in  ## will be overridden by self.run()
+        self.f_in  = f_in  #: will be overridden by self.run()
         self.keep_inp = f_in is not None
         self.push_inp = push_inp
 
@@ -207,7 +205,7 @@ class Executor:
 
         self.cwd = cwd or self.exe.cwd
 
-        ## Log object for own program messages
+        #: Log object for own program messages
         self.log = log or StdLog()
         self.verbose = verbose
         if self.verbose is None:
@@ -364,7 +362,7 @@ class Executor:
 
             self.runTime = self.execute( inp=self.inp )
 
-        except RunError, why:
+        except IOError, why:
             try:
                 self.failed()
             finally:
@@ -512,7 +510,7 @@ class Executor:
 
             return inp
 
-        ## put input string into file
+        ## else put input string into file
         self.f_in = self.f_in or tempfile.mktemp('_exec.inp')
 
         f = open( self.f_in, 'w')
@@ -570,17 +568,10 @@ class Test(BT.BiskitTest):
         self.x = ExeConfigCache.get( 'emacs', strict=0 )
         self.x.pipes = 1
 
-        if self.local:
-            self.e = Executor( 'emacs', args='.biskit/settings.cfg', strict=0,
-			       f_in=None,
-			       f_out=self.fout,
-			       verbose=1, cwd=t.absfile('~') )
-        else:
-            self.e = Executor( 'emacs', args='-kill .biskit/settings.cfg',
-			       strict=0,
-			       f_in=None,
-			       f_out=self.fout,
-			       verbose=0, cwd=t.absfile('~') )            
+	self.e = Executor( 'emacs', args='.biskit/settings.cfg', strict=0,
+			   f_in=None,
+			   f_out=self.fout,
+			   verbose=self.local, cwd=t.absfile('~') )
         
         self.r = self.e.run()
 
