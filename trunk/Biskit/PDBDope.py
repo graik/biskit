@@ -144,7 +144,7 @@ class PDBDope:
                               version= T.dateString() + ' ' + self.version() )
         
 
-    def addConservation( self, pfamEntries=None ):
+    def addConservation( self, pfamEntries=None, verbose=0, log=None):
         """
         Adds a conservation profile. See L{Biskit.Hmmer}
         
@@ -156,14 +156,20 @@ class PDBDope:
                                                 [start2, end2]]}]
                              - startPos, endPos as reported by hmmPfam
                                for PDB sequence generated from this model
-        @type  pfamEntries: [{dict}]           
+        @type  pfamEntries: [{dict}]
+
+        @param verbose: verbosity level (default: 0)
+        @type  verbose: 1|0
+	@param log: Log file for messages [STDOUT]
+	@type  log: Biskit.LogFile
+	
         @raise ExeConfigError: if external application is missing
         """
         ## mask with normal AA also used for HMM search
         mask = self.m.maskCA()
         mask = self.m.atom2resMask( mask )
 
-        h = Hmmer()
+        h = Hmmer( verbose=verbose, log=log )
         h.checkHmmdbIndex()
 
         p, hmmHits = h.scoreAbsSum( self.m, hmmNames=pfamEntries )
@@ -393,6 +399,8 @@ class LongTest( BT.BiskitTest ):
 
     def test_conservation(self):
 	"""PDBDope.addConservation (Hmmer) test"""
+	self.local = 0
+
 	if self.local: print "Adding conservation data...",
 	self.d.addConservation()
 	if self.local: print 'Done.'
