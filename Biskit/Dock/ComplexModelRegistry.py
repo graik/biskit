@@ -366,7 +366,7 @@ class Test(BT.BiskitTest):
     """Test case"""
 
     def test_ComplexModelRegistry(self):
-	"""Dock.CompelxModelRegistry test"""
+	"""Dock.ComplexModelRegistry test"""
         from Biskit.Dock import ComplexList
         
         self.cl = T.Load( T.testRoot() +'/dock/hex/complexes.cl' )
