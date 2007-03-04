@@ -324,7 +324,7 @@ class Test(BT.BiskitTest):
 
     TAGS = [ BT.OLD, BT.EXE ]  ## whatif is not officially supported any longer
 
-    def test_Trajectory(self):
+    def test_Whatif(self):
 	"""Whatif test"""
 
         from Biskit import PDBModel
