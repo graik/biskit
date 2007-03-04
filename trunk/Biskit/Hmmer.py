@@ -31,15 +31,15 @@ Search Hmmer Pfam database and retrieve conservation data.
 import tempfile
 import os, re, string
 import types, os.path
-import mathUtils as math
 import Numeric as N
 import molUtils
 import settings
 
+import Biskit.mathUtils as math
 from Biskit.Errors import BiskitError
 import Biskit.tools as T
 import Biskit.molTools as MT
-from Biskit import Executor, TemplateError, PDBModel, StdLog
+from Biskit import Executor, TemplateError, PDBModel, StdLog, EHandler
 
 
 ## executables
@@ -755,8 +755,8 @@ class Hmmer:
         @rtype: str OR None 
         """
         if len(seq1) != len(seq2):
-            print 'ERR in mergeHmmSeq:'
-            print '\tSequences of different lengths cannot be merged'
+            EHandler.warning( 'ERR in mergeHmmSeq:\n' +\
+			 '\tSequences of different lengths cannot be merged')
             return None
         else:
             result = ''
@@ -903,8 +903,9 @@ class Hmmer:
             ## retrieve hmm model
             hmmDic = self.getHmmProfile( name )
             if self.verbose:
-                print 'Hmm profile ' + str(name) + ' with accession number ' \
-                  + str(hmmDic['accession']) + ' retrieved'
+                self.log.writeln('Hmm profile ' + str(name) +\
+				 ' with accession number ' \
+				 + str(hmmDic['accession']) + ' retrieved')
 
             ## align sequence with model
             fastaSeq, hmmSeq, repete, hmmGap = self.align( model,
@@ -993,17 +994,18 @@ import Biskit.test as BT
 class Test(BT.BiskitTest):
     """Hmmer test"""
 
-    TAGS = [ BT.EXE, BT.LONG ]
+    TAGS = [ BT.EXE ]
     
     def test_Hmmer( self):
         """Hmmer test """
 	
         from Biskit import PDBModel
         import Biskit.tools as T
-    
-        if self.local: print "Loading PDB..."
+
+        if self.local: print "Loading PDB...",
         self.m = PDBModel( T.testRoot()+'/lig/1A19.pdb')
         self.model = self.m.compress( self.m.maskProtein() )
+	if self.local: print "Done"
 
         ## initiate and check database status
         self.hmmer = Hmmer( hmmdb=settings.hmm_db, verbose=self.local,
