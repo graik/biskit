@@ -568,7 +568,11 @@ class Test(BT.BiskitTest):
         self.x = ExeConfigCache.get( 'emacs', strict=0 )
         self.x.pipes = 1
 
-	self.e = Executor( 'emacs', args='.biskit/settings.cfg', strict=0,
+	args = '.biskit/settings.cfg'
+	if not self.local:
+	    args = '-kill ' + args
+
+	self.e = Executor( 'emacs', args=args, strict=0,
 			   f_in=None,
 			   f_out=self.fout,
 			   verbose=self.local, cwd=t.absfile('~') )
