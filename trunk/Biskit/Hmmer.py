@@ -488,7 +488,7 @@ class Hmmer:
         """
         self.hmmdb = hmmdb
         self.verbose = verbose
-	self.log = log
+	self.log = log or StdLog()
         self.tempDir = settings.tempDirShared
 
         self.fastaID = ''
