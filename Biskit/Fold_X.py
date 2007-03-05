@@ -229,13 +229,10 @@ class Fold_X( Executor ):
             T.tryRemove( 'errorfile.txt' )
 
             
-    def parse_foldx( self, output ):
+    def parse_foldx( self):
         """
         Extract energies from output.
 
-        @param output: Fold-X uotput file
-        @type  output: str
-        
         @return: dictionary with energy terms as keys
         @rtype: dict
         """
@@ -283,7 +280,7 @@ class Fold_X( Executor ):
         @note: Overrides Executor method
         """
         Executor.finish( self )
-        self.result = self.parse_foldx( self.output )
+        self.result = self.parse_foldx()
 
 #############
 ##  TESTING        

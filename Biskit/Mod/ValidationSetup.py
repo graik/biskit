@@ -39,7 +39,6 @@ from SequenceSearcher import SequenceSearcher
 from TemplateCleaner import TemplateCleaner
 
 import os.path
-import os, string
 
 class ValidationSetup:
     """

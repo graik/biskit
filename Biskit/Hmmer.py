@@ -27,7 +27,7 @@ Search Hmmer Pfam database and retrieve conservation data.
 """
 
 import tempfile
-import os, re, string
+import re, string
 import types, os.path
 import Numeric as N
 import molUtils
@@ -37,6 +37,7 @@ import Biskit.mathUtils as math
 from Biskit.Errors import BiskitError
 import Biskit.tools as T
 import Biskit.molTools as MT
+import Biskit.molUtils as MU
 from Biskit import Executor, TemplateError, PDBModel, StdLog, EHandler
 
 
@@ -100,7 +101,6 @@ class HmmerSearch( Executor ):
         
         self.fastaID = ''
         
-        noSearch = 0
         if noSearch:
             if self.verbose:
                 self.log.writeln(
@@ -461,7 +461,7 @@ class HmmerAlign( Executor ):
         """
         raise HmmerError,\
               'hmmeralign failed aligning sequence file %s with profile %s'\
-              %(fastaFile ,self.hmmFile)
+              %(self.fastaFile ,self.hmmFile)
     
 
     def finish( self ):
@@ -1032,7 +1032,7 @@ class Test(BT.BiskitTest):
 
             ## If there are more than one profile in the model, merge to one. 
             if self.result:
-                result = hmmer.mergeProfiles( self.result, self.cons )
+                self.result = self.hmmer.mergeProfiles( self.result, self.cons )
             else:
                 self.result = self.cons
 

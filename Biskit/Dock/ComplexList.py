@@ -30,7 +30,6 @@ List of Complex objects.
 import Numeric as N
 import types
 import biggles
-import copy
 import random
 
 import Biskit.tools as t

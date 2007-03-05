@@ -27,8 +27,6 @@ S{->} abstract base class (aka interface)
 
 import Numeric as N
 import types
-import copy
-import random
 
 import Biskit.tools as t
 import ColorSpectrum as C

@@ -358,7 +358,6 @@ class Test(BT.BiskitTest):
     """Test case"""
 
     def prepare(self):
-	import tempfile
 	self.fout = tempfile.mktemp('ps','testgnuplot_')
 
     def cleanUp(self):

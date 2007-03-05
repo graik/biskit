@@ -79,7 +79,7 @@ class AlignerSlave(JobSlave):
             f = open('ErrorReportError_XRefineSlave','a')
             f.write( str(why) )
             try:
-                f.write( t.lastErrorTrace() )
+                f.write( T.lastErrorTrace() )
             except:
                 pass
             f.close()

@@ -36,6 +36,7 @@ from Biskit.PDBDope import PDBDope
 from Biskit.PDBModel import PDBProfiles
 from Biskit.Errors import BiskitError
 from Biskit.LogFile import StdLog
+from Biskit import EHandler
 
 from Complex import Complex
 from ComplexList import ComplexList
@@ -44,7 +45,6 @@ from ComplexEvolvingList import ComplexEvolvingList
 import Numeric as N
 import tempfile
 import os.path
-import time
 
 slave_path = t.projectRoot()+"/Biskit/Dock/ContactSlave.py"
 

@@ -34,7 +34,7 @@ import tools as T
 import mathUtils as MU
 from Biskit.Errors import BiskitError
 from Biskit import EHandler
-from PDBModel import PDBModel
+from PDBModel import PDBModel, PDBError
 from ProfileCollection import ProfileCollection
 
 import string
@@ -694,7 +694,6 @@ class Trajectory:
 
         if verbose: T.errWrite( "rmsd fitting..." )
 
-        superImposed = [] ## superimposed frames
         rms = []          ## rms value of each frame
         non_outliers = [] ## fraction of atoms considered for rms and fit
         iterations = []   ## number of iterations performed on each frame

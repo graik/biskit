@@ -116,7 +116,7 @@ def centerSurfDist( model, surf_mask, mask=None ):
             mask = model.maskHeavy()
 
     ## calculate center of mass
-    center, mass = model.centerOfMass(), model.mass()
+    center = model.centerOfMass()
 
     ## surface atom coordinates
     surf_xyz = N.compress( mask*surf_mask, model.getXyz(), 0 )

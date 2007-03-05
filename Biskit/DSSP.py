@@ -25,9 +25,7 @@
 Calculates the secondary structure using DSSP.
 """
 
-import tempfile, re
-import os.path
-import string
+import tempfile
 import Numeric as N
 from Biskit import Executor, TemplateError
 import Biskit.tools as T
@@ -202,7 +200,7 @@ class Dssp( Executor ):
         while i<len(ss) or j<len(resDic):
 
             complete = __completeBB( resDic[j] )
-            res_name = MU.singleAA( [resDic[j][0]['residue_name']] )[0]
+##            res_name = MU.singleAA( [resDic[j][0]['residue_name']] )[0]
             
             ## assign irregular if not complete residue, DSSP
             ## skipps these residues

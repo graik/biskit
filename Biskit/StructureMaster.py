@@ -35,7 +35,7 @@ from Biskit.PVM import TrackingJobMaster
 class StructMaster(TrackingJobMaster):
 
     def __init__(self, dat, chunk, hosts, outFolder, skipWat=0, amber=0,
-                 sort=0, add_hosts=1, **kw):
+                 sort=0, **kw):
         """
         @param dat: data dictionary
         @type  dat: dict
@@ -119,7 +119,7 @@ class Test(BT.BiskitTest):
         ## run and wait for result
         self.r = self.master.calculateResult()
 
-        if local:
+        if self.local:
             print 'The converted pdb files has been written to %s' \
 		  % self.out_folder
 

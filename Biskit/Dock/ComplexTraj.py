@@ -304,7 +304,8 @@ class ComplexTraj( EnsembleTraj ):
                  (thinned) traj.
         @rtype: matrix
         """
-        r = [ self.atomContacts( i ) for i in range(0, len(self), step ) ]
+        r = [ self.atomContacts( i, cutoff=cutoff ) 
+             for i in range(0, len(self), step ) ]
         return N.sum( N.array( r ) ) / ( 1. * len(r) )
 
 

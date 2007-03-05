@@ -25,7 +25,7 @@
 Parse output file from hex docking run.
 """
 
-import re, sys
+import re
 import Numeric  ## array
 from Biskit.Dock import Complex, ComplexList
 

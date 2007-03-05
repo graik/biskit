@@ -86,7 +86,7 @@ class ComplexRandomizer:
         """
         r = model.clone()
         r.keep( N.nonzero( N.logical_not( r.maskH2O() ) ) )
-        center, mass = r.centerOfMass(), r.mass()
+        center = r.centerOfMass()
         r.setXyz( r.getXyz() - center )
 
         return r
@@ -102,7 +102,7 @@ class ComplexRandomizer:
         @return: largest distance
         @rtype: float
         """
-        center, mass = model.centerOfMass(), model.mass()
+        center = model.centerOfMass()
         dist = N.sqrt( N.sum( ( model.getXyz()-center )**2 , 1 ) )
 
         return max( dist )

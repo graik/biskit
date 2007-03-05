@@ -25,9 +25,9 @@
 List of ComplexEvolving instances.
 """
 
-from ComplexList import ComplexList
-from Complex import Complex as ProtComplex
+from ComplexList import ComplexList, ComplexListError
 from ComplexEvolving import ComplexEvolving
+import Numeric as N
 
 class ComplexEvolvingList( ComplexList ):
     """

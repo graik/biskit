@@ -25,7 +25,7 @@
 Create Amber topology and coordinate file from PDB.
 """
 
-import os, tempfile, commands, copy
+import os, tempfile, copy
 import Numeric as N
 
 import Biskit.tools as t

@@ -25,7 +25,6 @@ Search one or more sequence databases (SwissProt, Tremble) with a sequence
 using the method of choice (Blast , FastA)
 """
 
-import Bio.SwissProt.SProt
 from Bio.Blast import NCBIWWW
 from Bio.Blast import NCBIXML
 from Bio.Blast import NCBIStandalone
@@ -38,10 +37,9 @@ from Biskit import StdLog, EHandler
 from Biskit.Mod import settings
 
 import re, os
-import string, copy
+import string
 import commands
 import copy
-import sys
 import cStringIO
 
 class BlastError( E.BiskitError ):
@@ -365,6 +363,8 @@ class SequenceSearcher:
         @raise BlastError: if program call failes
         """
         results = err = p = None
+        resultOut = resultOut or self.outFolder+ self.F_BLAST_RAW_OUT
+        
         try:
 	    if self.verbose:
 		self.log.add('running blast...')
@@ -375,13 +375,11 @@ class SequenceSearcher:
 						    align_view=7, ## XML output
 						    **kw)
 
-	    results = self.__copyFileHandle(results,
-					  self.outFolder+ self.F_BLAST_RAW_OUT)
+	    results = self.__copyFileHandle(results, resultOut)
 	    err = self.__copyFileHandle(err, self.outFolder+self.F_BLAST_ERROR)
 
 	    if self.verbose:
-		self.log.writeln('Raw blast output copied to: ' +\
-				 self.outFolder + self.F_BLAST_RAW_OUT  )
+		self.log.writeln('Raw blast output copied to: ' + resultOut  )
 	    
 	    p = NCBIXML.BlastParser()
 	    
@@ -449,19 +447,19 @@ class SequenceSearcher:
         @raise BlastError: if program call failes
         """
         results = err = p = None
+        resultOut = resultOut or self.outFolder+ self.F_BLAST_RAW_OUT
+
         try:
             results, err = NCBIStandalone.blastpgp( settings.psi_blast_bin,
                                                     db, seqFile,
 						    align_view=7, ## XML output
                                                     expectation=e, **kw)
 
-	    results = self.__copyFileHandle(results,
-					  self.outFolder+ self.F_BLAST_RAW_OUT)
+	    results = self.__copyFileHandle(results,resultOut )
 	    err = self.__copyFileHandle(err, self.outFolder+self.F_BLAST_ERROR)
 
 	    if self.verbose:
-		self.log.writeln('Raw blast output copied to: ' +\
-				 self.outFolder + self.F_BLAST_RAW_OUT  )
+		self.log.writeln('Raw blast output copied to: ' + resultOut )
 
 	    p = NCBIXML.BlastParser()
  	    parsed = p.parse( results )[-1]
@@ -551,7 +549,7 @@ class SequenceSearcher:
         return frecord
 
 
-    def fastaFromIds( self, db, id_lst, fastaOut=None ):
+    def fastaFromIds( self, db, id_lst ):
         """
         Use::
            fastaFromIds( id_lst, fastaOut ) -> { str: Bio.Fasta.Record }

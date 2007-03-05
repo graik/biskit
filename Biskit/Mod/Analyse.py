@@ -36,7 +36,6 @@ from Biskit.Mod.Modeller import Modeller
 
 import os
 from string import *
-import re
 import Numeric as N
 
 
@@ -465,7 +464,7 @@ class Analyse:
                 sum += aln_dic["target"]["cov_ID"][k]
                 values +=1
 
-        cov_id_target = float(sum/values)
+##        cov_id_target = float(sum/values)
 
         for i in range(len(templates_profiles[templates[0]]["rProfile"])):
 

@@ -28,7 +28,6 @@ a residue mask for each of them.
 
 import Numeric as N
 import Biskit.tools as T
-import sys
 from Biskit.difflib_old import SequenceMatcher
 #from difflib import SequenceMatcher
 

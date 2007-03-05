@@ -101,7 +101,7 @@ class Table(UserList):
 
             columns = self.columns(rStart,rStop)
 
-            return table(lists = columns[lStart:lStop])
+            return Table(lists = columns[lStart:lStop])
 
     def __repr__(self):
         return 'table('+UserList.__repr__(self)+')'

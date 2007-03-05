@@ -176,11 +176,11 @@ class Pymoler( Executor ):
         self.initPymol()
 
         ## set arguments for display options (normal, full, all)
-        arg = args='-q %s'%self.foutName
+        arg = '-q %s'%self.foutName
         if full == 1:
-            arg = args='-qe %s'%self.foutName
+            arg = '-qe %s'%self.foutName
         if full == 2:
-            arg = args='-qei %s'%self.foutName
+            arg = '-qei %s'%self.foutName
             
         Executor.__init__( self, 'pymol', args=arg,
                            catch_err=1, catch_out=1, **kw )

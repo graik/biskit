@@ -88,7 +88,6 @@ class Test(BT.BiskitTest):
 
     def test_ExampleMaster(self):
 	"""PVM.ExampleMaster test"""
-	import time
 
         hosts = cpus_all[:8]
 

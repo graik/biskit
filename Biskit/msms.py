@@ -130,7 +130,6 @@ class Pdb2xyzrn( Executor ):
 
         ## convert into lists that mslib will like
         xyzr = []
-        r = []
         n = []
 
         for l in lines:

@@ -44,7 +44,7 @@ def unpack():
 
 def pack_and_send(tid, msg_tag, object, encoding = None):
     if encoding is None:
-        encoding = data['default']
+        encoding = P.data['default']
 
     return P.psend_str(encoding, tid, msg_tag, dumps(object))
 
@@ -115,7 +115,7 @@ def addHosts( number=None, hosts=H.nodes_all, expand=1 ):
             P.addhosts( hosts[:number+1] )
 
     except IndexError, error:
-        raise PVMError, 'Error adding hosts: %r' % error
+        raise IndexError, 'Error adding hosts: %r' % error
 
 
 def countHosts():

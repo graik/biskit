@@ -138,7 +138,7 @@ class Density:
 
         intervals = self.__find_intervals(ind)
 
-        lens = N.array([len(i) for i in intervals])
+##        lens = N.array([len(i) for i in intervals])
         levels = [N.sum(N.take(self.p, i)) for i in intervals]
         level = N.sum(levels) * self.delta_x
 

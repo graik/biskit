@@ -781,6 +781,7 @@ class PDBModel:
         @type  mask: list or array
         @param xtable: dict {str:str}, additional residue:single_letter mapping
                        for non-standard residues (default molUtils.xxDic)
+                       [currently not used]
         @type  xtable: dict
 
         @return: 1-letter-code AA sequence (based on first atom of each res).
@@ -1664,7 +1665,7 @@ class PDBModel:
         r.info = copy.deepcopy( self.info )
 
         if self.__terAtoms:
-            l = len( self.__terAtoms)
+##            l = len( self.__terAtoms)
             r.__terAtoms = self.__takeAtomIndices( self.__terAtoms, i )
 
 ##             if len( r.__terAtoms ) != l:
@@ -2094,7 +2095,7 @@ class PDBModel:
         r = [ i for i in range(len(m)) if i==0 or m[i] != m[i-1] ]
 
         if cache:
-            self__resIndex = r
+            self.__resIndex = r
 
         return r
 
@@ -2910,7 +2911,7 @@ class PDBModel:
         @rtype: float
         """
         m = self.takeChains([chain])
-        l_0 = len( m )
+
         m_cast = m.take( m.compareAtoms( ref )[0] )
 
         f = 1. * len( m_cast ) / m_cast.lenChains( breaks=1, maxDist=5.)

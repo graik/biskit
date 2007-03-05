@@ -108,9 +108,9 @@ def synchronized( f ):
         assert isinstance( parent, types.InstanceType ), \
                'missing self argument'
 
-        if not hasattr( a, 'lock' ):
+        if not hasattr( parent, 'lock' ):
             parent.lock = threading.RLock()
-        if not hasattr( a, 'lockMsg' ):
+        if not hasattr( parent, 'lockMsg' ):
             parent.lockMsg = threading.Condition()
 
         parent.lock.acquire()

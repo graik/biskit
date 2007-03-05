@@ -30,7 +30,6 @@ import settings
 import Biskit.tools as T
 from Biskit import StdLog, EHandler
 
-from Bio import Fasta
 import re
 import os, shutil
 import Numeric
@@ -39,7 +38,6 @@ import urllib
 import string
 import gzip
 import subprocess
-import types
 import  cStringIO
 from Bio import File
 
@@ -161,7 +159,7 @@ class TemplateSearcher( SequenceSearcher ):
         return result
 
 
-    def fastaFromIds( self, db, id_lst, fastaOut=None ):
+    def fastaFromIds( self, db, id_lst ):
         """
         Use::
            fastaFromIds( id_lst, fastaOut ) -> { str: Bio.Fasta.Record }

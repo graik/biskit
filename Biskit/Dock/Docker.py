@@ -34,7 +34,7 @@ from ComplexList import ComplexList
 import hexTools 
 import settings
 
-import sys, os, re, commands
+import re
 import os.path
 from time import localtime, sleep
 from threading import Thread, RLock, Condition
@@ -499,7 +499,6 @@ class RunThread( Thread ):
         print
         print "\t", t.lastError()
 
-        errorRunner = self
         self.owner.failedHex( self )
 
 

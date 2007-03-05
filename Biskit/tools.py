@@ -35,7 +35,6 @@ import traceback
 from inspect import getframeinfo
 from time import localtime
 import Numeric
-import types
 import glob
 import subprocess
 import gzip
@@ -333,7 +332,7 @@ def file2dic( filename ):
             if len( l ) > 1:
                 result[ line.split()[0] ] = l
     except:
-        s = "Error parsing option file %s." % fname
+        s = "Error parsing option file %s." % filename
         s += '\nLine: ' + str( line )
         s += '\n' + lastError()
         raise ToolsError( s )
@@ -986,7 +985,7 @@ def backup( fname, suffix='~' ):
     fname = absfile( fname )
     
     if os.path.exists( fname ):
-        os.rename( fname, fname + '~' )
+        os.rename( fname, fname + suffix )
         return True
     return False
 

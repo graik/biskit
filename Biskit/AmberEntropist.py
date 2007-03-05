@@ -26,7 +26,7 @@
 Run ptraj entropy analysis on Trajectory instance.
 """
 
-import tempfile, os, copy
+import tempfile, os
 import Numeric as N
 import random, time
 
