@@ -26,8 +26,6 @@
 Errors raised by Biskit scripts.
 """
 
-import exceptions
-
 class BiskitError( Exception ):
     """
     Root for all Errors raised by Biskit scripts.

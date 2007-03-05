@@ -138,7 +138,7 @@ class TrajCluster:
 
         while 1:
             clst = int( N.average(pos) )
-            self.cluster( clst, weight, converged, aMask, force=1 )
+            self.cluster( clst, weight, converged, aMask, force=force )
             rmsLst = [ self.avgRmsd(i, aMask)[0] for i in range(clst)]
 
             if N.average( rmsLst ) > rmsLimit:

@@ -30,6 +30,7 @@
 from PDBParseFile   import PDBParseFile
 from PDBParseModel  import PDBParseModel
 from PDBParsePickle import PDBParsePickle
+from PDBParser import PDBParserError
 
 class PDBParserFactory:
     """

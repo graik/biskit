@@ -27,7 +27,6 @@ An example of a Slave/Master setup.
 
 from Biskit.PVM import JobSlave
 import Biskit.tools as T
-import subprocess
 
 import time
 

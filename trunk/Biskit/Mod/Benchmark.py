@@ -27,8 +27,6 @@ Modeling benchmark
 """
 
 import os
-import re
-import linecache
 from Biskit.PDBModel import PDBModel
 from Biskit.ModelList import ModelList
 from Biskit.IcmCad import IcmCad as CAD

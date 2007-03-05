@@ -65,7 +65,7 @@ class FixedList( list ):
 
     def __iadd__( self, lst ):
         self.__stop()
-        super( GuardedList, self).__iadd__( lst )        
+        super( FixedList, self).__iadd__( lst )        
 
     def extend( self, lst ):
         self.__stop()

@@ -30,7 +30,6 @@ new implementations.
 from ChainSeparator import ChainSeparator
 from Scientific.IO.PDB import *
 import tools as T
-import re
 
 class ChainCleaner:
     """

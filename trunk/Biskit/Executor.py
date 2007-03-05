@@ -245,11 +245,11 @@ class Executor:
         @param stdout: PIPE or file handle or None (default: None)
         @type  stdout: int|file|None
         @param shell: wrap process in shell; see subprocess.Popen()
-                      (default: 0) 
+                      (default: 0, use exe_*.dat configuration) 
         @type  shell: 1|0
-        @param env: environment variables (default: None)
+        @param env: environment variables (default: None, use exe_*.dat config)
         @type  env: {str:str}
-        @param cwd: working directory (default: None)
+        @param cwd: working directory (default: None, means self.cwd)
         @type  cwd: str
         
         @return: output and error output
@@ -261,8 +261,9 @@ class Executor:
             p = subprocess.Popen( cmd.split(),
                                   bufsize=bufsize, executable=executable,
                                   stdin=stdin, stdout=stdout, stderr=stderr,
-                                  shell=self.exe.shell,
-                                  env=self.environment(), cwd=self.cwd )
+                                  shell=shell or self.exe.shell,
+                                  env=env or self.environment(), 
+                                  cwd=cwd or self.cwd )
 
             self.pid = p.pid
 
@@ -349,7 +350,7 @@ class Executor:
           - L{ cleanup() }
         
         @param inp_mirror: file name for formatted copy of inp file
-                           (default: None)
+                           (default: None) [not implemented]
         @type  inp_mirror: str
 
         @return: calculation result

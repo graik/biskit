@@ -27,7 +27,6 @@ Check sequence identity between templates.
 
 import os
 import re
-import linecache
 import Numeric as N
 
 import Biskit.tools as T
@@ -98,7 +97,7 @@ class CheckIdentities:
 
         for x in string_lines:
             if(x == '*\n'):
-                endof_1st_sequence = end_of_sequence
+##                endof_1st_sequence = end_of_sequence
                 break
 
             end_of_sequence+=1
@@ -217,9 +216,9 @@ class CheckIdentities:
             ## loop over all sequences in alignment
             info_ID, ID, cov_ID  = {}, {}, {}
             for y in self.sequences_name:
-                identity = 0
-                info_identity = 0
-                cov_identity = 0
+##                identity = 0
+##                info_identity = 0
+##                cov_identity = 0
                 nb_of_identities = 0
                 nb_of_template = 0 
                 template_info = []

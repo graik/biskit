@@ -29,7 +29,7 @@ from Biskit.PVM.TrackingJobMaster import TrackingJobMaster
 import Biskit.hosts as hosts
 from Biskit.tools import projectRoot
 import Biskit.tools as T
-import os, glob
+import os
 
 class ModelMaster(TrackingJobMaster):
 

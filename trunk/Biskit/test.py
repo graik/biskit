@@ -91,7 +91,7 @@ Note:
 '''
 
 import unittest as U
-import glob, types, re
+import glob
 import os.path
 
 import Biskit

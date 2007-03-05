@@ -25,9 +25,7 @@ Sequence Alignment
 """
 
 import re, os
-import commands
 
-import modUtils
 from TemplateCleaner import TemplateCleaner as TC
 from SequenceSearcher import SequenceSearcher as SS
 

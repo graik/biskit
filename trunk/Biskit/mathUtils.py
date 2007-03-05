@@ -31,6 +31,8 @@ import random
 import RandomArray
 import math
 
+class MathUtilError( Exception ):
+    pass
 
 def accumulate( a ):
     """

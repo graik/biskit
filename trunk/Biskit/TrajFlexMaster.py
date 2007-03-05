@@ -36,7 +36,7 @@ from Biskit.EnsembleTraj import EnsembleTraj, traj2ensemble
 
 import tempfile
 import Numeric as N
-import os, time
+import os
 
 ## PVM imports
 ## from Biskit.PVM.TrackingJobMaster import TrackingJobMaster
@@ -55,7 +55,7 @@ class TrajFlexMaster(TrackingJobMaster):
 
     slave_script =  T.projectRoot() + '/Biskit/TrajFlexSlave.py'
 
-    def __init__(self, traj1, traj2=None, aMask=None, hosts=hosts.cpus_all,
+    def __init__(self, traj1, traj2=None, hosts=hosts.cpus_all,
                  niceness=hosts.nice_dic, show_output=0, add_hosts=0,
                  log=None, slaveLog=None, verbose=1,
                  only_off_diagonal=1, only_cross_member=0):
@@ -66,8 +66,8 @@ class TrajFlexMaster(TrackingJobMaster):
         @type  traj1: Trajectory OR EnsembleTraj
         @param traj2: see traj1
         @type  traj2: Trajectory OR EnsembleTraj
-        @param aMask: atom mask, consider only subset of atoms (default: all)
-        @type  aMask: [0|1]
+##        @param aMask: atom mask, consider only subset of atoms (default: all)
+##        @type  aMask: [0|1]
         @param hosts: slave hosts to be used
                       (default: L{Biskit.hosts.cpus_all})
         @type  hosts: [str]

@@ -26,10 +26,9 @@ Parse Amber restart files.
     
 import re
 import Numeric as N
-import sys
 import os.path
 
-from AmberCrdParser import AmberCrdParser, ParseError
+from AmberCrdParser import ParseError
 from PDBModel import PDBModel
 import tools as T
 
@@ -181,12 +180,13 @@ class AmberRstParser:
             f = fcrd
         else:
             ## create new file handle
-            new = (mode=='w' or not os.path.exists( T.absfile(fcrd) ))
             mode = 'w'
             if append:
                 mode = 'a'
             f = open( T.absfile( fcrd ), mode )
-            if new:
+            
+            newf = (mode=='w' or not os.path.exists( T.absfile(fcrd) ))
+            if newf:
                 f.write("\n")
 
         i = 0

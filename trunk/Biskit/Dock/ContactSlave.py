@@ -28,10 +28,10 @@ Calculate contact matrix and some scores for complexes.
 from Biskit.PVM import JobSlave
 import Biskit.tools as T
 from Biskit import mathUtils as MU
-from Biskit.LogFile import StdLog
+from Biskit.LogFile import StdLog, LogFile
 import Numeric as N
 from Complex import Complex
-import os, os.path
+import os.path
 import time
 
 

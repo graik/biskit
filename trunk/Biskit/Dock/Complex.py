@@ -25,7 +25,7 @@
 collect and manage information about a docking result
 """
 
-from Biskit import PCRModel, PDBModel, PDBDope, molUtils, mathUtils, StdLog
+from Biskit import PCRModel, PDBModel, PDBDope, molUtils, mathUtils, StdLog, EHandler
 ## from Biskit import ProsaII
 from Biskit.Prosa2003 import Prosa2003
 
@@ -33,8 +33,6 @@ import Biskit.tools as t
 
 import Numeric as N
 
-import os       # remove()
-import tempfile
 from copy import deepcopy, copy
 from multiarray import arraytype
 
@@ -1084,16 +1082,16 @@ class Complex:
         result = {}
 
         def getSurface( model, key ):
-	    if self.verbose:
-		self.log.write("Calculating SurfaceRacer data for %s..."%key)
-            d = PDBDope( model )
-            d.addSurfaceRacer( probe=1.4 )
-	    if self.verbose:
-		self.log.writeln('Done.')
-            result['%s_AS'%key] = model.profile('AS')
-            result['%s_MS'%key] = model.profile('MS')
-            result['%s_relAS'%key] = model.profile('relAS')
-            result['%s_relMS'%key] = model.profile('relMS')
+            if verbose:
+                log.write("Calculating SurfaceRacer data for %s..."%key)
+                d = PDBDope( model )
+                d.addSurfaceRacer( probe=1.4 )
+            if verbose:
+                log.writeln('Done.')
+                result['%s_AS'%key] = model.profile('AS')
+                result['%s_MS'%key] = model.profile('MS')
+                result['%s_relAS'%key] = model.profile('relAS')
+                result['%s_relMS'%key] = model.profile('relMS')
 
         getSurface( rcom, 'rec' )
         getSurface( lcom, 'lig' )
@@ -1174,11 +1172,11 @@ class Complex:
         rec, lig = self.rec_model, self.lig_model
 
         ## add/update lig/rec fold-X energies if necessary
-        if not 'foldX' in rec.info or rec.isChanged()[0]:
+        if not 'foldX' in rec.info or rec.isChanged()[0] or force:
             d = PDBDope( rec )
             d.addFoldX()
 
-        if not 'foldX' in lig.info or lig.isChanged()[0]:
+        if not 'foldX' in lig.info or lig.isChanged()[0] or force:
             d = PDBDope( lig )
             d.addFoldX()
             try:
@@ -1225,28 +1223,28 @@ class Complex:
         try:
             recCons = self.rec().profile( cons_type, lookHarder=1 )
         except:
-	    if self.verbose:
-		self.log.add(
-		    '\n'+'*'*30+'\nNO HHM PROFILE FOR RECEPTOR\n'+'*'*30+'\n')
+            if verbose:
+                log.add('\n'+'*'*30+'\nNO HHM PROFILE FOR RECEPTOR\n'+\
+                        '*'*30+'\n')
             recCons = N.ones( self.rec().lenResidues() )
         try:
             ligCons = self.lig().profile( cons_type, lookHarder=1 )
         except:
-	    if self.verbose:
-		self.log.add(
-		    '\n'+'*'*30+'\nNO HHM PROFILE FOR LIGAND\n'+'*'*30+'\n')
+            if verbose:
+                log.add(\
+		            '\n'+'*'*30+'\nNO HHM PROFILE FOR LIGAND\n'+'*'*30+'\n')
             ligCons = N.ones( self.lig().lenResidues() )
 
         if self.rec().profile( 'surfMask' ):
             recSurf = self.rec().profile( 'surfMask' )
         else:
-            d = PDBDoppe(self.rec())
+            d = PDBDope(self.rec())
             d.addSurfaceMask()
 
         if self.lig().profile( 'surfMask' ):
             ligSurf = self.lig().profile( 'surfMask' )
         else:
-            d = PDBDoppe(self.lig())
+            d = PDBDope(self.lig())
             d.addSurfaceMask()
 
         surfMask = N.ravel(N.outerproduct( recSurf, ligSurf ))

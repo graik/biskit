@@ -109,7 +109,6 @@ class Test(BT.BiskitTest):
     
     def test_Hmmer( self):
         """ExeConfigCache test """
-	import os
 
         self.x = ExeConfigCache.get( 'xplor' )
         

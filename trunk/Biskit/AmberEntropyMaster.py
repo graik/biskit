@@ -24,7 +24,7 @@
 Parallellized AmberEntropist calculation.
 """
 
-import sys, os.path, tempfile, copy
+import os.path, copy
 import Numeric as N
 
 import Biskit.tools as T

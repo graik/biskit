@@ -28,8 +28,7 @@ import Biskit as B
 import Biskit.tools as T
 import Biskit.SettingsParser as P
 
-import user, os
-import ConfigParser
+import os
 
 class WriteCfgError( P.SettingsError ):
     pass
@@ -126,7 +125,6 @@ class SettingsManager:
         @rtype: dict {'str':SettingsParser.Setting}
         """
         r = {}
-        errors = {}
 
         for name, default in cfg_default.items():
 

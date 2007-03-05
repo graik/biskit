@@ -25,10 +25,6 @@
 organise, sort, and filter list of dictionaries or similar objects
 """
 
-import sys
-import Numeric as N
-import types
-import copy
 import random
 
 import Biskit.tools as t

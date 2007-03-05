@@ -262,7 +262,7 @@ class LocalPath( object ):
                                   maxSub=maxSub,
                                   resolveLinks=resolveLinks, **vars )
         
-        raise PathError, 'incompatible value for LocalPath' + str(v)
+        raise LocalPathError, 'incompatible value for LocalPath' + str(v)
 
         self.__hash = None
         self.__cache = None

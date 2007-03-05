@@ -26,7 +26,6 @@
 Utilities for handling structures and sequences
 """
 
-import ErrorHandler
 from Biskit import EHandler
 import tools as t
 

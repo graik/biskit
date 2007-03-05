@@ -31,9 +31,6 @@ from Biskit.Mod import Modeller as M
 
 from Biskit import LogFile
 import os
-import subprocess
-import settings
-import socket
 
 
 class ModelSlave(JobSlave):
@@ -75,7 +72,7 @@ class ModelSlave(JobSlave):
             f = open('ErrorReportError_XRefineSlave','a')
             f.write( str(why) )
             try:
-                f.write( t.lastErrorTrace() )
+                f.write( T.lastErrorTrace() )
             except:
                 pass
             f.close()

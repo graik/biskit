@@ -25,8 +25,6 @@ Parse a Biskit settings file.
 """
 
 import os
-import user
-import sys
 import ConfigParser
 
 import Biskit as B
@@ -306,11 +304,8 @@ class SettingsParser(object):
         return r
 
 
-    def parse( self, verbose=False ):
+    def parse( self ):
         """
-        @param verbose: print warning messages via Biskit.EHandler
-        @type  verbose: bool
-        
         @return: dict of type-cast params contained in fini
         @rtype: dict, {str: Setting}
 
@@ -335,7 +330,7 @@ class SettingsParser(object):
 
         return self.result
 
-    def __repr__( self, tab='\t' ):
+    def __repr__( self):
         r = super( SettingsParser, self).__repr__()
         err = len( [ s for s in self.result.values() if s.error ] )
         r += ' -- %i entries, (!) %i errors' % (len( self.result ), err)

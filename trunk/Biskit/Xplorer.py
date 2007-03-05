@@ -301,7 +301,7 @@ class Xplorer:
         @raise XPlorerError: if logLines is empty (Xplor hasn't been run)
         """
         if not self.logLines:
-            raise XPlorerError('Xplor log file is (yet) empty.')
+            raise XplorerError('Xplor log file is (yet) empty.')
 
         f = open( t.absfile(fname), 'w')
         f.writelines( self.logLines )

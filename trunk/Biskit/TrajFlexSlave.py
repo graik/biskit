@@ -226,7 +226,7 @@ class Test(BT.BiskitTest):
 
 if __name__ == '__main__':
 
-    import os, sys
+    import sys
 
     if len(sys.argv) == 2:
 

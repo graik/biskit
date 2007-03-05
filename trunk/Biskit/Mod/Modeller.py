@@ -27,10 +27,9 @@
 Interface to Modeller
 """
 
-import re, os, os.path, subprocess
-import commands
+import re, os.path, subprocess
 import linecache
-from string import *
+#from string import *
 
 import settings
 import Biskit.tools as T
@@ -141,7 +140,7 @@ CALL ROUTINE = 'model'             # do homology modelling
 
 
     def create_inp( self, f_pir, target_id, template_folder, template_ids,
-                    fout=None, alignment=0,
+                    fout=None,
                     starting_model=1, ending_model=10 ):
         """
         Create a input (.top) file for Modeller.
@@ -326,8 +325,9 @@ CALL ROUTINE = 'model'             # do homology modelling
         ## guess target seq id within alignment
         target_id = self.get_target_id( fasta_target )
 
-        self.create_inp( f_pir, target_id, template_folder, template_ids,
-                    fout, starting_model=1, ending_model=10)
+        self.create_inp( f_pir, target_id, template_folder, template_ids,fout, 
+                         starting_model=starting_model, 
+                         ending_model=ending_model)
 
 
     def go( self, host=None ):
@@ -354,7 +354,7 @@ CALL ROUTINE = 'model'             # do homology modelling
             sp.wait()
 
 	    if self.verbose:
-		self.logWrite( '..done: ' + str( output ) + '\n' )
+		self.logWrite( '..done')
 
         except EnvironmentError, why:
             self.logWrite("ERROR: Can't run Modeller: "+ str( why ) )
@@ -461,7 +461,7 @@ CALL ROUTINE = 'model'             # do homology modelling
             for string in pdb_list[i].info["headlines"]:
                 
                 tuple = ()
-                tuple = string.split()[0],join(string.split()[1:])
+                tuple = string.split()[0],''.join(string.split()[1:])
                 t.append(tuple)
 
             pdb_list[i].writePdb('%s/model_%02i.pdb'%(model_folder,i),

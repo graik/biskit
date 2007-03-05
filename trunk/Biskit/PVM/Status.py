@@ -26,7 +26,7 @@
 Thread - save job handling for JobMaster (see L{dispatcher}).
 """
 
-from threading import Thread, RLock, Condition
+from threading import RLock
 
 class Status:
     """

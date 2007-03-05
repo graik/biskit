@@ -25,7 +25,6 @@ utility funtions for Mod package
 """
 
 import os.path
-import types
 import Biskit.molUtils as MU
 import Biskit.tools as T
 

@@ -25,7 +25,7 @@
 Calculates accessible, molecular surface areas and average curvature.
 """
 
-import tempfile, re
+import tempfile
 import os.path
 import string
 import Numeric as N
@@ -245,16 +245,13 @@ class SurfaceRacer( Executor ):
             T.tryRemove( self.f_out_name )
 
 
-    def parse_result( self, output ):
+    def parse_result( self):
         """
         Parse the SurfaceRacer output file which has the same nawe as the input
         pdb, but with a txt extension. The output ends up un the same folder
         as the input. In addition a file called result.txt is created in the
         same directory as the binary.
         
-        @param output: full path to input pdb-file
-        @type  output: str
-
         @return: dictionary with curvature and surface data
         @rtype: dict
         """
@@ -367,7 +364,7 @@ class SurfaceRacer( Executor ):
         """
         Executor.finish( self )
 
-        self.result = self.parse_result( self.output )
+        self.result = self.parse_result()
 
         ## if probe radius other than 1.4 A the relative surface exposure
         ## cannot be calculated, but allow this check to be a little flexible

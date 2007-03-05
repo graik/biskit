@@ -30,7 +30,6 @@ from Biskit.Errors import BiskitError
 from Biskit import LocalPath, PDBModel
 
 import Biskit.tools as T
-import Numeric as N
 
 class RegistryError( BiskitError ):
     pass

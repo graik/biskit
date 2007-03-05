@@ -142,7 +142,7 @@ class Analyzer:
 
         self.hexContacts = []
 
-        f = lambda a: molUtils.elementType(a['element']) == 'p'
+#        f = lambda a: molUtils.elementType(a['element']) == 'p'
 
         i = 0
         while i < n:
@@ -281,7 +281,7 @@ class Analyzer:
         if arg.has_key('label'):
             self.plot.lastY -= .05
 
-            self.plot.add( biggles.PlotLabel( plot.lastX, plot.lastY,
+            self.plot.add( biggles.PlotLabel( self.plot.lastX, self.plot.lastY,
                                               arg['label'], **arg ))
 
     def report(self):

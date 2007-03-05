@@ -30,7 +30,7 @@ import Biskit.tools as t
 import Biskit.mathUtils as MU
 from Biskit import EHandler
 from Complex import Complex as ProtComplex
-from ComplexList import ComplexList, ComplexListError, ConditionError
+from ComplexList import ComplexList
 
 
 class ComplexEvolving( ProtComplex ):

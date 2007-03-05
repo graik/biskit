@@ -36,7 +36,7 @@ def rand_log_normal(alpha, beta, shape):
 
 def ln(r, alpha, beta):
     return N.exp(-0.5/beta**2 * (N.log(r) - alpha)**2 \
-                 - 0.5*N.log(2*pi)-N.log(beta*r))
+                 - 0.5*N.log(2*N.pi)-N.log(beta*r))
 
 
 def erf(x):
