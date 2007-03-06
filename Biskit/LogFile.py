@@ -80,7 +80,13 @@ class LogFile:
         @param s: line
         @type  s: str        
         """
-        self.f().writelines(s+"\n")
+	if not type(s) is list:
+	    s = [ s ]
+
+	for i in s:
+	    self.f().write(i)
+	    self.f().write('\n')
+
         self.f().flush()
 
 
@@ -91,7 +97,7 @@ class LogFile:
         @param s: line
         @type  s: str
         """
-        self.f().writelines(s)
+        self.f().write(s)
         self.f().flush()
 
 
