@@ -886,8 +886,7 @@ class TestBase(BT.BiskitTest):
 				  alignments=500, e=0.01 )
 
     def searchLocalPsiBlast(self):
-	self.searcher.localPSIBlast( self.f_target, self.db,
-				     'blastpgp', npasses=2 )
+	self.searcher.localPSIBlast( self.f_target, self.db, npasses=2 )
 
     def searchRemoteBlast(self):
 	self.searcher.remoteBlast( self.f_target, self.db, 'blastp',
