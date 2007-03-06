@@ -114,7 +114,7 @@ class Aligner:
         @type  msg: str
         """
         if self.log:
-            self.log.add( msg )
+            self.log.writeln( msg )
         else:
             if force:
                 print msg
@@ -178,8 +178,16 @@ class Aligner:
             for o in T.toList( output ):
                 r += ' ' + o
 
+	    if not outfile:
+		raise AlignerError, 'T-Coffee -output also requires -outfile'
+
         if outfile:
             r += ' -outfile ' + outfile
+
+	if not output:
+	    r += ' -lib_only'
+
+	r += ' -template_file No'  ## MSAP runs generate unwanted *.template_file
 
         for param, value in kw.items():
             r += ' -'+param + ' ' + str( value )
@@ -227,7 +235,7 @@ class Aligner:
                                 fasta_sequences=None, fasta_target=None,
                                 f_fast_tree=None, f_sequence_tree=None ):
         """
-        Prepare alignment commands for homology modelling.
+        Prepare alignment commands for homology modeling.
 
         @note: If verbose==1, the commands are mirrored to t_coffee.inp.
         
@@ -419,11 +427,10 @@ class Aligner:
 
         @raise AlignerError: if T_Coffee execution failed
         """
-	if self.verbose:
-	    self.logWrite( self.commands )
         try:
 	    if self.verbose:
 		self.logWrite('\nALIGNING...\n')
+
             for cmd in self.commands:
 
                 if type( cmd ) == tuple:
@@ -443,6 +450,7 @@ class Aligner:
                     output, error, returncod = tc.run()
 
                     self.logWrite( '..done: ' + str( output ) + '\n' )
+		    print "DEBUG: ", os.path.exists('1MHO_.template_file')
 
         except EnvironmentError, why:
             self.logWrite("ERROR: Can't run t_coffee: %s Error: %s"\
