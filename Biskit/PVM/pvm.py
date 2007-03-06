@@ -49,20 +49,6 @@ def pack_and_send(tid, msg_tag, object, encoding = None):
     return P.psend_str(encoding, tid, msg_tag, dumps(object))
 
 
-## def addHosts(hosts):
-##     """
-##     Add hosts to PVM.
-    
-##     @param hosts: list of hostnames
-##     @type  hosts: [str]
-##     """
-##     for host in hosts:
-##         try:
-##             result = P.addhosts([host])
-##         except:
-##             print host,'failed'
-
-
 def delHosts(hosts):
     """
     Remove hosts from PVM.

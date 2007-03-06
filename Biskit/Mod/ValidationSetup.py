@@ -141,7 +141,7 @@ class ValidationSetup:
         try:
             os.mkdir( '%s/%s'%(validation_folder,cluster) )
         except:
-            print 'Folder %s/%s alredy exists.'\
+            print 'Folder %s/%s already exists.'\
                   %(self.F_RESULT_FOLDER, cluster) 
 
 
@@ -396,7 +396,7 @@ class ValidationSetup:
             os.system('ln -s %s %s'%(sequences_folder , output_folder))
 
         else:
-            print 'Folder %s alredy exists, linking skipped.\
+            print 'Folder %s already exists, linking skipped.\
             '%(self.F_RESULT_FOLDER + '/%s'%cluster +
                SequenceSearcher.F_RESULT_FOLDER )
 
