@@ -117,6 +117,104 @@ class Executor:
       into the object's name space and passes them on to the template.
 
 
+    Communicating Input
+    -------------------
+
+      Programs often expect scripts, commands or additional parameters
+      from StdIn or from input files. Executor tries to support many
+      scenarios -- which one is chosen mainly depends on the
+      L{ExeConfig} `pipes` setting in exe_<program>.dat and on the
+      `template` parameter given to Executor.__init__.  (Note:
+      Executor loads the ExeConfig instance for the given program
+      `name` into its `self.exe` field.)
+
+      Here is an overview over the different scenarios and how to
+      activate them:
+
+      1. no input -- the program only needs command line parameters
+         (default behaviour)
+
+         - template == None
+
+      2. input pipe from STDIN -- this coresponds to
+         ``myprogram | 'some input string'``
+
+	 - exe.pipes == 1 / True
+	 - template != None ((or f_in points to existing file))
+
+	 2.1 `template` points to an existing file:
+
+	      Executor reads the template file, completes it in memory, and
+	      pushes it directly to the program.
+
+         2.2 `template` points to string that doesn't look like a file name:
+
+	      Executor completes the string in memory (using
+	      `self.template % self.__dict__`) and pushes it directly
+	      to the program. This is the fastest option as it avoids
+	      file access alltogether.
+
+	 2.3 `template` == None but f_in points to an *existing* file:
+
+	      Executor will read this file and push it unmodified to
+	      the program via StdIn. (kind of an exception, if used at
+	      all, f_in usual points to a *non-existing* file that
+	      will receive the completed input.)
+	 
+      3. input from file -- this coresponds to ``myprogram < input_file``
+
+	 - exe.pipes == 0 / False
+	 - template != None
+	 - push_inp == 1 / True (default)
+
+	 3.1 `template` points to an existing file:
+
+              Executor reads the template file, completes it in
+	      memory, saves the completed file to disc (creating or
+	      overriding self.f_in), opens the file and passes the
+	      file handle to the program (instead of STDIN).
+
+         3.2 `template` points to string that doesn't look like a file name:
+
+	      Same as 3.1, except that the template is not read from
+	      disc but directly taken from memory (see 2.2).
+
+      4. input from file passed as argument to the program -- this
+         corresponds to ``myprogram input_file``
+
+	 For this it is up to you to provide the correct program
+	 argument.
+
+	 4.1 Use template completion:
+
+	     The best option would be to set an explicit file name
+	     for `f_in` and include this file name into  `args`, Example::
+
+	       exe = ExeConfigCache.get('myprogram')
+	       assert not exe.pipes 
+ 
+	       x = Executor( 'myprogram', args='input.in', f_in='input.in',
+	                     template='/somewhere/input.template', cwd='/tmp' )
+
+	     Executor create your input file on the fly which is then
+	     passed as first argument.
+
+	 4.2 Without template completion:
+
+	     Similar, just that you don't give a template::
+
+	       x = Executor( 'myprogram', args='input.in', f_in='input.in',
+	                     cwd='/tmp' )
+
+	     It would then be up to you to provide the correct input file
+	     in `/tmp/input.in`. You could override the L{prepare()} hook
+	     method for creating it.
+	 
+	 There are other ways of doing the same thing.
+
+      Look at L{Executor.generateInput()} to see what is actually going on. 
+
+
     References
     ----------
       * See also L{Biskit.IcmCad} for an Example of how to overwrite and
@@ -147,16 +245,21 @@ class Executor:
         @type  args: str
         @param template: path to template for input file (default: None)
         @type  template: str
-        @param f_in: path to complete input file (default: None, discard)
+        @param f_in: target for completed input file (default: None, discard)
         @type  f_in: str
-        @param f_out: target file for output (default: None, discard)
+        @param f_out: target file for program output (default: None, discard)
         @type  f_out: str
+        @param f_err: target file for error messages (default: None, discard)
+        @type  f_err: str
         @param strict: strict check of environment and configuration file
                        (default: 1)
         @type  strict: 1|0
         @param catch_out: catch output in file (f_out or temporary)
                           (default: 1)
         @type  catch_out: 1|0
+        @param catch_err: catch errors in file (f_out or temporary)
+                          (default: 1)
+        @type  catch_err: 1|0
         @param push_inp: push input file to process via stdin ('< f_in') [1]
         @type  push_inp: 1|0
         @param node: host for calculation (None->no ssh) (default: None)
@@ -165,8 +268,8 @@ class Executor:
         @type  nice: int
         @param cwd: working directory, overwrites ExeConfig.cwd (default: None)
         @type  cwd: str
-        @param log: Biskit.LogFile, program log (None->STOUT) (default: None)
-        @type  log: 
+        @param log: execution log (None->STOUT) (default: None)
+        @type  log: Biskit.LogFile
         @param debug: keep all temporary files (default: 0)
         @type  debug: 0|1
         @param verbose: print progress messages to log (default: log != STDOUT)
@@ -192,7 +295,7 @@ class Executor:
         self.catch_out = catch_out
         self.catch_err = catch_err
         
-        self.f_in  = f_in  #: will be overridden by self.run()
+        self.f_in  = f_in  #: will be overridden by self.convertInput()
         self.keep_inp = f_in is not None
         self.push_inp = push_inp
 
@@ -218,7 +321,7 @@ class Executor:
         self.returncode = None #: int status returned by process
 	self.pid = None     #: process ID
 
-        self.result = None  ## set by self.finish()
+        self.result = None  #: set by self.finish()
 
         self.__dict__.update( kw )
 
@@ -240,10 +343,12 @@ class Executor:
         @type  bufsize: int
         @param executable: see subprocess.Popen() (default: None)
         @type  executable: str
-        @param stdin: PIPE or file handle or None (default: None)
+        @param stdin: subprocess.PIPE or file handle or None (default: None)
         @type  stdin: int|file|None
-        @param stdout: PIPE or file handle or None (default: None)
+        @param stdout: subprocess.PIPE or file handle or None (default: None)
         @type  stdout: int|file|None
+        @param stderr: subprocess.PIPE or file handle or None (default: None)
+        @type  stderr: int|file|None
         @param shell: wrap process in shell; see subprocess.Popen()
                       (default: 0, use exe_*.dat configuration) 
         @type  shell: 1|0
@@ -522,7 +627,8 @@ class Executor:
 
     def generateInp(self):
         """
-        Replace formatstr place holders in inp by fields of this class.
+        Prepare the program input (file or string) from a template (if
+        present, file or string).
 
         @return: input file name OR (if pipes=1) content of input file
         @rtype: str
