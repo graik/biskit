@@ -264,7 +264,9 @@ class Executor:
         @type  name: str
         @param args: command line arguments
         @type  args: str
-        @param template: path to template for input file (default: None)
+        @param template: template for input file -- this can be the template
+	                 itself or the path to a file containing it
+			 (default: None)
         @type  template: str
         @param f_in: target for completed input file (default: None, discard)
         @type  f_in: str
@@ -482,7 +484,8 @@ class Executor:
         Run the callculation. This calls (in that order):
           - L{ prepare() },
           - L{ execute() },
-          - L{ finish() }/ L{ fail() },
+	  - L{ postProcess() },
+          - L{ finish() } OR L{ fail() },
           - L{ cleanup() }
         
         @param inp_mirror: file name for formatted copy of inp file
@@ -498,6 +501,8 @@ class Executor:
             self.inp  = self.generateInp()
 
             self.runTime = self.execute( inp=self.inp )
+
+	    self.postProcess()
 
         except IOError, why:
             try:
@@ -560,6 +565,13 @@ class Executor:
     def prepare( self ):
         """
         called before running external program, override!
+        """
+        pass
+
+
+    def postProcess( self ):
+        """
+        called directly after running the external program, override!
         """
         pass
 
