@@ -35,13 +35,14 @@ Convert single amber crd into Trajectory object
 amber2traj.py -i sim.crd -o traj_0.dat -r ref.pdb [-b -wat -hyd -rnres
               -code PDBC ]
 
+    -i     input amber trajectory
+    -o     output file with pickled biskit Trajectory object
+    -r     reference PDB, must have identical atom content+order as sim.crd
     -b     traj has box info (3 additional coordinates per frame)
     -wat   delete WAT, Cl-, Na+ residues (after parsing)
     -hyd   delete all hydrogens (after parsing)
     -rnres rename amber residues HIE/HID/HIP, CYX to HIS and CYS
-    -code  PDB code of molecule (otherwise first 4 letters of ref file name)
-
-    ref.pdb must have identical atom content as sim.crd
+    -code  PDB code of molecule [first 4 letters of ref file name]
     """
     sys.exit( 0 )
 
