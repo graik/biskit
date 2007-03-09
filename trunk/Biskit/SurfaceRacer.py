@@ -377,7 +377,7 @@ class SurfaceRacer( Executor ):
             T.flushPrint("\nNo relative accessabilities calculated when using a prob radius other than 1.4 A or not using the Richards vdw radii set.")
 
 
-    def failed( self ):
+    def fail( self ):
         """
         Called if external program failed, Overrides Executor method.
 
@@ -391,7 +391,7 @@ class SurfaceRacer( Executor ):
             self.probe = self.probe + 0.001
             self.run()
 
-        Executor.failed( self )
+        Executor.fail( self )
     
 #############
 ##  TESTING        

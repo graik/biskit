@@ -52,7 +52,7 @@ class Executor:
     temporary files.
 
     There are two ways of using Executor
-    ------------------------------------
+    ====================================
     
       1. (recommended) Create a subclass of Executor for a certain program
           call. Methods to override would be:
@@ -64,7 +64,7 @@ class Executor:
                            (call parent cleanup!)
            - finish    ... called AFTER successful program execution
            - isfailed  ... to detect the success status after program execution
-           - failed    ... called if execution fails
+           - fail      ... called if execution fails
            
           Additionally, you should provide a simple program configuration file
           in biskit/external/defaults/. See L{Biskit.ExeConfig} for
@@ -84,7 +84,7 @@ class Executor:
 
 
     Templates
-    ---------
+    =========
       Templates are files or strings that contain place holders like,
       for example::
 
@@ -118,109 +118,130 @@ class Executor:
 
 
     Communicating Input
-    -------------------
+    ===================
 
-      Programs often expect scripts, commands or additional parameters
-      from StdIn or from input files. Executor tries to support many
-      scenarios -- which one is chosen mainly depends on the
-      L{ExeConfig} `pipes` setting in exe_<program>.dat and on the
-      `template` parameter given to Executor.__init__.  (Note:
-      Executor loads the ExeConfig instance for the given program
-      `name` into its `self.exe` field.)
+    Programs often expect scripts, commands or additional parameters
+    from StdIn or from input files. Executor tries to support many
+    scenarios -- which one is chosen mainly depends on the
+    L{ExeConfig} `pipes` setting in exe_<program>.dat and on the
+    `template` parameter given to Executor.__init__.  (Note: Executor
+    loads the ExeConfig instance for the given program `name` into its
+    `self.exe` field.)
 
-      Here is an overview over the different scenarios and how to
-      activate them:
+    Here is an overview over the different scenarios and how to
+    activate them:
 
-      1. no input -- the program only needs command line parameters
-         (default behaviour)
+      1. B{ no input (default behaviour)}
 
-         - template == None
+        The program only needs command line parameters
 
-      2. input pipe from STDIN -- this coresponds to
-         ``myprogram | 'some input string'``
+	Condition:
 
-	 - exe.pipes == 1 / True
-	 - template != None ((or f_in points to existing file))
+	  - template == None
 
-	 2.1 `template` points to an existing file:
+      2. B{ input pipe from STDIN
+        (== ``myprogram | 'some input string'``) }
 
-	      Executor reads the template file, completes it in memory, and
-	      pushes it directly to the program.
+	Condition:
 
-         2.2 `template` points to string that doesn't look like a file name:
+	  - exe.pipes == 1 / True
+	  - template != None ((or f_in points to existing file))
 
-	      Executor completes the string in memory (using
-	      `self.template % self.__dict__`) and pushes it directly
-	      to the program. This is the fastest option as it avoids
-	      file access alltogether.
+	Setup:
 
-	 2.3 `template` == None but f_in points to an *existing* file:
+	     1. `template` points to an existing file:
 
-	      Executor will read this file and push it unmodified to
-	      the program via StdIn. (kind of an exception, if used at
-	      all, f_in usual points to a *non-existing* file that
-	      will receive the completed input.)
-	 
-      3. input from file -- this coresponds to ``myprogram < input_file``
+		 Executor reads the template file, completes it in
+		 memory, and pushes it directly to the program.
 
-	 - exe.pipes == 0 / False
-	 - template != None
-	 - push_inp == 1 / True (default)
+	     2. `template` points to string that doesn't look like a file name:
 
-	 3.1 `template` points to an existing file:
+		 Executor completes the string in memory (using
+		 `self.template % self.__dict__`) and pushes it
+		 directly to the program. This is the fastest option
+		 as it avoids file access alltogether.
 
-              Executor reads the template file, completes it in
-	      memory, saves the completed file to disc (creating or
-	      overriding self.f_in), opens the file and passes the
-	      file handle to the program (instead of STDIN).
+	     3. `template` == None but f_in points to an *existing* file:
 
-         3.2 `template` points to string that doesn't look like a file name:
+		  Executor will read this file and push it unmodified to
+		  the program via StdIn. (kind of an exception, if used at
+		  all, f_in usual points to a *non-existing* file that
+		  will receive the completed input.)
 
-	      Same as 3.1, except that the template is not read from
-	      disc but directly taken from memory (see 2.2).
+      3. B{ input from file
+        (== ``myprogram < input_file``) }
 
-      4. input from file passed as argument to the program -- this
-         corresponds to ``myprogram input_file``
+	Condition:
 
-	 For this it is up to you to provide the correct program
-	 argument.
+	    - exe.pipes == 0 / False
+	    - template != None
+	    - push_inp == 1 / True (default)
 
-	 4.1 Use template completion:
+	Setup:
+	  
+	   1. `template` points to an existing file:
 
-	     The best option would be to set an explicit file name
-	     for `f_in` and include this file name into  `args`, Example::
+	         Executor reads the template file, completes it in
+	         memory, saves the completed file to disc (creating or
+	         overriding self.f_in), opens the file and passes the
+	         file handle to the program (instead of STDIN).
 
-	       exe = ExeConfigCache.get('myprogram')
-	       assert not exe.pipes 
- 
-	       x = Executor( 'myprogram', args='input.in', f_in='input.in',
-	                     template='/somewhere/input.template', cwd='/tmp' )
+	   2. `template` points to string that doesn't look like a file name:
 
-	     Executor create your input file on the fly which is then
-	     passed as first argument.
+	         Same as 3.1, except that the template is not read
+	         from disc but directly taken from memory (see 2.2).
 
-	 4.2 Without template completion:
+      4. B{ input from file passed as argument to the program
+        (== ``myprogram input_file``) }
 
-	     Similar, just that you don't give a template::
+	Condition:
 
-	       x = Executor( 'myprogram', args='input.in', f_in='input.in',
-	                     cwd='/tmp' )
+	  - exe.pipes == 0 / False
 
-	     It would then be up to you to provide the correct input file
-	     in `/tmp/input.in`. You could override the L{prepare()} hook
-	     method for creating it.
-	 
-	 There are other ways of doing the same thing.
+        For this it is up to you to provide the correct program
+	argument.
 
-      Look at L{Executor.generateInput()} to see what is actually going on. 
+	Setup:
+
+	   1. Use template completion:
+
+	         The best option would be to set an explicit file name
+	         for `f_in` and include this file name into  `args`, Example::
+
+	           exe = ExeConfigCache.get('myprogram')
+	           assert not exe.pipes 
+
+	           x = Executor( 'myprogram', args='input.in', f_in='input.in',
+			     template='/somewhere/input.template', cwd='/tmp' )
+
+	         Executor create your input file on the fly which is then
+	         passed as first argument.
+
+	   2. Without template completion:
+
+	         Similar, just that you don't give a template::
+
+	           x = Executor( 'myprogram', args='input.in', f_in='input.in',
+			     cwd='/tmp' )
+
+	         It would then be up to you to provide the correct
+	         input file in `/tmp/input.in`. You could override the
+	         L{prepare()} hook method for creating it.
+
+        There are other ways of doing the same thing.
+
+
+    Look at L{generateInp()} to see what is actually going on. 
 
 
     References
-    ----------
-      * See also L{Biskit.IcmCad} for an Example of how to overwrite and
-        use Executor.
-      * See also L{Biskit.ExeConfig} for a description of program
-        configuration.
+    ==========
+
+      - See also L{Biskit.IcmCad} for an Example of how to overwrite and
+         use Executor.
+
+      - See also L{Biskit.ExeConfig} for a description of program
+         configuration.
     """
 
     def __init__( self, name, args='', template=None, f_in=None, f_out=None,
@@ -323,7 +344,17 @@ class Executor:
 
         self.result = None  #: set by self.finish()
 
+	self.initVersion = self.version()
+
         self.__dict__.update( kw )
+
+
+    def version( self ):
+        """Version of class (at creation).
+        @return: version
+        @rtype: str
+        """       
+        return 'Executor $Revision$'
 
 
     def communicate( self, cmd, inp, bufsize=-1, executable=None,
@@ -451,7 +482,7 @@ class Executor:
         Run the callculation. This calls (in that order):
           - L{ prepare() },
           - L{ execute() },
-          - L{ finish() }/ L{ failed() },
+          - L{ finish() }/ L{ fail() },
           - L{ cleanup() }
         
         @param inp_mirror: file name for formatted copy of inp file
@@ -470,14 +501,14 @@ class Executor:
 
         except IOError, why:
             try:
-                self.failed()
+                self.fail()
             finally:
                 self.cleanup()
             raise RunError, why
 
         try:
             if self.isFailed():
-                self.failed()
+                self.fail()
             else:
                 self.finish()
         finally:
@@ -548,7 +579,7 @@ class Executor:
             t.tryRemove( self.f_err )
 
 
-    def failed( self ):
+    def fail( self ):
         """
         Called if external program failed, override! 
         """
