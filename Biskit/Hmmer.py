@@ -386,7 +386,7 @@ class HmmerProfile( Executor ):
             T.tryRemove( self.f_err )
 
             
-    def failed( self ):
+    def fail( self ):
         """
         Called if external program failed, override! 
         """
@@ -455,7 +455,7 @@ class HmmerAlign( Executor ):
         return fastaSeq, hmmSeq
 
 
-    def failed( self ):
+    def fail( self ):
         """
         Called if external program failed, override! 
         """
