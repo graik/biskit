@@ -170,6 +170,7 @@ if __name__ == '__main__':
         
         o = cmdDict( o )
         o['gray'] = fname
+ 	o['dot'] = absbinary('dot')
 
         ## command for version 2.x of epydoc
         if int(o['ver'])==2:
@@ -179,7 +180,7 @@ if __name__ == '__main__':
         ##
         ## 3.aplha2 argument --show-sourcecode now need to be given explicitly
         if int(o['ver'])==3:
-            command =  '%(bin)s -o %(o)s --css=white --url=%(url)s --name=Biskit --top=indices.html --show-sourcecode --graph=classtree --dotpath=/usr/bin/dot --parse-only --verbose %(t)s'%o
+            command =  '%(bin)s -o %(o)s --css=white --url=%(url)s --name=Biskit --top=indices.html --show-sourcecode --graph=classtree --dotpath=%(dot)s --parse-only --verbose %(t)s'%o
 
       #  classtree, callgraph, umlclasstree
         
