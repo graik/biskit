@@ -43,7 +43,9 @@ class DictList( BisList, list ):
     values within the dictionaries are easily accessible and can be
     plotted against each other.
 
-    I{Overriding / Extending:}
+    Overriding / Extending:
+    =======================
+    
     The class is designed to be easily adapted for holding more complex
     objects. In order to do so, the attribute item_type should be
     set to the allowed class. All objects with a get( key, default )
@@ -237,7 +239,7 @@ class DictList( BisList, list ):
         @param v: value
         @type  v: any
         """
-        v = self._processItem( v, len( self ) )
+        v = self._processNewItem( v, len( self ) )
         list.append( self, v )
 
 
