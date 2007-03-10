@@ -229,27 +229,37 @@ class ProfileCollection:
         
         @raise ProfileError:
         """
-        ## autodetect type
-        if asarray == 1:
-            if isinstance( prof, N.arraytype ):
-                return self.__picklesave_array( prof )
+	try:
 
-            p = self.__picklesave_array( N.array( prof ) )
-            if p.typecode() not in ['O','c']:  ## no char or object arrays!
-                return p
-            return prof
+	    ## autodetect type
+	    if asarray == 1:
+		if isinstance( prof, N.arraytype ):
+		    return self.__picklesave_array( prof )
 
-        ## force list
-        if asarray == 0:
-            if isinstance( prof, N.arraytype ):
-                return prof.tolist()
-            return prof
+		p = self.__picklesave_array( N.array( prof ) )
+		if p.typecode() not in ['O','c']:  ## no char or object arrays!
+		    return p
+		return prof
 
-        ## force array
-        if asarray == 2:
-            if isinstance( prof, N.arraytype ):
-                return self.__picklesave_array( prof )
-            return self.__picklesave_array( N.array( prof ) )
+	    ## force list
+	    if asarray == 0:
+		if isinstance( prof, N.arraytype ):
+		    return prof.tolist()
+		return prof
+
+	    ## force array
+	    if asarray == 2:
+		if isinstance( prof, N.arraytype ):
+		    return self.__picklesave_array( prof )
+		return self.__picklesave_array( N.array( prof ) )
+
+	except TypeError, why:
+	    ## Numeric bug: N.array(['','','']) raises TypeError on list of ''
+	    if asarray == 1 or asarray == 0:
+		return prof
+
+	    raise ProfileError, "Cannot create array from given list. %r"\
+		  % T.lastError()
 
         raise ProfileError, "%r not allowed as value for asarray" % asarray
 
