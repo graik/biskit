@@ -526,14 +526,14 @@ Run unittest tests for biskit.
 	 (If no tags are given to -i this means all tests are included)
 
     p    - packages to test, e.g. Biskit Biskit.Dock Biskit.Mod           [All]
-    v    - int, verbosity level                                             [2]
+    v    - int, verbosity level, 3 switches on several graphical plots      [2]
     log  - path to logfile (overriden); empty -log means STDOUT        [STDOUT]
     nox  - suppress test plots                                          [False]
-    dry  - do not actually run the test but just set everything up      [False]
+    dry  - do not actually run the test but just collect tests          [False]
                
 Examples:
 
-    * Run run all but long or obsolete tests from Biskit and Biskit.Dock:
+    * Run all but long or obsolete tests from Biskit and Biskit.Dock:
     test.py -e old long  -p Biskit Biskit.Dock
 
     * Run only PVM-dependent tests of the Biskit.Mod sub-package:
