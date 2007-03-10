@@ -363,7 +363,7 @@ class Test(BT.BiskitTest):
             self.rama.show()
             
         r = N.sum( N.compress( self.psi != None, self.psi ) )
-	self.assertEqual( r, -11717.909796797909 )
+	self.assertAlmostEqual( r, -11717.909796797909, 2 )
 
  
 if __name__ == '__main__':
