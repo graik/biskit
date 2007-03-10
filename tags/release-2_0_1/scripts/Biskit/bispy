@@ -1,0 +1,33 @@
+#!/usr/bin/python -i
+
+from Biskit.tools import *
+from Biskit import *
+import sys
+
+## activate tab-completion
+import rlcompleter, readline
+readline.parse_and_bind('tab: complete')
+
+def help():
+    print """
+bispy [pickled_object]
+
+Opens an interactive python prompt with all Biskit/* modules and Biskit.tools
+functions imported into the default namespace. A single argument can point
+to a pickled python object which is then unpickled and put into a variable x.
+"""
+
+args = sys.argv
+
+help()
+
+if len( args ) > 1:
+
+    try:
+         x = Load( args[1] )
+         print "Loaded %s and put it into variable x." % args[1]
+
+    except:
+	errWriteln( lastError() )
+        errWriteln('%s does not seem to be a pickled python object.'\
+                    % args[1] )

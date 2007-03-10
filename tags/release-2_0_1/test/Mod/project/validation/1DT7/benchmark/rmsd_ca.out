@@ -1,0 +1,14 @@
+# Carbon alpha RMSD.
+#  column 1. Normal fitting
+#  column 2. Itterative fitting
+#  column 3. Fraction of discarded residues in 2
+model_00	  3.197	  1.357	  0.188
+model_01	  3.535	  1.357	  0.212
+model_02	  3.471	  1.268	  0.237
+model_03	  3.927	  1.400	  0.215
+model_04	  3.768	  1.333	  0.220
+model_05	  3.663	  1.300	  0.295
+model_06	  3.699	  1.375	  0.160
+model_07	  3.783	  1.329	  0.237
+model_08	  3.741	  1.313	  0.316
+model_09	  4.366	  1.377	  0.233

@@ -1,0 +1,73 @@
+remarks Set up thioredoxin
+
+
+topology  
+  @TOPPAR:amber/topamber.inp 
+  @TOPPAR:amber/patches.pro
+end
+
+parameter @TOPPAR:amber/paramber.gb.inp end
+
+segment
+        name="    "
+        chain
+        link ppgp head - GLY tail + PRO end
+        link ppgg head - GLY tail + GLY end
+        link pepp head - * tail + PRO end
+        link ppg2 head - GLY tail + * end
+        link ppg1 head - * tail + GLY end
+        link pept head - * tail + * end
+        coordinates @trx.pdb
+        end
+end
+
+patch nser refe=nil=(resid 1) end
+patch nter refe="+"=(resid 1) end
+patch ntr2 refe="-"=(resid 1) refe="+"=(resid 2) end
+
+patch cala refe=nil=(resid 108) end
+patch cter refe="-"=(resid 108) end
+
+patch disu refe="1"=(resid 32) refe="2"=(resid 35) end
+
+coordinates  @trx.pdb
+
+write psf output=trx.psf end
+
+
+stop
+
+parameter
+nbonds 
+atom cdie trunc eps=1. 
+e14fac=0.8333333   ! use this to reproduce elec term to amber
+cutnb=9999. ctonnb=9996. ctofnb=9997.
+nbxmod=3 vswitch
+end
+end
+
+hbuild select=(resid 26 and name hd2) end
+
+
+parameter nbonds EPS=1. WEPS=78.5 
+         offset=0.09
+         gbhct 
+end end
+
+
+
+flags include ace end
+
+
+
+energy end
+
+
+minimize powell nstep=50 end
+
+
+write coor output=trxM.pdb end
+
+
+stop
+

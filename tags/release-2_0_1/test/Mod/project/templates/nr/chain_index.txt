@@ -1,0 +1,11 @@
+## template files mapped to matching chain ID
+Mod/project/templates/nr/1MHO.pdb      
+Mod/project/templates/nr/1K8U.pdb      A
+Mod/project/templates/nr/1J55.pdb      A
+Mod/project/templates/nr/1KSO.pdb      A
+Mod/project/templates/nr/1M31.pdb      A
+Mod/project/templates/nr/1NSH.pdb      A
+Mod/project/templates/nr/1K2H.pdb      A
+Mod/project/templates/nr/1DT7.pdb      A
+Mod/project/templates/nr/1MQ1.pdb      A
+Mod/project/templates/nr/1MWN.pdb      A

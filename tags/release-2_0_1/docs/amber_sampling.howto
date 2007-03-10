@@ -1,0 +1,267 @@
+.. ===================================================================
+.. Biskit, a toolkit for the manipulation of macromolecular structures
+.. Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
+..
+.. This program is free software; you can redistribute it and/or
+.. modify it under the terms of the GNU General Public License as
+.. published by the Free Software Foundation; either version 2 of the
+.. License, or any later version.
+..
+.. This program is distributed in the hope that it will be useful,
+.. but WITHOUT ANY WARRANTY; without even the implied warranty of
+.. MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+.. General Public License for more details.
+..
+.. You find a copy of the GNU General Public License in the file
+.. license.txt along with this program; if not, write to the Free
+.. Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+..
+..
+.. last $Author$
+.. last $Date$
+.. $Revision$
+.. ===================================================================
+.. See also: http://biskit.pasteur.fr/use/workflows/sampling-amber
+
+.. Structure sampling with Amber and amber_ensembleMD.py
+.. =====================================================
+
+This document described how to setup a parallell molecular dyanamics
+run using Amber and amber_ensembleMD.py.
+
+--------------------------------------------------------------------
+
+========
+Contents	
+========
+
+- `Requirements`_
+- `Overview`_
+- `Detailed instructions`_
+   - `1. Clean up model (by hand)`_
+   - `2a. Build topology (manually)`_
+   - `2b. Build topology (automatted)`_
+   - `3. Prepare folder and run MD`_
+   - `4. Convert amber result to pickled Biskit.EnsembleTraj object`_
+   - `5. Clustering of trajectory (select 10 snapshots)`_
+   
+--------------------------------------------------------------------
+
+Requirements
+============
+- Amber (7 or higher)
+- Biskit installation
+- 10 computers reachable via ssh without password
+- PDB with protein structure
+
+--------------------------------------------------------------------
+
+Overview
+========
+
+1. Check, clean up model, identify disulfide bridges (WhatIf web)
+2. build amber topology (tleap)
+3. run Ensemble simulation (amber_ensembleMD.py)
+4. convert result to Biskit.EnsembleTraj object
+5. fuzzy-cluster the trajectory
+
+--------------------------------------------------------------------
+
+Detailed instructions
+=====================
+
+1. Clean up model (by hand)
+---------------------------
+
+Create project folder
+
+>>> mkdir my_topology
+>>> cd my_topology
+
+Delete hydrogens from PDB
+
+Go to the whatif web interface::
+
+  http://www.cmbi.kun.nl/gv/servers/WIWWWI/
+	- HIS protonation
+		Hydrogens / Add protons
+		save hadded.pdb to my_topology
+	-> note how whatif protonated HIS residues (NE, ND, or both)
+	- ASN or GLN flips
+		Hydrogen / optimize h_bond network
+	-> note, which ASN, GLN have to be flipped (end of result page)
+
+- identify S-S bridges
+
+- edit PDB file:
+
+  - rename D-protonated HIS to HID
+  - rename E-protonated HIS to HIE
+  - rename dual-protonated HIS to HIP
+  - rename CYS involved in S-S bond into CYX
+  - switch OE and NE of ASN and GLN where suggested by WhatIf
+  - remove terminal OT1, OT2 atoms
+  - remove hetero atoms (except you have prep files for them)
+  - remove all hydrogen atoms (or give them correct amber names)
+
+
+2a. Build topology (manually)
+-----------------------------
+
+>>> cp ../cleaned.pdb ./in.pdb
+
+Select force field
+
+>>> ln -s $AMBERHOME/dat/leap/cmd/leaprc.ff99 ./leaprc
+
+run $AMBERHOME/exe/tleap, in tleap enter::
+
+        source leaprc.ff99
+
+	  ## optional:
+	  ## load definition and parameters for non-standard residues
+	m = loadAmberParams your_own.mod
+	m = loadAmberPrep your_own.prep
+
+        a = loadPdb in.pdb
+
+	  ## connect SG atoms of S-S bonds
+	  ## Note: use e.g. 'desc a.9' to check atom content
+        bond a.9.8  a.38.8
+        bond a.16.8 a.35.8
+
+	  ## add solvent
+	  ## consider using larger distance buffer and solvateOct
+	  ##
+          ## Amber 7 usage:
+	solvateBox a WATBOX216 10.0
+	  ## OR Amber 8 usage:
+	  ## solvateBox a TIP3PBOX 10.0
+
+	  ## add counter ions to neutrality (Na+ or Cl-)
+        addIons a Na+ 0 
+	
+	check a
+		-> "Unit is OK."
+	  ## save topology and initial coordinates
+	saveAmberParm a top.parm raw.crd
+
+	  ## quit tleap
+	quit
+
+Create PDB file from amber topology and coordinates
+
+>>> ambpdb -p top.parm < raw.crd > raw.pdb
+
+ **Note:** 
+ the classes used by *clean_template.py* of *biskit/scripts/Mod* 
+ can probably be adapted to automate most of the above.
+
+
+2b. Build topology (automatted)
+-------------------------------
+
+>>> amber_pdb2parm.py -i |PDBfile| [-o |out.parm| -fmod |external.mod|
+>>>                   -fprep |external.prep| ... ]
+
+This creates *out.parm*, *out.crd*, *out.pdb*, (and *leap.log* in current folder)
+
+The current version works for Amber 7. 
+Adapt the template in *biskit/external/amber/leap/solvate_box.leap*!
+
+
+3. Prepare folder and run MD
+----------------------------
+
+Create result folder
+
+>>> mkdir my_ensemble_MD
+>>> cd my_ensemble_MD
+
+Fill folder from standard MD template (in biskit cvs)
+
+>>> amber_ensembleMD.py -parm ~/my_topology/top.parm \
+>>>                     -crd ~/my_topology/raw.crd \
+>>>                     -pdb ~/my_topology/raw.pdb \
+>>>                     -nb_nodes 2 
+>>>                     -nodes_eq computer1 \
+>>>                     -nodes_prod computer2 computer3 ... \
+>>>                     -n_steps 125000
+
+ **Note:** 
+ type *amber_ensembleMD.py* for help
+
+Run equilibration and wait for it to finish
+
+>>> ssh computer1  ## important! must be on nodes_eq
+>>> cd my_ensemble_MD
+>>> ./start_eq.csh
+
+Run simulation (can be on any node)
+
+>>> ./start_prod.csh
+
+ **Note:** 
+ The complete MD setup is stored in 
+ *~biskit/external/amber/templates_ensemble_pme*. 
+ Make a copy, adapt it to your needs and use 
+ *amber_ensembleMD.py -template |your_copy|*.
+
+The template shell script calling sander is in *2_md_xx/2*/start.csh*
+and may need to be adapted to your LAM version.  
+
+ **Note:** 
+ The current setup works for Amber 8. Amber 7 required slithly different
+ input files, see *external/amber/template_pme_ensemble_amber7/*!
+
+
+4. Convert amber result to pickled Biskit.EnsembleTraj object
+-------------------------------------------------------------
+
+The result folder contains the coordinates of 10 production MDs in 10
+folders: e.g. *my_ensemble_MD/2????/3????/sim_protein.crd.gz*
+
+The following first step should already be done by the MD script,
+check whether traj_protein.dat exists
+
+>>> cd my_ensemble_MD/2_md_00/3_md_nvt_1ns
+
+Create Biskit.Trajectory w/o water, w/o hydrogens, with amber residue 
+names translated back to standard names 
+
+>>> amber2traj.py -i sim_protein.crd \
+>>>               -o traj_protein.dat \
+>>>               -r ../../0_dry.pdb \
+>>>               -b -wat -hyd -rnres
+
+Concat the single member trajectories into one EnsembleTraj object
+
+>>> cd my_ensemble_MD
+>>> traj2ensemble.py -i 2*/3*/traj_protein.dat \
+>>>                  -o traj_ens.dat  \
+>>>                  -pdbCode MD1
+
+ **Comment:** 
+ Consider using option -step or -s -e to get a smaller trajectory.
+
+
+5. Clustering of trajectory (select 10 snapshots)
+-------------------------------------------------
+
+>>> mkdir my_ensemble_MD/clustered
+>>> cd clustered
+  
+Select 10 snapshots, by CA clustering of every 5th frame
+
+>>> selectModels.py -i ../traj_ens.dat \
+>>>                 -n 10 -a CA \
+>>>                 -step 5 > cluster.log
+
+  **Comment:** 
+  This creates n pickled Biskit.PDBModel instances and a
+  pickled dictionary that contains all of them indexed by cluster
+  number. The dictionary is the input to the Biskit docking routines.
+
+If you need PDB files...
+
+>>> model2pdb.py -i *model
