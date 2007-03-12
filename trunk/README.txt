@@ -34,7 +34,7 @@ Release 2.0.1 introduces a new testing framework that is easier to
 maintain and more convenient to use: The module Biskit.test
 automatically collects and runs (unittest) test cases from across the
 whole package and allows to skip or include tests depending on TAGS or
-package. The Biskit.PVM package has been re-arranged: The compilation
+by package. The Biskit.PVM package has been re-arranged: The compilation
 of the built-in pypvm_core module used to be a notorious trouble
 maker. We have now outsourced and re-packaged pypvm into a standard
 distutils package that compiles and installs more smoothly. Besides,
@@ -110,7 +110,7 @@ field if the above link shouldn't work).
     suites. Some of them haven't been used in quite a while. Please,
     report any problems to the bug tracker [Category `scripts`]!
 
-* Amber* classes lack test cases
+* Some Amber* classes lack test cases
 
     We haven't yet written test cases for the AmberCrdEntropist,
     AmberEntropist, AmberParmBuilder. These classes are used for the
