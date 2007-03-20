@@ -525,9 +525,9 @@ class Pymoler( Executor ):
         colorNames = []
 
         for c in range(0, nColors):
-            rgb = [ float( spectrum[c][:4] ) / 255, \
-                  float( '0x' + spectrum[c][4:6] ) / 255, \
-                  float( '0x' + spectrum[c][6:] ) / 255 ]
+            rgb = [ float( T.hex2int(spectrum[c][:4]) ) / 255, \
+                    float( T.hex2int('0x' + spectrum[c][4:6]) ) / 255, \
+                    float( T.hex2int('0x' + spectrum[c][6:]) ) / 255 ]
 
             cName = 'c' + str(c)
             colorNames += cName
