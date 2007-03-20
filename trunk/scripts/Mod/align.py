@@ -33,11 +33,12 @@ import sys, os.path
 
 def _use( o ):
     print """
-Syntax: align.py [ -o |outFolder| -log |logFile| -h |host_computer| ]
+Syntax: align.py [ -o |outFolder| -log |logFile| -h |host_computer| -nosap ]
 
 Options:
     -o       output folder for results      (default: .)
     -log     log file                       (default: STDOUT)
+    -nosap   skip structural alignment      (default: don't skip)  
     -h       host computer for calculation  (default: local computer)
              -> must be accessible w/o password via ssh, check!
     -? or help .. this help screen
@@ -60,13 +61,14 @@ def defaultOptions():
 options   = tools.cmdDict( defaultOptions() )
 outFolder = tools.absfile( options['o'] )
 host = options['h']
+sap  = not 'nosap' in options
 
 log = None
 if options['log']:
     log = LogFile( outFolder + '/' + options['log'], 'a' )
     
 if not (os.path.exists( outFolder +'/templates' ) ):
-    print 'Current directory is not a valid modeling folder.' 
+    print 'Current directory is not a valid modeling folder (missing /templates).' 
     _use( defaultOptions() )
           
 if '?' in options or 'help' in options:
@@ -103,7 +105,7 @@ if '?' in options or 'help' in options:
 ##         Progressive Alignment."
     
 ## note 2: If there is only one template structure step 2 of T-coffee
-##         will not work. Solution, skipp the structural alignment if
+##         will not work. Solution, skip the structural alignment if
 ##         only one template structure is provided.
 
 ## note 3: In quite som cases the sequence retrieved from the nrpdb
@@ -116,7 +118,7 @@ if '?' in options or 'help' in options:
 
 
 try:
-    a = Aligner( outFolder, log )
+    a = Aligner( outFolder, log, verbose=1, sap=sap )
 
     a.align_for_modeller_inp()
 
