@@ -79,17 +79,22 @@ class Aligner:
     ## default result alignment file. Not actually needed in Aligner itself.
     F_FINAL_ALN  = F_FINAL + '.pir_aln'
 
-    def __init__( self, outFolder='.', log=None, verbose=1 ):
+    def __init__( self, outFolder='.', log=None, verbose=1, sap=1 ):
         """
         @param outFolder: base folder for t_coffee output
                           (default: L{F_RESULT_FOLDER})
         @type  outFolder: str
         @param log: log file instance, if None, STDOUT is used (default: None)
         @type  log: LogFile
+	@param verbose: be verbose
+	@type  verbose: 1 | 0
+	@param sap: perform structural alignment
+	@type  sap: 1 | 0
         """
         self.log = log
         self.outFolder = T.absfile( outFolder )
         self.verbose = verbose
+	self.sap = sap
 
         ## recognize file types for adding t_coffee type code
         self.ex_inp_types = { 'P' : re.compile('.+\.[Pp][Dd][Bb]$|'+
@@ -286,9 +291,12 @@ class Aligner:
             raise AlignerError( "\n No templates avaliable. ABORTING" )
 
         ## SAP will not run if there is only one template
-        if len( pdbFiles ) == 1:
-            print '\n WARNING! Only one template avaliable:' + str(pdbFiles)
-            print '          Structural alignment (SAP) will not be performed'
+        if (not self.sap) or ( len( pdbFiles ) == 1 ):
+	    if self.sap:
+		self.logWrite('WARNING! Only one template avaliable:' +\
+			      str(pdbFiles) )
+            self.logWrite('Structural alignment (SAP) will not be performed.')
+	    
             r = [
                 ## fast global pair-wise alignment
                 ## why not use slow pair? better for distant sequences
@@ -306,8 +314,8 @@ class Aligner:
                 ## combine alignments to one
                 self.coffee_align_inp( [ f_fast_lib, f_lalign_lib],
                                        clean_aln=0, newtree=f_fast_tree,
-                                       output=['clustalw','phylip','score_html',
-                                               'pir_aln'],
+                                       output=['clustalw','phylip',
+					       'score_html', 'pir_aln'],
 ##                                     run_name=T.stripFileName(f_final_aln),
                                        outfile=f_final_aln,
                                        quiet=f_coffee_log+'_4')
@@ -345,7 +353,8 @@ class Aligner:
                 ## combine alignments to one
                 self.coffee_align_inp( [ f_fast_lib, f_lalign_lib, f_sap_lib],
                                        clean_aln=0, newtree=f_fast_tree,
-                                       output=['clustalw','phylip','score_html',
+                                       output=['clustalw','phylip',
+					       'score_html',
                                                'pir_aln', 'score_ascii'],
  ##                                    run_name=T.stripFileName(f_final_aln),
                                        outfile=f_final_aln,
