@@ -181,7 +181,7 @@ class CheckIdentities:
     def identities(self, aln_dictionary):
         """
         Create a dictionary that contains information about all the
-        alignments in the aln_dictionar using pairwise comparisons.
+        alignments in the aln_dictionary using pairwise comparisons.
 
         @param aln_dictionary: alignment dictionary
         @type  aln_dictionary: dict
@@ -192,10 +192,10 @@ class CheckIdentities:
          - 'seq' - str, sequence of
          - 'template_info' - list of the same length as the 'key'
              sequence excluding deletions. The number of sequences
-             in tha multiple alignmentthat contain information at
+             in the multiple alignment that contain information at
              this position.
          - 'ID' - dict, sequence identity in precent comparing the
-            'key'  sequence all other sequences (excluding deletions)
+            'key'  sequence to all other sequences (excluding deletions)
          - 'info_ID' - dict, same as 'ID' but compared to the template
              sequence length (i.e excluding deletions and insertions
              in the 'key' sequence )
@@ -227,7 +227,7 @@ class CheckIdentities:
                 ## loop over the full length of the alignment
                 for w in range(len(aln_dictionary["target"]["seq"])):
 
-                    ## skipp deletions
+                    ## skip deletions
                     nb_of_info_res=0
                     if(aln_dictionary[i]["seq"][w] is not '-'):
                         nb_of_residues += 1
@@ -255,9 +255,14 @@ class CheckIdentities:
                 nb_cov_res = N.sum( N.greater(template_info, 0) )
 
                 ## calculate identities
-                info_ID[y] = 100. * nb_of_identities / nb_of_template
-                ID[y]      = 100. * nb_of_identities / nb_of_residues
-                cov_ID[y]  = 100. * nb_of_identities / nb_cov_res
+		info_ID[y] = ID[y] = cov_ID[y] = 0
+		## RAIK: Hack, nb_of_... can turn 0 for fragmented alignments
+		if nb_of_template:
+		    info_ID[y] = 100. * nb_of_identities / nb_of_template
+		if nb_of_residues:
+		    ID[y]      = 100. * nb_of_identities / nb_of_residues
+		if nb_cov_res:
+		    cov_ID[y]  = 100. * nb_of_identities / nb_cov_res
 
             aln_dictionary[i]["info_ID"] = info_ID 
             aln_dictionary[i]["ID"] = ID
@@ -334,7 +339,10 @@ class CheckIdentities:
         identities_cov_file = identities_cov_file or \
                               self.outFolder + self.F_OUTPUT_IDENTITIES_COV
 
-        head_ID = "Sequence identity in percent comparing a sequence to another \n(excluding deletions in the first sequence)"
+        head_ID = """Pairwise sequence identity in percent (excluding deletions
+in the reference) -- for that reason, the matrix is *not* symetric and
+should be read row-wise (the first line is the most interesting one).
+"""
 
         head_info_ID ="Sequence identity in percent comparing a sequence to another \n(excluding deletions and insertions in the first sequence)"
 
