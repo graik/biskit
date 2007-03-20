@@ -50,6 +50,8 @@ Options:
     -h       host computer for calculation  (default: local computer)
              -> must be accessible w/o password via ssh, check!
     -s       show structures on Pymol superimposed on average
+    -dry     do not run Modeller; just set up and try post-processing existing
+             results
     -? or help .. this help screen
 
 input: templates/modeller/*.pdb
@@ -57,6 +59,7 @@ input: templates/modeller/*.pdb
 
 output: modeller/modeller.log
                 /*.B9999000??   <- models
+		/model_??.pdb   <- processed PDBs ordered by modeller score
 
 Default options:
 """
@@ -118,7 +121,8 @@ try:
    
     r = m8.prepare_modeller( )
 
-    m8.go(host)  ## comment out for testing
+    if not 'dry' in options:
+	m8.go(host)  ## comment out for testing
 
     m8.postProcess()
     
@@ -156,6 +160,7 @@ if options.has_key('s'):
     p=Pymoler()
     ## add models
     for i in range( len(traj) ):
+	print 'Pymol.add model', i
         p.addPdb( traj[i], 'model_%i'%i ) 
         names  += [ 'model_%i'%i ]
 
@@ -183,5 +188,7 @@ if options.has_key('s'):
     
     p.add('select none')
     p.add('zoom all')
+
+    print 'writing pymol script and models...'
     
     p.show()
