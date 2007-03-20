@@ -143,7 +143,8 @@ CALL ROUTINE = 'model'             # do homology modelling
                     fout=None,
                     starting_model=1, ending_model=10 ):
         """
-        Create a input (.top) file for Modeller.
+        Create a input (.top) file for Modeller. An existing modeller.top file will NOT be
+	overidden to allow manual intervention.
         See L{MODELLER_TEMPLATE}.
         
         @param f_pir: PIR alignment file
@@ -176,9 +177,16 @@ CALL ROUTINE = 'model'             # do homology modelling
 
         fout = fout or self.outFolder + self.F_INP
 
+	if os.path.exists( fout ):
+	    self.logWrite('Warning: Using EXISTING modeller input file %s' % fout)
+	    return
+
         result = self.MODELLER_TEMPLATE % params
 
         try:
+	    if self.verbose:
+		self.logWrite('Creating modeller input file %s' % fout)
+
             open( fout, 'w').write( result )
         except IOError, why:
             raise ModellerError( "Can't create modeller inp file "+fout )
@@ -460,9 +468,8 @@ CALL ROUTINE = 'model'             # do homology modelling
 
             for string in pdb_list[i].info["headlines"]:
                 
-                tuple = ()
-                tuple = string.split()[0],''.join(string.split()[1:])
-                t.append(tuple)
+                pair = string.split()[0], ''.join(string.split()[1:])
+                t.append(pair)
 
             pdb_list[i].writePdb('%s/model_%02i.pdb'%(model_folder,i),
                                  headlines = t)
