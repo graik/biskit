@@ -3,8 +3,11 @@ Migration from Numeric to numpy
 
 There are some differences: 
 
+(2) arraytype is now numpy.ndarray
+
 (3) numpy doesn't allow 'if a:' or 'b = a or default' type of expressions
     to test for empty arrays
+
 (5) nonzero() now returns a tuple of lists instead of a list only
 
 All examples assume that numarray was imported as N (import numpy
@@ -43,7 +46,7 @@ Solutions:
     NEW:
     Biskit.tools.aBool() allows boolean evaluation of NumArrays and
     defaults to the normal bool() for everything else. 
-    Biskit.tools.either() could replace the or statement:
+    A Biskit.tools.either() could replace the or statement:
     
       b = Biskit.tools.either( a, N.ones( 10 ) )
 
