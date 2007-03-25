@@ -3,6 +3,8 @@ Migration from Numeric to numpy
 
 There are some differences: 
 
+(1) a.typecode() is now a.dtype
+
 (2) arraytype is now numpy.ndarray
 
 (3) numpy doesn't allow 'if a:' or 'b = a or default' type of expressions
@@ -16,21 +18,31 @@ as N) and Numeric as Numeric.
 Solutions:
 ----------
 
-1) Creating a NumArray from a Numeric.array (may also work for numpy?)
+1) a.typecode() is now numpy.ndarray
+   
+    Numpy doesn't use typecodes any longer but the old Numeric
+    typecodes are still supported.
 
-    if type( a ) is multiarray.arraytype:
-       a = N.array( a )
+    OLD::
+      a.typecode() == 'i'
+    
+    NEW::
+      a.dtype == 'i'
 
-    This replaces the numeric array by a NumArray. It is also possible
-    to make a copy that operates on the same memory:
-       b = N.array( N.memory.writeable_buffer(a),
-		    typecode=a.typecode(), shape=a.shape )
+2) arraytype is now numpy.ndarray
+
+    OLD::
+      if isinstance( a, Numeric.arraytype ):
+
+    NEW::
+      if isinstance( a, N.ndarray ):
 
 
 3) Boolean evaluation of arrays.
     
     The following did work for Numeric but does not work with numpy
     because numpy doesn't support boolean evaluation of arrays.
+
     OLD:
     a = None
     b = a or Numeric.ones( 10 )
@@ -44,17 +56,27 @@ Solutions:
     is ambiguous. Use a.any() or a.all()
 
     NEW:
-    Biskit.tools.aBool() allows boolean evaluation of NumArrays and
-    defaults to the normal bool() for everything else. 
-    A Biskit.tools.either() could replace the or statement:
-    
-      b = Biskit.tools.either( a, N.ones( 10 ) )
 
     numpy.any() is tolerant to empty lists and None as input::
 
       if numpy.any( a ):
           print "a is not None and not empty and not only zeros"
 
+    Biskit.tools.aBool() allows boolean evaluation of NumArrays and
+    defaults to the normal bool() for everything else. 
+    A Biskit.tools.either() could replace the or statement:
+    
+      b = Biskit.tools.either( a, N.ones( 10 ) )
+
+
+    In test cases (a, b are arrays):
+    OLD:
+      self.assertEqual( a, b )
+    ERROR:
+      ValueError in unittest
+
+    NEW:
+      self.assert_( N.all( a==b ) )
 
 5) Nonzero returns tuple
     
