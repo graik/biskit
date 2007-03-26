@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -35,7 +37,7 @@ from Biskit.LogFile import ErrLog, LogFile
 from Biskit.EnsembleTraj import EnsembleTraj, traj2ensemble
 
 import tempfile
-import Numeric as N
+import numpy.oldnumeric as N
 import os
 
 ## PVM imports
@@ -434,7 +436,7 @@ class Test(BT.BiskitTest):
     def test_FlexMaster(self):
 	"""TrajFlexMaster test"""
         from Biskit.MatrixPlot import MatrixPlot
-        from RandomArray import random
+        from numpy.oldnumeric.random_array import random
 
 	assert len(hosts.cpus_all) > 0,\
 	       'Master requires at least 1 PVM node for initialisation.'

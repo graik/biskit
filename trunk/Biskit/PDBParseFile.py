@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -27,7 +29,7 @@ Parse a PDB file into a PDBModel.
 @see L{PDBParserFactory}
 """
 import Scientific.IO.PDB as IO
-import Numeric as N
+import numpy.oldnumeric as N
 
 import Biskit.tools as T
 import Biskit as B
@@ -110,7 +112,7 @@ class PDBParseFile( PDBParser ):
 
                 model.atoms = model.atoms or atoms
 
-                model.xyz = model.xyz or xyz
+                if model.xyz is None: model.xyz = xyz
 
                 model.__terAtoms = model._PDBModel__pdbTer()
 
@@ -284,7 +286,7 @@ class Test(BT.BiskitTest):
         self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P.pdb')
 
         self.assertAlmostEqual( N.sum( self.m.centerOfMass() ),
-	       N.sum( N.array([ 29.53385022,  46.39655482,  37.75218589])))
+	      113.682601929 )
 
 if __name__ == '__main__':
 

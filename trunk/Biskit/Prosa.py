@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -31,7 +33,7 @@ for a while unitl  all transitions are made to the new version of Prosa.
 
 import tempfile
 import os
-import Numeric as N
+import numpy.oldnumeric as N
 
 import tools as T
 import Table

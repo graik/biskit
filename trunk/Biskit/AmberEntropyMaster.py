@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -25,7 +27,7 @@ Parallellized AmberEntropist calculation.
 """
 
 import os.path, copy
-import Numeric as N
+import numpy.oldnumeric as N
 
 import Biskit.tools as T
 import Biskit.settings as settings

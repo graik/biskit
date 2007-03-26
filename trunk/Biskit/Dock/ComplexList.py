@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -27,7 +29,7 @@
 List of Complex objects.
 """
     
-import Numeric as N
+import numpy.oldnumeric as N
 import types
 import biggles
 import random
@@ -37,7 +39,7 @@ from Biskit import PDBError, EHandler
 from Biskit.Errors import BiskitError
 
 from Biskit.Dock.Complex import Complex
-from ComplexModelRegistry import ComplexModelRegistry
+from Biskit.Dock.ComplexModelRegistry import ComplexModelRegistry
 
 
 class ComplexListError( BiskitError ):
@@ -348,7 +350,7 @@ class ComplexList( list ):
         """
         l = self
         if indices != None:
-            l = N.take( l, indices )
+            l = N.take( N.array(l,'O'), indices )
 
         if not unique:
             return [ c.info.get(infoKey, default) for c in l ]

@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -33,7 +35,7 @@ from Biskit import EHandler
 import Biskit.mathUtils as MU
 import Biskit.tools as T
 
-import Numeric as N
+import numpy.oldnumeric as N
 
 try:
     import biggles
@@ -362,7 +364,8 @@ class Test(BT.BiskitTest):
         if self.local:
             self.rama.show()
             
-        r = N.sum( N.compress( self.psi != None, self.psi ) )
+        r = N.sum( N.compress( N.logical_not(N.equal(self.psi, None)),
+			       self.psi ) )
 	self.assertAlmostEqual( r, -11717.909796797909, 2 )
 
  

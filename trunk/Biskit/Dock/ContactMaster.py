@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -42,7 +44,7 @@ from Complex import Complex
 from ComplexList import ComplexList
 from ComplexEvolvingList import ComplexEvolvingList
 
-import Numeric as N
+import numpy.oldnumeric as N
 import tempfile
 import os.path
 
@@ -251,7 +253,7 @@ class ContactMaster(TrackingJobMaster):
         @param m: model
         @type  m: PDBModel       
         """
-        if m.profile('relAS', 0) != 0:
+        if m.profile('relAS', 0) is not 0:
             return 
 
         d = PDBDope( m )

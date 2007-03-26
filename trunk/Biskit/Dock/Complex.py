@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -31,10 +33,10 @@ from Biskit.Prosa2003 import Prosa2003
 
 import Biskit.tools as t
 
-import Numeric as N
+import numpy.oldnumeric as N
 
 from copy import deepcopy, copy
-from multiarray import arraytype
+from numpy.oldnumeric import arraytype
 
 from difflib import SequenceMatcher
 
@@ -843,7 +845,8 @@ class Complex:
 
         ## get pair-wise distances -> atoms_rec x atoms_lig
         dist = getattr( self, 'pw_dist', None )
-        if not dist or N.shape( dist ) != ( N.sum(rec_mask), N.sum(lig_mask) ):
+        if dist is None or \
+	       N.shape( dist ) != ( N.sum(rec_mask), N.sum(lig_mask) ):
             dist = self.__pairwiseDistances(N.compress( rec_mask, rec_xyz, 0),
                                             N.compress( lig_mask, lig_xyz, 0) )
         if cache:
@@ -941,7 +944,7 @@ class Complex:
                 res2res = m[ int(recInd[r]):int(recInd[r+1]),
                              int(ligInd[l]):int(ligInd[l+1]) ]
 
-                if res2res:
+                if N.any( res2res ):
                     residueMatrix[r, l] = 1
 
         return residueMatrix
@@ -1328,7 +1331,7 @@ class Complex:
         
         @author: Michael Habeck
         """
-        from LinearAlgebra import singular_value_decomposition as svd
+        from numpy.oldnumeric.linear_algebra import singular_value_decomposition as svd
 
         ## center configurations
         x_av = N.sum(x) / len(x)

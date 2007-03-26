@@ -118,7 +118,7 @@ class Test(BT.BiskitTest):
         if self.local:
             print 'Rmsd between the two complex structures: %.2f Angstrom'%rms
 
-	self.assertAlmostEqual(rms, 58.784401345508634, 6)
+	self.assertAlmostEqual(rms, 58.7844130314, 6)
 
     
 if __name__ == '__main__':

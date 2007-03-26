@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -25,7 +27,7 @@
 Memory saving representation of a sparse array.
 """
 
-import Numeric as N
+import numpy.oldnumeric as N
 import types
 import copy
 
@@ -192,8 +194,7 @@ class SparseArray:
         Get default value, defined in L{__init__}.
         
         @return: default value for array elements (of lowest dimension)
-        @rtype: number
-        """
+        @rtype: number        """
         if self.is1D:
             return self.__default
         ## multidimensional
@@ -756,7 +757,7 @@ class Test(BT.BiskitTest):
         if self.local:
             print self.sa.toarray()
             
-	self.assertEqual( self.sb.toarray(), self.EXPECTED )
+	self.assert_( N.all( self.sb.toarray() == self.EXPECTED) )
 
 
     EXPECTED = N.array([[ 0.,  3.,  4.,  0.,  0.,  0.],

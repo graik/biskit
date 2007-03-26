@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -27,7 +29,7 @@ Analyze a structure using  Prosa2003.
 
 import os.path
 import string
-import Numeric as N
+import numpy.oldnumeric as N
 import tempfile
 
 import Biskit.tools as T
@@ -371,7 +373,8 @@ class Test(BT.BiskitTest):
         if self.local:
             print "Result: ", self.result
 
-        self.assertEqual( self.result, [ -94.568,  -64.903, -159.463 ] )
+        self.assert_( N.sum(self.result - [ -94.568,  -64.903, -159.463 ] ) \
+		      < 0.0000001 )
 
         
 if __name__ == '__main__':

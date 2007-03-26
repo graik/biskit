@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -26,7 +28,7 @@ Create structures with reduced number of atoms.
 """
 
 from PDBModel import PDBModel
-import Numeric as N
+import numpy.oldnumeric as N
 import tools as T
 import molUtils as MU
 
@@ -315,7 +317,7 @@ class ReduceCoordinates:
         """
 
         mass = self.m.atomProfile('mass')
-        xyz = xyz or self.m.getXyz()
+        if xyz is None: xyz = self.m.getXyz()
 
         mProf = [ N.sum( N.take( mass, group ) ) for group in self.groups ]
         xyz = self.reduceXyz( xyz )

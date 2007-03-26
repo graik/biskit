@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -30,8 +32,8 @@ import Biskit.tools as t
 from Biskit import Trajectory, mathUtils,  molUtils
 
 
-import Numeric as N
-import RandomArray
+import numpy.oldnumeric as N
+import numpy.oldnumeric.random_array as RandomArray
 import copy
 
 import biggles
@@ -353,5 +355,5 @@ class Test(BT.BiskitTest):
     
         
 if __name__ == '__main__':
-
+   
     BT.localTest()

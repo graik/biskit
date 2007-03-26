@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 # Copyright (c) 1999-2000 Gary Strangman; All Rights Reserved.
 #
 # This software is distributable under the terms of the GNU
@@ -323,7 +325,7 @@ Returns: rows from listoflists that meet the specified criterion.
 
 def flat(l):
     """
-Returns the flattened version of a '2D' list.  List-correlate to the a.flat()
+Returns the flattened version of a '2D' list.  List-correlate to the a.ravel()()
 method of NumPy arrays.
 
 Usage:    flat(l)
@@ -715,7 +717,7 @@ Usage:   nonrepeats (inlist)
 #===================   PSTAT ARRAY FUNCTIONS  =====================
 
 try:                         # DEFINE THESE *ONLY* IF NUMERIC IS AVAILABLE
- import Numeric
+ import numpy.oldnumeric as Numeric
  N = Numeric
 
  def aabut (source, *args):
@@ -928,12 +930,12 @@ Returns: a version of array a where listmap[i][0] = (instead) listmap[i][1]
 """
     ashape = a.shape
     if col == 'all':
-        work = a.flat
+        work = a.ravel()
     else:
         work = acolex(a,col)
-        work = work.flat
+        work = work.ravel()
     for pair in listmap:
-        if type(pair[1]) == StringType or work.typecode()=='O' or a.typecode()=='O':
+        if type(pair[1]) == StringType or work.dtype.char=='O' or a.dtype.char=='O':
             work = N.array(work,'O')
             a = N.array(a,'O')
             for i in range(len(work)):
@@ -957,7 +959,7 @@ Usage:   arowcompare(row1,row2)
 Returns: an array of equal length containing 1s where the two rows had
 identical elements and 0 otherwise
 """
-    if row1.typecode()=='O' or row2.typecode=='O':
+    if row1.dtype.char=='O' or row2.typecode=='O':
         cmpvect = N.logical_not(abs(N.array(map(cmp,row1,row2)))) # cmp fcn gives -1,0,1
     else:
         cmpvect = N.equal(row1,row2)
@@ -1006,13 +1008,13 @@ Usage:   aunique (inarray)
     uniques = N.array([inarray[0]])
     if len(uniques.shape) == 1:            # IF IT'S A 1D ARRAY
         for item in inarray[1:]:
-            if N.add.reduce(N.equal(uniques,item).flat) == 0:
+            if N.add.reduce(N.equal(uniques,item).ravel()) == 0:
                 try:
                     uniques = N.concatenate([uniques,N.array[N.NewAxis,:]])
                 except TypeError:
                     uniques = N.concatenate([uniques,N.array([item])])
     else:                                  # IT MUST BE A 2+D ARRAY
-        if inarray.typecode() != 'O':  # not an Object array
+        if inarray.dtype.char != 'O':  # not an Object array
             for item in inarray[1:]:
                 if not N.sum(N.alltrue(N.equal(uniques,item),1)):
                     try:

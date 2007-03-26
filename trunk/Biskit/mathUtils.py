@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -26,9 +28,9 @@
 general purpose math methods
 """
 
-import Numeric as N
+import numpy.oldnumeric as N
 import random
-import RandomArray
+import numpy.oldnumeric.random_array as RandomArray
 import math
 
 class MathUtilError( Exception ):
@@ -272,7 +274,7 @@ def random2DArray( matrix, ranNr=1, mask=None):
     a,b = N.shape( matrix )
 
     ## get array from matrix that is to be randomized
-    if mask:
+    if mask is not None:
         if len(mask) == len( N.ravel(matrix) ):
             array = N.compress( mask, N.ravel(matrix) )
 
@@ -295,7 +297,7 @@ def random2DArray( matrix, ranNr=1, mask=None):
         ranArray += randomMask( nOnes, lenArray )
 
     ## blow up to size of original matix
-    if mask:
+    if mask is not None:
         r = N.zeros(a*b)
         N.put( r, N.nonzero(mask), ranArray)
         return N.reshape( r, (a,b) )
@@ -398,7 +400,7 @@ def unpackBinaryMatrix( pcm, raveled=0 ):
     s = pcm['shape']
 
     m = N.zeros( N.cumproduct( s )[-1], N.Int)
-    m.savespace( 1 )
+    pass  ## m.savespace( 1 )
     N.put( m, pcm['nonzero'], 1 )
 
     if raveled:

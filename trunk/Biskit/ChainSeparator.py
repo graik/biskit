@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ## class ChainSeperator:
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -39,7 +41,7 @@ import Biskit.tools as T
 from LogFile import LogFile
 
 from Scientific.IO.PDB import *
-import Numeric as N
+import numpy.oldnumeric as N
 import string
 from difflib import SequenceMatcher
 import re

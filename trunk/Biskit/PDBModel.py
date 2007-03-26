@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -36,8 +38,8 @@ from Biskit import EHandler
 from ProfileCollection import ProfileCollection, ProfileError
 from PDBParserFactory import PDBParserFactory
 
-import Numeric as N
-import MLab
+import numpy.oldnumeric as N
+import numpy.oldnumeric.mlab as MLab
 import os, sys
 import copy
 import time
@@ -45,7 +47,7 @@ import string
 import types
 import Scientific.IO.PDB as IO
 
-from multiarray import arraytype
+from numpy.oldnumeric import arraytype
 
 
 class PDBProfiles( ProfileCollection ):
@@ -674,7 +676,7 @@ class PDBModel:
             if not xChanged:
                 self.xyz = None
 
-            if type( self.xyz ) == arraytype and self.xyz.typecode() != 'f':
+            if type( self.xyz ) == arraytype and self.xyz.dtype.char != 'f':
                 self.xyz = self.xyz.astype(N.Float32)
 
             if not aChanged:
@@ -787,7 +789,7 @@ class PDBModel:
         @return: 1-letter-code AA sequence (based on first atom of each res).
         @rtype: str
         """
-        mask = mask or N.ones( self.lenAtoms(), N.Int )
+        if mask is None: mask = N.ones( self.lenAtoms(), N.Int )
 
         firstAtm = N.zeros( self.lenAtoms() )
         N.put( firstAtm, self.resIndex(), 1 )
@@ -1245,7 +1247,7 @@ class PDBModel:
                 return self.indices(
                     lambda a, allowed=what: a['name'] in allowed )
 
-            if type( what[0] ) == int:
+            if isinstance( what[0] , int):
                 ## mask
                 if len( what ) == self.lenAtoms() and max( what ) < 2:
                     return N.nonzero( what )
@@ -1254,7 +1256,7 @@ class PDBModel:
                     return what
 
         ## single index
-        if type( what ) == int:
+        if isinstance( what , int):
             return N.array( [what], N.Int )
 
         raise PDBError("PDBModel.indices(): Could not interpret condition ")
@@ -1289,7 +1291,8 @@ class PDBModel:
                 return self.mask(
                     lambda a, allowed=what: a['name'] in allowed,   numpy)
 
-            if type( what[0] ) == int:
+            if isinstance( what[0] , int) or \
+	       (isinstance(what, N.ndarray) and what.dtype in [int, bool]):
                 ## mask
                 if len( what ) == self.lenAtoms() and max( what ) < 2:
                     return what
@@ -1300,7 +1303,7 @@ class PDBModel:
                     return r
 
         ## single index
-        if type( what ) == int:
+        if isinstance( what , int):
             return self.mask( [what] )
 
         raise PDBError, "PDBModel.mask(): Could not interpret condition "
@@ -1650,13 +1653,13 @@ class PDBModel:
         r.source = self.source
 
         r.xyz = N.take( self.getXyz(), i, 0 )
-        r.xyzChanged = self.xyzChanged or not (r.xyz == self.xyz)
+        r.xyzChanged = self.xyzChanged or not N.all(r.xyz == self.xyz)
 
         if deepcopy:
             r.atoms = [ copy.copy( a ) for a in self.getAtoms() ]
-            r.atoms = N.take( r.atoms, i ).tolist()
+            r.atoms = N.take( N.array(r.atoms, 'O'), i ).tolist()
         else:
-            r.atoms = N.take( self.getAtoms(), i ).tolist()
+            r.atoms = N.take( N.array(self.getAtoms(),'O'), i ).tolist()
         r.atomsChanged = self.atomsChanged or not (r.atoms == self.atoms)
 
         r.aProfiles = self.aProfiles.take( i )
@@ -1824,7 +1827,7 @@ class PDBModel:
 
         old_chains = []
         if keep_old:
-            old_chains = [ atoms[i]['chain_id'] for i in self.resIndex(breaks)]
+            old_chains = [ atoms[i]['chain_id'] for i in self.resIndex()]
             old_chains = mathUtils.nonredundant( old_chains )
             if '' in old_chains: old_chains.remove('')
 
@@ -1938,7 +1941,7 @@ class PDBModel:
         ri = N.concatenate( (self.resIndex( mask=mask ), [self.lenAtoms()] ) )
         resLen = len( ri ) - 1
         atoms = self.getAtoms()
-        if mask:
+        if mask is not None:
             atoms = N.compress( mask, atoms ).tolist()
 
         return [ atoms[ ri[res] : ri[res+1] ] for res in range( resLen ) ] 
@@ -1988,7 +1991,7 @@ class PDBModel:
             result.append( a['residue_number'] )
 
         ## by default take all atoms
-        mask = mask or N.ones( len(self.getAtoms() ) , N.Int )
+        if mask is None: mask = N.ones( len(self.getAtoms() ) , N.Int )
 
         ## apply mask to this list
         return N.compress( mask, N.array(result, N.Int) )
@@ -2006,7 +2009,7 @@ class PDBModel:
         @rtype:  list of int        
         """
         ## By default consider all atoms
-        mask = mask or N.ones( self.lenAtoms() )
+        if mask is None: mask = N.ones( self.lenAtoms() )
 
         result = []
 
@@ -2055,7 +2058,7 @@ class PDBModel:
                  unmasked atom
         @rtype:  list of int
         """
-        if self.__resMap and not force and mask == None:
+        if self.__resMap is not None and not force and mask == None:
             return self.__resMap
 
         result = self.__calcResMap( mask )
@@ -2083,13 +2086,13 @@ class PDBModel:
         @rtype: list of int
         """
 
-        if self.__resIndex and not force and mask == None:
+        if self.__resIndex is not None and not force and mask == None:
             return self.__resIndex
 
         cache = cache and mask == None
 
         m = self.resMap()
-        if mask:
+        if mask is not None:
             m = N.compress( mask, m )
 
         r = [ i for i in range(len(m)) if i==0 or m[i] != m[i-1] ]
@@ -2113,7 +2116,7 @@ class PDBModel:
         """
 
         m = self.resMap()
-        if mask:
+        if mask is not None:
             m = N.compress( mask, m )
 
         l = len(m)
@@ -2271,13 +2274,13 @@ class PDBModel:
         """
         x, y = self.getXyz(), other.getXyz()
 
-        mask_fit = mask_fit or mask
+        if mask_fit is None: mask_fit = mask
 
         if fit:
 
             fx, fy = x, y
 
-            if mask_fit:
+            if mask_fit is not None:
                 fx = N.compress( mask_fit, x, 0 )
                 fy = N.compress( mask_fit, y, 0 )
             ## find transformation for best match
@@ -2286,7 +2289,7 @@ class PDBModel:
             ## transform coordinates
             y = N.dot(y, N.transpose(r)) + t
 
-        if mask:
+        if mask is not None:
             x = N.compress( mask, x, 0 )
             y = N.compress( mask, y, 0 )
 
@@ -2325,7 +2328,7 @@ class PDBModel:
         """
         x, y = refModel.getXyz(), self.getXyz()
 
-        if mask:
+        if mask is not None:
             x = N.compress( mask, x, 0 )
             y = N.compress( mask, y, 0 )
             outlier_mask = N.zeros( N.sum(mask)  )
@@ -2418,7 +2421,7 @@ class PDBModel:
         @return: fitted PDBModel or sub-class
         @rtype: PDBModel
         """
-        if mask != None:
+        if mask is not None:
             m_this = self.compress( mask )
         else:
             m_this = self
@@ -2447,7 +2450,7 @@ class PDBModel:
         @rtype: PDBModel
         """
         r = self.clone()
-        mask = mask or N.ones( len(self) )
+        if mask is None: mask = N.ones( len(self) )
 
         avg = N.average( N.compress( mask, r.getXyz(), 0 ) )
 
@@ -2466,7 +2469,7 @@ class PDBModel:
         @return: xyz coordinates of center
         @rtype: (float, float, float)
         """
-        if mask == None:
+        if mask is None:
             return N.average( self.getXyz() )
 
         return N.average( N.compress( mask, self.getXyz(), axis=0 ) )
@@ -2527,7 +2530,7 @@ class PDBModel:
         @return: array with values set to the maximal intra-residue value
         @rtype: array of float
         """
-        if mask == None:
+        if mask is None:
             mask = N.ones( len(atomValues) )
 
         ## eliminate all values that do not belong to the selected atoms
@@ -3014,7 +3017,7 @@ class Test(BT.BiskitTest):
         sort = m2.argsort()
         m2 = m2.sort( sort )
 
-        self.assertAlmostEqual( N.sum( m2.centerOfMass() ), 23.10322160875, 7 )
+        self.assertAlmostEqual( N.sum( m2.centerOfMass() ),  23.1032009125)
 
 
 if __name__ == '__main__':

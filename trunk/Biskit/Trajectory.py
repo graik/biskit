@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -25,7 +27,7 @@
 Trajectory - Collection of coordinate frames of a molecule 
 """
 
-import Numeric as N
+import numpy.oldnumeric as N
 
 ## superposition module from M. Habeck
 import rmsFit
@@ -43,7 +45,7 @@ import copy
 import tempfile, os, types
 
 ## PCA
-import LinearAlgebra as LA
+import numpy.oldnumeric.linear_algebra as LA
 
 class TrajError( BiskitError ):
     pass
@@ -145,7 +147,7 @@ class Trajectory:
 
         ## frames x (N x 3) Array with coordinates
         self.frames = self.__collectFrames( pdbs, castAll )
-        self.frames.savespace()
+        pass  ## self.frames.savespace()
 
         ## [00011111111222233..] (continuous) residue number for each atom
         self.resIndex = self.ref.resMap()
@@ -167,7 +169,7 @@ class Trajectory:
         @raise TrajError: if out of memory OR invalid index
         """
         try:
-            if type( i ) is int:
+            if isinstance( i , int):
                 return self.getPDBModel( i )
 
             if type( i ) is types.SliceType:
@@ -211,7 +213,7 @@ class Trajectory:
         self.frameNames = getattr( self, 'frameNames', None)
         self.profiles = getattr( self, 'profiles', TrajProfiles() )
         try:
-            self.frames.savespace()
+            pass  ## self.frames.savespace()
         except:
             pass
 
@@ -221,7 +223,7 @@ class Trajectory:
         Called before pickling the object.
         """
         try:
-            if type( self.frames ) == list or self.frames.typecode() == 'd':
+            if type( self.frames ) == list or self.frames.dtype.char == 'd':
                 EHandler.warning("Converting coordinates to float array.")
                 self.frames = N.array( self.frames ).astype(N.Float32)
         except:
@@ -280,7 +282,7 @@ class Trajectory:
                     raise TrajError("Reference PDB doesn't match %s."
                                     %m.fileName)
 
-                if atomCast == range( len( m ) ):
+                if N.all( atomCast == range( len( m ) ) ):
                     atomCast = None   ## no casting necessary
                 else:
                     if self.verbose: T.errWrite(' casting ')
@@ -324,7 +326,7 @@ class Trajectory:
         @rtype: PDBModel
         """
         if (self.ref and refModel.equals( self.ref ) != [1,1] ) or \
-           (self.frames and refModel.lenAtoms() != len( self.frames[0] ) ):
+           (self.frames is not None and refModel.lenAtoms() != len( self.frames[0] ) ):
 
             raise TrajError(\
                 "Atoms of reference model don't match trajectory frames.")
@@ -360,7 +362,7 @@ class Trajectory:
             r.frameNames = self.frameNames + traj[0].frameNames
 
         try:
-            if self.pc and traj[0].pc:
+            if self.pc is not None and traj[0].pc is not None:
                 r.pc['p'] = N.concatenate( (self.pc['p'], traj[0].pc['p']),0)
                 r.pc['u'] = N.concatenate( (self.pc['u'], traj[0].pc['u']),0)
         except TypeError, why:
@@ -687,7 +689,7 @@ class Trajectory:
         else:
             refxyz = ref.getXyz()
 
-        if mask == None:
+        if mask is None:
             mask = N.ones( len( refxyz ) )
 
         refxyz = N.compress( mask, refxyz, 0 )
@@ -1065,7 +1067,7 @@ class Trajectory:
         @rtype: array
         """
         frames = self.frames
-        if mask != None:
+        if mask is not None:
             frames = N.compress( mask, frames, 1 )
 
         ## mean position of each atom in all frames
@@ -1099,8 +1101,8 @@ class Trajectory:
         if rchainMap is None:
             rchainMap = N.take( self.chainMap(), self.resIndex() )
 
-        left_allowed = left_allowed  or N.nonzero( self.ref.maskBB() )
-        right_allowed= right_allowed or N.nonzero( self.ref.maskBB() )
+        if left_allowed  is None: left_allowed = N.nonzero( self.ref.maskBB() )
+	if right_allowed is None: right_allowed= N.nonzero( self.ref.maskBB() )
 
         ## atom indices of center residue
         result = self.ref.res2atomIndices( [ res ] )
@@ -1147,7 +1149,7 @@ class Trajectory:
         @return: Numpy array ( N_unmasked x 1 ) of float
         @rtype: array
         """
-        if mask == None:
+        if mask is None:
             mask = N.ones( len( self.frames[0] ), N.Int )
 
         if verbose: T.errWrite( "rmsd fitting per residue..." )
@@ -1212,7 +1214,7 @@ class Trajectory:
         @return: Numpy array 1 x N of float
         @rtype: array
         """
-        if mask == None:
+        if mask is None:
             mask = N.ones( len( self.frames[0] ), N.Int )
 
         ## eliminate all values that do not belong to the selected atoms
@@ -1498,9 +1500,9 @@ class Trajectory:
                  projection of each frame in PC space, eigenvalue of each PC
         @rtype: array, array, array
         """
-        frameMask = frameMask or N.ones( len( self.frames ) )
+        if frameMask is None: frameMask = N.ones( len( self.frames ) )
 
-        atomMask = atomMask or N.ones( self.getRef().lenAtoms() )
+        if atomMask is None: atomMask = N.ones( self.getRef().lenAtoms() )
 
         if fit:
             self.fit( atomMask )
@@ -1542,7 +1544,7 @@ class Trajectory:
         @rtype: Trajectory
         """
         fit = 1
-        if self.pc:
+        if self.pc is not None:
             fit = self.pc['fit']
         pc = self.getPca( fit=fit )
 

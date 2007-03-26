@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ## Class msms
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -30,7 +32,7 @@ Use MSMS to calculate surface info.
        module for this kind of calculations.
 """
 
-import Numeric as N
+import numpy.oldnumeric as N
 import Biskit.tools as T
 import string
 import os

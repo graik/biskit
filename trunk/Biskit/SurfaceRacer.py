@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -28,7 +30,7 @@ Calculates accessible, molecular surface areas and average curvature.
 import tempfile
 import os.path
 import string
-import Numeric as N
+import numpy.oldnumeric as N
 
 from Biskit import Executor, TemplateError
 import Biskit.settings as S

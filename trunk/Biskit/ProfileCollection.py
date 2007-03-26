@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -25,7 +27,7 @@
 Manage profiles.
 """
 
-import Numeric as N
+import numpy.oldnumeric as N
 import tools as T
 import mathUtils as M
 from Biskit import EHandler
@@ -37,6 +39,12 @@ try:
 except:
     biggles = 0
 
+def isarray( a ):
+    """
+    Test for old Numeric and new numpy arrays (N.arraytype is not equivalent to
+    old Numeric.arraytype).
+    """
+    return 0 != getattr( a, 'astype', 0 )
 
 class ProfileError(Exception):
     pass
@@ -100,6 +108,24 @@ class ProfileCollection:
         """
         return 'ProfileCollection $Revision$'
 
+
+    def __setstate__(self, state ):
+        """
+        called for unpickling the object.
+	Compability fix: Convert Numeric arrays to numpy arrays.
+        """
+        self.__dict__ = state
+
+	try:
+	    import Numeric
+	except:
+	    return
+
+	for k, v in self.profiles.items():
+
+	    if getattr( v, 'astype', 0) and not isinstance( v, N.arraytype):
+		self.profiles[k] = N.array( v )
+    
 
     def __getitem__( self, k ):
         """
@@ -206,10 +232,10 @@ class ProfileCollection:
         @return: recast array or unchanged original
         @rtype:  Numeric.array
         """
-        if prof.typecode() in ['i','l']:
+        if prof.dtype.char in ['i','l']:
             return prof.astype( N.Int32 )
 
-        if prof.typecode() in ['f','d']:
+        if prof.dtype.char in ['f','d']:
             return prof.astype( N.Float32 )
 
         return prof
@@ -233,30 +259,30 @@ class ProfileCollection:
 
 	    ## autodetect type
 	    if asarray == 1:
-		if isinstance( prof, N.arraytype ):
+		if isarray( prof ):
 		    return self.__picklesave_array( prof )
 
 		p = self.__picklesave_array( N.array( prof ) )
-		if p.typecode() not in ['O','c']:  ## no char or object arrays!
+		if p.dtype.char not in ['O','c','S']: ## no char or object arrays!
 		    return p
-		return prof
+		return list( prof )
 
 	    ## force list
 	    if asarray == 0:
-		if isinstance( prof, N.arraytype ):
+		if isarray( prof ):
 		    return prof.tolist()
-		return prof
+		return list( prof )
 
 	    ## force array
 	    if asarray == 2:
-		if isinstance( prof, N.arraytype ):
+		if isarray( prof ):
 		    return self.__picklesave_array( prof )
 		return self.__picklesave_array( N.array( prof ) )
 
 	except TypeError, why:
 	    ## Numeric bug: N.array(['','','']) raises TypeError on list of ''
 	    if asarray == 1 or asarray == 0:
-		return prof
+		return list( prof )
 
 	    raise ProfileError, "Cannot create array from given list. %r"\
 		  % T.lastError()
@@ -278,10 +304,10 @@ class ProfileCollection:
         @return: profile
         @rtype: list OR array
         """
-        if mask:
+        if mask is not None:
 
             ## optimized variant for arrays
-            if isinstance( prof, N.arraytype ):
+            if isarray( prof ):
                 p = N.resize( prof, (len(mask), ) )
                 p[:] = default
                 N.put( p, N.nonzero( mask ), prof )
@@ -331,7 +357,7 @@ class ProfileCollection:
            return
 
         ## consistency check
-        if mask and N.sum(mask) != len(prof):
+        if mask is not None and N.sum(mask) != len(prof):
             raise ProfileError(
                 "Mask doesn't match profile ( N.sum(mask)!=len(prof) ). " +
                 "%i != %i" % (N.sum(mask), len( prof ) ) )
@@ -339,7 +365,7 @@ class ProfileCollection:
         prof = self.__array_or_list( prof, asarray )
 
         ## use default == 0 for arrays
-        if not default and isinstance( prof, N.arraytype ):
+        if not default and isarray( prof ):
             default = 0
 
         ## expand profile to have a value also for masked positions
@@ -491,7 +517,7 @@ class ProfileCollection:
         try:
             for key, prof in self.profiles.items():
 
-                if isinstance( prof, N.arraytype ):
+                if isarray( prof ):
                     result.set( key, N.take( prof, indices ) )
                 else:
                     result.set( key, [ prof[i] for i in indices ], asarray=0 )
@@ -555,7 +581,8 @@ class ProfileCollection:
         for k, p in self.profiles.items():
 
             try:
-                if isinstance( p, N.arraytype ):
+		# the getattr is a hack to still recognize old Numeric arrays
+                if isarray( p ):
                     r.set( k, N.concatenate( (p, next.get(k)) ),
                            **self.infos[k] )
                 else:
@@ -619,7 +646,7 @@ class ProfileCollection:
         for key, prof in source.items():
 
             ## replace "None" profiles
-            if key in self and not self[ key ]:
+            if key in self and not self[ key ] is None:
                 self.set( key, prof )
 
             ## add profiles that exist in source but not yet in this collection
@@ -700,7 +727,7 @@ class ProfileCollection:
 
             p = N.array( self.get( name[i] ) )
 
-            if p.typecode() in ['O','c']:
+            if p.dtype.char in ['O','c']:
                 raise TypeError, 'Cannot plot values of profile %s.' % name[i]
 
             plot.add( biggles.Curve( range( len(p) ), p, color=colors[i],
@@ -774,8 +801,8 @@ class Test(BT.BiskitTest):
 
         self.p.update( self.p2, stickyChanged=1 )
 
-        self.assertEqual( self.r['t1'],
-		      N.array([0, 2, 4, 6, 8, 0, 2, 4, 6, 8, 0, 2, 4, 6, 8]))
+        self.assert_( N.all( self.r['t1'] ==\
+		      N.array([0, 2, 4, 6, 8, 0, 2, 4, 6, 8, 0, 2, 4, 6, 8])))
     
 
 if __name__ == '__main__':
