@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -26,7 +28,7 @@ Calculates the secondary structure using DSSP.
 """
 
 import tempfile
-import Numeric as N
+import numpy.oldnumeric as N
 from Biskit import Executor, TemplateError
 import Biskit.tools as T
 import Biskit.molUtils as MU
@@ -229,7 +231,7 @@ class Dssp( Executor ):
         ## check that the entire sequence has a secondary structure assigned
         assert len(secStruc) == self.model.lenResidues()
                 
-        return N.sum(secStruc)        
+        return ''.join(secStruc)        
 
 
     def finish( self ):

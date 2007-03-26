@@ -84,7 +84,7 @@ def rms_pw_and_to_free( d, mask=None, bb=0, sc=0 ):
     models = [ d[k] for k in range( 2, 12 ) ]
 
     t = Trajectory( models )
-    mask = mask or t.ref.maskHeavy()
+    if mask is None: mask = t.ref.maskHeavy()
 
     ## only consider backbone or side chains
     if bb:

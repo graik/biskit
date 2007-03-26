@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Wolfgang Rieping
@@ -24,7 +26,7 @@
 create a histogram from data
 """
 
-import Numeric
+import numpy.oldnumeric as Numeric
 
 
 def histogram(data, nbins, range = None):
@@ -114,7 +116,7 @@ class Test(BT.BiskitTest):
         self.x = Numeric.arange( 4, 12, 1.2 )
         self.data = density( self.x, 3, hist=1 )
 
-        self.assert_( self.data, self.EXPECT )
+        self.assert_( Numeric.all( self.data == self.EXPECT) )
 
     EXPECT= Numeric.array([[  4. ,   0. ],
 			   [  4. ,   2. ],

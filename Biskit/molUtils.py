@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -29,7 +31,7 @@ Utilities for handling structures and sequences
 from Biskit import EHandler
 import tools as t
 
-import Numeric as N
+import numpy.oldnumeric as N
 import copy
 import types
 

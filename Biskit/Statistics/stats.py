@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 # Copyright (c) 1999-2000 Gary Strangman; All Rights Reserved.
 #
 # This software is distributable under the terms of the GNU
@@ -1942,9 +1944,9 @@ findwithin = Dispatch ( (lfindwithin, (ListType, TupleType)), )
 #=============  THE ARRAY-VERSION OF THE STATS FUNCTIONS  ===============
 
 try:                         # DEFINE THESE *ONLY* IF NUMERIC IS AVAILABLE
- import Numeric
+ import numpy.oldnumeric as Numeric
  N = Numeric
- import LinearAlgebra
+ import numpy.oldnumeric.linear_algebra as LinearAlgebra
  LA = LinearAlgebra
 
 
@@ -2062,7 +2064,7 @@ inarray, with only 1 'level' per dim that was collapsed over.
 Usage:   amean(inarray,dimension=None,keepdims=0)
 Returns: arithematic mean calculated over dim(s) in dimension
 """
-    if inarray.typecode() in ['l','s','b']:
+    if inarray.dtype.char in ['l','s','b']:
         inarray = inarray.astype(N.Float)
     if dimension == None:
         inarray = N.ravel(inarray)
@@ -2178,7 +2180,7 @@ inclusive list/tuple determines whether the lower and upper limiting bounds
 
 Usage:   atmean(a,limits=None,inclusive=(1,1))
 """
-     if a.typecode() in ['l','s','b']:
+     if a.dtype.char in ['l','s','b']:
          a = a.astype(N.Float)
      if limits == None:
          return mean(a)
@@ -2372,7 +2374,7 @@ Returns: skew of vals in a along dimension, returning ZERO where all vals equal
 """
     denom = N.power(amoment(a,2,dimension),1.5)
     zero = N.equal(denom,0)
-    if type(denom) == N.ArrayType and asum(zero) <> 0:
+    if isinstance(denom, N.ArrayType) and asum(zero) <> 0:
         print "Number of zeros in askew: ",asum(zero)
     denom = denom + zero  # prevent divide-by-zero
     return N.where(zero, 0, amoment(a,3,dimension)/denom)
@@ -2391,7 +2393,7 @@ Returns: kurtosis of values in a along dimension, and ZERO where all vals equal
 """
     denom = N.power(amoment(a,2,dimension),2)
     zero = N.equal(denom,0)
-    if type(denom) == N.ArrayType and asum(zero) <> 0:
+    if isinstance(denom, N.ArrayType) and asum(zero) <> 0:
         print "Number of zeros in akurtosis: ",asum(zero)
     denom = denom + zero  # prevent divide-by-zero
     return N.where(zero,0,amoment(a,4,dimension)/denom)
@@ -2848,14 +2850,14 @@ Returns: a, where each value is rounded to 'digits' decimals
          except:
              a = N.array(a,'O')
      shp = a.shape
-     if a.typecode() in ['f','F','d','D']:
+     if a.dtype.char in ['f','F','d','D']:
          b = N.ravel(a)
          b = N.array(map(ar,b))
          b.shape = shp
-     elif a.typecode() in ['o','O']:
+     elif a.dtype.char in ['o','O']:
          b = N.ravel(a)*1
          for i in range(len(b)):
-             if type(b[i]) == FloatType:
+             if isinstance(b[i], FloatType):
                  b[i] = round(b[i],digits)
          b.shape = shp
      else:  # not a float, double or Object array
@@ -3220,15 +3222,15 @@ Returns: t-value, two-tailed p-value
     t = N.where(zerodivproblem,1.0,t)           # replace NaN t-values with 1.0
     probs = abetai(0.5*df,0.5,float(df)/(df+t*t))
 
-    if type(t) == N.ArrayType:
+    if isinstance(t, N.ArrayType):
         probs = N.reshape(probs,t.shape)
     if len(probs) == 1:
         probs = probs[0]
         
     if printit <> 0:
-        if type(t) == N.ArrayType:
+        if isinstance(t, N.ArrayType):
             t = t[0]
-        if type(probs) == N.ArrayType:
+        if isinstance(probs, N.ArrayType):
             probs = probs[0]
         statname = 'Independent samples T-test.'
         outputpairedstats(printit,writemode,
@@ -3275,7 +3277,7 @@ Returns: t-value, two-tailed p-value
     t = N.where(zerodivproblem,1.0,t)          # replace NaN t-values with 1.0
     t = N.where(zerodivproblem,1.0,t)           # replace NaN t-values with 1.0
     probs = abetai(0.5*df,0.5,float(df)/(df+t*t))
-    if type(t) == N.ArrayType:
+    if isinstance(t, N.ArrayType):
         probs = N.reshape(probs,t.shape)
     if len(probs) == 1:
         probs = probs[0]
@@ -3535,7 +3537,7 @@ Usage:   achisqprob(chisq,df)    chisq=chisquare stat., df=degrees of freedom
         exponents = N.where(N.less(x,-BIG),-BIG,x)
         return N.exp(exponents)
 
-    if type(chisq) == N.ArrayType:
+    if isinstance(chisq, N.ArrayType):
         arrayflag = 1
     else:
         arrayflag = 0
@@ -3663,7 +3665,7 @@ Adapted from Numerical Recipies.  Can handle multiple dimensions.
 
 Usage:   aksprob(alam)
 """
-     if type(alam) == N.ArrayType:
+     if isinstance(alam, N.ArrayType):
          frozen = -1 *N.ones(alam.shape,N.Float64)
          alam = alam.astype(N.Float64)
          arrayflag = 1
@@ -3705,7 +3707,7 @@ of freedom for the denominator (dfF).  Can handle multiple dims for F.
 
 Usage:   afprob(dfnum, dfden, F)   where usually dfnum=dfbn, dfden=dfwn
 """
-    if type(F) == N.ArrayType:
+    if isinstance(F, N.ArrayType):
         return abetai(0.5*dfden, 0.5*dfnum, dfden/(1.0*dfden+dfnum*F))
     else:
         return abetai(0.5*dfden, 0.5*dfnum, dfden/float(dfden+dfnum*F))
@@ -3723,7 +3725,7 @@ Usage:   abetacf(a,b,x,verbose=1)
     EPS = 3.0e-7
 
     arrayflag = 1
-    if type(x) == N.ArrayType:
+    if isinstance(x, N.ArrayType):
         frozen = N.ones(x.shape,N.Float) *-1  #start out w/ -1s, should replace all
     else:
         arrayflag = 0
@@ -3798,7 +3800,7 @@ C.)  Can handle multiple dimensions.
 Usage:   abetai(a,b,x,verbose=1)
 """
     TINY = 1e-15
-    if type(a) == N.ArrayType:
+    if isinstance(a, N.ArrayType):
         if asum(N.less(x,0)+N.greater(x,1)) <> 0:
             raise ValueError, 'Bad x in abetai'
     x = N.where(N.equal(x,0),TINY,x)
@@ -3810,7 +3812,7 @@ Usage:   abetai(a,b,x,verbose=1)
     # 746 (below) is the MAX POSSIBLE BEFORE OVERFLOW
     exponents = N.where(N.less(exponents,-740),-740,exponents)
     bt = N.exp(exponents)
-    if type(x) == N.ArrayType:
+    if isinstance(x, N.ArrayType):
         ans = N.where(N.less(x,(a+1)/(a+b+2.0)),
                       bt*abetacf(a,b,x,verbose)/float(a),
                       1.0-bt*abetacf(b,a,1.0-x,verbose)/float(b))
@@ -3826,7 +3828,7 @@ Usage:   abetai(a,b,x,verbose=1)
 #######  AANOVA CALCULATIONS  #######
 #####################################
 
- import LinearAlgebra, operator
+ import numpy.oldnumeric.linear_algebra as LinearAlgebra, operator
  LA = LinearAlgebra
 
  def aglm(data,para):
@@ -3973,7 +3975,7 @@ dimensions as the input array.
 Usage:   asum(a, dimension=None, keepdims=0)
 Returns: array summed along 'dimension'(s), same _number_ of dims if keepdims=1
 """
-     if type(a) == N.ArrayType and a.typecode() in ['l','s','b']:
+     if isinstance(a, N.ArrayType) and a.dtype.char in ['l','s','b']:
          a = a.astype(N.Float)
      if dimension == None:
          s = N.sum(N.ravel(a))
@@ -4071,7 +4073,7 @@ Returns: the square of the sum over dim(s) in dimension
         inarray = N.ravel(inarray)
         dimension = 0
     s = asum(inarray,dimension,keepdims)
-    if type(s) == N.ArrayType:
+    if isinstance(s, N.ArrayType):
         return s.astype(N.Float)*s
     else:
         return float(s)*s

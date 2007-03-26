@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -32,7 +34,7 @@ from Biskit import EHandler
 import Biskit.mathUtils as M
 
 import types
-import Numeric as N
+import numpy.oldnumeric as N
 import Biskit.tools as T
 
 try:
@@ -209,7 +211,7 @@ class EnsembleTraj( Trajectory ):
         """
         result = N.zeros( self.lenFrames() )
 
-        if type( member ) == types.IntType:
+        if isinstance( member , types.IntType):
             N.put( result, self.memberIndices( member ), 1 )
 
         if type( member ) == types.ListType:
@@ -602,7 +604,7 @@ class EnsembleTraj( Trajectory ):
         @return: member mask of outlier trajectories
         @rtype: [0|1]
         """
-        mask = mask or self.ref.maskCA()
+        if mask is None: mask = self.ref.maskCA()
 
         traj = self.compressAtoms( mask )
         if step != 1:
@@ -687,5 +689,5 @@ class Test(BT.BiskitTest):
 
 
 if __name__ == '__main__':
-
+   
     BT.localTest()

@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -29,7 +31,7 @@ from Biskit.PVM import JobSlave
 import Biskit.tools as T
 from Biskit import mathUtils as MU
 from Biskit.LogFile import StdLog, LogFile
-import Numeric as N
+import numpy.oldnumeric as N
 from Complex import Complex
 import os.path
 import time
@@ -172,7 +174,7 @@ class ContactSlave(JobSlave):
 
         ## fill empty or nonexisting fields
         for k in keys:
-            if not self.force and c.get(k, None) == None:
+            if not self.force and c.get(k, None) is None:
                 return 1
 
         return 0
@@ -207,7 +209,7 @@ class ContactSlave(JobSlave):
         @type  c: Complex
         """
         try:
-            if self.requested(c, 'fnac_4.5') and self.c_ref_atom_4_5:
+            if self.requested(c, 'fnac_4.5') and self.c_ref_atom_4_5 != None:
                 ## cache pairwise atom distances for following calculations
                 contacts = c.atomContacts( 4.5, self.mask_rec, self.mask_lig,
                                            cache=1, map_back=0 )
@@ -216,7 +218,7 @@ class ContactSlave(JobSlave):
                 c['fnac_4.5'] = N.sum( N.ravel(contacts) * ref )\
                                 / float( N.sum(ref))
 
-            if self.requested(c, 'fnac_10') and self.c_ref_atom_10:
+            if self.requested(c, 'fnac_10') and self.c_ref_atom_10 != None:
 
                 contacts = c.atomContacts( 10., self.mask_rec, self.mask_lig,
                                            cache=1, map_back=0 )
@@ -232,12 +234,14 @@ class ContactSlave(JobSlave):
                 res_cont = c.resContacts( 4.5,
                                           cache=self.requested(c, 'c_res_4.5'))
 
-                if self.c_ref_res_4_5 and self.requested(c, 'fnrc_4.5' ):
+                if self.c_ref_res_4_5 != None \
+		   and self.requested(c, 'fnrc_4.5' ):
                     ref = N.ravel( self.c_ref_res_4_5 )
                     c['fnrc_4.5'] = N.sum(N.ravel(res_cont)*ref) \
                                     /float(N.sum(ref))
 
-                if self.c_ref_res_4_5 and self.requested(c, 'fnSurf_rec'):
+                if self.c_ref_res_4_5 != None \
+		   and self.requested(c, 'fnSurf_rec'):
                     r, l = c.fractionNativeSurface(res_cont,
                                                    self.c_ref_res_4_5 )
                     c['fnSurf_rec'] = r
@@ -282,7 +286,7 @@ class ContactSlave(JobSlave):
             if self.requested(c, 'c_ratom_10'):
                 c['c_ratom_10'] = MU.packBinaryMatrix(contacts)
 
-            if self.c_ref_ratom_10:
+            if self.c_ref_ratom_10 is not None:
                 ref = N.ravel( self.c_ref_ratom_10 )
                 c['fnarc_10'] = N.sum( N.ravel(contacts) * ref )\
                                 / float( N.sum(ref))
@@ -543,14 +547,14 @@ class Test(BT.BiskitTest):
 
 if __name__ == '__main__':
 
-    BT.localTest()
+##     BT.localTest()
 
-##     import os, sys
+    import os, sys
 
-##     if len(sys.argv) == 2:
+    if len(sys.argv) == 2:
 
-##         niceness = int(sys.argv[1])
-##         os.nice(niceness)
+        niceness = int(sys.argv[1])
+        os.nice(niceness)
 
-##     slave = ContactSlave()
-##     slave.start()
+    slave = ContactSlave()
+    slave.start()

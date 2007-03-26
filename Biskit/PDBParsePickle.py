@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -104,7 +106,7 @@ class Test(BT.BiskitTest):
     def test_PDBParsePickle( self ):
         """PDBParsePickle test"""
 
-	import Numeric as N
+	import numpy.oldnumeric as N
 
         ## loading output file from X-plor
         if self.local:

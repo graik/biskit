@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -151,7 +153,7 @@ class ComplexEvolving( ProtComplex ):
 
             return self.getComplex(i).info[key]
 
-        if type(k) == int:
+        if isinstance(k, int):
 
             return self.getComplex( k )
 

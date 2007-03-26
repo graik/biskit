@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2002-2005 Michael Habeck
@@ -25,8 +27,8 @@ superimpose 2 structures iteratively
 """
 
 import Biskit.mathUtils as MU
-import Numeric as N
-from LinearAlgebra import singular_value_decomposition as svd
+import numpy.oldnumeric as N
+from numpy.oldnumeric.linear_algebra import singular_value_decomposition as svd
 
 ## def average(x):
 ##     return N.sum(x) / len(x)

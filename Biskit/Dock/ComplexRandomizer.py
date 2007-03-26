@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ## generate random orientations of receptor and ligand
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -30,8 +32,8 @@ from Biskit.Dock.Complex import Complex
 import Biskit.mathUtils as ma
 import Biskit.molUtils as mol
 import Biskit.tools as t
-import RandomArray as ra
-import Numeric as N
+import numpy.oldnumeric.random_array as ra
+import numpy.oldnumeric as N
 from Biskit import Xplorer, PCRModel
 
 import tempfile

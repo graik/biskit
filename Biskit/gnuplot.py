@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 # Simple Gnuplot interface.
 #
 # Written by Konrad Hinsen <hinsen@ibs.ibs.fr>
@@ -372,7 +374,7 @@ class Test(BT.BiskitTest):
 
     def test_scatter(self):
 	"""gnuplot.scatter test (interactive only)"""
-	from RandomArray import poisson
+	from numpy.oldnumeric.random_array import poisson
 	if self.local:
 	    self.p = scatter( poisson(50,(1000,2))  )
 
@@ -383,7 +385,7 @@ class Test(BT.BiskitTest):
 	# plot( zip( range(10), range(10) ) )
 
 	# Two plots; each given by a 2d array
-	import Numeric as N
+	import numpy.oldnumeric as N
 	x = N.arange(10)
 	y1 = x**2
 	y2 = (10-x)**2

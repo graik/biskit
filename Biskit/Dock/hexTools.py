@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -25,7 +27,7 @@
 Various common functions used by the docking modeles.
 """
 
-import Numeric as N
+import numpy.oldnumeric as N
 import os
 
 import Biskit.tools as t
@@ -112,7 +114,7 @@ def centerSurfDist( model, surf_mask, mask=None ):
     @return: max distance, min distance
     @rtype: float, float
     """
-    if mask == None:
+    if mask is None:
             mask = model.maskHeavy()
 
     ## calculate center of mass
@@ -326,7 +328,7 @@ class Test(BT.BiskitTest):
         self.m = PDBModel( t.testRoot() + '/com/1BGS.pdb' )
         dist = centerSurfDist( self.m , self.m.maskCA() )
 
-        self.assertAlmostEqual( dist[0], 26.880976894654744, 7)
+        self.assertAlmostEqual( dist[0], 26.880979538, 7)
 
 
 if __name__ == '__main__':

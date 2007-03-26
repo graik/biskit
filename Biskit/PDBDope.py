@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -24,7 +26,7 @@
 Calculate and add various properties to PDBModel
 """
 
-import Numeric as N
+import numpy.oldnumeric as N
 import Biskit.tools as T
 
 from Biskit.WhatIf import WhatIf 
@@ -347,7 +349,7 @@ class Test(BT.BiskitTest):
         self.d.addDensity()
 
     def test_model(self):
-	"""PDBModel test final model"""
+	"""PDBDope test final model"""
 	from Biskit import PDBModel
 
         if self.local:
@@ -396,7 +398,7 @@ class LongTest( BT.BiskitTest ):
 	
         self.d = PDBDope( self.M )
 
-    def test_conservation(self):
+    def _test_conservation(self):
 	"""PDBDope.addConservation (Hmmer) test"""
 	self.local = 0
 
@@ -428,12 +430,34 @@ class OldTest( BT.BiskitTest ):
 
         self.d = PDBDope( self.M )
 
-    def test_addAsa(self):
+    def _test_addAsa(self):
 	"""PDBDope.addAsa (Whatif, obsolete) test"""
 	self.d.addASA()
 
 
   
 if __name__ == '__main__':
-    BT.localTest()
+
+##     BT.localTest()
+
+    from Biskit import PDBModel
+    f = T.testRoot() + '/com/1BGS.pdb'
+
+    M = PDBModel( f )
+    M = M.compress( M.maskProtein() )
+
+    
+    d = PDBDope( M )
+
+    d.addSecondaryStructure()
+
+    d.addFoldX()
+    
+    d.addDensity()
+    
+    d.addSurfaceRacer( probe=1.4 )
+
+    d.addSurfaceMask()
+    
+	
 

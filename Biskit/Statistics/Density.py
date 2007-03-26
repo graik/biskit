@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ## 
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (c) 2004 Wolfgang Rieping & Michael Habeck
@@ -26,7 +28,7 @@
 Analyze a density distribution of values.
 """
 
-import Numeric as N
+import numpy.oldnumeric as N
 import math
 import Biskit.hist as H
 

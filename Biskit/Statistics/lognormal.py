@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004 Michael Habeck
@@ -26,8 +28,8 @@
 lognormal distribution
 """
 
-import Numeric as N
-import RandomArray as R
+import numpy.oldnumeric as N
+import numpy.oldnumeric.random_array as R
 
 
 def rand_log_normal(alpha, beta, shape):

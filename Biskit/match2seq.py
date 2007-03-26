@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -26,7 +28,7 @@ compareStructures() compares sequences of 2 structures and returns
 a residue mask for each of them. 
 """
 
-import Numeric as N
+import numpy.oldnumeric as N
 import Biskit.tools as T
 from Biskit.difflib_old import SequenceMatcher
 #from difflib import SequenceMatcher
@@ -294,7 +296,7 @@ def delete( seqAA, seqNr, delList ):
 
                 for repete in intraRepeteList:
 
-                    repeteSeq = N.sum( seqAA[ positions[0]-len(repete) : positions[0] ] )
+                    repeteSeq = ''.join( seqAA[ positions[0]-len(repete) : positions[0] ] )
                     repetePos = range( positions[0]-len(repete), positions[0] )
 
                     if repete == repeteSeq:
@@ -315,7 +317,7 @@ def delete( seqAA, seqNr, delList ):
 
                 for repete in intraRepeteList:
 
-                    repeteSeq = N.sum( seqAA[ positions[0]+length : positions[0]+length+len(repete) ] )
+                    repeteSeq = ''.join( seqAA[ positions[0]+length : positions[0]+length+len(repete) ] )
                     repetePos =  range( positions[0]-length, positions[0]+length+len(repete) )
 
                     if repete == repeteSeq:
@@ -431,8 +433,8 @@ def compareModels( model_1, model_2 ):
     seqNr_2 = range( len( seqAA_2 ) )
 
     # get mask
-    mask_1 = N.zeros( len( seqNr_1 ), N.Int )
-    mask_2 = N.zeros( len( seqNr_2 ), N.Int )
+    mask_1 = N.zeros( len( seqNr_1 ) )
+    mask_2 = N.zeros( len( seqNr_2 ) )
 
     # compare sequences
     seqDiff = getOpCodes( seqAA_1, seqAA_2)
@@ -484,7 +486,8 @@ class Test(BT.BiskitTest):
             print 'mask2\n', mask2            
             globals().update( locals() )
 
-        self.assertEqual( (mask1, mask2), self.EXPECT )
+        self.assert_( N.all(mask1 == self.EXPECT[0] ) )
+	self.assert_( N.all(mask2 == self.EXPECT[1] ) )
 
 
     EXPECT =  N.array([1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,

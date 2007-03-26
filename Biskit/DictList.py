@@ -176,7 +176,7 @@ class DictList( BisList, list ):
 
         if not isinstance( lst, self.__class__ ):
 
-            indices = indices or range( len(self), len(self)+len(lst) )
+            if indices is None: indices = range( len(self), len(self)+len(lst) )
 
             lst = [self._processNewItem(v, i) for v,i in zip( lst, indices )]
 

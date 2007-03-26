@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -38,7 +40,7 @@ import re
 import os.path
 from time import localtime, sleep
 from threading import Thread, RLock, Condition
-import Numeric as N
+import numpy.oldnumeric as N
 
 class DockerError( Exception ):
     pass

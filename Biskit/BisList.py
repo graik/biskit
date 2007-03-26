@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -25,7 +27,7 @@ organise, sort, and filter collection of dictionaries or similar objects
 S{->} abstract base class (aka interface)
 """
 
-import Numeric as N
+import numpy.oldnumeric as N
 import types
 
 import Biskit.tools as t

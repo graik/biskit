@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2002-2004; Wolfgang Rieping
@@ -32,11 +34,11 @@ Reference::
   PROTEINS: Structure, Function and Genetics 14:249-264 1992
 """
 
-import Numeric as N
+import numpy.oldnumeric as N
 import Biskit.mathUtils as MU
 import tools
 
-from RandomArray import seed, random
+from numpy.oldnumeric.random_array import seed, random
 
 ## def average(x):
 ##     return N.sum(N.array(x)) / len(x)

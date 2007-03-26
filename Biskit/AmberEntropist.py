@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -27,7 +29,7 @@ Run ptraj entropy analysis on Trajectory instance.
 """
 
 import tempfile, os
-import Numeric as N
+import numpy.oldnumeric as N
 import random, time
 
 import Biskit.tools as t
@@ -275,7 +277,7 @@ class AmberEntropist( AmberCrdEntropist ):
                 refModel = refModel.take( ref_i )
                 m_avg    = m_avg.take( i )
 
-                if mask:   mask = N.take( mask, i )
+                if not mask is None:   mask = N.take( mask, i )
 
             r, t = m_avg.transformation( refModel, mask )
             traj.transform( r, t )

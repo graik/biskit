@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -29,7 +31,7 @@ Parallize calculation of pairwise rmsd between the frames of a trajectory.
 from Biskit.PVM import JobSlave
 import Biskit.tools as T
 import Biskit.rmsFit as rmsFit
-import Numeric as N
+import numpy.oldnumeric as N
 from Biskit.LogFile import ErrLog, LogFile
 
 import os, time

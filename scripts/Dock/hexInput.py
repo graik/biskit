@@ -35,7 +35,7 @@ def centerSurfDist( model, surf_mask, mask=None ):
     mask - atoms not to be considerd
     surf_mask - atom surface mask, needed for minimum surface distance
     """
-    if mask == None:
+    if mask is None:
             mask = model.maskHeavy()
 
     ## calculate center of mass

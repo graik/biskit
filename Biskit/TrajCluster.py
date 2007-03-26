@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -25,7 +27,7 @@
 Cluster the members of a trajectory.
 """
 
-import Numeric as N
+import numpy.oldnumeric as N
 import tools as T
 
 from mathUtils import aboveDiagonal, SD
@@ -92,7 +94,7 @@ class TrajCluster:
             aMask = N.ones( self.traj.getRef().lenAtoms() )
 
         if self.fc == None or force or self.fcWeight != weight \
-           or self.n_clusters != n_clusters or self.aMask != aMask \
+           or self.n_clusters != n_clusters or N.any( self.aMask != aMask) \
            or self.fcConverged != converged:
 
             self.n_clusters = n_clusters

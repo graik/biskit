@@ -1,3 +1,5 @@
+## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+
 ## Class conservation
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -29,7 +31,7 @@ Search Hmmer Pfam database and retrieve conservation data.
 import tempfile
 import re, string
 import types, os.path
-import Numeric as N
+import numpy.oldnumeric as N
 import molUtils
 import settings
 
@@ -728,7 +730,7 @@ class Hmmer:
                 j -= 1
             j += 1
 
-        return N.sum(new_fasta), N.sum(new_hmm), del_pos
+        return ''.join(new_fasta), ''.join(new_hmm), del_pos
 
 
     def mergeHmmSeq( self, seq1, seq2 ):
@@ -906,7 +908,7 @@ class Hmmer:
             ## Hmmer profile match scores for sequence
             cons = self.matchScore( fastaSeq, hmmSeq, hmmDic, key )
 
-            if result:
+            if result is not None:
                 result = self.mergeProfiles( result, cons )
             else:
                 result = cons
