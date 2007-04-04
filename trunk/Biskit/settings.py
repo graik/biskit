@@ -81,7 +81,6 @@ except Exception, why:
 ## Create some settings on the fly
 ##
 python_bin = sys.executable
-xterm_bin  = T.absbinary('xterm')
 projectRoot= T.projectRoot()
 
 pymol_scripts = projectRoot + '/external/pymol/'
