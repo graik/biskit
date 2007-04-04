@@ -27,7 +27,7 @@ Manage Master/Slave tasks.
 
 
 from PVMThread import PVMMasterSlave
-import Biskit.settings as settings
+from Biskit import ExeConfigCache
 from Status import Status
 import socket, pvm
 import pypvm
@@ -89,6 +89,10 @@ class JobMaster(PVMMasterSlave):
 
                 unique_list.append(d)
 
+        exe = ExeConfigCache.get('xterm')
+        exe.validate()
+        self.xterm_bin = exe.bin
+        
         self.hosts = unique_list
         self.niceness = niceness
         self.data = data
@@ -123,8 +127,8 @@ class JobMaster(PVMMasterSlave):
         """
         Start slave job
         """
-	assert len(self.hosts) > 0,\
-	       'Master needs at least 1 pvm node to start calculations.'
+        assert len(self.hosts) > 0,\
+               'Master needs at least 1 pvm node to start calculations.'
         self.finished = 0
 
         PVMMasterSlave.start(self)
@@ -194,7 +198,7 @@ class JobMaster(PVMMasterSlave):
         if show_output:
             display = socket.gethostname() + ':0.0'
 
-            command = settings.xterm_bin
+            command = self.xterm_bin
             argv = ['-title', str(host), '-geometry', '30x10',
                     '-display', display, '-e',
                     settings.python_bin, '-i', self.slave_script,
