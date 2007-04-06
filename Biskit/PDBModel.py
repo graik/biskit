@@ -746,6 +746,8 @@ class PDBModel:
     def getAtoms( self, mask=None ):
         """
         Get atom CrossViews that can be used like dictionaries.
+        Note that the direct manipulation of individual profiles is more 
+        efficient than the manipulation of CrossViews (on profiles)!
 
         @param mask: atom mask
         @type  mask: list of int OR array of 1||0
