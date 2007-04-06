@@ -1,6 +1,3 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
-
-##
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -270,7 +267,7 @@ class Test(BT.BiskitTest):
     """Test case"""
 
     def test_ComplexEvolving(self):
-	"""Dock.ComplexEvolving test"""
+        """Dock.ComplexEvolving test"""
         import time
 
         from Biskit.Dock import ComplexEvolving
@@ -278,7 +275,7 @@ class Test(BT.BiskitTest):
         c = t.Load( t.testRoot() + '/com/ref.complex' )
 
         self.ce= ComplexEvolving( c.rec_model, c.lig(), c,
-				  info={'comment':'test'} )
+                                  info={'comment':'test'} )
 
         time.sleep( 2 )
 
@@ -287,17 +284,17 @@ class Test(BT.BiskitTest):
                                     info={'comment':'test2'})
 
         if self.local:
-	    print '\nGenerations: '
+            print '\nGenerations: '
             for x in self.ce2:
                 print x['date']
 
             print 'Comments: ', self.ce2.valuesOf('comment')
              
         self.assertEqual( self.ce2.valuesOf('comment'),
-			  [None, 'test', 'test2'])
+                          [None, 'test', 'test2'])
 
 
 if __name__ == '__main__':
-
+    
     BT.localTest()
    

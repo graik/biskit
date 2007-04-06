@@ -290,7 +290,7 @@ class ComplexModelRegistry:
             if isinstance( model, PDBModel ):
                 f = model.source
 
-	    return f2com[ f ]
+            return f2com[ f ]
 
         except KeyError, why:
             raise RegistryError( "Model with source '%r' is unknown" % f )
@@ -314,19 +314,20 @@ class ComplexModelRegistry:
         """
         ## The problem here is to minimize the calls to PDBModel.validSource()
         ## because 60.000 calls to os.path.exists() would take a lot of time
+        assert isinstance( m, PDBModel )
 
         if isinstance( m.source, LocalPath ):
             f = m.source
         else:
             f = None
 
-        if f != None: ## don't use "if f" because that would call f.__len__
-            if m.xyzChanged or m.atomsChanged:
+        if f is not None: ## don't use "if f" because that would call f.__len__
+            if m.xyzChanged: # or m.atomsChanged:
                 ## don't add it to registry, it will remain a stray model
                 return m, f
 
             found = f2model.get( f, None )
-            if found != None:
+            if found is not None:
                 ## the source has already been checked, we can skip the usual..
                 ## .. exists()
                 return found, f
@@ -365,7 +366,7 @@ class Test(BT.BiskitTest):
     """Test case"""
 
     def test_ComplexModelRegistry(self):
-	"""Dock.ComplexModelRegistry test"""
+        """Dock.ComplexModelRegistry test"""
         from Biskit.Dock import ComplexList
         
         self.cl = T.Load( T.testRoot() +'/dock/hex/complexes.cl' )
@@ -376,9 +377,9 @@ class Test(BT.BiskitTest):
         for c in self.cl[:500]:
             self.r.addComplex( c )
 
-	check = self.r.getLigComplexes( self.r.ligModels()[0] )
+        check = self.r.getLigComplexes( self.r.ligModels()[0] )
 
-	self.assertEqual( len(check), 500 )
+        self.assertEqual( len(check), 500 )
     
 
 if __name__ == '__main__':

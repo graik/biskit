@@ -114,8 +114,8 @@ class ColorSpectrum:
         @return: normalized color
         @rtype: int 
         """
-	if self.vmax == self.vmin:
-	    return self.col_max
+        if self.vmax == self.vmin:
+            return self.col_max
         return (value - self.vmin) / ( self.vmax - self.vmin ) * self.col_max
 
 
@@ -317,18 +317,18 @@ class Test(BT.BiskitTest):
 
             x = (i, i+1 )
             self.p.add( B.FillBelow( x, (1., 1.),
-				     color = c_grey.color( i ) ) )
+                                     color = c_grey.color( i ) ) )
             self.result += [ c_grey.color( i ) ]
             
             self.p.add( B.FillBelow( x, (0.75, 0.75),
-				     color = c_sausage.color( i ) ) )
+                                     color = c_sausage.color( i ) ) )
             self.p.add( B.FillBelow( x, (0.5, 0.5),
-				     color = c_plasma.color( i ) ) )
+                                     color = c_plasma.color( i ) ) )
             self.p.add( B.FillBelow( x, (0.25, 0.25),
-				     color = c_plasma2.color( i ) ) )
+                                     color = c_plasma2.color( i ) ) )
 
 ##             self.p.add( B.FillBelow( x, (0., 0.),
-## 				     color = old_spectrum[i] ))
+##                                   color = old_spectrum[i] ))
 
         self.p.add( B.Curve( (0,100), (1.,1.)) )
         self.p.add( B.Curve( (0,100), (.75,.75)) )

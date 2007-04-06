@@ -206,7 +206,7 @@ class Docker:
             for chain in range( m.lenChains() ):
                 idx = N.nonzero( cMap == chain )
                 for i in idx:
-                    m.atoms[i]['chain_id'] = ids[chain]
+                    m.aProfiles['chain_id'][i] = ids[chain]
 
 
     def prepareHexPdbs( self, modelDic, idList, subDir ):
@@ -551,7 +551,7 @@ class TestCore(BT.BiskitTest):
 
     def dry_or_wet_run( self, run=True ):
         """ """
-	import time, os
+        import time, os
         import os.path
 
         ligDic = t.Load( t.testRoot() + '/multidock/lig/1A19_models.dic' )
@@ -578,14 +578,14 @@ class TestCore(BT.BiskitTest):
         recDic = t.Load( t.testRoot() + '/multidock/rec/1A2P_model.dic' )
 
         self.d = Docker( recDic, ligDic, out=self.out_folder,
-			 verbose=self.local )
+                         verbose=self.local )
 
         # dock rec 1 vs. lig 2 on localhost
         fmac1, fout = self.d.createHexInp( 1, 2 )
         if run:
             self.d.runHex( fmac1, log=1, ncpu=2 )
 
-	    self.d.waitForLastHex()
+            self.d.waitForLastHex()
 
         ## dock receptor 1 vs. ligand one on remote host
         # fmac2, fout2= d.createHexInp( 1, 1 )
@@ -600,17 +600,16 @@ class TestLong(TestCore):
     TAGS = [ BT.EXE, BT.LONG ]
 
     def test_DockerLong(self):
-	"""Dock.Docker real test (20-30min/CPU)"""
-	self.dry_or_wet_run( run=True )
-
+        """Dock.Docker real test (20-30min/CPU)"""
+        self.dry_or_wet_run( run=True )
 
 class TestShort(TestCore):
 
     TAGS = [ BT.EXE ]
 
     def test_DockerShort(self):
-	"""Dock.Docker dry run test"""
-	self.dry_or_wet_run( run=False )
+        """Dock.Docker dry run test"""
+        self.dry_or_wet_run( run=False )
 
 if __name__ == '__main__':
 

@@ -1,5 +1,3 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
-
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -151,7 +149,7 @@ class Ramachandran:
         if self.profileName in m.aProfiles.keys():
             prof = []
             aProfile = m.profile( self.profileName )
-            resIdx =  m.resIndex()
+            resIdx =  m.resIndex().tolist()
             resIdx += [ m.lenAtoms()]
             for i in range(len(resIdx)-1):
                 prof += [ N.average( N.take(aProfile, range(resIdx[i],
@@ -348,16 +346,16 @@ class Test(BT.BiskitTest):
     """Test"""
 
     def test_Ramachandran(self):
-	"""Ramachandran test"""
+        """Ramachandran test"""
         self.traj = T.Load( T.testRoot()+'/lig_pcr_00/traj.dat' )
 
-        self.traj.ref.setAtomProfile('mass', self.traj.ref.masses() ) 
+        self.traj.ref.aProfiles.set('mass', self.traj.ref.masses() ) 
 
         self.mdl = [ self.traj[0], self.traj[11] ]
         self.mdl = [ md.compress( md.maskProtein() ) for md in self.mdl ]
 
         self.rama = Ramachandran( self.mdl , name='test', profileName='mass',
-				  verbose=self.local)
+                                  verbose=self.local)
 
         self.psi = N.array( self.rama.psi )
 
@@ -365,8 +363,8 @@ class Test(BT.BiskitTest):
             self.rama.show()
             
         r = N.sum( N.compress( N.logical_not(N.equal(self.psi, None)),
-			       self.psi ) )
-	self.assertAlmostEqual( r, -11717.909796797909, 2 )
+                               self.psi ) )
+        self.assertAlmostEqual( r, -11717.909796797909, 2 )
 
  
 if __name__ == '__main__':

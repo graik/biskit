@@ -97,7 +97,7 @@ NOLOG"""
         self.f_relativeASA = tempfile.mktemp('_whatif_relative.log')
         self.f_residueASA = tempfile.mktemp('_whatif_residue.log')
 
-        self.model = model.clone( deepcopy=1 )
+        self.model = model.clone()
 
 
     def prepare( self ):
@@ -327,7 +327,7 @@ class Test(BT.BiskitTest):
     TAGS = [ BT.OLD, BT.EXE ]  ## whatif is not officially supported any longer
 
     def test_Whatif(self):
-	"""Whatif test"""
+        """Whatif test"""
 
         from Biskit import PDBModel
 
@@ -349,10 +349,8 @@ class Test(BT.BiskitTest):
             ## check that model hasn't changed
             m_ref = PDBModel(f)
             m_ref = m.compress( m.maskProtein() )
-            for k in m_ref.atoms[0].keys():
-                ref = [ m_ref.atoms[0][k] for i in range( m_ref.lenAtoms() ) ]
-                mod = [ m.atoms[0][k] for i in range( m.lenAtoms() ) ]
-                if not ref == mod:
+            for k in m_ref.aProfiles.keys():
+                if not N.all(m_ref[k] == m[k]):
                     print 'Not equal ', k
                 else:
                     print 'Equal ', k

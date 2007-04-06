@@ -268,15 +268,15 @@ class BisList:
     def valuesOf(self, key, default=None, indices=None, unique=0 ): 
         """
         Get all values assigned to a certain key of all or some
-        items. The result is guaranteed to have the same length as the
-        collection (or the list of given indices). Missing values are
-        replaced by default (None).
+        items. If unique==0, the result is guaranteed to have the same
+        length as the collection (or the list of given
+        indices). Missing values are replaced by default (None).
         
         @param key: key for item attribute
         @type  key: any
         @param default: default value if key is not found (default: None)
         @type  default: any
-        @param indices: list of int OR None(=all), indices (default: None)
+        @param indices: indices defining a subset of this list (default: None)
         @type  indices: list of int OR None
         @param unique: report each value only once (set union), (default 0)
         @type  unique: 1|0

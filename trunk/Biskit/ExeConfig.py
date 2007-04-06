@@ -131,20 +131,21 @@ class ExeConfig( object ):
         @raise ExeConfigError: if strict==1 and config file incomplete/missing
         """
         self.name = name    #: identifier
-	#: path to configuration file
+        #: path to configuration file
         self.dat  = os.path.join( self.PATH_CONF, 'exe_%s.dat' % name )
 
         if not os.path.exists( self.dat ):
             self.dat = os.path.join( self.PATH_CONF_DEFAULT,'exe_%s.dat'%name )
 
-	#: True if a configuration file was found
-	self.dat_found =  os.path.exists( self.dat )
+        #: True if a configuration file was found
+        self.dat_found =  os.path.exists( self.dat )
 
         self.strict = strict
 
         self.env_checked = 0 ## environment was verified
 
-	if strict and not self.dat_found:
+        if strict and not self.dat_found:
+
             raise ExeConfigError,\
                   'Could not find configuration file %s for program %s.'\
                   % (self.dat, self.name)

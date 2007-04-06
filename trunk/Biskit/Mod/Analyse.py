@@ -504,10 +504,11 @@ class Analyse:
         file.write("\n%s\n"%('='*70))
 
         ## write rmsd residue profiles
-        resDic = model.compress( model.maskCA()).atoms
+        res_nr = model.compress( model.maskCA()).aProfiles['residue_number']
+        res_na = model.compress( model.maskCA()).aProfiles['residue_name']        
         for i in range(len(templates_profiles[templates[0]]["rProfile"])):
-            file.write("%3i %3s"%(resDic[i]['residue_number'],
-                                  resDic[i]['residue_name']))
+            file.write("%3i %3s"%(res_nr[i],
+                                  res_na[i]))
             for k in templates_profiles:
                 file.write("%6.2f"%(templates_profiles[k]["rProfile"][i]))
 
@@ -534,8 +535,7 @@ class Analyse:
         @param model: target's model with the highest modeller score
         @type  model: PDBModel
         """
-        for a,v in zip(model.atoms, mean_rmsd_atoms):
-            a['temperature_factor'] = v
+        model['temperature_factor'] = v
 
         model.writePdb(self.outFolder + self.F_FINAL_PDB)       
 
@@ -607,7 +607,7 @@ class Test( BT.BiskitTest ):
     def prepare(self):
         import tempfile
         import shutil
-	
+
         ## collect the input files needed
         self.outfolder = tempfile.mkdtemp( '_test_Analyse' )
 
@@ -646,7 +646,7 @@ class Test( BT.BiskitTest ):
 
         if self.local and self.DEBUG:
             self.log.add(
-		'The result from the analysis is in %s/analyse'%self.outfolder)
+                'The result from the analysis is in %s/analyse'%self.outfolder)
             
     def cleanUp(self):
         T.tryRemove( self.outfolder, tree=1 )
@@ -662,13 +662,13 @@ class ProjectAnalyzeTest( BT.BiskitTest ):
         """
         Mod.Analyze full test/Mod/project test
         """
-	self.outfolder = T.testRoot() + '/Mod/project'
+        self.outfolder = T.testRoot() + '/Mod/project'
 
-	self.a = Analyse( outFolder = self.outfolder )
-	self.a.go()
+        self.a = Analyse( outFolder = self.outfolder )
+        self.a.go()
 
-	if self.local:
-	    print 'The result from the analysis can be found in %s/analyse'%outfolder
+        if self.local:
+            print 'The result from the analysis can be found in %s/analyse'%outfolder
 
 if __name__ == '__main__':
 

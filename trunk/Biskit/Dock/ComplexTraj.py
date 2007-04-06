@@ -337,24 +337,26 @@ class Test(BT.BiskitTest):
     TAGS = [ BT.LONG ]
 
     def test_ComplexTraj(self):
-	"""Dock.ComplexTraj test"""
+        """Dock.ComplexTraj test"""
 
         import Biskit.tools as T
 
-        ## there is no complex trajectori in the test folder so will have
+        ## there is no complex trajectory in the test folder so will have
         ## to create a fake trajectory with a complex
         f =  [ T.testRoot()+ '/com/1BGS.pdb' ] * 5
         t = Trajectory( f, verbose=self.local )
 
         t = ComplexTraj( t, recChains=[0] )
 
-## 	if self.local:
-## 	    print 'plotting contact density...'
-## 	    t.plotContactDensity( step=2 )
+        #if self.local:
+            #print 'plotting contact density...'
+            #t.plotContactDensity( step=2 )
 
+        ## create a fake second chain in the ligand
         for i in range( 1093+98, 1968 ):
-            t.ref.atoms[i]['chain_id'] = 'B'
+            t.ref.aProfiles['chain_id'][i] = 'B'
 
+        t.ref.chainIndex( force=1, cache=1 )
         t.cl = [1,2]
 
         r = N.concatenate((range(1093,1191), range(0,1093), range(1191,1968)))
@@ -370,4 +372,27 @@ class Test(BT.BiskitTest):
 
 if __name__ == '__main__':
 
+    #import Biskit.tools as T
+
+    ### there is no complex trajectory in the test folder so will have
+    ### to create a fake trajectory with a complex
+    #f =  [ T.testRoot()+ '/com/1BGS.pdb' ] * 5
+    #t = Trajectory( f, verbose=1 )
+
+    #t = ComplexTraj( t, recChains=[0] )
+
+    ##if self.local:
+        ##print 'plotting contact density...'
+        ##t.plotContactDensity( step=2 )
+
+    ##for i in range( 1093+98, 1968 ):
+    #t.ref.aProfiles['chain_id'][1093+98:1968] = 'B'
+    #t.ref.chainIndex( force=1, cache=1 )
+    #t.cl = [1,2]
+
+    #r = N.concatenate((range(1093,1191), range(0,1093), range(1191,1968)))
+
+    #tt = t.takeAtoms( r )
+
+    #contactMat = tt.atomContacts( 1 )
     BT.localTest()

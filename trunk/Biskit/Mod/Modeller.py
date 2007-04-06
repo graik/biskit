@@ -69,7 +69,7 @@ SET ALNFILE  = '%(f_pir)s'            # alignment filename
 SET KNOWNS   = %(template_ids)s  
 SET SEQUENCE = '%(target_id)s'        # code of the target
 SET ATOM_FILES_DIRECTORY = '%(template_folder)s'# directories for input atom files
-SET STARTING_MODEL= %(starting_model)i 	# index of the first model 
+SET STARTING_MODEL= %(starting_model)i  # index of the first model 
 SET ENDING_MODEL  = %(ending_model)i    # index of the last model
                                    #(determines how many models to calculate)
 
@@ -144,7 +144,7 @@ CALL ROUTINE = 'model'             # do homology modelling
                     starting_model=1, ending_model=10 ):
         """
         Create a input (.top) file for Modeller. An existing modeller.top file will NOT be
-	overidden to allow manual intervention.
+        overidden to allow manual intervention.
         See L{MODELLER_TEMPLATE}.
         
         @param f_pir: PIR alignment file
@@ -177,15 +177,15 @@ CALL ROUTINE = 'model'             # do homology modelling
 
         fout = fout or self.outFolder + self.F_INP
 
-	if os.path.exists( fout ):
-	    self.logWrite('Warning: Using EXISTING modeller input file %s' % fout)
-	    return
+        if os.path.exists( fout ):
+            self.logWrite('Warning: Using EXISTING modeller input file %s' % fout)
+            return
 
-        result = self.MODELLER_TEMPLATE % params
+	result = self.MODELLER_TEMPLATE % params
 
         try:
-	    if self.verbose:
-		self.logWrite('Creating modeller input file %s' % fout)
+            if self.verbose:
+                self.logWrite('Creating modeller input file %s' % fout)
 
             open( fout, 'w').write( result )
         except IOError, why:
@@ -354,15 +354,15 @@ CALL ROUTINE = 'model'             # do homology modelling
             if host:
                 cmd = "ssh %s '%s'" % (host, cmd)
 
-	    if self.verbose:
-		self.logWrite( 'Running Modeller. .. ')
-		self.logWrite( cmd )
+            if self.verbose:
+                self.logWrite( 'Running Modeller. .. ')
+                self.logWrite( cmd )
 
             sp = subprocess.Popen(cmd, shell=True, env=os.environ)
             sp.wait()
 
-	    if self.verbose:
-		self.logWrite( '..done')
+            if self.verbose:
+                self.logWrite( '..done')
 
         except EnvironmentError, why:
             self.logWrite("ERROR: Can't run Modeller: "+ str( why ) )
@@ -452,7 +452,7 @@ CALL ROUTINE = 'model'             # do homology modelling
 
         for model in pdb_list:
 
-            model.setResProfile("n_templates", template_info,
+            model.rProfiles.set("n_templates", template_info,
                                 comment="number of templates for each residue")
 
         rmask = pdb_list[0].profile2mask("n_templates", 1,1000)
@@ -461,8 +461,9 @@ CALL ROUTINE = 'model'             # do homology modelling
 
         for i in range(len(pdb_list)):
 
-            for a,v in zip(pdb_list[i].atoms, amask):
-                a['occupancy'] = v
+            pdb_list[i]['occupancy'] = amask
+            #for a,v in zip(pdb_list[i].atoms, amask):
+                #a['occupancy'] = v
 
             t = []
 
@@ -487,10 +488,10 @@ CALL ROUTINE = 'model'             # do homology modelling
 
             m = model.compress( model.maskCA())
 
-            atoms = DictList( m.atoms )
-            prof = atoms.valuesOf( "temperature_factor")
+            #atoms = DictList( m.atoms )
+            #prof = atoms.valuesOf( "temperature_factor")
 
-            model.setResProfile('mod_score', prof)
+            model.rProfiles.set('mod_score', m['temperature_factor'])
 
 
 
@@ -572,7 +573,7 @@ class TestBase(BT.BiskitTest):
 
         shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
                      self.outfolder  )
-	
+        
 
     def runmodeller( self, run=0 ):
         """
@@ -585,26 +586,26 @@ class TestBase(BT.BiskitTest):
         self.m.prepare_modeller( )
 
         if run:
+
             self.m.go()
             self.m.postProcess()
 
-	    if self.DEBUG and self.VERBOSITY > 2:
-		self.log.add('The modelling result id in %s/modeller'\
-			     %self.outfolder)
+            if self.DEBUG and self.VERBOSITY > 2:
+                self.log.add('The modelling result id in %s/modeller'\
+                             %self.outfolder)
 
-	    result = T.Load( self.outfolder + '/modeller/PDBModels.list' )
-	    self.assertEqual( len(result), 10 )
+            result = T.Load( self.outfolder + '/modeller/PDBModels.list' )
+            self.assertEqual( len(result), 10 )
 
     def cleanUp(self):
         T.tryRemove( self.outfolder, tree=1 )
-
 
 class TestDry( TestBase ):
     """Incomplete test case without running Modeller"""
 
     def test_modeller(self):
-	"""Mod.Modeller dry run"""
-	self.runmodeller(run=0)
+        """Mod.Modeller dry run"""
+        self.runmodeller(run=0)
 
 class Test( TestBase ):
     """Complete test case running modeller"""
@@ -612,8 +613,8 @@ class Test( TestBase ):
     TAGS = [BT.EXE, BT.LONG]
 
     def test_modeller(self):
-	"""Mod.Modeller complete test (ignore the 'import site' error!)"""
-	self.runmodeller(run=1)
+        """Mod.Modeller complete test (ignore the 'import site' error!)"""
+        self.runmodeller(run=1)
 
 
 if __name__ == '__main__':

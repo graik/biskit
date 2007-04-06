@@ -1,5 +1,3 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
-
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -846,7 +844,7 @@ class Complex:
         ## get pair-wise distances -> atoms_rec x atoms_lig
         dist = getattr( self, 'pw_dist', None )
         if dist is None or \
-	       N.shape( dist ) != ( N.sum(rec_mask), N.sum(lig_mask) ):
+               N.shape( dist ) != ( N.sum(rec_mask), N.sum(lig_mask) ):
             dist = self.__pairwiseDistances(N.compress( rec_mask, rec_xyz, 0),
                                             N.compress( lig_mask, lig_xyz, 0) )
         if cache:
@@ -1070,10 +1068,10 @@ class Complex:
                           rather than the value (both absolute and relative
                           values are returned)
         @type  profiles: 1|0 (default: 0)
-	@param log: log file [STDOUT]
-	@type  log: Biskit.LogFile
-	@param verbose: give progress report [1]
-	@type  verbose: bool | int
+        @param log: log file [STDOUT]
+        @type  log: Biskit.LogFile
+        @param verbose: give progress report [1]
+        @type  verbose: bool | int
 
         @return: AS area, MS area OR
                  a dictionary of lig, rec and com profiles
@@ -1175,11 +1173,11 @@ class Complex:
         rec, lig = self.rec_model, self.lig_model
 
         ## add/update lig/rec fold-X energies if necessary
-        if not 'foldX' in rec.info or rec.isChanged()[0] or force:
+        if not 'foldX' in rec.info or rec.xyzChanged or force:
             d = PDBDope( rec )
             d.addFoldX()
 
-        if not 'foldX' in lig.info or lig.isChanged()[0] or force:
+        if not 'foldX' in lig.info or lig.xyzChanged or force:
             d = PDBDope( lig )
             d.addFoldX()
             try:
@@ -1205,7 +1203,7 @@ class Complex:
 
 
     def conservationScore( self, cons_type='cons_ent', ranNr=150,
-			   log=StdLog(), verbose=1 ):
+                           log=StdLog(), verbose=1 ):
         """
         Score of conserved residue pairs in the interaction surface.
         Optionally, normalized by radom surface contacts.
@@ -1215,27 +1213,27 @@ class Complex:
         @type  cons_type: str
         @param ranNr: number of random matricies to use (default: 150)
         @type  ranNr: int
-	@param log: log file [STDOUT]
-	@type  log: Biskit.LogFile
-	@param verbose: give progress report [1]
-	@type  verbose: bool | int
+        @param log: log file [STDOUT]
+        @type  log: Biskit.LogFile
+        @param verbose: give progress report [1]
+        @type  verbose: bool | int
 
         @return: conservation score
         @rtype: float
         """
         try:
-            recCons = self.rec().profile( cons_type, lookHarder=1 )
+            recCons = self.rec().profile( cons_type, updateMissing=1 )
         except:
             if verbose:
                 log.add('\n'+'*'*30+'\nNO HHM PROFILE FOR RECEPTOR\n'+\
                         '*'*30+'\n')
             recCons = N.ones( self.rec().lenResidues() )
         try:
-            ligCons = self.lig().profile( cons_type, lookHarder=1 )
+            ligCons = self.lig().profile( cons_type, updateMissing=1 )
         except:
             if verbose:
                 log.add(\
-		            '\n'+'*'*30+'\nNO HHM PROFILE FOR LIGAND\n'+'*'*30+'\n')
+                            '\n'+'*'*30+'\nNO HHM PROFILE FOR LIGAND\n'+'*'*30+'\n')
             ligCons = N.ones( self.lig().lenResidues() )
 
         if self.rec().profile( 'surfMask' ):
@@ -1262,8 +1260,8 @@ class Complex:
 
         # get a random score
         if ranNr != 0:
-	    if self.verbose:
-		self.log.write('.')
+            if self.verbose:
+                self.log.write('.')
             ranMat =  mathUtils.random2DArray( cont, ranNr, mask=surfMask )
             random_score = N.sum(N.sum( ranMat * consMat ))/( ranNr*1.0 )
             return N.sum(N.sum(score))/random_score
@@ -1409,7 +1407,7 @@ class Test(BT.BiskitTest):
     """Test case"""
 
     def test_Complex(self):
-	"""Dock.Complex test"""
+        """Dock.Complex test"""
 
         lig = PCRModel( t.testRoot() + "/com/1BGS.psf",
                         t.testRoot() + "/com/lig.model")
@@ -1473,7 +1471,7 @@ class Test(BT.BiskitTest):
             globals().update( locals() )
 
         self.assertEqual( N.sum(contProfile_lig) + N.sum(contProfile_rec),
-			  2462 )
+                          2462 )
    
 
 if __name__ == '__main__':

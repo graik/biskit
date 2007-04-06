@@ -81,20 +81,32 @@ class Analyzer:
         bnd_rec = bnd_rec.sort()
         bnd_lig = bnd_lig.sort()
 
-        m_bnd_rec, m_t_rec = bnd_rec.equalAtoms( self.t_rec.getRef() )
-        m_bnd_lig, m_t_lig = bnd_lig.equalAtoms( self.t_lig.getRef() )
+        #m_bnd_rec, m_t_rec = bnd_rec.equalAtoms( self.t_rec.getRef() )
+        #m_bnd_lig, m_t_lig = bnd_lig.equalAtoms( self.t_lig.getRef() )
 
-        self.t_rec.removeAtoms( N.logical_not( m_t_rec ) )
-        self.t_lig.removeAtoms( N.logical_not( m_t_lig ) )
+        i_bnd_rec, i_t_rec = bnd_rec.compareAtoms( self.t_rec.getRef() )
+        i_bnd_lig, i_t_lig = bnd_lig.compareAtoms( self.t_lig.getRef() )
 
-        self.mask_free_lig = m_t_lig
-        self.mask_free_rec = m_t_rec
+        #self.t_rec.removeAtoms( N.logical_not( m_t_rec ) )
+        #self.t_lig.removeAtoms( N.logical_not( m_t_lig ) )
 
-        bnd_rec.remove( N.logical_not( m_bnd_rec ) )
-        bnd_lig.remove( N.logical_not( m_bnd_lig ) )
+        self.t_rec = self.t_rec.takeAtoms( i_t_rec )
+        self.t_lig = self.t_lig.takeAtoms( i_t_lig )
 
-        self.mask_bnd_rec = m_bnd_rec
-        self.mask_bnd_lig = m_bnd_lig
+        #self.mask_free_lig = m_t_lig
+        #self.mask_free_rec = m_t_rec
+        self.i_free_lig = i_t_lig
+        self.i_free_rec = i_t_rec
+
+        #bnd_rec.remove( N.logical_not( m_bnd_rec ) )
+        #bnd_lig.remove( N.logical_not( m_bnd_lig ) )
+        bnd_rec = bnd_rec.take( i_bnd_rec )
+        bnd_lig = bnd_lig.take( i_bnd_lig )
+
+        #self.mask_bnd_rec = m_bnd_rec
+        #self.mask_bnd_lig = m_bnd_lig
+        self.i_bnd_rec = i_bnd_rec
+        self.i_bnd_lig = i_bnd_lig
 
         ## put 'equalized' models back into ref complex
         self.com.rec_model = bnd_rec
@@ -160,8 +172,8 @@ class Analyzer:
                     com.rec_model = com.rec_model.sort()
                     com.lig_model = com.lig_model.sort()
 
-                    com.rec_model.remove( N.logical_not(self.mask_free_rec) )
-                    com.lig_model.remove( N.logical_not(self.mask_free_lig) )
+                    com.rec_model.keep( self.i_free_rec )
+                    com.lig_model.keep( self.i_free_lig )
                     com.lig_transformed = None
 
                     self.hexContacts += [ com.atomContacts() ]
@@ -322,7 +334,7 @@ class Test(BT.BiskitTest):
     
     def prepare(self):
         import tempfile
-	self.f_out = tempfile.mktemp( '_test_rec.traj' )
+        self.f_out = tempfile.mktemp( '_test_rec.traj' )
 
     def cleanUp(self):
         t.tryRemove( self.f_out )
@@ -334,16 +346,16 @@ class Test(BT.BiskitTest):
 
         ## create a minimal 1-frame receptor trajectory from a pdb file
         self.t_rec = Trajectory( [t.testRoot()+'/rec/1A2P.pdb'],
-				 verbose=self.local)
+                                 verbose=self.local)
         t.Dump( self.t_rec, self.f_out )
 
         ## load a complex list
         cl = t.Load( t.testRoot() + '/dock/hex/complexes.cl')
 
         self.a= Analyzer( rec = self.f_out,
-			  lig = t.testRoot()+'/lig_pcr_00/traj.dat',
-			  ref = t.testRoot()+'/com/ref.complex',
-			  verbose = self.local)
+                          lig = t.testRoot()+'/lig_pcr_00/traj.dat',
+                          ref = t.testRoot()+'/com/ref.complex',
+                          verbose = self.local)
 
         ## shuffle this list five times
         shuff_lst = self.a.shuffledLists( 5, range(8) )

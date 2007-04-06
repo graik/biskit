@@ -245,8 +245,8 @@ class AmberParmBuilder:
         for i in range( len( pw ) ):
             for j in range( i+1, len(pw) ):
                 if pw[i,j]:
-                    r += [ (m.atoms[i]['residue_number'],
-                            m.atoms[j]['residue_number']) ]
+                    r += [ (m.aProfiles['residue_number'][i],
+                            m.aProfiles['residue_number'][j]) ]
         return r
 
 
@@ -263,7 +263,7 @@ class AmberParmBuilder:
         for a,b in ss_residues:
             ss += [a,b]
 
-        for a in model.atoms:
+        for a in model:
             if a['residue_number'] in ss:
                 a['residue_name'] = 'CYX'
 
@@ -293,13 +293,13 @@ class AmberParmBuilder:
             m_ace.remove( ['CB'] )
 
         ## rename overhanging residue in cap PDB
-        for a in m_ace.atoms:
+        for a in m_ace:
             if a['residue_name'] != 'ACE':
-                a['residue_name'] = m_term.atoms[0]['residue_name']
+                a['residue_name'] = m_term.aProfiles['residue_name'][0]
             else:
-                a['residue_number'] = m_term.atoms[0]['residue_number']-1
-                a['chain_id']       = m_term.atoms[0]['chain_id']
-                a['segment_id']     = m_term.atoms[0]['segment_id']
+                a['residue_number'] = m_term.aProfiles['residue_number'][0]-1
+                a['chain_id']       = m_term.aProfiles['chain_id'][0]
+                a['segment_id']     = m_term.aProfiles['segment_id'][0]
 
         ## fit cap onto first residue of chain
         m_ace = m_ace.magicFit( m_term )
@@ -331,13 +331,13 @@ class AmberParmBuilder:
         m_term  = m_chain.resModels()[-1]
 
         ## rename overhanging residue in cap PDB, renumber cap residue
-        for a in m_nme.atoms:
+        for a in m_nme:
             if a['residue_name'] != 'NME':
-                a['residue_name'] = m_term.atoms[0]['residue_name']
+                a['residue_name'] = m_term.aProfiles['residue_name'][0]
             else:
-                a['residue_number'] = m_term.atoms[0]['residue_number']+1
-                a['chain_id']       = m_term.atoms[0]['chain_id']
-                a['segment_id']     = m_term.atoms[0]['segment_id']
+                a['residue_number'] = m_term.aProfiles['residue_number'][0]+1
+                a['chain_id']       = m_term.aProfiles['chain_id'][0]
+                a['segment_id']     = m_term.aProfiles['segment_id'][0]
 
         ## chain should not have any terminal O after capping
         m_chain.remove( ['OXT'] )            
@@ -503,7 +503,7 @@ class AmberParmBuilder:
 
         s = []
         for i in i_atoms:
-            res = m.atoms[i]['residue_number']
+            res = m.aProfiles['residue_number'][i]
             ## substract atom index of first atom in of this residue
             atm = i - rI[ rM[ i ] ] + 1  
             s += [ cmd % {'res':res, 'atom':atm} ]

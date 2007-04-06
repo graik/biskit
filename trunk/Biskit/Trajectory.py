@@ -424,7 +424,7 @@ class Trajectory:
         Get atom mask.
         
         @param what: Create the mask using::
-                      - funct( self.ref.atoms[i] ) -> int
+                      - funct( self.ref.aProfiles[i] ) -> int
                       - list int ( indices )
                       - mask
                       - list of str (atom names)
@@ -1102,10 +1102,10 @@ class Trajectory:
             rchainMap = N.take( self.chainMap(), self.resIndex() )
 
         if left_allowed  is None: left_allowed = N.nonzero( self.ref.maskBB() )
-	if right_allowed is None: right_allowed= N.nonzero( self.ref.maskBB() )
+        if right_allowed is None: right_allowed= N.nonzero( self.ref.maskBB() )
 
         ## atom indices of center residue
-        result = self.ref.res2atomIndices( [ res ] )
+        result = self.ref.res2atomIndices( [ res ] ).tolist()
 
         ## get indices of neighbore residues that still belong to same chain
         l = self.ref.lenResidues()
@@ -1598,7 +1598,7 @@ class Test(BT.BiskitTest):
 
 
     def test_Trajectory(self):
-	"""Trajectory test"""
+        """Trajectory test"""
 ##         f = T.testRoot() + '/lig_pc2_00/pdb/'
 ##         allfiles = os.listdir( f )
 ##         pdbs = []
@@ -1623,18 +1623,17 @@ class Test(BT.BiskitTest):
 
         ## remove waters
         self.traj = self.traj.compressAtoms(
-	    N.logical_not( self.traj.ref.maskH2O()) )
+            N.logical_not( self.traj.ref.maskH2O()) )
 
         ## get fluctuation on a residue level
         r1 = self.traj.getFluct_local( verbose=self.local )
 
         ## fit backbone of frames to reference structure
         self.traj.fit( ref=self.traj.ref,
-		       mask=self.traj.ref.maskBB(), verbose=self.local )
+                       mask=self.traj.ref.maskBB(), verbose=self.local )
         
         self.assertAlmostEqual( N.sum( self.traj.profile('rms') ),
-				58.101235746353879, 2 )
-
+                                58.101235746353879, 2 )
 
 
 if __name__ == '__main__':

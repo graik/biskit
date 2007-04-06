@@ -116,7 +116,7 @@ class Fold_X( Executor ):
                            %(self.temp_pdb, self.temp_option,
                              self.temp_command), **kw )
 
-        self.model = model.clone( deepcopy=1 )
+        self.model = model.clone()
 
         ## fold-X-allowed atoms for each res in standard order
         self.aminoAcidDict = molUtils.aaAtoms
@@ -162,7 +162,7 @@ class Fold_X( Executor ):
                 raise Fold_XError( s )
 
         ## make a copy
- #       model = model.take( range(model.lenAtoms()), deepcopy=1  )
+ #       model = model.take( range(model.lenAtoms()) )
  
         ## mask for all heavy atoms, H and H3
         heavy_mask = model.maskHeavy()
@@ -310,7 +310,8 @@ class Test(BT.BiskitTest):
         if self.local:
             print "Result: ", self.r
 
-	self.assertEqual(self.r, self.EXPECTED)
+        for k, v in self.r.items():
+            self.assertAlmostEqual( v, self.EXPECTED[k], 6 )
 
 
     EXPECTED = {'el': -13.766400000000001, 'wtbr': -4.8059700000000003, 'ene': -18.475000000000001, 'mc': 160.28800000000001, 'sloop': 0.0, 'dip': 0.00177626, 'sol_p': 167.71100000000001, 'disu': 0.0, 'tcl': 0.72696700000000003, 'cis': 0.0, 'p_cov': 0.0, 'sol_h': -134.613, 'bb_hb': -87.362499999999997, 'sc_hb': -48.350000000000001, 'vw': -116.67100000000001, 'sc': 58.089300000000001, 'el_kon': 0.0, 'mloop': 0.0, 'vwcl': 0.27728599999999998, 'bbcl': 0.37019200000000002}

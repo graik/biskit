@@ -488,7 +488,7 @@ class EnsembleTraj( Trajectory ):
                 if maxV is None or maxV < max( p ):
                     maxV = max(p)
 
-                page[i/2, i%2].add( biggles.Curve( range( len(p) ), p,
+                page[i/2, i%2].add( biggles.Curve( range( len(p) ), list(p),
                                                    color=colors[j], **arg ) )
 
                 page[i/2, i%2].add( biggles.PlotLabel( 0.8, 0.8-j/8.0, name[j],
@@ -635,8 +635,8 @@ class Test(BT.BiskitTest):
     """EnsembleTraj test"""
 
     def prepare(self):
-	self.tr = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat')
-		
+        self.tr = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat')
+                
     def test_EnsembleTraj( self ):
         """EnsembleTraj.fit/fitMembers/plotMembers test """
         ## The second part of the test will fail with the slimmed
@@ -662,30 +662,30 @@ class Test(BT.BiskitTest):
 
         self.p = self.tr.plotMemberProfiles( 'rms_CA_av', 'rms_CA_0',
                                         'rms_CA_ref', xlabel='frame' )
-	if self.local or self.VERBOSITY > 2:
-	    self.p.show()
+        if self.local or self.VERBOSITY > 2:
+            self.p.show()
 
         self.assertAlmostEqual( 26.19851,
-				 N.sum( self.tr.profile('rms_CA_av') ), 2 )
+                                 N.sum( self.tr.profile('rms_CA_av') ), 2 )
 
     def test_outliers(self, traj=None):
-	"""EnsembleTraj.outliers/concat test"""
+        """EnsembleTraj.outliers/concat test"""
 
-	self.t2 = self.tr.concat( self.tr )
+        self.t2 = self.tr.concat( self.tr )
 
-	self.o = self.t2.outliers( z=1.2, mask=self.tr.ref.maskCA(),
-			      verbose=self.local )
-	if self.local:
-	    print self.o
+        self.o = self.t2.outliers( z=1.2, mask=self.tr.ref.maskCA(),
+                              verbose=self.local )
+        if self.local:
+            print self.o
 
-	self.t = self.t2.compressMembers( N.logical_not( self.o ) )
+        self.t = self.t2.compressMembers( N.logical_not( self.o ) )
 
-	self.p2 = self.t.plotMemberProfiles( 'rms', xlabel='frame' )
+        self.p2 = self.t.plotMemberProfiles( 'rms', xlabel='frame' )
 
-	if self.local or self.VERBOSITY > 2:
-	    self.p2.show()
+        if self.local or self.VERBOSITY > 2:
+            self.p2.show()
 
-	self.assertEqual( self.o, 10 * [False] )
+        self.assertEqual( self.o, 10 * [False] )
 
 
 if __name__ == '__main__':

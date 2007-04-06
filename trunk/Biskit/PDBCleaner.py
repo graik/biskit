@@ -285,7 +285,7 @@ class Test(BT.BiskitTest):
     """Test class """
 
     def prepare(self):
-	from Biskit.LogFile import LogFile
+        from Biskit.LogFile import LogFile
         import tempfile
 
         self.f_out = tempfile.mktemp( '_test_PDBCleaner' )
@@ -298,14 +298,14 @@ class Test(BT.BiskitTest):
         
         ## Loading PDB...
         self.c = PDBCleaner( t.testRoot() + '/rec/1A2P_rec_original.pdb',
-			     log=self.l )
+                             log=self.l )
         
         self.m = self.c.process()
 
         if self.local:
             print 'PDBCleaner log file written to: %s'%self.f_out
 
-	self.assertAlmostEqual( N.sum( self.m.masses()), 34029.0115499993, 7 )
+        self.assertAlmostEqual( N.sum( self.m.masses()), 34029.0115499993, 7 )
 
     def cleanUp(self):
         t.tryRemove( self.f_out )    

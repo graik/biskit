@@ -204,15 +204,15 @@ nsAtoms={
 
 nsAtoms['NAP'] = nsAtoms['NDP'].remove('H26')
 
-## map AA and NS and some other residue names to single letter code
+#: map AA and NS and some other residue names to single letter code
 resDic = copy.copy( aaDic )
 resDic.update( nsDicStandard )
 
-## map AA and NS residue names to list of allowed heavy atoms
+#: map AA and NS residue names to list of allowed heavy atoms
 atomDic = copy.copy( aaAtoms )
 atomDic.update( nsAtoms )
 
-## some common synonyms of atom names
+#: some common synonyms of atom names
 atomSynonyms = { "O'":'O', 'OT1':'O', "O''":'OXT', 'OT2':'OXT',
                  'O1':'O', 'O2':'OXT',
                  'CD':'CD1'}
@@ -361,8 +361,9 @@ mu           = 1.66056e-27    ## atomic mass unit in [kg]
 angstroem    = 1e-10          ## [m]
 calorie      = 4.184          ## [J]
 
+#: dictionary with relative atomic mass of elements {'H':1.01, 'ZN':65.39, ...}
 atomMasses = { 'H':1.00797, 'C':12.01115, 'N':14.0067,
-               'S':32.064,  'O':15.9994,  'P':30.9738 }
+               'S':32.064,  'O':15.9994,  'P':30.9738, 'ZN': 65.39 }
 
 def allAACodes():
     """
@@ -493,97 +494,15 @@ def single2longAA( seq ):
     return result
 
 
-def positionByDescription( model, descr, report=0 ):
-    """
-    @note: Obsolete: use PDBModel.filter instead. 
-
-    Find the position of an atom(s) in the atom dictioanry by
-    description. If the description matches more than one atom
-    a list of matching positions is returned.
-
-    Example atom dictioary (valid keys)::
-      {'name': 'OG1', 'residue_number': 20, 'insertion_code': '',
-       'alternate': '', 'name_original': ' OG1',
-       'temperature_factor': 23.640000000000001, 'occupancy': 1.0,
-       'element': 'O', 'segment_id': 'RECA', 'charge': '',
-       'residue_name': 'THR', 'serial_number': 201, 'type': 'ATOM',
-       'chain_id': ''}
-
-    @param descr: dictionary with keys from the atom dictionary
-    @type  descr: dict
-    @param report: write a message to stdOut
-    @type  report: 1|0
-
-    @return: int or list of matching positions
-    @rtype: 
-    """
-    posLst = []
-
-    ## check that all keys are valid
-    for k in descr.keys():
-        if not k in model.atoms[0].keys():
-            EHandler.warning("Key:%s not in atom dictionary"%str(k) )
-
-    ## find all occurances of all keys
-    for k in descr.keys():
-        lst = [ a[k] for a in model.atoms ]
-
-        ## make sure that its possible ot itterate over value
-        if type( descr[k] ) != types.ListType:
-            values = [ descr[k] ]
-        else:
-            values = descr[k]
-
-        ## itterate over valuse of each keay, collect positions
-        i = 0
-        for v in values:
-            ## how many matches
-            try:
-                n = lst.count( v )
-            except:
-                EHandler.warning("Key %s doesn't contain value %s"%\
-                                     (str(k), str(v) ) )
-            ## collect positions
-            for x in range(n):
-                posLst += [ lst.index( v ) + i ]
-                lst.remove( v )
-                i += 1
-
-    ## identify postions common to all keys
-    nr_identifiers = len( descr.keys() )
-    positions = []
-    for v in posLst:
-        if posLst.count(v) == nr_identifiers:
-            positions += [v]
-            posLst.remove( v )
-
-    if report:
-        print 'pos serial_nr  segID  chainID  residue  atom'
-        for p in positions:
-            atomDic = model.atoms[p]
-            print '%4i %6i      %4s    %1s     %4i %3s  %4s '\
-                  %( p,
-                     atomDic['serial_number'],
-                     atomDic['segment_id'],
-                     atomDic['chain_id'],
-                     atomDic['residue_number'],
-                     atomDic['residue_name'],
-                     atomDic['name'] )
-
-    if len(positions) ==1:
-        return positions[0]
-    return  positions
-
-
 def cmpAtoms( a1, a2 ):
     """
     Comparison function for bringing atoms into standard order
     within residues as defined by L{atomDic}.
     
     @param a1: atom dictionary
-    @type  a1: PDBModel.atoms
+    @type  a1: CrossView or equivalent dictionary
     @param a2: atom dictionary
-    @type  a2: PDBModel.atoms
+    @type  a2: CrossView or equivalent dictionary
     
     @return: int or list of matching positions
     @rtype: [-1|0|1]   
@@ -613,7 +532,7 @@ def sortAtomsOfModel( model ):
     @rtype: PDBModel
     """
     ## make a copy
-    model = model.take( range(model.lenAtoms()), deepcopy=1  )
+    model = model.take( model.atomRange() )
 
     ## sort atoms
     model = model.sort( model.argsort( cmpAtoms ) )
@@ -634,7 +553,7 @@ class Test(BT.BiskitTest):
         """molUtils test"""
         from Biskit import PDBModel
 
-	S = self
+        S = self
         
         ## load a structure
         S.m = PDBModel( t.testRoot()+'/lig/1A19.pdb' )
@@ -645,8 +564,8 @@ class Test(BT.BiskitTest):
 
         ## compare the atom order
         cmp = []
-        for a in range( S.model_1.lenAtoms() ):
-            cmp += [ cmpAtoms( S.model_1.atoms[a], S.model_2.atoms[a] )]
+        for a in S.model_1.atomRange():
+            cmp += [ cmpAtoms( S.model_1.aProfiles[a], S.model_2.aProfiles[a] )]
 
         self.assertEqual( N.sum(cmp), 159 )
 
@@ -659,7 +578,7 @@ class Test(BT.BiskitTest):
         ## convert it to a list in one letter code
         S.seq=singleAA(S.seq)
 
-	self.assertEqual( ''.join(S.seq), S.model_1.sequence() )
+        self.assertEqual( ''.join(S.seq), S.model_1.sequence() )
 
 if __name__ == '__main__':
 

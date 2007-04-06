@@ -126,7 +126,7 @@ class Benchmark:
 	pdb = pdb.transform( *tmp_model.transformation(reference, n_it=0) )
 
         ## info about discarded residues in iterative fit
-	pdb_if.setAtomProfile( "rms_outliers",
+	pdb_if.aProfiles.set( "rms_outliers",
 			       tmp_model.profile("rms_outliers"),
 			       mask=atom_mask )
 
@@ -375,7 +375,7 @@ class Benchmark:
 	    self.calc_rmsd(fitted_model_if, fitted_model_wo_if,
 			   reference, pdb_list[i])
 
-	    pdb_list[i].setAtomProfile('rmsd2ref_if', aprofile,
+	    pdb_list[i].aProfiles.set('rmsd2ref_if', aprofile,
 				       mask=mask_final, default = -1,
 				       comment="rmsd to known reference structure")
 

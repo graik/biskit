@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2007 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -90,21 +90,29 @@ class PDBParser(object):
         raise NotImplementedError, 'description() is not implemented.'
         
 
-    def update( self, model, source, skipRes=None, lookHarder=0 ):
+    def update( self, model, source, skipRes=None, updateMissing=0, force=0 ):
         """
         Update empty or missing fields of model from the source. The
         model will be connected to the source via model.source.
+
         Override!
-        
+
+	Note for implementations:
+	  * Profiles that are taken from the source should be labeled
+	    'changed'=0 (regardless of their status in the source).
+	  * The same holds for coordinates (xyzChanged=0).
+	  * However, profiles or coordinates or fields existing in the model
+          must remain untouched.
+	
         @param model: existing model
         @type  model: PDBModel
         @param source: source PDB file or pickled PDBModel or PDBModel object
         @type  source: str || file || PDBModel
         @param skipRes: list residue names that should not be parsed
         @type  skipRes: [ str ]
-        @param lookHarder: check source for additional profiles that are not
+        @param updateMissing: check source for additional profiles that are not
                            yet known for the model [False]
-        @type  lookHarder: 1 || 0
+        @type  updateMissing: 1 || 0
         """
         raise NotImplementedError, 'update() is not implemented.'
 
@@ -113,14 +121,16 @@ class PDBParser(object):
         """
         This function is called by update() to decide whether or not to open
         the source.
-        Override if needed.
+        Override to make it more restrictive.
 
         @param model: model
         @type  model: PDBModel
         @return: true, if the model needs to be updated from its source
         @rtype: bool
         """
-        return (model.atoms is None or model.xyz is None)
+        return (model.xyz is None \
+		or None in model.aProfiles.profiles.values() \
+		or None in model.rProfiles.profiles.values() )
 
 
     def parse2new( self, source, disconnect=False, skipRes=None ):
@@ -138,7 +148,7 @@ class PDBParser(object):
         @rtype: PDBModel
         """
         m = B.PDBModel()
-        self.update( m, source, skipRes=skipRes)
+        self.update( m, source, updateMissing=True, skipRes=skipRes)
 
         if disconnect: m.disconnect()
 
