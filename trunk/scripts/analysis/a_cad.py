@@ -171,9 +171,9 @@ def zeroChainId( model ):
     """
     set chainId to ''
     """
-    for a in model.getAtoms():
-        a['chain_id']=''
-        
+    #for a in model.getAtoms():
+        #a['chain_id']=''
+    model['chain_id'] = len(model) * ['']
     
 def parse_icm( filename ):
     """
@@ -210,16 +210,18 @@ def pw_cad(  models_dic, ref_b, contacts ):
     # bound reference
     ref_b_file = tempfile.mktemp('icm_bound_pdb')
     ref_b.renumberResidues()
-    for a in ref_b.getAtoms():
-        a['chain_id']=''
+    #for a in ref_b.getAtoms():
+        #a['chain_id']=''
+    ref_b['chain_id'] = [''] * len(ref_b)
     ref_b.writePdb( ref_b_file )
 
     # free reference (model 1)
     ref_f_file = tempfile.mktemp('icm_free_pdb')
     ref_f = models_dic[1].clone()
     ref_f.renumberResidues()
-    for a in ref_f.getAtoms():
-        a['chain_id']=''
+    #for a in ref_f.getAtoms():
+        #a['chain_id']=''
+    ref_f['chain_id'] = [''] * len( ref_f )
     ref_f.writePdb( ref_f_file )
     
     for k in models_dic.keys():
@@ -228,9 +230,12 @@ def pw_cad(  models_dic, ref_b, contacts ):
 
         # write temp pdb model to disk
         m_file = tempfile.mktemp('icm_pdb')
+
         models_dic[k].renumberResidues()
-        for a in models_dic[k].getAtoms():
-            a['chain_id']=''
+        #for a in models_dic[k].getAtoms():
+            #a['chain_id']=''
+        models_dic[k]['chain_id'] = [''] * len( models_dic[k] )
+        
         models_dic[k].writePdb( m_file )
 
         inp_lst= ['call _startup \n'] + \
