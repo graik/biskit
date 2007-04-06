@@ -148,10 +148,13 @@ def changeModel( inFile, prefix, sourceModel ):
 #    model.validSource()
     model.setSource( sourceModel.validSource() )
 
-    model.atomsChanged = 0
+    #model.atomsChanged = 0
+    for k in model.aProfiles:
+        model.aProfiles[k,'changed'] = N.all( model[k] == sourceModel[k] )
+        
     model.xyzChanged = ( 0 != N.sum( N.ravel( model.xyz - sourceModel.xyz)) )
 
-    model.update( lookHarder=1 )
+    model.update( updateMissing=1 )
 
     if model.xyzChanged:
         
@@ -183,7 +186,7 @@ def updateModelDic( f ):
     d = T.Load( T.absfile( f ) )
 
     for m in d.values():
-        m.update( lookHarder=1 )
+        m.update( updateMissing=1 )
 
     T.Dump( d, T.absfile( f ) )
 

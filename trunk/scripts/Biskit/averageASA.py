@@ -171,8 +171,8 @@ def randomSurfaces( base_folder, label, mask ):
         asDic_sd = {}
 
         j = 0
-        atoms =  [ a['name'] for a in m.atoms ]
-        for n in atoms:
+        #atoms =  [ a['name'] for a in m.atoms ]
+        for n in m['name']:
             msDic[n]    = N.average(msLst)[j]
             asDic[n]    = N.average(asLst)[j]
             msDic_sd[n] = MAU.SD( msLst )[j]
