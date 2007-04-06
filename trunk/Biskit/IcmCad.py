@@ -120,8 +120,9 @@ copy a_ \"mol2\" delete
         @type  f_out: str        
         """
         model.renumberResidues()
-        for a in model.getAtoms():
-            a['chain_id']=''
+        #for a in model.getAtoms():
+            #a['chain_id']=''
+        model['chain_id'] = [''] * len( model )
         model.writePdb( f_out )
 
 
@@ -233,7 +234,7 @@ class Test(BT.BiskitTest):
 
     def test_IcmCad( self ):
         """IcmCad test"""
-	from Biskit import PDBModel
+        from Biskit import PDBModel
 
         if self.local: print 'Loading PDB...'
 
@@ -250,7 +251,7 @@ class Test(BT.BiskitTest):
 
         if self.local: print 'Starting ICM'
         self.x = IcmCad( self.m1, self.ms, debug=self.DEBUG,
-			 verbose=self.local )
+                         verbose=self.local )
 
         if self.local:
             print 'Running'
@@ -261,7 +262,7 @@ class Test(BT.BiskitTest):
             print "Result: ", self.r
         
         self.assertEqual( self.r, [8.8603529999999999, 9.0315890000000003,
-				   8.5055429999999994] )
+                                   8.5055429999999994] )
 
     
 
