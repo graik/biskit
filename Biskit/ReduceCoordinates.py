@@ -28,6 +28,7 @@ Create structures with reduced number of atoms.
 """
 
 from PDBModel import PDBModel
+from DictList import DictList
 import numpy.oldnumeric as N
 import tools as T
 import molUtils as MU
@@ -126,14 +127,28 @@ class ReduceCoordinates:
         """
         h = MU.atomMasses['H']
         masses = []
-        for a in model.atoms:
-            if a['element'] == 'H':
+        
+        elements = model['element']
+        resnames = model['residue_name']
+        anames   = model['name']
+        
+        for i in model.atomRange():
+            if elements[i] == 'H':
                 masses += [ 0 ]
             else:
-                masses += [ MU.atomMasses[ a['element'] ] +
-                            h * MU.aaAtomsH[a['residue_name']][a['name']] ]
+                masses += [ MU.atomMasses[ elements[i] ] +
+                            h * MU.aaAtomsH[ resnames[i] ][ anames[i] ] ]
+        
+        
+        #for a in model.atoms:
+            #if a['element'] == 'H':
+                #masses += [ 0 ]
+            #else:
+                #masses += [ MU.atomMasses[ a['element'] ] +
+                            #h * MU.aaAtomsH[a['residue_name']][a['name']] ]
 
-        model.setAtomProfile( 'mass', masses )
+        model.aProfiles.set( 'mass', masses, 
+                             comment='mass in D, hydrogen mass added to heavy' )
 
 
     def group( self, a_indices, maxPerCenter ):
@@ -171,32 +186,23 @@ class ReduceCoordinates:
         return result
 
 
-    def nextAtom( self, resName, resNumber, name, chainId, segid):
+    def nextAtom( self, atom, name ):
         """
         Create an atom dictionary.
-
-        @param resName: residue name
-        @type  resName: str
-        @param resNumber: residue number
-        @type  resNumber: int
+        @param atom:
+        @type  atom: L{Biskit.CrossView}
         @param name: atom name
         @type  name: str
-        @param chainId: chain identifier
-        @type  chainId: str
-        @param segid: segnemt identifier
-        @type  segid: str
         
         @return: atom dictionary
         @rtype: dict
         """
         self.currentAtom += 1
+        a = atom.toDict()
 
-        return {'residue_name':resName, 'name':name, 'type':'ATOM',
-                'residue_number':resNumber,
-                'serial_number': self.currentAtom,
-                'segment_id': segid, 'chain_id':chainId,
-                'name_original':name, 'element':'X'}
-
+        a['name'] = name
+        a['serial_number'] = self.currentAtom
+        return a
 
     def makeMap( self, maxPerCenter=4 ):
         """
@@ -216,7 +222,7 @@ class ReduceCoordinates:
         self.currentAtom = 0
 
         groups = []
-        atoms = []
+        atoms = DictList()
 
         for i in range( len( resIndex ) ):
 
@@ -227,16 +233,18 @@ class ReduceCoordinates:
             else:
                 last_atom = len( self.a_indices ) - 1
 
-            res_name = m.atoms[ first_atom ]['residue_name']
-            segid    = m.atoms[ first_atom ]['segment_id']
-            chainId  = m.atoms[ first_atom ]['chain_id']
-            res_number = m.atoms[first_atom]['serial_number']
+            a = m.aProfiles[ first_atom ]
+
+##             res_name  = m.aProfiles[ first_atom ]['residue_name']
+##             segid     = m.aProfiles[ first_atom ]['segment_id']
+##             chainId   = m.aProfiles[ first_atom ]['chain_id']
+##             res_number= m.aProfiles[ first_atom ]['serial_number']
 
             ## position of this residue's atoms in original PDBModel (unsorted)
             a_indices = self.a_indices[ first_atom : last_atom+1 ]
 
             ## for each center create list of atom indices and a center atom
-            if res_name != 'GLY' and res_name != 'ALA':
+            if a['residue_name'] != 'GLY' and a['residue_name'] != 'ALA':
 
                 bb_a_indices = N.compress( resModels[i].maskBB(), a_indices)
                 sc_a_indices = N.compress(
@@ -249,14 +257,12 @@ class ReduceCoordinates:
                 sc_groups = []
 
             groups += [ bb_a_indices ]
-            atoms  += [ self.nextAtom( res_name, res_number, 'BB',
-                                       chainId, segid ) ]
+            atoms  += [ self.nextAtom(a, 'BB') ]
 
             i = 0
             for g in sc_groups:
                 groups += [ g ]
-                atoms  += [ self.nextAtom( res_name, res_number, 'SC%i'%i,
-                                           chainId, segid) ]
+                atoms  += [ self.nextAtom( a, 'SC%i'%i) ]
                 i += 1
 
         self.groups = groups
@@ -278,7 +284,7 @@ class ReduceCoordinates:
                  (N_frames x N_less_atoms x 3)
         @rtype: array
         """
-        masses = self.m.atomProfile('mass')
+        masses = self.m.aProfiles.get('mass')
         r_xyz = None
 
         for atom_indices in self.groups:
@@ -316,16 +322,21 @@ class ReduceCoordinates:
         @rtype: PDBModel
         """
 
-        mass = self.m.atomProfile('mass')
+        mass = self.m.aProfiles.get('mass')
         if xyz is None: xyz = self.m.getXyz()
 
         mProf = [ N.sum( N.take( mass, group ) ) for group in self.groups ]
         xyz = self.reduceXyz( xyz )
 
         result = PDBModel()
-        result.setAtoms( self.atoms )
+
+        for k in self.atoms.keys():
+            result.aProfiles.set( k, self.atoms.valuesOf(k) )
+
+##         result.setAtoms( self.atoms )
+
         result.setXyz( xyz )
-        result.setAtomProfile( 'mass', mProf )
+        result.aProfiles.set( 'mass', mProf )
 
         if reduce_profiles:
             self.reduceAtomProfiles( self.m, result )
@@ -347,13 +358,17 @@ class ReduceCoordinates:
         """
         for profname in from_model.aProfiles:
 
-            p0 =  from_model.atomProfile(profname)
+            p0 =  from_model.aProfiles.get(profname)
             info = from_model.profileInfo( profname )
 
-            pr = [ N.average( N.take( p0, group ) ) for group in self.groups ]
+            try:
+                pr = [ N.average( N.take( p0, group ) ) for group in self.groups ]
 
-            to_model.setAtomProfile( profname, pr )
-            to_model.setProfileInfo( profname, **info )
+                to_model.aProfiles.set( profname, pr )
+            except:
+                pass
+                
+            to_model.aProfiles.setInfo( profname, **info )
 
 
 
@@ -366,12 +381,12 @@ class Test(BT.BiskitTest):
     """Test"""
 
     def test_ReduceCoordinates(self):
-	"""ReduceCoordinates test"""
+        """ReduceCoordinates test"""
 
         self.m = PDBModel( T.testRoot()+'/com/1BGS.pdb' )
         self.m = self.m.compress( N.logical_not( self.m.maskH2O() ) )
 
-        self.m.setAtomProfile('test', range(len(self.m)))
+        self.m.aProfiles.set('test', range(len(self.m)))
 
         self.red = ReduceCoordinates( self.m, 4 )
 

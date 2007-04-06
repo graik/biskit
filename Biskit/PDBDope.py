@@ -88,19 +88,19 @@ class PDBDope:
 
         normalRes = self.m.atom2resMask( normalAtoms )
 
-        self.m.setAtomProfile( 'relASA', atomRelAcc, ## normalAtoms, 0,
+        self.m.aProfiles.set( 'relASA', atomRelAcc, ## normalAtoms, 0,
                                comment='relative accessible surface area in %',
                                version= T.dateString() + ' ' + self.version() )
 
-        self.m.setResProfile( 'ASA_total', resASA[:,0], normalRes, 0,
+        self.m.rProfiles.set( 'ASA_total', resASA[:,0], normalRes, 0,
                               comment='accessible surface area in A^2',
                               version= T.dateString() + ' ' + self.version() )
 
-        self.m.setResProfile( 'ASA_sc', resASA[:,1], normalRes, 0,
+        self.m.rProfiles.set( 'ASA_sc', resASA[:,1], normalRes, 0,
                            comment='side chain accessible surface area in A^2',
                            version= T.dateString() + ' ' + self.version() )
 
-        self.m.setResProfile( 'ASA_bb', resASA[:,2], normalRes, 0,
+        self.m.rProfiles.set( 'ASA_bb', resASA[:,2], normalRes, 0,
                            comment='back bone accessible surface area in A^2',
                            version= T.dateString() + ' ' + self.version() )
 
@@ -116,7 +116,7 @@ class PDBDope:
         @type  pname: str
         """
         r = self.m.profile2mask( pname, cutoff_min=40 )
-        self.m.setResProfile( 'surfMask',  self.m.atom2resMask(r),
+        self.m.rProfiles.set( 'surfMask',  self.m.atom2resMask(r),
                               comment='residues with any atom > 40% exposed',
                               version= T.dateString() + ' ' + self.version() )
 
@@ -140,7 +140,7 @@ class PDBDope:
         dssp = Dssp( self.m )
         ss = dssp.run()
         
-        self.m.setResProfile( 'secondary',  ss,
+        self.m.rProfiles.set( 'secondary',  ss,
                               comment='secondary structure from DSSP',
                               version= T.dateString() + ' ' + self.version() )
         
@@ -161,9 +161,9 @@ class PDBDope:
 
         @param verbose: verbosity level (default: 0)
         @type  verbose: 1|0
-	@param log: Log file for messages [STDOUT]
-	@type  log: Biskit.LogFile
-	
+        @param log: Log file for messages [STDOUT]
+        @type  log: Biskit.LogFile
+        
         @raise ExeConfigError: if external application is missing
         """
         ## mask with normal AA also used for HMM search
@@ -175,19 +175,19 @@ class PDBDope:
 
         p, hmmHits = h.scoreAbsSum( self.m, hmmNames=pfamEntries )
 
-        self.m.setResProfile( 'cons_abs', p, mask, 0, hmmHits=hmmHits,
+        self.m.rProfiles.set( 'cons_abs', p, mask, 0, hmmHits=hmmHits,
               comment="absolute sum of all 20 hmm scores per position",
               version= T.dateString() + ' ' + self.version() )
 
         p, hmmHits = h.scoreMaxAll( self.m, hmmNames=hmmHits )
 
-        self.m.setResProfile( 'cons_max', p, mask, 0, hmmHits=hmmHits,
+        self.m.rProfiles.set( 'cons_max', p, mask, 0, hmmHits=hmmHits,
               comment="max of 20 hmm scores (-average / SD) per position",
               version= T.dateString() + ' ' + self.version() )
 
         p,  hmmHits = h.scoreEntropy( self.m, hmmNames=hmmHits )
 
-        self.m.setResProfile( 'cons_ent', p, mask, 0, hmmHits=hmmHits,
+        self.m.rProfiles.set( 'cons_ent', p, mask, 0, hmmHits=hmmHits,
               comment="entropy of emmission probabilities per position "+
                               "(high -> high conservation/discrimination)",
               version= T.dateString() + ' ' + self.version() )
@@ -224,7 +224,7 @@ class PDBDope:
             dist = N.sum(( xyz - self.m.xyz[i])**2, 1)
             contacts += [ N.sum( N.less(dist, radius**2 )) -1]
 
-        self.m.setAtomProfile( profName, contacts, mSurf, default=-1,
+        self.m.aProfiles.set( profName, contacts, mSurf, default=-1,
                                comment='atom density radius %3.1fA' % radius,
                                version= T.dateString() + ' ' + self.version() )
 
@@ -273,28 +273,28 @@ class PDBDope:
 
         fs_info= fs_dic['surfaceRacerInfo']
 
-        self.m.setAtomProfile( name_MS, fs_dic['MS'], mask, 0,
+        self.m.aProfiles.set( name_MS, fs_dic['MS'], mask, 0,
                                comment='Molecular Surface area in A',
                                version= T.dateString() + ' ' + self.version(),
                                **fs_info )
 
-        self.m.setAtomProfile( name_AS, fs_dic['AS'], mask, 0,
+        self.m.aProfiles.set( name_AS, fs_dic['AS'], mask, 0,
                                comment='Accessible Surface area in A',
                                version= T.dateString() + ' ' + self.version(),
                                **fs_info )
 
-        self.m.setAtomProfile( name_curv, fs_dic['curvature'], mask, 0,
+        self.m.aProfiles.set( name_curv, fs_dic['curvature'], mask, 0,
                                comment='Average curvature',
                                version= T.dateString() + ' ' + self.version(),
                                **fs_info )
 
         if round(probe, 1) == 1.4 and vdw_set == 1:
-            self.m.setAtomProfile( 'relAS', fs_dic['relAS'], mask, 0,
+            self.m.aProfiles.set( 'relAS', fs_dic['relAS'], mask, 0,
                                    comment='Relative solvent accessible surf.',
                                    version= T.dateString()+' ' +self.version(),
                                    **fs_info )
 
-            self.m.setAtomProfile( 'relMS', fs_dic['relMS'], mask, 0,
+            self.m.aProfiles.set( 'relMS', fs_dic['relMS'], mask, 0,
                                    comment='Relative molecular surf.',
                                    version= T.dateString()+' '+self.version(),
                                    **fs_info )
@@ -314,43 +314,43 @@ class Test(BT.BiskitTest):
     M     = None #: cache processed PDB between tests
 
     def prepare(self):
-	from Biskit import PDBModel
-	self.f = T.testRoot() + '/com/1BGS.pdb'
+        from Biskit import PDBModel
+        self.f = T.testRoot() + '/com/1BGS.pdb'
 
-	if not Test.M:
-	    if self.local: print "Loading PDB...",
-	    Test.M = PDBModel( self.f )
-	    Test.M = self.M.compress( Test.M.maskProtein() )
+        if not Test.M:
+            if self.local: print "Loading PDB...",
+            Test.M = PDBModel( self.f )
+            Test.M = self.M.compress( Test.M.maskProtein() )
 
-	    if self.local: print "Done"
-	
+            if self.local: print "Done"
+        
         self.d = PDBDope( self.M )
 
     def test_addFoldX( self ):
-	"""PDBDope.addFoldX test"""
-	self.d.addFoldX()
+        """PDBDope.addFoldX test"""
+        self.d.addFoldX()
 
     def test_addSurfaceRacer(self):
-	"""PDBDope.addSurfaceRacer/addSurfaceMask test"""
-	if self.local: print "Adding SurfaceRacer curvature...",
-	self.d.addSurfaceRacer( probe=1.4 )
-	if self.local: print 'Done.'
+        """PDBDope.addSurfaceRacer/addSurfaceMask test"""
+        if self.local: print "Adding SurfaceRacer curvature...",
+        self.d.addSurfaceRacer( probe=1.4 )
+        if self.local: print 'Done.'
 
-	if self.local: print "Adding surface mask...",
-	self.d.addSurfaceMask()
-	if self.local: print 'Done.'
+        if self.local: print "Adding surface mask...",
+        self.d.addSurfaceMask()
+        if self.local: print 'Done.'
 
     def test_addSecondaryStructure(self):
-	"""PDBDope.addSecondaryStructure test"""
-	self.d.addSecondaryStructure()
+        """PDBDope.addSecondaryStructure test"""
+        self.d.addSecondaryStructure()
 
     def test_addDensity(self):
-	"""PDBDope.addDensity test"""
+        """PDBDope.addDensity test"""
         self.d.addDensity()
 
     def test_model(self):
-	"""PDBDope test final model"""
-	from Biskit import PDBModel
+        """PDBDope test final model"""
+        from Biskit import PDBModel
 
         if self.local:
             print '\nData added to info record of model (key -- value):'
@@ -366,23 +366,22 @@ class Test(BT.BiskitTest):
             ## check that nothing has changed
             print '\nChecking that models are unchanged by doping ...'
 
-	m_ref = PDBModel( self.f )
-	m_ref = m_ref.compress( m_ref.maskProtein() )
-	for k in m_ref.atoms[0].keys():
-	    ref = [ m_ref.atoms[i][k] for i in range( m_ref.lenAtoms() ) ]
-	    mod = [ self.M.atoms[i][k] for i in range(self.M.lenAtoms()) ]
-	    self.assert_(ref == mod)
+        m_ref = PDBModel( self.f )
+        m_ref = m_ref.compress( m_ref.maskProtein() )
+        for k in m_ref.aProfiles.keys():
+            #ref = [ m_ref.atoms[i][k] for i in m_ref.atomRange() ]
+            #mod = [ self.M.atoms[i][k] for i in self.M.atomRange() ]
+            self.assert_( N.all( m_ref[k] == self.M[k]) )
                 
-	## display in Pymol
-	if self.local:
-	    print "Starting PyMol..."
-	    from Biskit.Pymoler import Pymoler
+        ## display in Pymol
+        if self.local:
+            print "Starting PyMol..."
+            from Biskit.Pymoler import Pymoler
 
-	    pm = Pymoler()
-	    pm.addPdb( self.M, 'm' )
-	    pm.colorAtoms( 'm', N.clip(self.M.profile('relAS'), 0.0, 100.0) )
-	    pm.show()
-            
+            pm = Pymoler()
+            pm.addPdb( self.M, 'm' )
+            pm.colorAtoms( 'm', N.clip(self.M.profile('relAS'), 0.0, 100.0) )
+            pm.show()
 
 class LongTest( BT.BiskitTest ):
 
@@ -390,31 +389,31 @@ class LongTest( BT.BiskitTest ):
 
 
     def prepare(self):
-	from Biskit import PDBModel
-	self.f = T.testRoot() + '/com/1BGS.pdb'
+        from Biskit import PDBModel
+        self.f = T.testRoot() + '/com/1BGS.pdb'
 
-	self.M = PDBModel( self.f )
-	self.M = self.M.compress( self.M.maskProtein() )
-	
+        self.M = PDBModel( self.f )
+        self.M = self.M.compress( self.M.maskProtein() )
+        
         self.d = PDBDope( self.M )
 
     def _test_conservation(self):
-	"""PDBDope.addConservation (Hmmer) test"""
-	self.local = 0
+        """PDBDope.addConservation (Hmmer) test"""
+        self.local = 0
 
-	if self.local: print "Adding conservation data...",
-	self.d.addConservation()
-	if self.local: print 'Done.'
+        if self.local: print "Adding conservation data...",
+        self.d.addConservation()
+        if self.local: print 'Done.'
 
-	## display in Pymol
-	if self.local:
-	    print "Starting PyMol..."
-	    from Biskit.Pymoler import Pymoler
+        ## display in Pymol
+        if self.local:
+            print "Starting PyMol..."
+            from Biskit.Pymoler import Pymoler
 
-	    pm = Pymoler()
-	    pm.addPdb( self.M, 'm' )
-	    pm.colorAtoms( 'm', N.clip(self.M.profile('cons_ent'), 0.0, 100.0) )
-	    pm.show()
+            pm = Pymoler()
+            pm.addPdb( self.M, 'm' )
+            pm.colorAtoms( 'm', N.clip(self.M.profile('cons_ent'), 0.0, 100.0) )
+            pm.show()
 
 
 class OldTest( BT.BiskitTest ):
@@ -422,20 +421,19 @@ class OldTest( BT.BiskitTest ):
     TAGS = [ BT.EXE, BT.OLD ]
 
     def prepare(self):
-	from Biskit import PDBModel
-	self.f = T.testRoot() + '/com/1BGS.pdb'
+        from Biskit import PDBModel
+        self.f = T.testRoot() + '/com/1BGS.pdb'
 
-	self.M = PDBModel( self.f )
-	self.M = self.M.compress( self.M.maskProtein() )
+        self.M = PDBModel( self.f )
+        self.M = self.M.compress( self.M.maskProtein() )
 
         self.d = PDBDope( self.M )
 
     def _test_addAsa(self):
-	"""PDBDope.addAsa (Whatif, obsolete) test"""
-	self.d.addASA()
+        """PDBDope.addAsa (Whatif, obsolete) test"""
+        self.d.addASA()
 
 
-  
 if __name__ == '__main__':
 
 ##     BT.localTest()
@@ -459,5 +457,3 @@ if __name__ == '__main__':
 
     d.addSurfaceMask()
     
-	
-

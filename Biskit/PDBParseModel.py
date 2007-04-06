@@ -67,23 +67,26 @@ class PDBParseModel( PDBParser ):
         return 'in-memory instances of PDBModel'
         
 
-    def update( self, model, source, skipRes=None, lookHarder=0 ):
+    def update( self, model, source, skipRes=None, updateMissing=0, force=0 ):
         """
         Update empty or missing fields of model from the source. The
         model will be connected to the source via model.source.
-        Override!
+        Profiles that are taken from the source are labeled 'changed'=0.
+        The same holds for coordinates (xyzChanged=0).
+        However, existing profiles or coordinates or fields remain untouched.
+
         @param model: existing model
         @type  model: PDBModel
         @param source: PDBModel object
         @type  source: str | file | PDBModel
         @param skipRes: list residue names that should not be parsed
         @type  skipRes: [ str ]
-        @param lookHarder: check source for additional profiles [0] 
-        @type  lookHarder: 1|0
+        @param updateMissing: check source for additional profiles [0] 
+        @type  updateMissing: 1|0
         """
         try:
             ## atoms and/or coordinates need to be updated from PDB
-            if self.needsUpdate( model ) or lookHarder:
+            if force or updateMissing or self.needsUpdate( model ):
 
                 s = source
 
@@ -91,17 +94,16 @@ class PDBParseModel( PDBParser ):
 
                 model.pdbCode  = model.pdbCode or s.pdbCode
 
-                model.atoms = model.atoms or s.getAtoms()
-
-                if model.xyz is None: model.xyz = s.getXyz()
-
-                model.__terAtoms = getattr(model, '_PDBModel__terAtoms',[])or \
-                                   getattr(s,'_PDBModel__terAtoms',[])
+                if model.xyz is None:
+                    model.xyz = s.getXyz()
+                    model.xyzChanged = 0
 
                 model.rProfiles.updateMissing( s.rProfiles,
-                                               copyMissing=lookHarder)
+                                               copyMissing=updateMissing,
+                                               setChanged=0 )
                 model.aProfiles.updateMissing( s.aProfiles,
-                                               copyMissing=lookHarder)
+                                               copyMissing=updateMissing,
+                                               setChanged=0 )
 
                 if skipRes is not None:
                     model.removeRes( skipRes )
@@ -132,7 +134,7 @@ class Test(BT.BiskitTest):
 
         self.assertAlmostEqual( N.sum( self.m.centerOfMass() ),
                113.682601929, 7 )
-				
+                                
 
 if __name__ == '__main__':
 

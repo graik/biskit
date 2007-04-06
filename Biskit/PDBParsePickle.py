@@ -66,10 +66,13 @@ class PDBParsePickle( PDBParseModel ):
         return 'pickled PDBModel (file)'
         
 
-    def update( self, model, source, skipRes=None, lookHarder=0 ):
+    def update( self, model, source, skipRes=None, updateMissing=0, force=0 ):
         """
         Update empty or missing fields of model from the source. The
         model will be connected to the source via model.source.
+        Profiles that are taken from the source are labeled 'changed'=0.
+        The same holds for coordinates (xyzChanged=0).
+        However, existing profiles or coordinates or fields remain untouched.
 
         @param model: existing model
         @type  model: PDBModel
@@ -77,18 +80,20 @@ class PDBParsePickle( PDBParseModel ):
         @type  source: str || file || PDBModel
         @param skipRes: list residue names that should not be parsed
         @type  skipRes: [ str ]
-        @param lookHarder: check source for additional profiles [0] 
-        @type  lookHarder: 1|0
+        @param updateMissing: check source for additional profiles [0] 
+        @type  updateMissing: 1|0
         """
         try:
-            if self.needsUpdate( model ) or lookHarder:
+            if force or updateMissing or self.needsUpdate( model ):
 
                 s = T.Load( source )
 
                 super( PDBParsePickle, self ).update(
-                    model, s, skipRes=skipRes, lookHarder=lookHarder)
+                    model, s, skipRes=skipRes, updateMissing=updateMissing,
+                    force=force )
                               
         except Exception, why:
+            print T.lastErrorTrace()
             raise PDBParserError, "Cannot unpickle source model from %s, "\
                    % str(source) + "Reason:\n" + str(why)
 
@@ -106,7 +111,7 @@ class Test(BT.BiskitTest):
     def test_PDBParsePickle( self ):
         """PDBParsePickle test"""
 
-	import numpy.oldnumeric as N
+        import numpy.oldnumeric as N
 
         ## loading output file from X-plor
         if self.local:
@@ -116,8 +121,8 @@ class Test(BT.BiskitTest):
         self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P_dry.model')
 
         self.assertAlmostEqual( N.sum( self.m.centerOfMass() ),
-				 114.18036673321811, 7)
+                                 114.18036673321811, 7)
 
 if __name__ == '__main__':
-
+   
     BT.localTest()

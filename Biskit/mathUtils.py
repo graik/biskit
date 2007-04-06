@@ -750,7 +750,7 @@ class Test(BT.BiskitTest):
     """Test case"""
 
     def test_mathUtils(self):
-	"""mathUtils test"""
+        """mathUtils test"""
         ## Calculating something ..
         self.d = N.array([[20.,30.,40.],[23., 31., 50.]])
 

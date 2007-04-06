@@ -411,7 +411,7 @@ def relExposure( model, absSurf, key='AS', clip=1 ):
         k=0
         cIdx = c.resIndex()
         ## and loop over atoms in chain
-        for a in c.atoms:
+        for a in c.aProfiles.iterDicts():
             ## N-terminal residue
             if k < cIdx[1]:
                 rel = __Nter( a, rel, absSurf, key, i )
@@ -438,8 +438,8 @@ def __Nter( a, rel, absSurf, key, i ):
     @type  rel: [float]
     @param absSurf: Absolute MS OR AS values
     @type  absSurf: [float]
-    @param key: MS or AS
-    @type  key: MS|AS
+    @param key: 'MS' or 'AS'
+    @type  key: str
     
     @return: rel - list of relative accessible surfaces with data from
                    N-terminal residues appended.
@@ -524,7 +524,7 @@ class Test(BT.BiskitTest):
     """Test case"""
 
     def test_surfaceRacerTools(self):
-	"""surfaceRacerTools test"""
+        """surfaceRacerTools test"""
         from Biskit import PDBModel
         import Biskit.tools as T
         

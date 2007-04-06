@@ -162,8 +162,9 @@ class TemplateCleaner:
 
         ## structure alignment program needs chain identifier
         if not chain_id:
-            for a in m_ca.atoms:
-                a['chain_id'] = 'A'
+            m_ca['chain_id'] = ['A'] * m_ca.lenAtoms()
+
+            chain_id = 'A'  ## for sequence record
 
 	    chain_id = 'A'  ## for sequence record
 
@@ -180,8 +181,8 @@ class TemplateCleaner:
             if res_to > n_res:
                 res_to = n_res
 
-            for ca in m_ca.atoms[ res_from: res_to ]:
-                s+= " %3s" % ca['residue_name']
+            for resname in m_ca.aProfiles['residue_name'][ res_from: res_to ]:
+                s+= " %3s" % resname
 
             head += [ ( 'SEQRES', s ) ]
 
@@ -201,9 +202,8 @@ class TemplateCleaner:
         @param fname: filename of new PDB file
         @type  fname: str        
         """
-        model = model.clone( deepcopy=1 )
-        for a in model.atoms:
-            a['chain_id'] = ''
+        model = model.clone()
+        model['chain_id'] = [''] * len(model)
 
         model.writePdb( fname )
 
@@ -298,7 +298,7 @@ class Test(BT.BiskitTest):
         import tempfile
         import shutil
         from Biskit.LogFile import LogFile
-	
+
         ## temp output directory
         self.outfolder = tempfile.mkdtemp( '_test_TemplateCleaner' )
         os.mkdir( self.outfolder +'/templates' )
@@ -307,16 +307,15 @@ class Test(BT.BiskitTest):
         self.f_out = self.outfolder + '/TemplateCleaner.log'
         self.l = LogFile( self.f_out, mode='w')
     
-	shutil.copytree( T.testRoot() + '/Mod/project/templates/nr',
+        shutil.copytree( T.testRoot() + '/Mod/project/templates/nr',
                          self.outfolder + '/templates/nr' )
 
     def cleanUp(self):
         T.tryRemove( self.outfolder, tree=1 )
 
-
     def test_TemplateCleaner(self):
-	"""Mod.TemplateCleaner test"""
-	import glob
+        """Mod.TemplateCleaner test"""
+        import glob
 
         self.c = TemplateCleaner( self.outfolder, log=self.l)
 
@@ -329,11 +328,10 @@ class Test(BT.BiskitTest):
             print 'TemplateCleaner log file written to: %s'% self.f_out
             globals().update( locals() )
 
-	## check that cleaned pdbs have been written
-	f_cleaned = glob.glob(self.outfolder+ '/templates/nr_cleaned/*pdb')
-	self.assert_( len(f_cleaned) > 0 )
+        ## check that cleaned pdbs have been written
+        f_cleaned = glob.glob(self.outfolder+ '/templates/nr_cleaned/*pdb')
+        self.assert_( len(f_cleaned) > 0 )
 
-        
 if __name__ == '__main__':
 
     BT.localTest(debug=1)

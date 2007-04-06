@@ -115,7 +115,7 @@ class Test(BT.BiskitTest):
         if self.local:
             print self.x
 
-	self.assert_( self.x.dat_found )
+        self.assert_( self.x.dat_found )
         
 
 if __name__ == '__main__':

@@ -331,7 +331,7 @@ class MSMS( Executor ):
 
         Executor.__init__( self, 'msms', args=arg, **kw )
 
-        self.model = model.clone( deepcopy=1 )
+        self.model = model.clone()
 
 
     def prepare( self ):

@@ -1,5 +1,3 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
-
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2006 Raik Gruenberg & Johan Leckner
@@ -132,7 +130,7 @@ class SurfaceRacer( Executor ):
         Executor.__init__( self, 'surfaceracer', template=self.inp,\
                            **kw )
 
-        self.model = model.clone( deepcopy=1 )
+        self.model = model.clone()
         self.model = self.model.compress( self.model.maskHeavy() )
 
         ## will be filled in by self.prepare() after the temp folder is ready

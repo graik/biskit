@@ -63,7 +63,7 @@ class AmberCrdParser:
     """
 
     def __init__( self, fcrd, fref, box=0, rnAmber=0, pdbCode=None,
-		  log=StdLog(), verbose=0 ):
+                  log=StdLog(), verbose=0 ):
         """
         @param fcrd: path to input coordinate file
         @type  fcrd: str
@@ -76,10 +76,10 @@ class AmberCrdParser:
         @type  rnAmber: 1|0
         @param pdbCode: pdb code to be put into the model (default: None)
         @type  pdbCode: str
-	@param log: LogFile instance [Biskit.StdLog]
-	@type  log: Biskit.LogFile
-	@param verbose: print progress to log [0]
-	@type  verbose: int
+        @param log: LogFile instance [Biskit.StdLog]
+        @type  log: Biskit.LogFile
+        @param verbose: print progress to log [0]
+        @type  verbose: int
         """
         self.fcrd = T.absfile( fcrd )
         self.crd  = T.gzopen( self.fcrd )
@@ -89,8 +89,8 @@ class AmberCrdParser:
 
         self.n = self.ref.lenAtoms()
 
-	self.log = log
-	self.verbose = verbose
+        self.log = log
+        self.verbose = verbose
 
         if rnAmber:
             self.ref.renameAmberRes()
@@ -107,10 +107,9 @@ class AmberCrdParser:
         if self.box:          self.lines_per_frame += 1
 
         ## mark chains (the TER position might get lost when deleting atoms)
-        if not self.ref.getAtoms()[0].get('chain_id',''):
-            self.ref.addChainId()
-
-
+        ## should not be necessary any longer
+##        if not self.ref.getAtoms()[0].get('chain_id',''):
+##            self.ref.addChainId()
 
     def line2numbers( self, l ):
         """
@@ -180,7 +179,7 @@ class AmberCrdParser:
         xyz = []
         i = 0
 
-	if self.verbose: self.log.write( "Reading frames .." )
+        if self.verbose: self.log.write( "Reading frames .." )
 
         try:
             while 1==1:
@@ -192,7 +191,7 @@ class AmberCrdParser:
                     self.log.write( '#' )
 
         except EOFError:
-	    if self.verbose: self.log.add("Read %i frames." % i)
+            if self.verbose: self.log.add("Read %i frames." % i)
 
         t = Trajectory( refpdb=self.ref )
 
@@ -210,37 +209,36 @@ class Test( BT.BiskitTest ):
     """Test AmberCrdParser"""
 
     def prepare(self):
-	root = T.testRoot() + '/amber/'
-	self.finp = root + 'sim.crd.gz'
-	self.fref = root + '1HPT_0.pdb'
-	self.fout = tempfile.mktemp('traj','dat')
+        root = T.testRoot() + '/amber/'
+        self.finp = root + 'sim.crd.gz'
+        self.fref = root + '1HPT_0.pdb'
+        self.fout = tempfile.mktemp('.dat', 'traj_')
 
     def cleanUp(self):
-	T.tryRemove( self.fout )
-	
+        T.tryRemove( self.fout )
+        
 
     def test_AmberCrdParser(self):
-	"""AmberCrdParser test"""
-	
-	self.p = AmberCrdParser( self.finp, self.fref, box=True, rnAmber=True,
-				 log=self.log, verbose=self.local )
-	self.t = self.p.crd2traj()
+        """AmberCrdParser test"""
+        
+        self.p = AmberCrdParser( self.finp, self.fref, box=True, rnAmber=True,
+                                 log=self.log, verbose=self.local )
+        self.t = self.p.crd2traj()
 
-	self.t.removeAtoms(lambda a: a['residue_name'] in ['WAT','Na+','Cl-'] )
-	self.t.removeAtoms(lambda a: a['element'] == 'H' )
+        self.t.removeAtoms(lambda a: a['residue_name'] in ['WAT','Na+','Cl-'] )
+        self.t.removeAtoms(lambda a: a['element'] == 'H' )
 
-	if self.local:
-	    print "Dumping result to ", self.fout
+        if self.local:
+            print "Dumping result to ", self.fout
 
-	T.Dump( self.t, T.absfile(self.fout) )
+        T.Dump( self.t, T.absfile(self.fout) )
 
-	if self.local:
-	    print "Dumped Trajectory with %i frames and %i atoms." % \
-		  (len(self.t), self.t.lenAtoms() )
+        if self.local:
+            print "Dumped Trajectory with %i frames and %i atoms." % \
+                  (len(self.t), self.t.lenAtoms() )
 
-	self.assertEqual( len(self.t), 10 )
-	self.assertEqual( self.t.lenAtoms(), 440 )
-	
+        self.assertEqual( len(self.t), 10 )
+        self.assertEqual( self.t.lenAtoms(), 440 )
 
 if __name__ == '__main__':
 

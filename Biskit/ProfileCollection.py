@@ -27,34 +27,194 @@
 Manage profiles.
 """
 
-import numpy.oldnumeric as N
+import numpy as N
 import tools as T
 import mathUtils as M
 from Biskit import EHandler
 
 import copy
+from UserDict import DictMixin
+import weakref
 
 try:
     import biggles
 except:
     biggles = 0
 
-def isarray( a ):
-    """
-    Test for old Numeric and new numpy arrays (N.arraytype is not equivalent to
-    old Numeric.arraytype).
-    """
-    return 0 != getattr( a, 'astype', 0 )
-
 class ProfileError(Exception):
     pass
 
+class _ViewSignal:
+    pass
+
+
+class CrossView( DictMixin ):
+    """
+    CrossView instances provide a dictionary-like read- and writeable
+    view on one position in a ProfileCollection.
+
+    Example:
+    ========
+      Let's assume we have a ProfileCollection p containing 2 profiles
+      'name' and 'mass':
+
+        >>> p
+        ProfileCollection: 2 profiles of length 5
+        name
+        {...}
+               ['a','b','c','d','e']
+        mass
+        {...}
+               [10, 20, 30, 40, 50]
+
+      A CrossView on the second position of p will then look like this:
+
+        >>> view = p[1]
+        >>> view
+        CrossView{'name': 'b', 'mass': 20}
+
+      And can be used to change the values of this position in the collection:
+
+        >>> view['name'] = 'X'
+
+      ... is equivalent to (but slower than):
+
+        >>> p['name'][1] = 'X'
+
+      The view can also be used to change several profiles simultaneously:
+
+        >>> view.update( {'name':'X', 'mass':100} )
+
+      It can I{not} be used to delete a profile position or remove a key.
+
+    Performance issues:
+    ===================
+      Creating and using a CrossView to access a single position in a
+      profile is not much more costly than the direct
+      p['profilename'][index] access -- Both take about 10 times longer
+      than accessing a normal dictionary.
+      
+      However, excessive use of CrossViews can deliver a blow to your
+      program's performance. Iterating over a whole ProfileCollection
+      in form of CrossViews (L{ProfileCollection.iterCrossViews}) is
+      about a factor 100 slower than direct iteration over the
+      elements of a single profile (array or list). Alternatively,
+      L{ProfileCollection.iterDicts} yields normal disconnected
+      dictionaries. It is in itself not much faster (30%) than
+      iterCrossViews but subsequent work with the dictionaries is, at
+      least, 10 times more efficient.
+
+    Developer Note:
+    ===============
+      As a safety measure, CrossView instances are / should be
+      invalidated as soon as the underlying ProfileCollection is
+      re-ordered or removed. To this end, the CrossView only keeps a
+      weak reference to its parent collection (so that the collection
+      will not be kept in memory for referencing views alone). Another weak
+      reference to the collection's _viewSignal field is used to sense
+      other changes -- overriding this field signals the killing
+      (alive=False) of all CrossViews pointing to this collection, see
+      L{ProfileCollection.killViews}.
+    """
+
+    @staticmethod
+    def _cease( ref ):
+        try:
+            self.alive = False
+        except:
+            pass
+
+    def __init__( self, parent, index ):
+        """
+        @param parent: ProfileCollection
+        @type  parent: ProfileCollection
+        @param index: position in profile collection
+        @type  index: int
+        """
+        self.parent = weakref.ref( parent, self._cease )
+        self.index  = index
+
+        self._signal = weakref.ref( parent._viewSignal, self._cease )
+
+        #: parent collection is alive and position is still correct
+        self.alive = True
+
+    def __getitem__( self, key ):
+        assert self.alive, 'view on dead or changed profile collection'
+
+        return self.parent().profiles[ key ][self.index]
+
+    def __setitem__( self, key, v):
+        assert self.alive, 'view on dead or changed profile collection'
+
+        self.parent().profiles[ key ][self.index] = v
+
+    def keys( self ):
+        assert self.alive, 'view on dead or changed profile collection'
+
+        return self.parent().profiles.keys()
+
+    def has_key(self, key ):
+        assert self.alive, 'view on dead or changed profile collection'
+
+        return self.parent().profiles.has_key( key )
+
+    def __contains__( self, key ):
+        assert self.alive, 'view on dead or changed profile collection'
+
+        return self.parent().profiles.has_key( key )
+
+    def __iter__( self ):
+        for k in self.parent().profiles.keys():
+            assert self.alive, 'view on dead or changed profile collection'
+
+            yield k
+            
+    def iteritems( self ):
+        """
+        Iterate over key : value pairs. Keys are all keys from the parent
+        ProfileCollection, values are the corresponding values at the
+        position for wich this CrossView was created.
+
+        @return: key:value pairs
+        @rtype: iterator over [ ( str, any ) ]
+        """
+        for k in self.parent().profiles.keys():
+            assert self.alive, 'view on dead or changed profile collection'
+
+            yield (k, self.parent()[ k ][self.index])
+
+    def toDict( self ):
+        """
+        Convert this CrossView into a standard dictionary that is detached
+        from the underlying ProfileCollection.
+
+        @return: dict with values indexed by parent ProfileCollection's keys
+        @rtype: dict
+        """
+        keys = self.parent().profiles.keys()
+
+        values = [ self.parent().profiles[k][self.index] for k in keys ]
+
+        assert self.alive, 'view on dead or changed profile collection'
+
+        return dict( zip( keys, values ) )
+
+    def __repr__(self):
+        if not self.alive:
+            return 'Dead CrossView{ }'
+        return 'CrossView' + DictMixin.__repr__(self)
+
+    def iterkeys(self):
+        return self.__iter__()
+
+
 class ProfileCollection:
     """
-    Manage profiles (arrays or lists of values) for trajectory frames
+    Manage profiles (arrays or lists of values) for Trajectory frames
     or atoms/residues in PDBModel. ProfileCollection resembles a
     2-dimensional array where the first axis (let's say row) is
-    accessed by a string key and each row has an additional info
+    accessed by a string key. Each row has an additional (meta)info
     dictionary assigned to it. The take() and concat() methods operate
     on the columns, i.e. they are applied to all profiles at the same
     time.
@@ -69,34 +229,88 @@ class ProfileCollection:
     The 'isarray' entry of a profile's info dictionary tells whether
     the profile is stored as array or as list.
 
-    ProfileCollection p can be accessed like a dictionary of lists::
-      len( p )          -> number of profiles (== len( p.profiles ) )
-      p['prof1']        -> list with values of profile 'prof1'
-      del p['prof1']    -> remove a profile
-      p['prof1'] = [..] -> add a profile without additional infos
-      for k in p        -> iterate over profile keys
-      'prof1' in p      -> 1, if collection contains key 'prof1'
+    Acessing profiles
+    =================
 
-    But it is more than that - each key also has a dictionary of info values
-    assigned to it (see getInfo(), setInfo(), p.infos). These can be accessed
-    like::
-      p['prof1','date']   -> date of creation of profile named 'prof1'
-      p.getInfo('prof1')  -> returns all info records
-      p['prof1','comment'] = 'first prof'  -> add/change single info value
+      ProfileCollection p can be used like a dictionary of lists::
+        len( p )          -> number of profiles (== len( p.profiles ) )
+        p['prof1']        -> list with values of profile 'prof1'
+        del p['prof1']    -> remove a profile
+        p['prof1'] = [..] -> add/override a profile without additional infos
 
-    Note: Profile arrays of float or int are automatically converted
-    to arrays of type Float32 or Int32. This is a savety measure
-    because we have stumbled accross problems when transferring
-    pickled objects between 32 and 64 bit machines.
-    @see L{ProfileCollection.__picklesave_array}
+        'prof1' in p      -> True, if collection contains key 'prof1'
+        for k in p:       -> iterate over profile keys
+        for k in p.iteritems():  -> iterate over key:profile pairs
+
+    Accessing Metainfo
+    ==================
+
+      Each profile key also has a dictionary of meta infos
+      assigned to it (see getInfo(), setInfo(), p.infos). These can be accessed
+      like::
+        p['prof1','date']   -> date of creation of profile named 'prof1'
+        p.getInfo('prof1')  -> returns all info records
+        p['prof1','comment'] = 'first prof'  -> add/change single info value
+
+    CrossViews
+    ==========
+
+      ProfileCollections can also be viewed from the side (along
+      columns) -- L{CrossView}s provide a dictionary with the values
+      of all profiles at a certain position. Changes to the
+      dictionary will change the value in the underlying profile and vice
+      versa, for example::
+        atom = p[10]        -> CrossView{'prof1' : 42.0, 'name' : 'CA', ... }
+        atom['prof1'] = 33  -> same as p['prof1'][10] = 33
+        p[10]['prof1']= 33  -> still the same but much slower
+
+        p[0] == p[-1]  -> True if the values of all profiles are identical at
+                          both positions
+
+        for a in p.iterCrossViews():  -> iterates over CrossView dictionaries
+        p.toCrossViews()    -> list of CrossViews for all positions
+
+      For read-only access, normal dictionaries are faster than CrossViews::
+        for d in p.iterDicts():       -> iterate over normal dictionaries
+        p.toDicts()         -> list of normal (but disconnected) dictionaries 
+
+      Adding a profile to a ProfileCollection will also 'magically'
+      add an additional key to all existing CrossViews of
+      it. CrossViews become invalid if their parent collection is
+      garbage collected or re-ordered.
+
+      B{Note}: The creation of many CrossViews hampers performance.
+      We provide a L{ProfileCollection.iterCrossView}
+      iterator to loop over these pseudo dictionaries for convenience --
+      direct iteration over the elements of a profile (array or list)
+      is about 100 times faster. If you need to repeatedly read from
+      many dictionaries, consider using L{ProfileCollection.toDicts}
+      and cache the resulting normal (disconnected) dictionaries::
+        cache = p.toDicts() # 'list( p.iterDicts() )' is equivalent but slower
+        
+
+    Note
+    ====
+
+      Profile arrays of float or int are automatically converted to
+      arrays of type Float32 or Int32. This is a safety measure
+      because we have stumbled over problems when transferring
+      pickled objects between 32 and 64 bit machines.
+
+      See also: L{ProfileCollection.__picklesave_array}
     """
 
-    def __init__( self, version=None, profiles=None, infos=None ):
+    __CrossView = CrossView
+
+    def __init__( self, profiles=None, infos=None ):
 
         self.profiles = profiles or {}
         self.infos = infos or {}
 
-        self.initVersion = version or self.version()
+        self.initVersion = self.version()
+
+        #: re-create this field to invalidate CrossViews! (see L{killViews()})
+        self._viewSignal = _ViewSignal()
 
 
     def version( self ):
@@ -108,36 +322,42 @@ class ProfileCollection:
         """
         return 'ProfileCollection $Revision$'
 
-
     def __setstate__(self, state ):
         """
         called for unpickling the object.
-	Compability fix: Convert Numeric arrays to numpy arrays.
+        Compability fix: Convert Numeric arrays to numpy arrays.
         """
         self.__dict__ = state
 
-	try:
-	    import Numeric
-	except:
-	    return
+        try:
+            import Numeric
+        except:
+            return
 
-	for k, v in self.profiles.items():
+        for k, v in self.profiles.items():
 
-	    if getattr( v, 'astype', 0) and not isinstance( v, N.arraytype):
-		self.profiles[k] = N.array( v )
+            if getattr( v, 'astype', 0) and not isinstance( v, N.ndarray):
+                self.profiles[k] = N.array( v )
     
 
     def __getitem__( self, k ):
         """
         Get profile item::
           p['prof1']         <==>  p.get( 'prof1' )         
-          p['prof1','info1]  <==>  p.get( 'prof1','info1' ) 
+          p['prof1','info1'] <==>  p.get( 'prof1','info1' )
+          p[10]              <==>  CrossView( p, 10 )
 
-        @return: item
-        @rtype: any
+        @return: profile OR meta infos thereof OR CrossView dict
+        @rtype: list OR array OR any OR CrossView
         """
-        return self.get( k )
+        if isinstance(k, int):
+            return CrossView( self, k )
 
+        if type(k) is slice:
+            return self.__getslice__( k )
+
+        return self.get( k )
+            
 
     def __setitem__( self, k, v ):
         """
@@ -163,6 +383,20 @@ class ProfileCollection:
         result = self.remove( k )
 
 
+    def __getslice__( self, *arg ):
+        """
+        Get list of CrossViews::
+          p[0:100:5] <==> [ CrossView(p,i) for i in range(0,100,5) ]
+        """
+        s = arg[0]
+        if len( arg ) > 1:
+            s = slice( *arg )
+
+        indices = range( *s.indices( self.profLength() ) )
+
+        return [ CrossView(self,i) for i in indices ]
+
+    
     def __len__( self ):
         """
         Length of profile
@@ -204,7 +438,14 @@ class ProfileCollection:
 
 
     def values( self ):
-        return self.profiles.values()
+        """
+        Get list of all profiles (arrays or lists of values)::
+          p.values() -> [ [any], [any], ... ]
+
+        @return: list of lists or arrays
+        @rtype: [ list/array ]       
+        """
+        return [ self.get( key ) for key in self.keys() ]
 
 
     def items( self ):
@@ -213,9 +454,77 @@ class ProfileCollection:
           p.items() -> [ (key1, [any]), (key2, [any]), ..) ]
 
         @return: list of tuples of profile names and profiles
-        @rtype: list       
+        @rtype: [ ( str, list/array ) ]       
         """
-        return self.profiles.items()
+        return [ (key, self.get(key)) for key in self.keys() ]
+
+    def iteritems(self):
+        """
+        Iterate over (key : profile) pairs:
+          >>> for key, profile in p.iteritems():
+          ...
+        """
+        for key in self.keys():
+            yield (key, self.get( key ) )
+
+
+    def iterCrossViews(self):
+        """
+        Iterate over values of all profiles as L{CrossView} 'dictionaries'
+        indexed by profile name, for example:
+          >>> for atom in p.iterCrossViews():
+          ...     print atom['name'], atom['residue_name']
+
+        The CrossViews remain connected to the profiles and can be
+        used to change values in many profiles simultaneously.
+        Consider using the somewhat faster L{ProfileCollection.iterDicts}
+        if this is not needed and speed is critical.
+
+        @return: CrossView instances behaving like dictionaries
+        @rtype: iterator over [ CrossView ]
+        """
+        for i in range( self.profLength() ):
+            yield self.__CrossView(self, i)
+
+
+    def iterDicts(self):
+        """
+        Iterate over (copies of) values of all profiles as normal dictionaries
+        indexed by profile name, for example:
+          >>> for atom in p.iterCrossViews():
+          ...     print atom['name'], atom['residue_name']
+
+        @return: dictionaries
+        @rtype: iterator over { 'key1':v1, 'key2':v2 }
+        """
+
+        keys = self.keys()
+        profs= zip( *[ self.get( k ) for k in keys ] )
+
+        for values in profs:
+
+            yield dict( zip(keys, values) )
+
+
+    def toCrossViews(self):
+        """
+        @return: list of CrossView pseudo dictionaries
+        @rtype: [ CrossView ]
+        """
+        return [self.__CrossView(self, i) for i in range(self.profLength()) ]
+
+    def toDicts(self):
+        """
+        @return: (copies of) values of all profiles as normal dictionaries
+        @rtype: [ dict ]
+        """
+        keys = self.keys()
+        profs= zip( *[ self.get( k ) for k in keys ] )
+
+        ## a bit faster than list( self.iterDicts() )
+        return [ dict( zip(keys, values) ) for values in profs ]
+
+
 
     def __picklesave_array( self, prof ):
         """
@@ -233,15 +542,15 @@ class ProfileCollection:
         @rtype:  Numeric.array
         """
         if prof.dtype.char in ['i','l']:
-            return prof.astype( N.Int32 )
+            return prof.astype( 'i' )
 
         if prof.dtype.char in ['f','d']:
-            return prof.astype( N.Float32 )
+            return prof.astype( 'f' )
 
         return prof
 
 
-    def __array_or_list( self, prof, asarray ):
+    def array_or_list( self, prof, asarray ):
         """
         Convert to array or list depending on asarray option
 
@@ -255,42 +564,50 @@ class ProfileCollection:
         
         @raise ProfileError:
         """
-	try:
+        try:
 
-	    ## autodetect type
-	    if asarray == 1:
-		if isarray( prof ):
-		    return self.__picklesave_array( prof )
+            ## autodetect type
+            if asarray == 1:
 
-		p = self.__picklesave_array( N.array( prof ) )
-		if p.dtype.char not in ['O','c','S']: ## no char or object arrays!
-		    return p
-		return list( prof )
+                if isinstance( prof, N.ndarray ):
+                    return self.__picklesave_array( prof )
 
-	    ## force list
-	    if asarray == 0:
-		if isarray( prof ):
-		    return prof.tolist()
-		return list( prof )
+                if type( prof ) is str:  # tolerate strings as profiles
+                    return list( prof )
+    
+                p = self.__picklesave_array( N.array( prof ) )
+                if p.dtype.char not in ['O','c','S']: ## no char or object arrays!
+                    return p
 
-	    ## force array
-	    if asarray == 2:
-		if isarray( prof ):
-		    return self.__picklesave_array( prof )
-		return self.__picklesave_array( N.array( prof ) )
+                return list( prof )
 
-	except TypeError, why:
-	    ## Numeric bug: N.array(['','','']) raises TypeError on list of ''
-	    if asarray == 1 or asarray == 0:
-		return list( prof )
+            ## force list
+            if asarray == 0:
 
-	    raise ProfileError, "Cannot create array from given list. %r"\
-		  % T.lastError()
+                if isinstance( prof, N.ndarray ):
+                    return prof.tolist()
+
+                return list( prof )
+
+            ## force array
+            if asarray == 2:
+                if isinstance( prof, N.ndarray ):
+                    return self.__picklesave_array( prof )
+                
+                return self.__picklesave_array( N.array( prof ) )
+
+        except TypeError, why:
+            ## Numeric bug: N.array(['','','']) raises TypeError
+            if asarray == 1 or asarray == 0:
+                return list( prof )
+
+            raise ProfileError, "Cannot create array from given list. %r"\
+                  % T.lastError()
 
         raise ProfileError, "%r not allowed as value for asarray" % asarray
 
 
-    def __expand( self, prof, mask, default ):
+    def expand( self, prof, mask, default ):
         """
         Expand profile to have a value also for masked positions.
 
@@ -307,15 +624,15 @@ class ProfileCollection:
         if mask is not None:
 
             ## optimized variant for arrays
-            if isarray( prof ):
+            if isinstance( prof, N.ndarray ):
                 p = N.resize( prof, (len(mask), ) )
                 p[:] = default
-                N.put( p, N.nonzero( mask ), prof )
+                N.put( p, N.nonzero( mask )[0], prof )
                 return p
 
             p = [ default ] * len( mask )
             prof.reverse()
-            for i in N.nonzero( mask ):
+            for i in N.nonzero( mask )[0]:
                 p[i] = prof.pop()
             return p
 
@@ -362,14 +679,14 @@ class ProfileCollection:
                 "Mask doesn't match profile ( N.sum(mask)!=len(prof) ). " +
                 "%i != %i" % (N.sum(mask), len( prof ) ) )
 
-        prof = self.__array_or_list( prof, asarray )
+        prof = self.array_or_list( prof, asarray )
 
         ## use default == 0 for arrays
-        if not default and isarray( prof ):
+        if not default and isinstance( prof, N.ndarray ):
             default = 0
 
         ## expand profile to have a value also for masked positions
-        prof = self.__expand( prof, mask, default )
+        prof = self.expand( prof, mask, default )
 
         l = self.profLength()
         if l and len( prof ) != l:
@@ -380,7 +697,7 @@ class ProfileCollection:
 
         info['version'] = '%s %s' % (T.dateString(), self.version() )
         if comment: info['comment'] = comment
-        info['isarray'] = isinstance( prof, N.arraytype )
+        info['isarray'] = isinstance( prof, N.ndarray )
 
         ## optional infos
         info.update( moreInfo )
@@ -389,7 +706,7 @@ class ProfileCollection:
         if not 'changed' in moreInfo:
             if name in self.keys():
                 info['changed'] = self.infos[name]['changed'] or \
-                                  not M.arrayEqual( self[name], prof )
+                                  not M.arrayEqual( self.profiles[name], prof )
             else:
                 info['changed'] = 1
 
@@ -439,7 +756,7 @@ class ProfileCollection:
         if type( name ) == tuple:
             result = self.getInfo( name[0] ).get( name[1], default )
 
-            if result is None and not self.infos[ name[0] ].has_key(name[1]):
+            if result is None and not self.getInfo( name[0] ).has_key(name[1]):
                 raise ProfileError( 'No info value found for '+str(name[1]) )
 
             return result
@@ -457,7 +774,7 @@ class ProfileCollection:
     def getInfo( self, name ):
         """
         Use::
-           getInfo( name ) -> dict with infos about profile::
+           getInfo( name ) -> dict with meta infos about profile::
            
         Guaranteed infos: 'version'->str, 'comment'->str, 'changed'->1|0
 
@@ -499,25 +816,30 @@ class ProfileCollection:
         return N.greater( p, cutoff_min ) * N.less( p, cutoff_max )
 
 
-    def take( self, indices ):
+    def take( self, indices, *initArgs, **initKw ):
         """
-        Take on profile using provided indices::
+        Take from profiles using provided indices::
           take( indices ) -> ProfileCollection with extract of all profiles
 
+        Any additional parameters are passed to the constructor of the
+        new instance.
+
         @param indices: list of indices
-        @type  indices [int]
+        @type  indices: [int]
 
         @return: new profile from indices
-        @rtype: profile
+        @rtype: ProfileCollection (or sub-class)
         
         @raise ProfileError: if take error
         """
-        result = self.__class__( self.version() )
+        result = self.__class__( *initArgs, **initKw )
 
         try:
-            for key, prof in self.profiles.items():
+            for key in self.profiles:
 
-                if isarray( prof ):
+                prof = self.get( key )
+
+                if isinstance( prof, N.ndarray ):
                     result.set( key, N.take( prof, indices ) )
                 else:
                     result.set( key, [ prof[i] for i in indices ], asarray=0 )
@@ -528,6 +850,17 @@ class ProfileCollection:
             raise ProfileError( "Can't take sub-profile: "+str(why) )
 
         return result
+
+
+    def compress( self, cond ):
+        """
+        Extract using a mask::
+          p.compress( mask ) <==> p.take( N.nonzero( mask ) )
+
+        @param cond: mask with 1 for the positions to keep
+        @type  cond: array or list of int 
+        """
+        return self.take( N.nonzero( cond )[0] )
 
 
     def remove( self, *key ):
@@ -565,10 +898,10 @@ class ProfileCollection:
           same number of profiles as p0 but with the length of p0+p1+p2..
 
         @param profiles: profile(s) to concatenate
-        @type  profiles: profileCollection(s)
+        @type  profiles: ProfileCollection(s)
         
         @return: concatenated profile(s)  
-        @rtype: profileCollection
+        @rtype: ProfileCollection / subclass
         """
 
         if len( profiles ) == 0:
@@ -581,8 +914,7 @@ class ProfileCollection:
         for k, p in self.profiles.items():
 
             try:
-		# the getattr is a hack to still recognize old Numeric arrays
-                if isarray( p ):
+                if isinstance( p, N.ndarray ):
                     r.set( k, N.concatenate( (p, next.get(k)) ),
                            **self.infos[k] )
                 else:
@@ -622,23 +954,30 @@ class ProfileCollection:
             self.set( key, prof, **info )
 
 
-    def updateMissing( self, source, copyMissing=1, allowEmpty=0 ):
+    def updateMissing( self, source, copyMissing=1, allowEmpty=0,
+                       setChanged=0 ):
         """
-        Merge other ProfileCollection into this one but do not replace / update
+        Merge other ProfileCollection into this one but do not override
         existing profiles and info records. There is one exception:
         Empty profiles (None or []) are replaced but their info records stay
         untouched. If copyMissing=0, profiles that are existing in source but
         not in this collection, are NOT copied (i.e. only empty profiles are
         replaced).
+
+        For each profile copied from the source the 'changed' flag is reset
+        to |setChanged| (default 0), regardless whether or not the profile is
+        marked 'changed' in the source collection.
         
         @param source: profile
         @type  source: ProfileCollection
         @param copyMissing: copy missing profiles that exist in source
                             (default: 1)
         @type  copyMissing: 0|1
-        @param allowEmpty: tolerate zero-length profiles after update
+        @param allowEmpty: still tolerate zero-length profiles after update
                            (default: 0)
         @type  allowEmpty: 0|1
+        @param setChanged: label profiles copied from source as 'changed' [0]
+        @type  setChanged: 0|1
         
         @raise ProfileError: if allowEmpty is 0 and some empty profiles
                              cannot be found in source
@@ -646,23 +985,41 @@ class ProfileCollection:
         for key, prof in source.items():
 
             ## replace "None" profiles
-            if key in self and not self[ key ] is None:
-                self.set( key, prof )
+            if key in self and self.profiles[ key ] in (None, []):
+                self.set( key, prof, changed=setChanged )
 
             ## add profiles that exist in source but not yet in this collection
             if copyMissing and not key in self:
                 info = copy.copy( source.getInfo( key ) )
-                del info['changed']
+                info['changed'] = setChanged
 
                 self.set( key, prof, **info )
 
-        if not allowEmpty and ( None in self.values() or [] in self.values() ):
-            for key, prof in self.items():
+        if not allowEmpty and ( None in self.profiles.values() \
+                                or [] in self.profiles.values() ):
+            for key, prof in self.profiles.items():
                 if not prof:
                     raise ProfileError, \
                           ('Trying to update %s profile but cannot find'\
                            + ' it in source.') % key
 
+
+    def isChanged( self, keys=None ):
+        """
+        @param keys: only check these profiles (default: None -> means all)
+        @type  keys: [ str ]
+        @return: True, if any of the profiles is tagged as 'changed'
+        @rtype: bool
+        """
+
+        keys = keys or self.keys()
+
+        for k in keys:
+            if self.getInfo( k )['changed']:
+                return True
+
+        return False
+        
 
     def clone( self ):
         """
@@ -675,29 +1032,40 @@ class ProfileCollection:
         return copy.deepcopy( self )
 
 
+    def killViews(self):
+        """
+        Deactivate any CrossView instances referring to this ProfileCollection.
+        """
+        self._viewSignal = _ViewSignal()
+
     def clear( self ):
         """
         Delete all::
           clear() -> None; delete all profiles and infos.
         """
+        self.killViews()
+
         self.profiles = {}
         self.infos = {}
+        
 
-
-    def profLength( self ):
+    def profLength( self, default=0 ):
         """
         Length of profile::
-          profLength() -> int; length of first non-None profile or 0
+          profLength() -> int; length of first non-None profile or default (0)
         
+        @param default: value to return if all profiles are set to None
+        @type  default: any
+          
         @return: length of first non-None profile or 0
         @rtype: int     
         """
-        for k, p in self.items():
+        for k, p in self.profiles.items():
 
-            if p != None:
+            if p is not None:
                 return len( p )
 
-        return 0
+        return default
 
 
     def plot( self, *name, **arg ):
@@ -727,10 +1095,11 @@ class ProfileCollection:
 
             p = N.array( self.get( name[i] ) )
 
-            if p.dtype.char in ['O','c']:
+            if p.dtype in ['O','c']:
                 raise TypeError, 'Cannot plot values of profile %s.' % name[i]
 
-            plot.add( biggles.Curve( range( len(p) ), p, color=colors[i],
+            # Biggles with its old Numeric cannot handle numpy arrays
+            plot.add( biggles.Curve( range( len(p) ), list(p), color=colors[i],
                                      **arg ) )
 
             plot.add( biggles.PlotLabel( 0.8, 0.8-i/8.0, name[i],
@@ -740,8 +1109,6 @@ class ProfileCollection:
 
 
     def __shortString( self, s, maxLen ):
-        """
-        """
         if len( s ) <= maxLen:
             return s
 
@@ -757,8 +1124,8 @@ class ProfileCollection:
             (len( self ), self.profLength() )
         for k in self.keys():
             s += k + '\n'
-            s += str(self.infos[k]) + '\n'
-            s += '\t' + self.__shortString( str(self.profiles[k]), 50 ) + '\n'
+            s += str(self.getInfo(k)) + '\n'
+            s += '\t' + self.__shortString( str(self[k]), 50 ) + '\n'
         return s
 
 
@@ -782,16 +1149,17 @@ class Test(BT.BiskitTest):
         mask = N.zeros( 10 )
         mask[0:10:2] = 1
         l = [ s for s in string.letters[:5] ] ## list of letters
+
         self.p.set( 't3', l, comment='masked test', option='z',
-		    mask=mask, default=99, asarray=0 )
+                    mask=mask, default=99, asarray=0 )
 
         if self.local:
-	    print '\nmasked profile: ', repr( self.p['t3'] )
+            print '\nmasked profile: ', repr( self.p['t3'] )
 
         self.p = self.p.take( range(0,10,2) )
 
         if self.local:
-	    print 'unmasked profile: ', repr( self.p['t3'] )
+            print 'unmasked profile: ', repr( self.p['t3'] )
 
         self.p2 = ProfileCollection()
         self.p2.set( 't1', self.p['t1'], comment='overridden', changed=1 )
@@ -802,10 +1170,101 @@ class Test(BT.BiskitTest):
         self.p.update( self.p2, stickyChanged=1 )
 
         self.assert_( N.all( self.r['t1'] ==\
-		      N.array([0, 2, 4, 6, 8, 0, 2, 4, 6, 8, 0, 2, 4, 6, 8])))
+                      [0, 2, 4, 6, 8, 0, 2, 4, 6, 8, 0, 2, 4, 6, 8]))
     
+
+    def test_iterations(self):
+        """ProfileCollection test"""
+        import string
+        import random
+
+        self.p3 = ProfileCollection()
+        self.p3.set( 'letters', string.letters )
+        self.p3.set( 'numbers', range(len(string.letters)) )
+        self.p3.set( 'random', [ random.randint(0,10000)
+                                 for i in range(len(string.letters)) ] )
+
+        self.p3 = self.p3.concat( self.p3, self.p3, self.p3 )
+        self.p3 = self.p3.concat( self.p3, self.p3, self.p3 )
+        self.p3 = self.p3.concat( self.p3, self.p3, self.p3 )
+        self.p3 = self.p3.concat( self.p3, self.p3, self.p3 )
+        self.p3 = self.p3.concat( self.p3, self.p3, self.p3 )
+        self.p3 = self.p3.concat( self.p3, self.p3, self.p3 )
+
+
+import profile
+
+def test_iter_views( p ):
+
+    r = []
+
+    for a in p.iterCrossViews():
+        r += [ a['letters'] ]
+        r += [ a['numbers'] ]
+
+    return r
+
+
+def test_iter_dicts( p ):
+
+    r = []
+
+    for a in p.iterDicts():
+        r += [ a['letters'] ]
+        r += [ a['numbers'] ]
+
+    return r
+
+def test_toDicts( p):
+    r = []
+
+    for a in p.toDicts():
+        r += [ a['letters'] ]
+        r += [ a['numbers'] ]
+
+    return r
+
+
+def test_lst( lst ):
+
+    r = []
+
+    for d in lst:
+        r += [ d['letters'] ]
+        r += [ a['numbers'] ]
+
+    return r
+
+def test_semidirect( p ):
+    r = []
+
+    for i in range( p.profLength()):
+        r += [ p['letters'][i] ]
+
+    return r
+
+
+def test_classic( p ):
+
+    r = []
+
+    for i in p['letters']:
+        r += [ i ]
+
+    return r
+
+def clock( s ):
+    profile.run( s, 'report.out' )
+
+    ## Analyzing
+    import pstats
+    p = pstats.Stats('report.out')
+
+    ## long steps and methods calling them
+    p.sort_stats('cumulative').print_stats(20)
+    p.print_callers(0.0)
 
 if __name__ == '__main__':
 
-	BT.localTest()
+    BT.localTest()
 

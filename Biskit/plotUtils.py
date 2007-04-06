@@ -545,9 +545,9 @@ class Test(BT.BiskitTest):
     """Test case"""
 
     def test_plotUtils(self):
-	"""plotUtils test"""
+        """plotUtils test"""
         self.p = prepare_plot(xlabel='', ylabel='flex $\langle{x}\rangle$',
-			      xrange=(0,5), yrange=(0,4) )
+                              xrange=(0,5), yrange=(0,4) )
 
         add_bars( self.p, [ 1, 2.5, 1.25, 0.3 ], fillfunc=diagonal_fill,
                   color='grey', size=0.1, invert=1,
@@ -562,8 +562,8 @@ class Test(BT.BiskitTest):
 ##         ## example of how to write an eps plot to disc
 ##         p.write_eps(T.absfile('~/test.eps'), width='10cm', height='8.7cm')
         
-	if self.local or self.VERBOSITY > 2:
-	    self.p.show()
+        if self.local or self.VERBOSITY > 2:
+            self.p.show()
         
        
 

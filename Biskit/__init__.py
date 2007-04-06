@@ -53,6 +53,7 @@ try:
     from PDBModel import PDBModel, PDBProfiles, PDBError
 
     from ProfileCollection import ProfileCollection, ProfileError
+    from ProfileMirror import ProfileMirror
     from Prosa import ProsaII
     from Pymoler import Pymoler
 

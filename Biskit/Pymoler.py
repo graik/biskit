@@ -51,7 +51,7 @@ class PymolModel:
         if type( model ) is str:
             self.fname = model
         else:
-            self.struct = model.clone( deepcopy=1 ) ## clone atom dicts
+            self.struct = model.clone() ## clone atom dicts
             self.temporary = 1
 
         self.modName = modName
@@ -79,10 +79,7 @@ class PymolModel:
             self.struct = PDBModel( self.fname )
             self.temporary = 1
 
-        i = 0
-        for atom in self.struct.atoms:
-            atom[ key ] = values[i]
-            i += 1
+        self.struct[ key ] = values
 
 
     def addResProperty( self, values, key='temperature_factor'):
@@ -104,12 +101,7 @@ class PymolModel:
                 self.struct = PDBModel( self.fname )
                 self.temporary = 1
 
-            i = 0
-            resMap = self.struct.resMap()
-
-            for atom in self.struct.atoms:
-                atom[ key ] = values[ resMap[i] ]
-                i += 1
+            self.struct[ key ] = self.struct.res2atomProfile( values )
         except:
             print T.lastError()
 
@@ -164,7 +156,7 @@ class Pymoler( Executor ):
         self.verbose = verbose
         
         # name of .pml file
-	self.foutName = tempfile.mktemp() + '.pml'
+        self.foutName = tempfile.mktemp() + '.pml'
 
         # open for <appending|writing|reading>
         self.fgenerate = open(self.foutName, mode) 
@@ -337,9 +329,9 @@ class Pymoler( Executor ):
         @type  selDic: dict
         """
         ## the selection must comply with one of the three selection
-	## schemes below
+        ## schemes below
         keyList = ['model', 'segment', 'chain', 'residue', 'atom', \
-		   'element', 'expression']
+                   'element', 'expression']
 
         # check for invalid selections
         for sel in selDic.keys():
@@ -383,27 +375,27 @@ class Pymoler( Executor ):
 
     def addDeleteScript(self):
         """
-	Deletes the pymol script file from disc
-	"""
-	self.add( "/ import os" )
-	self.add("/ os.system('rm " + self.foutName+ "')")
+        Deletes the pymol script file from disc
+        """
+        self.add( "/ import os" )
+        self.add("/ os.system('rm " + self.foutName+ "')")
 
 
     def addDeletePdbs(self):
         """
-	Deletes the pdb-files in the list from disc
-	"""
-	self.add( "/ import os" )
-	for key in self.dic.keys():
+        Deletes the pdb-files in the list from disc
+        """
+        self.add( "/ import os" )
+        for key in self.dic.keys():
 
             for model in self.dic[ key ]:
                 ## only remove files created by PymolInput!
-		if model.temporary:
-		        self.add( "/ os.system('rm " + model.fname + "')" )
+                if model.temporary:
+                        self.add( "/ os.system('rm " + model.fname + "')" )
 
 
     def setAtomValues( self, model, values, key='temperature_factor',
-		       lastOnly=0 ):
+                       lastOnly=0 ):
         """
         Add numeric value to all atoms of all Structures or the last
         Structure in a model.. The values will be written to either
@@ -433,12 +425,12 @@ class Pymoler( Executor ):
                     m.addProperty( values, key )
                 except:
                     T.errWriteln( "Warning: error while adding properties.")
-		    T.errWriteln( "Key: "+str( key )+" values: "+str( values ) )
+                    T.errWriteln( "Key: "+str( key )+" values: "+str( values ) )
                     T.errWriteln( T.lastError() )
 
 
     def setResValues( self, model, values, key='temperature_factor',
-		      lastOnly=0 ):
+                      lastOnly=0 ):
         """
         Add numeric value per residue to all atoms of all Structures
         or the last Structure in a model. The values will be written to
@@ -468,7 +460,7 @@ class Pymoler( Executor ):
                     m.addResProperty( values, key )
                 except:
                     T.errWriteln( "Warning: error while adding properties.")
-		    T.errWriteln( "Key: "+str( key )+" values: "+str( values ) )
+                    T.errWriteln( "Key: "+str( key )+" values: "+str( values ) )
                     T.errWriteln( T.lastError() )
 
 
@@ -552,10 +544,10 @@ class Pymoler( Executor ):
             print '\n\nWARNING: No external PyMol scripts added\n\n'
 
 
-##  	# MAKE default SELECTIONS
-## 	self.add('select bb, ' + self.makeSel({'expression':'*/c,ca,o,n'} ))
-##  	self.add('select sc, ' +\
-## 		 self.makeSel({'expression':'!(*/c,o,ca,n) and !element h'}))
+##      # MAKE default SELECTIONS
+##      self.add('select bb, ' + self.makeSel({'expression':'*/c,ca,o,n'} ))
+##      self.add('select sc, ' +\
+##               self.makeSel({'expression':'!(*/c,o,ca,n) and !element h'}))
 ##         self.add('select none')
 
 
@@ -563,15 +555,15 @@ class Pymoler( Executor ):
         """
         Overrides Executor method.
         """
-	# clean up files from disc
+        # clean up files from disc
         if cleanUp:
             self.addDeletePdbs()
             self.addDeleteScript()
 
-	self.flush()
+        self.flush()
 
         ## Write PDB's to disc if needed
-	self.writeStructures()
+        self.writeStructures()
 
 
     def show( self ):
@@ -592,7 +584,7 @@ class Test(BT.BiskitTest):
     TAGS = [ BT.EXE ]
 
     def test_Pymoler(self):
-	"""Pymoler test"""
+        """Pymoler test"""
         self.traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
 
         self.pm = Pymoler( full=0, verbose=self.local )
@@ -601,7 +593,7 @@ class Test(BT.BiskitTest):
 
         sel = self.pm.makeSel({'residue':29})
 ##         self.pm.add('show stick, %s' % sel)
-	self.pm.add('show surface, %s' % sel)
+        self.pm.add('show surface, %s' % sel)
 
         self.pm.add('mplay')
         
@@ -610,8 +602,8 @@ class Test(BT.BiskitTest):
             
         self.pm.run() ## old style call "pm.show()" also works
     
-	self.assert_( self.pm.pid is not None )
-	
+        self.assert_( self.pm.pid is not None )
+        
 if __name__ == '__main__':
 
     BT.localTest()

@@ -73,8 +73,8 @@ class PCRModel( PDBModel ):
         return self.psfFileName
 
 
-    def take(self, i, deepcopy=0 ):
-        r = PDBModel.take( self, i, deepcopy )
+    def take(self, i ):
+        r = PDBModel.take( self, i )
         r.psfFileName = self.psfFileName
         r.initVersion = self.initVersion
         return r
@@ -118,7 +118,7 @@ class Test(BT.BiskitTest):
         if self.local:
             print 'Rmsd between the two complex structures: %.2f Angstrom'%rms
 
-	self.assertAlmostEqual(rms, 58.7844130314, 6)
+        self.assertAlmostEqual(rms, 58.7844130314, 4)
 
     
 if __name__ == '__main__':

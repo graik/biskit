@@ -31,12 +31,16 @@ Parse a PDB file into a PDBModel.
 import Scientific.IO.PDB as IO
 import numpy.oldnumeric as N
 
-import Biskit.tools as T
 import Biskit as B
+import Biskit.mathUtils as M
+import Biskit.tools as T
 from Biskit.PDBParser import PDBParser, PDBParserError
 
 
 class PDBParseFile( PDBParser ):
+
+    #: default values for missing atom records
+    DEFAULTS = {}
 
     @staticmethod
     def supports( source ):
@@ -87,10 +91,13 @@ class PDBParseFile( PDBParser ):
         return ''
 
 
-    def update( self, model, source, skipRes=None, lookHarder=0):
+    def update( self, model, source, skipRes=None, updateMissing=0, force=0):
         """
         Update empty or missing fields of model from the source. The
         model will be connected to the source via model.source.
+        Profiles that are derived from the source are labeled 'changed'=0.
+        The same holds for coordinates (xyzChanged=0).
+        However, existing profiles or coordinates or fields remain untouched.
 
         @param model: existing model
         @type  model: PDBModel
@@ -98,23 +105,34 @@ class PDBParseFile( PDBParser ):
         @type  source: str
         @param skipRes: list residue names that should not be parsed
         @type  skipRes: [ str ]
-        @param lookHarder: ignored
-        @type  lookHarder: 1|0
+        @param updateMissing: ignored
+        @type  updateMissing: 1|0
 
         @raise PDBParserError - if something is wrong with the source file
         """
 
         try:
             ## atoms and/or coordinates need to be updated from PDB
-            if self.needsUpdate( model ):
+            if force or self.needsUpdate( model ):
 
                 atoms, xyz = self.__collectAll( source, skipRes )
 
-                model.atoms = model.atoms or atoms
+                keys = M.union( atoms.keys(),  self.DEFAULTS.keys() )
 
-                if model.xyz is None: model.xyz = xyz
+                for k in keys:
 
-                model.__terAtoms = model._PDBModel__pdbTer()
+                    if model.aProfiles.get( k, default=0, update=False ) in \
+                           (0,None):
+                    
+                        dflt = self.DEFAULTS.get( k, None )
+                        model.aProfiles.set(k, atoms.get(k, dflt), changed=0 )
+
+                if model.xyz is None:
+                    model.xyz = xyz
+                    model.xyzChanged = 0
+
+                model._resIndex  =None
+                model._chainIndex=None
 
                 model.fileName = model.fileName or source
 
@@ -201,8 +219,11 @@ REMEDY: run the script fixAtomIndices.py
                  and xyz array N x 3
         @rtype: ( list, array )
         """
-        items = []
         xyz   = []
+
+        aProfs = {}
+        for k in B.PDBModel.PDB_KEYS:
+            aProfs[k] = list()
 
         f = IO.PDBFile( fname )
 
@@ -236,7 +257,11 @@ REMEDY: run the script fixAtomIndices.py
                     a['name'] = a['name'].strip()
 
                     a['type'] = line[0]
-                    if newChain: a['after_ter'] = 1
+
+                    if newChain:
+                        a['after_ter'] = 1
+                    else:
+                        a['after_ter'] = 0
 
                     if a['element'] == '':
                         a['element'] = self.__firstLetter( a['name'] )
@@ -251,11 +276,12 @@ REMEDY: run the script fixAtomIndices.py
 
                     del a['position']
 
-                    items += [ a ]
+                    for k, v in a.items():
+                        aProfs[k].append( v )
 
         except:
-            raise PDBParserError("Error parsing file "+fname+": " + T.lastError())
-
+            raise PDBParserError("Error parsing file "+fname+": " \
+                                 + T.lastError())
         try:
             f.close()
         except:
@@ -265,13 +291,31 @@ REMEDY: run the script fixAtomIndices.py
             raise PDBParserError("Error parsing file "+fname+": "+
                             "Couldn't find any atoms.")
 
-        return items, N.array( xyz, N.Float32 )
+        return aProfs, N.array( xyz, N.Float32 )
     
 #############
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+import time
+
+def clock( s, ns=globals() ):
+    import cProfile
+
+    locals().update( ns )
+    
+    cProfile.run( s, 'report.out' )
+
+    ## Analyzing
+    import pstats
+    p = pstats.Stats('report.out')
+    p.strip_dirs()
+
+    ## long steps and methods calling them
+    p.sort_stats('cumulative').print_stats(20)
+    p.print_callers( 20 )
+
+
 class Test(BT.BiskitTest):
     """Test case"""
 
@@ -283,10 +327,13 @@ class Test(BT.BiskitTest):
             print 'Loading pdb file ..'
 
         self.p = PDBParseFile()
-        self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P.pdb')
+        self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P_rec_original.pdb')
+##      self.m2= self.p.parse2new( T.testRoot()+'/com/1BGS.pdb' )
 
-        self.assertAlmostEqual( N.sum( self.m.centerOfMass() ),
-	      113.682601929 )
+        self.assertAlmostEqual( N.sum( self.m.centerOfMass() ), 
+                                100.93785705968378, 4 )
+##         self.assertAlmostEqual( N.sum( self.m.centerOfMass() ),
+##            113.682601929 )
 
 if __name__ == '__main__':
 

@@ -960,7 +960,7 @@ def tryRemove(f, verbose=0, tree=0, wildcard=0 ):
             if tree:
                 shutil.rmtree( f, ignore_errors=1 )
             else:
-                errWriteln('%s is directory - not removed.')
+                errWriteln('%r is directory - not removed.' % f)
         else:
             if wildcard:
                 l = glob.glob( f )
@@ -970,7 +970,7 @@ def tryRemove(f, verbose=0, tree=0, wildcard=0 ):
                 os.remove( f )
         return 1
     except:
-        if verbose: errWriteln( 'Warning: Cannot remove %s.' % str(f) )
+        if verbose: errWriteln( 'Warning: Cannot remove %r.' % f )
         return 0
 
 def backup( fname, suffix='~' ):
@@ -1177,10 +1177,10 @@ def gzopen( fname, mode='r' ):
     fname = absfile( fname )
 
     if fname[-2:] == 'gz':
-	return gzip.open( fname, mode )
+        return gzip.open( fname, mode )
 
     return open( fname, mode )
-	
+        
 
 #############
 ##  TESTING        

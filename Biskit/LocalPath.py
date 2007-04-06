@@ -641,7 +641,7 @@ class Test(BT.BiskitTest):
 
         os.environ['PRJ_INTERFACES'] = '~raik/data/tb/interfaces'
 
-	S = self
+        S = self
 
         S.path = []
 
@@ -652,31 +652,31 @@ class Test(BT.BiskitTest):
             ('/home/Bis/johan/data/tb/interfaces','PRJ_INTERFACES'),
             ('/c11/com_wet/ref.com', None) )
         S.path += [ 'Example 1:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
-	S.assert_( 'johan' not in S.l.local() )
+        S.assert_( 'johan' not in S.l.local() )
 
         ## Example 2; create from path with custom variable
         S.l.set_path( '/home/Bis/raik/data/tb/interfaces/c11/com_wet/ref.com',
                     USER='/home/Bis/raik' )
         S.path +=  [ 'Example 2:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
-	S.assertEqual( S.l.formatted(),\
-	     '{/home/Bis/raik|$USER}/data/tb/interfaces/c11/com_wet/ref.com' )
+        S.assertEqual( S.l.formatted(),\
+             '{/home/Bis/raik|$USER}/data/tb/interfaces/c11/com_wet/ref.com' )
 
         ## Example 3; create from non-existing path
         S.l.set_path( '/home/xyz/data/tb/interfaces/c11/com_wet/ref.com' )
         S.path += [ 'Example 3:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
-	S.assert_( S.l.formatted() == S.l.local() )
+        S.assert_( S.l.formatted() == S.l.local() )
 
         ## Example 4; create from existing path with automatic substitution
         S.l.set_path( T.projectRoot() + '/test/com' )
         S.path += [ 'Example 4:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
-	S.assertEqual( S.l.formatted(),
-		       '{%s|$projectRoot}/test/com' % T.projectRoot())
+        S.assertEqual( S.l.formatted(),
+                       '{%s|$projectRoot}/test/com' % T.projectRoot())
 
         ## Example 5; rule out stray substitutions
         S.l.set_path( T.projectRoot() + '/tmp/com', maxSub=1, TMP='/tmp' )
         S.path += [ 'Example 5:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
-	S.assertEqual( S.l.formatted(),
-		       '{%s|$projectRoot}/tmp/com'% T.projectRoot())
+        S.assertEqual( S.l.formatted(),
+                       '{%s|$projectRoot}/tmp/com'% T.projectRoot())
 
         self.assertEqual( S.l.fragments[0][1], 'projectRoot' )
 
