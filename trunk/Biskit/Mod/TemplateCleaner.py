@@ -158,7 +158,7 @@ class TemplateCleaner:
         if not len( m_ca ) % 13 == 0:
             n_lines += 1
 
-        chain_id = m_ca.getAtoms()[0]['chain_id']
+        chain_id = m_ca['chain_id'][0]
 
         ## structure alignment program needs chain identifier
         if not chain_id:
@@ -166,7 +166,7 @@ class TemplateCleaner:
 
             chain_id = 'A'  ## for sequence record
 
-	    chain_id = 'A'  ## for sequence record
+            chain_id = 'A'  ## for sequence record
 
         ## create SEQRES record
         n_res = m_ca.lenResidues()
