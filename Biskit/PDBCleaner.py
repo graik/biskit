@@ -127,22 +127,23 @@ class PDBCleaner:
         self.logWrite(self.model.pdbCode +
                       ': Looking for non-standard residue names...')
 
-        for a in self.model.getAtoms():
+        resnames = self.model['residue_name']
+        for i in self.model.atomRange():
 
-            resname = a['residue_name'].upper()
+            resname = resnames[i].upper()
 
             if resname not in standard:
                 if resname in MU.nonStandardAA:
-                    a['residue_name'] = MU.nonStandardAA[ resname ]
+                    resnames[i] = MU.nonStandardAA[ resname ]
 
                     self.logWrite('renamed %s %i to %s' % \
-                                  (resname, a['residue_number'],
+                                  (resname, resnames[i],
                                    MU.nonStandardAA[ resname ]))
                 else:
-                    a['residue_name'] = 'ALA'
+                    resnames[i] = 'ALA'
 
                     self.logWrite('Warning: unknown residue name %s %i: ' \
-                                  % (resname, a['residue_number'] ) )
+                                  % (resname, resnames[i] ) )
                     self.logWrite('\t->renamed to ALA.')
 
                 replaced += 1
