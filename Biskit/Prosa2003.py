@@ -253,8 +253,9 @@ exit\n
                 model.concat(self.models[i])
 
         model.renumberResidues()
-        for a in model.getAtoms():
-            a['chain_id'] = 'P'
+        #for a in model.getAtoms():
+            #a['chain_id'] = 'P'
+        model['chain_id'] = ['P'] * len( model )
         model.writePdb( self.prosaPdbFile, ter=0 )
 
 
@@ -352,7 +353,7 @@ class Test(BT.BiskitTest):
     TAGS = [ BT.EXE ]
 
     def test_Prosa2003(self):
-	"""Prosa2003 test"""
+        """Prosa2003 test"""
         from Biskit import PDBModel
         
         ## Loading PDB...
@@ -374,7 +375,7 @@ class Test(BT.BiskitTest):
             print "Result: ", self.result
 
         self.assert_( N.sum(self.result - [ -94.568,  -64.903, -159.463 ] ) \
-		      < 0.0000001 )
+                      < 0.0000001 )
 
         
 if __name__ == '__main__':
