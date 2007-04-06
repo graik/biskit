@@ -54,6 +54,7 @@ Default options:
 
 def renameAmberRes( model ):
 
+    ## @todo: switch to direct model['residue_name'] access for speed
     for a in model.getAtoms():
         if a['residue_name'] == 'CYX':
             a['residue_name'] = 'CYS'
@@ -66,6 +67,7 @@ def unwrapAmberAtoms( model ):
     """
     numbers = map( str, range(10) )
 
+    ## @todo: switch to direct model['name'] access for speed
     for a in model.getAtoms():
         if len(a['name'])==4 and a['name'][0] in numbers:
             a['name'] = a['name'][1:] + a['name'][0]
