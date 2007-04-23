@@ -106,7 +106,7 @@ nonStandardAA={ 'UNK':'ALA', 'ABA':'ALA', 'B2A':'ALA',
                 'HIE':'HIS', 'HID':'HIS', 'HIP':'HIS',
                 'CYX':'CYS' }
 
-## heavy atoms of amino acids in standard order
+#: heavy atoms of amino acids in standard order, OXT applies to C term only
 aaAtoms={'GLY':['N','CA','C','O', 'OXT' ],
          'ALA':['N','CA','C','O', 'CB', 'OXT'],
          'VAL':['N','CA','C','O','CB','CG1','CG2', 'OXT'],
@@ -131,7 +131,7 @@ aaAtoms={'GLY':['N','CA','C','O', 'OXT' ],
          'ASP':['N','CA','C','O','CB','CG','OD1','OD2', 'OXT'],
          'GLU':['N','CA','C','O','CB','CG','CD','OE1','OE2', 'OXT']}
 
-## dictionary of elements
+#: dictionary of elements
 elements = { 'carbon':['C', 'CD2', 'CZ2', 'CB', 'CA', 'CG', 'CE', 'CD', 'CZ',
                        'CH2', 'CE3', 'CD1', 'CE1', 'CZ3', 'CG1', 'CG2', 'CE2'],
              'nitrogen':['NZ', 'ND2', 'NH1', 'NH2', 'ND1', 'NE1', 'NE2',
@@ -153,7 +153,7 @@ elements = { 'carbon':['C', 'CD2', 'CZ2', 'CB', 'CA', 'CG', 'CE', 'CD', 'CZ',
              'clustering_ABD':['C','CA','CB','CD','CD1','OD1','SD' ],
              'clustering_AB':['C','CA','CB']}
 
-## number of attached H for each heavy atom in each amino acid
+#: number of attached H for each heavy atom in each amino acid
 aaAtomsH={'XXX':{'N':1,'CA':1,'C':0,'O':0,'OXT':0},
           'GLY':{},
           'ALA':{'CB':3},
