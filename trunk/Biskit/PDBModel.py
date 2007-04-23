@@ -2412,21 +2412,16 @@ class PDBModel:
         Get list to map from any atom to a continuous residue numbering
         (starting with 0). A new residue is assumed to start whenever the
         'residue_number' or the 'residue_name' record changes between 2
-        atoms. The mask is applied BEFORE looking for residue borders,
-        i.e. it can change the residue numbering.
-
+        atoms.
+        
         See L{resList()} for an example of how to use the residue map.
 
-        @param mask: [0000011111001111...] include atom: yes or no
-                     len(atom_mask) == number of atoms in self.xyz
-        @type  mask: list of int (1||0)
         @param force: recalculate map even if cached one is available (def 0)
         @type  force: 0||1
         @param cache: cache new map (def 1)
         @type  cache: 0||1
 
-        @return: array [00011111122223333..], residue index for each
-                 unmasked atom
+        @return: array [00011111122223333..], residue index for each atom
         @rtype:  list of int
         """
         return self.index2map( self.resIndex( force=force,cache=cache ),
