@@ -62,7 +62,7 @@ Usage
     class Test(BT.BiskitTest):
         """Test MyModule"""
 
-	TAGS = [ BT.LONG ]
+        TAGS = [ BT.LONG ]
 
         def test_veryLongComputation( self ):
             """MyModule.veryLongComputation test"""
@@ -70,9 +70,9 @@ Usage
             self.m = MyClass()
             self.result = self.m.veryLongComputation()
 
-	    if self.local:   ## only if the module is executed directly
-		print self.result 
-		
+            if self.local:   ## only if the module is executed directly
+                print self.result 
+                
             self.assertEqual( self.result, 42, 'unexpected result' )
 
 
@@ -81,13 +81,13 @@ Usage
         ## run Test and push self.* fields into global namespace
         BT.localTest( )
 
-	print result  ## works thanks to some namespace magic in localTest
+        print result  ## works thanks to some namespace magic in localTest
 
 
 Note:
-	- If TAG is not given, the test will have the default NORMAL tag.
-	- Names of test functions **must** start with C{test}.
-	- The doc string of test_* will be reported as id of this test.
+        - If TAG is not given, the test will have the default NORMAL tag.
+        - Names of test functions **must** start with C{test}.
+        - The doc string of test_* will be reported as id of this test.
 '''
 
 import unittest as U
@@ -156,23 +156,23 @@ class BiskitTest( U.TestCase):
     VERBOSITY= 2
 
     def prepare(self):
-	"""Hook for test setup."""
-	pass
+        """Hook for test setup."""
+        pass
 
     def cleanUp( self ):
-	"""Hook for post-test clean up; skipped if DEBUG==True."""
-	pass
+        """Hook for post-test clean up; skipped if DEBUG==True."""
+        pass
 
     def setUp( self ):
         self.local =  self.__module__ == '__main__'
         self.log =       getattr( self, 'log', BiskitTest.TESTLOG )
-## 	self.verbosity = getattr( self, 'verbosity', BiskitTest.VERBOSITY )
-## 	self.debugging = getattr( self, 'debugging', BiskitTest.DEBUG )
-	self.prepare()
+##      self.verbosity = getattr( self, 'verbosity', BiskitTest.VERBOSITY )
+##      self.debugging = getattr( self, 'debugging', BiskitTest.DEBUG )
+        self.prepare()
 
     def tearDown( self ):
-	if not self.DEBUG:
-	    self.cleanUp()
+        if not self.DEBUG:
+            self.cleanUp()
 
 
 class FilteredTestSuite( U.TestSuite ):
@@ -232,9 +232,9 @@ class Flushing_TextTestResult( U._TextTestResult ):
     """
 
     def startTest(self, test):
-	"""print id at start of test... and flush it"""
-	super( self.__class__, self ).startTest( test )
-	self.stream.flush()
+        """print id at start of test... and flush it"""
+        super( self.__class__, self ).startTest( test )
+        self.stream.flush()
 
 class FlushingTextTestRunner( U.TextTestRunner ):
     """
@@ -244,7 +244,7 @@ class FlushingTextTestRunner( U.TextTestRunner ):
 
     def _makeResult(self):
         return Flushing_TextTestResult(self.stream, self.descriptions,
-				     self.verbosity)
+                                     self.verbosity)
 
 
 class BiskitTestLoader( object ):
@@ -257,25 +257,25 @@ class BiskitTestLoader( object ):
     def __init__( self, log=StdLog(),
                   allowed=[], forbidden=[], verbosity=2, debug=False ):
         """
-	@param log: log output target [default: L{Biskit.StdLog}]
-	@type  log: Biskit.LogFile
+        @param log: log output target [default: L{Biskit.StdLog}]
+        @type  log: Biskit.LogFile
         @param allowed: tags required for test to be considered, default: []
         @type  allowed: [ int ]
         @param forbidden: tags leading to the exclusion of test, default: []
         @type  forbidden: [ int ]
-	@param verbosity: verbosity level for unittest.TextTestRunner
-	@type  verbosity: int
-	"""
+        @param verbosity: verbosity level for unittest.TextTestRunner
+        @type  verbosity: int
+        """
 
         self.allowed  = allowed
         self.forbidden= forbidden
         self.log = log
         self.verbosity = verbosity
-	self.debugging = debug
+        self.debugging = debug
         self.suite =  FilteredTestSuite( allowed=allowed, forbidden=forbidden )
-	self.modules_untested = []  #: list of modules without test cases
-	self.modules_tested = []    #: list of modules containing test cases
-	self.result = U.TestResult() #: will hold test result after run()
+        self.modules_untested = []  #: list of modules without test cases
+        self.modules_tested = []    #: list of modules containing test cases
+        self.result = U.TestResult() #: will hold test result after run()
 
 
     def modulesFromPath( self, path=T.projectRoot(), module='Biskit' ):
@@ -320,22 +320,22 @@ class BiskitTestLoader( object ):
         @type  modules: [ module ]
         """
         for m in modules:
-	    tested = 0
+            tested = 0
 
             for i in m.__dict__.values():
 
                 if type(i) is type and \
-		   issubclass( i, Biskit.test.BiskitTest ) and \
-		   i.__name__ != 'BiskitTest':
+                   issubclass( i, Biskit.test.BiskitTest ) and \
+                   i.__name__ != 'BiskitTest':
                     
                     suite = U.defaultTestLoader.loadTestsFromTestCase( i )
                     self.suite.addTests( suite )
-		    tested = 1
+                    tested = 1
 
-	    if tested:
-	        self.modules_tested += [m]
-	    else:
-		self.modules_untested += [m]
+            if tested:
+                self.modules_tested += [m]
+            else:
+                self.modules_untested += [m]
 
 
     def collectTests( self, path=T.projectRoot(), module='Biskit' ):
@@ -351,12 +351,12 @@ class BiskitTestLoader( object ):
 
 
     def __moduleNames(self, modules ):
-	
-	modules = [ m.__name__ for m in modules ]   ## extract name
-	modules = [ m.replace('.',' .   ') for m in modules ]
+        
+        modules = [ m.__name__ for m in modules ]   ## extract name
+        modules = [ m.replace('.',' .   ') for m in modules ]
 
-	return modules
-	
+        return modules
+        
 
     def report( self ):
         """
@@ -366,15 +366,15 @@ class BiskitTestLoader( object ):
         total  = self.result.testsRun
         failed = len(self.result.failures) + len(self.result.errors)
 
-	m_tested  = len( self.modules_tested )
-	m_untested= len( self.modules_untested)
-	m_total  = m_tested + m_untested
+        m_tested  = len( self.modules_tested )
+        m_untested= len( self.modules_untested)
+        m_total  = m_tested + m_untested
 
-	## report coverage
-	print '\nTest Coverage:\n=============\n'
-	print '%i out of %i modules had no test case:' % (m_untested,m_total)
-	for m in self.__moduleNames( self.modules_untested) :
-	    print '\t', m
+        ## report coverage
+        print '\nTest Coverage:\n=============\n'
+        print '%i out of %i modules had no test case:' % (m_untested,m_total)
+        for m in self.__moduleNames( self.modules_untested) :
+            print '\t', m
 
         ## print a summary
         print '\nSUMMARY:\n=======\n'
@@ -393,19 +393,19 @@ class BiskitTestLoader( object ):
 
 
     def run( self, dry=False ):
-	"""
-	@param dry: do not actually run the test but just set it up [False]
-	@type  dry: bool
-	"""
-	## push global settings into test classes
-	for testclass in self.suite:
-	    testclass.DEBUG = self.debugging
-	    testclass.VERBOSITY = self.verbosity
-	    testclass.TESTLOG = self.log
+        """
+        @param dry: do not actually run the test but just set it up [False]
+        @type  dry: bool
+        """
+        ## push global settings into test classes
+        for testclass in self.suite:
+            testclass.DEBUG = self.debugging
+            testclass.VERBOSITY = self.verbosity
+            testclass.TESTLOG = self.log
 
         runner = FlushingTextTestRunner(self.log.f(), verbosity=self.verbosity)
-	if not dry:
-	    self.result = runner.run( self.suite )
+        if not dry:
+            self.result = runner.run( self.suite )
 
 #########################
 ### Helper functions ####
@@ -446,13 +446,13 @@ def extractTestCases( namespace ):
             r += [i]
 
     if not r:
-	raise BiskitTestError, 'no BiskitTest class found in namespace'
+        raise BiskitTestError, 'no BiskitTest class found in namespace'
 
     return r
 
 
 def localTest( testclass=None, verbosity=BiskitTest.VERBOSITY,
-	       debug=BiskitTest.DEBUG, log=BiskitTest.TESTLOG ):
+               debug=BiskitTest.DEBUG, log=BiskitTest.TESTLOG ):
     """
     Perform the BiskitTest(s) found in the scope of the calling module.
     After the test run, all fields of the BiskitTest instance are
@@ -476,25 +476,25 @@ def localTest( testclass=None, verbosity=BiskitTest.VERBOSITY,
     ## get calling namespace
     outer = getOuterNamespace()
     if testclass:
-	testclasses = [testclass]
+        testclasses = [testclass]
     else:
-	testclasses = extractTestCases( outer )
+        testclasses = extractTestCases( outer )
 
     suite = U.TestSuite()
     for test in testclasses:
-	suite.addTests( U.TestLoader().loadTestsFromTestCase( test ) )
+        suite.addTests( U.TestLoader().loadTestsFromTestCase( test ) )
 
     for test in suite:
-	test.DEBUG = debug
-	test.VERBOSITY = verbosity
-	test.TESTLOG = log
+        test.DEBUG = debug
+        test.VERBOSITY = verbosity
+        test.TESTLOG = log
 
     runner= U.TextTestRunner(verbosity=verbosity)
     r = runner.run( suite )
 
     for t in suite._tests:
         outer.update( t.__dict__ )
-	outer.update( {'self':t })
+        outer.update( {'self':t })
 
     return r
 
@@ -514,16 +514,16 @@ Run unittest tests for biskit.
 
     test.py [-i |include tag1 tag2..| -e |exclude tag1 tag2..|
              -p |package1 package2..|
-	     -v |verbosity| -log |log-file| -nox ]
+             -v |verbosity| -log |log-file| -nox ]
 
     i    - include tags, only run tests with at least one of these tags   [All]
     e    - exclude tags, do not run tests labeled with one of these tags  [old]
          valid tags are:
              long   - long running test case
-	     pvm    - depends on PVM
-	     exe    - depends on external application
-	     old    - is obsolete
-	 (If no tags are given to -i this means all tests are included)
+             pvm    - depends on PVM
+             exe    - depends on external application
+             old    - is obsolete
+         (If no tags are given to -i this means all tests are included)
 
     p    - packages to test, e.g. Biskit Biskit.Dock Biskit.Mod           [All]
     v    - int, verbosity level, 3 switches on several graphical plots      [2]
@@ -551,10 +551,10 @@ Default options:
 def _str2tags( s ):
     """convert list of string options to list of valid TAGS"""
     try:
-	r = [ x.upper() for x in s if x ] ## to list of uppercase str
-	r = [ eval( x ) for x in r ]      ## to list of int
+        r = [ x.upper() for x in s if x ] ## to list of uppercase str
+        r = [ eval( x ) for x in r ]      ## to list of int
     except:
-	EHandler.error('unrecognized tags: %r'%s)
+        EHandler.error('unrecognized tags: %r'%s)
 
     return r
 
@@ -566,9 +566,9 @@ def _convertOptions( o ):
     o['dry'] = ('dry' in o)
     o['debug'] = ('debug' in o)
     if o['log']:
-	o['log'] = LogFile( o['log'] )
+        o['log'] = LogFile( o['log'] )
     else:
-	o['log'] = StdLog()
+        o['log'] = StdLog()
     o['p'] = T.toList( o['p'] )
 
 if __name__ == '__main__':
@@ -578,30 +578,30 @@ if __name__ == '__main__':
 
 
     defaults = {'i':'',
-		'e':'old',
-		'p':['Biskit', 'Biskit.Dock', 'Biskit.Mod', 'Biskit.PVM', 
-		     'Biskit.Statistics'],
-		'v':'2',
-		'log': '', ##T.testRoot()+'/test.log',
-		}
+                'e':'old',
+                'p':['Biskit', 'Biskit.Dock', 'Biskit.Mod', 'Biskit.PVM', 
+                     'Biskit.Statistics'],
+                'v':'2',
+                'log': '', ##T.testRoot()+'/test.log',
+                }
 
     o = T.cmdDict( defaults )
 
     if len( sys.argv ) == 1 and 'test.py' in sys.argv[0]:
-	_use( defaults )
-	
+        _use( defaults )
+        
     _convertOptions( o )
 
     BiskitTest.VERBOSITY = o['v']
     BiskitTest.DEBUG = o['debug']
     
     l = BiskitTestLoader( allowed=o['i'], forbidden=o['e'],
-			  verbosity=o['v'], log=o['log'], debug=o['debug'])
+                          verbosity=o['v'], log=o['log'], debug=o['debug'])
 
 
     for package in o['p']:
-	print 'collecting ', repr( package )
-	l.collectTests( module=package )
+        print 'collecting ', repr( package )
+        l.collectTests( module=package )
 
     l.run( dry=o['dry'] )
     l.report()
