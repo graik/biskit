@@ -117,11 +117,11 @@ class CrossView( DictMixin ):
       L{ProfileCollection.killViews}.
     """
 
-    @staticmethod
-    def _cease( ref ):
+    def _cease( self, ref ):
         try:
             self.alive = False
         except:
+            EHandler.warning('error in CrossView._cease')
             pass
 
     def __init__( self, parent, index ):
@@ -210,31 +210,31 @@ class CrossView( DictMixin ):
 
 
 class ProfileCollection:
-    """
-    Manage profiles (arrays or lists of values) for Trajectory frames
-    or atoms/residues in PDBModel. ProfileCollection resembles a
-    2-dimensional array where the first axis (let's say row) is
-    accessed by a string key. Each row has an additional (meta)info
-    dictionary assigned to it. The take() and concat() methods operate
-    on the columns, i.e. they are applied to all profiles at the same
-    time.
+    """    
+    Manage profiles (arrays or lists of values) for Trajectory frames or
+    atoms/residues in PDBModel. ProfileCollection resembles a 2-dimensional
+    array where the first axis (let's say row) is accessed by a string key
+    rather than an index. Each row has an additional (meta)info dictionary
+    assigned to it. The take() and concat() methods operate on the columns,
+    i.e. they are applied to all profiles simultaneously.
 
-    By default, profiles of numbers are stored and returned as
-    Numeric.array and all others are stored and returned as ordinary
-    list. This behaviour can be modified with the option asarray of
-    ProfileCollection.set(). Using both lists and arrays is a
-    compromise between the efficiency of Numeric arrays and the
-    problem that arrays of objects cannot be unpickled (Numeric bug)
-    and that arrays of strings would end up as 2-D arrays of char.
-    The 'isarray' entry of a profile's info dictionary tells whether
-    the profile is stored as array or as list.
+    By default, profiles of numbers are stored and returned as Numpy.array and
+    all others are stored and returned as ordinary list. This behaviour can be
+    modified with the option asarray of ProfileCollection.set(). Using both
+    lists and arrays is a compromise between the efficiency of Numeric arrays
+    and two problems of of the old Numeric module -- (1) arrays of objects
+    could not be unpickled (Numeric bug) and (2) arrays of strings would end
+    up as 2-D arrays of char. The 'isarray' entry of a profile's info
+    dictionary tells whether the profile is stored as array or as list. (Since
+    we have now replaced Numeric by numpy, we can probably switch to the
+    exclusive use of numpy arrays.)
 
     Acessing profiles
     =================
 
       ProfileCollection p can be used like a dictionary of lists::
         len( p )          -> number of profiles (== len( p.profiles ) )
-        p['prof1']        -> list with values of profile 'prof1'
+        p['prof1']        -> list/array with values of profile 'prof1'
         del p['prof1']    -> remove a profile
         p['prof1'] = [..] -> add/override a profile without additional infos
 
@@ -245,9 +245,8 @@ class ProfileCollection:
     Accessing Metainfo
     ==================
 
-      Each profile key also has a dictionary of meta infos
-      assigned to it (see getInfo(), setInfo(), p.infos). These can be accessed
-      like::
+      Each profile key also has a dictionary of meta infos assigned to it (see
+      getInfo(), setInfo(), p.infos). These can be accessed like::
         p['prof1','date']   -> date of creation of profile named 'prof1'
         p.getInfo('prof1')  -> returns all info records
         p['prof1','comment'] = 'first prof'  -> add/change single info value
@@ -255,22 +254,24 @@ class ProfileCollection:
     CrossViews
     ==========
 
-      ProfileCollections can also be viewed from the side (along
-      columns) -- L{CrossView}s provide a dictionary with the values
-      of all profiles at a certain position. Changes to the
-      dictionary will change the value in the underlying profile and vice
-      versa, for example::
+      ProfileCollections can also be viewed from the side (along columns) --
+      L{CrossView}s provide a virtual dictionary with the values of all
+      profiles at a certain position. Changes to the dictionary will change
+      the value in the underlying profile and vice versa, for example::
+
         atom = p[10]        -> CrossView{'prof1' : 42.0, 'name' : 'CA', ... }
         atom['prof1'] = 33  -> same as p['prof1'][10] = 33
-        p[10]['prof1']= 33  -> still the same but much slower
+        p[10]['prof1']= 33  -> still the same but much slower, use instead...
+        p['prof1'][10]= 33  -> doesn't invoke CrossView and is thus faster
 
         p[0] == p[-1]  -> True if the values of all profiles are identical at
-                          both positions
+                          first and last position
 
         for a in p.iterCrossViews():  -> iterates over CrossView dictionaries
-        p.toCrossViews()    -> list of CrossViews for all positions
+        p.toCrossViews()              -> list of CrossViews for all positions
 
       For read-only access, normal dictionaries are faster than CrossViews::
+      
         for d in p.iterDicts():       -> iterate over normal dictionaries
         p.toDicts()         -> list of normal (but disconnected) dictionaries 
 
@@ -286,6 +287,7 @@ class ProfileCollection:
       is about 100 times faster. If you need to repeatedly read from
       many dictionaries, consider using L{ProfileCollection.toDicts}
       and cache the resulting normal (disconnected) dictionaries::
+      
         cache = p.toDicts() # 'list( p.iterDicts() )' is equivalent but slower
         
 
@@ -295,7 +297,8 @@ class ProfileCollection:
       Profile arrays of float or int are automatically converted to
       arrays of type Float32 or Int32. This is a safety measure
       because we have stumbled over problems when transferring
-      pickled objects between 32 and 64 bit machines.
+      pickled objects between 32 and 64 bit machines. With the transition
+      to numpy, this may not be needed any longer.
 
       See also: L{ProfileCollection.__picklesave_array}
     """
@@ -325,7 +328,8 @@ class ProfileCollection:
     def __setstate__(self, state ):
         """
         called for unpickling the object.
-        Compability fix: Convert Numeric arrays to numpy arrays.
+        Compability fix: Convert Numeric arrays to numpy arrays 
+                         -- requires old Numeric
         """
         self.__dict__ = state
 
@@ -399,9 +403,7 @@ class ProfileCollection:
     
     def __len__( self ):
         """
-        Length of profile
-
-        @return: profile length
+        @return: number of profiles in the collection
         @rtype: int        
         """
         return len( self.profiles )
@@ -539,7 +541,7 @@ class ProfileCollection:
         @type  prof: Numeric.array
 
         @return: recast array or unchanged original
-        @rtype:  Numeric.array
+        @rtype:  Numpy.array
         """
         if prof.dtype.char in ['i','l']:
             return prof.astype( 'i' )
@@ -1191,6 +1193,23 @@ class Test(BT.BiskitTest):
         self.p3 = self.p3.concat( self.p3, self.p3, self.p3 )
         self.p3 = self.p3.concat( self.p3, self.p3, self.p3 )
 
+
+    def test_crossvies(self):
+        """ProfileCollection.crossviews test"""
+        import string
+        
+        self.p4 = ProfileCollection()
+        self.p4['letters'] = string.letters
+        
+        self.assert_( self.p4[0]['letters'] == 'a' )
+        views = self.p4.toCrossViews()
+        
+        letters = ''.join( [ v['letters'] for v in views ] )
+        self.assertEqual( letters, string.letters )
+        
+        del self.p4
+        
+        self.assert_( views[0].alive is False )
 
 import profile
 
