@@ -639,7 +639,7 @@ class Test(BT.BiskitTest):
     def test_LocalPath( self ):
         """LocalPath test"""
 
-        os.environ['PRJ_INTERFACES'] = '~raik/data/tb/interfaces'
+        os.environ['PRJ_INTERFACES'] = os.path.expanduser('~')
 
         S = self
 
@@ -649,7 +649,7 @@ class Test(BT.BiskitTest):
 
         ## Example 1; create from fragments
         S.l.set_fragments(
-            ('/home/Bis/johan/data/tb/interfaces','PRJ_INTERFACES'),
+            ('/home/Bis/johan','PRJ_INTERFACES'),
             ('/c11/com_wet/ref.com', None) )
         S.path += [ 'Example 1:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
         S.assert_( 'johan' not in S.l.local() )
