@@ -62,15 +62,15 @@ def hbonds( model ):
     ## calculate pairwise distances and angles
     for d in d_ind:
         d_xyz  = model.xyz[d]
-        d_nr   = model.aProfiles['residue_number'][d]
-        d_cid  = model.aProfiles['chain_id'][d]
-        d_segi = model.aProfiles['segment_id'][d]
+        d_nr   = model.atoms['residue_number'][d]
+        d_cid  = model.atoms['chain_id'][d]
+        d_segi = model.atoms['segment_id'][d]
 
         for a in a_ind:
             a_xyz  = model.xyz[a]
-            a_nr   = model.aProfiles['residue_number'][a]
-            a_cid  = model.aProfiles['chain_id'][a]
-            a_segi = model.aProfiles['segment_id'][a]
+            a_nr   = model.atoms['residue_number'][a]
+            a_cid  = model.atoms['chain_id'][a]
+            a_segi = model.atoms['segment_id'][a]
             
             dist = N.sqrt( sum( (d_xyz - a_xyz)**2 ) )
 
@@ -149,7 +149,7 @@ def xyzOfNearestCovalentNeighbour( i, model ):
     @return: coordinates of the nearest atom 
     @rtype: [float, float, float]
     """
-    resModel = model.filter( residue_number=model.aProfiles['residue_number'][i] )
+    resModel = model.filter( residue_number=model.atoms['residue_number'][i] )
     dist = N.sqrt( N.sum( (resModel.xyz - model.xyz[i])**2 , 1) )
 
     ## set distance to self to something high

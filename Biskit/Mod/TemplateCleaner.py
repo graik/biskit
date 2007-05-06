@@ -181,7 +181,7 @@ class TemplateCleaner:
             if res_to > n_res:
                 res_to = n_res
 
-            for resname in m_ca.aProfiles['residue_name'][ res_from: res_to ]:
+            for resname in m_ca.atoms['residue_name'][ res_from: res_to ]:
                 s+= " %3s" % resname
 
             head += [ ( 'SEQRES', s ) ]

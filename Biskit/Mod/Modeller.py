@@ -452,7 +452,7 @@ CALL ROUTINE = 'model'             # do homology modelling
 
         for model in pdb_list:
 
-            model.rProfiles.set("n_templates", template_info,
+            model.residues.set("n_templates", template_info,
                                 comment="number of templates for each residue")
 
         rmask = pdb_list[0].profile2mask("n_templates", 1,1000)
@@ -491,7 +491,7 @@ CALL ROUTINE = 'model'             # do homology modelling
             #atoms = DictList( m.atoms )
             #prof = atoms.valuesOf( "temperature_factor")
 
-            model.rProfiles.set('mod_score', m['temperature_factor'])
+            model.residues.set('mod_score', m['temperature_factor'])
 
 
 

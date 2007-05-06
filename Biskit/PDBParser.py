@@ -129,8 +129,8 @@ class PDBParser(object):
         @rtype: bool
         """
         return (model.xyz is None \
-		or None in model.aProfiles.profiles.values() \
-		or None in model.rProfiles.profiles.values() )
+		or None in model.atoms.profiles.values() \
+		or None in model.residues.profiles.values() )
 
 
     def parse2new( self, source, disconnect=False, skipRes=None ):

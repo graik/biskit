@@ -121,11 +121,11 @@ class PDBParseFile( PDBParser ):
 
                 for k in keys:
 
-                    if model.aProfiles.get( k, default=0, update=False ) in \
+                    if model.atoms.get( k, default=0, update=False ) in \
                            (0,None):
                     
                         dflt = self.DEFAULTS.get( k, None )
-                        model.aProfiles.set(k, atoms.get(k, dflt), changed=0 )
+                        model.atoms.set(k, atoms.get(k, dflt), changed=0 )
 
                 if model.xyz is None:
                     model.xyz = xyz

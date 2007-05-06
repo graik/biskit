@@ -565,7 +565,7 @@ class Test(BT.BiskitTest):
         ## compare the atom order
         cmp = []
         for a in S.model_1.atomRange():
-            cmp += [ cmpAtoms( S.model_1.aProfiles[a], S.model_2.aProfiles[a] )]
+            cmp += [ cmpAtoms( S.model_1.atoms[a], S.model_2.atoms[a] )]
 
         self.assertEqual( N.sum(cmp), 159 )
 

@@ -411,7 +411,7 @@ def relExposure( model, absSurf, key='AS', clip=1 ):
         k=0
         cIdx = c.resIndex()
         ## and loop over atoms in chain
-        for a in c.aProfiles.iterDicts():
+        for a in c.atoms.iterDicts():
             ## N-terminal residue
             if k < cIdx[1]:
                 rel = __Nter( a, rel, absSurf, key, i )

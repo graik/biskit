@@ -147,7 +147,7 @@ class ReduceCoordinates:
                 #masses += [ MU.atomMasses[ a['element'] ] +
                             #h * MU.aaAtomsH[a['residue_name']][a['name']] ]
 
-        model.aProfiles.set( 'mass', masses, 
+        model.atoms.set( 'mass', masses, 
                              comment='mass in D, hydrogen mass added to heavy' )
 
 
@@ -233,12 +233,12 @@ class ReduceCoordinates:
             else:
                 last_atom = len( self.a_indices ) - 1
 
-            a = m.aProfiles[ first_atom ]
+            a = m.atoms[ first_atom ]
 
-##             res_name  = m.aProfiles[ first_atom ]['residue_name']
-##             segid     = m.aProfiles[ first_atom ]['segment_id']
-##             chainId   = m.aProfiles[ first_atom ]['chain_id']
-##             res_number= m.aProfiles[ first_atom ]['serial_number']
+##             res_name  = m.atoms[ first_atom ]['residue_name']
+##             segid     = m.atoms[ first_atom ]['segment_id']
+##             chainId   = m.atoms[ first_atom ]['chain_id']
+##             res_number= m.atoms[ first_atom ]['serial_number']
 
             ## position of this residue's atoms in original PDBModel (unsorted)
             a_indices = self.a_indices[ first_atom : last_atom+1 ]
@@ -284,7 +284,7 @@ class ReduceCoordinates:
                  (N_frames x N_less_atoms x 3)
         @rtype: array
         """
-        masses = self.m.aProfiles.get('mass')
+        masses = self.m.atoms.get('mass')
         r_xyz = None
 
         for atom_indices in self.groups:
@@ -322,7 +322,7 @@ class ReduceCoordinates:
         @rtype: PDBModel
         """
 
-        mass = self.m.aProfiles.get('mass')
+        mass = self.m.atoms.get('mass')
         if xyz is None: xyz = self.m.getXyz()
 
         mProf = [ N.sum( N.take( mass, group ) ) for group in self.groups ]
@@ -331,17 +331,17 @@ class ReduceCoordinates:
         result = PDBModel()
 
         for k in self.atoms.keys():
-            result.aProfiles.set( k, self.atoms.valuesOf(k) )
+            result.atoms.set( k, self.atoms.valuesOf(k) )
 
 ##         result.setAtoms( self.atoms )
 
         result.setXyz( xyz )
-        result.aProfiles.set( 'mass', mProf )
+        result.atoms.set( 'mass', mProf )
 
         if reduce_profiles:
             self.reduceAtomProfiles( self.m, result )
 
-            result.rProfiles = self.m.rProfiles
+            result.residues = self.m.residues
 
         return result
 
@@ -356,19 +356,19 @@ class ReduceCoordinates:
         @param to_model: model
         @type  to_model: PDBModel
         """
-        for profname in from_model.aProfiles:
+        for profname in from_model.atoms:
 
-            p0 =  from_model.aProfiles.get(profname)
+            p0 =  from_model.atoms.get(profname)
             info = from_model.profileInfo( profname )
 
             try:
                 pr = [ N.average( N.take( p0, group ) ) for group in self.groups ]
 
-                to_model.aProfiles.set( profname, pr )
+                to_model.atoms.set( profname, pr )
             except:
                 pass
                 
-            to_model.aProfiles.setInfo( profname, **info )
+            to_model.atoms.setInfo( profname, **info )
 
 
 
@@ -386,7 +386,7 @@ class Test(BT.BiskitTest):
         self.m = PDBModel( T.testRoot()+'/com/1BGS.pdb' )
         self.m = self.m.compress( N.logical_not( self.m.maskH2O() ) )
 
-        self.m.aProfiles.set('test', range(len(self.m)))
+        self.m.atoms.set('test', range(len(self.m)))
 
         self.red = ReduceCoordinates( self.m, 4 )
 

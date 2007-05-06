@@ -354,7 +354,7 @@ class Test(BT.BiskitTest):
 
         ## create a fake second chain in the ligand
         for i in range( 1093+98, 1968 ):
-            t.ref.aProfiles['chain_id'][i] = 'B'
+            t.ref.atoms['chain_id'][i] = 'B'
 
         t.ref.chainIndex( force=1, cache=1 )
         t.cl = [1,2]
@@ -386,7 +386,7 @@ if __name__ == '__main__':
         ##t.plotContactDensity( step=2 )
 
     ##for i in range( 1093+98, 1968 ):
-    #t.ref.aProfiles['chain_id'][1093+98:1968] = 'B'
+    #t.ref.atoms['chain_id'][1093+98:1968] = 'B'
     #t.ref.chainIndex( force=1, cache=1 )
     #t.cl = [1,2]
 

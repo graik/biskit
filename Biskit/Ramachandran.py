@@ -119,7 +119,7 @@ class Ramachandran:
         if self.verbose: print "Initiating PDBDope..."
         d = PDBDope( m )
                 
-        if not self.profileName in m.aProfiles.keys():
+        if not self.profileName in m.atoms.keys():
             
             if self.profileName in ['MS', 'AS', 'curvature', 'relAS', 'relMS']:
                 if self.verbose: print "Adding SurfaceRacer profile...",
@@ -133,7 +133,7 @@ class Ramachandran:
                 if self.verbose: print "Adding surface density...",
                 d.addDensity()
                                      
-        if not self.profileName in m.rProfiles.keys():
+        if not self.profileName in m.residues.keys():
                     
             if self.profileName in ['cons_abs', 'cons_max', 'cons_ent']:
                 if self.verbose: print "Adding conservation data...",
@@ -146,7 +146,7 @@ class Ramachandran:
         if self.verbose: print 'Done.'
 
         ## convert atom profiles to average residue profile
-        if self.profileName in m.aProfiles.keys():
+        if self.profileName in m.atoms.keys():
             prof = []
             aProfile = m.profile( self.profileName )
             resIdx =  m.resIndex().tolist()
@@ -349,7 +349,7 @@ class Test(BT.BiskitTest):
         """Ramachandran test"""
         self.traj = T.Load( T.testRoot()+'/lig_pcr_00/traj.dat' )
 
-        self.traj.ref.aProfiles.set('mass', self.traj.ref.masses() ) 
+        self.traj.ref.atoms.set('mass', self.traj.ref.masses() ) 
 
         self.mdl = [ self.traj[0], self.traj[11] ]
         self.mdl = [ md.compress( md.maskProtein() ) for md in self.mdl ]

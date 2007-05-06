@@ -365,8 +365,8 @@ class ContactMaster(TrackingJobMaster):
             mask_interface_ref = N.concatenate( (if_rec, if_lig) )
 
             ref_interface_model = RC.model().compress(mask_interface_ref)
-            ref_interface_model.rProfiles = PDBProfiles()
-            ref_interface_model.aProfiles = PDBProfiles()
+            ref_interface_model.residues = PDBProfiles()
+            ref_interface_model.atoms = PDBProfiles()
             ref_interface_model.xyz = ref_interface_model.xyz.tolist()
 
             return mask_interface, ref_interface_model

@@ -184,7 +184,7 @@ def setChainID( m ):
         for chain in range( m.lenChains() ):
             idx = N.nonzero( cMap == chain )
             for i in idx:
-                m.aProfiles['chain_id'][i] = id[chain]
+                m.atoms['chain_id'][i] = id[chain]
 
 
 def rmsdLimitedClustering( tc, options, min_cluster=5, max_cluster=30,

@@ -149,8 +149,8 @@ def changeModel( inFile, prefix, sourceModel ):
     model.setSource( sourceModel.validSource() )
 
     #model.atomsChanged = 0
-    for k in model.aProfiles:
-        model.aProfiles[k,'changed'] = N.all( model[k] == sourceModel[k] )
+    for k in model.atoms:
+        model.atoms[k,'changed'] = N.all( model[k] == sourceModel[k] )
         
     model.xyzChanged = ( 0 != N.sum( N.ravel( model.xyz - sourceModel.xyz)) )
 
@@ -160,10 +160,10 @@ def changeModel( inFile, prefix, sourceModel ):
         
         doper = PDBDope( model )
 
-        if 'MS' in sourceModel.aProfiles.keys():
+        if 'MS' in sourceModel.atoms.keys():
             doper.addSurfaceRacer( probe=1.4 )
 
-        if 'density' in sourceModel.aProfiles.keys():
+        if 'density' in sourceModel.atoms.keys():
             doper.addDensity()
 
         if 'foldX' in sourceModel.info.keys():

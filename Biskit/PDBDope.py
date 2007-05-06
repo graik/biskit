@@ -88,19 +88,19 @@ class PDBDope:
 
         normalRes = self.m.atom2resMask( normalAtoms )
 
-        self.m.aProfiles.set( 'relASA', atomRelAcc, ## normalAtoms, 0,
+        self.m.atoms.set( 'relASA', atomRelAcc, ## normalAtoms, 0,
                                comment='relative accessible surface area in %',
                                version= T.dateString() + ' ' + self.version() )
 
-        self.m.rProfiles.set( 'ASA_total', resASA[:,0], normalRes, 0,
+        self.m.residues.set( 'ASA_total', resASA[:,0], normalRes, 0,
                               comment='accessible surface area in A^2',
                               version= T.dateString() + ' ' + self.version() )
 
-        self.m.rProfiles.set( 'ASA_sc', resASA[:,1], normalRes, 0,
+        self.m.residues.set( 'ASA_sc', resASA[:,1], normalRes, 0,
                            comment='side chain accessible surface area in A^2',
                            version= T.dateString() + ' ' + self.version() )
 
-        self.m.rProfiles.set( 'ASA_bb', resASA[:,2], normalRes, 0,
+        self.m.residues.set( 'ASA_bb', resASA[:,2], normalRes, 0,
                            comment='back bone accessible surface area in A^2',
                            version= T.dateString() + ' ' + self.version() )
 
@@ -116,7 +116,7 @@ class PDBDope:
         @type  pname: str
         """
         r = self.m.profile2mask( pname, cutoff_min=40 )
-        self.m.rProfiles.set( 'surfMask',  self.m.atom2resMask(r),
+        self.m.residues.set( 'surfMask',  self.m.atom2resMask(r),
                               comment='residues with any atom > 40% exposed',
                               version= T.dateString() + ' ' + self.version() )
 
@@ -140,7 +140,7 @@ class PDBDope:
         dssp = Dssp( self.m )
         ss = dssp.run()
         
-        self.m.rProfiles.set( 'secondary',  ss,
+        self.m.residues.set( 'secondary',  ss,
                               comment='secondary structure from DSSP',
                               version= T.dateString() + ' ' + self.version() )
         
@@ -175,19 +175,19 @@ class PDBDope:
 
         p, hmmHits = h.scoreAbsSum( self.m, hmmNames=pfamEntries )
 
-        self.m.rProfiles.set( 'cons_abs', p, mask, 0, hmmHits=hmmHits,
+        self.m.residues.set( 'cons_abs', p, mask, 0, hmmHits=hmmHits,
               comment="absolute sum of all 20 hmm scores per position",
               version= T.dateString() + ' ' + self.version() )
 
         p, hmmHits = h.scoreMaxAll( self.m, hmmNames=hmmHits )
 
-        self.m.rProfiles.set( 'cons_max', p, mask, 0, hmmHits=hmmHits,
+        self.m.residues.set( 'cons_max', p, mask, 0, hmmHits=hmmHits,
               comment="max of 20 hmm scores (-average / SD) per position",
               version= T.dateString() + ' ' + self.version() )
 
         p,  hmmHits = h.scoreEntropy( self.m, hmmNames=hmmHits )
 
-        self.m.rProfiles.set( 'cons_ent', p, mask, 0, hmmHits=hmmHits,
+        self.m.residues.set( 'cons_ent', p, mask, 0, hmmHits=hmmHits,
               comment="entropy of emmission probabilities per position "+
                               "(high -> high conservation/discrimination)",
               version= T.dateString() + ' ' + self.version() )
@@ -224,7 +224,7 @@ class PDBDope:
             dist = N.sum(( xyz - self.m.xyz[i])**2, 1)
             contacts += [ N.sum( N.less(dist, radius**2 )) -1]
 
-        self.m.aProfiles.set( profName, contacts, mSurf, default=-1,
+        self.m.atoms.set( profName, contacts, mSurf, default=-1,
                                comment='atom density radius %3.1fA' % radius,
                                version= T.dateString() + ' ' + self.version() )
 
@@ -273,28 +273,28 @@ class PDBDope:
 
         fs_info= fs_dic['surfaceRacerInfo']
 
-        self.m.aProfiles.set( name_MS, fs_dic['MS'], mask, 0,
+        self.m.atoms.set( name_MS, fs_dic['MS'], mask, 0,
                                comment='Molecular Surface area in A',
                                version= T.dateString() + ' ' + self.version(),
                                **fs_info )
 
-        self.m.aProfiles.set( name_AS, fs_dic['AS'], mask, 0,
+        self.m.atoms.set( name_AS, fs_dic['AS'], mask, 0,
                                comment='Accessible Surface area in A',
                                version= T.dateString() + ' ' + self.version(),
                                **fs_info )
 
-        self.m.aProfiles.set( name_curv, fs_dic['curvature'], mask, 0,
+        self.m.atoms.set( name_curv, fs_dic['curvature'], mask, 0,
                                comment='Average curvature',
                                version= T.dateString() + ' ' + self.version(),
                                **fs_info )
 
         if round(probe, 1) == 1.4 and vdw_set == 1:
-            self.m.aProfiles.set( 'relAS', fs_dic['relAS'], mask, 0,
+            self.m.atoms.set( 'relAS', fs_dic['relAS'], mask, 0,
                                    comment='Relative solvent accessible surf.',
                                    version= T.dateString()+' ' +self.version(),
                                    **fs_info )
 
-            self.m.aProfiles.set( 'relMS', fs_dic['relMS'], mask, 0,
+            self.m.atoms.set( 'relMS', fs_dic['relMS'], mask, 0,
                                    comment='Relative molecular surf.',
                                    version= T.dateString()+' '+self.version(),
                                    **fs_info )
@@ -358,17 +358,17 @@ class Test(BT.BiskitTest):
                 print '%s -- %s'%(k, self.d.m.info[k])
                 
             print '\nAdded atom profiles:'
-            print self.M.aProfiles
+            print self.M.atoms
             
             print '\nAdded residue  profiles:'
-            print self.M.rProfiles
+            print self.M.residues
 
             ## check that nothing has changed
             print '\nChecking that models are unchanged by doping ...'
 
         m_ref = PDBModel( self.f )
         m_ref = m_ref.compress( m_ref.maskProtein() )
-        for k in m_ref.aProfiles.keys():
+        for k in m_ref.atoms.keys():
             #ref = [ m_ref.atoms[i][k] for i in m_ref.atomRange() ]
             #mod = [ self.M.atoms[i][k] for i in self.M.atomRange() ]
             self.assert_( N.all( m_ref[k] == self.M[k]) )
