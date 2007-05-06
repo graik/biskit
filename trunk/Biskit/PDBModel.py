@@ -3305,7 +3305,7 @@ class Test(BT.BiskitTest):
         self.fout_pdb = tempfile.mktemp( '_test1.pdb' )
         self.fout1 = tempfile.mktemp( '_test1.model' )
         self.fout2 = tempfile.mktemp( '_test2.model' )
-        print "prepare: ", time.clock() - t
+        if self.local: print "prepare: ", time.clock() - t
 
     def cleanUp( self ):
         T.tryRemove( self.fout1 )
@@ -3319,7 +3319,7 @@ class Test(BT.BiskitTest):
         self._m.removeRes(['TIP3', 'HOH'])
         self.assertEqual( len(self._m), 1968)
         self.assertAlmostEqual( self._m.mass(), 21325.90004, 3 )
-        print "removeRes: ", time.clock() - t
+        if self.local: print "removeRes: ", time.clock() - t
 
     def test_chainMethods(self):
         """PDBModel chain methods test"""
