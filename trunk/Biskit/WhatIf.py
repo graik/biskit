@@ -349,7 +349,7 @@ class Test(BT.BiskitTest):
             ## check that model hasn't changed
             m_ref = PDBModel(f)
             m_ref = m.compress( m.maskProtein() )
-            for k in m_ref.aProfiles.keys():
+            for k in m_ref.atoms.keys():
                 if not N.all(m_ref[k] == m[k]):
                     print 'Not equal ', k
                 else:

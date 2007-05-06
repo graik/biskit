@@ -296,5 +296,27 @@ class Test(BT.BiskitTest):
 
 if __name__ == '__main__':
     
-    BT.localTest()
+    import time
+
+    from Biskit.Dock import ComplexEvolving
+
+    c = t.Load( t.testRoot() + '/com/ref.complex' )
+
+    ce= ComplexEvolving( c.rec_model, c.lig(), c,
+                              info={'comment':'test'} )
+
+    time.sleep( 2 )
+
+    lig = ce.lig().transform( MU.randomRotation(), [0,0,0] )
+    ce2 = ComplexEvolving( ce.rec_model, lig, ce,
+                                info={'comment':'test2'})
+
+    print '\nGenerations: '
+    for x in ce2:
+        print x['date']
+
+    print 'Comments: ', ce2.valuesOf('comment')
+         
+
+    #BT.localTest()
    

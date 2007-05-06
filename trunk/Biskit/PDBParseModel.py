@@ -98,10 +98,10 @@ class PDBParseModel( PDBParser ):
                     model.xyz = s.getXyz()
                     model.xyzChanged = 0
 
-                model.rProfiles.updateMissing( s.rProfiles,
+                model.residues.updateMissing( s.residues,
                                                copyMissing=updateMissing,
                                                setChanged=0 )
-                model.aProfiles.updateMissing( s.aProfiles,
+                model.atoms.updateMissing( s.atoms,
                                                copyMissing=updateMissing,
                                                setChanged=0 )
 

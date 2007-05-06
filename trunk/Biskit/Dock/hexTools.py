@@ -176,11 +176,11 @@ def createHexInp( recPdb, recModel, ligPdb, ligModel, comPdb=None,
     outName_clust = t.absfile( outFile + '_hex_cluster.out')
 
     ## add surface profiles if not there
-    if not recModel.aProfiles.has_key('relAS'):
+    if not recModel.atoms.has_key('relAS'):
         #t.flushPrint('\nCalculating receptor surface profile')
         rec_asa = PDBDope( recModel )
         rec_asa.addSurfaceRacer()
-    if not ligModel.aProfiles.has_key('relAS'):
+    if not ligModel.atoms.has_key('relAS'):
         #t.flushPrint('\nCalculating ligand surface profile')
         lig_asa = PDBDope( ligModel )
         lig_asa.addSurfaceRacer()

@@ -149,11 +149,11 @@ def main(options):
 
 
     ## add surface profiles if not there
-    if not rec.aProfiles.has_key('relASA'):
+    if not rec.atoms.has_key('relASA'):
         flushPrint('\nCalculating receptor surface profile')
         rec_asa = PDBDope( rec )
         rec_asa.addASA()
-    if not lig.aProfiles.has_key('relASA'):
+    if not lig.atoms.has_key('relASA'):
         flushPrint('\nCalculating ligand surface profile')
         lig_asa = PDBDope( lig )
         lig_asa.addASA()

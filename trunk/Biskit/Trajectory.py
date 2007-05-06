@@ -424,7 +424,7 @@ class Trajectory:
         Get atom mask.
         
         @param what: Create the mask using::
-                      - funct( self.ref.aProfiles[i] ) -> int
+                      - funct( self.ref.atoms[i] ) -> int
                       - list int ( indices )
                       - mask
                       - list of str (atom names)

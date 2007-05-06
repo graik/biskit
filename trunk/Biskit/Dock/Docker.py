@@ -206,7 +206,7 @@ class Docker:
             for chain in range( m.lenChains() ):
                 idx = N.nonzero( cMap == chain )
                 for i in idx:
-                    m.aProfiles['chain_id'][i] = ids[chain]
+                    m.atoms['chain_id'][i] = ids[chain]
 
 
     def prepareHexPdbs( self, modelDic, idList, subDir ):

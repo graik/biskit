@@ -372,7 +372,7 @@ class Analyse:
             pdb_list = T.Load(pdb_list)
 
             template_rmsd_dic[template] = \
-              pdb_list[0].compress(pdb_list[0].maskCA()).aProfiles["rmsd2ref_if"]
+              pdb_list[0].compress(pdb_list[0].maskCA()).atoms["rmsd2ref_if"]
 
         return template_rmsd_dic
 
@@ -504,8 +504,8 @@ class Analyse:
         file.write("\n%s\n"%('='*70))
 
         ## write rmsd residue profiles
-        res_nr = model.compress( model.maskCA()).aProfiles['residue_number']
-        res_na = model.compress( model.maskCA()).aProfiles['residue_name']        
+        res_nr = model.compress( model.maskCA()).atoms['residue_number']
+        res_na = model.compress( model.maskCA()).atoms['residue_name']        
         for i in range(len(templates_profiles[templates[0]]["rProfile"])):
             file.write("%3i %3s"%(res_nr[i],
                                   res_na[i]))

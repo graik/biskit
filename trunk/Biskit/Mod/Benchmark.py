@@ -126,7 +126,7 @@ class Benchmark:
 	pdb = pdb.transform( *tmp_model.transformation(reference, n_it=0) )
 
         ## info about discarded residues in iterative fit
-	pdb_if.aProfiles.set( "rms_outliers",
+	pdb_if.atoms.set( "rms_outliers",
 			       tmp_model.profile("rms_outliers"),
 			       mask=atom_mask )
 
@@ -274,7 +274,7 @@ class Benchmark:
 			  self.F_RESULT_FOLDER + self.F_RMSD_RES + '_%02i'%t
 
 	    file = open(output_file, 'w')
-	    rmsd_res_list = m.compress(m.maskCA()).aProfiles["rmsd2ref_if"]
+	    rmsd_res_list = m.compress(m.maskCA()).atoms["rmsd2ref_if"]
 
             file.write("# Carbon alpha rmsd profile.\n")
 	    for i in range(len(rmsd_res_list)):
@@ -375,7 +375,7 @@ class Benchmark:
 	    self.calc_rmsd(fitted_model_if, fitted_model_wo_if,
 			   reference, pdb_list[i])
 
-	    pdb_list[i].aProfiles.set('rmsd2ref_if', aprofile,
+	    pdb_list[i].atoms.set('rmsd2ref_if', aprofile,
 				       mask=mask_final, default = -1,
 				       comment="rmsd to known reference structure")
 
