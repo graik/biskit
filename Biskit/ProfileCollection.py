@@ -673,6 +673,11 @@ class ProfileCollection:
         """
         if prof is None:
            self.profiles[ name ] = None
+           self.infos[name] = {}
+
+           if not 'changed' in moreInfo: moreInfo['changed'] = 0
+           self.setInfo( name, asarray=asarray, comment=comment,
+                         **moreInfo )           
            return
 
         ## consistency check
