@@ -535,7 +535,7 @@ class Analyse:
         @param model: target's model with the highest modeller score
         @type  model: PDBModel
         """
-        model['temperature_factor'] = v
+        model['temperature_factor'] = mean_rmsd_atoms
 
         model.writePdb(self.outFolder + self.F_FINAL_PDB)       
 

@@ -401,7 +401,6 @@ class Test(BT.BiskitTest):
         import tempfile
         import shutil
         from Biskit import PDBModel
-        from Biskit import Pymoler
         
         ## collect the input files needed
         self.outfolder = tempfile.mkdtemp( '_test_Benchmark' )
@@ -419,6 +418,7 @@ class Test(BT.BiskitTest):
 
     def test_Benchmark(self):
 	"""Mod.Benchmark test"""
+        from Biskit import Pymoler
 
         self.b = Benchmark( self.outfolder )
 
