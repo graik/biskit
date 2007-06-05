@@ -21,7 +21,7 @@
 ## last $Date$
 ## $Revision$
 """
-Singleton Cache of ExeConfig instances
+Cache of ExeConfig instances
 """
 
 import threading
@@ -107,7 +107,7 @@ class Test(BT.BiskitTest):
     """Test"""
 
     
-    def test_Hmmer( self):
+    def test_ExeConfigCache( self):
         """ExeConfigCache test """
 
         self.x = ExeConfigCache.get( 'xplor' )
