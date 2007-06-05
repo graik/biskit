@@ -32,6 +32,7 @@ import Biskit.settings as s
 from Biskit.LogFile import StdLog
 from Biskit.Errors import BiskitError
 from Biskit.ExeConfigCache import ExeConfigCache
+import Biskit as B
 
 class RunError( BiskitError ):
     pass
@@ -135,98 +136,98 @@ class Executor:
 
         The program only needs command line parameters
 
-	Condition:
+        Condition:
 
-	  - template == None
+          - template == None
 
       2. B{ input pipe from STDIN
         (== ``myprogram | 'some input string'``) }
 
-	Condition:
+        Condition:
 
-	  - exe.pipes == 1 / True
-	  - template != None ((or f_in points to existing file))
+          - exe.pipes == 1 / True
+          - template != None ((or f_in points to existing file))
 
-	Setup:
+        Setup:
 
-	     1. `template` points to an existing file:
+             1. `template` points to an existing file:
 
-		 Executor reads the template file, completes it in
-		 memory, and pushes it directly to the program.
+                 Executor reads the template file, completes it in
+                 memory, and pushes it directly to the program.
 
-	     2. `template` points to string that doesn't look like a file name:
+             2. `template` points to string that doesn't look like a file name:
 
-		 Executor completes the string in memory (using
-		 `self.template % self.__dict__`) and pushes it
-		 directly to the program. This is the fastest option
-		 as it avoids file access alltogether.
+                 Executor completes the string in memory (using
+                 `self.template % self.__dict__`) and pushes it
+                 directly to the program. This is the fastest option
+                 as it avoids file access alltogether.
 
-	     3. `template` == None but f_in points to an *existing* file:
+             3. `template` == None but f_in points to an *existing* file:
 
-		  Executor will read this file and push it unmodified to
-		  the program via StdIn. (kind of an exception, if used at
-		  all, f_in usual points to a *non-existing* file that
-		  will receive the completed input.)
+                  Executor will read this file and push it unmodified to
+                  the program via StdIn. (kind of an exception, if used at
+                  all, f_in usual points to a *non-existing* file that
+                  will receive the completed input.)
 
       3. B{ input from file
         (== ``myprogram < input_file``) }
 
-	Condition:
+        Condition:
 
-	    - exe.pipes == 0 / False
-	    - template != None
-	    - push_inp == 1 / True (default)
+            - exe.pipes == 0 / False
+            - template != None
+            - push_inp == 1 / True (default)
 
-	Setup:
-	  
-	   1. `template` points to an existing file:
+        Setup:
+          
+           1. `template` points to an existing file:
 
-	         Executor reads the template file, completes it in
-	         memory, saves the completed file to disc (creating or
-	         overriding self.f_in), opens the file and passes the
-	         file handle to the program (instead of STDIN).
+                 Executor reads the template file, completes it in
+                 memory, saves the completed file to disc (creating or
+                 overriding self.f_in), opens the file and passes the
+                 file handle to the program (instead of STDIN).
 
-	   2. `template` points to string that doesn't look like a file name:
+           2. `template` points to string that doesn't look like a file name:
 
-	         Same as 3.1, except that the template is not read
-	         from disc but directly taken from memory (see 2.2).
+                 Same as 3.1, except that the template is not read
+                 from disc but directly taken from memory (see 2.2).
 
       4. B{ input from file passed as argument to the program
         (== ``myprogram input_file``) }
 
-	Condition:
+        Condition:
 
-	  - exe.pipes == 0 / False
+          - exe.pipes == 0 / False
 
         For this it is up to you to provide the correct program
-	argument.
+        argument.
 
-	Setup:
+        Setup:
 
-	   1. Use template completion:
+           1. Use template completion:
 
-	         The best option would be to set an explicit file name
-	         for `f_in` and include this file name into  `args`, Example::
+                 The best option would be to set an explicit file name
+                 for `f_in` and include this file name into  `args`, Example::
 
-	           exe = ExeConfigCache.get('myprogram')
-	           assert not exe.pipes 
+                   exe = ExeConfigCache.get('myprogram')
+                   assert not exe.pipes 
 
-	           x = Executor( 'myprogram', args='input.in', f_in='input.in',
-			     template='/somewhere/input.template', cwd='/tmp' )
+                   x = Executor( 'myprogram', args='input.in', f_in='input.in',
+                             template='/somewhere/input.template', cwd='/tmp' )
 
-	         Executor create your input file on the fly which is then
-	         passed as first argument.
+                 Executor creates your input file on the fly which is then
+                 passed as first argument.
 
-	   2. Without template completion:
+           2. Without template completion:
 
-	         Similar, just that you don't give a template::
+                 Similar, just that you don't give a template::
 
-	           x = Executor( 'myprogram', args='input.in', f_in='input.in',
-			     cwd='/tmp' )
+                   x = Executor( 'myprogram', args='input.in', f_in='input.in',
+                             cwd='/tmp' )
 
-	         It would then be up to you to provide the correct
-	         input file in `/tmp/input.in`. You could override the
-	         L{prepare()} hook method for creating it.
+                 It would then be up to you to provide the correct
+                 input file in `/tmp/input.in`. You could override the
+                 L{prepare()} hook method for creating it.
 
         There are other ways of doing the same thing.
 
@@ -265,8 +266,8 @@ class Executor:
         @param args: command line arguments
         @type  args: str
         @param template: template for input file -- this can be the template
-	                 itself or the path to a file containing it
-			 (default: None)
+                         itself or the path to a file containing it
+                         (default: None)
         @type  template: str
         @param f_in: target for completed input file (default: None, discard)
         @type  f_in: str
@@ -297,7 +298,7 @@ class Executor:
         @type  debug: 0|1
         @param verbose: print progress messages to log (default: log != STDOUT)
         @type  verbose: 0|1
-        @param kw: key=value pairs with values for template file
+        @param kw: key=value pairs with values for template file or string
         @type  kw: key=value
         
         @raise ExeConfigError: if environment is not fit for running
@@ -342,11 +343,11 @@ class Executor:
         self.output = None  #: STDOUT returned by process
         self.error = None   #: STDERR returned by process
         self.returncode = None #: int status returned by process
-	self.pid = None     #: process ID
+        self.pid = None     #: process ID
 
         self.result = None  #: set by self.finish()
 
-	self.initVersion = self.version()
+        self.initVersion = self.version()
 
         self.__dict__.update( kw )
 
@@ -484,7 +485,7 @@ class Executor:
         Run the callculation. This calls (in that order):
           - L{ prepare() },
           - L{ execute() },
-	  - L{ postProcess() },
+          - L{ postProcess() },
           - L{ finish() } OR L{ fail() },
           - L{ cleanup() }
         
@@ -502,7 +503,7 @@ class Executor:
 
             self.runTime = self.execute( inp=self.inp )
 
-	    self.postProcess()
+            self.postProcess()
 
         except IOError, why:
             try:
@@ -595,7 +596,8 @@ class Executor:
         """
         Called if external program failed, override! 
         """
-        pass
+        B.EHandler.warning(\
+            'Execution failed. (Override Executor.fail() to handle this!)')
 
 
     def finish( self ):
@@ -705,34 +707,34 @@ class Test(BT.BiskitTest):
     TAGS = [ BT.EXE ]
 
     def prepare(self):
-	import tempfile
-	self.fout = tempfile.mktemp('_testexecutor.out')
+        import tempfile
+        self.fout = tempfile.mktemp('_testexecutor.out')
 
     def cleanUp(self):
-	t.tryRemove(self.fout)
+        t.tryRemove(self.fout)
     
     def test_Executor( self ):
-	"""Executor test (run emacs ~/.biskit/settings.cfg)"""
+        """Executor test (run emacs ~/.biskit/settings.cfg)"""
         ExeConfigCache.reset()
 
         self.x = ExeConfigCache.get( 'emacs', strict=0 )
         self.x.pipes = 1
 
-	args = '.biskit/settings.cfg'
-	if not self.local:
-	    args = '-kill ' + args
+        args = '.biskit/settings.cfg'
+        if not self.local:
+            args = '-kill ' + args
 
-	self.e = Executor( 'emacs', args=args, strict=0,
-			   f_in=None,
-			   f_out=self.fout,
-			   verbose=self.local, cwd=t.absfile('~') )
+        self.e = Executor( 'emacs', args=args, strict=0,
+                           f_in=None,
+                           f_out=self.fout,
+                           verbose=self.local, cwd=t.absfile('~') )
         
         self.r = self.e.run()
 
         if self.local:
             print 'Emacs was running for %.2f seconds'%self.e.runTime
 
-	self.assert_( self.e.pid != None )
+        self.assert_( self.e.pid != None )
 
 if __name__ == '__main__':
 
