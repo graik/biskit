@@ -34,6 +34,7 @@ from Biskit.Hmmer import Hmmer
 from Biskit.DSSP import Dssp
 from Biskit.Fold_X import Fold_X
 from Biskit.SurfaceRacer import SurfaceRacer
+from Biskit.Intervor import Intervor
 
 
 class PDBDope:
@@ -300,6 +301,28 @@ class PDBDope:
                                    **fs_info )
 
 
+    def addIntervor( self, cr=[0], cl=None, mode=2, breaks=0, **kw ):
+        """
+        Triangulate a protein-protein interface with intervor.
+        
+        @param model: Structure of receptor, ligand and water
+        @type  model: Biskit.PDBModel
+        @param cr: receptor chains (default: [0] = first chain)
+        @type  cr: [ int ]
+        @param cl: ligand chains (default: None = all remaining protein chains)
+        @type  cl: [ int ]
+        @param breaks: consider chain breaks (backbone gaps) (default: 0)
+        @type  breaks: bool or 1|0
+        @param mode: what to calculate (default 2, = all with shelling order)
+        @type  mode: int
+
+        @return: Intervor instance
+        @rtype: Biskit.Dock.Intervor
+        """
+        x = Intervor( self.m, cr=cr, cl=cl, mode=mode, breaks=breaks, **kw)
+        x.run()
+        
+        return x
 
 #############
 ##  TESTING        
@@ -347,6 +370,12 @@ class Test(BT.BiskitTest):
     def test_addDensity(self):
         """PDBDope.addDensity test"""
         self.d.addDensity()
+
+##     def test_addIntervor( self ):
+##         """PDBDope.addIntervor test // needs waters in structure"""
+##         x = self.d.addIntervor()
+##         if self.local:
+##             x.visualize()
 
     def test_model(self):
         """PDBDope test final model"""
@@ -436,24 +465,24 @@ class OldTest( BT.BiskitTest ):
 
 if __name__ == '__main__':
 
-##     BT.localTest()
+    BT.localTest()  ## pushes test PDBDope instance as 'd' into namespace
 
-    from Biskit import PDBModel
-    f = T.testRoot() + '/com/1BGS.pdb'
+##     from Biskit import PDBModel
+##     f = T.testRoot() + '/com/1BGS.pdb'
 
-    M = PDBModel( f )
-    M = M.compress( M.maskProtein() )
+##     M = PDBModel( f )
+##     M = M.compress( M.maskProtein() )
 
     
-    d = PDBDope( M )
+##     d = PDBDope( M )
 
-    d.addSecondaryStructure()
+##     d.addSecondaryStructure()
 
-    d.addFoldX()
+##     d.addFoldX()
     
-    d.addDensity()
+##     d.addDensity()
     
-    d.addSurfaceRacer( probe=1.4 )
+##     d.addSurfaceRacer( probe=1.4 )
 
-    d.addSurfaceMask()
+##     d.addSurfaceMask()
     
