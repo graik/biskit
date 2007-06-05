@@ -367,7 +367,7 @@ class ProfileCollection:
         """
         Set profile item::
           p['prof1'] = range(10)      <==> p.set( 'prof1', range(10) )      
-          p['prof1','info1]='comment' <==> p.setInfo('prof1',info1='comment')
+          p['prof1','info1']='comment' <==> p.setInfo('prof1',info1='comment')
 
         @return: item
         @rtype: any        
