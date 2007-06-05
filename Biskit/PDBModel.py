@@ -570,8 +570,10 @@ class PDBModel:
         if type( k ) is tuple:
             key, infokey = k
             if key in self.residues:
-                return self.residues.setInfo( (k, infokey), v )
-            return self.atoms.setInfo( (k, infokey), v )
+                self.residues[key, infokey] = v
+                return
+            self.atoms[key, infokey] = v
+            return
         
         raise ProfileError, 'Cannot interpret %r as profile name or profile info record' % k
 
