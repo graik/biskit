@@ -61,7 +61,7 @@ class IcmCad( Executor ):
              - Abagyan and Totrov mention a c-library available -- the best
                solution would hence be to wrap this c-library in python...
 
-    @note: Command configuration in: biskit/external/defaults/exe_icmbrowser.da
+    @note: Command configuration in: biskit/external/defaults/exe_icmbrowser.dat
     """
 
     inp_head = \
