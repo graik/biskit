@@ -51,7 +51,7 @@ class Intervor( Executor ):
     ... where the [0,1] designates the receptor chains, the remaining
     protein chains are considered ligand, the remaining chains water.
 
-    This creates several atom profiles in model:
+    The parser creates several atom profiles in model:
 
         * facets     ... raw info of all facets the atom is involved in
 
