@@ -314,7 +314,8 @@ class Docker:
         cmd = "%s -ncpu %i -nice %i -noexec < %s > %s"
         cmd = cmd % (self.bin, ncpu, nice, finp, flog )
 
-        cmd = "ssh %s %s" % (host, cmd)
+	if host != os.uname()[1]:
+	    cmd = "ssh %s %s" % (host, cmd)
 
         runner = RunThread( cmd, self, finp=finp, host=host,
                             log=log, verbose=self.verbose )
@@ -452,19 +453,23 @@ class RunThread( Thread ):
         try:
             if not os.path.exists( self.fout ):
 
-                if self.verbose: print "Executing: ", self.host, ' ', t.stripFilename(self.finp)
+                if self.verbose:
+		    print "Executing: ", self.host, ' ', \
+			  t.stripFilename(self.finp)
 
                 cmd_lst = self.cmd.split()
 
                 self.status = os.spawnvp(os.P_WAIT, cmd_lst[0], cmd_lst )
+
+		if self.status != 0:
+		    raise DockerError,\
+			  'Hex returned exit status %i' % self.status
 
                 waited = 0
                 while waited < 25 and not os.path.exists( self.fout ):
                     sleep( 5 )
                     waited += 5
 
-            if self.status != 0:
-                raise DockerError, 'Hex returned exit status %i' % self.status
 
             ## replace model numbers in HEX output file
             self.__hackHexOut( self.nRec, self.nLig, self.fout )
