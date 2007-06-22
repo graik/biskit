@@ -1,0 +1,275 @@
+
+remarks  file  generate.inp
+remarks  Generate structure file for a protein
+
+topology                        { Read topology file    }
+   reset
+   @@/home/Bis/nilges/programs/toppar2/param19/toph19.pro
+   @@/home/Bis/nilges/programs/toppar2/param19/toph19.sol
+
+end
+
+parameter                       { Read parameter file    }  
+    reset
+   @@/home/Bis/nilges/programs/toppar2/param19/param19.pro
+   @@/home/Bis/nilges/programs/toppar2/param19/param19.sol
+end
+
+segment
+   name="1D3A"                   { segment_id }
+   chain
+     @@/home/Bis/nilges/programs/toppar2/param19/toph19.pep
+     coordinates @/home/Bis/nilges/projects/1D3A_h2o2/1D3A/1D3A.PDB          { take sequence from PDB }
+   end
+end
+
+vector do (name="CD1") (name "CD"  and resname "ILE")  { rename ILE CD to CD1 }
+
+coordinates @/home/Bis/nilges/projects/1D3A_h2o2/1D3A/1D3A.PDB                 { read coordinates }
+
+
+{*** Mininize all heavy atom with 0,0,0 coordinates using only bond terms ***}
+
+vector identify (store1) ( hydrogen AND NOT known )                       {select all Hydrogens}
+constraints interaction = ( NOT store1 )( NOT store1 ) end                {only consider none-hydrogens}
+
+constraints fix ( NOT ((attr x=0.0)AND(attr y=0.0)AND(attr z=0.0))) end   {fix all atoms exept those with 0,0,0 coordinates}
+
+flags exclude * include bond  end  			                  {only use bond energy}
+
+parameter
+    nbonds  
+    atom rdie switch eps=1. { constant dielectric; electrostatic shifting; dielectric constant }
+    e14fac=0.4       { use this to reproduce elec term to amber }
+    cutnb=10.   { nonbonded interaction cutoff }
+    ctonnb=5.  { distance where the switching function becomes effective }
+    ctofnb=9.  { distance where nonbonded forces are zero }
+    nbxmod=5    { excludes some nonbonded interactions }
+    vswitch     { vdw switching }
+end end
+
+minimize 
+    powell
+    nstep=400
+end
+ 
+constraints fix( not all) end
+constraints interaction=(all)(all) end                  {consider all atoms}
+
+
+{*** Build hydrogens ***}
+hbuild
+    selection=( hydrogen )
+    print=on
+end
+
+{*** Mininize all atom using default energy terms ***}
+flags include bond angl dihe elec impr vdw end
+
+vector do (refx=x) (all)
+vector do (refy=y) (all)
+vector do (refz=z) (all)
+
+vector do (harm = 10) (not store2)
+flags include harm end
+minimize 
+    powell
+    nstep=100
+end
+
+parameter
+    nbonds  
+    atom cdie shift eps=1. { constant dielectric; electrostatic shifting; dielectric constant }
+    e14fac=0.4       { use this to reproduce elec term to amber }
+    cutnb=15.   { nonbonded interaction cutoff }
+    ctonnb=13.  { distance where the switching function becomes effective }
+    ctofnb=14.  { distance where nonbonded forces are zero }
+    nbxmod=5    { excludes some nonbonded interactions }
+    vswitch     { vdw switching }
+end end
+
+
+{*** conform to Hex names ***}
+vector do (resname="CYS") (resname "CYX") { rename all residues in disulfide bonds }
+
+vector do (name="H1")  (name "HT1")	  { rename N-terminal protons }
+vector do (name="H2")  (name "HT2")
+vector do (name="H3")  (name "HT3")
+vector do (name="O")   (name "OT1")	  { rename C-terminal oxygens}
+vector do (name="OXT") (name "OT2")
+	
+!vector do (name="HD11")(name "HD1" and resname "ILE")   { fix ILE atom names }   
+!vector do (name="HD12")(name "HD2" and resname "ILE")
+!vector do (name="HD13")(name "HD3" and resname "ILE")
+!!!!vector do (name="CD1") (name "CD"  and resname "ILE")  { the ILE CD is renamed earlier }
+!vector do (name="HG")  (name "HG1" and resname "SER")	{ fix SER atom names }
+!vector do (name="HG")  (name "HG1" and resname "CYS")	{ fix CYS atom names }
+
+{ rename all protons to conform to pdb-style names }
+vector do (name="1HH1")(name "HH11" and resname "ARG")
+vector do (name="2HH1")(name "HH12" and resname "ARG")
+vector do (name="1HH2")(name "HH21" and resname "ARG")
+vector do (name="2HH2")(name "HH22" and resname "ARG")
+
+vector do (name="1HD2")(name "HD21" and resname "ASN")
+vector do (name="2HD2")(name "HD22" and resname "ASN")
+
+vector do (name="1HE2")(name "HE21" and resname "GLN")
+vector do (name="2HE2")(name "HE22" and resname "GLN")
+ 
+
+eval ($boxlength = 18.856)   ! length of Brooks' water box
+eval ($thickness = 9)        ! maxi. initial water-protein distance (heavy atoms)
+eval ($pw_dist = 3.5)        ! mini. initial water-protein distance (heavy atoms)
+eval ($water_diam = 2.4)     ! diameter of water molecule
+eval ($dyncount = 1)         ! iteration number (usually 1)
+
+!--------------------------------------------------
+! read in the same box of water several times, and move it around
+! so as to cover all the space around the site of interest.
+! take into account box offset
+
+vector show max (x) ((not resn tip3) and not resn ani)
+evaluate ($xmax = $result)
+vector show min (x) ((not resn tip3) and not resn ani)
+evaluate ($xmin = $result)
+
+vector show max (y) ((not resn tip3) and not resn ani)
+evaluate ($ymax = $result)
+vector show min (y) ((not resn tip3) and not resn ani)
+evaluate ($ymin = $result)
+
+vector show max (z) ((not resn tip3) and not resn ani)
+evaluate ($zmax = $result)
+vector show min (z) ((not resn tip3) and not resn ani)
+evaluate ($zmin = $result)
+
+
+! loop over several iterations of water filling and dynamics
+
+
+!--------------------------------------------------
+! read in the same box of water several times, and move it around
+! so as to cover all the space around the site of interest.
+! take into account box offset
+
+
+! determine how many boxes are necessary in each dimension
+eval ($xbox = int( ($xmax - $xmin + 2 * ($thickness + $water_diam)) / $boxlength  + 0.5))
+eval ($ybox = int( ($ymax - $ymin + 2 * ($thickness + $water_diam)) / $boxlength  + 0.5))
+eval ($zbox = int( ($zmax - $zmin + 2 * ($thickness + $water_diam)) / $boxlength  + 0.5))
+
+eval ($xmtran =  $xmax + $thickness - $boxlength/2 + $water_diam)
+eval ($ymtran =  $ymax + $thickness - $boxlength/2 + $water_diam)
+eval ($zmtran =  $zmax + $thickness - $boxlength/2 + $water_diam)
+
+set echo off message off end
+eval ($xcount=0)
+eval ($xtrans = $xmin - $thickness - $water_diam - $boxlength/2 )
+while ($xtrans < $xmtran) loop wat1
+  eval ($xcount=$xcount+1)
+  eval ($xtrans = $xtrans + $boxlength)
+
+  eval ($ycount=0)
+  eval ($ytrans = $ymin - $thickness - $water_diam - $boxlength/2 )
+  while ($ytrans < $ymtran) loop wat2
+    eval ($ycount=$ycount+1)
+    eval ($ytrans = $ytrans + $boxlength)
+
+    eval ($zcount=0)                  
+    eval ($ztrans = $zmin - $thickness - $water_diam - $boxlength/2 )
+    while ($ztrans < $zmtran) loop wat3
+      eval ($zcount=$zcount+1)
+      eval ($ztrans = $ztrans + $boxlength)
+
+
+      segment
+        name="    "
+        chain
+          coordinates @@boxtyp20.pdb
+        end
+      end
+      coor @@boxtyp20.pdb 
+      vector do (segid=W000) (segid "    ")
+      coor sele=(segid W000) translate vector = ($xtrans $ytrans $ztrans) end
+
+      ! all new water oxygens
+      vector ident (store1) (segid W000 and name oh2) 
+      ! all new water oxygens close to a protein heavy atom
+      vector ident (store2) (store1 and (not (resn tip3 or resn ani or hydro)) around $pw_dist)
+      ! all new water oxygens close to old water oxygens
+      vector ident (store3) (store1 and (segid wat# and not hydro) around $water_diam)
+      ! all new water oxygens further than thickness away from a protein heavy atom
+      vector ident (store4) (store1 and not (not (resn tip3 or resn ani or hydro)) around $thickness)
+      delete sele= (byres (store2 or store3 or store4)) end
+  
+
+      ! give waters unique segid name
+      eval ($segid= "W" 
+             + encode($xcount) + encode($ycount) + encode($zcount))
+      vector do (segid = $segid) (segid W000)
+
+    end loop wat3
+  end loop wat2
+end loop wat1
+
+! now, give waters a unique resid so that we get the segid to play around with
+vector ident (store1) (all)
+vector show min (store1) (segid w*)
+vector do (store1 = store1 - $result + 1) (segid w*)
+vector do (resid = encode(int(store1/3 -0.1) +1)) (segid w* and not segid wat#)
+vector do (segid = W000) (segid w* and not segid wat#)
+
+! shave off any waters that left
+delete sele= (byres (name oh2 and not (not (resn tip3 or resn ani or hydro)) around $thickness)) end
+
+{* write out initial coordinates *}
+!   evaluate ($filename=$Filenames.fileroot+ encode($count)+ "wini.pdb")
+!   write coordinates sele= (all) output =$filename end
+
+
+! fix the protein for initial minimization
+constraints fix  (not resn tip3) end
+minimize powell nstep=40 drop=100 end
+
+! release protein and restrain harmonically
+constraints fix  (not all) end
+vector do (refx=x) (all)
+vector do (refy=y) (all)
+vector do (refz=z) (all)
+restraints harmonic 
+   exponent = 2
+end
+vector do (harm = 0)  (all)
+vector do (harm = 5) (not name h*)
+
+minimize powell nstep=40 drop=10 end
+minimize powell nstep=40 drop=10 end
+vector do (fbeta = 10. {1/ps} ) ( all )                
+
+! heat to 500 K
+for $bath in (100) loop heat
+   vector do (vx=maxwell($bath)) (all)
+   vector do (vy=maxwell($bath)) (all)
+   vector do (vz=maxwell($bath)) (all)  
+   dynamics verlet
+	nstep=100 timestep=0.002 {ps}
+	iasvel = current
+	tcoupling = true  tbath = $bath
+	nprint=5 iprfrq=50
+	ntrfrq = 500000000
+   end
+end loop heat
+
+minimize powell nstep=40 drop=10 end
+
+set echo on message on end
+
+
+{*** write pdb and psf files ***}
+write structure output= 1D3A.psf end
+write coor output = 1D3A.pdb end
+
+
+
+stop

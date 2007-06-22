@@ -1,0 +1,219 @@
+.. ===================================================================
+.. Biskit, a toolkit for the manipulation of macromolecular structures
+.. Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
+..
+.. This program is free software; you can redistribute it and/or
+.. modify it under the terms of the GNU General Public License as
+.. published by the Free Software Foundation; either version 2 of the
+.. License, or any later version.
+..
+.. This program is distributed in the hope that it will be useful,
+.. but WITHOUT ANY WARRANTY; without even the implied warranty of
+.. MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+.. General Public License for more details.
+..
+.. You find a copy of the GNU General Public License in the file
+.. license.txt along with this program; if not, write to the Free
+.. Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+..
+..
+.. last $Author$
+.. last $Date$
+.. $Revision$
+.. ===================================================================
+
+
+========
+Contents
+========
+- `Setting up pvm for python`_
+- `PVM commands`_
+- `Using remote windows with pvm`_
+- `Trouble shouting`_
+- `Enabling password-less login from A to B`_
+
+-----------------------------------------------------------------------
+
+Setting up pvm for python
+=========================
+
+1) Install pvm:
+   
+   See the `Biskit Installation`_ instructions
+
+    
+2) Make sure you can log into all nodes without password:
+
+   See `Enabling password-less login from A to B`_ at the end of this document
+
+
+3) Prepare environment::
+
+    export PVM_ROOT=/usr/share/pvm3
+    export PVM_RSH=/usr/bin/ssh
+
+
+4) Start the pvm demon::
+ 
+    pvm
+
+   To exit the demon::
+
+    pvm> (^D) 
+    or 
+    pvm> quit
+
+   You exit the demon but it stays in background
+
+
+5) in Master.py:
+   call pvmInit(hosts) with list of hosts
+
+
+6) run Master.py 
+   (See example code in `ExampleMaster.__main__`_)
+
+
+7) stop pvm daemon (optional)::
+
+    pvm
+    pvm> halt
+
+
+-----------------------------------------------------------------------
+
+
+PVM commands
+============
+
+================     ==================================================
+*command*            *function*
+----------------     --------------------------------------------------
+add host_name        manually add a host
+remove host_name     remove it
+reset                kill all your running pvm processes
+halt                 stop pvm altogether
+exit / ^D            exit the PVM shell without quitting the PVM demon
+================     ==================================================
+
+-----------------------------------------------------------------------
+
+Using remote windows with pvm
+=============================
+
+For security reasons, the default setting in recent linux distributions is 
+to not allow a machine to remotely open a window. So, by default the X server
+on these machines is running as "tcp nolisten". The current implementation of 
+getting remote windows from PVM slaves is using "xterm - display host:0.0" 
+which will not run with the new secure settings.
+
+
+1) To change back to the old insecure X server settings 
+   (example from a Linux box running the CentOS distriburion):
+
+   - Either comment in *DisallowTCP=false* in the file */etc/X11/gdm/gdm.conf* 
+
+   - Or use the graphical tools from menu
+     *System Settings -> Login Screen -> Security* 
+     and uncheck: 
+     *Always disallow TCP connections to the X server ...*
+
+
+2) Then on your local machine allow remote hosts to access the X server:
+
+   - allow all hosts:: 
+     
+      xhosts +
+
+   - or only specific hosts::
+   
+      xhost +remote.host.name
+
+
+3) Finally test that it is working (you must have password free ssh set up)::
+
+    ssh remote.host.name xterm -display local.host.name:0.0
+  
+   An xterm window from the remote machine should show up on your local machine.
+
+-----------------------------------------------------------------------
+
+Trouble shouting
+================
+
+1) If a slave can not be spawned:
+
+   - kill any pvm process left over on that node
+   - delete old *pvm\** files in */tmp* on that node
+   - try again
+
+   Scripts that help you clean up:
+
+   - `scripts/Biskit/killpp.py`_ kills processes on many nodes
+   - `scripts/Biskit/rm_pvm.py`_ removes your *pvm\** from */tmp* of all nodes
+
+
+2) If PVM doesn't use (for calculations) the node were the master is running:
+
+   - add this node with the full name e.g. otto.bis.pasteur.fr instead of otto
+
+-----------------------------------------------------------------------
+
+Enabling password-less login from A to B
+========================================
+
+3 steps:
+ 1) generate a identity file on A
+ 2) copy it over to B
+ 3) add this file to the list of authorized login
+
+The following works for ssh2:
+
+
+1) on A:
+ 
+   >>> ssh-keygen -t rsa
+
+   Hit return on each question (3)
+
+   >>> ssh-keygen -t dsa
+
+   Hit return on each question (3)
+
+
+2) copy \*pub files from A to B:
+
+   >>> cd ~/.ssh
+   >>> scp id_dsa.pub "B:.ssh/id_dsa.pub-Bis"
+   >>> scp id_rsa.pub "B:.ssh/id_rsa.pub-Bis"
+
+
+3) on B "authorize" login from A:
+
+   >>> ssh B
+   >>> cd $HOME/.ssh (you might need to create it )
+   >>> cat id_rsa.pub-Bis  id_dsa.pub-Bis  >> authorized_keys2
+
+
+Or download and use ssh-keyinstall to set up your system: 
+  http://www.stearns.org/ssh-keyinstall/	
+
+That's it. Test!
+
+Still having problems? Check for firewalls!
+
+
+
+
+
+
+.. ============================================================================
+.. ========== following this line are reStructuredText links ==================
+
+.. _`Biskit Installation`:  install/detailed-instructions/detailed-installation-instructions-for-biskit
+
+.. _`ExampleMaster.__main__`: http://cvs.sourceforge.net/viewcvs.py/biskit/biskit/Biskit/PVM/ExampleMaster.py
+
+.. _`scripts/Biskit/killpp.py`: http://cvs.sourceforge.net/viewcvs.py/biskit/biskit/scripts/Biskit/killpp.py
+
+.. _`scripts/Biskit/rm_pvm.py`: http://cvs.sourceforge.net/viewcvs.py/biskit/biskit/scripts/Biskit/rm_pvm.py
