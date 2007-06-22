@@ -21,11 +21,46 @@ and Hmmer; interfaces to further software can be added
 easily. Moreover, Biskit simplifies the parallelisation of
 calculations via PVM (Parallel Virtual Machine).
 
-In this document:  * Release 2.0.1
+In this document:  * Release 2.1.0-beta
+		   * Release 2.0.1
+		   * Release 2.0.0
 		   * Installation
 		   * License
 		   * Open issues
 
+Release 2.1.0-beta
+------------------
+
+Release 2.1.0 introduces a lot changes to the very core of Biskit:
+
+* PDBModel overhaul -- the atom dictionaries are gone and all the
+  information is now unified into `atoms` and `residues`
+  ProfileCollections, take, compress etc. are **much** more efficient,
+  profiles can be accessed in a more intuitive way, chain borders are
+  tracked more consistently, ... The new PDBModel is, as usual,
+  backward-compatible to pickles of previous versions.
+
+* Migration from Numeric to Numpy -- plenty of bugs in the old Numeric
+  have forced us to migrate earlier than anticipated. Unfortunately
+  some third-party libraries like Scientific and Biopython still
+  depend on Numeric -- so both libraries need to be installed. Also we
+  needed to convert the biggles module to the new numpy library.
+
+All tests I can currently perform (this excludes PVM, homology
+modeling and some interfaces to external programs) are running through
+without problems. But since the changes are very widespread and at the
+center of the package, I expect that there are some bugs still
+awaiting discovery.  Furthermore, I haven't yet converted the scripts
+folder to the new numpy and, since we are right now lacking a good
+test suite for this part of Biskit, many of the biskit/scripts will
+probably be broken (albeit not difficult to fix). 
+
+For this reason, we label this one as a "beta" release. Users who are
+mostly interested in reproducing one of the existing workflows
+(docking or homology modeling scripts) should for the moment stick to
+release 2.0.1. However, for everyone else, the improvements should
+outweight potential bugs and you spare yourself a later
+migration. Please don't hesitate to report any problems!
 
 Release 2.0.1
 -------------
@@ -85,6 +120,11 @@ License
 
 Biskit is distributed under the GNU GPL. See license.txt!
 
+
+Open issues in release 2.1.0-beta
+---------------------------------
+
+The issues are still the same as for version 2.0.1 below.
 
 Open issues in release 2.0.1
 ----------------------------
