@@ -179,8 +179,18 @@ copy a_ \"mol2\" delete
         """
         Overrides Executor method
         """
-        return self.error is None 
+        return self.error is None or not 'icm/def3> 1.8*Cad' in self.output
 
+
+    def fail( self ):
+	"""
+	Overrides Executor method. Called when execution fails.
+	"""
+	s = 'IcmBrowser failed. Please check the program output in the '+\
+	    'field `output` of this IcmCad instance (e.g. `print x.output`)!'
+	self.log.add( s )
+
+	raise IcmCadError, s
 
     def finish( self ):
         """
