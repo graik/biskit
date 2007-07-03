@@ -372,7 +372,7 @@ class SequenceSearcher:
             results, err = NCBIStandalone.blastall( settings.blast_bin,
                                                     method, db, seqFile,
                                                     expectation=e,
-						    align_view=7, ## XML output
+						    align_view='7', ## XML output
 						    **kw)
 
 	    results = self.__copyFileHandle(results, resultOut)
@@ -452,7 +452,7 @@ class SequenceSearcher:
         try:
             results, err = NCBIStandalone.blastpgp( settings.psi_blast_bin,
                                                     db, seqFile,
-						    align_view=7, ## XML output
+						    align_view='7', ## XML output
                                                     expectation=e, **kw)
 
 	    results = self.__copyFileHandle(results,resultOut )
