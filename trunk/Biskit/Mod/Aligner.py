@@ -459,7 +459,7 @@ class Aligner:
                     output, error, returncod = tc.run()
 
                     self.logWrite( '..done: ' + str( output ) + '\n' )
-		    print "DEBUG: ", os.path.exists('1MHO_.template_file')
+## 		    print "DEBUG: ", os.path.exists('1MHO_.template_file')
 
         except EnvironmentError, why:
             self.logWrite("ERROR: Can't run t_coffee: %s Error: %s"\
