@@ -227,45 +227,45 @@ class Intervor( Executor ):
                     'at2_serial', 'at2_resindex', 'so']
         
         try:
-            l = f = None
-            f = open( fname )
-            
-            ## handle file header (extract value keys from header line)
-            l = f.readline()
-            while not self.RE_SECTION_EDGES.match(l):
-                    l = f.readline()
-            
-            l = f.readline().replace('|', ' ')
-            keys = map( str.lower, l.split() )
-            
-            ## handle table (parse values into one dictionary for each line)
-            while f:
+            try:
+                l = f = None
+                f = open( fname )
+
+                ## handle file header (extract value keys from header line)
                 l = f.readline()
-                if len(l) < 3:
-                    break
-                
-                #l = l.replace( '|', ' ' )
-                values = self.RE_facet.match( l ).groups()
-                
-                d = dict( zip( keys, values ) )
-                
-                for k in int_keys:
-                    d[ k ] = int( d[ k ] )
-                d['facet_area'] = float( d['facet_area'] )
-                
-                result += [ d ]
-            
-        except IOError, why:
-            raise IntervorError, 'Error accessing intervor output file %r: %r'\
-                  % (fname, why)
-        except Exception, why:
-            raise IntervorError, 'Error parsing intervor output file %r: %r'\
-                  % (fname, why) + '\nThe offending line is: ' + repr(l)
-        
+                while not self.RE_SECTION_EDGES.match(l):
+                        l = f.readline()
+
+                l = f.readline().replace('|', ' ')
+                keys = map( str.lower, l.split() )
+
+                ## handle table (parse values into one dictionary for each line)
+                while f:
+                    l = f.readline()
+                    if len(l) < 3:
+                        break
+
+                    #l = l.replace( '|', ' ' )
+                    values = self.RE_facet.match( l ).groups()
+
+                    d = dict( zip( keys, values ) )
+
+                    for k in int_keys:
+                        d[ k ] = int( d[ k ] )
+                    d['facet_area'] = float( d['facet_area'] )
+
+                    result += [ d ]
+
+            except IOError, why:
+                raise IntervorError, 'Error accessing intervor output file %r: %r'\
+                      % (fname, why)
+            except Exception, why:
+                raise IntervorError, 'Error parsing intervor output file %r: %r'\
+                      % (fname, why) + '\nThe offending line is: ' + repr(l)
+
         finally:
             try:
                 f.close()
-                N.arra
             except:
                 pass
         
