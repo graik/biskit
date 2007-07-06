@@ -137,13 +137,12 @@ class PDBCleaner:
                     resnames[i] = MU.nonStandardAA[ resname ]
 
                     self.logWrite('renamed %s %i to %s' % \
-                                  (resname, resnames[i],
-                                   MU.nonStandardAA[ resname ]))
+                                  (resname, i, MU.nonStandardAA[ resname ]))
                 else:
                     resnames[i] = 'ALA'
 
                     self.logWrite('Warning: unknown residue name %s %i: ' \
-                                  % (resname, resnames[i] ) )
+                                  % (resname, i ) )
                     self.logWrite('\t->renamed to ALA.')
 
                 replaced += 1
@@ -271,6 +270,7 @@ class PDBCleaner:
         except KeyboardInterrupt, why:
             raise KeyboardInterrupt( why )
         except Exception, why:
+            self.logWrite('Error: '+t.lastErrorTrace())
             raise CleanerError( 'Error cleaning model: %r' % why )
 
         return self.model
