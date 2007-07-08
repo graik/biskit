@@ -143,8 +143,8 @@ CALL ROUTINE = 'model'             # do homology modelling
                     fout=None,
                     starting_model=1, ending_model=10 ):
         """
-        Create a input (.top) file for Modeller. An existing modeller.top file will NOT be
-        overidden to allow manual intervention.
+        Create a input (.top) file for Modeller. An existing modeller.top file
+	will NOT be overidden to allow manual intervention.
         See L{MODELLER_TEMPLATE}.
         
         @param f_pir: PIR alignment file
