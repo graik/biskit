@@ -47,18 +47,18 @@ class Xplorer(Executor):
 
     def __init__( self, template, pipes=None, **params):
         """
-	Create an Executor instance for XPlor jobs. The only argument required
-	is a template for the control script passed to Xplor. As usual, any
-	keyword=value pairs given to this constructor, can be used to
-	substitute place holders in the template (see L{Executor}!).
-	
+        Create an Executor instance for XPlor jobs. The only argument required
+        is a template for the control script passed to Xplor. As usual, any
+        keyword=value pairs given to this constructor, can be used to
+        substitute place holders in the template (see L{Executor}!).
+        
         @param template: template for Xplor input file. This can be the
-	                 template itself or the path to a file containing it.
+                         template itself or the path to a file containing it.
         @type  template: str
-	@param pipes: push input script directly through a pipe rather
-	              than writing it to disc; If != None, this option
-		      overrides the default setting from exe_xplor.dat.
-		      The default in exe_xplor is pipes = 1 (True).
+        @param pipes: push input script directly through a pipe rather
+                      than writing it to disc; If != None, this option
+                      overrides the default setting from exe_xplor.dat.
+                      The default in exe_xplor is pipes = 1 (True).
         @type  pipes: 1|0 or bool
 
         @param kw: additional key=value parameters for Executor
@@ -70,10 +70,10 @@ class Xplorer(Executor):
           nice     - int, nice level (default: 0)
           log      - Biskit.LogFile, program log (None->STOUT) (default: None)
         """
-	Executor.__init__( self, 'xplor', template=template, **params )
+        Executor.__init__( self, 'xplor', template=template, **params )
 
-	if pipes is not None:
-	    self.exe.pipes = pipes
+        if pipes is not None:
+            self.exe.pipes = pipes
 
         #: will contain copy of Xplor log file after run finished
         self.logLines = None
@@ -171,7 +171,7 @@ delete selection= (resname TIP3) end
 ! set toplogies etc.
 ! ------------------
 parameter
-  	reset
+        reset
         @@$param19
 end
 
@@ -188,7 +188,7 @@ write coor output= $lig_out end
 stop
 """
     def prepare(self):
-	self.dir_out = tempfile.mkdtemp( '_test_Xplorer' )
+        self.dir_out = tempfile.mkdtemp( '_test_Xplorer' )
 
         ## write a test template inp file to disc
         f = open( self.dir_out +'/test.inp', 'w')
@@ -197,7 +197,7 @@ stop
 
 
     def test_Xplorer( self ):
-	"""Xplorer test"""
+        """Xplorer test"""
 
         ## input template variables
         param = T.projectRoot() + '/external/xplor/toppar/param19.pro'
@@ -220,13 +220,13 @@ stop
             print """
 The minimized structure and the X-Plor log file
 have been written to %s and %s, respectively
-	    """ % (pdb_out, log_out)
+            """ % (pdb_out, log_out)
 
-	    print """See x.logLines for the complete xplor log file!"""
+            print """See x.logLines for the complete xplor log file!"""
         
 
     def cleanUp(self):
-	T.tryRemove( self.dir_out, tree=1 )
+        T.tryRemove( self.dir_out, tree=1 )
 
 if __name__ == '__main__':
 

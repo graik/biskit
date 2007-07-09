@@ -57,7 +57,7 @@ class Fold_X( Executor ):
       This is zero if not 'AnalyseComplex' is run. The final value are
       the number of residues.
       
-      We'll try to keep the energy labels of Fold-X version 1 of possible.
+      We'll try to keep the energy labels of Fold-X version 1 if possible.
       ::
         ene    - total energy	
 	bb_hb  - Backbone Hbond	
