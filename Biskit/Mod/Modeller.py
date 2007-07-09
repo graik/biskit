@@ -94,8 +94,8 @@ CALL ROUTINE = 'model'             # do homology modelling
     F_SCORE_OUT = F_RESULT_FOLDER + '/Modeller_Score.out'
 
 
-    def __init__( self, outFolder='.', zFilter=None, idFilter=None,
-		  log=None, verbose=1 ):
+    def __init__( self, outFolder='.', zfilter=None, idfilter=None,
+		  log=None, verbose=1, **kw ):
         """
         @param outFolder: base folder for Modeller output 
                           (default: L{F_RESULT_FOLDER})
@@ -121,8 +121,8 @@ CALL ROUTINE = 'model'             # do homology modelling
         self.f_inp = None
 
 	self.aln_info = CheckIdentities( self.outFolder )
-	self.z_filter = zFilter
-	self.id_filter = idFilter
+	self.z_filter = zfilter
+	self.id_filter = idfilter
 
         ## sequence ids from the last prepared alignment
         self.pir_ids = [] 
