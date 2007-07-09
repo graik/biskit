@@ -1,5 +1,3 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
-
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2007 Raik Gruenberg & Johan Leckner
@@ -54,16 +52,22 @@ class CheckIdentities:
     F_OUTPUT_IDENTITIES_COV = '/identities_cov.out'
 
 
-    def __init__(self, outFolder='.', verbose=1):
+    def __init__(self, outFolder='.', alignment=None, verbose=1):
         """
         @param outFolder: base folder
         @type  outFolder: str
+	@param alignment: path to alignment file in non-default location
+	@type  alignment: str
         @param verbose: write intermediary files (default: 0)
         @type  verbose: 1|0
         """
         self.outFolder = T.absfile( outFolder )
         self.verbose = verbose
+	self.f_aln = alignment or self.outFolder + self.F_INPUT_ALNS
         self.sequences_name=["target"]
+
+	#: will hold result dict after go()
+	self.result = None
 
 
     def get_lines(self, aln_file = None):
@@ -76,18 +80,12 @@ class CheckIdentities:
         @return: file as list of strings
         @rtype: [str]
         """
-        aln_file = aln_file or self.outFolder + self.F_INPUT_ALNS
-        file = open('%s'%aln_file, 'r')
-        string_lines = file.readlines()
-        file.close()
-
-        return string_lines
+        return open( self.f_aln, 'r').readlines()
 
 
     def search_length(self, string_lines):
         """
-        This function returns the length an alignment in the
-        file 'final.pir_aln'
+        Return the number of sequences in the alignment 'final.pir_aln'.
 
         @param string_lines: aln file as list of string
         @type  string_lines: [str]
@@ -99,7 +97,6 @@ class CheckIdentities:
 
         for x in string_lines:
             if(x == '*\n'):
-##                endof_1st_sequence = end_of_sequence
                 break
 
             end_of_sequence+=1
@@ -196,7 +193,7 @@ class CheckIdentities:
              sequence excluding deletions. The number of sequences
              in the multiple alignment that contain information at
              this position.
-         - 'ID' - dict, sequence identity in precent comparing the
+         - 'ID' - dict, sequence identity in percent comparing the
             'key'  sequence to all other sequences (excluding deletions)
          - 'info_ID' - dict, same as 'ID' but compared to the template
              sequence length (i.e excluding deletions and insertions
@@ -304,7 +301,7 @@ class CheckIdentities:
             f.write('\n')
 
 
-    def output_identities(self, aln_dictionary, identities_file = None,
+    def write_identities(self, identities_file = None,
                           identities_info_file = None,
                           identities_cov_file = None):
         """
@@ -350,11 +347,13 @@ should be read row-wise (the first line is the most interesting one).
 
         head_conv_ID ="Sequence identity in percent comparing a sequence to another \n(excluding deletions and insertions in the first sequence but only \nwhen the first sequence doesn't match any other sequence in the \nmultiple alignment )"
 
-        self.__writeId( identities_file, aln_dictionary,
+	assert self.result is not None, 'no alignment result to write, call go() first'
+
+        self.__writeId( identities_file, self.result,
                         'ID' , head_ID )
-        self.__writeId( identities_info_file, aln_dictionary,
+        self.__writeId( identities_info_file, self.result,
                         'info_ID' , head_info_ID )
-        self.__writeId( identities_cov_file, aln_dictionary,
+        self.__writeId( identities_cov_file, self.result,
                         'cov_ID', head_conv_ID )
 
 
@@ -372,19 +371,19 @@ should be read row-wise (the first line is the most interesting one).
         aln_length = self.search_length( string_lines )
 
         ## get information about the target sequence from the alignment
-        aln_dictionary = self.get_aln_sequences( string_lines,
-                                                 aln_length )
+        self.result = self.get_aln_sequences( string_lines,
+					      aln_length )
 
         ## add information about the aligned templates from the alignment
-        aln_dictionary = self.get_aln_templates( string_lines,
-                                                 aln_dictionary,
-                                                 aln_length )
+        self.result = self.get_aln_templates( string_lines,
+					      self.result,
+					      aln_length )
 
-        aln_dictionary = self.identities( aln_dictionary )
+        self.result = self.identities( self.result )
 
-        self.output_identities( aln_dictionary )
+##         self.write_identities()
 
-        return aln_dictionary
+        return self.result
 
 
 
@@ -412,7 +411,8 @@ class Test(BT.BiskitTest):
     def test_CheckIdentities(self):
 	"""Mod.CheckIdentities test"""
 	self.m = CheckIdentities( self.outfolder )
-	self.m.go()
+	self.result = self.m.go()
+	self.m.write_identities()
 
 	if self.local and self.DEBUG:
 	    self.log.add("""The result from the template comparison can be found in the three files %s, %s and %s that reside in the folder %s"""\
