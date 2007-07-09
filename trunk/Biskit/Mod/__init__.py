@@ -26,6 +26,7 @@ try:
     from SequenceSearcher import SequenceSearcher
     from TemplateSearcher import TemplateSearcher
     from TemplateCleaner import TemplateCleaner
+    from TemplateFilter import TemplateFilter
 
 except ImportError, why:
     B.EHandler.warning( 'Error importing Biskit/Mod modules', trace=1 )

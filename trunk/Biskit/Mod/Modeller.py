@@ -36,8 +36,9 @@ import Biskit.tools as T
 
 from Biskit.Mod.TemplateCleaner import TemplateCleaner as TC
 from Biskit.Mod.SequenceSearcher import SequenceSearcher as SS
-from Biskit.Mod.CheckIdentities import CheckIdentities as CI
+from Biskit.Mod.CheckIdentities import CheckIdentities
 from Aligner import Aligner
+from Biskit.Mod.TemplateFilter import TemplateFilter
 from Biskit.ModelList import ModelList
 from Biskit.DictList import DictList
 
@@ -46,6 +47,7 @@ from Biskit import PDBModel
 import glob
 
 from Biskit import StdLog, EHandler
+
 
 
 class ModellerError( Exception ):
@@ -92,24 +94,35 @@ CALL ROUTINE = 'model'             # do homology modelling
     F_SCORE_OUT = F_RESULT_FOLDER + '/Modeller_Score.out'
 
 
-    def __init__( self, outFolder='.', log=None, verbose=1 ):
+    def __init__( self, outFolder='.', zFilter=None, idFilter=None,
+		  log=None, verbose=1 ):
         """
         @param outFolder: base folder for Modeller output 
                           (default: L{F_RESULT_FOLDER})
         @type  outFolder: str
+	@param zFilter: override z-score cutoff of Mod.TemplateFilter
+	                0:skip this filter
+	@type  zFilter: float
+	@param idFilter: override sequence identity cutoff of Mod.TemplateFilter
+	                 0:skip this filter
+	@type  idFilter: float
         @param log: log file instance, if None, STDOUT is used (default: None)
         @type  log: LogFile
         @param verbose: verbosity level (default: 1)
         @type  verbose: 1|0
         """
         self.outFolder = T.absfile( outFolder )
-        self.log = log
 
+        self.log = log
         self.verbose = verbose
         
         self.prepareFolders()
 
         self.f_inp = None
+
+	self.aln_info = CheckIdentities( self.outFolder )
+	self.z_filter = zFilter
+	self.id_filter = idFilter
 
         ## sequence ids from the last prepared alignment
         self.pir_ids = [] 
@@ -203,7 +216,29 @@ CALL ROUTINE = 'model'             # do homology modelling
         @rtype: [str]      
         """
         fs = os.listdir( template_folder )
-        return [ f[:-4] for f in fs if f[-4:].upper()=='.PDB' ]
+        r = [ f[:-4] for f in fs if f[-4:].upper()=='.PDB' ]
+
+	return r
+
+
+    def filter_templates( self, target_id='target' ):
+	"""
+	
+	"""
+
+	tf = TemplateFilter( self.aln_info, target_id=target_id,
+			     verbose=self.verbose, log=self.log )
+
+	if self.z_filter != 0:
+	    tf.filter_z( self.z_filter )
+
+	if self.id_filter != 0:
+	    tf.filter_id( self.id_filter )
+	
+	r = tf.get_filtered()
+
+	return r
+
 
 
     def get_target_id( self, f_fasta ):
@@ -330,8 +365,16 @@ CALL ROUTINE = 'model'             # do homology modelling
         ## add Modeller-style lines and extract sequence ids
         self.prepare_alignment( f_pir, template_ids )
 
+	## analyze alignment
+	self.aln_info.go()
+	## write identity matrix files into project folder
+	self.aln_info.write_identities()
+	
         ## guess target seq id within alignment
         target_id = self.get_target_id( fasta_target )
+
+	## remove templates with low or below average similarity to target 
+	template_ids = self.filter_templates( target_id=target_id )
 
         self.create_inp( f_pir, target_id, template_folder, template_ids,fout, 
                          starting_model=starting_model, 
@@ -431,24 +474,17 @@ CALL ROUTINE = 'model'             # do homology modelling
         file_output.close()
 
 
-    def update_PDB(self, pdb_list, cwd, model_folder):
+    def update_PDB(self, pdb_list, model_folder):
         """
         Extract number of templates per residue position from alignment.
         Write new PDBs with number of templates in occupancy column.
 
         @param pdb_list: list of models
         @type  pdb_list: ModelList
-        @param cwd: current project directory
-        @type  cwd: str
         @param model_folder: folder with models
         @type  model_folder: str
         """
-        cwd = cwd or self.outFolder
-
-        ci = CI(cwd)
-        aln_dictionnary = ci.go()
-
-        template_info = aln_dictionnary["target"]["template_info"]
+        template_info =  self.aln_info.result["target"]["template_info"]
 
         for model in pdb_list:
 
@@ -536,7 +572,7 @@ CALL ROUTINE = 'model'             # do homology modelling
 
         pdb_list = pdb_list.sortBy("mod_score")
 
-        self.update_PDB(pdb_list, self.outFolder, model_folder)
+        self.update_PDB(pdb_list, model_folder)
 
         self.output_score(pdb_list,model_folder)
 
@@ -619,4 +655,4 @@ class Test( TestBase ):
 
 if __name__ == '__main__':
 
-    BT.localTest(verbosity=3)
+    BT.localTest(verbosity=3, debug=1)
