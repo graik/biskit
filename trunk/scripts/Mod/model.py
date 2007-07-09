@@ -27,6 +27,7 @@ import Biskit.Mod.modUtils as modUtils
 from Biskit.Mod import *
 from Biskit.Mod import Modeller as M
 from Biskit.Mod import TemplateCleaner as TS
+from Biskit.Mod import TemplateFilter as TF
 import Biskit.tools as tools
 from Biskit import EHandler
 from Biskit import LogFile
@@ -42,24 +43,33 @@ def _use( o ):
     print """
 Build model using Modeller.
 
-Syntax: model.py [ -o |outFolder| -log |logFile| -h |host_computer| ]
+Syntax: model.py [ -o |outFolder| -log |logFile| -h |host_computer|
+                   -v |verbosity|
+                   -zfilter |x.x| -idfilter |percent| ]
 
 Options:
-    -o       output folder for results      (default: .)
-    -log     log file                       (default: STDOUT)
-    -h       host computer for calculation  (default: local computer)
-             -> must be accessible w/o password via ssh, check!
-    -s       show structures on Pymol superimposed on average
-    -dry     do not run Modeller; just set up and try post-processing existing
-             results
+    -o         output folder for results      (default: .)
+    -log       log file                       (default: STDOUT)
+    -h         host computer for calculation  (default: local computer)
+               -> must be accessible w/o password via ssh, check!
+    -s         show structures on Pymol superimposed on average
+    -dry       do not run Modeller; just set up and try post-processing
+               existing results
+    -zfilter   ignore templates that are more than z standard deviations below
+               the average sequence identity to the target (0..switch off)
+	       (default: see Biskit.Mod.TemplateFilter.py)
+    -idfilter  ignore templates that have less than idfilter fraction sequence
+               identity to target sequence (the best template is always kept)
+	       (0..switch filtering off)
+    -v         verbosity level (0 - 3)
     -? or help .. this help screen
 
-input: templates/modeller/*.pdb
-       t_coffee/final.pir_aln
+input: ./templates/modeller/*.pdb
+       ./t_coffee/final.pir_aln
 
-output: modeller/modeller.log
-                /*.B9999000??   <- models
-		/model_??.pdb   <- processed PDBs ordered by modeller score
+output: ./modeller/modeller.log
+                  /*.B9999000??   <- models
+		  /model_??.pdb   <- processed PDBs ordered by modeller score
 
 Default options:
 """
@@ -71,8 +81,31 @@ Default options:
 def defaultOptions():
     return {'o':'.',
             'log': None,
-            'h':None
+            'h':None,
+	    'v':0,
+	    'zfilter':TF.Z_CUTOFF,
+	    'idfilter':TF.ID_CUTOFF,
             }
+
+def convertOptions( o ):
+    o['verbose'] = int( o.get('v',0) )
+    del o['v']
+    
+    o['outFolder'] = tools.absfile( o.get('o','.') )
+    del o['o']
+    
+    o['zfilter'] = float( o.get('zfilter',0) )
+    o['idfilter']= float( o.get('idfilter',0))
+
+    o['log'] = o.get('log', None)
+    if o['log']:
+	o['log'] = LogFile( o['o'] + '/' + options['log'], 'a' )
+
+    o['host'] = o.get('h', None)
+    del o['h']
+
+
+    return o
 
 def __printMatrix( matrix ):
     """
@@ -90,20 +123,14 @@ def __printMatrix( matrix ):
 ### MAIN ###
 
 options   = tools.cmdDict( defaultOptions() )
-outFolder = tools.absfile( options['o'] )
-
-## Test, comment in for testing
-# outFolder = tools.testRoot() + '/Mod/project'
-
-host = options['h']
-
-log = None
-if options['log']:
-    log = LogFile( outFolder + '/' + options['log'], 'a' ) 
 
 if '?' in options or 'help' in options:
     _use( defaultOptions() )
 
+options = convertOptions( options )
+
+## Test, comment in for testing
+# outFolder = tools.testRoot() + '/Mod/project'
 
 ###################
 ## Modeller
@@ -117,12 +144,12 @@ if '?' in options or 'help' in options:
 ##                 /*.B9999000??   <- models
 try:
 
-    m8 = M(outFolder, log)
+    m8 = M( **options )
    
     r = m8.prepare_modeller( )
 
     if not 'dry' in options:
-	m8.go(host)  ## comment out for testing
+	m8.go( options['host'] )  ## comment out for testing
 
     m8.postProcess()
     
