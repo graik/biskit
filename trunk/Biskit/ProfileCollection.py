@@ -1216,8 +1216,6 @@ class Test(BT.BiskitTest):
         
         self.assert_( views[0].alive is False )
 
-import profile
-
 def test_iter_views( p ):
 
     r = []
@@ -1278,6 +1276,8 @@ def test_classic( p ):
     return r
 
 def clock( s ):
+
+    import profile
     profile.run( s, 'report.out' )
 
     ## Analyzing
