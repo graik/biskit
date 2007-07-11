@@ -479,22 +479,20 @@ class Test(BT.BiskitTest):
     """
     def prepare(self):
         import tempfile
-        import shutil
+        import shutil, stat
 	from Biskit import LogFile, StdLog
 
         ## collect the input files needed
 
         self.outfolder = tempfile.mkdtemp( '_test_Aligner' )
 
-## 	self.outfolder = '/tmp/test_aligner'
-## 	try: os.mkdir(self.outfolder)
-## 	except: pass
-	
         os.mkdir( self.outfolder +'/templates' )
         os.mkdir( self.outfolder +'/sequences/' )
         
         shutil.copytree( T.testRoot() + '/Mod/project/templates/t_coffee',
                          self.outfolder + '/templates/t_coffee' )
+
+        os.chmod( self.outfolder + '/templates/t_coffee', stat.S_IWRITE )
         
         shutil.copy( T.testRoot() + '/Mod/project/templates/templates.fasta',
                      self.outfolder + '/templates' )
@@ -504,6 +502,13 @@ class Test(BT.BiskitTest):
 
         shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
                      self.outfolder  )
+
+        ## when copying from a write-protected biskit, the temp files are also
+        ## becomming write-protected
+        try:
+            os.system( 'chmod -R +xrw %s' % self.outfolder )
+        except Exception, error:
+            T.lastError( str( error ) )
 
 	if not self.local:
 	    self.a_log = LogFile( self.outfolder + '/Aligner.log' )
