@@ -44,25 +44,52 @@ def _use( o ):
 Build model using Modeller.
 
 Syntax: model.py [ -o |outFolder| -log |logFile| -h |host_computer|
+                   -top |input_script_template|
                    -v |verbosity|
-                   -zfilter |x.x| -idfilter |percent| ]
+                   -zfilter |x.x| -idfilter |percent|
+                   ...and more, see below...]
 
 Options:
     -o         output folder for results      (default: .)
     -log       log file                       (default: STDOUT)
-    -h         host computer for calculation  (default: local computer)
+    -node      host computer for calculation  (default: local computer)
                -> must be accessible w/o password via ssh, check!
     -s         show structures on Pymol superimposed on average
     -dry       do not run Modeller; just set up and try post-processing
                existing results
-    -zfilter   ignore templates that are more than z standard deviations below
+    -v         verbosity level (0 - 3)
+
+    -? or -help .. this help screen
+
+    The remaining options are simply passed on to Modeller but are usually
+    left at their default:
+
+    -fasta_target |file with target sequence|
+    -template_folder |folder containing template PDBs for modeller|
+    -f_pir |file containing alignment|
+    -starting_model |first homology model to report [1]|
+    -ending_model |last model to report [10]|
+    -zfilter |float|
+               ignore templates that are more than z standard deviations below
                the average sequence identity to the target (0..switch off)
 	       (default: see Biskit.Mod.TemplateFilter.py)
-    -idfilter  ignore templates that have less than idfilter fraction sequence
+    -idfilter |float|
+               ignore templates that have less than idfilter fraction sequence
                identity to target sequence (the best template is always kept)
 	       (0..switch filtering off)
-    -v         verbosity level (0 - 3)
-    -? or help .. this help screen
+
+    -mod_template |file|
+               Provide a different input script template (see Modeller.py).
+               You can use either old style modeller.top files or new-style
+               python scripts -- see biskit/external/modeller for an example.
+
+    Further options are passed on to the Executor parent class, for
+    example:
+
+    -debug |1| to not delete any temporary files
+    -nice |int| to adjust a non-0 nice level
+
+    
 
 input: ./templates/modeller/*.pdb
        ./t_coffee/final.pir_aln
@@ -81,13 +108,18 @@ Default options:
 def defaultOptions():
     return {'o':'.',
             'log': None,
-            'h':None,
+            'node':None,
 	    'v':1,
 	    'zfilter':TF.Z_CUTOFF,
 	    'idfilter':TF.ID_CUTOFF,
             }
 
 def convertOptions( o ):
+    """
+    Translate commandline options where needed.
+    You may need to add some entries here if you want to override exotic
+    Executor parameters from the commandline.
+    """
     o['verbose'] = int( o.get('v',1) )
     del o['v']
     
@@ -101,9 +133,8 @@ def convertOptions( o ):
     if o['log']:
 	o['log'] = LogFile( o['o'] + '/' + options['log'], 'a' )
 
-    o['host'] = o.get('h', None)
-    del o['h']
-
+    o['debug'] = int( o.get('debug', 0) )
+    o['nice']  = int( o.get('nice', 0) )
 
     return o
 
