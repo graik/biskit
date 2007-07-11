@@ -61,7 +61,7 @@ INCLUDE                               # Include the predefined TOP routines
 
 SET OUTPUT_CONTROL = 1 1 1 1 1        # uncomment to produce a large log file
 SET ALNFILE  = '%(f_pir)s'            # alignment filename
-SET KNOWNS   = %(template_ids_str)s  
+SET KNOWNS   = %(knowns_top)s  
 SET SEQUENCE = '%(target_id)s'        # code of the target
 SET ATOM_FILES_DIRECTORY = '%(template_folder)s'# directories for input atom files
 SET STARTING_MODEL= %(starting_model)i  # index of the first model 
@@ -138,6 +138,10 @@ CALL ROUTINE = 'model'             # do homology modelling
         self.target_id = None   # will be assigned in prepare()
         self.starting_model = starting_model
         self.ending_model   = ending_model
+
+        #: prepare() fills in the template ids formatted for old top or py
+        self.knowns_top = None
+        self.knowns_py  = None 
 
 	self.aln_info = CheckIdentities( self.outFolder )
 	self.z_filter = zfilter
@@ -325,8 +329,10 @@ CALL ROUTINE = 'model'             # do homology modelling
 	template_ids = self.filter_templates( target_id=self.target_id )
 
         ## convert template ids into modeller-formatted input line
-        self.template_ids_str = [ "'%s'"%id  for id in template_ids ]
-        self.template_ids_str = ' '.join( template_ids )
+        ## for python or old-style top input
+        self.knowns_py  = [ "'%s'"%id  for id in template_ids ]
+        self.knowns_py  = ', '.join( self.knowns_py )
+        self.knowns_top = ' '.join( template_ids )
 
 
     ####################
