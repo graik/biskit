@@ -162,7 +162,7 @@ class Test(BT.BiskitTest):
 
     def test_TemplateFilter(self):
 	"""Mod.TemplateFilter test"""
-	self.f = TemplateFilter( self.aln_info, verbose=1 )
+	self.f = TemplateFilter( self.aln_info, verbose=self.verbose )
 
 	self.f.filter_z( cutoff=0.25 )
 	self.f.filter_id()
