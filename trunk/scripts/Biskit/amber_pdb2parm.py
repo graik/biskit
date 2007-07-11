@@ -88,7 +88,7 @@ Default options:
     for key, value in options.items():
         print "\t-",key, "\t",value
         
-    sys.exit(0)
+    #sys.exit(0)
 
 options = t.cmdDict( {'o':'out.parm'} )
 
@@ -112,6 +112,11 @@ try:
 
     if 'log' in options:
         options['log'] = LogFile( options['log'] )
+
+    if 'norun' in options:
+        fbase = t.stripSuffix( t.absfile( options['i'] ) )
+        options['leap_in'] = options.get('leap_in', fbase+'_leap.in')
+        options['leap_pdb']= options.get('leap_pdb',fbase+'_forleap.pdb')
 
     a = AmberParmBuilder( options['i'], **options )
 
