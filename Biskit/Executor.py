@@ -238,8 +238,8 @@ class Executor:
     References
     ==========
 
-      - See also L{Biskit.IcmCad} for an Example of how to overwrite and
-         use Executor.
+      - See also L{Biskit.IcmCad} and L{Biskit.Xplorer} for examples of
+         how to overwrite and use Executor.
 
       - See also L{Biskit.ExeConfig} for a description of program
          configuration.
