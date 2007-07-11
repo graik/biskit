@@ -182,7 +182,7 @@ try:
     m8 = M( **options )
    
     if not 'dry' in options:
-	r = m8.run( options['host'] )  ## comment out for testing
+	r = m8.run()  ## comment out for testing
 
 except:
     EHandler.error( 'Error while modelling.')
