@@ -25,7 +25,7 @@
 
 from Biskit import PDBModel
 from Biskit.tools import *
-from Numeric import *
+from numpy.oldnumeric import *
 
 def __pairwiseDistances( u, v):
     """

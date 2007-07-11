@@ -23,7 +23,7 @@
 
 import os.path
 import os
-from Numeric import sum, logical_not
+from numpy.oldnumeric import sum, logical_not
 
 from Biskit.tools import *
 from Biskit.hosts import nodes_own
@@ -38,7 +38,7 @@ def defaultOptions():
             'out':'.',
             'nb_nodes':1,
             'nodes_eq':host_list[0],
-            'nodes_prod':host_list[:21],
+            'nodes_prod':host_list[:1],
             'n_members':10,
             'dt':0.002,
             'n_steps':500000,
