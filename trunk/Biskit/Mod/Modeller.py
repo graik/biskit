@@ -29,7 +29,7 @@ Interface to Modeller
 
 import re, os.path, subprocess
 import linecache
-#from string import *
+import glob
 
 import settings
 import Biskit.tools as T
@@ -41,24 +41,17 @@ from Aligner import Aligner
 from Biskit.Mod.TemplateFilter import TemplateFilter
 from Biskit.ModelList import ModelList
 from Biskit.DictList import DictList
-
-
+from Biskit.Executor import Executor
 from Biskit import PDBModel
-import glob
-
-from Biskit import StdLog, EHandler
-
 
 
 class ModellerError( Exception ):
     pass
 
-class Modeller:
+class Modeller( Executor ):
     """
     Take Alignment from t_coffee and template PDBs.
     Creates a modeller-script and runs modeller.
-
-    @todo: convert this to Executor child.
     """
 
     MODELLER_TEMPLATE = """
@@ -68,7 +61,7 @@ INCLUDE                               # Include the predefined TOP routines
 
 SET OUTPUT_CONTROL = 1 1 1 1 1        # uncomment to produce a large log file
 SET ALNFILE  = '%(f_pir)s'            # alignment filename
-SET KNOWNS   = %(template_ids)s  
+SET KNOWNS   = %(template_ids_str)s  
 SET SEQUENCE = '%(target_id)s'        # code of the target
 SET ATOM_FILES_DIRECTORY = '%(template_folder)s'# directories for input atom files
 SET STARTING_MODEL= %(starting_model)i  # index of the first model 
@@ -94,38 +87,66 @@ CALL ROUTINE = 'model'             # do homology modelling
     F_SCORE_OUT = F_RESULT_FOLDER + '/Modeller_Score.out'
 
 
-    def __init__( self, outFolder='.', zfilter=None, idfilter=None,
-		  log=None, verbose=1, **kw ):
+    def __init__( self, outFolder='.', mod_template=None,
+                  fasta_target=None, template_folder=None, f_pir=None,
+                  starting_model=1, ending_model=10,
+                  zfilter=None, idfilter=None,
+                  disc_report=1,
+		  **kw ):
         """
+        Create Executor instance for one modeller run.
+        
         @param outFolder: base folder for Modeller output 
                           (default: L{F_RESULT_FOLDER})
         @type  outFolder: str
+        @param mod_template   : template file/str for modeller input script
+        @type  mod_template   : str
+        @param fasta_target   : file with target sequence
+        @type  fasta_target   : str
+        @param template_folder: folder containing template PDBs for modeller
+        @type  template_folder: str
+        @param f_pir         : file containing alignment
+        @type  f_pir         : str
+        @param starting_model: first homology model to report [1]
+        @type  starting_model: int
+        @param ending_model  : last model to report [10]
+        @type  ending_model  : int
 	@param zFilter: override z-score cutoff of Mod.TemplateFilter
-	                0:skip this filter
-	@type  zFilter: float
-	@param idFilter: override sequence identity cutoff of Mod.TemplateFilter
-	                 0:skip this filter
+	                0..skip this filter
+	@type  zfilter: float
+	@param idfilter: override sequence identity cutoff of TemplateFilter
+	                 0..skip this filter
 	@type  idFilter: float
-        @param log: log file instance, if None, STDOUT is used (default: None)
-        @type  log: LogFile
-        @param verbose: verbosity level (default: 1)
-        @type  verbose: 1|0
+        @param disc_report : keep logs, write ordered pdbs to model_xx.pdb [1]
+        @type  disc_report : bool
         """
         self.outFolder = T.absfile( outFolder )
+        cwd = self.outFolder + self.F_RESULT_FOLDER
+        f_in = cwd + '/modeller.top'
 
-        self.log = log
-        self.verbose = verbose
-        
-        self.prepareFolders()
+        Executor.__init__(self, 'modeller',
+                          template= mod_template or self.MODELLER_TEMPLATE,
+                          args= f_in, # command line argument
+                          f_in= f_in, # target of template completion
+                          cwd= cwd,
+                          **kw)
 
-        self.f_inp = None
+        self.fasta_target= fasta_target or self.outFolder + SS.F_FASTA_TARGET
+        self.template_folder= template_folder or self.outFolder + TC.F_MODELLER
+        self.f_pir = f_pir or self.outFolder + Aligner.F_FINAL_ALN
+
+        self.target_id = None   # will be assigned in prepare()
+        self.starting_model = starting_model
+        self.ending_model   = ending_model
 
 	self.aln_info = CheckIdentities( self.outFolder )
 	self.z_filter = zfilter
 	self.id_filter = idfilter
 
+        self.disc_report = disc_report
+
         ## sequence ids from the last prepared alignment
-        self.pir_ids = [] 
+        self.pir_ids = []
 
 
     def prepareFolders( self ):
@@ -135,74 +156,20 @@ CALL ROUTINE = 'model'             # do homology modelling
         if not os.path.exists( self.outFolder + self.F_RESULT_FOLDER ):
             os.mkdir( self.outFolder + self.F_RESULT_FOLDER )
             if self.verbose:
-                self.logWrite( 'Creating '+self.outFolder + self.F_RESULT_FOLDER)
+                self.log.add('Creating '+self.outFolder + self.F_RESULT_FOLDER)
 
 
-    def logWrite( self, msg, force=1 ):
+    def generateInp( self ):
         """
-        Write message to log.
-
-        @param msg: message to print
-        @type  msg: str        
+        Modify Executor.generateInp so that it does NOT override an existing
+        input file.
         """
-        if self.log:
-            self.log.add( msg )
+        if os.path.exists( self.f_in ):
+            self.log.add('Warning: Using EXISTING modeller input file %s' %\
+                         self.f_in )
+            self.keep_inp = 1
         else:
-            if force:
-                print msg
-
-
-    def create_inp( self, f_pir, target_id, template_folder, template_ids,
-                    fout=None,
-                    starting_model=1, ending_model=10 ):
-        """
-        Create a input (.top) file for Modeller. An existing modeller.top file
-	will NOT be overidden to allow manual intervention.
-        See L{MODELLER_TEMPLATE}.
-        
-        @param f_pir: PIR alignment file
-        @type  f_pir: str
-        @param target_id: ID of target in the alignment file
-        @type  target_id: str
-        @param template_folder: folder with template coordinate files
-        @type  template_folder: str
-        @param template_ids: ids of all templates in the alignment file
-        @type  template_ids: [str]
-        @param fout: name of modeller script (default: None -> L{F_INP})
-        @type  fout: None or str
-        @param starting_model: first model
-        @type  starting_model: int
-        @param ending_model: last model
-        @type  ending_model: int
-        
-        @raise ModellerError: if can't create modeller inp file
-        """
-        template_ids = [ "'%s'"%id  for id in template_ids ]
-        template_ids = ' '.join( template_ids )
-
-
-        params = { 'template_ids' : template_ids,
-                   'target_id' : target_id,
-                   'f_pir' : f_pir,
-                   'template_folder' : template_folder,
-                   'starting_model' : starting_model,
-                   'ending_model' : ending_model }
-
-        fout = fout or self.outFolder + self.F_INP
-
-        if os.path.exists( fout ):
-            self.logWrite('Warning: Using EXISTING modeller input file %s' % fout)
-            return
-
-	result = self.MODELLER_TEMPLATE % params
-
-        try:
-            if self.verbose:
-                self.logWrite('Creating modeller input file %s' % fout)
-
-            open( fout, 'w').write( result )
-        except IOError, why:
-            raise ModellerError( "Can't create modeller inp file "+fout )
+            Executor.generateInp( self )
 
 
     def get_template_ids( self, template_folder ):
@@ -223,7 +190,7 @@ CALL ROUTINE = 'model'             # do homology modelling
 
     def filter_templates( self, target_id='target' ):
 	"""
-	
+	Kick out some templates before the modeller run.
 	"""
 
 	tf = TemplateFilter( self.aln_info, target_id=target_id,
@@ -238,7 +205,6 @@ CALL ROUTINE = 'model'             # do homology modelling
 	r = tf.get_filtered()
 
 	return r
-
 
 
     def get_target_id( self, f_fasta ):
@@ -274,8 +240,8 @@ CALL ROUTINE = 'model'             # do homology modelling
             raise ModellerError("Target ID %s is not found in alignment." %\
                                 id_fasta )
 
-        self.logWrite('Warning: target sequence ID extracted without check'+
-                      ' against alignment file. Use prepare_alignment first.')
+        self.log.add('Warning: target sequence ID extracted without check'+
+                     ' against alignment file. Use prepare_alignment first.')
 
         title.close()
 
@@ -336,34 +302,16 @@ CALL ROUTINE = 'model'             # do homology modelling
 
 
 
-    def prepare_modeller( self, fasta_target=None, f_pir=None,
-                          template_folder=None, fout=None,
-                          starting_model=1, ending_model=10 ):
+    def prepare( self ):
         """
-        @param fasta_target: target fasta file
-                             (default: None -> L{SS.F_FASTA_TARGET})
-        @type  fasta_target: str
-        @param f_pir: PIR alignment file
-                      (default: None -> L{Aligner.F_FINAL_ALN})
-        @type  f_pir: str
-        @param template_folder: folder with template coordinate files
-                                (default: None -> L{TC.F_MODELLER})
-        @type  template_folder: str
-        @param fout: name of modeller script (default: None -> L{F_INP})
-        @type  fout: None or str
-        @param starting_model: first model (default: 1)
-        @type  starting_model: int
-        @param ending_model: last model (default: 10)
-        @type  ending_model: int
+        Executed before modeller run.
         """
-        fasta_target = fasta_target or self.outFolder + SS.F_FASTA_TARGET
-        template_folder = template_folder or self.outFolder + TC.F_MODELLER
-        f_pir = f_pir or self.outFolder + Aligner.F_FINAL_ALN
+        self.prepareFolders()
 
-        template_ids = self.get_template_ids( template_folder )
+        template_ids = self.get_template_ids( self.template_folder )
 
         ## add Modeller-style lines and extract sequence ids
-        self.prepare_alignment( f_pir, template_ids )
+        self.prepare_alignment( self.f_pir, template_ids )
 
 	## analyze alignment
 	self.aln_info.go()
@@ -371,45 +319,14 @@ CALL ROUTINE = 'model'             # do homology modelling
 	self.aln_info.write_identities()
 	
         ## guess target seq id within alignment
-        target_id = self.get_target_id( fasta_target )
+        self.target_id = self.get_target_id( self.fasta_target )
 
 	## remove templates with low or below average similarity to target 
-	template_ids = self.filter_templates( target_id=target_id )
+	template_ids = self.filter_templates( target_id=self.target_id )
 
-        self.create_inp( f_pir, target_id, template_folder, template_ids,fout, 
-                         starting_model=starting_model, 
-                         ending_model=ending_model)
-
-
-    def go( self, host=None ):
-        """
-        Run Modeller job.
-
-        @param host:  name of host to use (default: None -> localhost)
-        @type  host: str
-
-        @raise ModellerError: if Modeller job fails
-        """
-        try:
-            cmd = "cd %s%s ; %s %s"% (self.outFolder, self.F_RESULT_FOLDER, \
-                                   settings.modeller_bin, self.F_MOD_SCRIPT)
-
-            if host:
-                cmd = "ssh %s '%s'" % (host, cmd)
-
-            if self.verbose:
-                self.logWrite( 'Running Modeller. .. ')
-                self.logWrite( cmd )
-
-            sp = subprocess.Popen(cmd, shell=True, env=os.environ)
-            sp.wait()
-
-            if self.verbose:
-                self.logWrite( '..done')
-
-        except EnvironmentError, why:
-            self.logWrite("ERROR: Can't run Modeller: "+ str( why ) )
-            raise ModellerError( "Can't run Modeller: " + str( why ) )
+        ## convert template ids into modeller-formatted input line
+        self.template_ids_str = [ "'%s'"%id  for id in template_ids ]
+        self.template_ids_str = ' '.join( template_ids )
 
 
     ####################
@@ -474,10 +391,12 @@ CALL ROUTINE = 'model'             # do homology modelling
         file_output.close()
 
 
-    def update_PDB(self, pdb_list, model_folder):
+    def update_models(self, pdb_list ):
         """
-        Extract number of templates per residue position from alignment.
-        Write new PDBs with number of templates in occupancy column.
+        Extract number of templates per residue position from alignment
+        and put it into a residue profile 'n_templates' of each model.
+        Then put the mask of 0 (no template) or 1 (any template) into
+        the occupancy column.
 
         @param pdb_list: list of models
         @type  pdb_list: ModelList
@@ -494,22 +413,32 @@ CALL ROUTINE = 'model'             # do homology modelling
         rmask = pdb_list[0].profile2mask("n_templates", 1,1000)
         amask = pdb_list[0].res2atomMask(rmask)
 
+        for m in pdb_list:
+            m['occupancy'] = amask
 
-        for i in range(len(pdb_list)):
 
-            pdb_list[i]['occupancy'] = amask
-            #for a,v in zip(pdb_list[i].atoms, amask):
-                #a['occupancy'] = v
+    def write_Pdbs( self, pdb_list, model_folder):
+        """
+        Save re-ordered homology models as model_00.pdb - model_xx.pdb.
+        The B-factor column contains the modeller score, occupancy
+        contains a mask with 0 meaning there was no template for this position.
+        
+        @param pdb_list: list of PDBModels
+        @type  pdb_list: ModelList
+        @param model_folder: folder to save in
+        @type  model_folder: str
+        """
+
+        for i, m in enumerate( pdb_list ):
 
             t = []
 
-            for string in pdb_list[i].info["headlines"]:
+            for string in m.info["headlines"]:
                 
                 pair = string.split()[0], ''.join(string.split()[1:])
                 t.append(pair)
 
-            pdb_list[i].writePdb('%s/model_%02i.pdb'%(model_folder,i),
-                                 headlines = t)
+            m.writePdb('%s/model_%02i.pdb'%(model_folder,i), headlines = t)
 
 
     def update_rProfiles(self, pdb_list):
@@ -531,7 +460,7 @@ CALL ROUTINE = 'model'             # do homology modelling
 
 
 
-    def write_PDBModels(self, pdb_list, model_folder = None):
+    def write_PDBModelList(self, pdb_list, model_folder = None):
         """
         Dump the list of PDBModels.
         
@@ -547,38 +476,67 @@ CALL ROUTINE = 'model'             # do homology modelling
         T.Dump(pdb_list, '%s'%(model_folder + self.F_PDBModels))
 
 
-    def postProcess(self, model_folder=None):
+    def postProcess( self ):
         """
+        @todo: parse modeller log into this instance?
+        """
+        pass
+    
+
+    def isFailed( self ):
+        """
+        Detect wether the modeller process failed to finish. (overrides
+        Executor method)
+        """
+        r = self.pdb_list( self.outFolder + self.F_INPUT_FOLDER )
+        return len( r ) < 1
+
+    def cleanup( self ):
+        Executor.cleanup( self )
+
+        if not self.disc_report:
+            T.tryRemove( self.outfolder + self.F_RESULT_FOLDER, tree=1 )
+
+
+    def finish(self):
+        """
+        If self.disc_report == 1:
         Rename model PDBs to 'model_01.pdb' - 'model_xx.pdb' according to their
         score, create and dump a ModelList instance containing these models
         and info-records and profiles with the Modeller score.
+
+        Otherwise the resulting models are only put into self.result and
+        nothing is written to disc.
 
         @param model_folder: folder containing model PDBs
                              (default: None -> L{F_INPUT_FOLDER})
         @type  model_folder: str
         """
-
-        model_folder = model_folder or self.outFolder + self.F_INPUT_FOLDER
+        model_folder = self.outFolder + self.F_RESULT_FOLDER
 
         model_files = self.pdb_list(model_folder)
 
-        pdb_list = ModelList( model_files )
+        self.result = ModelList( model_files )
 
-        for model in pdb_list:
+        for model in self.result:
 
             model.info["mod_score"] = self.extract_modeller_score(
                 model.validSource(), model)
             model.info['mod_pdb'] = model.source
 
-        pdb_list = pdb_list.sortBy("mod_score")
+        self.result = self.result.sortBy("mod_score")
 
-        self.update_PDB(pdb_list, model_folder)
+        self.update_models(self.result )
 
-        self.output_score(pdb_list,model_folder)
+        if self.disc_report:
 
-        self.update_rProfiles(pdb_list)
+            self.output_score(self.result,model_folder)
 
-        self.write_PDBModels(pdb_list, model_folder)
+            self.update_rProfiles(self.result)
+
+            self.write_Pdbs( self.result, model_folder )
+
+            self.write_PDBModelList(self.result, model_folder)
 
 
 
@@ -619,12 +577,12 @@ class TestBase(BT.BiskitTest):
 
         self.m = Modeller( self.outfolder, verbose=self.local )
 
-        self.m.prepare_modeller( )
+##         self.m.prepare_modeller( )
 
         if run:
 
-            self.m.go()
-            self.m.postProcess()
+            self.m.run()
+##             self.m.postProcess()
 
             if self.DEBUG and self.VERBOSITY > 2:
                 self.log.add('The modelling result id in %s/modeller'\

@@ -82,13 +82,13 @@ def defaultOptions():
     return {'o':'.',
             'log': None,
             'h':None,
-	    'v':0,
+	    'v':1,
 	    'zfilter':TF.Z_CUTOFF,
 	    'idfilter':TF.ID_CUTOFF,
             }
 
 def convertOptions( o ):
-    o['verbose'] = int( o.get('v',0) )
+    o['verbose'] = int( o.get('v',1) )
     del o['v']
     
     o['outFolder'] = tools.absfile( o.get('o','.') )
@@ -144,15 +144,15 @@ options = convertOptions( options )
 ##                 /*.B9999000??   <- models
 try:
 
+    if options['verbose'] > 0:
+        print "\n"+\
+              "Type model.py -? or model.py -help for a full list of options!"
+
     m8 = M( **options )
    
-    r = m8.prepare_modeller( )
-
     if not 'dry' in options:
-	m8.go( options['host'] )  ## comment out for testing
+	r = m8.run( options['host'] )  ## comment out for testing
 
-    m8.postProcess()
-    
 except:
     EHandler.error( 'Error while modelling.')
 
