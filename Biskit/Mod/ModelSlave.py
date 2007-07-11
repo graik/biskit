@@ -93,17 +93,18 @@ class ModelSlave(JobSlave):
             T.flushPrint( self.params['progress_str'] )
             for id, val in dict.items():
 
-                modeller_log = LogFile( '%s/Modeller.log' %val["outFolder"] )     
+                modeller_log = LogFile( '%s/Modeller.log' %val["outFolder"] )
 
                 d[id] = val
 
-                m = M( outFolder= val["outFolder"], log=modeller_log)
+                m = M( outFolder= val["outFolder"],
+                       fasta_target=val["fastaTarget"], f_pir=val["f_pir"],
+                       template_folder=val["template_folder"],
+                       starting_model=val["starting_model"],
+                       ending_model=val["ending_model"],
+                       log=modeller_log )
 
-                m.prepare_modeller(fasta_target=val["fastaTarget"], f_pir=val["f_pir"], template_folder=val["template_folder"],starting_model=val["starting_model"], ending_model=val["ending_model"])
-
-                m.go()
-
-                m.postProcess()
+                m.run()
 
         except Exception, why:
             self.reportError( 'ERROR '+str(why), val )
