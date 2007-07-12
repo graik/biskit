@@ -27,7 +27,7 @@
 Interface to Modeller
 """
 
-import re, os.path, subprocess
+import re, os.path
 import linecache
 import glob
 
@@ -122,7 +122,11 @@ CALL ROUTINE = 'model'             # do homology modelling
         """
         self.outFolder = T.absfile( outFolder )
         cwd = self.outFolder + self.F_RESULT_FOLDER
+
         f_in = cwd + '/modeller.top'
+        if mod_template and os.path.isfile( mod_template ) or \
+           os.path.islink( mod_template ):
+            f_in = os.path.join( cwd, os.path.basename( mod_template ) )
 
         Executor.__init__(self, 'modeller',
                           template= mod_template or self.MODELLER_TEMPLATE,
