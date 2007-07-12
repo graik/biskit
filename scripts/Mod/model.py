@@ -33,11 +33,11 @@ from Biskit import EHandler
 from Biskit import LogFile
 
 from Biskit.Pymoler import Pymoler
-import glob
 from Biskit.Trajectory import Trajectory
 
 import sys, os.path
 import string
+import glob
 
 def _use( o ):
     print """
@@ -196,7 +196,7 @@ if options.has_key('s'):
     names = []
 
     ## fit backbone of all models to average until convergence
-    models =  glob.glob( '%s/target.B*'%(outFolder + m8.F_RESULT_FOLDER) )
+    models =  glob.glob( '%s/target.B*'%(m8.outFolder + m8.F_RESULT_FOLDER) )
     traj = Trajectory( models )
     traj.blockFit2ref( mask=traj[0].maskBB() )
 
@@ -213,7 +213,7 @@ if options.has_key('s'):
     __printMatrix( rmsBB )
 
     ## get all templates
-    templates =  glob.glob( '%s*'%( outFolder + TS. F_MODELLER ))
+    templates =  glob.glob( '%s*'%( m8.outFolder + TS. F_MODELLER ))
     
     p=Pymoler()
     ## add models
