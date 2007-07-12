@@ -6,6 +6,10 @@ from modeller.automodel import *
 
 env = environ()
 
+# directories for input atom files
+env.io.atom_files_directory = '%(template_folder)s'
+
+
 a = automodel(env, alnfile='%(f_pir)s',
               knowns=( %(knowns_py)s ),
               sequence='%(target_id)s')
