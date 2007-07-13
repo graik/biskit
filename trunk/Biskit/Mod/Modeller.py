@@ -54,23 +54,7 @@ class Modeller( Executor ):
     Creates a modeller-script and runs modeller.
     """
 
-    MODELLER_TEMPLATE = """
-# Homology modelling by the MODELLER TOP routine 'model'.
-
-INCLUDE                               # Include the predefined TOP routines
-
-SET OUTPUT_CONTROL = 1 1 1 1 1        # uncomment to produce a large log file
-SET ALNFILE  = '%(f_pir)s'            # alignment filename
-SET KNOWNS   = %(knowns_top)s  
-SET SEQUENCE = '%(target_id)s'        # code of the target
-SET ATOM_FILES_DIRECTORY = '%(template_folder)s'# directories for input atom files
-SET STARTING_MODEL= %(starting_model)i  # index of the first model 
-SET ENDING_MODEL  = %(ending_model)i    # index of the last model
-                                   #(determines how many models to calculate)
-
-CALL ROUTINE = 'model'             # do homology modelling
-"""
-
+    MODELLER_TEMPLATE = T.projectRoot() + '/external/modeller/model_mult.py'
 
     F_RESULT_FOLDER = '/modeller'
     F_MOD_SCRIPT = 'modeller.top'
@@ -123,13 +107,15 @@ CALL ROUTINE = 'model'             # do homology modelling
         self.outFolder = T.absfile( outFolder )
         cwd = self.outFolder + self.F_RESULT_FOLDER
 
-        f_in = cwd + '/modeller.top'
+        mod_template = mod_template or self.MODELLER_TEMPLATE
+
+        f_in = cwd + '/model_mult.py'
         if mod_template and os.path.isfile( mod_template ) or \
            os.path.islink( mod_template ):
             f_in = os.path.join( cwd, os.path.basename( mod_template ) )
 
         Executor.__init__(self, 'modeller',
-                          template= mod_template or self.MODELLER_TEMPLATE,
+                          template=mod_template,
                           args= f_in, # command line argument
                           f_in= f_in, # target of template completion
                           cwd= cwd,
