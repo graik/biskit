@@ -80,6 +80,9 @@ class TemplateFilter(object):
 	@return: the identifiers of the templates that survived the filtering
 	@rtype: [ str ]
 	"""
+        if not N.sometrue(self.filter_mask):
+	    self.filter_mask[ N.argmax( self.identities ) ] = 1
+
 	r = N.compress( self.filter_mask, self.templates ).tolist()
 
 	if self.verbose:
@@ -132,10 +135,10 @@ class TemplateFilter(object):
 
 	r = N.greater( self.identities, cutoff )
 
-	if len(r) == 0:
-	    r = N.max( self.identities )
-
 	self.filter_mask *= r
+
+## 	if max(r) == 0:
+## 	    r[ N.argmax( self.identities ) ] = 1
 
 	if self.verbose:
 	    self.log.add('%i of %i templates fall through identity filter.' %
@@ -148,8 +151,6 @@ class TemplateFilter(object):
 #########
 
 import Biskit.test as BT
-import Biskit.tools as T
-from CheckIdentities import CheckIdentities
 
 class Test(BT.BiskitTest):
     """
@@ -157,12 +158,15 @@ class Test(BT.BiskitTest):
     """
     
     def prepare(self):
+        from CheckIdentities import CheckIdentities
+        import Biskit.tools as T
+
 	self.aln_info = CheckIdentities( alignment = T.testRoot() + \
 					 '/Mod/project/t_coffee/final.pir_aln' )
 
     def test_TemplateFilter(self):
 	"""Mod.TemplateFilter test"""
-	self.f = TemplateFilter( self.aln_info, verbose=self.verbose )
+	self.f = TemplateFilter( self.aln_info, verbose=self.local )
 
 	self.f.filter_z( cutoff=0.25 )
 	self.f.filter_id()
