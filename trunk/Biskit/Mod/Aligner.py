@@ -53,6 +53,7 @@ class TCoffee( Executor ):
         @type  host: str
         """
         Executor.__init__( self, 't_coffee', cmd, catch_out=1,
+                           verbose=1,
                            node=host, **kw )
 
 
@@ -222,11 +223,17 @@ class Aligner:
         """
         r = {}
 
+        cwd = TCoffee( '' ).cwd or os.getcwd()
+
         ## collect CA trace PDBs from default location
         if not pdbFiles:
             folder = self.outFolder + TC.F_COFFEE
             fs = os.listdir( folder )
             pdbFiles= [ folder + f for f in fs if f[-6:].upper()=='.ALPHA' ]
+
+            ## relativize to current working folder to reduce length
+            ## of T-Coffee / SAP arguments
+            pdbFiles= [ T.relpath( cwd, f ) for f in pdbFiles ]
 
         r['pdbs'] = T.toList( pdbFiles )
         r['templates'] = fasta_templates or self.outFolder + TC.F_FASTA
@@ -269,7 +276,7 @@ class Aligner:
         f_sequences = d['sequences']
         f_target    = d['target']
 
-        pdbFiles = [ T.absfile( f ) for f in pdbFiles ]
+##         pdbFiles = [ T.absfile( f ) for f in pdbFiles ]
 
         f_templates = T.absfile( f_templates )
         f_sequences = T.absfile( f_sequences )
