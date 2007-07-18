@@ -237,6 +237,45 @@ def splithome( filename ):
     return user_home, rest
 
 
+def __pathsplit(p, rest=[]):
+    """
+    from ASPN Python Cookbook
+    """
+    (h,t) = os.path.split(p)
+    if len(h) < 1: return [t]+rest
+    if len(t) < 1: return [h]+rest
+    return __pathsplit(h,[t]+rest)
+
+def __commonpath(l1, l2, common=[]):
+    """
+    from ASPN Python Cookbook
+    """
+    if len(l1) < 1: return (common, l1, l2)
+    if len(l2) < 1: return (common, l1, l2)
+    if l1[0] != l2[0]: return (common, l1, l2)
+    return __commonpath(l1[1:], l2[1:], common+[l1[0]])
+
+def relpath(p1, p2):
+    """
+    Translate p2 into a path relative to p1.
+    @param p1: base path
+    @type p1 : str
+    @param p2: target path
+    @type p2 : str
+
+    @return: relative path p1 -> p2
+    @rtype: str
+    """
+    if not p1 or not p2:
+        return p2
+    (__common,l1,l2) = __commonpath(__pathsplit(p1), __pathsplit(p2))
+    p = []
+    if len(l1) > 0:
+        p = [ '../' * len(l1) ]
+    p = p + l2
+    return os.path.join( *p )
+
+
 def stripSuffix( filename ):
     """
     Return file name without ending.
