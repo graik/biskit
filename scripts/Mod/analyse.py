@@ -75,7 +75,7 @@ if __name__ == '__main__':
     ## look for default cross-validation projects
     d = []
     if os.path.exists( f + VS.F_RESULT_FOLDER ):
-        d = [ os.getcwd() ]
+        d = [ f ]
 
     if options.has_key('d'):
         folders = T.toList(options['d'])
