@@ -136,6 +136,12 @@ def convertOptions( o ):
     o['debug'] = int( o.get('debug', 0) )
     o['nice']  = int( o.get('nice', 0) )
 
+    if 'ending_model' in o:
+        o['ending_model'] = int( o['ending_model'] )
+
+    if 'starting_model' in o:
+        o['starting_model'] = int( o['starting_model'] )
+
     return o
 
 def __printMatrix( matrix ):
