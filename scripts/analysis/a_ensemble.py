@@ -27,7 +27,7 @@ import sys
 import os.path as osp
 
 import biggles
-import Numeric as N
+import numpy.oldnumeric as N
 
 from Biskit.tools import *
 from Biskit.EnsembleTraj import EnsembleTraj, traj2ensemble
@@ -98,9 +98,9 @@ o['i'] = absfile( o['i'] )
 o['o'] = o.get('o',
                '%s/%s_rms.eps' % (osp.dirname(o['i']), stripFilename(o['i'])))
 
-print "Loading...",
+flushPrint( "Loading..." )
 t = Load( o['i'] )
-print "done."
+flushPrint( "done." )
 
 if not isinstance( t, EnsembleTraj ):
     t = traj2ensemble( t )
@@ -108,18 +108,18 @@ if not isinstance( t, EnsembleTraj ):
 if o['step'] != 1:
     t = t.thin( o['step'] ) 
 
-print "Fitting...",
+flushPrint( "Fitting..." )
 calcRmsd( t )
-print "done."
+flushPrint( "done." )
 
 p = plot( t, o.get( 'title', stripFilename(o['i']) ) )
 
-print "Getting outliers ...",
+flushPrint( "Getting outliers ..." )
 markOutliers( t, o['z'], p )
-print "done."
+flushPrint( "done." )
 
 p.show()
 
-print "Saving plot...",
+flushPrint( "Saving plot..." )
 p.write_eps( o['o'], width="18cm", height="29cm" )
-print "done."
+flushPrint( "done." )

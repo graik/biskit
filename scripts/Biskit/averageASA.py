@@ -28,7 +28,7 @@ from Biskit import molUtils as MOU
 import Biskit.mathUtils as MAU
 from Biskit import tools as T
 import os, os.path
-import Numeric as N
+import numpy.oldnumeric as N
 from Biskit.PDBDope import PDBDope
 from Biskit.PDBModel import PDBModel
 import time, sys

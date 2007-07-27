@@ -70,7 +70,7 @@ ref = traj.getRef()
 ref.disconnect()
 
 ref.setAtomProfile( 'fluct_global', f_global,
-                comment='fluctuation around average position in Å' )
+                comment='fluctuation around average position in A' )
 
 ref.setAtomProfile( 'fluct_local', f_local,
                 comment='fluctuation after fitting to each residue backbone')

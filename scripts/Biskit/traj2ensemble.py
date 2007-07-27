@@ -31,7 +31,7 @@ from Biskit import Trajectory
 from Biskit import EnsembleTraj
 from Biskit.EnsembleTraj import traj2ensemble
 
-import Numeric as N
+import numpy.oldnumeric as N
 
 def use():
     if len( sys.argv ) < 2:

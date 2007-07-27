@@ -37,8 +37,8 @@ from PDBModel import *
 import molUtils as MU
 
 from Numeric import *
-from LinearAlgebra import singular_value_decomposition as svd
-from LinearAlgebra import determinant as det
+from numpy.oldnumeric.linear_algebra import singular_value_decomposition as svd
+from numpy.oldnumeric.linear_algebra import determinant as det
 from LinearAlgebra import *
 
 from gnuplot import *
