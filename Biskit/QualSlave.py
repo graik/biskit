@@ -135,6 +135,44 @@ class QualSlave(JobSlave):
         return p
 
 #############
+## DEBUGGING
+#############
+from threading import Thread
+import time
+
+class Flusher( Thread ):
+
+    def __init__( self, *f ):
+	Thread.__init__( self )
+	self.setDaemon( True )
+	
+	self.files = f
+	self.stop = False
+
+    def setStop( self ):
+	self.stop = True
+
+    def run( self ):
+
+	while not self.stop:
+	    for f in self.files:
+		f.flush()
+	    time.sleep( 2 )
+
+
+def redirect_output():
+    import tempfile, os, sys
+    
+    f_out = open( tempfile.mktemp( '.out', 'slave_', os.getcwd() ), 'w' )
+
+    sys.stdout = f_out
+    sys.stderr = f_out
+    flusher = Flusher( f_out )
+    flusher.start()
+
+
+
+#############
 ##  TESTING        
 #############
 import Biskit.test as BT
@@ -167,6 +205,8 @@ class Test(BT.BiskitTest):
 if __name__ == '__main__':
 
 ##     BT.localTest()  ## for interactive debugging only
+    
+    redirect_output()
 
     import os, sys
 
