@@ -72,12 +72,20 @@ class Test(BT.BiskitTest):
 
 if __name__ == '__main__':
 
+    import tempfile, os
+    
+    f_out = open( tempfile.mktemp( '.out', 'slave_', os.getcwd() ), 'w' )
+
+    sys.stdout = f_out
+    sys.stderr = f_out
+
     import os, sys
 
     if len(sys.argv) == 2:
 
-        niceness = int(sys.argv[1])
-        os.nice(niceness)
+	niceness = int(sys.argv[1])
+	os.nice(niceness)
 
     slave = Slave()
     slave.start()
+
