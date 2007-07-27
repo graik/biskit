@@ -690,7 +690,7 @@ class Trajectory:
             refxyz = ref.getXyz()
 
         if mask is None:
-            mask = N.ones( len( refxyz ) )
+            mask = N.ones( len( refxyz ), N.int32 )
 
         refxyz = N.compress( mask, refxyz, 0 )
 
@@ -716,16 +716,19 @@ class Trajectory:
 
             else:
                 r, t = rmsFit.findTransformation( refxyz,
-                                    N.compress( mask, xyz, 0) )
-
+                                    N.compress( mask, xyz, 0))
+                
                 xyz_transformed = N.dot( xyz, N.transpose(r)) + t
 
                 d = N.sqrt(N.sum(N.power( N.compress(mask, xyz_transformed,0)\
                                          - refxyz, 2), 1))
+
+                    
                 rms += [ N.sqrt( N.average(d**2) ) ]
 
+
             if fit:
-                self.frames[i] = xyz_transformed.astype(N.Float32)
+                self.frames[i] = xyz_transformed.astype(N.float32)
 
             if verbose and i%100 == 0:
                 T.errWrite( '#' )
@@ -1150,7 +1153,7 @@ class Trajectory:
         @rtype: array
         """
         if mask is None:
-            mask = N.ones( len( self.frames[0] ), N.Int )
+            mask = N.ones( len( self.frames[0] ), N.int32 )
 
         if verbose: T.errWrite( "rmsd fitting per residue..." )
 
@@ -1215,7 +1218,7 @@ class Trajectory:
         @rtype: array
         """
         if mask is None:
-            mask = N.ones( len( self.frames[0] ), N.Int )
+            mask = N.ones( len( self.frames[0] ), N.int32 )
 
         ## eliminate all values that do not belong to the selected atoms
         masked = atomValues * mask
@@ -1460,7 +1463,7 @@ class Trajectory:
         @rtype: dict
         """
         if aMask == None:
-            aMask = N.ones( self.getRef().lenAtoms() )
+            aMask = N.ones( self.getRef().lenAtoms(), N.int32 )
 
         pc = getattr(self, 'pc', None)
 
@@ -1500,9 +1503,10 @@ class Trajectory:
                  projection of each frame in PC space, eigenvalue of each PC
         @rtype: array, array, array
         """
-        if frameMask is None: frameMask = N.ones( len( self.frames ) )
+        if frameMask is None: frameMask = N.ones( len( self.frames ), N.int32 )
 
-        if atomMask is None: atomMask = N.ones( self.getRef().lenAtoms() )
+        if atomMask is None: atomMask = N.ones(self.getRef().lenAtoms(),
+                                               N.int32)
 
         if fit:
             self.fit( atomMask )

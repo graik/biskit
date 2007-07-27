@@ -1706,7 +1706,7 @@ class PDBModel:
         index = N.concatenate( (index, [len_i]) )
         delta = index[1:] - index[:-1] 
         ## Numeric: delta = N.take( index, range(1, len(index) ) ) - index[:-1]
-        return N.repeat( range(len(delta)), delta)
+        return N.repeat( range(len(delta)), delta.astype( N.int32) )
 
 
     def map2index( self, imap ):
@@ -1750,7 +1750,7 @@ class PDBModel:
         index = N.concatenate( (index, [len_i]) )
         delta = index[1:] - index[:-1] 
         # Numeric: delta = N.take( index, range(1, len(index) ) ) - index[:-1]
-        return N.repeat( mask, delta )
+        return N.repeat( mask, delta.astype( N.int32 ) )
 
 
     def atom2resMask( self, atomMask ):
