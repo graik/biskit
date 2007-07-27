@@ -120,9 +120,6 @@ class Test(BT.BiskitTest):
         ##     time.sleep( 10 )
         ##     rst = master.getRst()
         
-        if local:
-            globals().update( locals() )
-            
 
 if __name__ == '__main__':
 
