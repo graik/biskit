@@ -26,7 +26,7 @@
 
 import time
 import random
-import Numeric as N
+import numpy.oldnumeric as N
 import os.path, os
 
 from Biskit.tools import *

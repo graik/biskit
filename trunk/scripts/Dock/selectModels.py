@@ -30,7 +30,7 @@ import Biskit.mathUtils as MaU
 from Biskit import TrajCluster, EnsembleTraj, PCRModel, molUtils
 from Biskit.Dock import hexTools
 from Biskit.EnsembleTraj import traj2ensemble
-import Numeric as N
+import numpy.oldnumeric as N
 
 import os.path
 import copy, sys
