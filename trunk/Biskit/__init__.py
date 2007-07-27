@@ -20,6 +20,9 @@
 ##
 ##
 
+## execute ~/.pythonrc.py if it exists
+import user
+
 ## default error handler
 from ErrorHandler import ErrorHandler
 EHandler = ErrorHandler()
