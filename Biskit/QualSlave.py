@@ -163,7 +163,7 @@ class Flusher( Thread ):
 def redirect_output():
     import tempfile, os, sys
     
-    f_out = open( tempfile.mktemp( '.out', 'slave_', os.getcwd() ), 'w' )
+    f_out = open( tempfile.mktemp( '.out', 'slave_', T.absfile('~'), 'w' )
 
     sys.stdout = f_out
     sys.stderr = f_out
