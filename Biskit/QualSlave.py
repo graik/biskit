@@ -163,7 +163,7 @@ class Flusher( Thread ):
 def redirect_output():
     import tempfile, os, sys
     
-    f_out = open( tempfile.mktemp( '.out', 'slave_', T.absfile('~'), 'w' )
+    f_out = open( tempfile.mktemp( '.out', 'slave_', T.absfile('~'), 'w' ))
 
     sys.stdout = f_out
     sys.stderr = f_out
@@ -206,17 +206,8 @@ if __name__ == '__main__':
 
 ##     BT.localTest()  ## for interactive debugging only
     
-    import tempfile, os, sys
-
-    os.system('touch %s' %  tempfile.mktemp('.test','touch', T.absfile('~') ) )
-    f_out = open( tempfile.mktemp( '.out', 'slave_', T.absfile('~'), 'w' )
-
-    sys.stdout = f_out
-    sys.stderr = f_out
-    flusher = Flusher( f_out )
-    flusher.start()
-
-
+    redirect_output()
+    
     import os, sys
 
     if len(sys.argv) == 2:
