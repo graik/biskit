@@ -206,7 +206,16 @@ if __name__ == '__main__':
 
 ##     BT.localTest()  ## for interactive debugging only
     
-    redirect_output()
+    import tempfile, os, sys
+
+    os.system('touch %s' %  tempfile.mktemp('.test','touch', T.absfile('~') ) )
+    f_out = open( tempfile.mktemp( '.out', 'slave_', T.absfile('~'), 'w' )
+
+    sys.stdout = f_out
+    sys.stderr = f_out
+    flusher = Flusher( f_out )
+    flusher.start()
+
 
     import os, sys
 
