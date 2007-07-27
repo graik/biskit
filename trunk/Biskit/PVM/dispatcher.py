@@ -29,6 +29,7 @@ Manage Master/Slave tasks.
 from PVMThread import PVMMasterSlave
 from Biskit import ExeConfigCache
 from Status import Status
+import Biskit.settings as settings
 import socket, pvm
 import pypvm
 
