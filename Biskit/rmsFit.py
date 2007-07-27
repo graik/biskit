@@ -60,11 +60,13 @@ def findTransformation(x, y):
     x = x - x_av
     y = y - y_av
 
+
     ## svd of correlation matrix
     v, l, u = svd(N.dot(N.transpose(x), y))
 
     ## build rotation matrix and translation vector
     r = N.dot(v, u)
+    
     t = x_av - N.dot(r, y_av)
 
     return r, t
@@ -97,7 +99,7 @@ def match(x, y, n_iterations=1, z=2, eps_rmsd=0.5, eps_stdv=0.05):
     n = 0
     converged = 0
 
-    mask = N.ones(len(y))
+    mask = N.ones(len(y), N.int32 )
 
     while not converged:
 
