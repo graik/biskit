@@ -30,7 +30,7 @@ over many nodes.
 
 from Biskit.PVM import TrackingJobMaster
 from Biskit.ReduceCoordinates import ReduceCoordinates
-from Biskit.hosts import cpus_all, nice_dic
+from Biskit.PVM.hosts import cpus_all, nice_dic
 import Biskit.tools as t
 import Biskit.mathUtils as MU
 import Biskit.settings as settings
@@ -626,6 +626,7 @@ class Test(BT.BiskitTest):
 
     def prepare(self):
         self.cl_out = tempfile.mktemp('_test.cl')
+	self.master = None
 	
 
     def cleanUp(self):

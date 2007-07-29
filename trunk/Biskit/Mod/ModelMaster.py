@@ -26,7 +26,7 @@ Parallelize Modeller runs
 
 from Biskit.PVM.TrackingJobMaster import TrackingJobMaster
 
-import Biskit.hosts as hosts
+import Biskit.PVM.hosts as hosts
 from Biskit.tools import projectRoot
 import Biskit.tools as T
 import os

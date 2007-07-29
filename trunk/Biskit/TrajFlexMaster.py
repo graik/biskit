@@ -27,7 +27,7 @@
 """
 Parallize calculation of pairwise rmsd between the frames of a trajectory
 """
-import Biskit.hosts as hosts
+import Biskit.PVM.hosts as hosts
 
 import Biskit.tools as T
 import Biskit.settings as settings
@@ -71,7 +71,7 @@ class TrajFlexMaster(TrackingJobMaster):
 ##        @param aMask: atom mask, consider only subset of atoms (default: all)
 ##        @type  aMask: [0|1]
         @param hosts: slave hosts to be used
-                      (default: L{Biskit.hosts.cpus_all})
+                      (default: L{Biskit.PVM.hosts.cpus_all})
         @type  hosts: [str]
         @param niceness: { str:int, 'default':int }, nice value for each
                          host 
