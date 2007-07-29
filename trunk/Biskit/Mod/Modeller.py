@@ -50,24 +50,42 @@ class ModellerError( Exception ):
 
 class Modeller( Executor ):
     """
-    Take Alignment from t_coffee and template PDBs.
-    Creates a modeller-script and runs modeller.
+    Interface to the Modeller program for building homology models:
+    
+    1) Read: Alignment from t_coffee and template PDBs.
+
+       - t_coffee/final.pir_aln
+       - templates/modeller/*pdb
+    
+    2) Create a modeller-script -> modeller/modeller.top
+    3) Run modeller.
+    4) Postprocess the modeller models.
+
+    Result:
+    
+    - models sorted by their modeller score into model_00.pdb - model_xx.pdb:
+       - the local modeller score is in the temperature_factor column
+       - the number of templates for each residue is in the occupancy column
+
+    - a pickled list of corresponding PDBModels:
+       - modeller score in residue profile 'mod_score'
+       - template coverage is in residue profile 'n_templates'
+       - info['mod_score'] contains the overall modeller score
+       - info['mod_pdb'] contains the file name of the raw modeller PDB 
     """
 
-    MODELLER_TEMPLATE = T.projectRoot() + '/external/modeller/model_mult.py'
+    MODEL_SCRIPT      = 'model_mult.py'
+    MODEL_SCRIPT_PATH = T.projectRoot() + '/external/modeller/' + MODEL_SCRIPT
 
     F_RESULT_FOLDER = '/modeller'
-    F_MOD_SCRIPT = 'modeller.top'
+##     F_MOD_SCRIPT = 'modeller.top'
 
     F_INPUT_FOLDER = F_RESULT_FOLDER
 
-    ## default modeller inp file
-    F_INP = F_RESULT_FOLDER + '/' + F_MOD_SCRIPT
-
-    ## standard file name output for PDBModels
+    #: standard file name output for PDBModels
     F_PDBModels = '/PDBModels.list'
 
-    ## standard file name output for Objective Function
+    #: standard file name output for Objective Function
     F_SCORE_OUT = F_RESULT_FOLDER + '/Modeller_Score.out'
 
 
@@ -107,9 +125,10 @@ class Modeller( Executor ):
         self.outFolder = T.absfile( outFolder )
         cwd = self.outFolder + self.F_RESULT_FOLDER
 
-        mod_template = mod_template or self.MODELLER_TEMPLATE
+        mod_template = mod_template or self.MODEL_SCRIPT_PATH
 
-        f_in = cwd + '/model_mult.py'
+	# don't override existing modeller script
+        f_in = os.path.join( cwd, self.MODEL_SCRIPT )
         if mod_template and os.path.isfile( mod_template ) or \
            os.path.islink( mod_template ):
             f_in = os.path.join( cwd, os.path.basename( mod_template ) )
@@ -357,14 +376,14 @@ class Modeller( Executor ):
         r1 = re.compile(r'\w\d.*\d')
 
         line_of_interest = linecache.getline(f_model, 2)
-        OF = r1.findall(line_of_interest)
+        score = r1.findall(line_of_interest)
 
-        file = open(model.validSource(),'r')
-        string = file.readlines()[:2]
-        model.info["headlines"] = string
-        file.close()
+        f = open(model.validSource(),'r')
+        s = f.readlines()[:2]
+        model.info["headlines"] = s
+        f.close()
 
-        return  float(OF[0])
+        return  float(score[0])
 
 
     def output_score(self, pdb_list, model_folder):
@@ -449,11 +468,8 @@ class Modeller( Executor ):
 
             m = model.compress( model.maskCA())
 
-            #atoms = DictList( m.atoms )
-            #prof = atoms.valuesOf( "temperature_factor")
-
-            model.residues.set('mod_score', m['temperature_factor'])
-
+            model.residues.set('mod_score', m['temperature_factor'],
+			       comment='local modeller score')
 
 
     def write_PDBModelList(self, pdb_list, model_folder = None):
@@ -571,7 +587,8 @@ class TestBase(BT.BiskitTest):
         @type  run: 1|0
         """
 
-        self.m = Modeller( self.outfolder, verbose=self.local )
+        self.m = Modeller( self.outfolder, verbose=self.local,
+			   ending_model=2 )
 
 ##         self.m.prepare_modeller( )
 
@@ -585,7 +602,7 @@ class TestBase(BT.BiskitTest):
                              %self.outfolder)
 
             result = T.Load( self.outfolder + '/modeller/PDBModels.list' )
-            self.assertEqual( len(result), 10 )
+            self.assertEqual( len(result), 2 )
 
     def cleanUp(self):
         T.tryRemove( self.outfolder, tree=1 )
