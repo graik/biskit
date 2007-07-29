@@ -30,6 +30,7 @@ issued if pypvm is missing and the public classes are exported as
 Pseudo-classes. Pseudo classes are empty and raise an ImportError when you
 try to initialize them. See also L{Biskit.tools.tryImport}.
 """
+## import user  ## ensure that ~/.pythonrc.py is executed
 
 ##
 ## error-tolerant export of public classes

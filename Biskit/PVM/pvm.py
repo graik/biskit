@@ -31,7 +31,7 @@ from cPickle import dumps # as _dumps
 from cPickle import loads # as _loads
 import os
 
-import Biskit.hosts as H
+import hosts as H
 
 
 def pack(object):
@@ -85,7 +85,7 @@ def addHosts( number=None, hosts=H.nodes_all, expand=1 ):
                    if number == 0, nothing happens
                    if number == None, all hosts are added (default)
     @type  number: int
-    @param hosts: list of host names (default: Biskit.hosts.nodes_all)
+    @param hosts: list of host names (default: Biskit.PVM.hosts.nodes_all)
     @type  hosts: [str]
     @param expand: add full address to local node
     @type  expand: [1|0]

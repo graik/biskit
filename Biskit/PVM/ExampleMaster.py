@@ -27,7 +27,7 @@ An example of a Master/Slave setup
 
 from Biskit.PVM.TrackingJobMaster import TrackingJobMaster
 
-from Biskit.hosts import nodes_all, cpus_all
+from Biskit.PVM.hosts import nodes_all, cpus_all
 from Biskit.tools import projectRoot
 
 

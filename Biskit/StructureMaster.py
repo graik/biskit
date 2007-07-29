@@ -26,7 +26,7 @@
 Parallizes the convertion of PDB files into pickled PDBModel objects.
 """
 
-import Biskit.hosts as hosts
+import Biskit.PVM.hosts as hosts
 import Biskit.tools as T
 ## from Biskit.PVM.TrackingJobMaster import TrackingJobMaster
 from Biskit.PVM import TrackingJobMaster

@@ -34,7 +34,7 @@ import Biskit.settings as settings
 import Biskit.mathUtils as MU
 
 from Biskit.PVM.TrackingJobMaster import TrackingJobMaster
-from Biskit.hosts import cpus_all, nice_dic
+from Biskit.PVM.hosts import cpus_all, nice_dic
 from Biskit import PDBModel, PDBProfiles, EHandler, StdLog
 
 from Biskit.Dock import Complex
