@@ -29,6 +29,7 @@ Triangulate a protein-protein interface with Intervor.
 import tempfile, re
 import numpy as N
 import os.path as osp
+import glob
 
 import Biskit as B
 import Biskit.tools as T
@@ -169,6 +170,13 @@ class Intervor( Executor ):
             model['residue_name'][i] = 'HOH'
 
 
+##     def __choinWaterChains( self, m ):
+## 	"""workaround the fact that each water gets its own chain"""
+## 	m._chainIndex = m.chainIndex( breaks=self.breaks )
+## 	print 'DEBUG', self.chains_lig
+## 	m._chainIndex = m._chainIndex[ : self.chains_lig[-1]+2 ]
+
+
     def prepare( self ):
         """
         Prepare PDB input file for Intervor. Called before program execution.
@@ -177,7 +185,7 @@ class Intervor( Executor ):
         * renumber all atoms consequtively starting with 0
         """
         m = self.model.clone()
-        
+
         self.__renameWaters( m )
 
         m.addChainId()
@@ -366,20 +374,19 @@ class Intervor( Executor ):
         ## replace all 0 values by -1 to distinguish them better by color
         model[profile] += (model[profile] == 0) * -1 
         
-        rec = model.takeChains( self.chains_rec )
-        lig = model.takeChains( self.chains_lig )
+        rec = model.takeChains( self.chains_rec, breaks=self.breaks )
+        lig = model.takeChains( self.chains_lig, breaks=self.breaks )
 
         water = xwater = None
         
         if wat:
-            water  = model.takeChains(wat)
+            water  = model.takeChains(wat, breaks=self.breaks)
+	    water = water.compress( N.greater( water['n_facets'], 0) )
 
         if xwat:
-            xwater = model.takeChains( xwat ) ## X-ray determined water
-        
-        ## kick out waters that do not belong to the interface
-        xwater = xwater.compress( N.greater( xwater['n_facets'], 0) )
-        water = water.compress( N.greater( water['n_facets'], 0) )
+            xwater = model.takeChains( xwat, breaks=self.breaks ) ## X-ray determined water
+            ## kick out waters that do not belong to the interface
+	    xwater = xwater.compress( N.greater( xwater['n_facets'], 0) )
         
         pm = Pymoler()
         
