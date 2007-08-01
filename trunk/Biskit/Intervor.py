@@ -73,9 +73,14 @@ class Intervor( Executor ):
     """
     
     #: reg expressions for parsing
-    RE_SECTION_EDGES = re.compile( '^Section Delaunay' )
+    RE_SECTION_SO = re.compile( '^Facet count' )
     
     RE_facet = re.compile( '^(\d+) *\| *(\d+) *([\w\d]+) *(\w+) *(\w) *(\d+) *\| *(\d+) *([\w\d]+) *(\w+) *(\w) *(\d+) *\| *(\d+) +(\d+)')
+
+    RE_FACET_RECORD = re.compile( '\\n *(?P<serial_1>\d+) +(?P<atom_1>\w+) +(?P<res_1>\w+) +(?P<chain_1>[A-Z]?) *(?P<resnr_1>\d+)'+\
+                                  ' +(?P<serial_2>\d+) +(?P<atom_2>\w+) +(?P<res_2>\w+) +(?P<chain_2>[A-Z]?) *(?P<resnr_2>\d+)' +\
+                                  ' +(?P<pairtype>\w+)' +\
+                                  '*\\n(?:[0-9\.\-]+ +){6} (?P<area>[0-9\.]+)')
 
     
     def __init__( self, model, cr=[0], cl=None, mode=2, breaks=0,
@@ -171,10 +176,10 @@ class Intervor( Executor ):
 
 
 ##     def __choinWaterChains( self, m ):
-## 	"""workaround the fact that each water gets its own chain"""
-## 	m._chainIndex = m.chainIndex( breaks=self.breaks )
-## 	print 'DEBUG', self.chains_lig
-## 	m._chainIndex = m._chainIndex[ : self.chains_lig[-1]+2 ]
+##      """workaround the fact that each water gets its own chain"""
+##      m._chainIndex = m.chainIndex( breaks=self.breaks )
+##      print 'DEBUG', self.chains_lig
+##      m._chainIndex = m._chainIndex[ : self.chains_lig[-1]+2 ]
 
 
     def prepare( self ):
@@ -195,7 +200,7 @@ class Intervor( Executor ):
         m['serial_number'] = range( len( m ) )
 
         ## override commandline args that will be used by run()
-        self.args = "-f %s -o %i -C %s -C %s" %\
+        self.args = "-f %s -o %i -C %s -C %s -v 2 -D ." %\
             (self.f_pdb, self.mode, rec_ids, lig_ids) 
         
         m.writePdb( self.f_pdb )
@@ -231,9 +236,6 @@ class Intervor( Executor ):
         """
         result = []
 
-        int_keys = ['edge_index','at1_serial', 'at1_resindex',
-                    'at2_serial', 'at2_resindex', 'so']
-        
         try:
             try:
                 l = f = None
@@ -241,32 +243,20 @@ class Intervor( Executor ):
 
                 ## handle file header (extract value keys from header line)
                 l = f.readline()
-                while not self.RE_SECTION_EDGES.match(l):
+                while not self.RE_SECTION_SO.match(l):
                         l = f.readline()
-
-                l = f.readline().replace('|', ' ')
-                keys = map( str.lower, l.split() )
 
                 ## handle table (parse values into one dictionary for each line)
                 while f:
                     l = f.readline()
-                    if len(l) < 3:
+                    if l == 'Atom serial#, MinSO, MaxSO\n':
                         break
 
-                    #l = l.replace( '|', ' ' )
-                    values = self.RE_facet.match( l ).groups()
-
-                    d = dict( zip( keys, values ) )
-
-                    for k in int_keys:
-                        d[ k ] = int( d[ k ] )
-                    d['facet_area'] = float( d['facet_area'] )
-
-                    result += [ d ]
+                    result.append( int( l.split()[1]) )
 
             except IOError, why:
-                raise IntervorError, 'Error accessing intervor output file %r: %r'\
-                      % (fname, why)
+                raise IntervorError( 'Error accessing intervor output file %r: %r'\
+                      % (fname, why))
             except Exception, why:
                 raise IntervorError, 'Error parsing intervor output file %r: %r'\
                       % (fname, why) + '\nThe offending line is: ' + repr(l)
@@ -276,9 +266,53 @@ class Intervor( Executor ):
                 f.close()
             except:
                 pass
-        
+
         return result
 
+
+    def __parseFacetRecord( self, r ):
+        r = self.RE_FACET_RECORD.match( r )
+        try:
+            d = r.groupdict()
+
+            for k in d:
+                if 'serial' in k or 'resnr' in k:
+                    d[k] = int( d[k] )
+
+            d['area'] = round( float( d['area'] ), 2 )
+
+            return d
+            
+        except AttributeError:
+            raise IntervorError, 'couldnt parse facet record %r' % r
+
+    def __parseFacets( self, fname ):
+        """
+        -> Biskit.DictList
+        """
+        result = []
+        
+        try:
+            l = f = None
+            f = open( fname )
+
+            lines = f.readlines()
+            lines = ''.join( lines )
+            
+            records = lines.split( 'FBeg' )
+            records = [ r for r in records if len( r ) > 10 ]
+
+            result = B.DictList( [ self.__parseFacetRecord(r) for r in records ] )
+
+        except IOError, why:
+            raise IntervorError( 'Error accessing intervor output file %r: %r'\
+                      % (fname, why))
+        except Exception, why:
+            raise IntervorError, 'Error parsing intervor output file %r: %r'\
+                  % (fname, why) + '\nThe offending line is: ' + repr(l)
+
+        return result
+    
 
     def __mapfacets2Atoms( self, raw_table ):
         """
@@ -291,14 +325,10 @@ class Intervor( Executor ):
         """
         facet_profile = [ B.DictList() for i in self.model.atomRange() ]
         
-        for facet in raw_table:
-            a1 = facet['at1_serial']
-            a2 = facet['at2_serial']
+        for facet in raw_table.iterDicts():
+            a1 = facet['serial_1']
+            a2 = facet['serial_2']
             
-            #if facet_profile[a1] is None:
-                #facet_profile[a1] = B.DictList()
-            #if facet_profile[a2] is None:
-                #facet_profile[a2] = B.DictList()
 
             facet_profile[a1] += [ facet ]
             facet_profile[a2] += [ facet ]
@@ -309,32 +339,40 @@ class Intervor( Executor ):
         self.model['n_facets'] = [ len(f or []) for f in facet_profile ]
         self.model['n_facets','comment'] = 'number of interface facets'
 
+        self.model['so_min'] = [ min( f.valuesOf('so') or [0] )
+                                 for f in facet_profile ]
+        self.model['so_max'] = [ max( f.valuesOf('so') or [0] )
+                                 for f in facet_profile ]
+        self.model['facet_area'] = [ N.sum( f.valuesOf('area') or [0])
+                                     for f in facet_profile ] 
 
-    def __createProfiles( self, model ):
-        """
-        Create shelling order profiles from raw facet profile.
-        """
-        
-        assert 'facets' in model.atoms, "profile 'facets' not found"
-        
-        so_min = [ min( f.valuesOf( 'so' ) or [0] ) for f in model['facets'] ]
-        so_max = [ max( f.valuesOf( 'so' ) or [0] ) for f in model['facets'] ]
+        self.model['so_min','comment'] = 'smallest Intervor shelling order of '\
+                                         + 'any facet this atom is involved in'
 
-        facet_area = [ N.sum( f.valuesOf( 'facet_area') or [0])
-                       for f in model['facets'] ]
-        
-        model['so_min'] = so_min
-        model['so_max'] = so_max
-        model['facet_area'] = facet_area
-        
-        model['so_min', 'comment'] = 'smallest Intervor shelling order of any'\
-             + ' facet this atom is involved in'
+        self.model['so_max','comment'] = 'highest Intervor shelling order of '\
+                                         +'any facet this atom is involved in'
 
-        model['so_max', 'comment'] = 'highest Intervor shelling order of any'\
-             + ' facet this atom is involved in'
+        self.model['facet_area','comment']='sum of area of all intervor facets'\
+                                            + ' this atom is involved in'
+        
 
-        model['facet_area', 'comment'] = 'sum of area of all intervor facets' \
-             + ' this atom is involved in'
+##     def __createProfiles( self, model ):
+##         """
+##         Create shelling order profiles from raw facet profile.
+##         """
+        
+##         assert 'facets' in model.atoms, "profile 'facets' not found"
+        
+##         so_min = [ min( f.valuesOf( 'so' ) or [0] ) for f in model['facets'] ]
+##         so_max = [ max( f.valuesOf( 'so' ) or [0] ) for f in model['facets'] ]
+
+##         facet_area = [ N.sum( f.valuesOf( 'facet_area') or [0])
+##                        for f in model['facets'] ]
+        
+##         model['so_min'] = so_min
+##         model['so_max'] = so_max
+##         model['facet_area'] = facet_area
+        
 
 
     def finish( self ):
@@ -342,12 +380,23 @@ class Intervor( Executor ):
         """
         Executor.finish( self )
         f_so = self.f_prefix + '_intervor_SO.txt'
-        
-        raw = self.__parseSO( f_so )
-        self.result = raw
-        
-        self.__mapfacets2Atoms( raw )
-        self.__createProfiles( self.model )
+        f_fac= self.f_prefix + '_intervor_interface-IV.txt'
+
+        facets = B.ProfileCollection()
+
+        facets['so'] = N.array( self.__parseSO( f_so ), N.int32 )
+
+        d = self.__parseFacets( f_fac )
+
+        for k in d.keys():
+            facets[ k ] = d.valuesOf( k )
+            assert len(facets[k]) == len(facets['so']),\
+                   'number of facet records and shelling order records dont match'
+
+        self.result = facets
+
+        self.__mapfacets2Atoms( facets )
+##         self.__createProfiles( self.model )
     
         
     def visualize( self, profile='so_min', wat=None, xwat=None ):
@@ -381,12 +430,12 @@ class Intervor( Executor ):
         
         if wat:
             water  = model.takeChains(wat, breaks=self.breaks)
-	    water = water.compress( N.greater( water['n_facets'], 0) )
+            water = water.compress( N.greater( water['n_facets'], 0) )
 
         if xwat:
             xwater = model.takeChains( xwat, breaks=self.breaks ) ## X-ray determined water
             ## kick out waters that do not belong to the interface
-	    xwater = xwater.compress( N.greater( xwater['n_facets'], 0) )
+            xwater = xwater.compress( N.greater( xwater['n_facets'], 0) )
         
         pm = Pymoler()
         
@@ -417,15 +466,46 @@ class Intervor( Executor ):
         
 ######## TESTING #########
 ## Proper test case wrapping comes later
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Test class"""
+    
+    TAGS = [BT.EXE]
+
+    def prepare( self ):
+        self.m = B.PDBModel( T.testRoot() + '/com/1BGS.pdb' )
+
+    def test_Intervor( self ):
+        """Intervor parsing test"""
+        self.x = Intervor( self.m, [0], debug=self.DEBUG, verbose=self.local,
+                           catch_err=1 )
+        self.x.run()
+
+        if self.local:
+           pm = x.visualize( profile='so_min', xwat=[2], wat=[3] )
+           pm.run()
+
+class TestDry(BT.BiskitTest):
+    
+    def prepare( self ):
+        self.m = B.PDBModel( T.testRoot() + '/com/1BGS.pdb' )
+
+    def test_IntervorDry(self):
+        self.x = Intervor( self.m, [0], debug=self.DEBUG, verbose=self.local,
+                           catch_err=1 )
+        
+        self.x.f_prefix = T.testRoot() + '/intervor/tmpNoUFoi'
+
+        self.x.finish()
+
 if __name__ == '__main__':
 
-    m = B.PDBModel( T.testRoot() + '/com/1BGS.pdb' )
+    BT.localTest(debug=1)
 
-    x = Intervor( m, [0], debug=1, verbose=0, catch_err=1 )
-    x.run()
-
-    pm = x.visualize( profile='so_min', xwat=[2], wat=[3] )
-    pm.run()
+##     pm = x.visualize( profile='so_min', xwat=[2], wat=[3] )
+##     pm.run()
 
 
 
+## new usage:: intervor.exe -f pdbfile -o 2 -C AB -C C -v 2 -D .
