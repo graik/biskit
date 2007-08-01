@@ -2526,10 +2526,10 @@ class PDBModel:
         #segid of first atom of each chain
         seg_ids   = N.take( self.atoms['segment_id'], chainindex )
 
-        res_names = N.concatenate( (res_names, ['-1'] ) )
-        chain_ids = N.concatenate( (chain_ids, ['-1'] ) )
-        seg_ids   = N.concatenate( (seg_ids,   ['-1'] ) )
-        res_nmbrs = N.concatenate( (res_nmbrs, [ res_nmbrs[-1]+1 ] ) )
+        res_names = N.concatenate( (['-1'], res_names) )
+        chain_ids = N.concatenate( (['-1'], chain_ids) )
+        seg_ids   = N.concatenate( (['-1'], seg_ids ) )
+        res_nmbrs = N.concatenate( ([-100], res_nmbrs) )
 
         delta     = res_nmbrs[1:] - res_nmbrs[:-1] 
         same_name = res_names[1:] == res_names[:-1]
