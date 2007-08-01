@@ -471,7 +471,7 @@ class PDBModel:
 
         if source <> None:
 
-            self.update( skipRes=skipRes, updateMissing=1 )
+            self.update( skipRes=skipRes, updateMissing=1, force=1 )
 
         if noxyz:
             ## discard coordinates, even when read from PDB file
@@ -2297,15 +2297,15 @@ class PDBModel:
         @param maxDist: maximal distance between consequtive residues
                         [ None ] .. defaults to twice the average distance
         @type  maxDist: float
-	@param singleRes: allow chains consisting of single residues (def 0)
-	@type  singleRes: 1||0
+        @param singleRes: allow chains consisting of single residues (def 0)
+        @type  singleRes: 1||0
 
         @return: total number of chains
         @rtype: int
         """
         try:
             return len( self.chainIndex( breaks=breaks, maxDist=maxDist,
-					 singleRes=singleRes) )
+                                         singleRes=singleRes) )
         except IndexError:  ## empty residue map
             return 0
 
@@ -2391,26 +2391,26 @@ class PDBModel:
         lastResName   = ''
         index = -1
         lastAlt = 'x'
-	lastSegid = -1
+        lastSegid = -1
 
         res_nrs = self.atoms['residue_number']
         res_nam = self.atoms['residue_name']
         ins_cod = self.atoms['insertion_code']
-	seg_id  = self.atoms['segment_id']
+        seg_id  = self.atoms['segment_id']
 
         ## create residue numbering for selected atoms
         for i in range( self.lenAtoms() ):
 
             if res_nrs[i] != lastResNumber or \
                res_nam[i] != lastResName   or \
-	       seg_id[i]  != lastSegid or \
+               seg_id[i]  != lastSegid or \
                ins_cod[i] != lastAlt:
 
                 ## start of new residue
                 lastResNumber = res_nrs[i]
                 lastResName   = res_nam[i]
                 lastAlt       = ins_cod[i]
-		lastSegid     = seg_id[i]
+                lastSegid     = seg_id[i]
                 index += 1
 
                 result.append( i )
@@ -2498,7 +2498,7 @@ class PDBModel:
             if chn_ids[i] != lastChainID or \
                seg_ids[i] != lastSegID   or \
                res_nrs[i] <  lastResidue or \
-	       ter_atm[i]:
+               ter_atm[i]:
 
                 result.append( i )
 
@@ -2510,43 +2510,43 @@ class PDBModel:
 
 
     def __filterSingleResChains( self, chainindex, ignore_resnumbers=0 ):
-	"""
-	Join chains containing single residues with identical name into
-	one chain. Typically required for waters or ions if they are
-	separated by TER or picked up by the chain break detection
-	@param check_resnumbers: (def 1)
-	@type  check_resnumbers: 1||0
-	"""
-	# residue name of first atom of each chain
-	res_names = N.take( self.atoms['residue_name'], chainindex )
-	# residue number of first atom of each chain
-	res_nmbrs = N.take( self.atoms['residue_number'], chainindex )
-	# chain id of first atom of each chain
-	chain_ids = N.take( self.atoms['chain_id'], chainindex )
-	#segid of first atom of each chain
-	seg_ids   = N.take( self.atoms['segment_id'], chainindex )
+        """
+        Join chains containing single residues with identical name into
+        one chain. Typically required for waters or ions if they are
+        separated by TER or picked up by the chain break detection
+        @param check_resnumbers: (def 1)
+        @type  check_resnumbers: 1||0
+        """
+        # residue name of first atom of each chain
+        res_names = N.take( self.atoms['residue_name'], chainindex )
+        # residue number of first atom of each chain
+        res_nmbrs = N.take( self.atoms['residue_number'], chainindex )
+        # chain id of first atom of each chain
+        chain_ids = N.take( self.atoms['chain_id'], chainindex )
+        #segid of first atom of each chain
+        seg_ids   = N.take( self.atoms['segment_id'], chainindex )
 
-	res_names = N.concatenate( (res_names, ['-1'] ) )
-	chain_ids = N.concatenate( (chain_ids, ['-1'] ) )
-	seg_ids   = N.concatenate( (seg_ids,   ['-1'] ) )
-	res_nmbrs = N.concatenate( (res_nmbrs, [ res_nmbrs[-1]+1 ] ) )
+        res_names = N.concatenate( (res_names, ['-1'] ) )
+        chain_ids = N.concatenate( (chain_ids, ['-1'] ) )
+        seg_ids   = N.concatenate( (seg_ids,   ['-1'] ) )
+        res_nmbrs = N.concatenate( (res_nmbrs, [ res_nmbrs[-1]+1 ] ) )
 
         delta     = res_nmbrs[1:] - res_nmbrs[:-1] 
-	same_name = res_names[1:] == res_names[:-1]
-	same_chain= chain_ids[1:] == chain_ids[:-1]
-	same_seg  =   seg_ids[1:] ==   seg_ids[:-1]
+        same_name = res_names[1:] == res_names[:-1]
+        same_chain= chain_ids[1:] == chain_ids[:-1]
+        same_seg  =   seg_ids[1:] ==   seg_ids[:-1]
 
-	if ignore_resnumbers:
-	    delta = N.ones( len(delta), N.Int )
+        if ignore_resnumbers:
+            delta = N.ones( len(delta), N.Int )
 
-	is_single = (delta==1) \
-		    * same_name * same_chain * same_seg
+        is_single = (delta==1) \
+                    * same_name * same_chain * same_seg
 
-	return N.compress( N.logical_not(is_single), chainindex)
+        return N.compress( N.logical_not(is_single), chainindex)
 
-	
+        
     def chainIndex( self, breaks=0, maxDist=None, force=0, cache=0,
-		    singleRes=0 ):
+                    singleRes=0 ):
         """
         Get indices of first atom of each chain.
 
@@ -2558,13 +2558,13 @@ class PDBModel:
                         find chain boundaries, use with care! (def 0)
         @type  force  : 1||0
         @param cache  : cache new index even if it was derrived from
-	                non-default parameters (def 0)
-			Note: a simple m.chainIndex() will always cache
+                        non-default parameters (def 0)
+                        Note: a simple m.chainIndex() will always cache
         @type  cache  : 1||0
-	@param singleRes: allow chains consisting of single residues (def 0)
-	                  Otherwise group consecutive residues with identical
-			  name into one chain.
-	@type  singleRes: 1||0
+        @param singleRes: allow chains consisting of single residues (def 0)
+                          Otherwise group consecutive residues with identical
+                          name into one chain.
+        @type  singleRes: 1||0
 
         @return: array (1 x N_chains) of int
         @rtype: list of int
@@ -2584,13 +2584,13 @@ class PDBModel:
             r = mathUtils.union( break_pos, r )
             r.sort()
 
-	## filter out chains consisting only of a single residue
-	if not singleRes:
-	    r = self.__filterSingleResChains( r, ignore_resnumbers=breaks )
+        ## filter out chains consisting only of a single residue
+        if not singleRes:
+            r = self.__filterSingleResChains( r, ignore_resnumbers=breaks )
 
-	## cache the result if it has been computed with default parameters
-	if not(breaks or force or maxDist or singleRes) or cache:
-	    self._chainIndex = r
+        ## cache the result if it has been computed with default parameters
+        if not(breaks or force or maxDist or singleRes) or cache:
+            self._chainIndex = r
 
         return N.array( r, N.Int )
 
@@ -3465,14 +3465,14 @@ class Test(BT.BiskitTest):
         self.m4 = B.PDBModel( T.testRoot()+'/com/1BGS_original.pdb')
         self.assertEqual( self.m4.lenChains(), 9 )
         self.assertEqual( self.m4.lenChains( breaks=1 ), 9 )
-	self.assertEqual( self.m4.lenChains( breaks=1, singleRes=1 ), 138 )
+        self.assertEqual( self.m4.lenChains( breaks=1, singleRes=1 ), 138 )
         self.m4.writePdb( self.fout_pdb, ter=2 )
 
     def test_chainSingleResidues( self ):
-	"""PDBModel single residue chain test"""
-	self.m5 = B.PDBModel( T.testRoot() + '/amber/1HPT_0.pdb' )
-	self.assert_( self.m5.lenChains() < 10, 'single residue chains' )
-	
+        """PDBModel single residue chain test"""
+        self.m5 = B.PDBModel( T.testRoot() + '/amber/1HPT_0.pdb' )
+        self.assert_( self.m5.lenChains() < 10, 'single residue chains' )
+        
 
     def test_rename(self):
         """PDBModel renameAmberRes tests"""
