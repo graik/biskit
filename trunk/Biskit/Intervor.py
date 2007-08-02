@@ -483,7 +483,7 @@ class Test(BT.BiskitTest):
         self.x.run()
 
         if self.local:
-           pm = x.visualize( profile='so_min', xwat=[2], wat=[3] )
+           pm = self.x.visualize( profile='so_min', xwat=[2], wat=[3] )
            pm.run()
 
 class TestDry(BT.BiskitTest):
