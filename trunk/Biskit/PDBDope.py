@@ -34,7 +34,6 @@ from Biskit.Hmmer import Hmmer
 from Biskit.DSSP import Dssp
 from Biskit.Fold_X import Fold_X
 from Biskit.SurfaceRacer import SurfaceRacer
-from Biskit.Intervor import Intervor
 
 
 class PDBDope:
@@ -319,6 +318,8 @@ class PDBDope:
         @return: Intervor instance
         @rtype: Biskit.Dock.Intervor
         """
+	from Biskit.Dock.Intervor import Intervor
+
         x = Intervor( self.m, cr=cr, cl=cl, mode=mode, breaks=breaks, **kw)
         x.run()
         
