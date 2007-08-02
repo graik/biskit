@@ -168,27 +168,27 @@ class PDBDope:
         @raise ExeConfigError: if external application is missing
         """
         ## mask with normal AA also used for HMM search
-        mask = self.m.maskCA()
-        mask = self.m.atom2resMask( mask )
+##         mask = self.m.maskCA()
+##         mask = self.m.atom2resMask( mask )
 
         h = Hmmer( verbose=verbose, log=log )
         h.checkHmmdbIndex()
 
         p, hmmHits = h.scoreAbsSum( self.m, hmmNames=pfamEntries )
 
-        self.m.residues.set( 'cons_abs', p, mask, 0, hmmHits=hmmHits,
+        self.m.residues.set( 'cons_abs', p, hmmHits=hmmHits,
               comment="absolute sum of all 20 hmm scores per position",
               version= T.dateString() + ' ' + self.version() )
 
         p, hmmHits = h.scoreMaxAll( self.m, hmmNames=hmmHits )
 
-        self.m.residues.set( 'cons_max', p, mask, 0, hmmHits=hmmHits,
+        self.m.residues.set( 'cons_max', p, hmmHits=hmmHits,
               comment="max of 20 hmm scores (-average / SD) per position",
               version= T.dateString() + ' ' + self.version() )
 
         p,  hmmHits = h.scoreEntropy( self.m, hmmNames=hmmHits )
 
-        self.m.residues.set( 'cons_ent', p, mask, 0, hmmHits=hmmHits,
+        self.m.residues.set( 'cons_ent', p, hmmHits=hmmHits,
               comment="entropy of emmission probabilities per position "+
                               "(high -> high conservation/discrimination)",
               version= T.dateString() + ' ' + self.version() )
@@ -426,7 +426,7 @@ class LongTest( BT.BiskitTest ):
         
         self.d = PDBDope( self.M )
 
-    def _test_conservation(self):
+    def test_conservation(self):
         """PDBDope.addConservation (Hmmer) test"""
         self.local = 0
 
