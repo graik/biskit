@@ -31,6 +31,7 @@ try:
     from Docker import Docker
     from FixedList import FixedList
     from HexParser import HexParser
+    from Intervor import Intervor
 
 except Exception, why:
     EHandler.warning("Couldn't import all Biskit.Dock modules.\n" + str(why))
