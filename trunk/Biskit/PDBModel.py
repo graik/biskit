@@ -2022,9 +2022,9 @@ class PDBModel:
         r.atoms.model = r
 
         r._resIndex   = N.concatenate(
-            (self.resIndex(), m.resIndex() + self.lenResidues())) 
+            (self.resIndex(), m.resIndex() + self.lenAtoms())) 
         r._chainIndex =N.concatenate(
-            (self.chainIndex(), m.chainIndex() +self.lenChains()))
+            (self.chainIndex(), m.chainIndex() +self.lenAtoms()))
 
         r.info = copy.deepcopy( self.info )
 
