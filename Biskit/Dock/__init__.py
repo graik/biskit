@@ -32,6 +32,8 @@ try:
     from FixedList import FixedList
     from HexParser import HexParser
     from Intervor import Intervor
+    from PatchGenerator import PatchGenerator
+    from PatchGeneratorFromOrbit import PatchGeneratorFromOrbit
 
 except Exception, why:
     EHandler.warning("Couldn't import all Biskit.Dock modules.\n" + str(why))
