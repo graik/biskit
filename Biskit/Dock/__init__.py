@@ -31,11 +31,11 @@ try:
     from Docker import Docker
     from FixedList import FixedList
     from HexParser import HexParser
-    from Intervor import Intervor
-    from PatchGenerator import PatchGenerator
-    from PatchGeneratorFromOrbit import PatchGeneratorFromOrbit
+##     from Intervor import Intervor
+##     from PatchGenerator import PatchGenerator
+##     from PatchGeneratorFromOrbit import PatchGeneratorFromOrbit
 
-except Exception, why:
+except IOError, why:
     EHandler.warning("Couldn't import all Biskit.Dock modules.\n" + str(why))
 
 ## PVM-dependent modules
