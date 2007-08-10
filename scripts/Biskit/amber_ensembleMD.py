@@ -26,7 +26,7 @@ import os
 from numpy.oldnumeric import sum, logical_not
 
 from Biskit.tools import *
-from Biskit.hosts import nodes_own
+from Biskit.PVM.hosts import nodes_own
 from Biskit import PDBModel
 
 host_list = nodes_own

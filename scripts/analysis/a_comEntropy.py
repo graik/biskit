@@ -29,7 +29,7 @@ import sys, time
 
 import Biskit.tools as t
 import Biskit.mathUtils as mu
-import Biskit.hosts as hosts
+import Biskit.PVM.hosts as hosts
 from Biskit.AmberEntropyMaster import AmberEntropyMaster
 
 def _use():

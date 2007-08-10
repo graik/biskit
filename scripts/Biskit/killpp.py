@@ -25,12 +25,11 @@ import string
 import commands
 import getpass
 
-modules = '~raik/biskit'
-modules = os.path.expanduser(modules)
- 
-sys.path.insert(0, modules)
+## modules = '~/biskit'
+## modules = os.path.expanduser(modules)
+## sys.path.insert(0, modules)
 
-from Biskit.hosts import nodes_all
+from Biskit.PVM.hosts import nodes_all
 from Biskit.tools import *
 import Biskit.mathUtils as MU
 

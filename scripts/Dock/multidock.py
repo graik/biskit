@@ -27,7 +27,7 @@ import time
 
 from Biskit.tools import *
 from Biskit.Dock import Docker, HexParser
-from Biskit.hosts import *
+from Biskit.PVM.hosts import *
 
 
 o = {'rdic':'pcr_rec/rec_model.dic',
