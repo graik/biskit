@@ -22,7 +22,7 @@
 from Biskit.StructureMaster import StructMaster
 
 import Biskit.tools as T
-import Biskit.hosts as hosts
+import Biskit.PVM.hosts as hosts
 import sys
 
 def _use( o ):

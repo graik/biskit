@@ -23,7 +23,7 @@
 
 import os
 import sys, string
-from Biskit.hosts import nodes_all
+from Biskit.PVM.hosts import nodes_all
 
 def cleanPvm( host ):
     cmd = "ssh %s 'rm /tmp/pvm*'"

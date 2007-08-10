@@ -27,7 +27,7 @@ from Biskit.Mod.ValidationSetup import ValidationSetup as VS
 from Biskit.Mod.TemplateSearcher import TemplateSearcher as TS
 from Biskit.Mod.Aligner import Aligner as A
 import Biskit.tools as T
-import Biskit.hosts as hosts
+import Biskit.PVM.hosts as hosts
 import sys, os
 import os.path as osp
 import glob

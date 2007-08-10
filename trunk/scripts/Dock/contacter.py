@@ -27,7 +27,7 @@
 import Biskit.tools as t
 import sys
 import Biskit.mathUtils as MU
-from Biskit.hosts import cpus_all, nice_dic
+from Biskit.PVM.hosts import cpus_all, nice_dic
 
 from Biskit.Dock import ContactMaster, ComplexList, ComplexEvolvingList
 

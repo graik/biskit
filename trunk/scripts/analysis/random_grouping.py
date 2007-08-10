@@ -34,7 +34,7 @@ from Biskit.Dock import ComplexRandomizer, ComplexList
 from Biskit.Dock import ContactMaster, ComplexGroups
 
 from Biskit import Trajectory
-from Biskit.hosts import nice_dic, cpus_own
+from Biskit.PVM.hosts import nice_dic, cpus_own
 
 default_options = {'o':'random_complexes_',
                    'ref':'../../com_wet/ref.complex',

@@ -1,4 +1,4 @@
-#!/usr/bin/python -i
+#!/usr/local/bin/python -i
 
 from Biskit.tools import *
 from Biskit import *
