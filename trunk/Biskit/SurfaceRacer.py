@@ -54,7 +54,7 @@ class SurfaceRacer( Executor ):
     Options
     -------
         probe    - float, probe radii
-        vdw_set  - int, Van del Waals radii set
+        vdw_set  - int, Van der Waals radii set
                       1. Richards (1977)
                       2. Chothia  (1976)
         mode     - int, calculation mode
@@ -93,9 +93,9 @@ class SurfaceRacer( Executor ):
         SurfaceRacer creates three output files::
           result.txt - contains breakdown of surface areas and is writen
                          to the directory where the program resides. This
-                         file is discharded here.
+                         file is discarded here.
           file *.txt - contains the accessible, molecular surface areas
-                         and average curvature information paresd here.
+                         and average curvature information parsed here.
                          The filename is that of the input pdb file but
                          with a .txt extension.
           stdout     - some general information about the calculation.
