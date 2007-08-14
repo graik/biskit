@@ -21,8 +21,6 @@
 ## last $Date$
 ## $Revision$
 """Generate and analyze ROC curves of specificity versus sensitivity."""
-from __future__ import absolute_import
-
 import numpy as N
 import copy, random
 
@@ -185,6 +183,7 @@ class ROCalyzer( object ):
 	@return: probability P that the prediction success of score is just
 	         a random effect (1.0 means it's just perfectly random).
 	"""
+	from Biskit import EHandler
 
 	## list of random deviations from diagonal area 0.5
 	a_rand = [ self.area(c)-0.5
@@ -193,7 +192,8 @@ class ROCalyzer( object ):
 	sd_rand = N.std( a_rand )
 	av_rand = N.mean(a_rand )
 
-	assert round(av_rand,2) == 0.0, 'random sampling is skewed'
+	if round(av_rand,2) != 0.0:
+	    EHandler.warning( 'random sampling is skewed by %f'% (av_rand-0.0))
 
 	a = self.rocarea( score )
 	z = a / sd_rand
