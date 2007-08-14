@@ -44,10 +44,10 @@ from Biskit import Executor, TemplateError, PDBModel, StdLog, EHandler
 
 
 ## executables
-hmmpfamExe = settings.hmmpfam_bin
-hmmfetchExe = settings.hmmfetch_bin
+## hmmpfamExe = settings.hmmpfam_bin
+## hmmfetchExe = settings.hmmfetch_bin
 hmmalignExe = settings.hmmalign_bin
-hmmindexExe = settings.hmmindex_bin
+## hmmindexExe = settings.hmmindex_bin
 hmmDatabase = settings.hmm_db
 
 
@@ -189,30 +189,29 @@ class HmmerSearch( Executor ):
                   'Hmmersearch result file %s seems incomplete.'%self.f_out 
 
         try:
-            out = open( self.f_out, 'r' )
-            while 1:
-                l = out.readline()
+            lines = open( self.f_out, 'r' ).readlines()
+	    while lines:
+		l = lines.pop(0)
                 ## get names and descriptions of matching profiles
                 if re.match('^-{8}\s{7,8}-{11}.+-{3}$', l):
-                    m = string.split( out.readline() )
+                    m = string.split( lines.pop(0) )
                     while len(m) != 0:
                         matches[m[0]] =  m[1:] 
-                        m = string.split( out .readline() )
+                        m = string.split( lines.pop(0) )
 
                 ## get hits, scores and alignment positions
                 if re.match('^-{8}\s{7,8}-{7}\s-{5}\s-{5}.+-{7}$', l):
-                    h = string.split( out.readline() )
+                    h = string.split( lines.pop(0) )
                     while len(h) != 0:
                         hits += [ h ] 
-                        h = string.split( out.readline() )
+                        h = string.split( lines.pop(0) )
                     break
                 
-        except:
+        except Exception, why:
             raise HmmerError,\
-                  'ERROR parsing hmmpfam search result: %s'%self.f_out
+                  'ERROR parsing hmmpfam search result: %s'%self.f_out +\
+		  '\n%r' % why
         
-        out.close() 
-
         return matches, hits
         
 
@@ -777,7 +776,9 @@ class Hmmer:
         @rtype: str, str
         """
         ## align sequence to hmm profile
-        out = os.popen( hmmalignExe + ' -q ' + self.hmmFile + \
+##         out = os.popen( hmmalignExe + ' -q ' + self.hmmFile + \
+##                         ' ' + file ).read()
+        out = os.popen( self.exe.bin + ' -q ' + self.hmmFile + \
                         ' ' + file ).read()
 
         ## extract search sequence
@@ -842,6 +843,10 @@ class Hmmer:
         """
         cons = []
         hmmShift = 0
+
+	assert len(hmmSeq) == len( fastaSeq ), \
+	       'Length of HMM profile does not match length of sequence.\n' + \
+	       'Check for unusual residues in input model!'
 
         for i in range( len( fastaSeq ) ):
 
