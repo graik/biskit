@@ -166,28 +166,32 @@ class PDBDope:
         
         @raise ExeConfigError: if external application is missing
         """
-        ## mask with normal AA also used for HMM search
-##         mask = self.m.maskCA()
-##         mask = self.m.atom2resMask( mask )
+        ## mask out solvent and other troublemakers
+	mask = self.m.maskProtein()
+	resmask = self.m.atom2resMask( mask )
+	
+	m = self.m
+	if not N.alltrue( mask ):
+	    m = self.m.compress( mask )
 
         h = Hmmer( verbose=verbose, log=log )
         h.checkHmmdbIndex()
 
-        p, hmmHits = h.scoreAbsSum( self.m, hmmNames=pfamEntries )
+        p, hmmHits = h.scoreAbsSum( m, hmmNames=pfamEntries )
 
-        self.m.residues.set( 'cons_abs', p, hmmHits=hmmHits,
+        self.m.residues.set( 'cons_abs', p, hmmHits=hmmHits, mask=resmask,
               comment="absolute sum of all 20 hmm scores per position",
               version= T.dateString() + ' ' + self.version() )
 
-        p, hmmHits = h.scoreMaxAll( self.m, hmmNames=hmmHits )
+        p, hmmHits = h.scoreMaxAll( m, hmmNames=hmmHits )
 
-        self.m.residues.set( 'cons_max', p, hmmHits=hmmHits,
+        self.m.residues.set( 'cons_max', p, hmmHits=hmmHits, mask=resmask,
               comment="max of 20 hmm scores (-average / SD) per position",
               version= T.dateString() + ' ' + self.version() )
 
-        p,  hmmHits = h.scoreEntropy( self.m, hmmNames=hmmHits )
+        p,  hmmHits = h.scoreEntropy( m, hmmNames=hmmHits )
 
-        self.m.residues.set( 'cons_ent', p, hmmHits=hmmHits,
+        self.m.residues.set( 'cons_ent', p, hmmHits=hmmHits, mask=resmask,
               comment="entropy of emmission probabilities per position "+
                               "(high -> high conservation/discrimination)",
               version= T.dateString() + ' ' + self.version() )
