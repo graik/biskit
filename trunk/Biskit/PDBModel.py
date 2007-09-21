@@ -1515,7 +1515,7 @@ class PDBModel:
         return self.maskF( f )
 
 
-    def _maskCB( self ):
+    def maskCB( self ):
         """
         Short cut for mask of all CB I{and} CA of GLY.
 
@@ -2096,6 +2096,7 @@ class PDBModel:
         self.info = r.info
 
         self.__maskCA = self.__maskBB = self.__maskHeavy = None
+        self.__chainBreaks = None
 
 
     def clone( self ):
@@ -2149,6 +2150,17 @@ class PDBModel:
         return mask
 
 
+    def takeResidues( self, i ):
+        """
+        Copy the given residues into a new model.
+        @param i: residue indices
+        @type  i: [ int ]
+        @return: PDBModel with given residues in given order
+        @rtype: PDBModel / subclass
+        """
+        return self.take( self.res2atomIndices( i_res ) )
+
+    
     def takeChains( self, chains, breaks=0 ):
         """
         Get copy of this model with only the given chains.
@@ -3199,68 +3211,6 @@ class PDBModel:
                 atmID = 1
 
         return [seqID, atmID]
-
-
-##     def equalAtoms( self, ref ):
-##         """
-##         Apply to SORTED models without HETATOMS. Coordinates are not checked.
-
-##         @note: in some rare cases m1.equalAtoms( m2 ) gives a different result
-##                than m2.equalAtoms( m1 ). This is due to the used
-##                SequenceMatcher class.      
-##         @todo: option to make sure atoms are also in same order
-
-##         @param ref: reference PDBModel
-##         @type  ref: PDBModel
-
-##         @return: (mask, mask_ref), two atom masks for all equal (1) atoms
-##                   in models
-##         @rtype: (array, array)
-##         """
-##         ## compare sequences
-##         seqMask, seqMask_ref = match2seq.compareModels(self, ref)
-
-##         ## get residue mask on atom level
-##         mask = self.res2atomMask(seqMask)
-##         mask_ref = ref.res2atomMask(seqMask_ref)
-
-##         ## get list of matching RESIDUES
-##         equal = N.nonzero(seqMask)
-##         equal_ref = N.nonzero(seqMask_ref)
-
-##         ## check that all atoms are equal in matching residues
-##         for i in range(0, len(equal)):
-
-##             ## atom name lists for current residue
-##             aa = self.atomNames(equal[i],equal[i])
-##             aa_ref = ref.atomNames(equal_ref[i],equal_ref[i])
-
-##             ## starting atom of current residue
-##             ind = self.resIndex()[ equal[i] ]
-##             ind_ref = ref.resIndex()[ equal_ref[i] ]
-
-##             ## check that the atoms are the same
-##             for j in range( len(aa) ):
-
-##                 try:
-##                     mask[ind] = aa[j] == aa_ref[j]
-##                     ind += 1
-
-##                 except IndexError:
-##                     mask[ind] = 0
-##                     ind += 1
-
-##             for j in range( len(aa_ref) ):
-
-##                 try:
-##                     mask_ref[ind_ref] = aa_ref[j] == aa[j]
-##                     ind_ref += 1
-##                 except IndexError:
-##                     mask_ref[ind_ref] = 0
-##                     ind_ref += 1
-
-
-##         return mask, mask_ref
 
 
     def compareAtoms( self, ref ):
