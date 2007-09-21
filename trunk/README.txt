@@ -99,9 +99,9 @@ Up-to-date installation instructions can be found online:
 (Some older instructions are still kept in docs/.)
 
 The biskit python library (module) biskit/Biskit needs to be in your
-$PYTHONPATH and depends on other python libraries (Numeric,
+$PYTHONPATH and depends on other python libraries (numpy,
 Scientific, biggles) which in turn depend on a few additional
-libraries or programs (netcdf, gnuplot).
+libraries or programs (netcdf, gnuplot, Numeric).
 
 The complete list is given here:
    http://biskit.pasteur.fr/install/short/
@@ -121,13 +121,8 @@ License
 Biskit is distributed under the GNU GPL. See license.txt!
 
 
-Open issues in release 2.1.0-beta
----------------------------------
-
-The issues are still the same as for version 2.0.1 below.
-
-Open issues in release 2.0.1
-----------------------------
+Open issues
+-----------
 
 Please, check out the latest CVS snapshot and the list of open bugs at
 http://sf.net/projects/biskit, before reporting any new problem!
@@ -140,9 +135,8 @@ The up-to-date list of open issues can be found at:
 field if the above link shouldn't work).
 
 
-* some test pickles still need to be re-created on 64 bit
-
-    see bug 1624505
+* most pickles in test/ are still using the older versions of
+  PDBModel, this is partly intentional (ensuring backwards compability).
 
 * not all scripts are tested
 
@@ -161,25 +155,16 @@ field if the above link shouldn't work).
 * the parallel versions of the Mod scripts may have bugs
 
     We have started working on some projects that will use the
-    modeling pipeline.  Any problems should be sorted out along the
-    way. The non-parallel modeling (search_sequences,
+    modeling pipeline.  Any problems will hopefully be sorted out
+    along the way. The non-parallel modeling (search_sequences,
     search_templates, clean_templates, align, model) should
     nevertheless work.
 
-* host management is a bit awkward
+* API-Documentation issues
 
-    Biskit.PVM keeps track of available computer nodes in a settings
-    file `~/.biskit/hosts.dat`.  Nodes are classified into groups
-    (own, shared, others) to which one can assign different
-    nice-levels. RAM and CPU-number can also be given and some scripts
-    use this to e.g. exclude nodes that are not up to the task from
-    memory hungry calculations. The resulting hosts.dat format is a
-    bit awkward and not easy to maintain (or understand). There are
-    three workarounds:
-    
-    - study it and use it
-    - use the native pvm host management (see pvm documentation)
-    - come up with your own solution and just pass your list to the master
+    The online API-documentation is usually lacking behind quite a
+    bit. Also, epydoc gets confused by our practise to override the
+    name of modules in the Biskit namespace with the classes they define.
 
 
 For any other questions...
