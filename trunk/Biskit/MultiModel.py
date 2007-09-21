@@ -194,11 +194,11 @@ class Feature(object):
         MultiModel.take.) The method calculates the new feature2model map
         from the current map and the given model indices.
 
-        @param new_model: new parent model that is an extract of the current one
+        @param new_model: new parent model derrived from the current one
         @type  new_model: MultiModel
         @param model_i  : positions of the new model's atoms in the old model
         @type  model_i  : [ int ]
-        @param add2model: register the new Feature with the new parent model [1]
+        @param add2model: register the Feature with the new parent model [1]
         @type  add2model: bool
 
         @return: Extract of this feature connected to the new model
@@ -228,7 +228,7 @@ class Feature(object):
         @param add2model: register new feature with parent model [0]
         @type  add2model: bool
         
-        @return: an independent copy of this feature pointing to the same model.
+        @return: an independent copy of this feature pointing to the same model
         @rtype : Feature or subclass thereof
         """
         model = model or self.model
@@ -265,6 +265,9 @@ class MultiModel( Model ):
             self.addSequence( *sequences )
 
     
+    def version( self ):
+        return Model.version(self) + '; MultiModel $Revision$'
+
     def __newChain( self ):
         """
         Prepare adding a new chain/molecule to this model.
@@ -275,21 +278,32 @@ class MultiModel( Model ):
         else:
             self._chainIndex = N.concatenate( (self._chainIndex, 
                                                [ self.lenAtoms() ] ) )
- 
 
-    def addSequence( self, sequence, newchain=True ):
+
+    def __extendProfile( self, collection, key, n_items ):
         """
-        Add sequence to this model without creating a new chain.
+        Add n_items default values to profile key in collection.
+        """
+        collection[key].extend( [collection[key, 'default']] * n_items )
+
+
+    def addSequence( self, sequence, newchain=True, default=None ):
+        """
+        Add sequence to this model with or without creating a new chain.
         For each residue, the necessary atoms are created from a standard 
         dictionary with standard names.
         
         @param sequence: sequence, 1-letter coded or list of 3-letter names
         @type  sequences: str or [ str ]
+        @param newchain: put added residues into a new chain [True]
+        @type  newchain: bool
+        @param default: default value to add to existing profiles [None]
+        @type  default: any
         """
         if newchain and len( sequence ) > 0:
             self.__newChain()
 
-        rrnames = self.residues['name']      # residue names for residue profile 
+        rrnames = self.residues['name']    # residue names for residue profile 
         anames  = self.atoms['name']         # atom names for atom profile
         rnames  = self.atoms['residue_name'] # residue names for atom profile
         elements= self.atoms['element']      # element codes for atom profile
@@ -301,7 +315,6 @@ class MultiModel( Model ):
         else:
             i_res = self.lenAtoms()
    
-
         if type( sequence ) is str:
                 sequence = MU.single2longAA( sequence )
         
@@ -315,7 +328,7 @@ class MultiModel( Model ):
         
             atoms = MU.atomDic[ res ][:-1]
             anames.extend( atoms )  ## include all atoms but last OXT
-            rnames.extend( [res] * len( atoms ) )
+            rnames.extend( [res] * len( atoms ) )  ## append residue_names
         
             ## too simple minded but there is no good dictionary in molUtlis
             elements.extend( [ a[0] for a in atoms ] )
