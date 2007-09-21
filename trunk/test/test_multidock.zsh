@@ -58,7 +58,7 @@ echo " ============= Prepare cluster centers for docking ============= "
 PCR2hex.py  -psf ../../lig/*psf -pdb *model
 echo "DONE\n"
 
-echo " ============= Add structure realted data to models ============= " 
+echo " ============= Add structure related data to models ============= " 
 dope.py -s ../../lig/1A19.pdb  -so ../../lig/1A19_dry.model -i *.model  -dic 1A19_model.dic
 echo "DONE\n"
   
