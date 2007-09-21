@@ -3,11 +3,11 @@ Migration from Numeric to numarray
 
 There are some minor differences: 
 
-(2) Numarray doesn't have the average() function
 (3) it doesn't allow 'if a:' or 'b = a or default' type of expressions
     to test for empty arrays
 (4) take(), compress(), etc. insist on arrays of numbers (no 'O' arrays)
 (5) nonzero() now returns a tuple of lists instead of a list only
+(6) numbers returned from numpy arrays are not standard python types
 
 All examples assume that numarray was imported as N (import numarray
 as N) and Numeric as Numeric.
@@ -92,3 +92,15 @@ as N) and Numeric as Numeric.
     ValueError: Arrays have incompatible shapes 
     NEW: 
     false = Biskit.mathUtils.arrayEqual( N.ones((10,10)), range(10))
+
+7) numbers returned from numpy arrays are not standard python types
+
+   OLD::
+   a = zeros( 10, 'i' )
+   if type( a[0] ) is int:
+   if type( a[0] ) == int:
+   ERROR::
+   no error, type( a[0] ) is <type 'numpy.int32'> and the expression evalutes
+   to FALSE
+   NEW::
+   if isinstance( a[0], int ):
