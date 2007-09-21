@@ -613,7 +613,7 @@ class ProfileCollection:
         """
         Expand profile to have a value also for masked positions.
 
-        @param prof: profile
+        @param prof: input profile
         @type  prof: list OR array
         @param mask: atom mask
         @type  mask: [int]
@@ -705,6 +705,7 @@ class ProfileCollection:
         info['version'] = '%s %s' % (T.dateString(), self.version() )
         if comment: info['comment'] = comment
         info['isarray'] = isinstance( prof, N.ndarray )
+        info['default'] = default
 
         ## optional infos
         info.update( moreInfo )
@@ -867,7 +868,7 @@ class ProfileCollection:
         @param cond: mask with 1 for the positions to keep
         @type  cond: array or list of int 
         """
-        return self.take( N.nonzero( cond )[0] )
+        return self.take( N.flatnonzero( cond ) )
 
 
     def remove( self, *key ):
