@@ -2289,13 +2289,13 @@ class PDBModel:
 
     def lenResidues( self ):
         """
-        Number of resudies in model.
+        Number of residues in model.
 
         @return: total number of residues
         @rtype: int
         """
-        if self._resIndex is None:
-            return 0
+##         if self._resIndex is None:
+##             return 0
 
         return len( self.resIndex() )
 
