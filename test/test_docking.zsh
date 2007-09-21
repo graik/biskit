@@ -58,7 +58,7 @@ echo " ============= Cleaning up receptor pdb file ============= "
 cd $root/rec
 pdb2xplor.py -i 1A2P_rec_original.pdb 
 if [[ $dry = false ]]; then
-    xplor-nih < 1A2P_rec_original_generate.inp > 1A2P_rec_original_generate.log
+    xplor < 1A2P_rec_original_generate.inp > 1A2P_rec_original_generate.log
 fi
 echo "DONE cleaning\n"
 
@@ -66,7 +66,7 @@ echo " ============= Cleaning up ligand pdb file ============= "
 cd $root/lig
 pdb2xplor.py -i 1A19_lig_original.pdb -c 1
 if [[ $dry = false ]]; then
-    xplor-nih < 1A19_lig_original_generate.inp > 1A19_lig_original_generate.log
+    xplor < 1A19_lig_original_generate.inp > 1A19_lig_original_generate.log
 fi
 echo "DONE cleaning\n"
 
@@ -74,7 +74,7 @@ echo " ============= Cleaning up reference complex pdb file ============= "
 cd $root/com
 pdb2xplor.py -i 1BGS_edited.pdb
 if [[ $dry = false ]]; then
-    xplor-nih < 1BGS_edited_generate.inp  > 1BGS_edited_generate.log
+    xplor < 1BGS_edited_generate.inp  > 1BGS_edited_generate.log
 fi    
 pdb2complex.py -c 1BGS.pdb  -r 0 -l 1
 echo "DONE cleaning\n"
@@ -145,6 +145,9 @@ echo "DONE\n"
 
 echo " ============= Calculating fractions of native contacts ============= "
 contacter.py -i complexes.cl -ref ../../com/ref.complex -a
+echo "DONE\n"
+
+echo " ============= Analyze results ============= "
 inspectComplexList.py complexes.cl
 a_compare_rms_vs_fnc.py -i complexes_cont.cl
 echo "DONE\n"
