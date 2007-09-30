@@ -1,3 +1,22 @@
+Changes for revision 2.0.2
+==========================
+
+* switch project from cvs to subversion
+
+Biskit
+------
+
+* bugfixes
+
+* new: Intervor.py
+  a wrapper for Cazal et al.'s interface triangulation program
+
+PVM
+---
+
+* simplified handling of pvm host lists
+
+
 Changes for revision 2.0.1
 ==========================
 
