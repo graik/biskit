@@ -181,7 +181,7 @@ class SettingsManager:
             if not os.path.exists( fpath ):
                 if self.verbose:
                     B.EHandler.warning('Creating folder %s for Biskit settings.'\
-                                   %fpath )
+                                       %fpath )
                 os.mkdir( fpath )
 
             sections = [P.Setting.NORMAL, P.Setting.PATH, P.Setting.BIN]
@@ -215,7 +215,7 @@ class SettingsManager:
 
         except OSError, e:
             raise WriteCfgError, e
-        
+
     def settings2dict( self ):
         """
         Create dictionary from settings.
@@ -240,7 +240,7 @@ class SettingsManager:
         if self.fusermissing and self.createmissing:
             if self.verbose:
                 B.EHandler.warning('Creating new user configuration file %s.' \
-                               % self.fuser, trace=0, error=0)
+                                   % self.fuser, trace=0, error=0)
             self.writeUserSettings( errorsonly=True )
 
         d = self.settings2dict()
@@ -252,24 +252,24 @@ class SettingsManager:
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test"""
 
     def test_SettingsManager(self):
-	"""SettingsManager test"""
+        """SettingsManager test"""
 
-	f_in = T.projectRoot()+'/external/defaults/settings.cfg'
-	self.f_out =  T.tempDir() + '/settings.cfg'
-	
+        f_in = T.projectRoot()+'/external/defaults/settings.cfg'
+        self.f_out =  T.tempDir() + '/settings.cfg'
+
         self.m = SettingsManager( f_in, self.f_out,
-				  createmissing=True,
-				  verbose=self.local )
+                                  createmissing=True,
+                                  verbose=self.local )
 
         ns = locals()             ## fetch local namespace
 
         self.m.updateNamespace( ns ) ## parse and insert options into namespace
-        
+
         if self.local:
             globals().update( locals() ) ## publish namespace for debugging
 
@@ -278,8 +278,8 @@ class Test(BT.BiskitTest):
         self.assertEqual( r, 42) ## from 'int-testparam = 42' in settings.cfg
 
     def cleanUp(self):
-	T.tryRemove( self.f_out )
-        
+        T.tryRemove( self.f_out )
+
 
 if __name__ == '__main__':
 
