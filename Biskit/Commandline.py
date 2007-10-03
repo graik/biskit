@@ -19,7 +19,7 @@
 ## last $Date: 2007-09-30 19:58:21 +0200 (Sun, 30 Sep 2007) $
 ## $Revision: 536 $
 """
-parse and organize commandline options
+Parse and organize commandline options
 """
 
 import sys
@@ -33,6 +33,13 @@ class Commandline(dict):
     """
     Parse and organize commandline options.
     
+    Example::
+    
+         o = Commandline( a=1, b='in.txt', cut=int, sample=[ float ] )
+         o.parse()
+    
+    
+    
     """
     
     def __init__( self, **kw ):
@@ -44,6 +51,7 @@ class Commandline(dict):
         self.__setDefaults( **kw )
 
     def __parseDefault( self, k, v ):
+        """a default value can be a value, a type, or a list thereof"""
 
         tdefault = type(v) if v is not None else str #: default type
         vdefault = v       #: default default value
@@ -104,7 +112,9 @@ class Commandline(dict):
         @type  v: any
         @return: True if v is a valid value for argument k
         """
-        t = self.types.get( k, str )
+        t = self.types.get( k, None )
+        if t is None:
+            return True
 
         if type( t ) is list:
             t = t[0]
@@ -116,7 +126,7 @@ class Commandline(dict):
                 r = r and self.isvalid( k, i )
             return r
 
-        return type( v ) is self.types.get( k, str )
+        return type( v ) is t
     
     def validate( self ):
         """
@@ -226,7 +236,12 @@ class Commandline(dict):
         
 
     def parse( self, argv=sys.argv ):
-
+        """
+        Fetch command line arguments and match them against the default values
+        and types.
+        @param argv: [default: sys.argv]
+        @type  argv: dict
+        """
         self.__parse( argv )
 
         if 'x' in self:
@@ -236,6 +251,8 @@ class Commandline(dict):
         self.weakupdate( self.defaults )
         
         self.__typecast()
+        
+        self.validate()
 
 
 
@@ -246,5 +263,5 @@ s = '-i 0 0 -cut 25 -v 1.2 -o out.txt -a -b'
 sys.argv += s.split()
 print sys.argv
 
-o = Commandline( cut=int, a=False, i=[1,2] )
+o = Commandline( cut=int, a=False, i=[1,2], l=[ str ] )
 o.parse()
