@@ -543,7 +543,7 @@ class Test(BT.BiskitTest):
 class TestDry( Test ):
     """Test case dry run -- only initialize without running t-coffee"""
 
-    TAGS = []
+    TAGS = [BT.EXE]
 
     def test_AlignerDryRun(self):
 	"""Mod.Aligner dry run test"""
