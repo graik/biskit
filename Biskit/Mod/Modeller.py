@@ -610,6 +610,8 @@ class TestBase(BT.BiskitTest):
 class TestDry( TestBase ):
     """Incomplete test case without running Modeller"""
 
+    TAGS = [BT.EXE]
+
     def test_modeller(self):
         """Mod.Modeller dry run"""
         self.runmodeller(run=0)
