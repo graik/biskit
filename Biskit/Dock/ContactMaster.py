@@ -630,8 +630,9 @@ class Test(BT.BiskitTest):
 	
 
     def cleanUp(self):
-        t.tryRemove( self.master.outFile )
-        t.tryRemove( self.master.ferror )
+	if self.master is not None:
+	    t.tryRemove( self.master.outFile )
+	    t.tryRemove( self.master.ferror )
 
 
     def test_ContactMaster(self):
