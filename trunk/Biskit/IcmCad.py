@@ -179,7 +179,8 @@ copy a_ \"mol2\" delete
         """
         Overrides Executor method
         """
-        return self.error is None or not 'icm/def3> 1.8*Cad' in self.output
+        return self.error != '' or \
+	       not '3> 1.8*Cad' in self.output
 
 
     def fail( self ):
