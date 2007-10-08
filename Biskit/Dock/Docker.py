@@ -42,6 +42,7 @@ from time import localtime, sleep
 from threading import Thread, RLock, Condition
 import numpy.oldnumeric as N
 
+
 class DockerError( Exception ):
     pass
 
@@ -454,8 +455,9 @@ class RunThread( Thread ):
             if not os.path.exists( self.fout ):
 
                 if self.verbose:
-		    print "Executing: ", self.host, ' ', \
+		    print "Executing on ", self.host, ' with ', \
 			  t.stripFilename(self.finp)
+		    print "Command: ", self.cmd
 
                 cmd_lst = self.cmd.split()
 
