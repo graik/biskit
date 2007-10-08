@@ -80,7 +80,8 @@ class Aligner:
     ## default result alignment file. Not actually needed in Aligner itself.
     F_FINAL_ALN  = F_FINAL + '.pir_aln'
 
-    def __init__( self, outFolder='.', log=None, verbose=1, sap=1 ):
+    def __init__( self, outFolder='.', log=None, verbose=1, sap=1,
+		  debug=False):
         """
         @param outFolder: base folder for t_coffee output
                           (default: L{F_RESULT_FOLDER})
@@ -96,6 +97,7 @@ class Aligner:
         self.outFolder = T.absfile( outFolder )
         self.verbose = verbose
 	self.sap = sap
+	self.debug = debug
 
         ## recognize file types for adding t_coffee type code
         self.ex_inp_types = { 'P' : re.compile('.+\.[Pp][Dd][Bb]$|'+
