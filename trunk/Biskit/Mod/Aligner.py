@@ -53,7 +53,6 @@ class TCoffee( Executor ):
         @type  host: str
         """
         Executor.__init__( self, 't_coffee', cmd, catch_out=1,
-                           verbose=1,
                            node=host, **kw )
 
 
