@@ -455,18 +455,15 @@ class Aligner:
                 else:
 
                     if host:
-                        tc = TCoffee( cmd, host )
+                        tc = TCoffee( cmd, host, verbose=self.verbose,
+				      debug=self.debug, log=self.log)
                     else:
-                        tc = TCoffee( cmd )
-
-                    self.logWrite( 'Running t_coffee .. ')
-                    self.logWrite( cmd )
+                        tc = TCoffee( cmd, verbose=self.verbose,
+				      debug=self.debug, log=self.log)
 
                     ## run t_coffee
                     output, error, returncod = tc.run()
 
-                    self.logWrite( '..done: ' + str( output ) + '\n' )
-## 		    print "DEBUG: ", os.path.exists('1MHO_.template_file')
 
         except EnvironmentError, why:
             self.logWrite("ERROR: Can't run t_coffee: %s Error: %s"\
