@@ -804,11 +804,13 @@ class PDBModel:
 
         @param name: name to access profile
         @type  name: str        
-        @param default: default result if no profile is found,
-                        if None, raise exception or try updating
+        @param default: default result if no profile is found, if None,
+	                try to update from source and raise error [None]
         @type  default: any
+	@param update: update from source before returning empty profile [True]
+	@type  update: bool
         @param updateMissing: update from source before reporting missing
-                              profile
+                              profile [False]
         @type  updateMissing: 0||1
 
         @raise ProfileError: if neither atom- nor rProfiles contains |name|
@@ -825,6 +827,9 @@ class PDBModel:
             return self.residues.get( name, default,
                                        update=update, updateMissing=0)
 
+	if default is not None:
+	    return default
+
         raise ProfileError( 'No profile info found with name '+str(name))
     
 
@@ -835,14 +840,13 @@ class PDBModel:
 
         @param name: name to access profile
         @type  name: str       
-        @param updateMissing:update from source before reporting missing profile::
+        @param updateMissing: update from source before reporting missing profile::
                            Guaranteed infos: 'version'->str,
                                              'comment'->str,
                                              'changed'->1||0
         @type  updateMissing: 0|1
 
-        @raise ProfileError: if neither atom - nor rProfiles
-                                   contains |name|
+        @raise ProfileError: if neither atom - nor rProfiles contains |name|
         """
         if updateMissing and not name in self.atoms and \
                not name in self.residues:
