@@ -43,7 +43,7 @@ class TCoffee( Executor ):
     """
     Execute a t_coffee command
     """
-    
+
     def __init__(self, cmd, host=None, **kw ):
         """
         @param cmd: command sequence
@@ -80,7 +80,7 @@ class Aligner:
     F_FINAL_ALN  = F_FINAL + '.pir_aln'
 
     def __init__( self, outFolder='.', log=None, verbose=1, sap=1,
-		  debug=False):
+                  debug=False):
         """
         @param outFolder: base folder for t_coffee output
                           (default: L{F_RESULT_FOLDER})
@@ -95,15 +95,15 @@ class Aligner:
         self.log = log
         self.outFolder = T.absfile( outFolder )
         self.verbose = verbose
-	self.sap = sap
-	self.debug = debug
+        self.sap = sap
+        self.debug = debug
 
         ## recognize file types for adding t_coffee type code
         self.ex_inp_types = { 'P' : re.compile('.+\.[Pp][Dd][Bb]$|'+
                                                '.+\.[Aa][Ll][Pp][Hh][Aa]$'),
-                              'L' : re.compile('.+\.[Ll][Ii][Bb]$'),
-                              'S' : re.compile('.*\.[Ff][Aa][Ss][Tt][Aa]$')
-                            }
+                                               'L' : re.compile('.+\.[Ll][Ii][Bb]$'),
+                                               'S' : re.compile('.*\.[Ff][Aa][Ss][Tt][Aa]$')
+                                           }
 
         self.commands = []  ## list of t_coffee commands to run
 
@@ -131,10 +131,10 @@ class Aligner:
         """
         Try guessing a t_coffee type code for file name and add type code
         (P for structurem S for sequence and L for library).
-        
+
         @param inp: file name
         @type  inp: str
-        
+
         @return: type_code + file name OR file name unchanged
         @rtype: str
         """
@@ -148,7 +148,7 @@ class Aligner:
                           output=None, outfile=None, **kw ):
         """
         Create a single t_coffee command.
-        
+
         @param input: list of input files
         @type  input: [str]
         @param method: t_coffee method ('M' is added automatically)
@@ -162,7 +162,7 @@ class Aligner:
         @type  outfile: str
         @param kw: additional param=value pairs
         @type  kw: param=value
-        
+
         @return: t_coffee command
         @rtype: str
         """
@@ -185,16 +185,16 @@ class Aligner:
             for o in T.toList( output ):
                 r += ' ' + o
 
-	    if not outfile:
-		raise AlignerError, 'T-Coffee -output also requires -outfile'
+            if not outfile:
+                raise AlignerError, 'T-Coffee -output also requires -outfile'
 
         if outfile:
             r += ' -outfile ' + outfile
 
-	if not output:
-	    r += ' -lib_only'
+        if not output:
+            r += ' -lib_only'
 
-	r += ' -template_file No'  ## MSAP runs generate unwanted *.template_file
+        r += ' -template_file No'  ## MSAP runs generate unwanted *.template_file
 
         for param, value in kw.items():
             r += ' -'+param + ' ' + str( value )
@@ -203,7 +203,7 @@ class Aligner:
 
 
     def __default_input_files( self, pdbFiles=None, fasta_templates=None,
-                                fasta_sequences=None, fasta_target=None ):
+                               fasta_sequences=None, fasta_target=None ):
         """
         Fetch missing fasta and pdb files from standard locations.
 
@@ -218,7 +218,7 @@ class Aligner:
         @param fasta_target: fetch fasta target file from
                              L{SS.F_FASTA_TARGET} (default:None)
         @type  fasta_target: [str]
-        
+
         @return: dictionary mapping input file class to path(s)
         @rtype:  {str:[str]}
         """
@@ -251,7 +251,7 @@ class Aligner:
         Prepare alignment commands for homology modeling.
 
         @note: If verbose==1, the commands are mirrored to t_coffee.inp.
-        
+
         @param pdbFiles: template PDBs from L{TC.F_COFFEE} (default:None)
         @type  pdbFiles: [str]
         @param fasta_templates: template sequences from
@@ -300,11 +300,11 @@ class Aligner:
 
         ## SAP will not run if there is only one template
         if (not self.sap) or ( len( pdbFiles ) == 1 ):
-	    if self.sap:
-		self.logWrite('WARNING! Only one template avaliable:' +\
-			      str(pdbFiles) )
+            if self.sap:
+                self.logWrite('WARNING! Only one template avaliable:' +\
+                              str(pdbFiles) )
             self.logWrite('Structural alignment (SAP) will not be performed.')
-	    
+
             r = [
                 ## fast global pair-wise alignment
                 ## why not use slow pair? better for distant sequences
@@ -323,11 +323,11 @@ class Aligner:
                 self.coffee_align_inp( [ f_fast_lib, f_lalign_lib],
                                        clean_aln=0, newtree=f_fast_tree,
                                        output=['clustalw','phylip',
-					       'score_html', 'pir_aln'],
+                                               'score_html', 'pir_aln'],
 ##                                     run_name=T.stripFileName(f_final_aln),
                                        outfile=f_final_aln,
                                        quiet=f_coffee_log+'_4')
-                ]
+            ]
 
         ## Normal alignment run with structural alignment
         ## (more than one template)
@@ -362,12 +362,12 @@ class Aligner:
                 self.coffee_align_inp( [ f_fast_lib, f_lalign_lib, f_sap_lib],
                                        clean_aln=0, newtree=f_fast_tree,
                                        output=['clustalw','phylip',
-					       'score_html',
+                                               'score_html',
                                                'pir_aln', 'score_ascii'],
- ##                                    run_name=T.stripFileName(f_final_aln),
+                                       ##                                    run_name=T.stripFileName(f_final_aln),
                                        outfile=f_final_aln,
                                        quiet=f_coffee_log+'_4')
-                ]
+            ]
 
         ## add to internal command 'queue'
         self.commands += r
@@ -409,7 +409,7 @@ class Aligner:
 
         @param fname: fasta file to repair
         @type  fname: str
-        
+
         @raise AlignerError: if cannot fix target sequence file
         """
         bak_fname = fname+'_original'
@@ -437,7 +437,7 @@ class Aligner:
     def go( self, host=None ):
         """
         Run the previously added commands, delete internal command list.
-        
+
         @param host: host name for remote execution
                      (default: None=local execution)
         @type  host: str
@@ -445,8 +445,8 @@ class Aligner:
         @raise AlignerError: if T_Coffee execution failed
         """
         try:
-	    if self.verbose:
-		self.logWrite('\nALIGNING...\n')
+            if self.verbose:
+                self.logWrite('\nALIGNING...\n')
 
             for cmd in self.commands:
 
@@ -457,10 +457,10 @@ class Aligner:
 
                     if host:
                         tc = TCoffee( cmd, host, verbose=self.verbose,
-				      debug=self.debug, log=self.log)
+                                      debug=self.debug, log=self.log)
                     else:
                         tc = TCoffee( cmd, verbose=self.verbose,
-				      debug=self.debug, log=self.log)
+                                      debug=self.debug, log=self.log)
 
                     ## run t_coffee
                     output, error, returncod = tc.run()
@@ -472,7 +472,7 @@ class Aligner:
             raise AlignerError( "Can't run t_coffee: %s Error: %"\
                                 %( why, error ) )
 
-        
+
 #############
 ##  TESTING        
 #############
@@ -485,7 +485,7 @@ class Test(BT.BiskitTest):
     def prepare(self):
         import tempfile
         import shutil, stat
-	from Biskit import LogFile, StdLog
+        from Biskit import LogFile, StdLog
 
         ## collect the input files needed
 
@@ -493,12 +493,12 @@ class Test(BT.BiskitTest):
 
         os.mkdir( self.outfolder +'/templates' )
         os.mkdir( self.outfolder +'/sequences/' )
-        
+
         shutil.copytree( T.testRoot() + '/Mod/project/templates/t_coffee',
                          self.outfolder + '/templates/t_coffee' )
 
         os.chmod( self.outfolder + '/templates/t_coffee', stat.S_IWRITE )
-        
+
         shutil.copy( T.testRoot() + '/Mod/project/templates/templates.fasta',
                      self.outfolder + '/templates' )
 
@@ -515,24 +515,24 @@ class Test(BT.BiskitTest):
         except Exception, error:
             T.lastError( str( error ) )
 
-	if not self.local:
-	    self.a_log = LogFile( self.outfolder + '/Aligner.log' )
-	else:
-	    self.a_log = StdLog()
+        if not self.local:
+            self.a_log = LogFile( self.outfolder + '/Aligner.log' )
+        else:
+            self.a_log = StdLog()
 
-    
+
     def t_Aligner(self, run=True ):
 
         self.a = Aligner( outFolder=self.outfolder, verbose=self.local,
-			  log=self.a_log)
+                          log=self.a_log)
 
         self.a.align_for_modeller_inp()
 
         if run:
             self.a.go()
-	    if self.local:
-		self.log.add(
-		    'The alignment result is in %s/t_coffee' % self.outfolder)
+            if self.local:
+                self.log.add(
+                    'The alignment result is in %s/t_coffee' % self.outfolder)
 
     def cleanUp(self):
         T.tryRemove( self.outfolder, tree=1 )
@@ -544,8 +544,8 @@ class TestDry( Test ):
     TAGS = [BT.EXE]
 
     def test_AlignerDryRun(self):
-	"""Mod.Aligner dry run test"""
-	self.t_Aligner(run=False)
+        """Mod.Aligner dry run test"""
+        self.t_Aligner(run=False)
 
 
 class TestLong( Test ):
@@ -554,8 +554,8 @@ class TestLong( Test ):
     TAGS = [BT.EXE, BT.LONG]
 
     def test_Aligner(self):
-	"""Mod.Aligner test"""
-	self.t_Aligner(run=True)
+        """Mod.Aligner test"""
+        self.t_Aligner(run=True)
 
 if __name__ == '__main__':
 
