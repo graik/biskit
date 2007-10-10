@@ -51,8 +51,8 @@ class PickyURLopener(urllib.FancyURLopener):
 	Default error handling.
 	@raise IOError: if something went wrong
 	"""
-	raise IOError, 'Cannot open %r. Error %r (%s)' % (url,errcode,errmsg)
-	
+        raise IOError, 'Cannot open %r. Error %r (%s)' % (url,errcode,errmsg)
+
 urllib._urlopener = PickyURLopener()
 
 
@@ -110,7 +110,7 @@ class TemplateSearcher( SequenceSearcher ):
         self.ex_pdb   = re.compile( 'pdb\|([A-Z0-9]{4})\|([A-Z]*)' )
 
         self.ex_resolution = re.compile(\
-             'REMARK   2 RESOLUTION\. *([0-9\.]+|NOT APPLICABLE)' )
+            'REMARK   2 RESOLUTION\. *([0-9\.]+|NOT APPLICABLE)' )
 
         self.prepareFolders()
 
@@ -141,7 +141,7 @@ class TemplateSearcher( SequenceSearcher ):
 
         @param blast_records: result from BlastParser
         @type  blast_records: Bio.Blast.Record.Blast
-        
+
         @return: list of dictionaries mapping pdb codes and chain IDs
         @rtype: [ {'pdb':str, 'chain':str } ]
 
@@ -165,7 +165,7 @@ class TemplateSearcher( SequenceSearcher ):
         """
         Use::
            fastaFromIds( id_lst, fastaOut ) -> { str: Bio.Fasta.Record }
-        
+
         @param db: database name
         @type  db: str
         @param id_lst: list of dictionaries with pdb codes and chain IDs
@@ -190,13 +190,13 @@ class TemplateSearcher( SequenceSearcher ):
     def getLocalPDBHandle( self, id, db_path=settings.pdb_path ):
         """
         Get the coordinate file from a local pdb database.
-        
+
         @param id: pdb code, 4 characters
         @type  id: str
         @param db_path: path to local pdb database
                         (default: L{settings.pdb_path})
         @type  db_path: str
-        
+
         @return: the requested pdb file as a file handle
         @rtype: open file handle
 
@@ -228,13 +228,13 @@ class TemplateSearcher( SequenceSearcher ):
     def getRemotePDBHandle( self, id, rcsb_url=settings.rcsb_url ):
         """
         Get the coordinate file remotely from the RCSB.
-        
+
         @param id: pdb code, 4 characters
         @type  id: str
         @param rcsb_url: template url for pdb download
                          (default: L{settings.rcsb_url})
         @type  rcsb_url: str
-        
+
         @return: the requested pdb file as a file handle
         @rtype: open file handle
 
@@ -251,7 +251,7 @@ class TemplateSearcher( SequenceSearcher ):
 
 
     def parsePdbFromHandle(self, handle, first_model_only=True ):
-	"""
+        """
 	Parse PDB from file/socket or string handle into memory.
 
 	@param handle: fresh open file/socket handle to PDB ressource or string
@@ -263,36 +263,36 @@ class TemplateSearcher( SequenceSearcher ):
         @rtype: [str], {'resolution':float }
 	@raise BlastError: if passed in string is too short
 	"""
-	lines = []
-	res_match = None
-	infos = {}
+        lines = []
+        res_match = None
+        infos = {}
 
-	if type( handle ) is str:
-	    if len(handle) < 5000:
-		raise BlastError( "Couldn't extract PDB Info." )
-	    handle =  cStringIO.StringIO( handle )
+        if type( handle ) is str:
+            if len(handle) < 5000:
+                raise BlastError( "Couldn't extract PDB Info." )
+            handle =  cStringIO.StringIO( handle )
 
 ## 	if handle.peekline()[:6] != 'TITLE':
 ## 	    raise BlastError, 'Ressource does not seem to be a PDB:\n%r' %\
 ## 		  handle.peekline()
 
-	for l in handle:
-	    lines += [ l ]
+        for l in handle:
+            lines += [ l ]
 
-	    res_match = res_match or self.ex_resolution.search( l )
+            res_match = res_match or self.ex_resolution.search( l )
 
-	    if first_model_only and l[:6] == 'ENDMDL':
-		break
-		
-	if res_match:
-	    if res_match.groups()[0] == 'NOT APPLICABLE':
-		infos['resolution'] = self.NMR_RESOLUTION
-	    else:
-		infos['resolution'] = float( res_match.groups()[0] )
-	else:
-	    raise BlastError, 'No resolution record found in PDB.'
+            if first_model_only and l[:6] == 'ENDMDL':
+                break
 
-	return lines, infos
+        if res_match:
+            if res_match.groups()[0] == 'NOT APPLICABLE':
+                infos['resolution'] = self.NMR_RESOLUTION
+            else:
+                infos['resolution'] = float( res_match.groups()[0] )
+        else:
+            raise BlastError, 'No resolution record found in PDB.'
+
+        return lines, infos
 
 
     def retrievePDBs( self, outFolder=None, pdbCodes=None ):
@@ -301,12 +301,12 @@ class TemplateSearcher( SequenceSearcher ):
         download the coordinartes drom the RSCB.
         Write PDBs for given fasta records. Add PDB infos to internal
         dictionary of fasta records. NMR structures get resolution 3.5.
-        
+
         @param outFolder: folder to put PDB files into (default: L{F_ALL})
         @type  outFolder: str OR None
         @param pdbCodes: list of PDB codes [all previously found templates]
         @type  pdbCodes: [str]
-        
+
         @return: list of PDB file names
         @rtype: [str]
 
@@ -330,12 +330,12 @@ class TemplateSearcher( SequenceSearcher ):
                     h = open( fname, 'r' )
                 else:
                     h = self.getLocalPDBHandle( c )
-		if not self.silent:
-		    T.flushPrint('l')
+                if not self.silent:
+                    T.flushPrint('l')
             except:
                 h = self.getRemotePDBHandle( c )
-		if not self.silent:
-		    T.flushPrint('r')
+                if not self.silent:
+                    T.flushPrint('r')
 
             try:
                 lines, infos = self.parsePdbFromHandle( h, first_model_only=1 )
@@ -368,10 +368,10 @@ class TemplateSearcher( SequenceSearcher ):
     def selectFasta( self, ids_in_cluster ):
         """
         select one member of cluster of sequences.
-        
+
         @param ids_in_cluster: list of sequence ids defining the cluster
         @type  ids_in_cluster: [str]
-        
+
         @return: Bio.Fasta.Record
         @rtype: Bio.Fasta.Record
         """
@@ -385,7 +385,7 @@ class TemplateSearcher( SequenceSearcher ):
     def reportClustering( self, raw=None ):
         """
         Report the clustering result.
-        
+
         Writes:
          - clustering results to L{F_CLUSTER_LOG}
          - blast records to L{F_BLAST_OUT}
@@ -429,7 +429,7 @@ class TemplateSearcher( SequenceSearcher ):
 
         @param outFolder: folder to write files to (default: L{F_NR})
         @type  outFolder: str OR None
-        
+
         @return: { str_filename : str_chain_id }, file names and chain ids
         @rtype: {str, str}
 
@@ -464,7 +464,7 @@ class TemplateSearcher( SequenceSearcher ):
 ##  TESTING        
 #############
 import Biskit.test as BT
-     
+
 class Test(BT.BiskitTest):
     """
     Test class
@@ -473,10 +473,10 @@ class Test(BT.BiskitTest):
     TAGS = [ BT.EXE, BT.LONG ]
 
     def prepare(self):
-	import tempfile
+        import tempfile
         import shutil
         from Biskit.LogFile import LogFile
-        
+
         self.query = T.testRoot() + '/Mod/project/target.fasta'
         self.outfolder = tempfile.mkdtemp( '_test_TemplateSearcher' )
         shutil.copy( self.query, self.outfolder )
@@ -485,23 +485,23 @@ class Test(BT.BiskitTest):
         self.f_out = self.outfolder + '/TemplateSearcher.log'
 
         self.l = LogFile( self.f_out, mode='w')
-	if self.local:  self.l = StdLog()
+        if self.local:  self.l = StdLog()
 
         self.f_target = self.outfolder + '/target.fasta'
 
 
     def test_TemplateSearcher(self):
-	"""Mod.TemplateSearcher test"""
+        """Mod.TemplateSearcher test"""
         silent = 0
         if self.local: silent=0
 
         self.searcher = TemplateSearcher( outFolder=self.outfolder,
-					  verbose=1, log=self.l,
-					  silent=silent )
+                                          verbose=1, log=self.l,
+                                          silent=silent )
 
         db = settings.db_pdbaa
         self.searcher.localBlast( self.f_target, db, 'blastp',
-				  alignments=200, e=0.0001)
+                                  alignments=200, e=0.0001)
 
         ## first tries to collect the pdb files from a local db and if
         ## that fails it tries to collect them remotely
@@ -512,16 +512,16 @@ class Test(BT.BiskitTest):
         self.searcher.writeFastaClustered()
 
         fn = self.searcher.saveClustered()
-        
+
         if self.local and self.DEBUG:
             self.log.add(
-		'\nThe set of clustered template files from the search' +\
-		'    can be found in %s/templates' % self.outfolder +\
-		'\nTemplateSearcher log file written to: %s' % self.f_out)
+                '\nThe set of clustered template files from the search' +\
+                '    can be found in %s/templates' % self.outfolder +\
+                '\nTemplateSearcher log file written to: %s' % self.f_out)
 
     def cleanUp(self):
         T.tryRemove( self.outfolder, tree=1 )
-        
+
 
 if __name__ == '__main__':
 
