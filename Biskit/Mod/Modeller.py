@@ -51,18 +51,18 @@ class ModellerError( Exception ):
 class Modeller( Executor ):
     """
     Interface to the Modeller program for building homology models:
-    
+
     1) Read: Alignment from t_coffee and template PDBs.
 
        - t_coffee/final.pir_aln
        - templates/modeller/*pdb
-    
+
     2) Create a modeller-script -> modeller/modeller.top
     3) Run modeller.
     4) Postprocess the modeller models.
 
     Result:
-    
+
     - models sorted by their modeller score into model_00.pdb - model_xx.pdb:
        - the local modeller score is in the temperature_factor column
        - the number of templates for each residue is in the occupancy column
@@ -94,10 +94,10 @@ class Modeller( Executor ):
                   starting_model=1, ending_model=10,
                   zfilter=None, idfilter=None,
                   disc_report=1,
-		  **kw ):
+                  **kw ):
         """
         Create Executor instance for one modeller run.
-        
+
         @param outFolder: base folder for Modeller output 
                           (default: L{F_RESULT_FOLDER})
         @type  outFolder: str
@@ -127,7 +127,7 @@ class Modeller( Executor ):
 
         mod_template = mod_template or self.MODEL_SCRIPT_PATH
 
-	# don't override existing modeller script
+        # don't override existing modeller script
         f_in = os.path.join( cwd, self.MODEL_SCRIPT )
         if mod_template and os.path.isfile( mod_template ) or \
            os.path.islink( mod_template ):
@@ -152,9 +152,9 @@ class Modeller( Executor ):
         self.knowns_top = None
         self.knowns_py  = None 
 
-	self.aln_info = CheckIdentities( self.outFolder )
-	self.z_filter = zfilter
-	self.id_filter = idfilter
+        self.aln_info = CheckIdentities( self.outFolder )
+        self.z_filter = zfilter
+        self.id_filter = idfilter
 
         self.disc_report = disc_report
 
@@ -188,7 +188,7 @@ class Modeller( Executor ):
     def get_template_ids( self, template_folder ):
         """
         Extract names of all PDB files in a folder (without .PDB)
-        
+
         @param template_folder: folder with template coordinate files
         @type  template_folder: str
 
@@ -198,33 +198,33 @@ class Modeller( Executor ):
         fs = os.listdir( template_folder )
         r = [ f[:-4] for f in fs if f[-4:].upper()=='.PDB' ]
 
-	return r
+        return r
 
 
     def filter_templates( self, target_id='target' ):
-	"""
+        """
 	Kick out some templates before the modeller run.
 	"""
 
-	tf = TemplateFilter( self.aln_info, target_id=target_id,
-			     verbose=self.verbose, log=self.log )
+        tf = TemplateFilter( self.aln_info, target_id=target_id,
+                             verbose=self.verbose, log=self.log )
 
-	if self.z_filter != 0:
-	    tf.filter_z( self.z_filter )
+        if self.z_filter != 0:
+            tf.filter_z( self.z_filter )
 
-	if self.id_filter != 0:
-	    tf.filter_id( self.id_filter )
-	
-	r = tf.get_filtered()
+        if self.id_filter != 0:
+            tf.filter_id( self.id_filter )
 
-	return r
+        r = tf.get_filtered()
+
+        return r
 
 
     def get_target_id( self, f_fasta ):
         """
         Extract (first) sequence id from fasta file. Make intelligent guess
         if there is no exact match between target fasta and alignment file.
-        
+
         @param f_fasta: fasta file with target sequence
         @type  f_fasta: str
 
@@ -304,7 +304,7 @@ class Modeller( Executor ):
 ##                         lines[i + 2] = '*' + lines[i + 2]
 
                 lines[i + 1] = "%s:%s: : : : : : : : \n" \
-                               % (prefix, id)
+                     % (prefix, id)
 
             else:
                 if not ex_description.match( current ):
@@ -326,16 +326,16 @@ class Modeller( Executor ):
         ## add Modeller-style lines and extract sequence ids
         self.prepare_alignment( self.f_pir, template_ids )
 
-	## analyze alignment
-	self.aln_info.go()
-	## write identity matrix files into project folder
-	self.aln_info.write_identities()
-	
+        ## analyze alignment
+        self.aln_info.go()
+        ## write identity matrix files into project folder
+        self.aln_info.write_identities()
+
         ## guess target seq id within alignment
         self.target_id = self.get_target_id( self.fasta_target )
 
-	## remove templates with low or below average similarity to target 
-	template_ids = self.filter_templates( target_id=self.target_id )
+        ## remove templates with low or below average similarity to target 
+        template_ids = self.filter_templates( target_id=self.target_id )
 
         ## convert template ids into modeller-formatted input line
         ## for python or old-style top input
@@ -350,7 +350,7 @@ class Modeller( Executor ):
     def pdb_list(self, model_folder):
         """
         Compile a list with the names of all models created by Modeller.
-        
+
         @param model_folder: folder containing model PDBs
                              (output from Modeller)
         @type  model_folder: str
@@ -369,7 +369,7 @@ class Modeller( Executor ):
         @type  f_model: str
         @param model: model
         @type  model: PDBModel
-        
+
         @return: modeller score for the models
         @rtype: float
         """
@@ -389,7 +389,7 @@ class Modeller( Executor ):
     def output_score(self, pdb_list, model_folder):
         """
         Write a list of model scores to file L{F_SCORE_OUT}
-        
+
         @param pdb_list: list of models
         @type  pdb_list: ModelList
         @param model_folder: ouput folder
@@ -423,7 +423,7 @@ class Modeller( Executor ):
         for model in pdb_list:
 
             model.residues.set("n_templates", template_info,
-                                comment="number of templates for each residue")
+                               comment="number of templates for each residue")
 
         rmask = pdb_list[0].profile2mask("n_templates", 1,1000)
         amask = pdb_list[0].res2atomMask(rmask)
@@ -437,7 +437,7 @@ class Modeller( Executor ):
         Save re-ordered homology models as model_00.pdb - model_xx.pdb.
         The B-factor column contains the modeller score, occupancy
         contains a mask with 0 meaning there was no template for this position.
-        
+
         @param pdb_list: list of PDBModels
         @type  pdb_list: ModelList
         @param model_folder: folder to save in
@@ -449,7 +449,7 @@ class Modeller( Executor ):
             t = []
 
             for string in m.info["headlines"]:
-                
+
                 pair = string.split()[0], ''.join(string.split()[1:])
                 t.append(pair)
 
@@ -460,7 +460,7 @@ class Modeller( Executor ):
         """
         Read Modeller score from the 'temperature_factor' column and
         create a profile from it.
-        
+
         @param pdb_list: list of models
         @type  pdb_list: ModelList
         """
@@ -469,13 +469,13 @@ class Modeller( Executor ):
             m = model.compress( model.maskCA())
 
             model.residues.set('mod_score', m['temperature_factor'],
-			       comment='local modeller score')
+                               comment='local modeller score')
 
 
     def write_PDBModelList(self, pdb_list, model_folder = None):
         """
         Dump the list of PDBModels.
-        
+
         @param pdb_list: list of models
         @type  pdb_list: ModelList
         @param model_folder: ouput folder (default: None -> L{F_PDBModels})
@@ -484,7 +484,7 @@ class Modeller( Executor ):
         ## cut connection to target.Bxxxxx.pdb
         for m in pdb_list:
             m.disconnect()
-            
+
         T.Dump(pdb_list, '%s'%(model_folder + self.F_PDBModels))
 
 
@@ -493,7 +493,7 @@ class Modeller( Executor ):
         @todo: parse modeller log into this instance?
         """
         pass
-    
+
 
     def isFailed( self ):
         """
@@ -556,12 +556,12 @@ class Modeller( Executor ):
 ##  TESTING        
 #############
 import Biskit.test as BT
-    
+
 class TestBase(BT.BiskitTest):
     """
     Test base class
     """
-    
+
     def prepare(self):
         import tempfile
         import shutil
@@ -579,7 +579,7 @@ class TestBase(BT.BiskitTest):
 
         shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
                      self.outfolder  )
-        
+
 
     def runmodeller( self, run=0 ):
         """
@@ -588,7 +588,7 @@ class TestBase(BT.BiskitTest):
         """
 
         self.m = Modeller( self.outfolder, verbose=self.local,
-			   ending_model=2 )
+                           ending_model=2 )
 
 ##         self.m.prepare_modeller( )
 
