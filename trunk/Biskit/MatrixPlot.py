@@ -90,7 +90,7 @@ class MatrixPlot(FramedPlot):
     of each cell will be illutrated using the selected color range.
     """
 
-    def __init__(self, matrix, mesh = 0, palette = "plasma", legend = 0):
+    def __init__(self, matrix, mesh=0, palette="plasma", legend=0, step=1):
         """
         @param matrix: the 2-D array to plot
         @type  matrix: array
@@ -101,6 +101,8 @@ class MatrixPlot(FramedPlot):
         @param legend: create a legend (scale) showing the walues of the
                        different colors in the plot.  
         @type  legend: 1|0
+        @param step: reduce matrix -- take only each step position in x and y
+        @type  step: int
 
         @return: biggles plot object, view with biggles.FramedPlot.show() or
                  save with biggles.FramedPlot.write_eps(file_name).
@@ -112,6 +114,9 @@ class MatrixPlot(FramedPlot):
         FramedPlot.__init__(self)
 
         self.palette = ColorSpectrum( palette )
+
+        if step != 1:
+            matrix = self.__thinarray( matrix, step )
 
         self.matrix = self.palette.color_array( matrix )
         s = N.shape( self.matrix )
@@ -164,6 +169,18 @@ class MatrixPlot(FramedPlot):
         return inset
 
 
+    def __thinarray( self, a, step ):
+        """
+        @param a: input array
+        @type  a: N.array
+        @param step: stepping in both dimensions
+        @type  step: int
+        @return: smaller array
+        @rtype: N.array
+        """
+        r = N.take( a, range( 0, len(a), step ), axis=0 )
+        r = N.take( r, range( 0, len(r[0]), step ), axis=1 )
+        return r
 
 
 #############
@@ -173,7 +190,7 @@ import Biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test class """
-    
+
     def test_MatrixPlot( self ):
         """MatrixPlot test"""
         n = 30
@@ -183,15 +200,15 @@ class Test(BT.BiskitTest):
         for i in range(N.shape(z)[0]):
             for j in range(N.shape(z)[1]):
                 z[i,j] = N.exp(-0.01*((i-n/2)**2+(j-n/2)**2))
-            
+
         self.p = MatrixPlot(z, palette='sausage', legend=1)
 
-	if self.local or self.VERBOSITY > 2:
-	    self.p.show()
-        
-	self.assert_( self.p is not None )
- 
-        
+        if self.local or self.VERBOSITY > 2:
+            self.p.show()
+
+        self.assert_( self.p is not None )
+
+
 
 if __name__ == '__main__':
 
