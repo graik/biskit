@@ -1217,64 +1217,6 @@ class Test(BT.BiskitTest):
         
         self.assert_( views[0].alive is False )
 
-def test_iter_views( p ):
-
-    r = []
-
-    for a in p.iterCrossViews():
-        r += [ a['letters'] ]
-        r += [ a['numbers'] ]
-
-    return r
-
-
-def test_iter_dicts( p ):
-
-    r = []
-
-    for a in p.iterDicts():
-        r += [ a['letters'] ]
-        r += [ a['numbers'] ]
-
-    return r
-
-def test_toDicts( p):
-    r = []
-
-    for a in p.toDicts():
-        r += [ a['letters'] ]
-        r += [ a['numbers'] ]
-
-    return r
-
-
-def test_lst( lst ):
-
-    r = []
-
-    for d in lst:
-        r += [ d['letters'] ]
-        r += [ a['numbers'] ]
-
-    return r
-
-def test_semidirect( p ):
-    r = []
-
-    for i in range( p.profLength()):
-        r += [ p['letters'][i] ]
-
-    return r
-
-
-def test_classic( p ):
-
-    r = []
-
-    for i in p['letters']:
-        r += [ i ]
-
-    return r
 
 def clock( s ):
 
