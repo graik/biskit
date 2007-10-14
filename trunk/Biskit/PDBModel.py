@@ -596,14 +596,14 @@ class PDBModel:
     def __str__( self ):
         return self.__repr__()
     
-    def report( self ):
+    def report( self, prnt=True, plot=False ):
         """
-        Create a brief description of this model. Use::
+        Print (or return) a brief description of this model.
         
-             print model.report()
-        
-        @return: formatted description of this model
-        @rtype: str
+        @prnt: directly print report to STDOUT (default True)
+        @prnt: bool
+        @return: if prnt==True: None, else: formatted description of this model
+        @rtype: None or str
         """
         r = self.__repr__()
         
@@ -618,9 +618,36 @@ class PDBModel:
                             T.clipStr( repr(self.residues.keys()), 57 ))
         r += '\n %2i info records:     %s' % ( len( self.info ), 
                             T.clipStr( repr( self.info.keys() ), 57 ))
+
+        if plot:
+            self.gnuplot()
+
+        if prnt:
+            print r
+        else:
+            return r
         
-        return r
+    def gnuplot( self, hetatm=False ):
+        """
+        Get a quick & dirty overview over the content of a PDB. gnuplot
+        simply creates a 2-D plot of all x-coordinates versus all y coordinates, 
+        colored by chain. This is obviously not publication-quality ;-). 
+        Use the Biskit.Pymoler class for real visalization.
+
+        @param hetatm: include hetero atoms, usually messy, (default False)
+        @type  hetatm: bool
+        """
+        from Biskit import gnuplot
+
+        m = self
+        if not hetatm:
+            m = self.compress( N.logical_not( self.maskHetatm() ) )
         
+        chains = [ self.takeChains( [i] ) for i in range( m.lenChains())]
+        xy = [ zip( m.xyz[:,0], m.xyz[:,1] ) for m in chains ]
+
+        gnuplot.plot( *xy )
+ 
  
     def __vintageCompatibility( self ):
         """
@@ -1959,13 +1986,17 @@ class PDBModel:
         return r
 
 
-    def atom2resProfile( self, p ):
+    def atom2resProfile( self, p, f=None ):
         """
         Get a residue profile where each residue has the value that its first
         atom has in the atom profile.
         @param p: name of existing atom profile OR ...
                   [ any ], list of lenAtoms() length
         @type  p: str
+        @param f: function to calculate single residue from many atom values 
+                  f( [atom_value1, atom_value2,...] ) -> res_value
+                  (default None, simply take value of first atom in each res.)
+        @type  f: func
 
         @return: [ any ] OR array, residue profile
         @rtype: list or array
@@ -1975,7 +2006,11 @@ class PDBModel:
 
         isArray = isinstance( p, N.arraytype )
 
-        r = N.take( p, self.resIndex() )
+        if not f:
+            r = N.take( p, self.resIndex() )
+        else:
+            r = [ f( values ) for values in self.profile2resList( p ) ]
+            r = N.array( r )
 
         if not isArray:
             return r.tolist()
@@ -2027,6 +2062,25 @@ class PDBModel:
         return r
 
 
+    def profile2resList( self, p ):
+        """
+        Group the profile values of each residue's atoms into a separate list.
+        @param p: name of existing atom profile OR ...
+                  [ any ], list of lenAtoms() length
+        
+        @return: a list (one entry per residue) of lists (one entry per resatom)
+        @rtype: [ [ any ] ]
+        """
+        if type( p ) is str:
+            p = self.atoms.get( p )
+
+        rI = self.resIndex()       # starting atom of each residue
+        rE = self.resEndIndex()    # ending atom of each residue
+        
+        r = [ p[ rI[res] : rE[res] ] for res in range( self.lenResidues() ) ]
+        return r
+    
+    
     def concat( self, *models ):
         """
         Concatenate atoms, coordinates and profiles. source and fileName
@@ -2526,7 +2580,7 @@ class PDBModel:
         @rtype: list of int
         """
         r = self.resIndex()
-        N.concatenate( (r[1:], [self.lenAtoms()]) ) - 1 
+        return N.concatenate( (r[1:], [self.lenAtoms()]) ) - 1 
 
 
     def __inferChainIndex( self ):
