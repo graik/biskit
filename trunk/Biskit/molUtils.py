@@ -38,7 +38,7 @@ import types
 class MolUtilError( Exception ):
     pass
 
-## translate amino acid names to single letter code
+#: translate PDB amino acid names to single letter code
 aaDicStandard =\
               {'asp':'D', 'glu':'E', 'lys':'K', 'his':'H', 'arg':'R',
                'gln':'Q', 'asn':'N', 'ser':'S', 'asx':'B', 'glx':'Z',
@@ -46,17 +46,37 @@ aaDicStandard =\
                'gly':'G', 'ala':'A', 'ile':'I', 'leu':'L', 'cys':'C',
                'met':'M', 'thr':'T', 'val':'V', 'pro':'P' }
 
-## same for nucleic acids (incomplete)
-nsDicStandard = {'atp':'A', 'gtp':'G', 'ctp':'C', 'thy':'T', 'ura':'U'}
+#: same for nucleic acids (incomplete)
+nsDicStandard = {'a':'a', 'g':'g', 'c':'c', 't':'t', 'u':'u'}
 
+#: extend aaDicStandard with non-standard residues
 aaDic = copy.copy( aaDicStandard )
 
 aaDic.update( {'cyx':'C', 'hid':'H', 'hie':'H', 'hip':'H',
                'unk':'X', 'ace':'X', 'nme':'X'} )#, 'ndp':'X' } )
 
-## translate common hetero residues to pseudo single letter code
-xxDic = {'tip3':'~', 'hoh':'~', 'wat':'~', 'cl-':'-', 'na+':'+',
+#: extend nsDicStandard with non-standard residues
+nsDic = copy.copy( nsDicStandard )
+
+nsDic.update( {'atp':'a', 'gtp':'g', 'ctp':'c', 'ttp':'t', 'utp':'u',
+               'adp':'a', 'gdp':'g', 'cdp':'c', 'tdp':'t', 'udp':'u',
+               'amp':'a', 'gmp':'g',
+               'fad':'f', 'fmp':'f',
+               'nad':'n',
+           } )
+
+#: translate common hetero residues to pseudo single letter code
+xxDic = {'tip3':'~', 'hoh':'~', 'wat':'~', 'cl-':'-', 'na+':'+', 'ca':'+',
          'ndp':'X', 'nap':'X'}
+
+#: translate standard PDB amino and nucleic acid names to single letter code
+resDicStandard = copy.copy( aaDicStandard )
+resDicStandard.update( nsDicStandard )
+
+#: extend resDicStandard with common non-standard names
+resDic = copy.copy( aaDic )
+resDic.update( nsDic )
+resDic.update( xxDic )
 
 ## map non-standard amino acid names to closest standard amino acid
 ##
@@ -438,7 +458,7 @@ def resType( resCode ):
     return result
 
 
-def singleAA(seq, xtable=xxDic ):
+def singleAA(seq, xtable=None, nonstandard=True ):
     """
     convert list with 3-letter AA code to list with 1-letter code
     
@@ -446,14 +466,16 @@ def singleAA(seq, xtable=xxDic ):
     @type  seq: [str]
     @param xtable: dictionary with additional str:single_char mapping
     @type  xtable: dict
+    @param nonstandard: support non-standard residue names (default True)
+    @type  nonstandard: bool
     
     @return: list with 1-letter code; C{ ['A','C','L','A'...]}
     @rtype: [str]
     """
     result = []             # will hold 1-letter list
-    table = aaDic
+    table = resDic if nonstandard else resDicStandard
     if xtable:
-        table = copy.copy( resDic )
+        table = copy.copy( table )
         table.update( xtable )
 
     for aa in seq:
@@ -461,8 +483,7 @@ def singleAA(seq, xtable=xxDic ):
             aa = aa.lower()
             result +=  [ table[aa] ]
         except:
-            EHandler.warning("singleAA(): unknown Residue: " + aa) 
-            result = result + ['X']
+            result = result + ['?']
     return result
 
 
@@ -581,5 +602,5 @@ class Test(BT.BiskitTest):
         self.assertEqual( ''.join(S.seq), S.model_1.sequence() )
 
 if __name__ == '__main__':
-
+    
     BT.localTest()
