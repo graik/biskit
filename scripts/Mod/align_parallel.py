@@ -63,12 +63,11 @@ Default options:\
         print "\t-",key, "\t",value
 
     sys.exit(0)
-    
 
-if __name__ == '__main__':
 
-    ## look for default cross-validation projects
-    d = []
+def collect_project_folders( ):
+
+    d=[]
     f = os.getcwd()
     if osp.exists( f + VS.F_RESULT_FOLDER ):
         d = glob.glob( f + VS.F_RESULT_FOLDER + '/????' )
@@ -93,9 +92,18 @@ if __name__ == '__main__':
     if len(d)==0:
         print 'Nothing to align. Exiting.'
         sys.exit(0)
-        
+
+    return d
+
+if __name__ == '__main__':
+
+    ## look for default cross-validation projects
+    d = []
+
     options = T.cmdDict({'h':10, 'd':d})
 
+    d=options['d'] or collect_project_folders( )
+    
     if (options['d'] is None) or ('help' in options or '?' in options):
         _use( options )
 
@@ -125,7 +133,7 @@ if __name__ == '__main__':
     ## check for completed jobs
     j=0
     for i in d:
-        if osp.exists( i + A.F_FINAL +'.aln' ):
+        if osp.exists( i + A.F_FINAL +'.pir_aln' ):
             j+=1
         else:
             print 'ERROR:Alignment error in %s see Aligner.log for more info'%i
