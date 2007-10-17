@@ -26,6 +26,7 @@ from Biskit.Mod.ModelMaster import ModelMaster
 from Biskit.Mod.ValidationSetup import ValidationSetup as VS
 from Biskit.Mod.TemplateSearcher import TemplateSearcher as TS
 from Biskit.Mod.Modeller import Modeller as M
+from Biskit.Mod.TemplateFilter import TemplateFilter as TF
 import Biskit.tools as T
 import Biskit.PVM.hosts as hosts
 import sys, os
@@ -62,10 +63,9 @@ Default options:\
     sys.exit(0)
 
 
-if __name__ == '__main__':
+def collect_project_folders( ):
 
-    ## look for default cross-validation projects
-    d = []
+    d=[]
     f = os.getcwd()
     if osp.exists( f + VS.F_RESULT_FOLDER ):
         d = glob.glob( f + VS.F_RESULT_FOLDER + '/????' )
@@ -91,8 +91,14 @@ if __name__ == '__main__':
         print 'Nothing to model. Exiting.'
         sys.exit(0)
 
+    return d
 
-    options = T.cmdDict({'h':10, 'd':d})
+
+if __name__ == '__main__':
+
+    ## look for default cross-validation projects
+    options = T.cmdDict({'h':10, 'd':[], 'zfilter':TF.Z_CUTOFF,'idfilter':TF.ID_CUTOFF})
+    d=options['d'] or collect_project_folders( )
 
     if (options['d'] is None) or ('help' in options or '?' in options):
         _use( options )
@@ -102,9 +108,10 @@ if __name__ == '__main__':
     fastaTarget = options.get('fta', None)
     f_pir = options.get('pir', None)
     template_folder = options.get('tf', None)
-    starting_model = options.get('sm', None)
-    ending_model = options.get('em', None)
+    starting_model = int(options.get('sm', 1))
+    ending_model = int(options.get('em', 10))
     ferror = options.get('fe', None)
+    windows = "w" in options
 
     print "Initialize Job queue.."
 
@@ -115,7 +122,7 @@ if __name__ == '__main__':
                          template_folder=template_folder,
                          starting_model=starting_model,
                          ending_model=ending_model,
-                         ferror=ferror)
+                         ferror=ferror,show_output=windows)
     
     master.calculateResult()
 
