@@ -473,7 +473,12 @@ def singleAA(seq, xtable=None, nonstandard=True ):
     @rtype: [str]
     """
     result = []             # will hold 1-letter list
-    table = resDic if nonstandard else resDicStandard
+
+    table = resDicStandard
+    if nonstandard: table = resDic
+
+## Python2.5    
+##     table = resDic if nonstandard else resDicStandard
     if xtable:
         table = copy.copy( table )
         table.update( xtable )
