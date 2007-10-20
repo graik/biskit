@@ -25,6 +25,7 @@ Parse and organize commandline options into a dictionary.
 import sys
 import Biskit.tools as T
 import Biskit as B
+import Biskit.mathUtils as M
 
 class CommandlineError( B.BiskitError ):
     pass
@@ -34,62 +35,75 @@ class Commandline(dict):
     Parse and organize commandline options into a dictionary. Command line
     arguments are recognized by a leading '-'. The following patterns are
     supported:
-    
-        - -arg value    ... a single value assigned to argument 'arg'
 
-        - -arg v1 v2    ... a list of values assigned to 'arg'
+        * -arg value    ... a single value assigned to argument 'arg'
 
-        - -arg -nextarg ... 'arg' is either True (given) or False (not given)
+        * -arg v1 v2    ... a list of values assigned to 'arg'
+
+        * -arg -nextarg ... 'arg' is either True (given) or False (not given)
 
     The argument '-x' has special meaning and can be used to read arguments
-    from a file (one line per argument, ala 'arg \tvalue').
-    
-    Commandline can be initialized with default values and target types for
+    from a file (one line per argument, ala 'arg \tvalue'). However,
+    arguments given at the commandline will override arguments listed in the
+    -x file.
+
+    Commandline can be initialized with default values and types for
     each argument and, after parsing, Commandline will type-cast default values
     and given arguments into a dictionary representation.
-    
+
+    A short description can be assigned to each argument and will be reported
+    along with the default value by Commandline.reportArguments().
+
+    Use setTest() to define arguments and values for an independent test
+    run of the script -- the test must be self-sufficient and can only
+    rely on data that are checked into biskit/test.
+
     Example:
     ========
-    
+
        Let's assume your program has been called like this::
-       
+
          ~> myprogram.py -cut 11 -sample 12 11 -a 5 -z 11.5 -force
-         
+
        Inside myprogram.py the command line parser could be set up like this::
-    
+
          o = Commandline( a=1, b='in.txt', cut=int, sample=[ float ] )
-         
+
        This tells Commandline that the default values for -a and -b are 1 and
        'in.txt', respectively. It also tells Commandline that any argument -cut
        should be converted to an integer and any argument(s) -sample should
        be converted to a list of floats. Arguments to -a will also be converted
        to int since the default value has this type.
-       
+
        The current command line is then read in like this::
-       
+
          o.parse()
-       
+
        and will result in a dictionary like this::
-       
+
          o
          {'cut':11, 'b':'in.txt', 'sample':[ 12.0, 11.0 ], 'a':5, 
           'z':'11.5', 'force':True }
-        
+
        Note that 'b' is taken unchanged from the default values and the value 
        of 'z' remains a string because Commandline doesn't know anything about
        this kind of argument.
-       
-    Documentation and testing:
-    ==========================
-    
+
+    Special options
+    ===============
+
+    -help  ... list description of arguments
+    -x     ... read arguments and values from file
+    -test  ... prepare test
+
     """
-    
+
     def __init__( self, **kw ):
         self.defaults = {}  #: default values for arguments
         self.types = {}  #: map arguments to target types
         self.docs = {}   #: description of arguments
         self.test = {}   #: set of arguments and values to run a test case
-        
+
         self.__setDefaults( **kw )
 
     def __parseDefault( self, k, v ):
@@ -116,30 +130,30 @@ class Commandline(dict):
             assert len(v) == 2, 'tuple must be (type, defaultvalue)'
             tdefault = v[0]
             vdefault = v[1]
-        
+
         elif type(v) is list:
             r = [ self.__parseDefault( k, x ) for x in v ]
             vdefault = [ x[1] for x in r ]
             tdefault = [ r[0][0] ]
-        
+
         return tdefault, vdefault
-    
+
     def __setDefaults( self, **kw ):
         """Called automatically by __init__"""
-        
+
         for k, v in kw.items():
             t, param = self.__parseDefault( k, v )
 
             self.types[k] = t
 
             if param is None:
-		pass
-	    elif param == [None]:
-		self.defaults[k] = []
-	    else:
+                pass
+            elif param == [None]:
+                self.defaults[k] = []
+            else:
                 self.defaults[k] = param 
 
-    
+
     def setTest( self, **testparam ):
         """Provide arguments for a unittest."""
         self.test = testparam
@@ -151,7 +165,7 @@ class Commandline(dict):
         @type docs  - { str:str }
         """
         self.docs = docs
-    
+
     def weakupdate( self, d ):
         """
         Copy over values from d but don't override existing values
@@ -161,7 +175,7 @@ class Commandline(dict):
         for k, v in d.items():
             if not k in self:
                 self[k] = v
-    
+
     def isvalid( self, k, v ):
         """
         @param k: argument key
@@ -185,14 +199,14 @@ class Commandline(dict):
             return r
 
         return type( v ) is t
-    
+
     def validate( self ):
         """
         Validate all items of this dictionary (call .isvalid on all of them).
-        
+
         Note: If an argument has a list of values, each item is validated
               separately.
-        
+
         @raise CommandLineError, on the first invalid item
         """
         for k, v in self.items():
@@ -204,7 +218,7 @@ class Commandline(dict):
         for k, v in self.items():
             t = self.types.get( k, type(v) )
             try:
-                
+
                 if type(t) is list:
                     t = t[0]
                     if type(v) is not list:
@@ -227,7 +241,7 @@ class Commandline(dict):
         @raise T.ToolsError, if anything goes wrong
         """
         return T.file2dic( f )
-    
+
     def updateFromFile( self, f ):
         """
         Parse 'commandline arguments' from file.
@@ -245,33 +259,24 @@ class Commandline(dict):
         """
         Parse commandline options into dictionary of type 
         C{ {<option> : <value>} }
-        Options are recognised by a leading '-'.
-        
-        Option C{ -x |file_name| } is interpreted as file with additional options.
-        The key value pairs in lst_cmd replace key value pairs in the
-        -x file and in dic_default.
-    
-        @param lst_cmd: list with the command line options::
-                        e.g. ['-pdb', 'in1.pdb', 'in2.pdb', '-o', 'out.dat']
-        @type  lst_cmd: [str]
-    
+
         @return: command dictionary::
-                 ala {'pdb':['in1.pdb', 'in2.pdb'], 'psf':'in.psf', 'o':'out.dat'}
+                 ala {'pdb':['in1.pdb', 'in2.pdb'], 'psf':'in.psf'}
         @rtype: {<option> : <value>}
         """
         argv = argv[1:]
         try:
-    
+
             for cmd in argv:
                 if (cmd[0] == '-'):            # this entry is new option
                     current_option = cmd[1:]    # take all but leading "-"
                     self[current_option] = True # default argument w/o value
                     counter = 0        # number of values for this option
                 else:                  # this entry is value for latest option
-    
+
                     if counter < 1:
                         self[current_option] = cmd
-    
+
         # in case, several values follow after a "-xxx" option convert dict
         # entry into list and add all elements (until the next "-") to it
                     else:
@@ -280,18 +285,18 @@ class Commandline(dict):
                             self[current_option] = [ self[current_option] ]
         # add value to list
                         self[current_option] = self[current_option] + [cmd]
-    
+
                     counter = counter + 1
-    
+
         except (KeyError, UnboundLocalError), why:
             raise KeyError, "Can't resolve command line options.\n \tError:"\
                   +str(why)
-    
-    
+
+
     def isEmpty( self ):
         """@return: True if external commandline is empty"""
         return len( sys.argv ) == 1
-        
+
 
     def parse( self, argv=sys.argv ):
         """
@@ -307,9 +312,9 @@ class Commandline(dict):
 
         ## fill in missing default values
         self.weakupdate( self.defaults )
-        
+
         self.__typecast()
-        
+
         self.validate()
 
         self.postprocess()
@@ -321,16 +326,17 @@ class Commandline(dict):
         """
         if 'test' in self:
             self.makeTest()
-        
+
         if 'help' in self or '?' in self:
-            self.reportArguments()
+            print self.reportArguments()
 
 
     REPORT_LAYOUT = '\t-%-10s\t(%s), %s\n'
 
     def reportArguments( self ):
         """Pretty-print arguments, default values and documentation"""
-        keys = self.defaults.keys()
+        keys = M.nonredundant( self.defaults.keys() + self.docs.keys() +\
+                               self.types.keys() )
         keys.sort()
         r = ''
 
@@ -338,13 +344,13 @@ class Commandline(dict):
 
             arg = k
             doc = self.docs.get( k, '' )
-            
-            v = self.defaults[k]
+
+            v = self.defaults.get(k, None)
             if v is None:
                 v = ''
-            
+
             r += self.REPORT_LAYOUT % (arg, v, doc)
-        
+
         return r
 
     def makeTest( self ):
@@ -368,13 +374,13 @@ class Test(BT.BiskitTest):
         sys.argv += s.split()
 
         if self.local:
-            print '\ninput arguments: ', s
+            print '\n\tinput arguments: ', s
 
         self.o = Commandline( cut=int, a=False, i=[1,2], l=[ str ], d=22 )
         self.o.setDocs( cut='cutoff value for input',
-                   a='activate a',
-                   l='input list',
-                   i='starting values')
+                        a='activate a',
+                        l='input list',
+                        i='starting values')
         self.o.setTest( cut=10, a=True, extra='extraoption' )
 
 
@@ -382,9 +388,9 @@ class Test(BT.BiskitTest):
         """Commandline.parse test"""
         self.o.parse()
         o = self.o
-        
+
         if self.local:
-            print '\noutput dictionary: ', self.o
+            print '\n\toutput dictionary: ', self.o
 
         self.assertEqual( o['i'], [0,0] )
         self.assertEqual( o['cut'], 25 )
@@ -394,15 +400,15 @@ class Test(BT.BiskitTest):
         self.assertEqual( o['b'], True )
         self.assertEqual( o['d'], 22 )
         self.assertEqual( o['l'], [] )
-        
-    
+
+
     def test_doc(self):
         """Commandline.reportArguments test"""
         r = self.o.reportArguments()
-        
+
         if self.local:
-            print '\nArgument documentation: \n', r
-        
+            print '\n\tArgument documentation: \n', r
+
         pattern = self.o.REPORT_LAYOUT % ('cut', '', 'cutoff value for input')
         self.assert_( pattern in r )
 
@@ -410,12 +416,12 @@ class Test(BT.BiskitTest):
     def test_test(self):
         """Commandline.makeTest test"""
         import copy
-        
+
         d = copy.copy(sys.argv)
         d.append( '-test' )
         self.o.parse( d )
         o = self.o
-        
+
         if self.local:
             print '\ntest scenario: ', self.o
 
@@ -423,8 +429,8 @@ class Test(BT.BiskitTest):
         self.assertEqual( o['cut'], 10 )
         self.assertEqual( o['a'], True )
         self.assertEqual( o['extra'], 'extraoption' )
-        
+
 
 if __name__ == '__main__':
-    
+
     BT.localTest()
