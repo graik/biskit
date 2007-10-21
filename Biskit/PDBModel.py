@@ -633,14 +633,16 @@ class PDBModel:
         colored by chain. This is obviously not publication-quality ;-). 
         Use the Biskit.Pymoler class for real visalization.
 
-        @param hetatm: include hetero atoms, usually messy, (default False)
+        @param hetatm: include hetero & solvent atoms (default False)
         @type  hetatm: bool
         """
         from Biskit import gnuplot
 
         m = self
         if not hetatm:
-            m = self.compress( N.logical_not( self.maskHetatm() ) )
+            mask = self.maskHetatm()
+            mask = mask + m.maskSolvent()
+            m = self.compress( N.logical_not( mask ) )
         
         chains = [ self.takeChains( [i] ) for i in range( m.lenChains())]
         xy = [ zip( m.xyz[:,0], m.xyz[:,1] ) for m in chains ]
@@ -3526,7 +3528,12 @@ class Test(BT.BiskitTest):
         self.assertEqual(n_cyx, self.m3.atoms['residue_name'].count('CYS'))
         self.assertEqual(n_hix, self.m3.atoms['residue_name'].count('HIS'))
 
-
+    def test_report(self):
+        """PDBModel report&plot test"""
+        self.report_output = self.m.report( prnt=self.local,
+                                plot=(self.local or self.VERBOSITY > 2) )
+ 
+        
     def test_sourceHandling(self):
         """PDBModel source / disconnection tests"""
         self._m = self.m.clone()
