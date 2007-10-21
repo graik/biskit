@@ -468,7 +468,6 @@ class PDBModel:
         self.info = { 'date':T.dateSortString() }
 
         if source <> None:
-
             self.update( skipRes=skipRes, updateMissing=1, force=1 )
 
         if noxyz:
@@ -2021,9 +2020,9 @@ class PDBModel:
         """
         profile2mask( str_profname, [cutoff_min, cutoff_max=None])
 
-        @param cutoff_min: low value cutoff
+        @param cutoff_min: low value cutoff (all values >= cutoff_min)
         @type  cutoff_min: float
-        @param cutoff_max: high value cutoff
+        @param cutoff_max: high value cutoff (all values < cutoff_max)
         @type  cutoff_max: float
 
         @return: mask len( profile(profName) ) x 1||0
@@ -2036,7 +2035,7 @@ class PDBModel:
         cutoff_min = cutoff_min or min( p ) - 1
         cutoff_max = cutoff_max or max( p ) + 1
 
-        return N.greater( p, cutoff_min ) * N.less( p, cutoff_max )
+        return N.greater_equal( p, cutoff_min ) * N.less( p, cutoff_max )
 
 
     def profile2atomMask( self, profName, cutoff_min=None, cutoff_max=None ):
