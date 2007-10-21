@@ -619,16 +619,16 @@ class PDBModel:
                             T.clipStr( repr( self.info.keys() ), 57 ))
 
         if plot:
-            self.gnuplot()
+            self.plot()
 
         if prnt:
             print r
         else:
             return r
         
-    def gnuplot( self, hetatm=False ):
+    def plot( self, hetatm=False ):
         """
-        Get a quick & dirty overview over the content of a PDB. gnuplot
+        Get a quick & dirty overview over the content of a PDBModel. plot
         simply creates a 2-D plot of all x-coordinates versus all y coordinates, 
         colored by chain. This is obviously not publication-quality ;-). 
         Use the Biskit.Pymoler class for real visalization.
