@@ -22,10 +22,12 @@ segment
  
  	SET ECHO=TRUE END     
  
-    coordinates @%(segment_pdb)s         ! load sequence from pdb
+    ! load sequence from pdb
+    coordinates @%(segment_pdb)s
    end
 end
 
 vector do (name="CD1") (name "CD"  and resname "ILE")  { rename ILE CD to CD1 }
 
-coordinates @%(segment_pdb)s              ! load structure
+! load structure
+coordinates @%(segment_pdb)s
