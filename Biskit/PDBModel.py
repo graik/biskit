@@ -2030,12 +2030,9 @@ class PDBModel:
 
         @raise ProfileError: if no profile is found with name profName
         """
-        p = self.profile( profName )
-
-        cutoff_min = cutoff_min or min( p ) - 1
-        cutoff_max = cutoff_max or max( p ) + 1
-
-        return N.greater_equal( p, cutoff_min ) * N.less( p, cutoff_max )
+        if profName in self.atoms:
+            return self.atoms.profile2mask( profName, cutoff_min, cutoff_max)
+        return self.residues.profile2mask( profName, cutoff_min, cutoff_max)
 
 
     def profile2atomMask( self, profName, cutoff_min=None, cutoff_max=None ):
