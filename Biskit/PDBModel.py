@@ -2372,7 +2372,7 @@ class PDBModel:
             if r != -1:
                 return r
 
-        if self.source is None or lookup:
+        if self.source is None and not lookup:
             return 0
 
         return len( self.getXyz() )
