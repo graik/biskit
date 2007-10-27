@@ -30,7 +30,7 @@ import Biskit.mathUtils as M
 class CommandlineError( B.BiskitError ):
     pass
 
-class Commandline(dict):
+class CommandLine(dict):
     """ 
     Parse and organize commandline options into a dictionary. Command line
     arguments are recognized by a leading '-'. The following patterns are
@@ -47,12 +47,12 @@ class Commandline(dict):
     arguments given at the commandline will override arguments listed in the
     -x file.
 
-    Commandline can be initialized with default values and types for
-    each argument and, after parsing, Commandline will type-cast default values
+    CommandLine can be initialized with default values and types for
+    each argument and, after parsing, CommandLine will type-cast default values
     and given arguments into a dictionary representation.
 
     A short description can be assigned to each argument and will be reported
-    along with the default value by Commandline.reportArguments().
+    along with the default value by CommandLine.reportArguments().
 
     Use setTest() to define arguments and values for an independent test
     run of the script -- the test must be self-sufficient and can only
@@ -67,10 +67,10 @@ class Commandline(dict):
 
        Inside myprogram.py the command line parser could be set up like this::
 
-         o = Commandline( a=1, b='in.txt', cut=int, sample=[ float ] )
+         o = CommandLine( a=1, b='in.txt', cut=int, sample=[ float ] )
 
-       This tells Commandline that the default values for -a and -b are 1 and
-       'in.txt', respectively. It also tells Commandline that any argument -cut
+       This tells CommandLine that the default values for -a and -b are 1 and
+       'in.txt', respectively. It also tells CommandLine that any argument -cut
        should be converted to an integer and any argument(s) -sample should
        be converted to a list of floats. Arguments to -a will also be converted
        to int since the default value has this type.
@@ -86,7 +86,7 @@ class Commandline(dict):
           'z':'11.5', 'force':True }
 
        Note that 'b' is taken unchanged from the default values and the value 
-       of 'z' remains a string because Commandline doesn't know anything about
+       of 'z' remains a string because CommandLine doesn't know anything about
        this kind of argument.
 
     Special options
@@ -102,7 +102,10 @@ class Commandline(dict):
         self.defaults = {}  #: default values for arguments
         self.types = {}  #: map arguments to target types
         self.docs = {}   #: description of arguments
+	self.description = '' #: description of program itself
         self.test = {}   #: set of arguments and values to run a test case
+	self.program = '' #: will receive name of the program
+	self.required = [] #: list of required arguments (show help screen)
 
         self.__setDefaults( **kw )
 
@@ -160,11 +163,21 @@ class Commandline(dict):
 
     def setDocs( self, **docs ):
         """
-        Provide a short description of command line arguments.
+        Provide a short description of each command line argument.
         @param docs - key=value pairs (argument='description')
         @type docs  - { str:str }
         """
         self.docs = docs
+	self.docs.update( test='perform self-test', help='display help screen')
+
+    def setDescription( self, s ):
+	"""
+	Provide the first part of the help screen, printed before the
+	listing of argument descriptions.
+	@param s: description
+	@type s : str
+	"""
+	self.description = s
 
     def weakupdate( self, d ):
         """
@@ -231,7 +244,7 @@ class Commandline(dict):
                 raise CommandLineError("argument %r (%r) doesn't fit %r"\
                                        % (k, v, t) )
             except TypeError, error:
-                raise CommandlineError("argument %r (%r) doesn't fit %r"\
+                raise CommandLineError("argument %r (%r) doesn't fit %r"\
                                        % (k, v, t) )
 
     def __file2dic( self, f ):
@@ -264,6 +277,7 @@ class Commandline(dict):
                  ala {'pdb':['in1.pdb', 'in2.pdb'], 'psf':'in.psf'}
         @rtype: {<option> : <value>}
         """
+	self.program = argv[0]
         argv = argv[1:]
         try:
 
@@ -320,21 +334,27 @@ class Commandline(dict):
         self.postprocess()
 
 
-    def postprocess( self ):
+    def postprocess( self, helpexit=True ):
         """
-        Respond to special options
+        Respond to special options or missing arguments
         """
         if 'test' in self:
             self.makeTest()
 
-        if 'help' in self or '?' in self:
-            print self.reportArguments()
+        if 'help' in self or self.missingArguments():
+            print self.report()
+	    if helpexit:
+		sys.exit()
+
 
 
     REPORT_LAYOUT = '\t-%-10s\t(%s), %s\n'
 
     def reportArguments( self ):
-        """Pretty-print arguments, default values and documentation"""
+        """Pretty-print arguments, default values and documentation
+	@return: formatted string ready for print
+	@rtype: str
+	"""
         keys = M.nonredundant( self.defaults.keys() + self.docs.keys() +\
                                self.types.keys() )
         keys.sort()
@@ -352,6 +372,29 @@ class Commandline(dict):
             r += self.REPORT_LAYOUT % (arg, v, doc)
 
         return r
+
+    def missingArguments( self ):
+	return [ a for a in self.required if not a in self ]
+
+    def reportRequires( self ):
+	"""
+	@return:  list of required arguments
+	@rtype: str
+	"""
+	r = ''
+	if self.required:
+	    r = 'Required arguments: ' + str( self.required )
+
+	if self.missingArguments():
+	    r += '(missing: %r)' % self.missingArguments()
+
+	return r
+
+    def report( self ):
+	return self.program +'\n' + \
+	       self.description + '\n' + \
+	       self.reportArguments() +'\n' + \
+	       self.reportRequired()
 
     def makeTest( self ):
         self.clear()
@@ -376,7 +419,8 @@ class Test(BT.BiskitTest):
         if self.local:
             print '\n\tinput arguments: ', s
 
-        self.o = Commandline( cut=int, a=False, i=[1,2], l=[ str ], d=22 )
+        self.o = CommandLine( cut=int, a=False, i=[1,2], l=[ str ], d=22,
+			      odd=float )
         self.o.setDocs( cut='cutoff value for input',
                         a='activate a',
                         l='input list',
@@ -385,7 +429,7 @@ class Test(BT.BiskitTest):
 
 
     def test_parsing(self):
-        """Commandline.parse test"""
+        """CommandLine.parse test"""
         self.o.parse()
         o = self.o
 
@@ -403,7 +447,7 @@ class Test(BT.BiskitTest):
 
 
     def test_doc(self):
-        """Commandline.reportArguments test"""
+        """CommandLine.reportArguments test"""
         r = self.o.reportArguments()
 
         if self.local:
@@ -414,7 +458,7 @@ class Test(BT.BiskitTest):
 
 
     def test_test(self):
-        """Commandline.makeTest test"""
+        """CommandLine.makeTest test"""
         import copy
 
         d = copy.copy(sys.argv)
