@@ -86,8 +86,9 @@ Usage
 
 Note:
         - If TAG is not given, the test will have the default NORMAL tag.
-        - Names of test functions **must** start with C{test}.
+        - Names of test functions **must** start with C{test_}.
         - The doc string of test_* will be reported as id of this test.
+	- this module also acts as the script to collect and run the tests
 '''
 
 import unittest as U
@@ -104,6 +105,7 @@ LONG   = 1  ## long running test case
 PVM    = 2  ## depends on PVM
 EXE    = 3  ## depends on external application
 OLD    = 5  ## is obsolete
+SCRIPT = 6  ## a script test case
 
 class BiskitTestError( Exception ):
     pass
@@ -228,7 +230,7 @@ class Flushing_TextTestResult( U._TextTestResult ):
     Helper class for (Flushing)TextTestRunner.
     Customize _TextTestResult so that the reported test id is flushed
     B{before} the test starts. Otherwise the 'sometest.id ...' is only
-    printed together with the '...ok' after the test is finished.
+    printed together with the '...ok' after the test has finished.
     """
 
     def startTest(self, test):
