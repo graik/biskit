@@ -26,6 +26,7 @@ import sys
 import Biskit.tools as T
 import Biskit as B
 import Biskit.mathUtils as M
+import Biskit.test as BT
 
 class CommandlineError( B.BiskitError ):
     pass
@@ -104,10 +105,14 @@ class CommandLine(dict):
         self.docs = {}   #: description of arguments
 	self.description = '' #: description of program itself
         self.test = {}   #: set of arguments and values to run a test case
+	self.test_cleanup = [] #: files to remove after test
+	self.test_ok = None #: func returns test success
+	self.test_tags = ['script'] #: tags classifying the test case
 	self.program = '' #: will receive name of the program
 	self.required = [] #: list of required arguments (show help screen)
 
         self.__setDefaults( **kw )
+
 
     def __parseDefault( self, k, v ):
         """A default value can be a value, a type, or a list thereof.
@@ -156,10 +161,27 @@ class CommandLine(dict):
             else:
                 self.defaults[k] = param 
 
-
-    def setTest( self, **testparam ):
-        """Provide arguments for a unittest."""
+    def setTest( self, fsuccess=None, tags=[ BT.SCRIPT ], **testparam ):
+        """Provide arguments for a unittest.
+	@param fsuccess: function to test for test success (-> True)
+	@type  fsuccess: func
+	@param tags: tags to associate with this test case ([ SCRIPT ])
+	             Note: the tags are defined in Biskit.test
+	@type  tags: [ int ]
+	
+	The remaining arg=value pairs are interpreted as test arguments
+	"""
         self.test = testparam
+	self.test_ok = fsuccess
+	self.test_tags = tags
+
+    def setTestCleanup( self, cleanuplist ):
+	"""
+	@param cleanup: list of files to remove after a test
+	@type  cleanup: [ str ]
+	"""
+	self.test_cleanup = cleanuplist
+	
 
     def setDocs( self, **docs ):
         """
@@ -168,7 +190,8 @@ class CommandLine(dict):
         @type docs  - { str:str }
         """
         self.docs = docs
-	self.docs.update( test='perform self-test', help='display help screen')
+	self.docs.update( test='perform self-test', help='display help screen',
+			  x='get extra options from this file' )
 
     def setDescription( self, s ):
 	"""
@@ -178,6 +201,15 @@ class CommandLine(dict):
 	@type s : str
 	"""
 	self.description = s
+
+    def setRequired( self, l ):
+	"""
+	CommandLine will display the help screen if a required argument is
+	missing.
+	@param l: list of required arguments
+	@type l: [ str ]
+	"""
+	self.required = l
 
     def weakupdate( self, d ):
         """
@@ -336,7 +368,11 @@ class CommandLine(dict):
 
     def postprocess( self, helpexit=True ):
         """
-        Respond to special options or missing arguments
+        Respond to special options or missing arguments:
+	* test -- replace dictionary content by test setup
+	* help -- display help screen
+	@param helpexit: exit program after help screen display (True)
+	@type helpexit: bool
         """
         if 'test' in self:
             self.makeTest()
@@ -344,11 +380,10 @@ class CommandLine(dict):
         if 'help' in self or self.missingArguments():
             print self.report()
 	    if helpexit:
-		sys.exit()
+		sys.exit(0)
 
 
-
-    REPORT_LAYOUT = '\t-%-10s\t(%s), %s\n'
+    REPORT_LAYOUT = '  -%-8s%-15s\t%s\n'
 
     def reportArguments( self ):
         """Pretty-print arguments, default values and documentation
@@ -368,40 +403,73 @@ class CommandLine(dict):
             v = self.defaults.get(k, None)
             if v is None:
                 v = ''
+	    else:
+		v = '['+str(v)+']'
 
             r += self.REPORT_LAYOUT % (arg, v, doc)
 
         return r
 
     def missingArguments( self ):
+	"""
+	@return: required arguments that have not been specified
+	@rtype: [ str ]
+	"""
 	return [ a for a in self.required if not a in self ]
 
-    def reportRequires( self ):
+    def reportRequired( self ):
 	"""
-	@return:  list of required arguments
+	@return: pretty-formatted list of required (and missing) arguments
 	@rtype: str
 	"""
 	r = ''
 	if self.required:
-	    r = 'Required arguments: ' + str( self.required )
+	    r = 'Required arguments: '
+	    for a in self.required:
+		r += ' -%s ' %  a
 
 	if self.missingArguments():
-	    r += '(missing: %r)' % self.missingArguments()
+	    r += '\nMissing arguments : '
+	    for a in self.missingArguments():
+		r += ' -%s ' % a
 
 	return r
 
     def report( self ):
+	"""
+	@return: formatted string with program name, description,
+	         argument documentation, list of required arguments
+        @rtype: str
+	"""
 	return self.program +'\n' + \
 	       self.description + '\n' + \
 	       self.reportArguments() +'\n' + \
-	       self.reportRequired()
+	       self.reportRequired() + '\n'
 
     def makeTest( self ):
+	"""
+	Put test arguments into the CommandLine record.
+	"""
         self.clear()
         self.weakupdate( self.defaults )
         self.__typecast()
         self.validate()
         self.update( self.test )
+	self['test'] = True
+
+    def testCleanup( self, tree=True ):
+	"""
+	Remove files marked as 'cleanup' by setTest(). 
+	@param tree: try also removing directories
+	@type tree: bool
+	"""
+	for f in self.test_cleanup:
+	    T.tryRemove( f, tree=tree )
+
+    def testSuccess( self ):
+	if not self.test_ok:
+	    return True
+	return self.test_ok()
 
 #############
 ##  TESTING        

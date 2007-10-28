@@ -77,6 +77,7 @@ try:
     
     from ModelList import ModelList
     from Ramachandran import Ramachandran
+    from CommandLine import CommandLine
 
 ## PVM-dependent modules
 
