@@ -31,7 +31,7 @@ def _use( o ):
 Syntax: 1pdb2model.py -i |file1| [-o |outfile| -psf |psf_file| -wat -amber
                       -pdb |PDBCode| ]
 
-Result: self-sufficient pickled PDBModel or PCRModel, with itself as source
+Result: stand-alone pickled PDBModel or PCRModel
         
 Options:
     -i      input PDB or pickled PDBModel
