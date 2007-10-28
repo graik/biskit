@@ -821,7 +821,7 @@ class ProfileCollection:
         cutoff_min = cutoff_min or min( p ) - 1
         cutoff_max = cutoff_max or max( p ) + 1
 
-        return N.greater( p, cutoff_min ) * N.less( p, cutoff_max )
+        return N.greater_equal( p, cutoff_min ) * N.less( p, cutoff_max )
 
 
     def take( self, indices, *initArgs, **initKw ):
