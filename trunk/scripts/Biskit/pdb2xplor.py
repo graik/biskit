@@ -290,7 +290,9 @@ def _defaultOptions():
         'o':'.',
         't':projectRoot()+'/external/xplor/templates/param19',
         'c':'0',
-        'thickness':'9'}
+        'thickness':'9',
+	'pw_dist':'3.5',
+	'water_diam':'2.4'}
 
 def _use(options):
     print """
