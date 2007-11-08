@@ -97,8 +97,8 @@ vector do (name="2HE2")(name "HE22" and resname "GLN")
 
 eval ($boxlength = 18.856)   ! length of Brooks' water box
 eval ($thickness = %(thickness)s)        ! maxi. initial water-protein distance (heavy atoms)
-eval ($pw_dist = 3.5)        ! mini. initial water-protein distance (heavy atoms)
-eval ($water_diam = 2.4)     ! diameter of water molecule
+eval ($pw_dist = %(pw_dist)s)        ! mini. initial water-protein distance (heavy atoms)
+eval ($water_diam = %(water_diam)s )     ! diameter of water molecule
 eval ($dyncount = 1)         ! iteration number (usually 1)
 
 !--------------------------------------------------
