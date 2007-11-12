@@ -124,7 +124,10 @@ class CommandLine(dict):
         @rtype: (type, any)
         """
 
-        tdefault = type(v) if v is not None else str #: default type
+        tdefault = str #: default type
+        if v is not None:
+            tdefault = type(v)
+            
         vdefault = v       #: default default value
 
         if type(v) is type:
