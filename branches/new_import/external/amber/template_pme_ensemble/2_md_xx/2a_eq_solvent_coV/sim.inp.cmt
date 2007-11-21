@@ -1,0 +1,77 @@
+10ps constant volume MD heating up solvent
+ &cntrl
+# seed random number
+  ig     = %(rand_seed)i,
+# start md from coord. only
+  ntx    = 1,       irest  = 0,
+
+# for big systems
+  lastist= 3000000,
+  lastrst= 3000000,
+
+# frequency of report to: out, restart file, crd, vel
+  ntpr   = 50,
+  ntwr=5000, ntwx=500, ntwv=500,
+
+# periodic, cutoff for "direct search space" in PME
+  ntb    = 1,
+  cut    = 9.0,
+
+# restraints, varying values
+  ntr    = 1,
+  nmropt = 1,
+
+# dynamics
+  imin   = 0,
+  nstlim = 10000,
+       
+# time step, calc. slowly varying forces every 2 steps only
+  dt     = 0.001,   nrespa = 2,
+
+# Shake on
+  ntc    = 2,       tol    = 0.00001,
+# don't calculate H-bond energies
+  ntf    = 2,
+
+# temperature, Behrendsen thermostat
+  temp0  = 300.0,   tempi  = 100.0,
+  ntt    = 1,
+
+# re-assign temperature, remove translation/rotation
+  vrand  = 1000,    nscm   = 1010,
+
+# constant volume
+  ntb    = 1,
+
+# constant pressure periodic, isotropic box scaling, tight coupling
+# for solute and solvent (tauts)
+#  ntb    = 2,
+#  ntp    = 1,
+#  tautp  = 0.2,
+
+# Restrain solute (protein)
+  restraint_wt=50.0,
+  restraintmask=' :1-%(lenres)i',
+
+ &end
+
+# Temperature ramp
+ &wt
+   type='TEMP0', istep1=0,     istep2=1000,
+                 value1=100.0, value2=100.0,
+ &end
+ &wt
+   type='TEMP0', istep1=1001,   istep2=9000,
+                 value1=100.0,  value2=300.0,
+ &end
+ &wt
+   type='TEMP0', istep1=9001,  istep2=10000,
+                 value1=300.0, value2=300.0,
+ &end
+ &wt
+   type='END',
+ &end
+ &rst
+   iat=0,
+ &end
+
