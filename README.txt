@@ -21,12 +21,30 @@ and Hmmer; interfaces to further software can be added
 easily. Moreover, Biskit simplifies the parallelisation of
 calculations via PVM (Parallel Virtual Machine).
 
-In this document:  * Release 2.1.0-beta
+In this document:  * Release 2.1.1
+		   * Release 2.1.0-beta
 		   * Release 2.0.1
 		   * Release 2.0.0
 		   * Installation
 		   * License
 		   * Open issues
+
+Release 2.1.1
+-------------
+
+Release 2.1.1 adds many bug fixes but only a few new features to the
+previous beta release:
+
+* switch from CVS to SVN version control
+
+* PDBModel: new report() and plot() function to get a fast overview
+  over the content of a PDB
+
+* new CommandLine.py will soon replace the old tools.cmdDict command
+  line option parsing for scripts; with type-casting and test fixture
+  built in
+
+...
 
 Release 2.1.0-beta
 ------------------
