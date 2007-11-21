@@ -27,7 +27,7 @@
 Create structures with reduced number of atoms.
 """
 
-from PDBModel import PDBModel
+from pdbModel import PDBModel
 from DictList import DictList
 import numpy.oldnumeric as N
 import tools as T

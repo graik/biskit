@@ -28,7 +28,7 @@ import sys
 import numpy.oldnumeric as N
 
 import Biskit.tools as T
-from Biskit.PDBModel import PDBModel
+from Biskit.pdbModel import PDBModel
 from Biskit.PDBDope import PDBDope
 
 import Biskit.LocalPath

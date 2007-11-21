@@ -28,7 +28,7 @@
 Convert a PDB file to a pickled PDBModel object.
 """
     
-from PDBModel import PDBModel
+from pdbModel import PDBModel
 import tools as T
 
 ## PVM imports

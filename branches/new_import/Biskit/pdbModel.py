@@ -3568,9 +3568,7 @@ class Test(BT.BiskitTest):
         self._m2.disconnect()
         self._m2.slim()
         self.assert_( self._m2.atoms.profiles['name'] is not None )
-
-
-
+        
 
 def clock( s, ns=globals() ):
     import cProfile

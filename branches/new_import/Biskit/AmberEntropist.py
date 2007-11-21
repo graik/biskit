@@ -38,7 +38,7 @@ import Biskit.mathUtils as MU
 from Biskit.Errors import BiskitError
 from Biskit.AmberCrdEntropist import AmberCrdEntropist, EntropistError
 from Biskit.AmberParmBuilder import AmberParmBuilder
-from Biskit.PDBModel import PDBModel
+from Biskit.pdbModel import PDBModel
 from Biskit.Trajectory import Trajectory
 from Biskit.EnsembleTraj import EnsembleTraj
 from Biskit.LocalPath import LocalPath

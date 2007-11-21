@@ -31,7 +31,7 @@ import numpy.oldnumeric as N
 import os.path
 
 from AmberCrdParser import ParseError
-from PDBModel import PDBModel
+from pdbModel import PDBModel
 import tools as T
 
 class AmberRstParser:

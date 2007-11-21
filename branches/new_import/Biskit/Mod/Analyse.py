@@ -30,7 +30,7 @@ Analyze model quality
 """
 
 import Biskit.tools as T
-from Biskit.PDBModel import PDBModel
+from Biskit.pdbModel import PDBModel
 from Biskit.Mod.Benchmark import Benchmark
 from Biskit.Mod.ValidationSetup import ValidationSetup as VS
 from Biskit.Mod.CheckIdentities import CheckIdentities as CI

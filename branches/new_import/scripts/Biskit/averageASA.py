@@ -30,7 +30,7 @@ from Biskit import tools as T
 import os, os.path
 import numpy.oldnumeric as N
 from Biskit.PDBDope import PDBDope
-from Biskit.PDBModel import PDBModel
+from Biskit.pdbModel import PDBModel
 import time, sys
 import glob
 import subprocess

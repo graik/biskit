@@ -53,7 +53,7 @@ try:
     from LocalPath import LocalPath, LocalPathError
 
     from PCRModel import PCRModel
-    from PDBModel import PDBModel, PDBProfiles, PDBError
+    from pdbModel import PDBModel, PDBProfiles, PDBError
 
     from ProfileCollection import ProfileCollection, ProfileError
     from ProfileMirror import ProfileMirror

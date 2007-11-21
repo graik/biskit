@@ -30,7 +30,7 @@ Clean PDB-files so that they can be used for MD.
 
 import Biskit.molUtils as MU
 import Biskit.tools as t
-from Biskit.PDBModel import PDBModel
+from Biskit.pdbModel import PDBModel
 
 import numpy.oldnumeric as N
 

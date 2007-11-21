@@ -25,7 +25,7 @@ Display Structures with Pymol
 """
 
 
-from PDBModel import PDBModel
+from pdbModel import PDBModel
 import tools as T
 import os
 import tempfile

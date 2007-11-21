@@ -32,7 +32,7 @@ import sys
 
 import tools as T
 from Trajectory import Trajectory
-from PDBModel import PDBModel
+from pdbModel import PDBModel
 from LogFile import StdLog
 
 def _use():

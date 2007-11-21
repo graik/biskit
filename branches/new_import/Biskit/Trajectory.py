@@ -36,7 +36,7 @@ import tools as T
 import mathUtils as MU
 from Biskit.Errors import BiskitError
 from Biskit import EHandler
-from PDBModel import PDBModel, PDBError
+from pdbModel import PDBModel, PDBError
 from ProfileCollection import ProfileCollection
 
 import string

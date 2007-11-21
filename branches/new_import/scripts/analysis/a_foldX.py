@@ -26,7 +26,7 @@
 ## $Revision$
 
 from Biskit.tools import *
-from Biskit.PDBModel import PDBModel
+from Biskit.pdbModel import PDBModel
 import os
 
 import Biskit.hist

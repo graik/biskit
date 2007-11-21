@@ -29,7 +29,7 @@ Modeling benchmark
 """
 
 import os
-from Biskit.PDBModel import PDBModel
+from Biskit.pdbModel import PDBModel
 from Biskit.ModelList import ModelList
 from Biskit.IcmCad import IcmCad as CAD
 

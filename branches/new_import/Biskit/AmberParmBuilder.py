@@ -34,7 +34,7 @@ import Biskit.tools as t
 import Biskit.settings as s
 import Biskit.mathUtils as MU
 from Biskit.LogFile import LogFile, StdLog
-from Biskit.PDBModel import PDBModel
+from Biskit.pdbModel import PDBModel
 from Biskit.Errors import BiskitError
 from Biskit.PDBCleaner import PDBCleaner
 from Biskit import Executor

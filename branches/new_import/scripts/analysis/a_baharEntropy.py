@@ -33,7 +33,7 @@
 
 from tools import *
 from mathUtils import *
-from PDBModel import *
+from pdbModel import *
 import molUtils as MU
 
 from Numeric import *

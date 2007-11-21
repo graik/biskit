@@ -27,7 +27,7 @@ Setup directory structure for the validation.
 """
 
 import Biskit.tools as T
-from Biskit.PDBModel import PDBModel
+from Biskit.pdbModel import PDBModel
 import re
 import glob
 import copy

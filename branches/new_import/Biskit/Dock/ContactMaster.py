@@ -35,7 +35,7 @@ import Biskit.tools as t
 import Biskit.mathUtils as MU
 import Biskit.settings as settings
 from Biskit.PDBDope import PDBDope
-from Biskit.PDBModel import PDBProfiles
+from Biskit.pdbModel import PDBProfiles
 from Biskit.Errors import BiskitError
 from Biskit.LogFile import StdLog
 from Biskit import EHandler

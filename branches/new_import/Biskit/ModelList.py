@@ -26,7 +26,7 @@
 organise, sort, and filter list of PDBModels
 """
 from DictList import DictList
-from PDBModel import PDBModel
+from pdbModel import PDBModel
 import Biskit.tools as T
 
 class ModelList( DictList ):
