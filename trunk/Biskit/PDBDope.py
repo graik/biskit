@@ -147,7 +147,11 @@ class PDBDope:
 
     def addConservation( self, pfamEntries=None, verbose=0, log=None):
         """
-        Adds a conservation profile. See L{Biskit.Hmmer}
+        Adds a conservation score profile from pFam HMMs. See L{Biskit.Hmmer}
+	The theoretically most useful one is 'cons_ent' which gives the relative
+	entropy of the residue distribution with respect to the background 
+	distribution of amino acids (Kullback-Leibler distance) in swissprot.
+	See PMID 16916457.
         
         @param pfamEntries: External hmmSearch result, list of
                             (non-overlapping) profile hits.
@@ -192,8 +196,9 @@ class PDBDope:
         p,  hmmHits = h.scoreEntropy( m, hmmNames=hmmHits )
 
         self.m.residues.set( 'cons_ent', p, hmmHits=hmmHits, mask=resmask,
-              comment="entropy of emmission probabilities per position "+
-                              "(high -> high conservation/discrimination)",
+              comment="relative entropy (Kullback-Leibler distance) between "\
+	      +"observed and background amino acid distribution "\
+	      +"(high -> high conservation/discrimination)",
               version= T.dateString() + ' ' + self.version() )
 
 
