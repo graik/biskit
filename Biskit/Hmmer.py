@@ -302,8 +302,6 @@ class HmmerProfile( Executor ):
         ent = [ N.resize( self.entropy(e, nullProb), (1,20) )[0] for e in emmProb ]
         profileDic['ent'] = N.array(ent)
 
-        profileDic['ent'] = N.array(ent)
-
         ###### TEST #####
 
         proba = N.array(prob)[:,1:]
@@ -351,14 +349,19 @@ class HmmerProfile( Executor ):
         nullProb = N.power( 2, N.array( nullEmm )/1000.0 )*(1./20)
 
         ## Emmission probabilities: prob = nullProb 2 ^ (nullEmm / 1000)
-        emmProb = nullProb * N.power( 2, ( emmScore/1000.0) )
+	## see http://www.ebc.ee/WWW/hmmer2-html/node26.html
+	emmProb = nullProb * N.power( 2, ( emmScore/1000.0) )
 
         return emmProb, nullProb
 
 
     def entropy( self, emmProb, nullProb ):
-        """
-        calculate entropy for normalized probabilities scaled by aa freq.
+	""" 
+	Calculate the Kullback-Leibler distance between the observed and the
+	background amino acid distribution at a given position. High values mean
+	high conservation. Empty (all 0) emmission probabilities yield score 0.
+	See also:BMC Bioinformatics. 2006; 7: 385
+	
         emmProb & nullProb is shape 1,len(alphabet)
 
         @param emmProb: emmission probabilities
@@ -366,11 +369,12 @@ class HmmerProfile( Executor ):
         @param nullProb: null probabilities
         @type  nullProb: array
 
-        @return: entropy value
+        @return: relative entropy score
         @rtype:  float
         """
-        ## remove zeros to avoid log error
-        emmProb = N.clip(emmProb, 1.e-10, 1.)
+        ## avoid log error
+	if N.sum( emmProb ) == 0.:
+	    return 0.
 
         return N.sum( emmProb * N.log(emmProb/nullProb) )
 
@@ -889,9 +893,9 @@ class Hmmer:
             ## get profile for model
             searchResult, searchHits = self.searchHmmdb( model )
             hmmNames = self.selectMatches( searchResult, searchHits )
-        else:
-            searchResult = self.searchHmmdb( model, noSearch=1 )
-            hmmNames = hmmNames
+        #else:
+            #searchResult = self.searchHmmdb( model, noSearch=1 )
+            #hmmNames = hmmNames
 
         ## retrieve hmm model(s)
         result = None
@@ -1055,6 +1059,8 @@ class Test(BT.BiskitTest):
 if __name__ == '__main__':
 
     BT.localTest()
+    
+    
 
 
 
