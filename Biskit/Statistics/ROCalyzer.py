@@ -203,7 +203,53 @@ class ROCalyzer( object ):
 
 	## probability that the score hits just at random
 	return 1.0 - p
-	
+
+class ROCThreshold(object):
+
+    def __init__( self, target ):
+        """
+        @param target: the target profile to be predicted by a score
+        @type  target: [ float ]
+        """
+        self.target = target
+
+    def target2mask( self, n=1 ):
+        """
+        Select n highest points from target profile as True Positives.
+        @param n: number of true positives to be selected
+        @type  n: int
+        """
+        order = N.argsort( self.target ).tolist()
+        order.reverse()
+
+        r = N.zeros( len(self.target), int )
+        N.put( r, order[:n], 1 )
+        return r
+
+    def threshold_curve( self, score, n_samples=1000 ):
+        """
+        @param target: the target profile to be predicted
+        @type  target: [ float ]
+        @param score: the score predicted for each item
+        @type  score: [ float ]
+        """
+        if n_samples >= len( self.target ):
+            n_samples = len( self.target )
+
+        t_min = min(self.target)
+        t_max = max(self.target)
+        step  = (t_max - t_min) * 1. / n_samples
+        
+        t_range = N.arange( t_min, t_max, step )
+
+        r = []
+        for i in t_range:
+            n = N.sum( N.greater( self.target, i ) )
+            roc = ROCalyzer( self.target2mask( n ) )
+            r += [roc.rocarea( score )]
+
+        return t_range, r
+
     
 #############
 ##  TESTING        
@@ -259,6 +305,22 @@ class Test(BT.BiskitTest):
 	self.perfect = zip( perfect_x, perfect_y )
 	
 	self.assertEqual( a.area( self.perfect ), 0.5 )
+
+    def test_threshold(self):
+        """Statistics.ROCThreshold test"""
+	from Biskit.gnuplot import plot
+
+        target = 1./ N.array( self.cl.valuesOf('rms') )
+
+        rt = ROCThreshold( target )
+        positives = rt.target2mask( N.sum( self.hits ) )
+
+        self.target_range,self.rocarea = rt.threshold_curve( self.score )
+
+        if self.local:
+            plot( zip(1./self.target_range,self.rocarea) )
+
+        self.assert_( max(self.rocarea) > 0.4 )
 
 	
 if __name__ == '__main__':
