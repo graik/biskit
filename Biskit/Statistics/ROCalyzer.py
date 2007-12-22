@@ -26,6 +26,9 @@ import copy, random
 
 import lognormal as L
 
+class ROCError( Exception ):
+    pass
+
 class ROCalyzer( object ):
     """
     Generate and analyze ROC (reciever operating characteristic) curves
@@ -86,6 +89,8 @@ class ROCalyzer( object ):
     def roccurve( self, score, ref=None ):
 	"""
 	Calculate the ROC curve of the given score.
+        @todo: doesn't handle target containing only true positives or
+        only true negatives
 	
 	@param score: sequence of score values for target sequence
 	@type  score: [ int ] or [ float ]
@@ -97,10 +102,14 @@ class ROCalyzer( object ):
 	if ref is None:
 	    ref = self.positives
 
+        if N.sum( ref ) == len( ref ) or N.sum(ref) == 0:
+            raise ROCError,\
+                  'Cannot compute Roc curves for all positive or all '+\
+                  'negative target'
 	order = N.argsort( score ).tolist()
 	order.reverse()
 
-	score = N.take( score, order )
+## 	score = N.take( score, order )
 	ref = N.take( ref, order )
 
 	#: number of true positives identified with decreasing score
@@ -134,9 +143,9 @@ class ROCalyzer( object ):
 	c = N.array( curve )
 	assert len( N.shape( c ) ) == 2
 
-	## apply boundaries
+	## apply boundaries  ## here we have a problem with flat curves
 	mask = N.greater_equal( c[:,1], start )
-	mask *= N.less( c[:,1], stop )
+	mask *= N.less_equal( c[:,1], stop )
 	c = N.compress( mask, c, axis=0 )
 
 	## fill to boundaries -- not absolutely accurate: we actually should
@@ -226,29 +235,29 @@ class ROCThreshold(object):
         N.put( r, order[:n], 1 )
         return r
 
-    def threshold_curve( self, score, n_samples=1000 ):
+    def threshold_curve( self, score ):
         """
         @param target: the target profile to be predicted
         @type  target: [ float ]
         @param score: the score predicted for each item
         @type  score: [ float ]
         """
-        if n_samples >= len( self.target ):
-            n_samples = len( self.target )
-
-        t_min = min(self.target)
-        t_max = max(self.target)
-        step  = (t_max - t_min) * 1. / n_samples
+        import Biskit.tools as T
+        ## order from highest to lowest
+        ordered = N.take( self.target, N.argsort( self.target ) )
+        ordered = ordered[::-1]
         
-        t_range = N.arange( t_min, t_max, step )
+        r = N.zeros( (len(self.target), 2) )
+        r[:,0] = ordered
+        
+        for n in range(len(self.target)-1):
+            roc = ROCalyzer( self.target2mask( n+1 ) )
 
-        r = []
-        for i in t_range:
-            n = N.sum( N.greater( self.target, i ) )
-            roc = ROCalyzer( self.target2mask( n ) )
-            r += [roc.rocarea( score )]
+            r[n,0] = ordered[n]
+            r[n,1] = roc.rocarea( score )
 
-        return t_range, r
+        return r
+
 
     
 #############
@@ -315,12 +324,12 @@ class Test(BT.BiskitTest):
         rt = ROCThreshold( target )
         positives = rt.target2mask( N.sum( self.hits ) )
 
-        self.target_range,self.rocarea = rt.threshold_curve( self.score )
+        self.t_curve = rt.threshold_curve( self.score )
 
         if self.local:
-            plot( zip(1./self.target_range,self.rocarea) )
+            plot( self.t_curve )
 
-        self.assert_( max(self.rocarea) > 0.4 )
+        self.assert_( max(self.t_curve[:,1]) > 0.4 )
 
 	
 if __name__ == '__main__':
