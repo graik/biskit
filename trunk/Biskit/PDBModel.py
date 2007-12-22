@@ -2247,7 +2247,7 @@ class PDBModel:
         @return: PDBModel with given residues in given order
         @rtype: PDBModel / subclass
         """
-        return self.take( self.res2atomIndices( i_res ) )
+        return self.take( self.res2atomIndices( i ) )
 
 
     def takeChains( self, chains, breaks=0 ):
