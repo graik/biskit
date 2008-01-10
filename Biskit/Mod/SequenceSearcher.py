@@ -702,9 +702,9 @@ class SequenceSearcher:
         @type  ncpu: int  
         """
         iter = 1
-        while self.clustersCurrent > self.clusterLimit \
-              or self.clustersCurrent == None \
-              and (simCut > 0 or lenCut > 0):
+        while (self.clustersCurrent > self.clusterLimit \
+              or self.clustersCurrent == None) \
+              and (simCut > 0 and lenCut > 0):
 
             self.clusterFasta( fastaIn, simCut, lenCut, ncpu )
             self.clustersCurrent = len( self.clusters )
