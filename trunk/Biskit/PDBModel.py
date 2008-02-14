@@ -1642,6 +1642,15 @@ class PDBModel:
         return N.array(
             [ n.upper() in names for n in self.atoms['residue_name'] ] )
 
+    def maskDNA( self ):
+            """
+            Short cut for mask of all atoms in DNA
+
+            @return: N.array( 1 x N_atoms ) of 0||1
+            @rtype: array
+            """
+            return self.maskFrom( 'residue_name',
+                                  ['A','C','G','T','DA','DC','DG','DT'] )
 
     def indicesFrom( self, key, cond ):
         """
