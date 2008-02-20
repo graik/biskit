@@ -502,8 +502,9 @@ class SequenceSearcher:
                     break
 
             if (not match) or (not match.group('id')):
-                raise BlastError( "Couldn't find ID in " + a.title +\
-                                  "with pattern " + str(pattern))
+                raise BlastError( "Couldn't find ID in '" + a.title + "'"+\
+                  ". Check database or add pattern to "+\
+                  "SequenceSearcher.__init__" )
 
             result += [ match.group('id') ]
 
