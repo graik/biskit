@@ -66,12 +66,12 @@ class HmmerdbIndex( Executor ):
         @param hmmdb: Pfam hmm database
         @type  hmmdb: str
         """
-	Executor.__init__( self, 'hmmindex', args='%s'%hmmdb, **kw )
+        Executor.__init__( self, 'hmmindex', args='%s'%hmmdb, **kw )
 
         if not os.path.exists(hmmdb+'.ssi'):
             if self.verbose:
                 self.log.writeln(
-		    'HMMINDEX: Indexing hmm database. This will take a while')
+                    'HMMINDEX: Indexing hmm database. This will take a while')
             
             self.run()
 
@@ -84,10 +84,10 @@ class HmmerSearch( Executor ):
     only write the temporary sequence files.
     """
 
-    def __init__( self, target, hmmdb, noSearch=None, **kw ):
+    def __init__( self, target, hmmdb=settings.hmm_db, noSearch=None, **kw ):
         """
-        @param target: sequence 
-        @type  target: PDBModel or fasta file
+        @param target: fasta sequence, fasta file, or PDBModel 
+        @type  target: PDBModel instabce or fasta file
         @param hmmdb: Pfam hmm database
         @type  hmmdb: str
         @param noSearch: don't perform a seach
@@ -106,7 +106,7 @@ class HmmerSearch( Executor ):
         if noSearch:
             if self.verbose:
                 self.log.writeln(
-		    'Profiles provided - No search will be performed.')
+                    'Profiles provided - No search will be performed.')
 
 
     def __verify_fasta(self, target ):
@@ -123,19 +123,19 @@ class HmmerSearch( Executor ):
         @return: conforms to the fsata format
         @rtype: True/False
         """
-        if not type(target) == types.ListType:
+        if type(target) != types.ListType:
             if os.path.exists( target ):
                 f = open( target, 'r' )
                 target = f.readlines()
 
-        if not target[0][0] == '>':
+        if target[0][0] != '>':
             self.log.writeln('Fasta format does not contain description line.')
             return False
 
         for i in range( 1, len(target) ):
             if len( target[i] ) >= 80:
                 self.log.writeln(
-		    'Fasta sequence lines longer that 80 characters')
+                    'Fasta sequence lines longer that 80 characters')
                 return False
 
             for j in target[i]:
@@ -149,29 +149,31 @@ class HmmerSearch( Executor ):
            
     def prepare( self ):
         """
-        If the target id a PDBModel its sequence will be written
+        If the target is a PDBModel its sequence will be written
         to disc as a fasta file.
-        If it is a fasta file the path to the file will be passed on.
+        If it is already fasta file the path to the file will be passed on.
         """
-        ## if target is a PDBModel
-        if isinstance( self.target, PDBModel):
+        ## if target is a PDBModel or simple sequence string
+        if isinstance(self.target, PDBModel):
             fastaSeq, self.fastaID = MT.fasta( self.target )
             ## write fasta sequence file
             seq = open( self.fName, 'w' )
             seq.write( fastaSeq )
             seq.close()
-
-        ## else assume it is a fasta sequence file   
+        
+        elif self.__verify_fasta(self.target):
+            ## else assume it is a fasta sequence file   
+            self.fName = self.target
+        
         else:
-            if self.__verify_fasta(self.target):
-                self.fName = self.target
-
+            raise HmmerError, 'cannot interpret target %r' % self.target
+        
 
     def parse_result( self ):
         """
         Parse the output from hmmpfam.
         
-        @return: dictionary witn profile names as keys and a list of
+        @return: dictionary with profile names as keys and a list of
                  lists containing information about the range where the
                  profile matches the sequence
         @rtype: dict, [list]
@@ -190,8 +192,8 @@ class HmmerSearch( Executor ):
 
         try:
             lines = open( self.f_out, 'r' ).readlines()
-	    while lines:
-		l = lines.pop(0)
+            while lines:
+                l = lines.pop(0)
                 ## get names and descriptions of matching profiles
                 if re.match('^-{8}\s{7,8}-{11}.+-{3}$', l):
                     m = string.split( lines.pop(0) )
@@ -210,7 +212,7 @@ class HmmerSearch( Executor ):
         except Exception, why:
             raise HmmerError,\
                   'ERROR parsing hmmpfam search result: %s'%self.f_out +\
-		  '\n%r' % why
+                  '\n%r' % why
         
         return matches, hits
         
@@ -227,22 +229,51 @@ class HmmerSearch( Executor ):
 class HmmerProfile( Executor ):
     """
     Get the hmm profile with name hmmName from hmm databse
-    (using the program hmmfetch).
+    (using the program hmmfetch) and calculate 3 different conservation
+    scores.
+
+    Use::
+
+      p = HmmerProfile( 'FH2' )
+      profileDic = p.run()
+
+    Will fetch the Pfam profile 'FH2'.
+
+    profileDic then has the following entries:
+
+      * 'name'
+      * 'accession'
+      * 'NrSeq'
+      * 'profLength' -- profile length
+      * 'seqNr' -- ?? list 1 .. NrSeq 
+      * 'AA' -- amino acids in same order as columns in 'emmScore'
+      * 'emmScore' -- (profLength x 20) array of emmission scores
+      * 'ent' -- Kulbach-Leibler distance conservation measure (best measure)
+      * 'absSum' -- alternative conservation measure
+      * 'maxAllScale' -- alternative conservation measure
+
+    Use 
+    >>> p = HmmerProfile( 'FH2', f_out='your_new.hmm' )
+    to capture the HMM file, which is otherwise cleaned up.
     """
     
-    def __init__( self, hmmName, hmmdb, **kw ):
+    def __init__( self, hmmName, hmmdb=settings.hmm_db, **kw ):
         """
         @param hmmName: hmm profile name
         @type  hmmName: str
         @param hmmdb: Pfam hmm database
         @type  hmmdb: str
+        **kw - all Executor parameters, in particular:
+        @param f_out: target file name for profile.hmm, prevents its deletion
+        @type  f_out: str
+        @param debug:
+        @param log:
+        @param ...
         """
         self.hmmName = hmmName
 
         Executor.__init__( self, 'hmmfetch',
                            args=' %s %s'%(hmmdb, hmmName), **kw )
-
-        self.f_out = tempfile.mktemp('.hmm')
 
         
     def parse_result( self ):
@@ -329,7 +360,7 @@ class HmmerProfile( Executor ):
                               N.shape( p[i] ) ) ]
         profileDic['maxAllScale'] = p4
 
-        return self.f_out, profileDic
+        return profileDic
 
 
     def hmmEmm2Prob( self, nullEmm, emmScore ):
@@ -349,19 +380,19 @@ class HmmerProfile( Executor ):
         nullProb = N.power( 2, N.array( nullEmm )/1000.0 )*(1./20)
 
         ## Emmission probabilities: prob = nullProb 2 ^ (nullEmm / 1000)
-	## see http://www.ebc.ee/WWW/hmmer2-html/node26.html
-	emmProb = nullProb * N.power( 2, ( emmScore/1000.0) )
+        ## see http://www.ebc.ee/WWW/hmmer2-html/node26.html
+        emmProb = nullProb * N.power( 2, ( emmScore/1000.0) )
 
         return emmProb, nullProb
 
 
     def entropy( self, emmProb, nullProb ):
-	""" 
-	Calculate the Kullback-Leibler distance between the observed and the
-	background amino acid distribution at a given position. High values mean
-	high conservation. Empty (all 0) emmission probabilities yield score 0.
-	See also:BMC Bioinformatics. 2006; 7: 385
-	
+        """ 
+        Calculate the Kullback-Leibler distance between the observed and the
+        background amino acid distribution at a given position. High values mean
+        high conservation. Empty (all 0) emmission probabilities yield score 0.
+        See also:BMC Bioinformatics. 2006; 7: 385
+        
         emmProb & nullProb is shape 1,len(alphabet)
 
         @param emmProb: emmission probabilities
@@ -373,22 +404,10 @@ class HmmerProfile( Executor ):
         @rtype:  float
         """
         ## avoid log error
-	if N.sum( emmProb ) == 0.:
-	    return 0.
+        if N.sum( emmProb ) == 0.:
+            return 0.
 
         return N.sum( emmProb * N.log(emmProb/nullProb) )
-
-
-    def cleanup( self ):
-        """
-        Clean up after external program has finished (failed or not).
-        Override, but call in child method!
-        """
-        if not self.keep_inp and not self.debug:
-            T.tryRemove( self.f_in )
-
-        if self.f_err and not self.debug:
-            T.tryRemove( self.f_err )
 
             
     def fail( self ):
@@ -407,7 +426,6 @@ class HmmerProfile( Executor ):
         self.result = self.parse_result( )
 
 
-
 class HmmerAlign( Executor ):
     """
     Align fasta formated sequence to hmm profile (using hmmalign).
@@ -423,6 +441,11 @@ class HmmerAlign( Executor ):
         @type  fastaID: str     
         """
         self.fastaID = fastaID
+        self.hmmFile = hmmFile
+        self.fastaFile = fastaFile
+        
+        assert T.fileLength( self.hmmFile ) > 10, \
+               'input HMM file missing or empty'
         
         Executor.__init__( self, 'hmmalign',
                            args=' -q %s %s'%(hmmFile, fastaFile), **kw )
@@ -482,23 +505,28 @@ class Hmmer:
     Search Hmmer Pfam database and retrieve conservation score for model
     """
 
-    def __init__(self, hmmdb = hmmDatabase, verbose=1, log=StdLog() ): 
+    def __init__(self, hmmdb=hmmDatabase, verbose=1, log=StdLog(),
+                 debug=False ): 
         """
         @param hmmdb: Pfam hmm database
         @type  hmmdb: str
         @param verbose: verbosity level (default: 1)
         @type  verbose: 1|0
-	@param log: Log file for messages [STDOUT]
-	@type  log: Biskit.LogFile
+        @param log: Log file for messages [STDOUT]
+        @type  log: Biskit.LogFile
+        @param debug: don't cleanup temporary files [False]
+        @type  debug: 1|0
+        
         """
         self.hmmdb = hmmdb
         self.verbose = verbose
-	self.log = log or StdLog()
+        self.log = log or StdLog()
         self.tempDir = settings.tempDirShared
+        self.debug = debug
 
         self.fastaID = ''
 
-        self.hmmFile = ''
+        self.hmmFile = tempfile.mktemp('.hmm', dir=self.tempDir)
         self.fastaFile = tempfile.mktemp('.fasta', dir=self.tempDir)
         self.sub_fastaFile = tempfile.mktemp('_sub.fasta', dir=self.tempDir)
 
@@ -517,7 +545,7 @@ class Hmmer:
         If the profile names have been provided - skip the search and
         only write the temporary sequence files.
           
-        @param target: sequence 
+        @param target: sequence file or PDBModel
         @type  target: PDBModel or fasta file
         @param noSearch: don't perform a seach
         @type  noSearch: 1 OR None
@@ -529,10 +557,10 @@ class Hmmer:
         """
         if self.verbose:
             self.log.writeln(
-		'\nSearching hmm database, this will take a while...')
+                '\nSearching hmm database, this will take a while...')
 
         search = HmmerSearch( target, self.hmmdb, verbose=self.verbose,
-			      log=self.log )
+                              log=self.log, debug=self.debug )
         matches, hits = search.run()
         
         return matches, hits
@@ -561,14 +589,14 @@ class Hmmer:
             return None
         if len(matches) == 1:
             if self.verbose:
-		self.log.writeln('\nFound only one matching profile.')
+                self.log.writeln('\nFound only one matching profile.')
         if len(matches) > 1:
             if self.verbose: self.log.writeln('\nFound more than one hit.\n')
 
         try:
             if self.verbose:
                 self.log.writeln(
-		    '\tName -- Nr hits -- Score -- E-value -- Description')
+                    '\tName -- Nr hits -- Score -- E-value -- Description')
                 for k in matches.keys():
                     self.log.writeln( '\t'+k+' --'+matches[k][-1] +' -- '+\
                           matches[k][-3]+ ' -- '+ matches[k][-2]+' -- '+\
@@ -587,7 +615,7 @@ class Hmmer:
 
             ## print warning message if profile doesn't meet criteria
             if score < score_cutoff and eValue > eValue_cutoff \
-		   and self.verbose:
+                   and self.verbose:
                 self.log.writeln('\nWARNING: Bad scores! Profile NOT used.')
                 self.log.writeln('\t Name: %s - Score: %f E-value: %f ' \
                       %( hmmName, score, eValue ) )
@@ -622,12 +650,16 @@ class Hmmer:
         @return: dictionary with warious information about the profile
         @rtype: dict
         """
-        profile = HmmerProfile( hmmName, self.hmmdb, verbose=self.verbose,
-				log=self.log)
-        self.hmmFile, profileDic = profile.run()
+        profile = HmmerProfile( hmmName, self.hmmdb,
+                                # giving explicit f_out prevents deletion
+                                f_out=self.hmmFile,
+                                verbose=self.verbose,
+                                log=self.log,
+                                debug=self.debug )
 
-        return profileDic
-
+        r = profile.run()
+        assert os.path.exists( self.hmmFile )
+        return r
 
     def align( self, model, hits ):
         """
@@ -636,7 +668,7 @@ class Hmmer:
         be subdevided and the alignment will be performed on each part.
         a final merger profile for the profile will be returned.
         
-        @param model: model
+        @param model: structure model
         @type  model: PDBModel       
         @param hits: list with matching sections from L{searchHmmdb}
         @type  hits: [[int,int]]
@@ -674,7 +706,7 @@ class Hmmer:
                 ## get sub-alignmnet
                 align = HmmerAlign( self.hmmFile, self.sub_fastaFile,
                                     self.fastaID, verbose=self.verbose,
-				    log=self.log)
+                                    log=self.log)
 
                 sub_fastaSeq, sub_hmmSeq = align.run()
 
@@ -751,7 +783,7 @@ class Hmmer:
         """
         if len(seq1) != len(seq2):
             EHandler.warning( 'ERR in mergeHmmSeq:\n' +\
-			 '\tSequences of different lengths cannot be merged')
+                         '\tSequences of different lengths cannot be merged')
             return None
         else:
             result = ''
@@ -792,7 +824,7 @@ class Hmmer:
         ## extract hmm sequence
         hmmSeq = re.findall( '#=[A-Z]{2}\s[A-Z]{2}\s+[.x]+', out )
         hmmSeq = string.join(
-	    [ string.strip( string.split(i)[2] ) for i in hmmSeq ], '')
+            [ string.strip( string.split(i)[2] ) for i in hmmSeq ], '')
 
         return fastaSeq, hmmSeq
 
@@ -848,9 +880,9 @@ class Hmmer:
         cons = []
         hmmShift = 0
 
-	assert len(hmmSeq) == len( fastaSeq ), \
-	       'Length of HMM profile does not match length of sequence.\n' + \
-	       'Check for unusual residues in input model!'
+        assert len(hmmSeq) == len( fastaSeq ), \
+               'Length of HMM profile does not match length of sequence.\n' + \
+               'Check for unusual residues in input model!'
 
         for i in range( len( fastaSeq ) ):
 
@@ -905,8 +937,8 @@ class Hmmer:
             hmmDic = self.getHmmProfile( name )
             if self.verbose:
                 self.log.writeln('Hmm profile ' + str(name) +\
-				 ' with accession number ' \
-				 + str(hmmDic['accession']) + ' retrieved')
+                                 ' with accession number ' \
+                                 + str(hmmDic['accession']) + ' retrieved')
 
             ## align sequence with model
             fastaSeq, hmmSeq, repete, hmmGap = self.align( model,
@@ -979,12 +1011,10 @@ class Hmmer:
         """
         remove temp files
         """
-        del_lst = [ self.sub_fastaFile, self.hmmFile, self.fastaFile ]
-        for d in del_lst:
-            try:
-                os.remove( d )
-            except:
-                pass
+        if not self.debug:
+            del_lst = [ self.sub_fastaFile, self.hmmFile, self.fastaFile ]
+            for d in del_lst:
+                T.tryRemove( d )
 
 
 #############
@@ -997,27 +1027,44 @@ class Test(BT.BiskitTest):
 
     TAGS = [ BT.EXE ]
     
-    def test_Hmmer( self):
-        """Hmmer test """
-	
+    M = None
+
+    def prepare( self ):
         from Biskit import PDBModel
         import Biskit.tools as T
 
-        if self.local: print "Loading PDB...",
-        self.m = PDBModel( T.testRoot()+'/lig/1A19.pdb')
-        self.model = self.m.compress( self.m.maskProtein() )
-	if self.local: print "Done"
+        if not self.M:
+            if self.local: print "Loading PDB...",
+            self.M = PDBModel( T.testRoot()+'/lig/1A19.pdb')
+            self.M = self.M.compress( self.M.maskProtein() )
+            if self.local: print "Done"
+    
+    def test_HmmSearch( self ):
+        """HmmSearch test"""
+        self.searcher = HmmerSearch( self.M, 
+                                   verbose=self.local,
+                                   log=self.log )
+        self.matches, self.hits = self.searcher.run()
 
+    def test_HmmProfile( self ):
+        """HmmerProfile test"""
+        profile = HmmerProfile( 'FH2', verbose=self.local, log=self.log)
+        self.profileDic = profile.run()
+
+
+    def test_Hmmer( self):
+        """Hmmer test """
+        
         ## initiate and check database status
         self.hmmer = Hmmer( hmmdb=settings.hmm_db, verbose=self.local,
-			    log=self.log )
+                            log=self.log )
         self.hmmer.checkHmmdbIndex()
 
         ## scoring methods to use
         method = [ 'emmScore', 'ent', 'maxAll', 'absSum', 'maxAllScale' ]
 
         ## search
-        searchMatches, searchHits = self.hmmer.searchHmmdb( self.model )
+        searchMatches, searchHits = self.hmmer.searchHmmdb( self.M )
         hmmNames = self.hmmer.selectMatches( searchMatches, searchHits )
   ##      hmmNames = {'Barstar': [[1, 89]]}
         
@@ -1031,7 +1078,7 @@ class Test(BT.BiskitTest):
 
             ## align sequence with model
             fastaSeq, hmmSeq, repete, hmmGap = \
-                  self.hmmer.align( self.model, hmmNames[ name ] )
+                  self.hmmer.align( self.M, hmmNames[ name ] )
 
             ## cast hmm model
             hmmDic_cast = \
@@ -1039,7 +1086,7 @@ class Test(BT.BiskitTest):
 
             ## Hmmer profile match scores for sequence
             self.cons = self.hmmer.matchScore( fastaSeq, hmmSeq,
-					  hmmDic_cast, method[0] )
+                                          hmmDic_cast, method[0] )
 
             ## If there are more than one profile in the model, merge to one. 
             if self.result:
@@ -1047,9 +1094,9 @@ class Test(BT.BiskitTest):
             else:
                 self.result = self.cons
 
-	    self.hmmer.cleanup()
+        self.hmmer.cleanup()
 
-	self.assertEqual( self.result, self.EXPECTED )
+        self.assertEqual( self.result, self.EXPECTED )
 
 
     #: Hmmer emission scores
