@@ -61,11 +61,11 @@ class Executor:
            - __init__  ... to set your own default values
                            (call parent __init__!)
            - prepare   ... called BEFORE program execution
-           - cleanup   ... called AFTER program execution
-                           (call parent cleanup!)
            - finish    ... called AFTER successful program execution
            - isfailed  ... to detect the success status after program execution
            - fail      ... called if execution fails
+           - cleanup   ... called AFTER everything else
+                           (call parent cleanup!)
            
           Additionally, you should provide a simple program configuration file
           in biskit/external/defaults/. See L{Biskit.ExeConfig} for
