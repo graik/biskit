@@ -25,6 +25,7 @@ import numpy as N
 import copy, random
 
 import lognormal as L
+import stats
 
 class ROCError( Exception ):
     pass
@@ -94,10 +95,10 @@ class ROCalyzer( object ):
 	
 	@param score: sequence of score values for target sequence
 	@type  score: [ int ] or [ float ]
-	@param ref  : alternative mask of positives (replaces self.positives)
+	@param ref  : alternative mask of positives (overrides self.positives)
 	@type  ref  : [ 1|0 ]
-	@return: a curve describing sensitivity (first item) versus specificity
-	@rtype: [ (sens, spec), ]
+	@return: curve describing 1-specificity (1st column) versus sensitivity
+	@rtype: [ (specifity, false_positive_rate) ]
 	"""
 	if ref is None:
 	    ref = self.positives
@@ -109,7 +110,6 @@ class ROCalyzer( object ):
 	order = N.argsort( score ).tolist()
 	order.reverse()
 
-## 	score = N.take( score, order )
 	ref = N.take( ref, order )
 
 	#: number of true positives identified with decreasing score
@@ -117,10 +117,10 @@ class ROCalyzer( object ):
 
 	# number of false positives picked up with decreasing score
 	neg = N.logical_not( ref )
-	n_neg = N.sum( neg ) - N.add.accumulate( neg  )
+	n_neg = N.add.accumulate( neg  )
 
-	sensitivity = 1. * n_pos / n_pos[-1]
-	specificity = 1. * n_neg / n_neg[0]
+	sensitivity = 1. * n_pos / n_pos[-1] ## true positive rate
+	specificity = 1. * n_neg / n_neg[-1] ## FP_rate = 1-specificity
 
 	return zip( specificity, sensitivity )
 
@@ -129,7 +129,7 @@ class ROCalyzer( object ):
 	"""
 	Numerically add up the area under the given curve.
 	The curve is a 2-D array or list of tupples as returned by roccurve().
-	The x-axis is the second column of this array (curve[:,1]) !
+	The x-axis is the first column of this array (curve[:,0]).
 
 	@param curve: a list of x,y coordinates
 	@type  curve: [ (y,x), ] or N.array
@@ -144,16 +144,19 @@ class ROCalyzer( object ):
 	assert len( N.shape( c ) ) == 2
 
 	## apply boundaries  ## here we have a problem with flat curves
-	mask = N.greater_equal( c[:,1], start )
-	mask *= N.less_equal( c[:,1], stop )
+	mask = N.greater_equal( c[:,0], start )
+	mask *= N.less( c[:,0], stop+1e-15 )
 	c = N.compress( mask, c, axis=0 )
 
 	## fill to boundaries -- not absolutely accurate: we actually should
 	## interpolate to the neighboring points instead
-	c = N.concatenate((N.array([[c[0,0], start],]), c,
-			   N.array([[c[-1,0],stop ],])) )
-	x = c[:,1]
-	y = c[:,0]
+        if c[0,0] > start:
+            c = N.concatenate( (N.array([[start, c[0,1]],]), c) )
+        if c[-1,0] < stop:
+            c = N.concatenate( (c, N.array([[stop, c[-1,1]],])) )
+            
+	x = c[:,0]
+	y = c[:,1]
 
 	dx = x[1:] - x[:-1] # distance on x between points 
 	dy = y[1:] - y[:-1] # distance on y between points
@@ -183,7 +186,8 @@ class ROCalyzer( object ):
 	"""
 	Test how a given score performs at predicting items in the
 	positive list compared to its 'performance' at  predicting random
-	elements. 
+	elements. The result corresponds to a two-tailed P value.
+        See L{utest} for the analytical solution. 
 	@param score: the score predicted for each item
 	@type  score: [ float ]
 	@param n_samples: number of random samples
@@ -212,6 +216,34 @@ class ROCalyzer( object ):
 
 	## probability that the score hits just at random
 	return 1.0 - p
+
+    def utest( self, score ):
+        """
+        Gives the Mann-Withney U test probability that the score is
+        random.  See:
+
+        Mason & Graham (2002) Areas beneath the relative operating
+        characteristics (ROC) and relative operating levels (ROL)
+        curves: Statistical significance and interpretation
+
+	@param score: the score predicted for each item
+	@type  score: [ float ]
+
+        @return: 1-tailed P-value
+        @rtype: float
+        """
+        sample1 = N.compress( self.positives, score )
+        sample1 = sample1[-1::-1]  # invert order
+
+        sample2 = N.compress( N.logical_not( self.positives ), score )
+        sample2 = sample2[-1::-1]  # invert order
+
+        sample1 = sample1.tolist()
+        sample2 = sample2.tolist()
+
+        p = stats.mannwhitneyu( sample1, sample2 )
+        return p[1]
+        
 
 class ROCThreshold(object):
 
@@ -291,8 +323,8 @@ class Test(BT.BiskitTest):
 	if self.local:
 	    plot( self.roc )
 
-    def test_background(self):
-	"""Statistics.ROCalyzer.background test"""
+    def test_noise(self):
+	"""Statistics.ROCalyzer.isnoise/utest test"""
 	a = ROCalyzer( self.hits )
 
 	rand = a.random_roccurves( self.score, 500 )
@@ -300,9 +332,19 @@ class Test(BT.BiskitTest):
 
 	self.assertAlmostEqual( a.area(self.avg), 0.5, 1 )
 
-	p = a.isnoise( self.score, n_samples=1000 )
+	p1 = a.isnoise( self.score, n_samples=1000 )
+        p2 = a.utest( self.score )
 
-	self.assertAlmostEqual( p, 0.0, 3 )
+        if self.local:
+            print "\nsimulation  P: ", p1
+            print "mannwithney P: ", p2
+
+	self.assertAlmostEqual( p1, 0.0, 3 )
+        self.assertAlmostEqual( p2, 0.0, 3 )
+
+        r =  p1 / p2
+        self.assert_( (r<3.25) and (r>0.75),
+                      'isnoise P should be about twice that of utest')
 	
 	
     def test_area(self):
@@ -313,7 +355,8 @@ class Test(BT.BiskitTest):
 	perfect_x = N.arange(0.0, 1.0, +1.0/len(self.score) )
 	self.perfect = zip( perfect_x, perfect_y )
 	
-	self.assertEqual( a.area( self.perfect ), 0.5 )
+	self.assertAlmostEqual( a.area( self.perfect ), 0.5, 5 )
+
 
     def test_threshold(self):
         """Statistics.ROCThreshold test"""
