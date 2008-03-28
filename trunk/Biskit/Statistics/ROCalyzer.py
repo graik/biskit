@@ -224,6 +224,9 @@ class ROCalyzer( object ):
         characteristics (ROC) and relative operating levels (ROL)
         curves: Statistical significance and interpretation
 
+        Note: P-values below 1.1e-09 are reported as 0.0.
+        See zprob() in Biskit.Statistics.stats! 
+
 	@param score: the score predicted for each item
 	@type  score: [ float ]
 
