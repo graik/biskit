@@ -25,7 +25,6 @@ Parse and organize commandline options into a dictionary.
 import sys
 import Biskit.tools as T
 import Biskit as B
-import Biskit.mathUtils as M
 import Biskit.test as BT
 
 class CommandlineError( B.BiskitError ):
@@ -393,8 +392,8 @@ class CommandLine(dict):
 	@return: formatted string ready for print
 	@rtype: str
 	"""
-        keys = M.nonredundant( self.defaults.keys() + self.docs.keys() +\
-                               self.types.keys() )
+        keys = list( set( self.defaults.keys() + self.docs.keys() +\
+                               self.types.keys() ) )
         keys.sort()
         r = ''
 

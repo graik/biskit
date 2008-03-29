@@ -228,7 +228,7 @@ class ROCalyzer( object ):
         characteristics (ROC) and relative operating levels (ROL)
         curves: Statistical significance and interpretation
 
-        Note (1): P-values below ~6.1e-13 are reported as 0.0.
+        Note (1): P-values below ~1e-16 are reported as 0.0.
         See zprob() in Biskit.Statistics.stats!
 
         Note (2): the P-value does not distinguish between positive
