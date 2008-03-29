@@ -158,7 +158,7 @@ def cross(v, w):
 
 def aboveDiagonal( pw_m ):
     """
-    Collect att the values above the diagonal in a square
+    Collect all the values above the diagonal in a square
     matrix.
     
     @param pw_m: symmetric square matrix
@@ -359,6 +359,51 @@ def runningAverage( x, interval=2, preserve_boundaries=0 ):
             l.append(N.average(slice))
 
     return N.array(l)
+
+def area(curve, start=0.0, stop=1.0 ):
+    """
+    Numerically add up the area under the given curve.
+    The curve is a 2-D array or list of tupples.
+    The x-axis is the first column of this array (curve[:,0]).
+    (originally taken from Biskit.Statistics.ROCalyzer)
+
+    @param curve: a list of x,y coordinates
+    @type  curve: [ (y,x), ] or N.array
+    @param start: lower boundary (in x) (default: 0.0)
+    @type  start: float
+    @param stop: upper boundary (in x) (default: 1.0)
+    @type  stop: float
+    @return: the area underneath the curve between start and stop.
+    @rtype: float
+    """
+    ## convert and swap axes
+    curve = N.array( curve )
+    c = N.zeros( N.shape(curve), curve.dtype )
+    c[:,0] = curve[:,1]
+    c[:,1] = curve[:,0]
+    
+    assert len( N.shape( c ) ) == 2
+
+    ## apply boundaries  ## here we have a problem with flat curves
+    mask = N.greater_equal( c[:,1], start )
+    mask *= N.less_equal( c[:,1], stop )
+    c = N.compress( mask, c, axis=0 )
+
+    ## fill to boundaries -- not absolutely accurate: we actually should
+    ## interpolate to the neighboring points instead
+    c = N.concatenate((N.array([[c[0,0], start],]), c,
+                       N.array([[c[-1,0],stop ],])) )
+    x = c[:,1]
+    y = c[:,0]
+
+    dx = x[1:] - x[:-1] # distance on x between points 
+    dy = y[1:] - y[:-1] # distance on y between points
+
+    areas1 = y[:-1] * dx  # the rectangles between all points
+    areas2 = dx * dy / 2.0 # the triangles between all points
+
+    return N.sum(areas1) + N.sum(areas2)
+
 
 
 def packBinaryMatrix( cm ):
@@ -750,7 +795,7 @@ class Test(BT.BiskitTest):
     """Test case"""
 
     def test_mathUtils(self):
-        """mathUtils test"""
+        """mathUtils.polar/euler test"""
         ## Calculating something ..
         self.d = N.array([[20.,30.,40.],[23., 31., 50.]])
 
@@ -759,6 +804,12 @@ class Test(BT.BiskitTest):
         self.t = eulerRotation( self.a[0][0], self.a[0][1], self.a[0][2]  )
 
         self.assertAlmostEqual( N.sum( SD(self.a) ), self.EXPECT )
+
+    def test_area(self):
+        """mathUtils.area test"""
+        self.c = zip( N.arange(0,1.01,0.1), N.arange(0,1.01,0.1) )
+        self.area = area( self.c )
+        self.assertAlmostEqual( self.area, 0.5, 7 )
 
     EXPECT = N.sum( N.array([ 2.12132034,  0.70710678,  7.07106781]) )
     
