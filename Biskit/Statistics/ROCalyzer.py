@@ -25,7 +25,11 @@ import numpy as N
 import copy, random
 
 import lognormal as L
-import stats
+try:
+    import scipy.stats as stats
+except:
+    # import outdated stand-alone internal copy with some numeric issues
+    import stats
 
 class ROCError( Exception ):
     pass
@@ -224,8 +228,12 @@ class ROCalyzer( object ):
         characteristics (ROC) and relative operating levels (ROL)
         curves: Statistical significance and interpretation
 
-        Note: P-values below 1.1e-09 are reported as 0.0.
-        See zprob() in Biskit.Statistics.stats! 
+        Note (1): P-values below ~6.1e-13 are reported as 0.0.
+        See zprob() in Biskit.Statistics.stats!
+
+        Note (2): the P-value does not distinguish between positive
+        and negative deviations from random -- a ROC area of 0.1 will
+        get the same P-value as a ROC area of 0.9.
 
 	@param score: the score predicted for each item
 	@type  score: [ float ]
@@ -292,6 +300,27 @@ class ROCThreshold(object):
 
         return r
 
+def pfisher( pvalues ):
+    """
+    Combine independent P-values into one according to
+
+    Fisher, R. A. (1948) Combining independent tests of significance.
+    American Statistician, vol. 2, issue 5, page 30.
+
+    ('Fisher method' or 'inverse ChiSquare method') See also book:
+    Walter W. Piegorsch, A. John Bailer: Analyzing Environmental Data. Wiley
+
+    @param pvalues: list of independent P-values
+    @type  pvalues: [ float ]
+    @return: P-value 
+    @rtype: float
+    """
+    ## stats.mannwhitneyu minimal P ~ stats.zprob( 8.2 );
+    ## all below becomes 0. which is not handled by the fisher test 
+    clipped = N.clip( pvalues, 1.0e-16, 1.0 )
+    
+    x2 = -2 * N.sum( N.log( clipped ) )
+    return stats.chisqprob( x2, 2*len(pvalues) )
 
     
 #############
@@ -374,6 +403,12 @@ class Test(BT.BiskitTest):
             plot( self.t_curve )
 
         self.assert_( max(self.t_curve[:,1]) > 0.4 )
+
+    def test_pfisher( self ):
+        """Statistics.ROCalyzer.pfisher test"""
+        p = pfisher( [0.046, .072, .0005, .999, 0.198, .944, .0015, 0.0075,
+                      .0625, .003, .0014, .0005, .238, .988])
+        self.assertAlmostEqual( p, 3.2675687582319262e-10, 5 )
 
 	
 if __name__ == '__main__':
