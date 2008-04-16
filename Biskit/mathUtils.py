@@ -306,6 +306,18 @@ def random2DArray( matrix, ranNr=1, mask=None):
         return  N.reshape( ranArray, (a,b) )
 
 
+def slidingAverage( y, window=2 ):
+    if window == 0:
+        return y
+
+    assert window < len(y), 'window size too large for array'
+
+    margin = int(round((window-1)/2.))
+
+    return [ N.average( y[i-margin : i+margin] )
+             for i in range(margin,len(y)-margin) ]
+
+
 def runningAverage( x, interval=2, preserve_boundaries=0 ):
     """
     Running average (smoothing) over a given data window.
