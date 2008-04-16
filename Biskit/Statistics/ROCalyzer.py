@@ -178,10 +178,10 @@ class ROCalyzer( object ):
 	performance. See also isnoise() for quantifying this.
 	@param score: the score predicted for each item
 	@type  score: [ float ]
-	@return: a.area( a.roccurve( score) ) - 0.5
+	@return: a.area( a.roccurve( score) )
 	@rtype: float
 	"""
-	return self.area( self.roccurve( score ) ) - 0.5
+	return self.area( self.roccurve( score ) )
 
 
     def isnoise( self, score, n_samples=1000 ):
