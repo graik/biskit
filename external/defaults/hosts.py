@@ -24,8 +24,8 @@ Biskit.PVM.hosts.py.
 #              have one entry per available CPU.
 #  You can shorten the above cpus_own line with normal python magic::
 #     cpus_own  = nodes_own * 2
-nodes_own = []
-cpus_own = []
+nodes_own = ['localhost']
+cpus_own = ['localhost']
 
 ##
 #: computers shared with others, medium priority
