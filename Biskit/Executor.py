@@ -309,18 +309,22 @@ class Executor:
 
         self.f_out = t.absfile( f_out )
         if not f_out and catch_out:
-            self.f_out = tempfile.mktemp( '.out' )
+            self.f_out = tempfile.mktemp( '.out', name+'_' )
 
         self.f_err = t.absfile( f_err )
         if not f_err and catch_err:
-            self.f_err = tempfile.mktemp( '.err' )
+            self.f_err = tempfile.mktemp( '.err', name+'_' )
                 
-        self.keep_out  = f_out is not None
-        self.catch_out = catch_out
-        self.catch_err = catch_err
+        self.keep_out = f_out is not None
+        self.keep_inp = f_in  is not None  #: do not clean up the input file
+        self.catch_out = catch_out         #: capture STDOUT into file
+        self.catch_err = catch_err         #: capture STDERR into file
         
-        self.f_in  = f_in  #: will be overridden by self.convertInput()
-        self.keep_inp = f_in is not None
+        self.f_in = t.absfile( f_in )
+        ## pre-define name of input file that will be generated later 
+        if template and not f_in:
+            self.f_in  = tempfile.mktemp('.inp', name+'_')
+
         self.push_inp = push_inp
 
         self.args = args
@@ -332,7 +336,7 @@ class Executor:
 
         self.cwd = cwd or self.exe.cwd
 
-        #: Log object for own program messages
+        #: Log object for own messages
         self.log = log or StdLog()
         self.verbose = verbose
         if self.verbose is None:
@@ -505,7 +509,7 @@ class Executor:
 
             self.postProcess()
 
-        except IOError, why:
+        except MemoryError, why:
             try:
                 self.fail()
             finally:
@@ -651,9 +655,8 @@ class Executor:
 
             ## convert file to string
             if not inp and os.path.exists( self.f_in or '' ):
-
                 return open( self.f_in, 'r' ).read()
-
+            ## or return string unchanged
             return inp
 
         ## no pipes and no input string
@@ -662,7 +665,8 @@ class Executor:
             return inp
 
         ## else put input string into file
-        self.f_in = self.f_in or tempfile.mktemp('_exec.inp')
+        assert self.f_in
+##         self.f_in = self.f_in or tempfile.mktemp('_exec.inp')
 
         f = open( self.f_in, 'w')
         f.write(inp)
@@ -673,9 +677,9 @@ class Executor:
     def generateInp(self):
         """
         Prepare the program input (file or string) from a template (if
-        present, file or string).
+        any, file or string).
 
-        @return: input file name OR (if pipes=1) content of input file
+        @return: input file name OR (if pipes=1) content of input file OR None
         @rtype: str
         
         @raise TemplateError: if error while creating template file
@@ -689,7 +693,7 @@ class Executor:
             return self.convertInput( inp )
 
         except Exception, why:
-            s =  "Error while creating template file."
+            s =  "Error while creating input file from template."
             s += "\n  template file: " + str( self.template )
             s += "\n  why: " + str( why )
             s += "\n  Error:\n  " + t.lastError()
