@@ -1172,7 +1172,7 @@ class PDBModel:
         (see AmberParmBuilder for an example). 
         Internally amber uses H atom names ala HD21 while standard pdb files
         use 1HD2. By default, ambpdb produces 'standard' pdb atom names but
-        it gives the less ambiguous amber names with switch -aatm.
+        it can output the less ambiguous amber names with switch -aatm.
 
         @param change: change this model's atoms directly (default:1)
         @type  change: 1|0
@@ -1184,7 +1184,8 @@ class PDBModel:
         """
         numbers = map( str, range(10) )
 
-        resI = self.resIndex()
+        resI = self.resIndex().tolist()
+        resI.append( len( resI ) )
 
         names    = self.atoms['name']
         resnames = self.atoms['residue_name']
@@ -3536,6 +3537,17 @@ class Test(BT.BiskitTest):
 
         self.assertEqual(n_cyx, self.m3.atoms['residue_name'].count('CYS'))
         self.assertEqual(n_hix, self.m3.atoms['residue_name'].count('HIS'))
+
+    def test_xplor2amber(self):
+        """PDBModel xplor2amber test"""
+        ## test is simply back-converting a PDB comming from 'ambpdb -aatm'
+        ## a better test would be starting from an actually xplor-generated PDB
+        m1 = B.PDBModel( T.testRoot() +'/amber/1HPT_0dry.pdb' )
+        m1.xplor2amber( aatm=True )
+
+        m2 = B.PDBModel( T.testRoot() + '/amber/1HPT_0dry_amberformat.pdb' )
+        self.assertEqual( m1.atomNames(), m2.atomNames() )
+
 
     def test_report(self):
         """PDBModel report&plot test"""
