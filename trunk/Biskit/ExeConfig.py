@@ -199,7 +199,7 @@ class ExeConfig( object ):
                       'Could not find BINARY section in %s.' % self.dat
 
         try:
-            self.env = self.conf.items( self.SECTION_ENV )
+            self.env = dict( self.conf.items( self.SECTION_ENV ) )
         except:
             pass
 
@@ -232,8 +232,8 @@ class ExeConfig( object ):
         """
         Get needed environment variables.
         
-        @return: dictionary with environment for subprocess.Popen
-                 OR None, if no environment was specified
+        @return: dictionary with environment for subprocess.Popen;
+                 empty, if no environment was specified
         @rtype: {str:str} OR None
 
         @raise ExeConfigError: if env was not yet checked by update_environment
@@ -241,14 +241,7 @@ class ExeConfig( object ):
         if not self.env_checked:
             raise ExeConfigError, 'Environment not yet checked, validate()!'
 
-        if self.env is None:
-            return None
-
-        r = {}
-        for key,value in self.env:
-            r[ key ] = value
-
-        return r
+        return self.env
 
 
     def update_environment( self ):
@@ -262,16 +255,14 @@ class ExeConfig( object ):
 
         if self.env:
 
-            for i in range( len( self.env) ):
-
-                key, value = self.env[ i ]
+            for key,value in self.env.items():
 
                 if value is '':
 
                     if os.getenv( key ) is None:
                         missing += [ key ]
                     else:
-                        self.env[ i ] = (key, os.getenv( key ) )
+                        self.env[ key ] = os.getenv( key )
 
         self.env_checked = 1
 
