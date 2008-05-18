@@ -1185,7 +1185,7 @@ class PDBModel:
         numbers = map( str, range(10) )
 
         resI = self.resIndex().tolist()
-        resI.append( len( resI ) )
+        resI = N.concatenate( (resI, [len(self)] ) )
 
         names    = self.atoms['name']
         resnames = self.atoms['residue_name']
