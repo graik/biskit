@@ -37,6 +37,7 @@ from Biskit.LogFile import LogFile, StdLog
 from Biskit.PDBModel import PDBModel
 from Biskit.Errors import BiskitError
 from Biskit.PDBCleaner import PDBCleaner
+from Biskit.AmberLeap import AmberLeap
 from Biskit import Executor
 
 class AmberError( BiskitError ):
@@ -71,7 +72,7 @@ class AmberParmBuilder:
 
     ## script to create a parm that exactly mirrors a given PDB
     script_mirror_pdb = """
-    logFile %(leap_out)s
+    logFile %(f_out)s
     source %(leaprc)s
     %(fmod)s
     %(fprep)s
@@ -93,7 +94,7 @@ class AmberParmBuilder:
 
     def __init__( self, model,
                   leap_template=F_leap_in,
-                  leaprc=s.leaprc,
+                  leaprc=None,
                   leap_out=None, leap_in=None,
                   leap_pdb=None,
                   log=None,
@@ -105,7 +106,7 @@ class AmberParmBuilder:
         @type  model: PDBModel or str
         @param leap_template: path to template file for leap input
         @type  leap_template: str
-        @param leaprc: path to parameter file for leap
+        @param leaprc: forcefield parameter file or code (e.g. ff99)
         @type  leaprc: str
         @param leap_out: target file for leap.log (default: discard)
         @type  leap_out: str
@@ -116,17 +117,14 @@ class AmberParmBuilder:
         """
         self.m = PDBModel( model )
 
-        self.leap_template = t.absfile( leap_template )
+        self.leap_template = leap_template
         self.leaprc  = leaprc
-
-        self.leap_in = leap_in or tempfile.mktemp( '_leap_in' )
-        self.keep_leap_in = leap_in is not None
 
         self.leap_pdb = leap_pdb or tempfile.mktemp( '_leap_pdb' )
         self.keep_leap_pdb = leap_pdb is not None
 
-        self.leap_out= leap_out or tempfile.mktemp( '_leap_log' )
-        self.keep_leap_out = leap_out is not None
+        self.leap_in = leap_in
+        self.leap_out= leap_out
 
         self.log = log or StdLog()
 
@@ -136,12 +134,14 @@ class AmberParmBuilder:
         self.__dict__.update( kw )
 
 
-    def __runLeap( self, in_script, norun=0, **kw ):
+    def __runLeap( self, in_script, in_pdb, norun=0, **kw ):
         """
         Create script file and run Leap.
 
         @param in_script: content of ptraj script with place holders
         @type  in_script: str
+        @param in_pdb: PDB file to load into tleap
+        @type  in_pdb: str
         @param norun: 1 - only create leap scrip (default: 0)
         @type  norun: 1|0
         @param kw: key=value pairs for filling place holders in script
@@ -150,44 +150,56 @@ class AmberParmBuilder:
         @raise AmberError: if missing option for leap input file or
                            if could not create leap input file
         """
-        ## create leap script
-        try:
-            ## use own fields and given kw as parameters for leap script
-            d = copy.copy( self.__dict__ )
-            d.update( kw )
+        x = AmberLeap( in_script,
+                       in_pdb=in_pdb,
+                       log=self.log, verbose=self.verbose, debug=self.debug,
+                       catch_out=True,
+                       f_in=self.leap_in,
+                       f_out=self.leap_out,
+                       **kw )
+        if norun:
+            x.generateInp()
+        else:
+            x.run()
+        
+##         ## create leap script
+##         try:
+##             ## use own fields and given kw as parameters for leap script
+##             d = copy.copy( self.__dict__ )
+##             d.update( kw )
 
-            in_script = in_script % d
-            f = open( self.leap_in, 'w')
-            f.write( in_script )
-            f.close()
+##             in_script = in_script % d
+##             f = open( self.leap_in, 'w')
+##             f.write( in_script )
+##             f.close()
 
-            if self.verbose:
-                self.log.add('leap-script: ')
-                self.log.add( in_script )
+##             if self.verbose:
+##                 self.log.add('leap-script: ')
+##                 self.log.add( in_script )
 
-        except IOError:
-            raise AmberError('Could not create leap input file')
-        except:
-            raise AmberError('missing option for leap input file\n'+\
-                             'available: %s' % (str( d.keys() ) ))
+##         except IOError:
+##             raise AmberError('Could not create leap input file')
+##         except:
+##             raise AmberError('missing option for leap input file\n'+\
+##                              'available: %s' % (str( d.keys() ) ))
 
-        ## run tleap
-        args = '-f %s' % self.leap_in
+##         ## run tleap
+##         args = '-f %s' % self.leap_in
 
-        if not norun:
-            self.exe = Executor('tleap', args, log=self.log,verbose=1,
-                                catch_out=0)
-            self.output, self.error, self.status = self.exe.run()
+##         if not norun:
+##             self.exe = Executor('tleap', args, log=self.log,verbose=1,
+##                                 catch_out=0)
+##             self.output, self.error, self.status = self.exe.run()
 
-            if not os.path.exists( kw['out_parm'] ):
-                raise AmberError, "tleap failed"
+##             if not os.path.exists( kw['out_parm'] ):
+##                 raise AmberError, "tleap failed"
 
-        ## clean up
+##         ## clean up
 
-        if not self.keep_leap_in and not self.debug:
-            t.tryRemove( self.leap_in )
-        if not self.keep_leap_out and not self.debug:
-            t.tryRemove( self.leap_out)
+##         if not self.keep_leap_in and not self.debug:
+##             t.tryRemove( self.leap_in )
+##         if not self.keep_leap_out and not self.debug:
+##             t.tryRemove( self.leap_out)
 
 
     def parm2pdb( self, f_parm, f_crd, f_out, aatm=0 ):
@@ -210,7 +222,7 @@ class AmberParmBuilder:
         args = '-p %s %s' % (f_parm, '-aatm'*aatm )
 
         x = Executor('ambpdb', args, f_in=f_crd, f_out=f_out,
-                     log=self.log, verbose=1)
+                     log=self.log, verbose=1, catch_err=1)
 
         output,error,status = x.run()
 
@@ -440,7 +452,7 @@ class AmberParmBuilder:
         fprep = [ t.absfile( f ) for f in t.toList( fprep ) ]
 
         try:
-            self.log.add( 'Cleaning PDB file for Amber:' )
+            if self.verbose: self.log.add( '\nCleaning PDB file for Amber:' )
             m = self.leapModel( hetatm=hetatm )
 
             if cap:
@@ -449,8 +461,13 @@ class AmberParmBuilder:
                 capN = MU.union( capN, N.array( end_broken ) + 1 )
 
             for i in capN:
+                if self.verbose:
+                    self.log.add( 'Adding ACE cap to chain %i' % i )
                 m = self.capACE( m, i )
+
             for i in capC:
+                if self.verbose:
+                    self.log.add( 'Adding NME cap to chain %i' % i )
                 m = self.capNME( m, i )
 
             m.renumberResidues( addChainId=1 )  ## again, to accomodate capping
@@ -463,9 +480,11 @@ class AmberParmBuilder:
             ss = self.__ssBonds( m, cutoff=4. )
             self.__cys2cyx( m, ss )
             leap_ss  = self.__fLines( self.ss_bond, ss )
-            self.log.add('Found %i disulfide bonds: %s' % (len(ss),str(ss)))
+            if self.verbose:
+                self.log.add('Found %i disulfide bonds: %s' % (len(ss),str(ss)))
 
-            self.log.add( 'writing cleaned PDB to %s'  % self.leap_pdb )
+            if self.verbose:
+                self.log.add( 'writing cleaned PDB to %s'  % self.leap_pdb )
             m.writePdb( self.leap_pdb, ter=3 )
 
             self.__runLeap( template, in_pdb=self.leap_pdb,
@@ -598,31 +617,80 @@ class AmberParmBuilder:
 
 #############
 ## TESTING ##
+import Biskit.test as BT
+import tempfile
+import Biskit.tools as T
+
+class Test( BT.BiskitTest ):
+    """Test AmberParmBuilder"""
+
+    TAGS = [ BT.EXE ]
+
+    def prepare(self):
+        root = T.testRoot() + '/amber/'
+        self.ref = PDBModel( T.testRoot() + '/amber/1HPT_0.pdb')
+        self.refdry = root + '1HPT_0dry.pdb'
+
+        self.dryparm = tempfile.mktemp('.parm', 'dry_')
+        self.drycrd  = tempfile.mktemp('.crd', 'dry_')
+        self.drypdb  = tempfile.mktemp('.pdb', 'dry_')
+        self.wetparm = tempfile.mktemp('.parm', 'wet_')
+        self.wetcrd  = tempfile.mktemp('.crd', 'wet_')
+        self.wetpdb  = tempfile.mktemp('.pdb', 'wet_')
+
+    def cleanUp(self):
+        T.tryRemove( self.dryparm )
+        T.tryRemove( self.drycrd )
+        T.tryRemove( self.drypdb )
+        T.tryRemove( self.wetparm )
+        T.tryRemove( self.wetcrd )
+        T.tryRemove( self.wetpdb )
+        
+
+    def test_AmberParmMirror(self):
+        """AmberParmBuilder.parmMirror test"""
+        ref = self.ref
+        mask = N.logical_not( ref.maskH2O() ) ## keep protein and Na+ ion
+        self.mdry = ref.compress( mask )
+
+        self.a = AmberParmBuilder( self.mdry, verbose=self.local,
+                                   debug=self.DEBUG )
+
+        self.a.parmMirror(f_out=self.dryparm,
+                          f_out_crd=self.drycrd )
+
+        self.a.parm2pdb( self.dryparm, self.drycrd, self.drypdb )
+
+        self.m1 = PDBModel(self.drypdb)
+        self.m2 = PDBModel(self.refdry)
+
+        eq = N.array( self.m1.xyz == self.m2.xyz )
+        self.assert_( eq.all() )
+
+
+    def test_AmberParmSolvated( self ):
+        """AmberParmBuilder.parmSolvated test"""
+        ## remove waters and hydrogens
+        self.mdry = self.ref.compress( self.ref.maskProtein() )
+        self.mdry = self.mdry.compress( self.mdry.maskHeavy() )
+
+        self.a = AmberParmBuilder( self.mdry,
+                                   verbose=self.local, debug=self.DEBUG)
+
+        self.a.parmSolvated( self.wetparm, f_out_crd=self.wetcrd,
+                             f_out_pdb=self.wetpdb,
+                             box=2.5 )
+
+        self.m3 = PDBModel( self.wetpdb )
+
+        m3prot = self.m3.compress( self.m3.maskProtein() )
+        refprot= self.ref.compress( self.ref.maskProtein() )
+        
+        self.assertEqual( self.ref.lenChains(), self.m3.lenChains() )
+        self.assertEqual( refprot.atomNames(), m3prot.atomNames() )
+
+
+
 if __name__ == '__main__':
 
-    f = t.testRoot() + '/Amber/'
-
-    traj = t.Load( f + 'lig.etraj')
-    m = traj.ref
-
-    ## create solvated topology from xplor PDB
-    a = AmberParmBuilder( m, verbose=1, debug=1 )
-
-    a.parmSolvated( f + 'lig_solvated.parm', box=2.5,
-                    f_out_pdb = f + 'lig_solvated.pdb',
-                    f_out_crd = f + 'lig_solvated.crd')
-
-
-    ## create amber pdb without water and hydrogen
-    m = m.compress( m.maskProtein() )
-    m = m.compress( m.maskHeavy() )
-
-    f_in = f + '/AmberParmBuilder/lig_stripped.pdb'
-
-    m.writePdb( f_in )
-
-    ## create mirror parm for this stripped PDB
-
-    a = AmberParmBuilder( f_in, verbose=1, debug=1 )
-
-    a.parmMirror( f + '/AmberParmBuilder/lig_stripped.parm' )
+    BT.localTest()

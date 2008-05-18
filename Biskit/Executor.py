@@ -666,7 +666,6 @@ class Executor:
 
         ## else put input string into file
         assert self.f_in
-##         self.f_in = self.f_in or tempfile.mktemp('_exec.inp')
 
         f = open( self.f_in, 'w')
         f.write(inp)

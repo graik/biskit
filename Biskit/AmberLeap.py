@@ -216,7 +216,8 @@ class Test( BT.BiskitTest ):
                             leaprc='ff03',
                             leap_out=self.flog,
                             fmod='', fprep='', ss_bonds='', box=12.5,
-                            in_pdb=self.fpdb)
+                            in_pdb=self.fpdb,
+                            debug=self.DEBUG)
         self.run()
         
         
