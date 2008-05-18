@@ -5,7 +5,7 @@
 ## Build Amber topology from cleaned PDB file
 ## to be used with AmberParmBuilder.py
 
-logFile %(leap_out)s
+logFile %(f_out)s
 
 source %(leaprc)s
 
