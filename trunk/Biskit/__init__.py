@@ -42,7 +42,6 @@ try:
 
     from AmberCrdParser import AmberCrdParser, ParseError
     from AmberRstParser import AmberRstParser
-    from AmberParmBuilder import AmberParmBuilder
     from PDBCleaner import PDBCleaner, CleanerError
     from Blast2Seq import Blast2Seq
     from ChainCleaner import ChainCleaner
@@ -66,6 +65,9 @@ try:
     from Xplorer import Xplorer, XplorerError, RunError
     from ColorSpectrum import ColorSpectrum
     from MatrixPlot import MatrixPlot
+
+    from AmberLeap import AmberLeap
+    from AmberParmBuilder import AmberParmBuilder
 
     from Hmmer import Hmmer
     from Fold_X import Fold_X, Fold_XError
