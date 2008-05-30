@@ -2331,10 +2331,10 @@ class PDBModel:
 
     def renumberResidues( self, mask=None, start=1, addChainId=1 ):
         """
-        Make all residue numbers consecutive and remove any insertion code
-        letters. Note that a backward jump in residue numbering is interpreted
-        as end of chain by chainMap() and chainIndex(). Chain borders might
-        hence get lost if there is no change in chain label or segid.
+        Make all residue numbers consecutive and remove any insertion
+        code letters. Note that a backward jump in residue numbering
+        (among other things) is interpreted as end of chain by
+        chainMap() and chainIndex() when a PDB file is loaded.
 
         @param mask: [ 0||1 x N_atoms ] atom mask to apply BEFORE
         @type  mask: list of int
