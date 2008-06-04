@@ -308,7 +308,8 @@ def pfisher( pvalues ):
     American Statistician, vol. 2, issue 5, page 30.
 
     ('Fisher method' or 'inverse ChiSquare method') See also book:
-    Walter W. Piegorsch, A. John Bailer: Analyzing Environmental Data. Wiley
+    Walter W. Piegorsch, A. John Bailer: Analyzing Environmental Data.
+    Wiley 2005
 
     @param pvalues: list of independent P-values
     @type  pvalues: [ float ]
