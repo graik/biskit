@@ -73,7 +73,7 @@ class PDBCleaner:
         i = 0
         to_be_removed = []
 
-        for a in self.model.getAtoms():
+        for a in self.model:
 
             if a['alternate']:
                 try:
@@ -114,7 +114,7 @@ class PDBCleaner:
         
         @param amber: don't rename HID, HIE, HIP, CYX, NME, ACE [0]
         @type  amber: 1||0
-        @param keep: names of residues to keep
+        @param keep: names of additional residues to keep
         @type keep:  [ str ]
         """
         standard = MU.atomDic.keys() + keep
