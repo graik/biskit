@@ -291,13 +291,13 @@ class Test(BT.BiskitTest):
     def test_ExeConfig( self ):
         """ExeConfig test (validate xclock)"""
 
-        x = ExeConfig( 'xclock', strict=1 )
+        x = ExeConfig( 'ls', strict=1 )
         x.validate()
 
         if self.local:
             print x.bin
 
-        self.assertEquals( True, 'xclock' in x.bin )
+        self.assertEquals( True, 'ls' in x.bin )
     
         
 if __name__ == '__main__':

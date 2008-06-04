@@ -1,9 +1,9 @@
 [BINARY]
 
-comment= demo config file for the unix xclock program
+comment= demo config file for the unix ls command
 
 ## binary
-bin=xclock
+bin=ls
 
 ## working directory
 cwd=
