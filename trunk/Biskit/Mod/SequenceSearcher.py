@@ -48,20 +48,6 @@ class BlastError( E.BiskitError ):
 class InternalError( E.BiskitError ):
     pass
 
-def args2str( f ):
-    """decorator that converts all arguments of a method into strings"""
-    def wrapper( *args, **kw ):
-
-        str_args = [ str( a ) if a != None else a for a in args[1:] ]
-        for k in kw:
-            kw[k] = str( kw[k] )
-
-        result = f( *str_args, **kw )
-        return result
-
-    return wrapper
-
-
 class SequenceSearcher:
     """
     Take a sequence and return a list of nonredundant homolog
