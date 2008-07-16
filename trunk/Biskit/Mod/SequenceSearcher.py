@@ -48,6 +48,20 @@ class BlastError( E.BiskitError ):
 class InternalError( E.BiskitError ):
     pass
 
+def args2str( f ):
+    """decorator that converts all arguments of a method into strings"""
+    def wrapper( *args, **kw ):
+
+        str_args = [ str( a ) if a != None else a for a in args[1:] ]
+        for k in kw:
+            kw[k] = str( kw[k] )
+
+        result = f( *str_args, **kw )
+        return result
+
+    return wrapper
+
+
 class SequenceSearcher:
     """
     Take a sequence and return a list of nonredundant homolog
@@ -231,8 +245,14 @@ class SequenceSearcher:
         finally:
             return cStringIO.StringIO( str_results )
 
+    def __dictvalues2str( self, kw ):
+        """convert all dict values to strings; see bug #2019987"""
+        r = {}
+        for k,v in kw.items():
+            r[k] = str( v )
+        return r
 
-    def remoteBlast( self, seqFile, db, method, e=0.01, **kw ):
+    def remoteBlast( self, seqFile, db, method, e='0.01', **kw ):
         """
         Perform a remote BLAST search using the QBLAST server at NCBI.
         Uses Bio.Blast.NCBIWWW.qblast (Biopython) for the search
@@ -266,13 +286,13 @@ class SequenceSearcher:
                every change in the output file might kill the
                parser. If you still want to use remoteBlast we
                strongly recomend that you install BioPython
-               from CVS. Information on how to do this you
-               will find on the BioPython homepage.
+               from CVS. Information on how to do this can be
+               found on the BioPython homepage.
 
         @todo: Remote Blasting is running as expected but sequences
                are still retrieved from a local database. Implement remote
                collection of fasta seuqences from NCBI (there should be
-               something like in Biopython). Otherwise something like this
+               something alike in Biopython). Otherwise something like this
                will also work::
 
                  ## collect the entry with gi 87047648
@@ -289,6 +309,9 @@ class SequenceSearcher:
                              i+= 1
                  print seq       
         """
+        kw = self.__dictvalues2str( kw )
+        e = str(e)
+
         try:
             fasta = Fasta.Iterator( open(seqFile) )
             query = fasta.next()
@@ -317,7 +340,7 @@ class SequenceSearcher:
 
 
     def localBlast( self, seqFile, db, method='blastp',
-                    resultOut=None, e=0.01, **kw ):
+                    resultOut=None, e='0.01', **kw ):
         """
         Performa a local blast search (requires that the blast binaries
         and databases are installed localy).
@@ -364,6 +387,8 @@ class SequenceSearcher:
         """
         results = err = p = None
         resultOut = resultOut or self.outFolder+ self.F_BLAST_RAW_OUT
+        kw = self.__dictvalues2str( kw )
+        e = str(e)
 
         try:
             if self.verbose:
@@ -394,7 +419,7 @@ class SequenceSearcher:
             raise BlastError( str(why) ) 
 
 
-    def localPSIBlast( self, seqFile, db, resultOut=None, e=0.01, **kw ):
+    def localPSIBlast( self, seqFile, db, resultOut=None, e='0.01', **kw ):
         """
         Performa a local psi-blast search (requires that the blast binaries
         and databases are installed localy).
@@ -448,6 +473,8 @@ class SequenceSearcher:
         """
         results = err = p = None
         resultOut = resultOut or self.outFolder+ self.F_BLAST_RAW_OUT
+        kw = self.__dictvalues2str( kw )
+        e = str(e)        
 
         try:
             results, err = NCBIStandalone.blastpgp( settings.psi_blast_bin,
