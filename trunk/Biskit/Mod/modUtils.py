@@ -56,10 +56,11 @@ def parse_tabbed_file( fname ):
                     result[ fpdb ] = chain_id
                     
             except:
+                ## no chain given
                 fpdb = l.strip()
                 
                 if not osp.exists(fpdb):
-                    fpdb = '%s/%s'%(T.testRoot(), fpdb)                
+                    fpdb = osp.join( osp.split( fname )[0], fpdb )
                     
                 result[ fpdb ] = ''
 
