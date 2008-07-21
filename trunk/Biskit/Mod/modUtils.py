@@ -24,7 +24,7 @@
 utility funtions for Mod package
 """
 
-import os.path
+import os.path as osp
 import Biskit.molUtils as MU
 import Biskit.tools as T
 
@@ -46,21 +46,22 @@ def parse_tabbed_file( fname ):
         if not l[0] == '#':
             
             try:
-                fname, chain_id = l.split()
+                fpdb, chain_id = l.split()
 
-                if not os.path.exists(fname):
-                    fname = '%s/%s'%(T.testRoot(), fname)
+                if not osp.exists(fpdb):
+                    fpdb = osp.join( osp.split( fname )[0], fpdb )
+##                     fpdb = '%s/%s'%(T.testRoot(), fpdb)
                     
-                if not len(fname) == 0:
-                    result[ fname ] = chain_id
+                if not len(fpdb) == 0:
+                    result[ fpdb ] = chain_id
                     
             except:
-                fname = l.strip()
+                fpdb = l.strip()
                 
-                if not os.path.exists(fname):
-                    fname = '%s/%s'%(T.testRoot(), fname)                
+                if not osp.exists(fpdb):
+                    fpdb = '%s/%s'%(T.testRoot(), fpdb)                
                     
-                result[ fname ] = ''
+                result[ fpdb ] = ''
 
     f.close()
 
