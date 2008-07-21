@@ -306,7 +306,9 @@ class Test(BT.BiskitTest):
 
         ## log file
         self.f_out = self.outfolder + '/TemplateCleaner.log'
-        self.l = LogFile( self.f_out, mode='w')
+        self.l = None
+        if not self.local:
+            self.l = LogFile( self.f_out, mode='w')
     
         shutil.copytree( T.testRoot() + '/Mod/project/templates/nr',
                          self.outfolder + '/templates/nr' )
