@@ -30,6 +30,7 @@ from TemplateSearcher import TemplateSearcher
 import modUtils
 
 import os, string
+import numpy as N
 
 class TemplateCleaner:
     """
@@ -108,8 +109,13 @@ class TemplateCleaner:
         @return: PDBModel with only the specified chain
         @rtype: PDBModel
         """
-        return model.compress( model.mask( \
-            lambda a, id=chainId: a['chain_id'] == id ))
+        chain_mask = model.mask( lambda a, id=chainId: a['chain_id'] == id )
+
+        if N.sum( chain_mask ) == 0:
+            raise CleanerError( "Cannot find chain %s in PDB '%s'." % \
+                                (repr(chainId), model.pdbCode) )
+        
+        return model.compress( chain_mask )
 
 
     def fasta_sequence( self, header, s ):
@@ -163,8 +169,6 @@ class TemplateCleaner:
         ## structure alignment program needs chain identifier
         if not chain_id:
             m_ca['chain_id'] = ['A'] * m_ca.lenAtoms()
-
-            chain_id = 'A'  ## for sequence record
 
             chain_id = 'A'  ## for sequence record
 
