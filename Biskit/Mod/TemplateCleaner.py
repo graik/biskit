@@ -229,6 +229,7 @@ class TemplateCleaner:
         @type  keep_hetatoms: 0|1
         """
         fasta = ""
+        c = None
 
         for f, id in file_dic.items():
 
@@ -334,7 +335,7 @@ class Test(BT.BiskitTest):
 
 if __name__ == '__main__':
 
-    BT.localTest(debug=1)
+    BT.localTest(debug=0)
 
 
 
