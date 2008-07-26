@@ -108,32 +108,6 @@ class SequenceSearcher:
         """
         self.outFolder = T.absfile( outFolder )
 
-        ##
-        ## NOTE: If you get errors of the type "Couldn't find ID in"
-        ##       check these regexps (see getSequenceIDs function)!
-        ##
-
-        self.ex_gi    = re.compile( '^>(?P<db>ref|gb|ngb|emb|dbj|prf)\|{1,2}(?P<id>[A-Z_0-9.]{4,9})\|' )
-        self.ex_swiss = re.compile( '^>sp\|(?P<id>[A-Z0-9_]{5,7})\|' )
-        self.ex_swiss2= re.compile( '^>.*swiss.*\|(?P<id>[A-Z0-9_]{5,7})\|' )
-        self.ex_pdb   = re.compile( '^>pdb\|(?P<id>[A-Z0-9]{4})\|' )
-        self.ex_all   = re.compile( '^>.*\|(?P<id>[A-Z0-9_.]{4,14})\|' )
-
-        ##
-        ##      RegExp for the remoteBlast searches. Somehow the
-        ##      NCBI GI identifier is written before the identifier
-        ##      we want (even though this is explicitly turned off in
-        ##      SequenceSearcher.remoteBlast).
-        ##
-
-        gi = '^gi\|(?P<gi>[0-9]+)\|'
-        self.ex_Rgi_1 = re.compile( gi+'(?P<db>ref|sp|pdb|gb|ngb|emb|dbj|prf|pir)\|(?P<id>[A-Z_0-9.]+)\|' )
-        self.ex_Rgi_2 = re.compile( gi+'(?P<db>ref|sp|pdb|gb|ngb|emb|dbj|prf|pir)\|{2}(?P<id>[A-Z_0-9.]+)' )
-        self.ex_Rswiss = re.compile( gi+'sp\|(?P<id>[A-Z0-9_]{5,7})\|' )
-        self.ex_Rpdb   = re.compile( gi+'pdb\|(?P<id>[A-Z0-9]{4})\|' )
-
-
-
         self.verbose = verbose
         self.log = log or StdLog()
 
@@ -312,9 +286,7 @@ class SequenceSearcher:
                 self.log.writeln('Raw blast output copied to: ' +\
                                  self.outFolder + self.F_BLAST_RAW_OUT  )
 
-            p = NCBIXML.BlastParser()
-
-            parsed = p.parse( results )[0]
+            parsed = NCBIXML.parse( results ).next()
 
             self.__blast2dict( parsed, db )
 
@@ -392,9 +364,7 @@ class SequenceSearcher:
             if self.verbose:
                 self.log.writeln('Raw blast output copied to: ' + resultOut  )
 
-            p = NCBIXML.BlastParser()
-
-            parsed = p.parse( results )[0]
+            parsed = NCBIXML.parse( results ).next()
 
             self.__blast2dict( parsed, db )
 
@@ -474,8 +444,7 @@ class SequenceSearcher:
             if self.verbose:
                 self.log.writeln('Raw blast output copied to: ' + resultOut )
 
-            p = NCBIXML.BlastParser()
-            parsed = p.parse( results )[-1]
+            parsed = NCBIXML.parse( results ).next()
 
             self.__blast2dict( parsed, db )
 
@@ -498,28 +467,8 @@ class SequenceSearcher:
 
         @return: list of sequence IDs
         @rtype: [str]
-
-        @raise BlastError: if can't find ID
         """
-        result = []
-
-        for a in blast_records.alignments:
-            for pattern in [self.ex_gi,  self.ex_swiss, self.ex_swiss2,
-                            self.ex_pdb, self.ex_all,
-                            self.ex_Rgi_1, self.ex_Rgi_2,
-                            self.ex_Rswiss, self.ex_Rpdb]:
-
-                match = re.search( pattern, a.title )
-
-                if match:
-                    break
-
-            if (not match) or (not match.group('id')):
-                raise BlastError( "Couldn't find ID in '" + a.title + "'"+\
-                  ". Check database or add pattern to "+\
-                  "SequenceSearcher.__init__" )
-
-            result += [ match.group('id') ]
+        result = [ a.accession for a in blast_records.alignments ]
 
         return result
 
