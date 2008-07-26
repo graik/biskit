@@ -28,5 +28,14 @@ try:
     from TemplateCleaner import TemplateCleaner
     from TemplateFilter import TemplateFilter
 
+    import Biskit.PVM as PVM
+    if PVM.pvm_installed:
+        from ModelMaster import ModelMaster
+        from ModelSlave  import ModelSlave
+        from AlignerMaster import AlignerMaster
+        from AlignerSlave  import AlignerSlave
+
 except ImportError, why:
     B.EHandler.warning( 'Error importing Biskit/Mod modules', trace=1 )
+
+del PVM

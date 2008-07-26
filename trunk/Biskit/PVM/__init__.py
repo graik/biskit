@@ -38,12 +38,14 @@ try to initialize them. See also L{Biskit.tools.tryImport}.
 from Biskit import EHandler
 import Biskit.tools as T
 
-r = True
+pvm_installed = True
 
-r = T.tryImport( 'TrackingJobMaster', 'TrackingJobMaster', namespace=globals())
-r = T.tryImport( 'dispatcher', 'JobSlave', namespace=globals() ) and r
+pvm_installed = T.tryImport( 'TrackingJobMaster', 'TrackingJobMaster',
+                             namespace=globals())
+pvm_installed = T.tryImport( 'dispatcher', 'JobSlave',
+                             namespace=globals() ) and pvm_installed
 
-if not r:
+if not pvm_installed:
     EHandler.warning('Could not import PVM (Parallel Virtual Machine) modules.'+
         ' Please check that PVM and pypvm are installed!\n'+
         '\tParallelisation is not available.')
@@ -51,4 +53,4 @@ if not r:
 ##
 ## clean up
 ##
-del r, EHandler, T
+del EHandler, T
