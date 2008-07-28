@@ -28,6 +28,7 @@ Search for templates.
 """
 
 from SequenceSearcher import SequenceSearcher, BlastError
+import Biskit.settings as bisSettings
 import settings
 import Biskit.tools as T
 from Biskit import StdLog, EHandler
@@ -187,7 +188,7 @@ class TemplateSearcher( SequenceSearcher ):
         return result
 
 
-    def getLocalPDBHandle( self, id, db_path=settings.pdb_path ):
+    def getLocalPDBHandle( self, id, db_path=bisSettings.pdb_path ):
         """
         Get the coordinate file from a local pdb database.
 
@@ -225,7 +226,7 @@ class TemplateSearcher( SequenceSearcher ):
         raise BlastError( "Couldn't find PDB file.")
 
 
-    def getRemotePDBHandle( self, id, rcsb_url=settings.rcsb_url ):
+    def getRemotePDBHandle( self, id, rcsb_url=bisSettings.rcsb_url ):
         """
         Get the coordinate file remotely from the RCSB.
 

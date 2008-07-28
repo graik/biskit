@@ -27,7 +27,8 @@ help()
 if len( args ) > 1:
     
     try:
-        if len(args[1]) > 3 and str.upper( args[1][-4:] ) == '.PDB':
+        if (len(args[1]) > 3 and str.upper( args[1][-4:] ) == '.PDB') \
+               or (len( args[1] ) ==4 ):
             x = PDBModel( args[1] )
         else:
             x = Load( args[1] )
