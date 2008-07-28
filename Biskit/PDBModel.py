@@ -133,273 +133,11 @@ class PDBModel:
     data associated to residues. A normal dictionary 'info' is there to accept
     any information about the whole model.
 
-    Creating a PDBModel
-    ===================
-
-         1. from a PDB file::
-
-           >>> m = PDBModel('~/my/structure.pdb')
-
-         2. from a pickled PDBModel::
-
-           >>> m = PDBModel('~/my/pickled.model')
-
-          Or::
-           >>> import Biskit.tools as T
-           >>> m = T.Load('~/my/pickled.model')
-
-         3. from another PDBModel in memory::
-
-           >>> m = PDBModel( sourcemodel )
-
-      The file or object passed to the constructor becomes the L{source}
-      of the PDBModel. See the section on saving PDBModels below!
-
-
-    Working with profiles
-    =====================
-
-      See L{ProfileCollection} and L{CrossView}!
-
-      For example:
-
-        >>> m.atoms['element']
-
-      ...will give you a list of length m.lenAtoms() with the Element character
-      of each atom.
-
-        >>> m.atoms
-      and
-        >>> m.residues
-
-      ... will give you an overview over the available atom profiles and their
-      associated meta data.
-
-      ProfileCollection (the mother class of aProfiles and rProfiles)
-      offers many convenient methods to access, modify, iterate
-      and even plot profiles. 
-
-      For convenience, we have defined some shortcuts so that many profile
-      methods can be directly accessed from the model. In the following
-      examples, m is again a PDBModel instance::
-
-        >>> m['name']            ## fetch the atom profile 'name'
-        ['H1', 'H2', 'N', 'H3', 'CA', 'CB', 'C', 'O', 'N', 'H', '...
-
-        >>> m['residue_name']   ## fetch the **atom** profile 'residue_name'
-        ['ALA', 'ALA', 'ALA', 'ALA', 'ALA', 'ALA', 'ALA', 'ALA', 'GLN', ...
-
-      Note that 'residue_name' still has one value per atom because it comes
-      from the parsing of the PDB file. If you want to have a real residue
-      profile with the residue names, you can create a copy::
-
-        >>> m['resname'] = m.atom2resProfile('residue_name')
-
-      Which is equivalent to the direct call::
-
-        >>> m.residues.set('resname', m.atom2resProfile( 'residue_name' ))
-
-      Now let's do some simple calculation. We want to create a profile
-      that lists the distance of each atom from the molecule's center
-      of mass. This is how it works::
-
-        >>> diff = m.xyz - m.centerOfMass()
-        >>> dist = N.sqrt( N.sum( diff**2, axis=1 ) )
-        >>> m['from_center'] = dist
-
-      However, the shortcuts don't offer you all the options of the real
-      ProfileCollection methods. So you may rather want to create the
-      profile like this::
-
-        >>> m.atoms.set('from_center', dist, 'my_bday'='01/01/1900',
-                            comment='distance in A from center of mass' )
-
-      You can then access the meta infos of your profile like this::
-        >>> m['from_center', 'my_bday']
-        '01/01/1900'
-
-      Sometimes you don't actually have a value for each atom. So suppose,
-      you extracted only C-alpha distances from your dist profile. You
-      can still use them as atom profile if you give a mask designating
-      the positions for which you actually have values::
-
-        >>> dist = N.compress( dist, m.maskCA() )  ## extract CA distances
-        >>> m.atoms.set('ca_from_center', dist, mask=m.maskCA(),
-                            default=-1, comment='CA distances' )
-
-      The new profile will have the CA distances associated to CA atoms
-      and -1 in all other positions.
-
-    Working with atoms
-    ==================
-
-      You can fetch a virtual dictionary with the values of all atom
-      profiles for one atom::
-
-        >>> m[0]
-        CrossView{'name': 'H1', 'residue_number': 1, 'insertion_code': '',
-        ...
-
-      Which is the same as::
-        >>> m.atoms[0]
-
-      Changes to this dictionary change the underlying profiles at the
-      position of this atom. Vice versa, changes to the profiles are
-      mirrored in the 'dictionary'.
-
-      Iteration over a model m will give you one CrossView after the other::
-        >>> for atom in m:
-        ...    if atom['element']=='C' and atom['temperature_factor'] > 70:
-        ...        atom['charge'] = 1.
-
-      However, working with CrossViews is usually much slower than directly
-      working with the underlying profiles. So the above example
-      would be much more efficiently done like this::
-
-        >>> m['charge'] = N.greater( m['temperature_factor'], 70 ) * \
-        ...                  m.maskFrom('element', 'C')
-
-      See the description of L{CrossView} for a detailed discussion of
-      performance issues.
-
-    Manipulating PDBModels
-    ======================
-
-      Methods are provided to extract, remove, re-arrange, or concatenate
-      atoms, chains or residues in ways similar to the handling of Numeric
-      arrays. The major methods for this are L{take}, L{compress}, L{concat},
-      L{takeResidues} and L{takeChains}. All of these methods operate on
-      coordinates, atom- and residue profiles simultaneously so that
-      everything always stays synchronized.
-
-      Atoms, residues and chains can be selected by their indices (positions)
-      or with masks (of 1 and 0 or True and False). And there are many methods
-      to produce such masks. The following example extracts all CA atoms from
-      a PDBModel and puts them into a new model 'm_ca'::
-
-        >>> mask_ca = m.maskFrom('name', 'CA')
-        >>> m_ca = m.compress( mask_ca )
-
-      We have a shortcut for this::
-        >>> m_ca = m.compress( m.maskCA() )
-
-      Masks are normal Numpy arrays and can be combined with logical_and,
-      logical_or (simple * and + does the same) and other methods. Masks
-      calculated from atoms can be converted to residue or chain masks and
-      back with atom2resMask, atom2chainMask, res2atomMask, etc. methods.
-
-      Many PDBModel methods (called take-something) operate
-      with indices rather than masks.  Indices are lists of (atom,
-      residue, or chain) positions. A mask can easily be converted
-      into a list of indices with the Numeric.nonzero() function. So::
-
-        >>> m_ca = m.compress( mask_ca )
-      Is equivalent to::
-        >>> m_ca = m.take( N.nonzero( mask_ca ) )
-
-      Like masks, indices can be converted between atom, residue, and
-      chain level with atom2resIndices, res2atomIndices, and so on. The
-      following example builds a new model m2 from only the first and last
-      chain of an existing model m::
-
-        >>> m2 = m.takeChains( [0] ).concat( m.takeChains( [-1] ) )
-
-      However more efficient and easier would be::
-        >>> m2 = m.takeChains( [0,-1] )
-
-      Which is the same as::
-
-        >>> m2 = m.take( m.chain2atomIndices( [0,-1] ) )
-
-      numpy.put() is used to convert a list of indices into a mask::
-
-        >>> cacb_pos = m.indicesFrom('name', ['CA','CB'] )
-        >>> mask = N.zeros( len(m) )
-        >>> N.put( mask, cacb_pos, 1 )
-        >>>   ## Test:
-        >>> N.all( mask == N.nonzero( cacb_pos ) )
-        True
-
-    Comparing PDBModels
-    ===================
-
-      You can compare and normalize the atom content of similar models
-      with  L{compareAtoms}, calculate an (iterative) RMSD with
-      L{rms}, and superposition two equivalent (L{fit}) or almost equivalent
-      models (L{magicFit}) -- again with or without iterative removal of
-      variable regions.
-
-    Surfaces, Energies, Conservations...
-    ====================================
-
-      L{PDBDope} adds surfaces, conservation profiles, energies and other
-      information from external programs to PDBModels::
-
-        >>> d = PDBDope( m )
-        >>> d.addConservation()  ## needs Hmmer and Pfam installed
-        >>> d.addSurfaceRacer()  ## access. and mol. surface from surfrace
-        >>> d.addDensity()       ## simple atomic density
-        >>> d.addFoldX()         ## puts fold-X scores into m.info
-        >>> d.addSecondaryStructure()  ## from DSSP
-
-    Saving a PDBModel
-    =================
-
-      A normal PDB file can be created from the model at any time::
-        >>> m.writePdb('~/my/modified.pdb')
-      There are several options for dealing with TER records and
-      atom names.
-
-      However, writing and reading PDB files is rather slow and
-      additional information in rProfiles, aProfiles, or info is lost.
-      We therefore recommend to pickle PDBModels as python objects
-      to disc. This can be done in two ways::
-
-        >>> T.Dump( m, '~/my/repickled.model' )
-      Or::
-        >>> m.saveAs( '~/my/repickled.model' )
-
-      There is a subtle but important difference between the two
-      methods: The model remembers its source (a PDB file or a
-      PDBModel in memory or a pickled PDBModel on disc) and keeps
-      track of whether xyz, or (which) profiles have been changed with
-      respect to this source. Normal pickling with T.Dump will
-      automatically trigger a L{slim()} method. slim() resets the xyz
-      array or any profiles to 'None' if they have not been changed
-      since being read from a source on disc (a source in memory
-      doesn't count). 
-
-      However, the source connection can also become a little
-      confusing, especially if you move or change the file with the
-      source model. To avoid any such confusion you should use the
-      second method for saving models::
-
-        >>> m.saveAs( '~/my/repickled.model' )
-
-      saveAs produces an independent stand-alone PDBModel on
-      disc, which can also be copied around between different
-      machines (python pickles are, at least in theory, platform
-      independent).
-
-    Relation to other Biskit classes
-    ================================
-
-      A L{Dock.Complex} can be created from two PDBModels and offers
-      methods for contact evaluation, scoring and other things::
-
-        >>> c = Complex( rec_model, lig_model )
-
-      The receptor and ligand PDBModels of a complex are accessible
-      as::
-        >>> m1 = c.rec()
-        >>> m2 = c.lig()
-
-      A L{Trajectory} adds a time dimension to a PDBModel and can be
-      created from a list of PDBModels, PDBs or an Amber crd file. The
-      underlying PDBModel of a trajectory t is accessed as::
-        >>> m = t.ref
-      And a PDBModel for a certain time point can be created by indexing::
-        >>> model_10 = t[10]
+    For detailed documentation,
+    see http://biskit.pasteur.fr/doc/handling_structures/PDBModel
+
+    @todo:
+       * outsource validSource into PDBParserFactory
     """
 
     #: keys of all atom profiles that are read directly from the PDB file
@@ -428,8 +166,8 @@ class PDBModel:
         @raise PDBError: if file exists but can't be read
         """
         self.source = source
-        if type( self.source ) is str:
-            self.source = LocalPath( self.source )
+        if type( source ) is str and os.path.isfile( source ):
+            self.source = LocalPath( source )
 
         self.__validSource = 0
         self.fileName = None
@@ -1067,7 +805,11 @@ class PDBModel:
                 if isinstance( self.source, B.PDBModel ):
                     self.__validSource = self.source
                 else:
-                    self.__validSource = None
+                    ## risky: the PDB code may not exist!
+                    if type( self.source ) is str and len( self.source )==4:
+                        self.__validSource = self.source
+                    else:
+                        self.__validSource = None
 
         return self.__validSource
 
@@ -3612,19 +3354,5 @@ def clock( s, ns=globals() ):
     return r
 
 if __name__ == '__main__':
-
-##     import Biskit as B
-
-##     print "Loading"
-##     m = B.PDBModel( T.testRoot()+'/com/1BGS.pdb')
-##     print "Loaded"
-##     m.slim()
-
-##     m_ = B.PDBModel( m )
-##     l1 = m_.atoms['name']
-##     m_.slim()
-##     l2 = m_.atoms['name']
-
-##     print "Done"
 
     BT.localTest()

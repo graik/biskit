@@ -30,6 +30,7 @@
 from PDBParseFile   import PDBParseFile
 from PDBParseModel  import PDBParseModel
 from PDBParsePickle import PDBParsePickle
+from PDBParseNCBI   import PDBParseNCBI
 from PDBParser import PDBParserError
 
 class PDBParserFactory:
@@ -60,6 +61,9 @@ class PDBParserFactory:
 
         if PDBParseModel.supports( source ):
             return PDBParseModel()
+
+        if PDBParseNCBI.supports( source ):
+            return PDBParseNCBI()
 
         if PDBParsePickle.supports( source ):
             return PDBParsePickle()

@@ -38,4 +38,7 @@ try:
 except ImportError, why:
     B.EHandler.warning( 'Error importing Biskit/Mod modules', trace=1 )
 
-del PVM
+try:
+    del PVM
+except:
+    pass
