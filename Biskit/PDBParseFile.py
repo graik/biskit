@@ -30,6 +30,7 @@ Parse a PDB file into a PDBModel.
 """
 import Scientific.IO.PDB as IO
 import numpy.oldnumeric as N
+import os.path
 
 import Biskit as B
 import Biskit.mathUtils as M
@@ -57,8 +58,9 @@ class PDBParseFile( PDBParser ):
         """
         return (type(source) is str or isinstance(source, B.LocalPath)) and \
             (source[-4:].upper() == '.PDB' or
-             source[-7:].upper() == '.PDB.GZ')
-
+             source[-7:].upper() == '.PDB.GZ' or
+             source[-8:].upper() == '.PDB.BZ2' or
+             ':/' in source)
 
     @staticmethod
     def description():
@@ -74,7 +76,28 @@ class PDBParseFile( PDBParser ):
         """
         return 'PDB file'
 
+    @staticmethod
+    def sourceExists( source ):
+        """
+        Override!
 
+        The method is static and can thus be called directly with the parser
+        class rather than with an instance::
+
+        >>> if PDBParser.sourceExists('~/myfile.pdb'):
+        >>>     ...
+
+        @return: whether or not the given source is available for reading
+        @rtype: bool
+        """
+        if type( source ) is str:
+            return os.path.exists( T.absfile( source ) )
+        if type( source ) is B.LocalPath:
+            return source.exists()
+        
+        raise PDBParserError, 'unsupported source type: %r' % source
+
+    
     def idFromName( self, fname ):
         """
         Extract PDB code from file name.
@@ -101,8 +124,8 @@ class PDBParseFile( PDBParser ):
 
         @param model: existing model
         @type  model: PDBModel
-        @param source: source PDB file
-        @type  source: str
+        @param source: source PDB file 
+        @type  source: str OR Biskit.LocalPath
         @param skipRes: list residue names that should not be parsed
         @type  skipRes: [ str ]
         @param updateMissing: ignored
@@ -114,6 +137,9 @@ class PDBParseFile( PDBParser ):
         try:
             ## atoms and/or coordinates need to be updated from PDB
             if force or self.needsUpdate( model ):
+                
+                if not type( source ) is str:
+                    source = source.local()
 
                 atoms, xyz = self.__collectAll( source, skipRes )
 
@@ -299,23 +325,6 @@ REMEDY: run the script fixAtomIndices.py
 import Biskit.test as BT
 import time
 
-def clock( s, ns=globals() ):
-    import cProfile
-
-    locals().update( ns )
-    
-    cProfile.run( s, 'report.out' )
-
-    ## Analyzing
-    import pstats
-    p = pstats.Stats('report.out')
-    p.strip_dirs()
-
-    ## long steps and methods calling them
-    p.sort_stats('cumulative').print_stats(20)
-    p.print_callers( 20 )
-
-
 class Test(BT.BiskitTest):
     """Test case"""
 
@@ -332,8 +341,7 @@ class Test(BT.BiskitTest):
 
         self.assertAlmostEqual( N.sum( self.m.centerOfMass() ), 
                                 100.93785705968378, 4 )
-##         self.assertAlmostEqual( N.sum( self.m.centerOfMass() ),
-##            113.682601929 )
+
 
 if __name__ == '__main__':
 

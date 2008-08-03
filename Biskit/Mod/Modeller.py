@@ -378,7 +378,7 @@ class Modeller( Executor ):
         line_of_interest = linecache.getline(f_model, 2)
         score = r1.findall(line_of_interest)
 
-        f = open(model.validSource(),'r')
+        f = open(model.sourceFile(),'r')
         s = f.readlines()[:2]
         model.info["headlines"] = s
         f.close()
@@ -401,7 +401,7 @@ class Modeller( Executor ):
         for model in pdb_list:
 
             file_output.write('%s\t%6.2f\n'%(T.stripFilename(
-                model.validSource()), model.info["mod_score"]))
+                model.sourceFile()), model.info["mod_score"]))
 
         file_output.close()
 
@@ -533,7 +533,7 @@ class Modeller( Executor ):
         for model in self.result:
 
             model.info["mod_score"] = self.extract_modeller_score(
-                model.validSource(), model)
+                model.sourceFile(), model)
             model.info['mod_pdb'] = model.source
 
         self.result = self.result.sortBy("mod_score")

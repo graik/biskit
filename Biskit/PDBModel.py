@@ -36,6 +36,7 @@ from Biskit import EHandler
 from ProfileCollection import ProfileCollection, ProfileError
 from PDBParserFactory import PDBParserFactory
 from PDBParseFile import PDBParseFile
+from PDBSource import PDBSource
 import Biskit as B
 
 import numpy.oldnumeric as N
@@ -108,8 +109,7 @@ class PDBProfiles( ProfileCollection ):
         if r is None and (update or updateMissing):
 
             ## only read PDB source if this is indeed useful
-            if not name in PDBModel.PDB_KEYS and \
-               PDBParseFile.supports( self.model.validSource() ):
+            if not name in PDBModel.PDB_KEYS and self.model.source.isPDBFile():
                 return None
 
             self.model.update( updateMissing=updateMissing )
@@ -165,11 +165,8 @@ class PDBModel:
 
         @raise PDBError: if file exists but can't be read
         """
-        self.source = source
-        if type( source ) is str and os.path.isfile( source ):
-            self.source = LocalPath( source )
-
-        self.__validSource = 0
+        #self.__validSource = 0
+        self.source = PDBSource( source )
         self.fileName = None
         self.pdbCode = pdbCode
         self.xyz = None
@@ -205,7 +202,7 @@ class PDBModel:
         #: to collect further informations
         self.info = { 'date':T.dateSortString() }
 
-        if source <> None:
+        if not self.source.isEmpty():
             self.update( skipRes=skipRes, updateMissing=1, force=1 )
 
         if noxyz:
@@ -327,34 +324,34 @@ class PDBModel:
     def __repr__( self ):
         code = self.pdbCode or ''
         return  '[%s %s %5i atoms, %4i residues, %2i chains]' % \
-            ( self.__class__.__name__, code, self.lenAtoms(lookup=False), 
-              self.lenResidues(), self.lenChains() )
-    
+                ( self.__class__.__name__, code, self.lenAtoms(lookup=False), 
+                  self.lenResidues(), self.lenChains() )
+
     def __str__( self ):
         return self.__repr__()
-    
+
     def report( self, prnt=True, plot=False ):
         """
         Print (or return) a brief description of this model.
-        
+
         @prnt: directly print report to STDOUT (default True)
         @prnt: bool
         @return: if prnt==True: None, else: formatted description of this model
         @rtype: None or str
         """
         r = self.__repr__()
-        
+
         for c in range( self.lenChains() ):
             r += '\n\t* chain %i: %s' % ( c,
-                        T.clipStr( self.takeChains( [c] ).sequence(), 60 ) )
+                                          T.clipStr( self.takeChains( [c] ).sequence(), 60 ) )
 
         r += '\n source: ' + repr( self.source )
         r += '\n %2i atom profiles:    %s' % ( len( self.atoms ), 
-                            T.clipStr( repr(self.atoms.keys()), 57 )) 
+                                               T.clipStr( repr(self.atoms.keys()), 57 )) 
         r += '\n %2i residue profiles: %s' % ( len( self.residues ),
-                            T.clipStr( repr(self.residues.keys()), 57 ))
+                                               T.clipStr( repr(self.residues.keys()), 57 ))
         r += '\n %2i info records:     %s' % ( len( self.info ), 
-                            T.clipStr( repr( self.info.keys() ), 57 ))
+                                               T.clipStr( repr( self.info.keys() ), 57 ))
 
         if plot:
             self.plot()
@@ -363,7 +360,7 @@ class PDBModel:
             print r
         else:
             return r
-        
+
     def plot( self, hetatm=False ):
         """
         Get a quick & dirty overview over the content of a PDBModel. plot
@@ -381,13 +378,13 @@ class PDBModel:
             mask = self.maskHetatm()
             mask = mask + m.maskSolvent()
             m = self.compress( N.logical_not( mask ) )
-        
+
         chains = [ self.takeChains( [i] ) for i in range( m.lenChains())]
         xy = [ zip( m.xyz[:,0], m.xyz[:,1] ) for m in chains ]
 
         gnuplot.plot( *xy )
- 
- 
+
+
     def __vintageCompatibility( self ):
         """
         backward compatibility to vintage PDBModels < 2.0.0
@@ -415,9 +412,7 @@ class PDBModel:
 
         ## first generation source was just a simple string
         if type( self.source ) == str:
-            self.source = LocalPath( self.source )
-
-        self.__validSource = getattr( self, '_PDBModel__validSource', 0)
+            self.setSource( self.source )
 
         self.initVersion = getattr( self, 'initVersion', 'old PDBModel')
 
@@ -432,6 +427,10 @@ class PDBModel:
         """
         self.__vintageCompatibility()
 
+        ## source has been outsourced ;-) into a separate class
+        if not isinstance( self.source, PDBSource ):
+            self.source = PDBSource( self.source )
+        
         ## if there were not even old profiles...
         if getattr( self, 'atoms', 0) is 0:
             self.atoms = PDBProfiles(self)
@@ -498,34 +497,6 @@ class PDBModel:
             pass
 
 
-    def update( self, skipRes=None, updateMissing=0, force=0 ):
-        """
-        Read coordinates, atoms, fileName, etc. from PDB or
-        pickled PDBModel - but only if they are currently empty.
-        The atomsChanged and xyzChanged flags are not changed.
-
-        @param skipRes: names of residues to skip if updating from PDB
-        @type  skipRes: list of str
-        @param updateMissing: 0(default): update only existing profiles
-        @type  updateMissing: 0|1
-        @param force: ignore invalid source (0) or report error (1)
-        @type  force: 0|1
-
-        @raise PDBError: if file can't be unpickled or read: 
-        """
-        source = self.validSource()
-
-        if source is None and force:
-            raise PDBError( str(self.source) + ' is not a valid source.')
-
-        if source is None:
-            return
-
-        parser = PDBParserFactory.getParser( source )
-        parser.update(self, source, skipRes=skipRes,
-                      updateMissing=updateMissing, force=force )
-
-
     def setXyz(self, xyz ):
         """
         Replace coordinates.
@@ -542,18 +513,6 @@ class PDBModel:
         self.xyzChanged = self.xyzChanged or \
             not mathUtils.arrayEqual(self.xyz,old )
         return old
-
-
-    def setSource( self, source ):
-        """
-        @param source: LocalPath OR PDBModel OR str
-        """
-        if type( source ) == str:
-            self.source = LocalPath( source )
-        else:
-            self.source = source
-        self.__validSource = 0
-
 
     def getXyz( self, mask=None ):
         """
@@ -689,6 +648,106 @@ class PDBModel:
         return r
 
 
+    #####################################################
+    ## Source handling
+
+    def update( self, skipRes=None, updateMissing=0, force=0 ):
+        """
+        Read coordinates, atoms, fileName, etc. from PDB or
+        pickled PDBModel - but only if they are currently empty.
+        The atomsChanged and xyzChanged flags are not changed.
+
+        @param skipRes: names of residues to skip if updating from PDB
+        @type  skipRes: list of str
+        @param updateMissing: 0(default): update only existing profiles
+        @type  updateMissing: 0|1
+        @param force: ignore invalid source (0) or report error (1)
+        @type  force: 0|1
+
+        @raise PDBError: if file can't be unpickled or read: 
+        """
+        if not self.source.exists() and force:
+            raise PDBError( str(self.source) + ' is not a valid source.')
+
+        if self.source.isEmpty():
+            return
+
+        parser = self.source.parser
+        parser.update(self, self.source._source, skipRes=skipRes,
+                      updateMissing=updateMissing, force=force )
+
+
+    def setSource( self, source):
+        """
+        @param source: LocalPath OR PDBModel OR str OR PDBSource
+        """
+        if not isinstance( source, PDBSource):
+            self.source = PDBSource( source )
+        else:
+            self.source = source
+
+    #def validSource(self):
+        #"""
+        #Check for a valid source on disk.
+
+        #@return:  str or PDBModel, None if this model has no valid source
+        #@rtype: str or PDBModel or None
+        #"""
+        #if self.__validSource == 0:
+
+            #if isinstance( self.source, LocalPath ) and self.source.exists():
+                #self.__validSource = self.source.local()
+            #else:
+                #if isinstance( self.source, B.PDBModel ):
+                    #self.__validSource = self.source
+                #else:
+                    ### risky: the PDB code may not exist!
+                    #if type( self.source ) is str and len( self.source )==4:
+                        #self.__validSource = self.source
+                    #else:
+                        #if type( self.source ) is str and '://' in self.source:
+                            #self.__validSource = self.source
+
+                        #else:
+                            #self.__validSource = None
+
+        #return self.__validSource
+
+
+    def sourceFile( self ):
+        """
+        Name of pickled source or PDB file. If this model has another
+        PDBModel as source, the request is passed on to this one.
+
+        @return: file name of pickled source or PDB file
+        @rtype: str
+
+        @raise PDBError: if there is no existing source file available
+        """
+        return self.source.file
+
+
+    def disconnect( self ):
+        """
+        Disconnect this model from its source (if any).
+        """
+        self.update()
+
+        try:
+            self.fileName = self.fileName or self.source.file
+        except:
+            pass
+
+        self.setSource( None )
+
+        self.xyzChanged = 1
+
+        for p in self.residues:
+            self.residues.setInfo( p, changed=1 )
+        for p in self.atoms:
+            self.atoms.setInfo( p, changed=1 )
+
+
     def xyzIsChanged(self):
         """
         Tell if xyz or atoms have been changed compared to source file or
@@ -709,12 +768,12 @@ class PDBModel:
         @return: xyz has been changed
         @rtype: bool
         """
-        if self.validSource() is None:
+        if not self.source.exists():
             return True
 
-        if isinstance( self.source, B.PDBModel ):
+        if self.source.isInstance():
             return self.xyzIsChanged() or \
-                   self.source.xyzChangedFromDisc()
+                   self.source._source.xyzChangedFromDisc()
 
         return self.xyzIsChanged()
 
@@ -729,12 +788,12 @@ class PDBModel:
 
         @raise ProfileError: if there is no atom or res profile with pname
         """
-        if self.validSource() is None:
+        if self.source.isEmpty():
             return True
 
-        if isinstance( self.source, B.PDBModel ):
+        if self.source.isInstance():
             return self.profileInfo( pname )['changed'] or \
-                   self.source.profileChangedFromDisc( pname )
+                   self.source._source.profileChangedFromDisc( pname )
 
         return self.profileInfo( pname )['changed']
 
@@ -787,77 +846,10 @@ class PDBModel:
             self.__slimProfiles()
 
         self.__maskCA = self.__maskBB = self.__maskHeavy = None
-        self.__validSource = 0
 
 
-    def validSource(self):
-        """
-        Check for a valid source on disk.
-
-        @return:  str or PDBModel, None if this model has no valid source
-        @rtype: str or PDBModel or None
-        """
-        if self.__validSource == 0:
-
-            if isinstance( self.source, LocalPath ) and self.source.exists():
-                self.__validSource = self.source.local()
-            else:
-                if isinstance( self.source, B.PDBModel ):
-                    self.__validSource = self.source
-                else:
-                    ## risky: the PDB code may not exist!
-                    if type( self.source ) is str and len( self.source )==4:
-                        self.__validSource = self.source
-                    else:
-                        self.__validSource = None
-
-        return self.__validSource
-
-
-    def sourceFile( self ):
-        """
-        Name of pickled source or PDB file. If this model has another
-        PDBModel as source, the request is passed on to this one.
-
-        @return: file name of pickled source or PDB file
-        @rtype: str
-
-        @raise PDBError: if there is no valid source
-        """
-        s = self.validSource()
-
-        if s is None:
-            raise PDBError('no valid source')
-
-        if type( s ) == str:
-            return s
-
-        return self.source.sourceFile()
-
-
-    def disconnect( self ):
-        """
-        Disconnect this model from its source (if any).
-
-        @note: If this model has an (in-memory) PDBModel instance as source,
-        the entries of 'atoms' could still reference the same dictionaries.
-        """
-        self.update()
-
-        try:
-            self.fileName = self.fileName or self.sourceFile()
-        except:
-            pass
-
-        self.setSource( None )
-
-        self.xyzChanged = 1
-
-        for p in self.residues:
-            self.residues.setInfo( p, changed=1 )
-        for p in self.atoms:
-            self.atoms.setInfo( p, changed=1 )
-
+    ## end of source handling
+    ###################################################################
 
     def getPdbCode(self):
         """
@@ -1386,14 +1378,14 @@ class PDBModel:
             [ n.upper() in names for n in self.atoms['residue_name'] ] )
 
     def maskDNA( self ):
-            """
+        """
             Short cut for mask of all atoms in DNA
 
             @return: N.array( 1 x N_atoms ) of 0||1
             @rtype: array
             """
-            return self.maskFrom( 'residue_name',
-                                  ['A','C','G','T','DA','DC','DG','DT'] )
+        return self.maskFrom( 'residue_name',
+                              ['A','C','G','T','DA','DC','DG','DT'] )
 
     def indicesFrom( self, key, cond ):
         """
@@ -1817,7 +1809,7 @@ class PDBModel:
         Group the profile values of each residue's atoms into a separate list.
         @param p: name of existing atom profile OR ...
                   [ any ], list of lenAtoms() length
-        
+
         @return: a list (one entry per residue) of lists (one entry per resatom)
         @rtype: [ [ any ] ]
         """
@@ -1826,11 +1818,11 @@ class PDBModel:
 
         rI = self.resIndex()       # starting atom of each residue
         rE = self.resEndIndex()    # ending atom of each residue
-        
+
         r = [ p[ rI[res] : rE[res] ] for res in range( self.lenResidues() ) ]
         return r
-    
-    
+
+
     def concat( self, *models ):
         """
         Concatenate atoms, coordinates and profiles. source and fileName
@@ -2122,7 +2114,7 @@ class PDBModel:
             if r != -1:
                 return r
 
-        if self.source is None and not lookup:
+        if self.source.isEmpty and not lookup:
             return 0
 
         return len( self.getXyz() )
@@ -2741,7 +2733,7 @@ class PDBModel:
 
     def center( self, mask=None ):
         """
-        Geometric centar of model.
+        Geometric center of model.
 
         @param mask: atom mask applied before calculating the center
         @type  mask: list of int (1||0)
@@ -2796,40 +2788,21 @@ class PDBModel:
         return N.sum( self.masses() )
 
 
-    def residusMaximus( self, atomValues, mask=None ):
+    def residusMaximus( self, atomValues ):
         """
         Take list of value per atom, return list where all atoms of any
         residue are set to the highest value of any atom in that residue.
         (after applying mask)
 
+        Deprecated: Use instead atom2resProfile( profile, f=numpy.max )
+
         @param atomValues: values per atom
         @type  atomValues: list 
-        @param mask: atom mask
-        @type  mask: list of int (1||0)
 
         @return: array with values set to the maximal intra-residue value
         @rtype: array of float
         """
-        if mask is None:
-            mask = N.ones( len(atomValues) )
-
-        ## eliminate all values that do not belong to the selected atoms
-        masked = atomValues * mask
-
-        result = []
-
-        ## set all atoms of each residue to uniform value
-        for res in range( 0, self.lenResidues() ):
-
-            ## get atom entries for this residue
-            resAtoms = N.compress( N.equal( self.resMap(), res ), masked )
-
-            ## get maximum value
-            masterValue = max( resAtoms )
-
-            result += resAtoms * 0.0 + masterValue
-
-        return N.array( result, N.Float32 )
+        return self.atom2resProfile( atomValues, f=N.max )
 
 
     def argsort( self, cmpfunc=None ):
@@ -2878,14 +2851,12 @@ class PDBModel:
         @param sortArg: comparison function
         @type  sortArg: function
 
-        @return: copy of this model with re-sorted atoms (see Numeric.take() )
+        @return: copy of this model with re-sorted atoms
         @rtype: PDBModel
         """
         sortArg = sortArg or self.argsort()
 
-        r = self.take( sortArg )
-
-        return r
+        return self.take( sortArg )
 
 
     def unsort( self, sortList ):
@@ -3294,9 +3265,9 @@ class Test(BT.BiskitTest):
     def test_report(self):
         """PDBModel report&plot test"""
         self.report_output = self.m.report( prnt=self.local,
-                                plot=(self.local or self.VERBOSITY > 2) )
- 
-        
+                                            plot=(self.local or self.VERBOSITY > 2) )
+
+
     def test_sourceHandling(self):
         """PDBModel source / disconnection tests"""
         self._m = self.m.clone()

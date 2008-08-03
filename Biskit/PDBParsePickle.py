@@ -25,6 +25,7 @@
 """
 Parse a pickled PDBModel from disc into a new PDBModel instance 
 """
+import os
 import Biskit.tools as T
 import Biskit as B
 
@@ -49,7 +50,8 @@ class PDBParsePickle( PDBParseModel ):
                  implementation (equivalent to isinstance( source, PDBModel) )
         @rtype: bool
         """
-        return (type(source) is str) or isinstance(source, B.LocalPath)
+        return ((type(source) is str) or isinstance(source, B.LocalPath)) \
+               and os.path.isfile( str( source ) )
 
     @staticmethod
     def description():
@@ -64,7 +66,27 @@ class PDBParsePickle( PDBParseModel ):
         @rtype: str
         """
         return 'pickled PDBModel (file)'
+
+    
+    @staticmethod
+    def sourceExists( source ):
+        """
+        The method is static and can thus be called directly with the parser
+        class rather than with an instance::
+
+        >>> if PDBParser.sourceExists('~/myfile.model'):
+        >>>     ...
+
+        @return: whether or not the given source is available for reading
+        @rtype: bool
+        """
+        if type( source ) is str:
+            return os.path.exists( T.absfile( source ) )
+        if type( source ) is B.LocalPath:
+            return source.exists()
         
+        raise PDBParserError, 'unsupported source type: %r' % source
+
 
     def update( self, model, source, skipRes=None, updateMissing=0, force=0 ):
         """
@@ -86,6 +108,8 @@ class PDBParsePickle( PDBParseModel ):
         try:
             if force or updateMissing or self.needsUpdate( model ):
 
+                if type( source ) is not str:
+                    source = source.local()
                 s = T.Load( source )
 
                 super( PDBParsePickle, self ).update(
