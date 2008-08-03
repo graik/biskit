@@ -88,7 +88,22 @@ class PDBParser(object):
         @rtype: str
         """
         raise NotImplementedError, 'description() is not implemented.'
-        
+
+    @staticmethod
+    def sourceExists( source ):
+        """
+        Override!
+
+        The method is static and can thus be called directly with the parser
+        class rather than with an instance::
+
+        >>> if PDBParser.sourceExists('~/myfile.pdb'):
+        >>>     ...
+
+        @return: whether or not the given source is available for reading
+        @rtype: bool
+        """
+        raise NotImplementedError, 'sourceExists() is not implemented'
 
     def update( self, model, source, skipRes=None, updateMissing=0, force=0 ):
         """

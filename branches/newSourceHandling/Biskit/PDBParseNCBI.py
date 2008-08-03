@@ -32,6 +32,7 @@ from Bio import File
 import numpy.oldnumeric as N
 import urllib, re, tempfile, os
 
+
 import Biskit.tools as T
 import Biskit.settings as settings
 import Biskit as B
@@ -73,87 +74,95 @@ class PDBParseNCBI( PDBParseModel ):
         @return: short free text description of the supported format
         @rtype: str
         """
-        return 'fetch PDB entry from NCBI'
+        return 'fetch PDB entry from NCBI web site or local database'
 
-    def getLocalPDBHandle( self, id, db_path=settings.pdb_path ):
+    def getLocalHandle( self, f ):
         """
-        Get the coordinate file from a local pdb database.
-
-        @param id: pdb code, 4 characters
-        @type  id: str
-        @param db_path: path to local pdb database
-                        (default: L{settings.pdb_path})
-        @type  db_path: str
+        Open coordinate file from a local pdb database.
 
         @return: the requested pdb file as a file handle
         @rtype: open file handle
 
         @raise PDBParserError: if couldn't find PDB file
         """
-        id = string.lower( id )
+        ## gzipped pdb file
+        if f[-3:]=='.gz':
+            return gzip.open(f)
+        ## the gzip module doesn't handle .Z files
+        ## doesn't return open file handle 
+        elif f[-2:]=='.Z':
+            p = subprocess.Popen( [ 'gunzip', '-c', f ],
+                                  stdout=subprocess.PIPE )
+            return p.communicate()[0]
+        ## uncompressed
+        else:
+            return open(f)
+
+    def getRemoteHandle( self, f ):
+        """
+        Open coordinate file via http socket.
+        @return: the requested pdb file as url handle
+        @rtype: open Bio.File.UndoHandle
+        """
+
+        handle = urllib.urlopen( f )
+        uhandle = File.UndoHandle(handle)
+
+        if not uhandle.peekline():
+            raise PDBParseError( "Couldn't retrieve ", f )
+
+        return uhandle
+
+
+    def getRemotePDBAddress( self, id, rcsb_url=settings.rcsb_url ):
+        """
+        @param id: pdb code, 4 characters
+        @type  id: str
+        @param rcsb_url: template url for pdb download
+                         (default: L{settings.rcsb_url})
+        @type  rcsb_url: str
+        """
+        return rcsb_url% (id,id)
+    
+
+    def getLocalPDBAddress( self, id, db_path=settings.pdb_path ):
+        """
+        @param id: pdb code, 4 characters
+        @type  id: str
+        @param db_path: path to local pdb database
+                        (default: L{settings.pdb_path})
+        @type  db_path: str
+        """
+        id = id.lower()
         filenames = ['%s.pdb' % id,
                      db_path + '/pdb%s.ent' % id,
                      db_path + '/%s/pdb%s.ent.Z' %( id[1:3], id ) ]
 
         for f in filenames:
             if os.path.exists( f ):
-                ## gzipped pdb file
-                if f[-3:]=='.gz':
-                    return gzip.open(f)
-                ## the gzip module doesn't handle .Z files
-                ## doesn't return open file handle 
-                elif f[-2:]=='.Z':
-                    p = subprocess.Popen( [ 'gunzip', '-c', f ],
-                                          stdout=subprocess.PIPE )
-                    return p.communicate()[0]
-                ## uncompressed
-                else:
-                    return open(f)
+                return f
 
-        raise PDBParseError( "Couldn't find PDB file locally.")
+        return None
 
 
-    def getRemotePDBHandle( self, id, rcsb_url=settings.rcsb_url ):
+    def parsePdbHeader(self, f ):
         """
-        Get the coordinate file remotely from the RCSB.
-
-        @param id: pdb code, 4 characters
-        @type  id: str
-        @param rcsb_url: template url for pdb download
-                         (default: L{settings.rcsb_url})
-        @type  rcsb_url: str
-
-        @return: the requested pdb file as a file handle
-        @rtype: open file handle
-
-        @raise PDBParserError: if couldn't retrieve PDB file
-        """
-        handle = urllib.urlopen( rcsb_url% (id,id) )
-
-        uhandle = File.UndoHandle(handle)
-
-        if not uhandle.peekline():
-            raise PDBParseError( "Couldn't retrieve ", rcsb_url )
-
-        return uhandle
-
-
-    def parsePdbFromHandle(self, handle, first_model_only=True ):
-        """
-	Parse PDB from file/socket or string handle into memory.
+	Parse PDB meta infos from open file/socket handle.
 
 	@param handle: fresh open file/socket handle to PDB ressource or string
 	@type  handle: open file-like object or str
-	@param first_model_only: only take first of many NMR models [True]
-	@type  first_model_only: bool
 
         @return: pdb file as list of strings, dictionary with resolution
         @rtype: [str], {'resolution':float }
 	@raise PDBParserError: if passed in string is too short
 	"""
-        lines = []
         res_match = None
         infos = {}
+
+        if os.path.isfile( f ):
+            handle = self.getLocalHandle( f )
+        else:
+            handle = self.getRemoteHandle( f )
 
         if type( handle ) is str:
             if len(handle) < 5000:
@@ -165,50 +174,34 @@ class PDBParseNCBI( PDBParseModel ):
 ## 		  handle.peekline()
 
         for l in handle:
-            lines += [ l ]
 
             res_match = res_match or self.ex_resolution.search( l )
 
-            if first_model_only and l[:6] == 'ENDMDL':
-                break
+            if res_match:
+                if res_match.groups()[0] == 'NOT APPLICABLE':
+                    infos['resolution'] = self.NMR_RESOLUTION
+                else:
+                    infos['resolution'] = float( res_match.groups()[0] )
 
-        if res_match:
-            if res_match.groups()[0] == 'NOT APPLICABLE':
-                infos['resolution'] = self.NMR_RESOLUTION
-            else:
-                infos['resolution'] = float( res_match.groups()[0] )
-        else:
+                break
+            
+        if not res_match:
             raise PDBParserError, 'No resolution record found in PDB.'
 
-        return lines, infos
+        return infos
 
 
     def fetchPDB( self, id ):
-        
-        try:
-            h = self.getLocalPDBHandle( id )
-        except:
-            h = self.getRemotePDBHandle( id )
 
-        fname = tempfile.mktemp( '.pdb', 'ncbiparser_' )
+        f = self.getLocalPDBAddress( id ) or self.getRemotePDBAddress( id )
 
-        lines, infos = self.parsePdbFromHandle( h, first_model_only=1 )
+        infos = self.parsePdbHeader( f )
 
-        ## close if it is a handle
-        try: h.close()
-        except:
-            pass
-
-        f = open( fname, 'w', 1 )
-        f.writelines( lines )
-        f.close()
-
-        m = B.PDBModel( fname )
+        m = B.PDBModel( f )
         m.disconnect()
 
-        T.tryRemove( fname )
-
         return m
+
 
     def update( self, model, source, skipRes=None, updateMissing=0, force=0 ):
         """
@@ -241,7 +234,7 @@ class PDBParseNCBI( PDBParseModel ):
                    % str(source) + "Reason:\n" + str(why)
         
         ## override source set by PDBParseModel
-        model.source = source
+        model.setSource( source )
 
 
 #############

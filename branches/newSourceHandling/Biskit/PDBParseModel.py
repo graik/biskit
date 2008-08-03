@@ -65,7 +65,24 @@ class PDBParseModel( PDBParser ):
         @rtype: str
         """
         return 'in-memory instances of PDBModel'
-        
+
+    
+    @staticmethod
+    def sourceExists( source ):
+        """
+        Override!
+
+        The method is static and can thus be called directly with the parser
+        class rather than with an instance::
+
+        >>> if PDBParser.sourceExists('~/myfile.pdb'):
+        >>>     ...
+
+        @return: whether or not the given source is available for reading
+        @rtype: bool
+        """
+        return isinstance( source, B.PDBModel )
+
 
     def update( self, model, source, skipRes=None, updateMissing=0, force=0 ):
         """
