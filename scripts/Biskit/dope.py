@@ -146,7 +146,7 @@ def changeModel( inFile, prefix, sourceModel ):
         raise ConvertError('source and other models are not equal: ' + str(eq))
 
 #    model.validSource()
-    model.setSource( sourceModel.validSource() )
+    model.setSource( sourceModel.sourceFile() )
 
     #model.atomsChanged = 0
     for k in model.atoms:
