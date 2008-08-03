@@ -40,18 +40,18 @@ def localizeModel( m, replace, ftarget=None ):
     ftarget - str, target file name
     """
     result = 0
-    print '\t', m.source.formatted(),
-    f = m.source.original()
-    s = m.source
+    print '\t', m.source.getLocalPath().formatted(),
+    f = m.source.getLocalPath().original()
+    s = m.source.getLocalPath()
 
     for repl in replace:
         f = f.replace( repl[0], repl[1] )
     
-    m.source = LocalPath( f )
-    print " -> ", m.source.formatted()
+    m.setSource( LocalPath( f ) )
+    print " -> ", m.source.getLocalPath().formatted()
 
     ## don't slim if model is it's own source
-    if ftarget and tools.absfile( ftarget ) == m.source.local():
+    if ftarget and tools.absfile( ftarget ) == m.source.file:
         m.forcePickle = 1
 
     return 1

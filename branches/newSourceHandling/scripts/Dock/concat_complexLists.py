@@ -134,7 +134,7 @@ def save_changed_models( cl, out='./changed_models' ):
     for m in cl.recModels() + cl.ligModels():
 
 ##         if m.isChangedFromDisc() != (0,0):
-        dir, fname = os.path.split( m.source.local() )
+        dir, fname = os.path.split( m.source.file )
         m.saveAs( out + '/' + fname )
         count += 1
 
