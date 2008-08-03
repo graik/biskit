@@ -1,0 +1,337 @@
+! -----------------------------------------------------------
+! short refinement of docked protein complex
+! Michael Nilges
+! adapted for XRefineSlave.py by Raik Grünberg
+! $Revision$
+! last $Date$
+! last $Author$
+! -----------------------------------------------------------
+
+REMARK heat ensemble for 0.1 ps at 25 K and write out ensemble trajectory
+REMARK Michael Nilges, IP, 05-APR-2002
+
+! ------------------------------------------------------------
+! Place holders to be inserted by Python script
+! ------------------------------------------------------------
+evaluate ($ligandpsf   = "%(lig_psf)s")
+evaluate ($ligandpdb   = "%(lig_in)s")
+evaluate ($receptorpsf = "%(rec_psf)s")
+evaluate ($receptorpdb = "%(rec_in)s")
+evaluate ($ligand_out  = "%(lig_out)s" )
+evaluate ($recept_out  = "%(rec_out)s" )
+
+evaluate ($complexpsf  = "%(com_psf)s" )
+evaluate ($complex_out = "%(com_out)s" )
+evaluate ($energy_out  = "%(ene_out)s" )
+
+evaluate ($path = "%(path)s" )
+evaluate ($param19= $path + "param19.pro")
+evaluate ($nbonds_repel = $path + "nbonds_repel.inp" )
+evaluate ($nbonds_LB89 = $path + "nbonds_LB89.inp" )
+evaluate ($neutral19 = $path + "neutral19.inp" )
+evaluate ($lesA_J = $path + "lesA-J.inp" )
+evaluate ($eval_energy = $path + "eval_energy.inp" )
+
+evaluate ($dist = -0.5)
+evaluate ($initialtemp = 500)
+evaluate ($tempstep = 50)
+evaluate ($finaltemp = 500)
+evaluate ($ncopy = 10)
+evaluate ($WeightTemp = 50000)
+
+! ------------------------------------------------------------
+! read psf and pdb files for the unrefined receptor and ligand
+! ------------------------------------------------------------
+structure @@$ligandpsf end
+coor @@$ligandpdb
+delete selection= (resname TIP3) end
+vector do (zcomp = -1 ) (all)       ! mark ligand in B-Factor column
+vector do (segid = "LIG_") (all)
+
+structure @@$receptorpsf end
+coor @@$receptorpdb
+delete selection= (resname TIP3) end
+vector do (segid = "REC_") (not segid "LIG_")
+
+evaluate ($ligand = "LIG_")
+evaluate ($recept = "REC_")
+
+evaluate ($iresid = 0)
+for $id in id (name ca and segid $ligand) loop numb
+   evaluate ($iresid = $iresid + 1)
+   vector do (resid = encode($iresid)) (byresid id $id)
+end loop numb
+
+evaluate ($iresid = 0)
+for $id in id (name ca and segid $recept) loop numb
+   evaluate ($iresid = $iresid + 1)
+   vector do (resid = encode($iresid)) (byresid id $id)
+end loop numb
+remark renumbered psf file for complex
+write structure output= $complexpsf end
+
+
+! ------------------
+! set toplogies etc.
+! ------------------
+parameter
+  	reset
+        @@$param19
+	@@$nbonds_repel
+end
+parameter nbonds wmin 0.1 end end
+
+@$neutral19	!scale sicechain charges
+
+flags include bonds angles dihed improper vdw elec ncs noe end
+
+! out file for energies, the first line is used by XRefineComplex.py
+!  to define the dictionary keys
+set display=$energy_out end
+display noe bond angl dihe impr vdw elec total
+
+! ------------------------------------------------------------------------
+! identify the ligand residues in contact with the receptor and vice versa
+!
+!        L0 and R0 - residues involved in interactions 
+!                    (within 5Å of the other component)
+!        IL and IR - intermediate region, residues between the interaction 
+!                    region and the rest of the protein 
+!                    (within 7.5Å of an interaction residue)
+!        FL and FR - the remaning part
+! ------------------------------------------------------------------------
+
+vector identify (xcomp) (byresidue (segid $ligand and (segid $recept) around  5.0))
+vector identify (ycomp) (byresidue (segid $recept and (segid $ligand) around  5.0))
+vector do (segid = L0) (attribute xcomp > 0)
+vector do (segid = R0) (attribute ycomp > 0)
+vector identify (store1) (byresidue (segid $ligand and (segid L0) around  2.5) and not segid L0)
+vector identify (store2) (byresidue (segid $recept and (segid R0) around  2.5) and not segid R0)
+vector do (segid = IL) (store1)
+vector do (segid = IR) (store2)
+
+duplicate selection= (segid $ligand and attribute xcomp le 0) segid= FL end
+duplicate selection= (segid $recept and attribute ycomp le 0) segid= FR end
+
+! --------------------------------------
+! multiply the contact regions
+!     L0, L1 ... and R0, R1 ... R$ncopy
+! --------------------------------------
+evaluate ($i = 0)
+evaluate ($segid = "L" + encode($i))
+evaluate ($segiL_$i = $segid)
+evaluate ($segid = "R" + encode($i))
+evaluate ($segiR_$i = $segid)
+evaluate ($i = 1)
+while ($i lt $ncopy) loop segi
+  evaluate ($segid = "L" + encode($i))
+  evaluate ($segiL_$i = $segid)
+  evaluate ($segid = "R" + encode($i))
+  evaluate ($segiR_$i = $segid)
+  duplicate selection= (segid L0) segid= $segiL_$i end
+  duplicate selection= (segid R0) segid= $segiR_$i end
+  evaluate ($i = $i + 1)
+end loop segi
+
+! ------------------------------------------
+! no interaction between multi copy segments
+! ------------------------------------------
+evaluate ($i = 0)
+while ($i lt $ncopy) loop divi
+   evaluate ($enerL_$i = 1/$ncopy)
+   evaluate ($enerR_$i = 1/$ncopy)
+   evaluate ($i = $i + 1)
+end loop divi
+@$lesA_J
+
+! ------------------------------------------
+! center of mass to center of mass restraint
+! ------------------------------------------
+noe 
+   nrestraints 1000
+   ceiling 1000
+   class pull
+   assign (segid $ligand and name CA and attribute xcomp le 0)
+          (segid $recept and name CA and attribute ycomp le 0) 1.0 0.0 0.0
+   potential pull soft
+   average pull center 
+   sqconst pull 10
+   scale pull 1
+   rswi pull 1
+   asym pull 2.0
+end
+
+! ------------------------------------------
+! restrain the region distant from the interface to the starting structure 
+! without affecting translation or rotation
+! (ncs = non-crystallographic symmetry )
+! ------------------------------------------
+ncs restraint
+   group
+      equivalent (segid $ligand and attribute xcomp le 0)
+      equivalent (segid FL)
+      weight 500
+   end
+   group
+      equivalent (segid $recept and attribute ycomp le 0)
+      equivalent (segid FR)
+      weight 500
+   end
+end
+constraints fix (segid F%%) end
+
+! remove possible clashes
+minimize powell nstep=10 nprint 5 end
+
+! -------------------------------------
+! temperature coupling to Langevin bath
+! -------------------------------------
+vector do (fbeta = 30) (not segid L* and not segid I* and not segid R*)
+vector do (fbeta = 5) (segid L* or segid I* or segid R*)
+vector do (mass = 10) (segid L* or segid I* or segid R*)
+vector do (mass = 2)  (not segid L* and not segid I* and not segid R*)
+parameter bonds (all) (all) 100 TOKEN end 
+
+constraints fix ((not segid R+ and not segid L+) or segid L0 or segid R0) end
+flags exclude vdw elec noe end
+vector do (vx = maxwell(500)) (all)
+vector do (vy = maxwell(500)) (all)
+vector do (vz = maxwell(500)) (all)
+dynamics verlet
+   nstep=1000 timestep=0.002 {ps}
+   iasvel = current
+   tcoupling = false  tbath = 1000
+   rbuf = 0 origin = (0 0 0)  ilbfrq = 500000000
+   nprint=50 iprfrq=50
+   ntrfrq = 500000000
+end
+flags include vdw elec noe end
+
+
+!write structure output= init.psf end
+!write coor output= init.pdb  end
+
+! ---------------------------------
+! define interaction between copies 
+! ---------------------------------
+@$eval_energy
+@$lesA_J
+constraints fix (segid F%%) end
+
+minimize powell nstep=100 nprint 5 end
+evaluate ($tempcount = 0)
+
+vector ident (store8) (segid $ligand and name CA and attribute xcomp le 0)
+vector ident (store9) (segid $recept and name CA and attribute ycomp le 0)
+
+
+evaluate ($mintotal = 1000000)
+evaluate ($targettemp = 
+      min($finaltemp, $initialtemp + $tempcount * $tempstep))
+vector do (vx = maxwell($targettemp)) (all)
+vector do (vy = maxwell($targettemp)) (all)
+vector do (vz = maxwell($targettemp)) (all)
+
+while ($tempcount lt 100) loop heat
+!! while ($tempcount lt 2) loop heat   !! for debugging
+   coor translate vector= 
+       (head (store8) tail (store9) ) dist $dist
+        selection= (segid $ligand or segid L%% or segid IL)
+   end
+   energy end
+   evaluate ($oldnoe = $noe)
+
+   evaluate ($previoustemp = $tempcount)
+   evaluate ($tempcount = $tempcount + 1)
+
+
+   @$eval_energy
+   @$lesA_J
+
+{
+   mini rigid
+      group (segid $recept or segid IR or segid R+)
+      group (segid $ligand   or segid IL or segid L+)
+      nstep 100
+   end
+}
+
+   dynamics verlet
+	nstep=100 timestep=0.002 {ps}
+	iasvel = current
+	tcoupling = false  tbath = $targettemp
+	rbuf = 0 origin = (0 0 0)  ilbfrq = 500000000
+	nprint=50 iprfrq=50
+	ntrfrq = 500000000
+   end
+   
+
+   if ($ener lt $mintotal) then
+      eval ($mintotal = $ener)
+      coor copy end
+   end if
+
+   ! print energies to file
+   evaluate ($total = $bond + $angl + $dihe + $impr + $vdw + $elec )
+   display $noe $bond $angl $dihe $impr $vdw $elec $total
+
+!   evaluate ($filename = "file_" + encode($tempcount) + ".pdb")
+!   write coor output= $filename  
+!         selection= ((not segid R%% and not segid L%% and not segid F%%)
+!                      or segid $maxL or segid $maxR) 
+!   end
+   energy end
+   if ($noe gt $oldnoe) then exit loop heat end if
+   evaluate ($weighttemp = max(500, $weighttemp / 2))
+end loop heat
+
+! coor swap end
+
+@$eval_energy
+@$lesA_J
+
+
+! ------------------------------------------
+! refine the lowest energy structure further
+! ------------------------------------------
+parameter
+	@@$nbonds_LB89
+end
+
+constraints 
+   interaction (not (segid L%% or segid R%% or segid F%%) or segid $maxR or segid $maxL)
+               (not (segid L%% or segid R%% or segid F%%) or segid $maxR or segid $maxL)
+   weights * 1.0 end
+end
+mini powell nstep 100 end   
+
+
+dynamics verlet
+	nstep=1000 timestep=0.002 {ps}
+	iasvel = current
+	tcoupling = false  tbath = 300
+	rbuf = 0 origin = (0 0 0)  ilbfrq = 500000000
+	nprint=50 iprfrq=50
+	ntrfrq = 500000000
+end
+
+mini powell nstep 100 end   
+
+vector do (segid = $ligand) (segid $maxL or segid IL)
+vector do (segid = $recept) (segid $maxR or segid IR)
+
+! print energies to file
+evaluate ($total = $bond + $angl + $dihe + $impr + $vdw + $elec )
+display $noe $bond $angl $dihe $impr $vdw $elec $total
+
+write coor  selection=(segid $ligand or segid $recept) output= $complex_out end
+
+! read in psf file and start pdb file for a monomer
+! doesn't work correctly
+structure reset @@$complexpsf end
+coor @@$complex_out
+
+write coor  selection= (segid $ligand) output= $ligand_out end
+write coor  selection= (segid $recept) output= $recept_out end
+
+stop

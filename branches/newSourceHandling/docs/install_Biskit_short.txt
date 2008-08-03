@@ -1,0 +1,91 @@
+.. ===================================================================
+.. Biskit, a toolkit for the manipulation of macromolecular structures
+.. Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
+..
+.. This program is free software; you can redistribute it and/or
+.. modify it under the terms of the GNU General Public License as
+.. published by the Free Software Foundation; either version 2 of the
+.. License, or any later version.
+..
+.. This program is distributed in the hope that it will be useful,
+.. but WITHOUT ANY WARRANTY; without even the implied warranty of
+.. MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+.. General Public License for more details.
+..
+.. You find a copy of the GNU General Public License in the file
+.. license.txt along with this program; if not, write to the Free
+.. Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+..
+..
+.. last $Author$
+.. last $Date$
+.. $Revision$
+.. ===================================================================
+.. A more up-to-date version can be found online:
+..         http://biskit.pasteur.fr/install/short/
+
+
+=================
+Short Instruction
+=================
+
+
+1) install required libraries
+
+   =====================    ==============================================
+   *to install*              *comment or link*
+   ---------------------    ----------------------------------------------
+   python                    http://www.python.org/ (2.4)    
+   python-dev                python development files
+   plotutils                 http://www.gnu.org/software/plotutils/
+   gnuplot                   plotting program
+   python-numeric            http://sourceforge.net/projects/numpy/
+   python-netcdf             http://www.unidata.ucar.edu/software/netcdf/
+   python-scientific         Scientific python library
+   python-egenix-mxtools     needed for BioPython
+   python-biopython          http://www.biopython.org/
+   python-biggles            http://biggles.sourceforge.net/
+   pvm                       ParallelVirtualMachine binaries
+   pvm-dev                   PVM development files
+   openssh-server            usually already pre-installed
+   =====================    ==============================================
+
+
+2) setup PVM:: 
+
+    export PVM_ROOT=/usr/lib/pvm3
+    export PVM_RSH=/usr/bin/ssh
+
+   Ensure all hosts can be reached via ssh without password (see `pvm.howto`_!)
+
+
+3) fetch latest Biskit snapshot::
+
+    cvs -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/biskit login
+    cvs -z3 -d:pserver:anonymous@cvs.sourceforge.net:/cvsroot/biskit co -P biskit
+
+
+4) compile pypvm module::
+
+    cd biskit/Biskit/PVM
+    make
+
+
+5) setup::
+
+    biskit/scripts/Biskit/setup_biskit.py
+ 
+   edit *~/.biskit/settings.dat* for your environment
+
+
+6) install helper applications
+   This depends on what you actually see `Installing helper applications`_
+
+
+
+
+
+.. ============================================================================
+.. ========== following this line are reStructuredText links ==================
+.. _`pvm.howto`: install/detailed-instructions/pvm-howto/
+.. _`Installing helper applications`: install/detailed-instructions/helper-applications
