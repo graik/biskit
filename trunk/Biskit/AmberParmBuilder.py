@@ -360,6 +360,7 @@ class AmberParmBuilder:
         ## concat cap on chain
         m_chain = m_chain.concat( m_nme.resModels()[-1] )
 
+        ## should be obsolete now
         if m_chain._PDBModel__terAtoms != []:
             m_chain._PDBModel__terAtoms = [ len( m_chain ) - 1 ]
 
