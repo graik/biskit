@@ -198,7 +198,7 @@ if __name__ == '__main__':
     from Biskit.Dock import Complex
 
     print "Loading"
-    m_com = Load( testRoot() + '/com/dry_com.model' )
+    m_com = Load( testRoot() + '/com/ref.complex' ).model()
     rec = m_com.takeChains([0])
     lig = m_com.takeChains([1])
 
