@@ -37,10 +37,11 @@ import numpy.oldnumeric as N
 
 import tools as T
 import Table
+import settings as S
 
 class ProsaII:
 
-    def __init__(self, executable = 'prosaII', temp_dir = T.tempDir() ):
+    def __init__(self, executable = 'prosaII', temp_dir=S.tempDirShared ):
 
         self.executable = executable
         self.setCleanup()
