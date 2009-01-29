@@ -259,7 +259,7 @@ class PDBDope:
            relAS - Relative solvent accessible surface
            relMS - Relative molecular surface
            
-        See {Bikit.SurfaceRacer}
+        See {Biskit.SurfaceRacer}
         
         @param probe: probe radius
         @type  probe: float
