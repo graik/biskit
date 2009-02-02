@@ -1566,8 +1566,48 @@ class PDBModel:
         """
         index = N.concatenate( (index, [len_i]) )
         delta = index[1:] - index[:-1] 
-        # Numeric: delta = N.take( index, range(1, len(index) ) ) - index[:-1]
+
         return N.repeat( mask, delta.astype( N.int32 ) )
+
+
+    def extendIndex( self, i, index, len_i ):
+        """
+        Translate a list of positions that is defined, e.g., on residues
+        (/chains) to a list of atom positions AND also return the starting
+        position of each residue (/chain) in the new list of atoms.
+
+        @param i : positions in higher level list of residues or chains
+        @type  i : [ int ] or N.array of int
+        @param index: atomic starting positions of all residues or chains
+        @type  index: [ int ] or N.array of int
+        @param len_i: length of atom index (total number of atoms)
+        @type  len_i: int
+
+        @return: (ri, rindex) - atom positions & new index
+        @rtype:  N.array of int, N.array of int
+        """
+        ## last atom of each residue / chain
+        stop = N.concatenate( (index[1:], [len_i]) ) - 1
+
+        ifrom = N.take( index, i )
+        ito   = N.take( stop, i )
+
+        ## number of atoms in each of the new residues 
+        rangelen = ito - ifrom + 1
+
+        rindex   = N.concatenate( ([0], N.cumsum( rangelen[:-1] )) )
+
+        ## (1) repeat position of first atom in each residue as often as there
+        ## are atoms in this residue. (2) add a range array so that numbers
+        ## are increasing from each atom to the next but (3) reset the added
+        ## range to 0 at each residue starting position .
+
+        ri    = N.repeat( ifrom,  rangelen )
+        delta = N.repeat( rindex, rangelen )
+
+        ri =  ri + N.arange( len(ri), dtype=N.int32 ) - delta
+
+        return ri, rindex
 
 
     def atom2resMask( self, atomMask ):
@@ -1589,6 +1629,10 @@ class PDBModel:
     def atom2resIndices( self, indices ):
         """
         Get list of indices of residues for which any atom is in indices.
+
+        Note: in the current implementation, the resulting residues are
+        returned in their old order, regardless of the order of input
+        positions.
 
         @param indices: list of atom indices
         @type  indices: list of int
@@ -1617,23 +1661,19 @@ class PDBModel:
 
     def res2atomIndices( self, indices ):
         """
-        Convert residue indices to atom indices.
+        Convert residue indices to atom indices. Also return the starting
+        position of each residue in the new list of atoms.
 
         @param indices: list/array of residue indices
         @type  indices: list/array of int
 
-        @return: list of atom indices
-        @rtype: list of int
+        @return: array of atom positions, new residue index
+        @rtype: (N.array of int, N.array of int)
         """
         if max( indices ) > self.lenResidues() or min( indices ) < 0:
             raise PDBError, "invalid residue indices"
 
-        resMask = N.zeros( self.lenResidues() )
-        N.put( resMask, indices, 1 )
-
-        atomMask= self.res2atomMask( resMask )
-
-        return N.nonzero( atomMask )
+        return self.extendIndex( indices, self.resIndex(), self.lenAtoms() )
 
 
     def atom2chainIndices( self, indices, breaks=0 ):
@@ -1691,25 +1731,20 @@ class PDBModel:
 
     def chain2atomIndices( self, indices, breaks=0 ):
         """
-        Convert chain indices into atom indices.
+        Convert chain indices into atom indices. Also return the starting
+        position of each chain in the new list of atoms.
 
-        @param indices: list of chain indices
-        @type  indices: list of int
-        @param breaks: look for chain breaks in backbone coordinates (def. 0)
-        @type  breaks: 0||1
+        @param indices: list/array of chain indices
+        @type  indices: list/array of int
 
-        @return: all atoms belonging to the given chains
-        @rtype: list of int
+        @return: array of atom positions, new chain index
+        @rtype: (N.array of int, N.array of int)
         """
         if max( N.absolute(indices) ) > self.lenChains( breaks=breaks ):
             raise PDBError, "invalid chain indices"
 
-        chainMask = N.zeros( self.lenChains( breaks=breaks ) )
-        N.put( chainMask, indices, 1 )
-
-        atomMask= self.chain2atomMask( chainMask, breaks=breaks )
-
-        return N.nonzero( atomMask )
+        return self.extendIndex( indices, self.chainIndex( breaks=breaks ),
+                                 self.lenAtoms() )
 
 
     def res2atomProfile( self, p ):
@@ -1872,7 +1907,8 @@ class PDBModel:
         return r.concat( *models[1:] )
 
 
-    def take( self, i, *initArgs, **initKw ):
+    def take( self, i, rindex=None, cindex=None,
+              *initArgs, **initKw ):
         """
         Extract a PDBModel with a subset of atoms::
           take( atomIndices ) -> PDBModel / sub-class.
@@ -1893,14 +1929,21 @@ class PDBModel:
 
         ## more tricky: rescue residue borders and extract residue profiles
         new_resmap   = N.take( self.resMap(), i )
-        r._resIndex = self.map2index( new_resmap )
+        if rindex is not None:
+            r._resIndex = rindex
+        else:
+            ## this can fail if residues are repeated in the selection
+            r._resIndex = self.map2index( new_resmap )
 
         i_res     = N.take( new_resmap, r._resIndex )
         r.residues = self.residues.take( i_res, r )
 
         ## now the same with chain borders (and later profiles)
-        new_chainmap   = N.take( self.chainMap(), i )
-        r._chainIndex = self.map2index( new_chainmap )
+        if cindex is not None:
+            r._chainIndex = cindex
+        else:
+            new_chainmap   = N.take( self.chainMap(), i )
+            r._chainIndex = self.map2index( new_chainmap )
 
         ## copy non-sequential infos
         r.info = copy.deepcopy( self.info )
@@ -1999,7 +2042,8 @@ class PDBModel:
         @return: PDBModel with given residues in given order
         @rtype: PDBModel / subclass
         """
-        return self.take( self.res2atomIndices( i ) )
+        i, index = self.res2atomIndices( i )
+        return self.take( i, rindex=index )
 
 
     def takeChains( self, chains, breaks=0 ):
@@ -2016,7 +2060,8 @@ class PDBModel:
         @return: PDBModel consisting of the given chains in the given order
         @rtype : PDBModel / subclass
         """
-        return self.take( self.chain2atomIndices( chains, breaks=breaks ) )
+        i, index = self.chain2atomIndices( chains, breaks=breaks )
+        return self.take( i, cindex=index )
 
 
     def addChainFromSegid(self, verbose=1):
