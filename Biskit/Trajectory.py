@@ -1108,7 +1108,7 @@ class Trajectory:
         if right_allowed is None: right_allowed= N.nonzero( self.ref.maskBB() )
 
         ## atom indices of center residue
-        result = self.ref.res2atomIndices( [ res ] ).tolist()
+        result = self.ref.res2atomIndices( [ res ] )[0].tolist()
 
         ## get indices of neighbore residues that still belong to same chain
         l = self.ref.lenResidues()
@@ -1122,11 +1122,11 @@ class Trajectory:
 
         ## convert to atom indices, filter them against allowed neighbore atoms
         if outer_left:
-            outer_left = self.ref.res2atomIndices( outer_left )
+            outer_left = self.ref.res2atomIndices( outer_left )[0]
             outer_left = MU.intersection( left_allowed,  outer_left )
 
         if outer_right:
-            outer_right= self.ref.res2atomIndices( outer_right)
+            outer_right= self.ref.res2atomIndices( outer_right)[0]
             outer_right= MU.intersection( right_allowed, outer_right)
 
         return result, outer_left + outer_right
