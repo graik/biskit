@@ -47,7 +47,7 @@ class XRefineComplex( Xplorer ):
 
         passed on to Xplorer:
         xout    - str, file name of xplor log file (None->discard) [None]
-        bin     - str, file name of xplor binary     [settings.xplor_bin]
+        bin     - str, file name of xplor binary                  [xplor]
         node    - str, host for calculation (None->local)          [None]
         nice    - int, nice level                                     [0]
         log     - Biskit.LogFile, program log (None->STOUT)        [None]

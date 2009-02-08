@@ -2,7 +2,7 @@
 
 comment=
 
-## binary
+## binary for XPLOR-NIH;  http://nmr.cit.nih.gov/xplor-nih
 bin=xplor
 
 ## working directory
