@@ -483,7 +483,7 @@ def main(options):
     ## run X-Plor
     if options.has_key('exe'):
         
-        out, error, returncode = Executor( settings.xplor_bin , strict=0,
+        out, error, returncode = Executor( 'xplor' , strict=0,
                                            f_in=xplorer.cleaner.pdbname + "_generate.inp",
                                            f_out=xplorer.cleaner.pdbname + '_generate.log').run()
     ## Show structure in pymol

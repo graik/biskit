@@ -24,6 +24,7 @@
 ## $Date$
 
 from Biskit.tools import *
+from Biskit import ExeConfig
 import Biskit.settings as settings
 
 import os
@@ -75,7 +76,8 @@ class Runner:
         self.pdbCode = '"%s"' % self.getPdbCode()
 
         ## XPlor binary
-        self.xbin  = settings.xplorpcr_bin
+        self.xbin = ExeConfigCache.get( 'xplor' ).bin
+##        self.xbin  = settings.xplorpcr_bin
 
         ## template for xplor input
         self.ftemplate = absfile( projectRoot()+

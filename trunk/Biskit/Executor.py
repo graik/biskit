@@ -81,7 +81,8 @@ class Executor:
           >>> out, error, returncode = Executor('ls', strict=0).run()
 
           strict=0 means, ExeConfig does not insist on an existing exe_ls.dat
-          file and instead looks for a program called 'ls' in the search path.
+          configuration file and instead looks for a program called 'ls' in the 
+          search path.
 
 
     Templates
@@ -126,7 +127,7 @@ class Executor:
     scenarios -- which one is chosen mainly depends on the
     L{ExeConfig} `pipes` setting in exe_<program>.dat and on the
     `template` parameter given to Executor.__init__.  (Note: Executor
-    loads the ExeConfig instance for the given program `name` into its
+    loads the ExeConfig instance for the given program into its
     `self.exe` field.)
 
     Here is an overview over the different scenarios and how to
@@ -167,7 +168,7 @@ class Executor:
                   Executor will read this file and push it unmodified to
                   the program via StdIn. (kind of an exception, if used at
                   all, f_in usual points to a *non-existing* file that
-                  will receive the completed input.)
+                  will receive the completed input file.)
 
       3. B{ input from file
         (== ``myprogram < input_file``) }
@@ -192,14 +193,14 @@ class Executor:
                  Same as 3.1, except that the template is not read
                  from disc but directly taken from memory (see 2.2).
 
-      4. B{ input from file passed as argument to the program
+      4. B{ input file passed as argument to the program
         (== ``myprogram input_file``) }
 
         Condition:
 
           - exe.pipes == 0 / False
 
-        For this it is up to you to provide the correct program
+        Here it is up to you to provide the correct program
         argument.
 
         Setup:
