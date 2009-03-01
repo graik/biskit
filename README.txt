@@ -32,7 +32,7 @@ In this document:  * Release 2.2
 Release 2.2
 ------------
 
-Release 2.1.1 adds many bug fixes and a few new features to the
+Release 2.2 adds many bug fixes and a few new features to the
 previous beta release:
 
 * switch from CVS to SVN version control
