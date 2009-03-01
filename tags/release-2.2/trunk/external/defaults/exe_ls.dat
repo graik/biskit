@@ -1,0 +1,29 @@
+[BINARY]
+
+comment= demo config file for the unix ls command
+
+## binary
+bin=ls
+
+## working directory
+cwd=
+
+## wrap process in shell
+shell=0
+
+## use non-default shell
+shellexe=
+
+## communicate with process via STDIN and STDOUT
+pipes=0
+
+## Use new environment containing only variables given below
+replaceEnv=0
+
+##
+## run time environment settings
+## Empty entries mark variables that have to be specified from outside
+##
+[ENVIRONMENT]
+
+TEST_PARAM=ignored
