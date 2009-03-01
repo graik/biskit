@@ -1,0 +1,24 @@
+
+! build segment for AMBER force field
+! has to be used with pdb2xplor.py to fill in place holders
+
+segment
+   name="%(segment_id)4s"                   ! segment_id
+   chain
+        link ppgp head - GLY tail + PRO end
+        link ppgg head - GLY tail + GLY end
+        link pepp head - * tail + PRO end
+        link ppg2 head - GLY tail + * end
+        link ppg1 head - * tail + GLY end
+        link pept head - * tail + * end
+
+        coordinates @%(segment_pdb)s        ! take sequence from PDB
+    end
+end
+
+%(amber_patch)s
+
+vector do (name="CD1") (name "CD"  and resname "ILE")  ! rename ILE CD to CD1
+
+coordinates @%(segment_pdb)s                ! read coordinates
+

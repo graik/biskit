@@ -1,0 +1,72 @@
+!! Copyright (C) 2002-2005 Michael Nilges
+!!
+!! This program is free software; you can redistribute it and/or
+!! modify it under the terms of the GNU General Public License as
+!! published by the Free Software Foundation; either version 2 of the
+!! License, or any later version.
+!!
+!! This program is distributed in the hope that it will be useful,
+!! but WITHOUT ANY WARRANTY; without even the implied warranty of
+!! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+!! General Public License for more details.
+!!
+!! You find a copy of the GNU General Public License in the file
+!! license.txt along with this program; if not, write to the Free
+!! Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+!!
+!! $Revision$
+!! last $Author$
+!! last $Date$
+!! adapted to be used with runPCR.py (Raik Gruenberg)
+
+flags include pcr end
+eval ($evecfile = $structureid + "_" + encode($previoustemp) + "_" + "evec.dat")
+eval ($unifile = $structureid + "_" + "uniform" + "_" + "eval.dat")
+eval ($averfile = $structureid + "_" + encode($previoustemp) + "_" + "aver.dat")
+eval ($gmodfile = $structureid + "_" + encode($previoustemp) + "_" + "gmod.dat")
+
+
+pcr restraints
+
+	initialize
+
+	group 
+
+		! define ensemble members
+
+		equi  (segid 0* and @@atomselection  )
+		equi  (segid 1* and @@atomselection  )
+		equi  (segid 2* and @@atomselection  )
+		equi  (segid 3* and @@atomselection  )
+		equi  (segid 4* and @@atomselection  )
+		equi  (segid 5* and @@atomselection  )
+		equi  (segid 6* and @@atomselection  )
+		equi  (segid 7* and @@atomselection  )
+		equi  (segid 8* and @@atomselection  )
+		equi  (segid 9* and @@atomselection  )
+
+
+		! define weights
+
+		w-var = $PCRweight
+		w-ave = 0.0
+		w-ext = $PCRweight
+                maxp  = 1
+		w-cvar = 0.0
+
+		! inputs for variance, average and extremum restraints
+
+		edim1 = $Npcr
+		eivc1 = $evecfile
+                eivl  = $unifile
+
+		! inputs for cumulative variance restraint
+
+		edim2 = 0
+
+		! reference structure
+
+		refs = $averfile
+
+	end
+end

@@ -1,0 +1,51 @@
+10ps constant pressure MD on solvent
+ &cntrl
+# seed random number
+  ig     = %(rand_seed)i, 
+# start md from coord. only
+  ntx    = 1,       irest  = 0,
+
+# increase stack frame size for bigger systems
+  lastist= 3000000,
+  lastrst= 3000000,
+
+# frequency of report to: out, restart file, crd, vel
+  ntpr   = 50,
+  ntwr=5000, ntwx=500, ntwv=500,
+
+# periodic, cutoff for "direct search space" in PME
+  ntb    = 1,
+  cut    = 9.0,
+
+# dynamics
+  imin   = 0,
+  nstlim = 10000,
+       
+# time step, full calc. necessary with ntp>0
+  dt     = 0.001,   nrespa = 1,
+
+# Shake on
+  ntc    = 2,       tol    = 0.00001,
+# don't calculate H-bond energies
+  ntf    = 2,
+
+# temperature, Behrendsen thermostat, tight temperature control
+  temp0  = 300.0,   tempi  = 300.0,
+  ntt    = 1,
+  tautp  = 0.5,
+
+# re-assign temperature, remove translation/rotation
+#  vrand  = 1000,    
+  nscm   = 1010,
+
+# constant pressure periodic, isotropic box scaling, tight pressure coupling,
+  ntb    = 2,
+  ntp    = 1,
+  taup   = 1.0,
+
+# Restrain solute (protein)
+  ntr=1,
+  restraint_wt=50.0,
+  restraintmask=' :1-%(lenres)i',
+
+ &end

@@ -1,0 +1,229 @@
+.. ===================================================================
+.. Biskit, a toolkit for the manipulation of macromolecular structures
+.. Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
+..
+.. This program is free software; you can redistribute it and/or
+.. modify it under the terms of the GNU General Public License as
+.. published by the Free Software Foundation; either version 2 of the
+.. License, or any later version.
+..
+.. This program is distributed in the hope that it will be useful,
+.. but WITHOUT ANY WARRANTY; without even the implied warranty of
+.. MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+.. General Public License for more details.
+..
+.. You find a copy of the GNU General Public License in the file
+.. license.txt along with this program; if not, write to the Free
+.. Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+..
+..
+.. last $Author$
+.. last $Date$
+.. $Revision$
+.. ===================================================================
+.. More up-to-date instructions covering more programs are online:
+..       http://biskit.pasteur.fr/install/applist/
+..       http://biskit.pasteur.fr/install/install/applications
+
+
+========
+Contents
+========
+- `Installing and testing local blast environment`_
+- `Install Pfam database for HMMER`_
+- `Install local PDB database`_
+- `Installing T-Cofee, ClustalW and SAP`_
+
+------------------------------------------------------------
+
+
+Installing and testing local blast environment
+==============================================
+
+1. **Get the NCBI toolkit**
+
+   Download using anonymous ftp from ftp.ncbi.nih.gov and install it.
+   (ftp://ftp.ncbi.nlm.nih.gov/toolbox/ncbi_tools/CURRENT/)
+
+
+2. **Install data bases (option 2 recommended)**
+
+   *2.1 option 1 - FASTA formated databases:*
+
+   - Download the databases via anonymous ftp (in binary mode) 
+     from ftp://ftp.ncbi.nlm.nih.gov/blast/db/FASTA 
+     The minimum requirement is swissprot and pdbaa.
+   - uncompress the databases 
+   - Format the databases with -o option (formatdb -o ...)
+     Example: formatdb -i database -p T -o T
+
+   *2.2 option 2 - Preformated databases (needs less space and are preformated):*
+
+   - Download the databases via anonymous ftp (in binary mode) 
+     from ftp://ftp.ncbi.nlm.nih.gov/blast/db OR download the script 
+     update_blastdb.pl and use it to download/update your databases.
+     (http://www.ncbi.nlm.nih.gov/blast/docs/update_blastdb.pl)
+   - The minimum requirement is nr (parent of the other databases), 
+     swissprot and pdbaa.   
+
+
+3. **Set up environment (option 1 recommended)**
+
+   *3.1 option 1 - create ~/.ncbirc*
+
+   - Create a file named .ncbirc in your home and edit the path to 
+     the ncbi data directory and add proxy info if any. 
+     Example::
+
+          [NCBI]
+          DATA=/Bis/ncbi/data
+
+          [NET_SERV]
+          SRV_CONN_MODE=FIREWALL
+          SRV_HTTP_PROXY_HOST=cache.pasteur.fr
+          SRV_HTTP_PROXY_PORT=8080
+
+   - Export the database path::
+     
+          zsh:  export BLASTDB=/Bis/db/blastdb
+          tcsh: setenv BLASTDB /Bis/db/blastdb
+
+   *3.2 option 2 - no proxy server*
+
+   - tcsh example:: 
+
+          setenv BLASTMAT /Bis/ncbi/data
+          setenv BLASTDB  /Bis/db/blastdb
+          setenv PATH ${PATH}: /Bis/ncbi/bin
+
+
+
+4. **$BLASTDB**
+
+   $BLASTDB must contain all data base and index files (links to files also work)
+   (nr.*, pdbaa.*, (swiss.*))
+
+
+5. **test blast environment**
+
+   You can test your blast setup by following this example::
+
+     cd ~/biskit/test/Mod
+       
+     # retrieve sequence
+     fastacmd -d pdbaa -s 3TGI >! test.fasta
+
+     # search against PDB
+     blastall -p blastp -d pdbaa < test.fasta
+
+     # search against all
+     blastall -p blastp -d nr < test.fasta > nr.out
+
+     # cluster sequences
+     blastclust -i test_blastclust.fasta
+     -> should yield:
+     [blastclust] WARNING: Could not find taxdb.bti
+     Apr 19, 2004  1:30 PM Start clustering of 12 queries
+     a b c d e g h i j l
+     f
+     k
+     m
+
+
+---------------------------------------------------------------
+
+Install Pfam database for HMMER
+===============================
+
+1. Download database
+
+   - Download database by anonymous ftp and unpack
+
+   - Example::
+
+      ftp ftp.sanger.ac.uk
+           cd pub/databases/Pfam/current_release
+           get Pfam_ls.gz
+           bye
+      gzip -d Pfam_ls.gz
+
+2. Setup paths
+
+   - Add the path to the database to ~/.biskit/settings.dat
+   - Assign the path of the Pfam database to the 'hmm_db' variable. 
+     Example: hmm_db = /shared/db/Pfam_ls
+
+
+---------------------------------------------------------------
+
+
+Install local PDB database
+==========================
+
+If you plan on heavily use the homology modelling modules you might 
+want to consider installing a local copy of the PDB database. If you
+don't have a local copy the pdb files will be automatically downloaded
+but this can be quite time consuming. There are two optional ways of
+installing the PDB database locally
+
+1. **Local PDB data base**
+
+   1.1 *OPTION 1 - Mirror the full pdb ftp (approx. 20 GB).*
+
+   - download a mirroring script at http://www.rcsb.org/pdb/software-list.html
+     You'll find them under the headline "FTP Archive Resources". We are using 
+     rsyncPDB.sh.
+   - use the documentation provided with the script to install a local database.
+   - in ~/.biskit/settings.dat set the variable "pdb_path" to the directory
+     ftp_download/data/structures/divided/pdb
+
+   1.2 *OPTION 2 - Mirror only the pdb flat files needed by Biskit (approx. 5 GB).*
+   
+   - same as above but in step 2 edit the script like this::
+
+        ${RSYNC} -rlpt -v -z --delete --port=$PORT 
+        $SERVER::ftp_data/structures/divided/pdb/ 
+        $MIRRORDIR > $LOGFILE 2>/dev/null
+
+
+2. **Setup data base path**
+
+- Assign the path of the pdb database to the 'pdb_path' variable. 
+  The path shoud point to the folder within which the pdb files in 
+  regular pdb-format are found. If you are using a divided database
+  (see 1.2) the path should point towards the folder with containing 
+  the divided folders.
+- example: pdb_path = /shared/db/divided/pdb
+
+---------------------------------------------------------------
+
+Installing T-Cofee, ClustalW and SAP
+====================================
+
+Download and install CLUSTALW
+-----------------------------
+- ftp://ftp.ebi.ac.uk/pub/software/unix/clustalw/
+- *setenv CLUSTALW_4_TCOFFEE /path/to/clustalw*
+
+Download and install SAP
+------------------------
+- http://igs-server.cnrs-mrs.fr/~cnotred/Projects_home_page/3dcoffee_home_page.html
+- *setenv SAP_4_TCOFFEE /path/to/sap*
+
+Download and install TCOFFEE
+----------------------------
+- http://igs-server.cnrs-mrs.fr/~cnotred/Projects_home_page/t_coffee_home_page.html
+  (OR http://igs-server.cnrs-mrs.fr/~cnotred/Packages)
+
+- Set the *t_coffee_bin* variable in *~/.biskit/settings.dat*::
+
+    t_coffee_bin = /shared_bin/T-Coffee/t_coffee
+
+- Optional settings
+
+  + force T-Coffee not to validate filenames of structures against the RCSB.
+    The validation is quite time consuming, therefore this setting is recommended.
+    *setenv NO_REMOTE_PDB_DIR 1*
+  + If you have a local database installed installed this can be used for the
+    validation.  
+    *setenv PDB_DIR /path/to/your/pdb/database*
