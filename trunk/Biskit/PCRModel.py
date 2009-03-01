@@ -73,8 +73,8 @@ class PCRModel( PDBModel ):
         return self.psfFileName
 
 
-    def take(self, i ):
-        r = PDBModel.take( self, i )
+    def take(self, i, rindex=None, cindex=None ):
+        r = PDBModel.take( self, i, rindex=rindex, cindex=cindex )
         r.psfFileName = self.psfFileName
         r.initVersion = self.initVersion
         return r
