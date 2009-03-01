@@ -21,7 +21,7 @@ and Hmmer; interfaces to further software can be added
 easily. Moreover, Biskit simplifies the parallelisation of
 calculations via PVM (Parallel Virtual Machine).
 
-In this document:  * Release 2.1.1
+In this document:  * Release 2.2
 		   * Release 2.1.0-beta
 		   * Release 2.0.1
 		   * Release 2.0.0
@@ -29,10 +29,10 @@ In this document:  * Release 2.1.1
 		   * License
 		   * Open issues
 
-Release 2.1.1
--------------
+Release 2.2
+------------
 
-Release 2.1.1 adds many bug fixes but only a few new features to the
+Release 2.1.1 adds many bug fixes and a few new features to the
 previous beta release:
 
 * switch from CVS to SVN version control
@@ -40,11 +40,22 @@ previous beta release:
 * PDBModel: new report() and plot() function to get a fast overview
   over the content of a PDB
 
-* new CommandLine.py will soon replace the old tools.cmdDict command
+* PDBModel: PDBModel( '3TGI' ) will fetch the PDB entry 3TGI directly 
+  from the ncbi database or a local mirror
+
+* PDBModel: new maskDNA() function
+
+* new CommandLine.py is a candidate to replace the old tools.cmdDict command
   line option parsing for scripts; with type-casting and test fixture
   built in
 
-...
+* Statistics/ROCalyzer module calculates ROC areas and their statistic 
+  significance
+
+* new Intervor module wraps the Voronoi interface calculator of Cazal et
+  al (but Frederic hasn't got around to offer a intervor version for
+  download yet... come on Frederic ;o)! )
+
 
 Release 2.1.0-beta
 ------------------
@@ -136,13 +147,13 @@ The installation of helper applications is described here:
 License
 -------
 
-Biskit is distributed under the GNU GPL. See license.txt!
+Biskit is distributed under the GNU GPL version 3. See license.txt!
 
 
 Open issues
 -----------
 
-Please, check out the latest CVS snapshot and the list of open bugs at
+Please, check out the latest SVN snapshot and the list of open bugs at
 http://sf.net/projects/biskit, before reporting any new problem!
 
 The up-to-date list of open issues can be found at:
@@ -172,9 +183,7 @@ field if the above link shouldn't work).
 
 * the parallel versions of the Mod scripts may have bugs
 
-    We have started working on some projects that will use the
-    modeling pipeline.  Any problems will hopefully be sorted out
-    along the way. The non-parallel modeling (search_sequences,
+    The non-parallel modeling (search_sequences,
     search_templates, clean_templates, align, model) should
     nevertheless work.
 
