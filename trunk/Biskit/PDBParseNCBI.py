@@ -205,7 +205,8 @@ class PDBParseNCBI( PDBParseModel ):
 
         m = B.PDBModel( fname )
         m.disconnect()
-
+        m.pdbCode = id
+        
         T.tryRemove( fname )
 
         return m
