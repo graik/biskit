@@ -105,6 +105,8 @@ class PDBParseModel( PDBParser ):
                                                copyMissing=updateMissing,
                                                setChanged=0 )
 
+                model.info.update( s.info )
+
                 if skipRes is not None:
                     model.removeRes( skipRes )
                                
