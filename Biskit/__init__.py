@@ -2,7 +2,7 @@
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2007 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -48,6 +48,8 @@ try:
     from ChainSeparator import ChainSeparator
     from ChainWriter import ChainWriter
 
+    from EDParser import EZDParser
+
     from EnsembleTraj import EnsembleTraj
     from LocalPath import LocalPath, LocalPathError
 
@@ -76,7 +78,7 @@ try:
     from DSSP import Dssp, Dssp_Error
     from FuzzyCluster import FuzzyCluster
     from PDBDope import PDBDope
-    
+
     from ModelList import ModelList
     from Ramachandran import Ramachandran
     from CommandLine import CommandLine
