@@ -69,7 +69,7 @@ class PDBProfiles( ProfileCollection ):
         self.model = model
 
     def version( self ):
-        return ProfileCollection.version(self) + '; PDBModel $Revision$'
+        return ProfileCollection.version(self)
 
 
     def get( self,  name, default=None, update=True, updateMissing=False ):
@@ -1354,7 +1354,8 @@ class PDBModel:
         @return: N.array( 1 x N_atoms ) of 0||1
         @rtype: array
         """
-        return self.maskFrom('residue_name', ['TIP3','HOH','WAT','Na+', 'Cl-'])
+        return self.maskFrom('residue_name', ['TIP3','HOH','WAT','Na+', 'Cl-',
+                                              'CA'])
 
     def maskHetatm( self ):
         """
@@ -1862,7 +1863,7 @@ class PDBModel:
         rI = self.resIndex()       # starting atom of each residue
         rE = self.resEndIndex()    # ending atom of each residue
         
-        r = [ p[ rI[res] : rE[res] ] for res in range( self.lenResidues() ) ]
+        r = [ p[ rI[res] : rE[res]+1 ] for res in range( self.lenResidues() ) ]
         return r
     
     
