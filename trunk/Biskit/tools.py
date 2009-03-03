@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2007 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -466,14 +466,14 @@ def cmdDict( defaultDic={} ):
     return get_cmdDict( sys.argv[1:], defaultDic )
 
 
-def Dump(this, filename, gzip = 0, mode = 'w'):
+def dump(this, filename, gzip = 0, mode = 'w'):
     """
     Dump this::
-      Dump(this, filename, gzip = 0)
+      dump(this, filename, gzip = 0)
       Supports also '~' or '~user'.
 
+    @note : Peter Schmidtke : gzip fixed, works now
     @author: Wolfgang Rieping
-    @note gzip currently doesn't work.
 
     @param this: object to dump
     @type  this: any
@@ -489,21 +489,21 @@ def Dump(this, filename, gzip = 0, mode = 'w'):
     if not mode in ['w', 'a']:
         raise "mode has to be 'w' (write) or 'a' (append)"
 
-##     if gzip:
-##         import gzip
-##         f = gzip.GzipFile(filename, mode)
-##     else:
-    f = open(filename, mode)
+    if gzip:
+        f = gzopen(filename, "wb")
+    else:
+        f = open(filename, mode)
 
     cPickle.dump(this, f, 1)
 
     f.close()
 
 
-def Load(filename, gzip = 0):
+def load(filename, gzip = 0):
     """
     Load dumped object from file.
 
+    @note : Peter Schmidtke : gzip fixed, works now
     @author: Wolfgang Rieping
 
     @param filename: name of file
@@ -519,10 +519,12 @@ def Load(filename, gzip = 0):
     filename = osp.expanduser(filename)
 
     try:
-        f = open(filename)
+        if gzip :
+            f=gzopen(filename,"rb")
+        else :            
+            f = open(filename)
 
         objects = []
-
         eof = 0
         n = 0
 
