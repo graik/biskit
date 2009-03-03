@@ -30,7 +30,7 @@ import os.path
 import string
 import numpy.oldnumeric as N
 
-from Biskit import Executor, TemplateError
+from Biskit import Executor, TemplateError, EHandler
 import Biskit.settings as S
 import Biskit.tools as T
 
@@ -370,12 +370,20 @@ class SurfaceRacer( Executor ):
         ## cannot be calculated, but allow this check to be a little flexible
         ## if we ate forced to slightly increase the radii to excape round off
         ## SurfaceRacer errors
-        if round(self.probe, 1) == 1.4 and self.vdw_set == 1:
-            self.__relExposure('MS')
-            self.__relExposure('AS')
-        else:
-            T.flushPrint("\nNo relative accessabilities calculated when using a prob radius other than 1.4 A or not using the Richards vdw radii set.")
-
+        try:
+            if round(self.probe, 1) == 1.4 and self.vdw_set == 1:
+                self.__relExposure('MS')
+                self.__relExposure('AS')
+            else:
+                EHandler.warning("No relative accessabilities calculated "+\
+                                 "when using a prob radius other than 1.4 A"+\
+                                 " or not using the Richards vdw radii set.")
+        except KeyError, what:
+            EHandler.warning("Missing standard accessibilities for some "+\
+                             "atoms. No relative accesibilities calculated.")
+            if 'relMS' in self.result: del self.result['relMS']
+            if 'relAS' in self.result: del self.result['relAS']
+            
 
     def fail( self ):
         """

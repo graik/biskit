@@ -274,8 +274,8 @@ class PDBDope:
         name_AS   = 'AS' + probe_suffix * ('_%3.1f' % probe)
         name_curv = 'curvature' + probe_suffix * ('_%3.1f' % probe)
 
-        ## hydrogens are not allowed during FastSurf calculation
-        mask = self.m.maskHeavy()
+        ## hydrogens + waters are not allowed during FastSurf calculation
+        mask = self.m.maskHeavy() * N.logical_not( self.m.maskSolvent() )
         
         fs = SurfaceRacer( self.m, probe, vdw_set=vdw_set )
         fs_dic = fs.run()
@@ -297,7 +297,7 @@ class PDBDope:
                                version= T.dateString() + ' ' + self.version(),
                                **fs_info )
 
-        if round(probe, 1) == 1.4 and vdw_set == 1:
+        if round(probe, 1) == 1.4 and vdw_set == 1 and 'relAS' in fs_dic:
             self.m.atoms.set( 'relAS', fs_dic['relAS'], mask, 0,
                                    comment='Relative solvent accessible surf.',
                                    version= T.dateString()+' ' +self.version(),
