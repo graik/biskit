@@ -33,10 +33,10 @@ from Model import Model
 class Feature(object):
     """
     A Feature is adding information like, e.g., a structure to part of a 
-    MultiModel and provides a specialized view on this part of the MultiModel.
+    Polymer and provides a specialized view on this part of the Polymer.
     About like this::
     
-        xxxxxxxxxxxxxxMultiModelxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+        xxxxxxxxxxxxxxPolymerxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
         
              * ****  **********Feature1*******
                                            *******Feature2*******
@@ -46,9 +46,9 @@ class Feature(object):
     
     The most important fields of a feature are:
     
-    * model -- the "parent" MultiModel to which the feature belongs
+    * model -- the "parent" Polymer to which the feature belongs
 
-    * map   -- the atom positions in the MultiModel that are occupied by the
+    * map   -- the atom positions in the Polymer that are occupied by the
                feature
                
     * atoms -- a virtual ProfileCollection that mirrors all atom profiles of 
@@ -70,16 +70,16 @@ class Feature(object):
     
     def __init__(self, model, map2model, add2model=True ):
         """
-        Create a new feature for a given MultiModel.
+        Create a new feature for a given Polymer.
         
-        @param model: existing MultiModel
-        @type  model: MultiModel
+        @param model: existing Polymer
+        @type  model: Polymer
         @param map:   map feature positions to positions in the model
         @type  map:   [ int ]
         @param add2model: register the new feature with the parent model [1]
         @type  add2model: bool
         """
-        assert isinstance( model, MultiModel )
+        assert isinstance( model, Polymer )
 
         self.model = model
         self.map   = N.array( map2model, 'i' )
@@ -104,7 +104,7 @@ class Feature(object):
     def concat( self, *others ):
         """
         Concatenate this with one or more other features (of the same 
-        MultiModel).
+        Polymer).
         """
         if len( others ) == 0:
             return self
@@ -115,7 +115,7 @@ class Feature(object):
                'can only concat with other Feature instances'
         
         assert next.model is self.model, \
-               'can only concat features that belong to the same MultiModel.'
+               'can only concat features that belong to the same Polymer.'
 
         rmap = N.concatenate( (self.map, next.map ) )
         
@@ -129,7 +129,7 @@ class Feature(object):
     
     def modelMask( self ):
         """
-        Create a mask for parent MultiModel, marking every position covered by
+        Create a mask for parent Polymer, marking every position covered by
         this feature.
         @return:
         @rtype: N.array of int or bool
@@ -192,11 +192,11 @@ class Feature(object):
         """
         Transfer a copy of this feature into a model that is about to be
         extracted from the current parent model. (This method is needed for
-        MultiModel.take.) The method calculates the new feature2model map
+        Polymer.take.) The method calculates the new feature2model map
         from the current map and the given model indices.
 
         @param new_model: new parent model derrived from the current one
-        @type  new_model: MultiModel
+        @type  new_model: Polymer
         @param model_i  : positions of the new model's atoms in the old model
         @type  model_i  : [ int ]
         @param add2model: register the Feature with the new parent model [1]
@@ -223,7 +223,7 @@ class Feature(object):
         map.
         
         @param model: new parent model, if different from current [None]
-        @type  model: MultiModel
+        @type  model: Polymer
         @param map2model: new feature->model map, if different from old [None]
         @param map2model: [int]
         @param add2model: register new feature with parent model [0]
@@ -238,7 +238,7 @@ class Feature(object):
         return self.__class__( model, map2model, add2model=add2model )
 
 
-class MultiModel( Model ):
+class Polymer( Model ):
     
     #: default profiles for atoms
     ATOM_KEYS    = ['residue_name', 'name', 'element']
@@ -251,7 +251,7 @@ class MultiModel( Model ):
     
     def __init__(self, *sequences ):
         """
-        Create a new MultiModel.
+        Create a new Polymer.
 
         @param sequence: sequence, 1-letter coded or list of 3-letter names; 
                          several sequences are interpreted as distinct chains
@@ -267,7 +267,7 @@ class MultiModel( Model ):
 
     
     def version( self ):
-        return Model.version(self) + '; MultiModel $Revision$'
+        return Model.version(self) + '; Polymer $Revision$'
 
     def __newChain( self ):
         """
@@ -364,14 +364,14 @@ class MultiModel( Model ):
 
     def take( self, i ):
         """
-        Extract a MultiModel with a subset of atoms::
-          take( atomIndices ) -> MultiModel / sub-class.
+        Extract a Polymer with a subset of atoms::
+          take( atomIndices ) -> Polymer / sub-class.
 
         @param i: atomIndices, positions to take in the order to take
         @type  i: list/array of int
 
-        @return: MultiModel / sub-class
-        @rtype: MultiModel
+        @return: Polymer / sub-class
+        @rtype: Polymer
         """
         r = Model.take( self, i )
         
@@ -413,7 +413,7 @@ class MultiModel( Model ):
 
 if __name__ == '__main__':
     
-    m = MultiModel('ACAGPL','SS')
+    m = Polymer('ACAGPL','SS')
 
     f_ = Feature( m, range( 1, len(m), 2 ) )
 
