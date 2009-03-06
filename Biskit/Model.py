@@ -168,6 +168,7 @@ class Model( object ):
                 return self.residues.set( k, v )
             if v is not None and len( v ) == self.lenChains():
                 return self.chains.set( k, v )
+
             if k in self.atoms:
                 return self.atoms.set( k, v )
             if k in self.residues:
