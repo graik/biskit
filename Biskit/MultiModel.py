@@ -179,6 +179,7 @@ class Feature(object):
     def _projectMap( self, model_i ):
         """
         Create a new feature -> model map for the given model positions.
+        see: transfer()
         """
         ## positions in new model that still have a corresponding feature atom
         mask_f2new_model = N.take( self.modelMask(), model_i )
