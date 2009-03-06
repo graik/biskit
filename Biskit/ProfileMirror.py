@@ -31,12 +31,12 @@ from Biskit.ProfileCollection import _ViewSignal, CrossView
 
 class ProfileMirror( B.ProfileCollection ):
     """
-    Access only part of an underlying ProfileCollection from a MultiModel.
+    Access only part of an underlying ProfileCollection from a Polymer.
     """
     
     def __init__( self, parentProfiles, map2model ):
         """
-        @param parentProfiles: profiles of the MultiModel
+        @param parentProfiles: profiles of the Polymer
         @type  parentProfiles: ProfileCollection
         @param map: map positions in this ProfileCollection to positions in the
                     parent profile
@@ -45,7 +45,7 @@ class ProfileMirror( B.ProfileCollection ):
         #: feature -> model map from parent feature
         self.map = map2model
 
-        #: a ProfileCollection of the MultiModel that is parent of the Feature
+        #: a ProfileCollection of the Polymer that is parent of the Feature
         assert isinstance( parentProfiles, B.ProfileCollection )
         self.pc = parentProfiles
 
@@ -136,7 +136,7 @@ class ProfileMirror( B.ProfileCollection ):
         Add/override a profile. The two info records 'version', 'changed' and 
         'isarray' are always modified but can be overridden by key=value pairs 
         to this function. If the profile does not yet exist in the parent 
-        ProfileCollection, a new profile is created for the whole MultiModel
+        ProfileCollection, a new profile is created for the whole Polymer
         and the values not covered by this ProfileMirror are set to <default>.
         
         @param name: profile name (i.e. key)
@@ -214,7 +214,7 @@ class ProfileMirror( B.ProfileCollection ):
         Take from profiles using provided indices::
           take( indices ) -> FeatureProfiles mapping to subset of parent
 
-        @param indices: list of indices into this profile (not the MultiModel)
+        @param indices: list of indices into this profile (not the Polymer)
         @type  indices: [int]
 
         @return: new instance that maps to a new subset of positions

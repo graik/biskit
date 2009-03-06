@@ -71,7 +71,7 @@ def map2index( imap ):
 class Model( object ):
     """
     Model is intended to become the common base class for PDBModel and
-    MultiModel. 
+    Polymer. 
     """
     #: [str], default profiles for atoms
     ATOM_KEYS    = []
@@ -296,7 +296,7 @@ class Model( object ):
     def take( self, i ):
         """
         Extract a Model with a subset of atoms::
-          take( atomIndices ) -> MultiModel / sub-class.
+          take( atomIndices ) -> Polymer / sub-class.
 
         @param i: atomIndices, positions to take in the order to take
         @type  i: list/array of int
