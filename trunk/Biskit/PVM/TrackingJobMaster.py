@@ -340,7 +340,7 @@ class TrackingJobMaster( JobMaster ):
         @param fname: file name
         @type  fname: str
         """
-        T.Dump( self.getRst(), fname )
+        T.dump( self.getRst(), fname )
 
 
     def setRst( self, rst_data ):

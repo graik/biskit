@@ -35,7 +35,7 @@ class ComplexEvolvingList( ComplexList ):
     """
     List of ComplexEvolving instances.
     Used for organising, sorting, and filtering Complexes during refinement.
-    
+
     @todo: implement plotting functions for evolving Complexes
     @todo: right now normal Complexes are tolerated
     @todo: adapt model management
@@ -46,7 +46,7 @@ class ComplexEvolvingList( ComplexList ):
         """
         @param lst: list of Complexes
         @type  lst: [ComplexEvolving]
-        
+
         @raise ComplexListError: if list contains non-Complex item.
         """
         ComplexList.__init__( self, lst )
@@ -55,7 +55,7 @@ class ComplexEvolvingList( ComplexList ):
     def version( self ):
         """
         Version of Dock.Complex
-        
+
         @return: version of class
         @rtype: str
         """        
@@ -80,7 +80,7 @@ class ComplexEvolvingList( ComplexList ):
     def allVersionList( self ):
         """
         Get all versions of each Complex as a seperate Complex instance.
-        
+
         @return: ComplexList of normal Complex instances
         @rtype: ComplexList
         """
@@ -98,10 +98,10 @@ class ComplexEvolvingList( ComplexList ):
     def toComplexList( self, version=-1 ):
         """
         Get a ComplexList that contains only a single version of each Complex.
-        
+
         @param version: version in history, -1 == last [-1] (default: -1)
         @type  version: int
-        
+
         @return: ComplexList
         @rtype: ComplexList
         """
@@ -113,11 +113,11 @@ class ComplexEvolvingList( ComplexList ):
         Get a simple python list of Complexes. If version==None, the list
         contains ComplexEvolving instances with all versions, otherwise
         the list contains Complex instances representing a single version.
-        
+
         @param version: version in history, -1 == last, None == all
                         (default: None)
         @type  version: int
-        
+
         @return: python list of Complexes
         @rtype: [ Complex ]
         """
@@ -131,7 +131,7 @@ class ComplexEvolvingList( ComplexList ):
                   indices=None, unique=0 ):
         """
         Get all values of a certain info record of all or some Complexes.
-        
+
         @param infoKey: key for info dict
         @type  infoKey: str
         @param version: index in history or None (=current) (default: None)
@@ -143,7 +143,7 @@ class ComplexEvolvingList( ComplexList ):
         @type  indices: [int] OR None
         @param unique: report each value only once (set union), (default: 0)
         @type  unique: 1|0
-        
+
         @return: list of values
         @rtype: [any]
         """
@@ -171,19 +171,19 @@ class ComplexEvolvingList( ComplexList ):
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test case"""
 
     def test_ComplexEvolvingList(self):
-	"""Dock.ComplexEvolvingList test"""
+        """Dock.ComplexEvolvingList test"""
 
         import Biskit.tools as t
         from Biskit.Dock import ComplexEvolving
         from Biskit.Dock import ComplexEvolvingList
-    
+
         ## original complex
-        cl = t.Load(  t.testRoot() + "/dock/hex/complexes.cl" )
+        cl = t.load(  t.testRoot() + "/dock/hex/complexes.cl" )
 
         ## first evolution step
         c = ComplexEvolving( cl[0].rec(), cl[0].lig(), cl[0],
@@ -195,7 +195,7 @@ class Test(BT.BiskitTest):
 
         ## create an evolving complex list
         cl = ComplexEvolvingList( [c, c] )
-        
+
         if self.local:
             ## last version of all complexes in list
             print cl.valuesOf('comment')
@@ -205,14 +205,14 @@ class Test(BT.BiskitTest):
 
             ## the first complex in the list
             print cl[0].valuesOf('comment')
-    
+
             globals().update( locals() )
-            
+
         self.assertEqual( (cl.valuesOf('comment'), cl[0].valuesOf('comment')),
-			  (['test2', 'test2'], [None, 'test1', 'test2']) )
+                          (['test2', 'test2'], [None, 'test1', 'test2']) )
 
 if __name__ == '__main__':
 
     BT.localTest()
-    
+
 

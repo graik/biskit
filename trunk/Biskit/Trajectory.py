@@ -153,7 +153,9 @@ class Trajectory:
         self.resIndex = self.ref.resMap()
 
         ## keep list of loaded files
-        self.frameNames = pdbs
+        if type( pdbs[0] ) is str:
+            self.frameNames = pdbs
+        self.frameNames = [ str( i ) for i in range(len(pdbs)) ]
 
 
     def __getitem__( self, i ):
@@ -1617,7 +1619,7 @@ class Test(BT.BiskitTest):
 ##         traj = Trajectory( pdbs[:3], ref, rmwat=0 )
 
         ## Loading
-        self.traj = T.Load(T.testRoot() + '/lig_pcr_00/traj.dat')
+        self.traj = T.load(T.testRoot() + '/lig_pcr_00/traj.dat')
 
         ## sort frames after frameNames
         self.traj.sortFrames()

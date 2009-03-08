@@ -347,7 +347,7 @@ if __name__ == '__main__':
         _use()
 
     ## Load result tree and dict with protocols
-    dat = T.Load( options['i'] )
+    dat = T.load( options['i'] )
     title = 't' in options
 
     p = dat['protocols']

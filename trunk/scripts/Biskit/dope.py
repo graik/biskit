@@ -172,7 +172,7 @@ def changeModel( inFile, prefix, sourceModel ):
     outFile = os.path.dirname( inFile ) + '/' + prefix +\
               T.stripFilename( inFile ) + '.model' 
 
-    T.Dump( model, outFile )
+    T.dump( model, outFile )
 
     print '-> ' + os.path.basename( outFile )
 
@@ -183,12 +183,12 @@ def updateModelDic( f ):
 
     print 'Updating ', f
 
-    d = T.Load( T.absfile( f ) )
+    d = T.load( T.absfile( f ) )
 
     for m in d.values():
         m.update( updateMissing=1 )
 
-    T.Dump( d, T.absfile( f ) )
+    T.dump( d, T.absfile( f ) )
 
 ##########
 ## MAIN ##
@@ -228,7 +228,7 @@ if sourceOut:
                             dssp =('dssp' in options['p']) )
 else:
     try:
-        source = T.Load( sourceIn )
+        source = T.load( sourceIn )
         if not source.profile('cons_ent', None):
             raise Exception()
     except:

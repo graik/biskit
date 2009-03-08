@@ -143,7 +143,7 @@ del options['i']
 a = AmberEntropist( f_in, **options )
 a.run()
 
-t.Dump( a.result, options['o'] )
+t.dump( a.result, options['o'] )
 
 print "Dumped detailed result to %s. (for python unpickling)" % options['o']
 print "Entropy in cal/mol-kelvin (total, vibrational): ",

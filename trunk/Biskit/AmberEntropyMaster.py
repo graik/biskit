@@ -261,7 +261,7 @@ class AmberEntropyMaster(TrackingJobMaster):
         @rtype: trajectoty, [int], [int]
         """
         self.log.add('Loading ' + fname )
-        t = T.Load( fname )
+        t = T.load( fname )
 
         t.ref.addChainId()
         t = t.compressAtoms( t.ref.maskProtein() )
@@ -403,7 +403,7 @@ class AmberEntropyMaster(TrackingJobMaster):
             self.log.add('using existing ' + fname )
         else:
             self.log.add('Saving ' + fname )
-            T.Dump( o, fname )
+            T.dump( o, fname )
 
         return fname
 
@@ -454,7 +454,7 @@ class AmberEntropyMaster(TrackingJobMaster):
             else:
                 self.log.add_nobreak('saving ' + f + '...')
                 m = traj.takeMember( n )
-                T.Dump( m, f )
+                T.dump( m, f )
                 self.log.add('done')
             r += [ f ]
 
@@ -505,7 +505,7 @@ class AmberEntropyMaster(TrackingJobMaster):
         """
         f_prot = T.stripSuffix( T.absfile(self.fout) ) + '_protocols.dat'
         self.log.add_nobreak( 'Saving parameters to %s...' % f_prot )
-        T.Dump( self.protocols, f_prot )
+        T.dump( self.protocols, f_prot )
 
 
     def done(self):
@@ -514,7 +514,7 @@ class AmberEntropyMaster(TrackingJobMaster):
         """
         tree = self.getResult()
         self.log.add("Saving result to %s..." % self.fout)
-        T.Dump( tree, self.fout )
+        T.dump( tree, self.fout )
         self.log.add( "Done" )
 
 

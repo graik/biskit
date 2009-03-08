@@ -61,7 +61,7 @@ o = cmdDict( o )
 
 
 print "Loading trajectory .. "
-traj = Load( absfile(o['i']) )
+traj = load( absfile(o['i']) )
 traj = traj2ensemble( traj )
 
 print "Removing frames ..."
@@ -69,5 +69,5 @@ thin_traj = traj.thin( step=int(o['step']) )
 
 print "Dumping thinned trajectory with %i frames (%i frames removed)..."\
       %(thin_traj.lenFrames(), traj.lenFrames()-thin_traj.lenFrames())
-Dump( thin_traj, absfile( o['i'] ) )
+dump( thin_traj, absfile( o['i'] ) )
 

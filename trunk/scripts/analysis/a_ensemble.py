@@ -99,7 +99,7 @@ o['o'] = o.get('o',
                '%s/%s_rms.eps' % (osp.dirname(o['i']), stripFilename(o['i'])))
 
 flushPrint( "Loading..." )
-t = Load( o['i'] )
+t = load( o['i'] )
 flushPrint( "done." )
 
 if not isinstance( t, EnsembleTraj ):

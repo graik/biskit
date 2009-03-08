@@ -81,7 +81,7 @@ for f in files:
     try:
         print "Re-localizing ", f
         f = tools.absfile( f )
-        o = tools.Load( f )
+        o = tools.load( f )
         result = 0
 
         if o.__class__ in [ PCRModel, PDBModel ]:
@@ -97,7 +97,7 @@ for f in files:
         if result:
             f_bak = f + '__old'
             os.rename( f, f_bak )
-            tools.Dump( o, f )
+            tools.dump( o, f )
             print "..done"
         else:
             print "..skipped"

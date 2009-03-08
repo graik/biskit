@@ -156,7 +156,7 @@ options = t.cmdDict( defaultOptions() )
 
 ## load docking solutions
 t.flushPrint( "\nLoading complex list %s ... " % t.absfile( options['i'] ) )
-complex_lst = t.Load( options['i'] )
+complex_lst = t.load( options['i'] )
 t.flushPrint( "done\n" )
 
 ## validate and expand list of keys to be calculated
@@ -190,7 +190,7 @@ if not 'all' in options and not isinstance( complex_lst, ComplexEvolvingList):
 ## load reference complex if given
 refComplex = None
 if options.has_key('ref'):
-    refComplex = t.Load( t.absfile( options['ref'] ) )
+    refComplex = t.load( t.absfile( options['ref'] ) )
 
 ## remove excluded hosts
 if 'e' in options:
@@ -262,16 +262,16 @@ try:
                         
                 ## subList contains no info to be updated   
                 else:
-                    t.Dump( subLst, subFile )
+                    t.dump( subLst, subFile )
 
         print '\nCollecting final results...'
         complex_lst = ComplexList()
         for f in subFile_names:
-            sub = t.Load( f )
+            sub = t.load( f )
             complex_lst += sub
             os.unlink( f )
 
-        t.Dump( complex_lst, options['o'] )
+        t.dump( complex_lst, options['o'] )
 
     else:
 

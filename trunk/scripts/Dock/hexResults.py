@@ -301,7 +301,7 @@ for cg in cgList:
     print 'Working on ', cgName
     
     ## collect data
-    group = Load( cgFile )
+    group = load( cgFile )
     data, clst_range = clustInfo( group )
 
     ## create framedArray

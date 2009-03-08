@@ -637,7 +637,7 @@ class Complex:
         """
         ## Backwards compatibility
         if self.contacts != None and type( self.contacts ) == str:
-            self.contacts = t.Load( self.contacts )
+            self.contacts = t.load( self.contacts )
             EHandler.warning("loading old-style pickled contacts.") 
             return self.contacts
 

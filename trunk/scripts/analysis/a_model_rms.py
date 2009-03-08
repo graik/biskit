@@ -172,9 +172,9 @@ except:
     print "\na_model_rms.py rec_models.dic lig_models.dic ref.complex\n"
 
 errWriteln('Loading...')
-d_rec = Load( fdic_rec )
-d_lig = Load( fdic_lig )
-refCom= Load( frefCom ) 
+d_rec = load( fdic_rec )
+d_lig = load( fdic_lig )
+refCom= load( frefCom ) 
 
 errWrite('pairwise...')
 ## all heavy atom rms spread

@@ -173,11 +173,11 @@ if __name__ == '__main__':
 #    options = test()
     options = cmdDict( defOptions() )
 
-complexes = Load( absfile(options['c']) )
+complexes = load( absfile(options['c']) )
 #complexes = complexes[:20]
 
 ## create a reference complex, get binding energy
-ref_com = Load( options['ref'] )
+ref_com = load( options['ref'] )
 ref_lig = ref_com.lig()
 ref_rec = ref_com.rec()
 ref_com_model = ref_com.rec().concat( ref_com.lig())

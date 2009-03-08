@@ -219,8 +219,8 @@ mask = [ int(i) for i in T.toList( options['mask'] )]
 MS, AS, MS_sd, AS_sd = randomSurfaces( base_folder, label, mask )
 
 ## save dictionary with all 20 amino acids
-T.Dump( MS, base_folder + 'MS%s.dic'%label)
-T.Dump( AS, base_folder + 'AS%s.dic'%label )
-T.Dump( MS_sd, base_folder + 'MS_sd%s.dic'%label )
-T.Dump( AS_sd, base_folder + 'AS_sd%s.dic'%label )
+T.dump( MS, base_folder + 'MS%s.dic'%label)
+T.dump( AS, base_folder + 'AS%s.dic'%label )
+T.dump( MS_sd, base_folder + 'MS_sd%s.dic'%label )
+T.dump( AS_sd, base_folder + 'AS_sd%s.dic'%label )
 

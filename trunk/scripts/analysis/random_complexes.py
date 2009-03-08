@@ -69,8 +69,8 @@ if len(sys.argv) < 2:
 options = cmdDict( default_options )
 
 try:
-    rec = Load( options['r'] )
-    lig = Load( options['l'] )
+    rec = load( options['r'] )
+    lig = load( options['l'] )
     ro  = absfile( options['ro'] )
     lo  = absfile( options['lo'] )
     out = absfile( options['o'] )
@@ -93,7 +93,7 @@ for i in range( n ):
     flushPrint('#')
 
 flushPrint('\nDumping result...')
-Dump( result, out )
+dump( result, out )
 
 
 if traj:

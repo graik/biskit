@@ -57,9 +57,9 @@ class Analyzer:
         self.options = options
 
         if verbose: t.flushPrint("\nLoading...")
-        self.t_lig = t.Load( options['lig'] )
-        self.t_rec = t.Load( options['rec'] )
-        self.com= t.Load( options['ref'] )
+        self.t_lig = t.load( options['lig'] )
+        self.t_rec = t.load( options['rec'] )
+        self.com= t.load( options['ref'] )
 
         ## delete H from all players
         self.t_lig.removeAtoms( self.t_lig.getRef().maskH() )
@@ -347,10 +347,10 @@ class Test(BT.BiskitTest):
         ## create a minimal 1-frame receptor trajectory from a pdb file
         self.t_rec = Trajectory( [t.testRoot()+'/rec/1A2P.pdb'],
                                  verbose=self.local)
-        t.Dump( self.t_rec, self.f_out )
+        t.dump( self.t_rec, self.f_out )
 
         ## load a complex list
-        cl = t.Load( t.testRoot() + '/dock/hex/complexes.cl')
+        cl = t.load( t.testRoot() + '/dock/hex/complexes.cl')
 
         self.a= Analyzer( rec = self.f_out,
                           lig = t.testRoot()+'/lig_pcr_00/traj.dat',

@@ -179,14 +179,14 @@ if __name__ == '__main__':
 
     result = ComplexList()
     
-    rec_dic = T.Load( T.absfile( options['rdic'] ) )
-    lig_dic = T.Load( T.absfile( options['ldic'] ) )
+    rec_dic = T.load( T.absfile( options['rdic'] ) )
+    lig_dic = T.load( T.absfile( options['ldic'] ) )
 
     for f in fs:
 
         T.flushPrint('Loading %s ...' % f )
 
-        cl = T.Load( f )
+        cl = T.load( f )
         
         cl = reduceComplexList( cl )
 
@@ -207,4 +207,4 @@ if __name__ == '__main__':
     save_changed_models( result, T.absfile( options['mo']) )
 
     T.flushPrint('Dumping result to %s' % T.absfile( options['o'] ) )
-    T.Dump( result, T.absfile( options['o'] ) )
+    T.dump( result, T.absfile( options['o'] ) )

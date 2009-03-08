@@ -59,7 +59,7 @@ f_out = T.absfile( o.get('o', f_in) )
 n = int( o['n'] )
 
 T.flushPrint("Loading...")
-t = T.Load( f_in )
+t = T.load( f_in )
 
 T.flushPrint("Converting %i frames..." % len(t) )
 
@@ -75,6 +75,6 @@ if f_in == f_out:
     os.rename( f_in, f_in + '_backup')
 
 T.flushPrint("Saving...")
-T.Dump( t, f_out )
+T.dump( t, f_out )
 
 T.flushPrint("Done.\n")

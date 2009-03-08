@@ -40,9 +40,9 @@ def testSuccess():
 def setOptions():
 
     o = CommandLine( rec=str, lig=str, hex=str,
-		     o='complexes.cl',
-		     p=True,
-		     mac=False )
+                     o='complexes.cl',
+                     p=True,
+                     mac=False )
 
     o.setDescription("""
 Parse output file from hex docking run, create ComplexList and pickle it to
@@ -51,33 +51,33 @@ a file. Also creates a plot of the cluster distribution (using hex rmsd).
 Note: Input model dictionaries are created by selectModels.py.
 
 Syntax:		hex2complex -rec |models_rec| -lig |models_lig| -hex |hex.out|
-		-o |output name| -p |create plot|
+-o |output name| -p |create plot|
 
 Example:	hex2complex -rec 1BZY_models.dic -lig 2AKZ_models.dic
-		-hex 1BZY_2AKZ_hex.out -o complexes.cl -p
-		""")
+-hex 1BZY_2AKZ_hex.out -o complexes.cl -p
+""")
 
     o.setRequired( [ 'rec', 'lig', 'hex' ] )
 
     o.setDocs( rec='pickled receptor model dictionary',
-	       lig='pickled ligand model dictionary',
-	       hex='output file from hex',
-	       o=  'name of resulting complex list',
-	       p=  'create biggles plot of rmsd vs. solution',
+               lig='pickled ligand model dictionary',
+               hex='output file from hex',
+               o=  'name of resulting complex list',
+               p=  'create biggles plot of rmsd vs. solution',
                mac="force rec and lig 'model 1' to be used for all" )
 
     f = testRoot() + '/'
     ftemp = S.tempDirLocal
 
     o.setTest( lig= f + 'dock/lig/1A19_model.dic',
-	       rec= f + 'dock/rec/1A2P_model.dic',
-	       hex= f + 'dock/hex/1A2P-1A19_hex.out',
-	       o=   ftemp + '/complexes.cl',
-	       p= 1,
-	       fsuccess=testSuccess )
+               rec= f + 'dock/rec/1A2P_model.dic',
+               hex= f + 'dock/hex/1A2P-1A19_hex.out',
+               o=   ftemp + '/complexes.cl',
+               p= 1,
+               fsuccess=testSuccess )
 
     o.setTestCleanup( [ ftemp + '/complexes.cl',
-			ftemp + '/complexes.eps' ] )
+                        ftemp + '/complexes.eps' ] )
 
     o.parse()
 
@@ -115,15 +115,15 @@ def plot( complex_lst ):
     clst_list = []
     rms_list = []
     for compl in complex_lst:
-	clst_list += [ compl.info['hex_clst'] ]
-	rms_list += [ compl.info['rms'] ]
+        clst_list += [ compl.info['hex_clst'] ]
+        rms_list += [ compl.info['rms'] ]
 
     ## get average, max, min and size of cluster
     data = []
     clst_range = range( 1, max(clst_list)+1 )
     for clst in clst_range:
-	rms = compress( equal(clst_list, clst), rms_list)
-	data += [ [ average( rms ), max( rms ), min ( rms ), len( rms ) ] ]
+        rms = compress( equal(clst_list, clst), rms_list)
+        data += [ [ average( rms ), max( rms ), min ( rms ), len( rms ) ] ]
     data = transpose(data)
 
     ## Inset
@@ -138,10 +138,10 @@ def plot( complex_lst ):
     ## add label with info about 'good' solutions (average rmsd < 10A)
     good = []
     for clst in clst_range:
-	if data[0][clst -1] < 10:
-	    good += [ clst ]
+        if data[0][clst -1] < 10:
+            good += [ clst ]
     plot.add( biggles.PlotLabel( 0.5, 0.98,
-				 'Solutions with rmsd < 10A', size=1 ) )
+                                 'Solutions with rmsd < 10A', size=1 ) )
     plot.add( biggles.PlotLabel( 0.5, 0.95, str(good), size=1 ) )
 
     ## plot and save
@@ -154,20 +154,20 @@ def main( o ):
 
     ## load pickeled model dictionaries with PCRModels indexed by hex model
     ## number
-    rec_lst = Load( o['rec'] )
-    lig_lst = Load( o['lig'] )
+    rec_lst = load( o['rec'] )
+    lig_lst = load( o['lig'] )
 
     ## open hex output file
     if o['mac']:
         parser = HexParser( o['hex'], rec_lst, lig_lst, forceModel=(1,1) )
     else:
         parser = HexParser( o['hex'], rec_lst, lig_lst )
-        
+
     ## generate dictionary of Complex objects from hex output
     complex_lst = parser.parseHex()
 
     ## pickle list to file
-    Dump( complex_lst, o['o'] )
+    dump( complex_lst, o['o'] )
 
     return complex_lst
 
@@ -176,10 +176,10 @@ def main( o ):
 if __name__ == '__main__':
 
     complex_lst = main(options)
-    
+
     if options['p']:
-	plot( complex_lst )
+        plot( complex_lst )
 
     if 'test' in options:
-	print 'Test worked? ', options.testSuccess()
-	options.testCleanup()
+        print 'Test worked? ', options.testSuccess()
+        options.testCleanup()

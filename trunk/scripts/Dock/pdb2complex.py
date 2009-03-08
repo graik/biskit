@@ -80,4 +80,4 @@ ref_lig.saveAs( T.absfile( options['lo'] ) )
 
 ref_rec.saveAs( T.absfile( options['ro'] ) )
 
-T.Dump( com, T.absfile( options['o']) )
+T.dump( com, T.absfile( options['o']) )

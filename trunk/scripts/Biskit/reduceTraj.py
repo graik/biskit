@@ -89,7 +89,7 @@ if not 'o' in o:
     o['o'] = os.path.dirname( absfile(o['i'])) + '/'+o['o']
 
 print "Loading trajectory .. "
-t = Load( absfile(o['i']) )
+t = load( absfile(o['i']) )
 
 if 'amber' in o:
     renameAmberRes( t.getRef() )
@@ -102,9 +102,9 @@ ref = red.reduceToModel( t.ref.getXyz() )
 
 if 'red' in o:
     ## just replace ref model in already reduced trajectory
-    tred = Load( absfile(o['red']))
+    tred = load( absfile(o['red']))
     tred.setRef( ref )
-    Dump( tred, absfile( o['red']) )
+    dump( tred, absfile( o['red']) )
     sys.exit(0)
 
 print "Reducing .. "
@@ -114,6 +114,6 @@ t.frames = frames
 t.ref = ref
 
 print "Dumping.."
-Dump( t, absfile( o['o'] ) )
+dump( t, absfile( o['o'] ) )
 
 print "Done in %3.2f min" % ((time.time() - start_time)/60.0)

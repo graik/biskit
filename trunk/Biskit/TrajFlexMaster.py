@@ -153,7 +153,7 @@ class TrajFlexMaster(TrackingJobMaster):
         @type  n_nodes: int
         @param n_frames: length of trajectory
         @type  n_frames: int
-        
+
         @return: calculate number of frames per chunk
         @rtype: int
         """
@@ -174,10 +174,10 @@ class TrajFlexMaster(TrackingJobMaster):
     def __getFrameWindows( self, traj, n_frames ):
         """
         Divide frame indices into chunks.
-        
+
         @param n_frames: number of frames per chunk
         @type  n_frames: int
-        
+
         @return: list with start and stop frame index of each chunk
         @rtype: [(int, int)]
         """
@@ -212,7 +212,7 @@ class TrajFlexMaster(TrackingJobMaster):
         @type  f_frames_1: {(int, int) : str}
         @param f_frames_2: file name of chunk 2 of frames
         @type  f_frames_2: {(int, int) : str}
-        
+
         @return: { ((int, int),(int, int)) : (str, str) }
         @rtype:  {((int, int),(int, int)) : (str, str)}
         """
@@ -274,7 +274,7 @@ class TrajFlexMaster(TrackingJobMaster):
 
             a = traj.frames[ w[0]:w[1] ]
             f = outFolder + '/%s_%i_to_%i.dat' % ((prefix,) + w)
-            T.Dump( a, f )
+            T.dump( a, f )
             r[w] = f
 
             if self.verbose and i % (len(i_windows)/50 + 1) == 0:
@@ -291,7 +291,7 @@ class TrajFlexMaster(TrackingJobMaster):
 
         @param traj: Trajectory
         @type  traj: Trajectory
-        
+
         @return: member index of each frame OR None if traj is
                  not a EnsembleTraj
         @rtype: [ int ] OR None
@@ -312,11 +312,11 @@ class TrajFlexMaster(TrackingJobMaster):
     def getResult( self, mirror=0 ):
         """
         Get result matrix ordered such as input trajectory.
-        
+
         @param mirror: mirror the matrix at diagonal (default: 1)
                        (only for intra-traj)
         @type  mirror: 1|0
-        
+
         @return: array( (n_frames, n_frames), 'f'), matrix of pairwise rms
         @rtype: array
         """
@@ -367,11 +367,11 @@ class TrajFlexMaster(TrackingJobMaster):
         """
         Get result matrix ordered first by member then by time. (requires
         EnsembleTraj)
-        
+
         @param mirror: mirror matrix at diagonal (only for intra-traj. rms)
                        (default: 0)
         @type  mirror: 0|1
-        
+
         @param step: take only every step frame [1]
         @type  step: int
         """
@@ -399,7 +399,7 @@ class TrajFlexMaster(TrackingJobMaster):
         """
         @return: list of all calculated pairwise rms values
         @rtype: [float]
-        
+
         @raise FlexError: if there are no results yet
         """
         r = []
@@ -416,7 +416,7 @@ class TrajFlexMaster(TrackingJobMaster):
         """
         @return: average pairwise rmsd and it's standard deviation
         @rtype: (float, float)
-        
+
         @raise FlexError: if there are no results yet
         """
         r = self.rmsList()
@@ -427,21 +427,21 @@ class TrajFlexMaster(TrackingJobMaster):
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test Adaptive clustering"""
 
     TAGS = [ BT.PVM ]
 
     def test_FlexMaster(self):
-	"""TrajFlexMaster test"""
+        """TrajFlexMaster test"""
         from Biskit.MatrixPlot import MatrixPlot
         from numpy.oldnumeric.random_array import random
 
-	assert len(hosts.cpus_all) > 0,\
-	       'Master requires at least 1 PVM node for initialisation.'
-	
-        traj_1 = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
+        assert len(hosts.cpus_all) > 0,\
+               'Master requires at least 1 PVM node for initialisation.'
+
+        traj_1 = T.load( T.testRoot() + '/lig_pcr_00/traj.dat' )
         traj_1 = traj2ensemble( traj_1 )
 
         ## create fake second trajectory by adding

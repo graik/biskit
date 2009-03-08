@@ -255,7 +255,7 @@ class Test(BT.BiskitTest):
 
         self.ms = []
 
-        self.lig_traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
+        self.lig_traj = T.load( T.testRoot() + '/lig_pcr_00/traj.dat' )
         for m in self.lig_traj[:3]:
             m = m.compress( m.maskProtein() )
             self.ms.append(m)

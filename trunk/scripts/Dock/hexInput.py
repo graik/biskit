@@ -127,8 +127,8 @@ def main(options):
         lig_dic = stripFilename(options['l'])[:4] + '_model.dic'
         lig_path = options['l'][:options['l'].rfind('/')]
 
-        rec = Load( absfile(rec_path + '/' + rec_dic) )
-        lig = Load( absfile(lig_path + '/' + lig_dic) )
+        rec = load( absfile(rec_path + '/' + rec_dic) )
+        lig = load( absfile(lig_path + '/' + lig_dic) )
         
         print 'Loading dictionaries'
         

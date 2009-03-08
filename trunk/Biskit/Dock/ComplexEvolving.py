@@ -272,7 +272,7 @@ class Test(BT.BiskitTest):
 
         from Biskit.Dock import ComplexEvolving
 
-        c = t.Load( t.testRoot() + '/com/ref.complex' )
+        c = t.load( t.testRoot() + '/com/ref.complex' )
 
         self.ce= ComplexEvolving( c.rec_model, c.lig(), c,
                                   info={'comment':'test'} )
@@ -300,7 +300,7 @@ if __name__ == '__main__':
 
     from Biskit.Dock import ComplexEvolving
 
-    c = t.Load( t.testRoot() + '/com/ref.complex' )
+    c = t.load( t.testRoot() + '/com/ref.complex' )
 
     ce= ComplexEvolving( c.rec_model, c.lig(), c,
                               info={'comment':'test'} )

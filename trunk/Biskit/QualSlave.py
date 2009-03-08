@@ -90,7 +90,7 @@ class QualSlave(JobSlave):
         @return: ensemble trajectory object
         @rtype: EnsembleTraj
         """
-        t = T.Load( T.absfile( ftraj ) )
+        t = T.load( T.absfile( ftraj ) )
         return traj2ensemble( t )
 
 

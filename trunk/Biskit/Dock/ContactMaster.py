@@ -606,7 +606,7 @@ class ContactMaster(TrackingJobMaster):
             self.complexLst = self.complexLst_original
 
         if self.verbose: print "\nSaving result to %s..." % self.outFile
-        t.Dump( self.complexLst, self.outFile )
+        t.dump( self.complexLst, self.outFile )
 
         self.finished = 1
 
@@ -640,10 +640,10 @@ class Test(BT.BiskitTest):
         niceness = {'default': 0}
         self.hosts = cpus_all[:4]
 
-        lst = t.Load( t.testRoot() + "/dock/hex/complexes.cl")
+        lst = t.load( t.testRoot() + "/dock/hex/complexes.cl")
         lst = lst[:9]
 
-        refcom = t.Load( t.testRoot() + "/com/ref.complex")
+        refcom = t.load( t.testRoot() + "/com/ref.complex")
 
         self.master = ContactMaster( lst, chunks = 3, hosts = self.hosts,
 				     niceness = niceness,

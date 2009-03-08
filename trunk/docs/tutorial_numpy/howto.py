@@ -11,7 +11,7 @@ from Biskit.gnuplot import *
 
 a = array( [ [ 1,2,3,4,5 ], [6,7,8,9,10] ] )
 
-b = array( [ '1', '2', '3' ], int )
+#b = array( [ '1', '2', '3' ], int )
 b = array( range(10) )
 b = arange( 10 )
 
@@ -195,7 +195,8 @@ m = m.compress( m.maskProtein() )
 diff = m.xyz - m.centerOfMass()
 
 # or by hand:
-diff = m.xyz - average( m.xyz, axis=0, weights=m.masses() )
+diff = m.xyz - average( m.xyz, axis=0 )
+# diff = m.xyz - average( m.xyz, axis=0, weights=m.masses() )
 
 dist = sqrt( sum( diff**2, axis=1 ) )
 

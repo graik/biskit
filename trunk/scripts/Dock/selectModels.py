@@ -85,7 +85,7 @@ def load( options ):
     f_traj = options['i']
     start = int( options['s'] )
     
-    traj = T.Load( f_traj )
+    traj = T.load( f_traj )
 
     if traj.__class__ != EnsembleTraj:
         traj = traj2ensemble( traj )
@@ -266,7 +266,7 @@ def cluster( tc, options ):
         
     ## save model dictionary
     fdic = options['dic'] or m.getPdbCode() + '_models.dic'
-    T.Dump( model_dic, T.absfile( fdic ) )
+    T.dump( model_dic, T.absfile( fdic ) )
 
 ## REDUNDANT CODE AS MULTIDOCK NOW WRITES THE HEX PDB FILES
 ##
@@ -316,7 +316,7 @@ if __name__ == '__main__':
     r = cluster( tc, options )
 ##    r=rmsdLimitedClustering( tc, options )
     if options.has_key('co'):
-        T.Dump( tc, options['co'] )
+        T.dump( tc, options['co'] )
 
     report( tc )
         

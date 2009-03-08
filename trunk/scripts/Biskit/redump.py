@@ -58,7 +58,7 @@ class PickleUpgrader(pickle.Unpickler):
         return resolveClass(module, cname)
 
 
-def sloppyLoad( f ):
+def sloppyload( f ):
     """
     f - str, file name
     -> any, unpickled object
@@ -66,7 +66,7 @@ def sloppyLoad( f ):
     try:
         T.flushPrint( "Loading " + str(f) + '\n' )
 
-        return T.Load( T.absfile( f ) )
+        return T.load( T.absfile( f ) )
 
     except cPickle.UnpicklingError:
 
@@ -85,14 +85,14 @@ fs = sys.argv[1:]
 for f in fs:
 
     try:
-        o = sloppyLoad( f )
+        o = sloppyload( f )
 
         ## don't slim PDBModels that are their own source
         if isinstance( o, PDBModel ) and str( o.source ) == T.absfile( f ):
             o.forcePickle = 1
             
         T.flushPrint('Dumping %s\n' % f )
-        T.Dump( o, T.absfile( f ) )
+        T.dump( o, T.absfile( f ) )
 
     except:
         print "Error with ", f

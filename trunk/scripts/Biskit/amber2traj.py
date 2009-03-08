@@ -73,6 +73,6 @@ if __name__ == '__main__':
         t.removeAtoms( lambda a: a['element'] == 'H' )
 
     print "Dumping result to ", fout
-    Dump( t, absfile(fout) )
+    dump( t, absfile(fout) )
 
     print "Done"

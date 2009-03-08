@@ -470,7 +470,7 @@ class Test(BT.BiskitTest):
     def test_match2seq(self):
         """match2seq test"""
         ## Reading pdb files
-        lig_traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )[:2]
+        lig_traj = T.load( T.testRoot() + '/lig_pcr_00/traj.dat' )[:2]
         m = [ m.compress( m.maskProtein() ) for m in lig_traj ]
 
         ## make the models different

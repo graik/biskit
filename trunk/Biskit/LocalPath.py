@@ -375,7 +375,7 @@ class LocalPath( object ):
         @raise IOError: if file can not be found
         """
         try:
-            return T.Load( self.local( existing=1 ) )
+            return T.load( self.local( existing=1 ) )
         except LocalPathError, why:
             raise IOError, "Cannot find file %s (constructed from %s)" %\
                   self.local(), str( self )
@@ -390,7 +390,7 @@ class LocalPath( object ):
         """
         try:
             f = self.local()
-            T.Dump( f, o )
+            T.dump( f, o )
             return f
         except:
             T.errWriteln("Couldn't dump to %s (constructed from %s)" %\

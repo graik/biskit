@@ -49,8 +49,8 @@ class PatchGeneratorFromOrbit:
         xyz   - 3 x n array of float; coordinates, if None -- take model atoms
         -> distances of all atoms to given point
         """
-	if xyz is None:
-	    xyz = self.model.getXyz()
+        if xyz is None:
+            xyz = self.model.getXyz()
         return N.sqrt( N.sum( N.power( xyz - point, 2), 1 ) )
 
 
@@ -62,8 +62,8 @@ class PatchGeneratorFromOrbit:
         center - 3 array of float
         -> array n x 3 of float
         """
-	if center is None:
-	    center = self.center
+        if center is None:
+            center = self.center
 
         xyz = ra.random( (n,3) ) - 0.5
 
@@ -117,9 +117,9 @@ class PatchGeneratorFromOrbit:
             origin = points[0]
 
         dist = self.__distances( origin, points )
-        
+
         return N.take( points, N.argsort( dist ) )
-        
+
 
     def randomPatches( self, size, n=None, exclude=None,
                        max_overlap=0, exclude_all=None ):
@@ -132,11 +132,11 @@ class PatchGeneratorFromOrbit:
         exclude_all - [ 1|0 ], don't touch ANY of these atoms
         -> [ [ 1|0 ] ], list of atom masks
         """
-	if exclude is None:
-	    exclude = N.zeros( self.model.lenAtoms(), 'i' )
+        if exclude is None:
+            exclude = N.zeros( self.model.lenAtoms(), 'i' )
 
-	if exclude_all is None:
-	    exclude_all = N.zeros( self.model.lenAtoms(), 'i' )
+        if exclude_all is None:
+            exclude_all = N.zeros( self.model.lenAtoms(), 'i' )
 
         n = n or 500
 
@@ -146,13 +146,13 @@ class PatchGeneratorFromOrbit:
         origin = centers[0]
 
         tabu = exclude_all
-	if not N.any( tabu ):
-	    tabu = exclude
+        if not N.any( tabu ):
+            tabu = exclude
         else:
             origin = self.model.center( mask=tabu )
 
         centers = self.orderCenters( centers, origin )
-        
+
         r = []
 
         for i in range(n):
@@ -160,7 +160,7 @@ class PatchGeneratorFromOrbit:
             m = self.patchAround( centers[i], size )
 
             if N.sum( m * exclude ) <= max_overlap \
-                   and N.sum( m * exclude_all ) == 0:
+               and N.sum( m * exclude_all ) == 0:
 
                 exclude = exclude + m
                 r += [ m ]
@@ -171,11 +171,11 @@ class PatchGeneratorFromOrbit:
 def test( model, center2center, nAtoms=10, exclude=None ):
 
     from Biskit import Pymoler, PDBModel
-    
+
     g = PatchGeneratorFromOrbit( model, center2center )
 
     overlap = int( round( nAtoms / 4.0 ) )
-    
+
     r = g.randomPatches( nAtoms, 500, max_overlap=overlap, exclude=exclude )
 
     profile = N.sum( N.array(r) )
@@ -198,7 +198,7 @@ if __name__ == '__main__':
     from Biskit.Dock import Complex
 
     print "Loading"
-    m_com = Load( testRoot() + '/com/ref.complex' ).model()
+    m_com = load( testRoot() + '/com/ref.complex' ).model()
     rec = m_com.takeChains([0])
     lig = m_com.takeChains([1])
 

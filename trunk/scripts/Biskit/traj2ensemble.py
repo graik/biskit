@@ -67,7 +67,7 @@ def addFrameNames( traj, trajNumber ):
 def loadTraj( f, trajIndex, start=0, end=None, step=1 ):
     """Load traj from file, add frame names, extract portion if requested"""
     
-    t = T.Load( T.absfile( f ) )
+    t = T.load( T.absfile( f ) )
     addFrameNames( t, trajIndex )
 
     e = end or len( t )
@@ -146,4 +146,4 @@ T.flushPrint("Converting to EnsembleTraj...")
 result = traj2ensemble( result, len(inLst))
 
 T.flushPrint( "Done\nDumping ensemble traj to " + o['o'] )
-T.Dump( result, T.absfile( o['o'] ) )
+T.dump( result, T.absfile( o['o'] ) )

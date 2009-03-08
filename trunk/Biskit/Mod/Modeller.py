@@ -485,7 +485,7 @@ class Modeller( Executor ):
         for m in pdb_list:
             m.disconnect()
 
-        T.Dump(pdb_list, '%s'%(model_folder + self.F_PDBModels))
+        T.dump(pdb_list, '%s'%(model_folder + self.F_PDBModels))
 
 
     def postProcess( self ):
@@ -601,7 +601,7 @@ class TestBase(BT.BiskitTest):
                 self.log.add('The modelling result id in %s/modeller'\
                              %self.outfolder)
 
-            result = T.Load( self.outfolder + '/modeller/PDBModels.list' )
+            result = T.load( self.outfolder + '/modeller/PDBModels.list' )
             self.assertEqual( len(result), 2 )
 
     def cleanUp(self):
