@@ -7,19 +7,10 @@ import tools
 
 class EZDParser:
     """ 
-    Store and manipulate coordinates and atom infos stemming from a PDB
-    file. Coordinates are stored in the Numeric array 'xyz'; the additional
-    atom infos from the PDB (name, residue_name, and many more) are stored in
-    a L{PDBProfiles} instance 'aProfiles' which can be used to also associate
-    arbitrary other data to the atoms. Moreover, a field 'rProfiles' can hold
-    data associated to residues. A normal dictionary 'info' is there to accept
-    any information about the whole model.
+    Parse Electron Density Maps (EZD format).
 
-    For detailed documentation,
-    see http://biskit.pasteur.fr/doc/handling_structures/PDBModel
-
-    @todo:
-       * outsource validSource into PDBParserFactory
+    Electron Density Maps can be obtained from the EDS in Upsala:
+    http://eds.bmc.uu.se/eds/
     """
 
     #: keys of all atom profiles that are read directly from the PDB file
@@ -27,30 +18,20 @@ class EZDParser:
 #                'scale', 'alpha', 'beta', 'gamma',
 #                'a', 'b', 'c']
 
-    def __init__( self, source=None, noxyz=0, skipRes=None ):
+    def __init__( self, source=None ):
         """
-        - PDBModel() creates an empty Model to which coordinates (field xyz)
-          and PDB infos (field atoms) have still to be added.
-        - PDBModel( file_name ) creates a complete model with coordinates
-          and PDB infos taken from file_name (pdb, pdb.gz, pickled PDBModel)
-        - PDBModel( PDBModel ) creates a copy of the given model
-        - PDBModel( PDBModel, noxyz=1 ) creates a copy without coordinates
-
-        @param source: str, file name of pdb/pdb.gz file OR pickled PDBModel OR
-                      PDBModel, template structure to copy atoms/xyz field from
-        @type  source: str or PDBModel
-        @param pdbCode: PDB code, is extracted from file name otherwise
-        @type  pdbCode: str or None
-        @param noxyz: 0 (default) || 1, create without coordinates
-        @type  noxyz: 0||1
-
-        @raise PDBError: if file exists but can't be read
+        @param source: path to EZD file
+        @type  source: str OR file handle
         """
         
+        ## Raik says: this is always overridden by the "self.source=source" 
         if type( source ) is str and os.path.isfile( source ):
             self.source = LocalPath( source )
 
 	self.source = source
+
+        ## my suggestion (LocalPath is a bit overkill here):
+        self.source = tools.absfile( source )
 	
 	#try :
         f=tools.gzopen(self.source)
@@ -209,3 +190,44 @@ class EZDParser:
     def getIdxFromCart(self,coords):
         """Get numpy array indices for a cartesian position in the ED grid"""
         return npy.round((coords-self.__cartesianOrigin)/self.resolution)
+
+
+#############
+##  TESTING        
+#############
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Test class"""
+
+    def prepare( self ):
+        self.f = os.path.join( tools.testRoot(), 'eedensity/3tgi.ezd.gz' )
+        self.p = None
+    
+    def test_all( self ):
+        """EZDParser test"""
+
+        if self.local:
+            print "parsing ...",
+        self.p = self.p or EZDParser( self.f )
+
+        if self.local:
+            print "Done"
+        
+        self.origin = self.p.getCartesianOrigin()
+        target = [ -38.92757372, -115.8054999 ,  -36.27633333]
+
+        ## compare result with expected result but allow for numeric deviations
+        self.assert_( npy.sum(self.origin - target) < 1e-8 )
+
+        self.grid = self.p.getCartesianPositionGrid()
+        self.assertEquals( npy.shape( self.grid ), (129, 105, 104, 4) )
+
+        self.i = self.p.getIdxFromCart( [10, 10, 10] )
+        self.assert_( npy.all( self.i == [  82.,  212.,   80.] ) )
+        
+
+
+if __name__ == '__main__':
+
+    BT.localTest()
