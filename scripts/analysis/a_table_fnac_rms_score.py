@@ -239,8 +239,8 @@ options['title'] = 't' in options
 try:
     errWrite('Loading list...')
 
-    cl = Load( absfile( options['i'] ) )
-    ref= Load( absfile( options['ref']))
+    cl = load( absfile( options['i'] ) )
+    ref= load( absfile( options['ref']))
 
 except:
     errWrite('error.\n')
@@ -274,4 +274,4 @@ report( cl, options['title'], scores, rec_model_numbers, lig_model_numbers )
 
 ## Dump ComplexList with PDBModels, that have RMS values in info dict
 errWrite('\nDumping ComplexList with RMS values...\n')
-Dump( cl, absfile( options['i'] ) )
+dump( cl, absfile( options['i'] ) )

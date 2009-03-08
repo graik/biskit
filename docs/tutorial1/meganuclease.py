@@ -118,7 +118,7 @@ pm.run()
 d = PDBDope( com.rec_model )
 
 # d.addConservation()
-prot = T.Load('rec.model')
+prot = T.load('rec.model')
 
 prot.residues
 

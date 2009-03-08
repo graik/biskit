@@ -8,4 +8,4 @@
 1K2H.pdb      A
 1DT7.pdb      A
 1MQ1.pdb      A
-1MWN.pdb      A
+1MWN.pdb      Z

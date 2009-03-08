@@ -33,7 +33,7 @@ fout = fin + '_backup'
 exit = 0
 
 try:
-    o = t.Load( fin )
+    o = t.load( fin )
     print "%s looks alright.\nnothing to be done." % fin
     exit = 1
 except ImportError:
@@ -81,7 +81,7 @@ f.close()
 
 try:
     print "checking...",
-    o = t.Load( fin )
+    o = t.load( fin )
     print "Done"
 except ImportError:
     print "could not fix %s" % fin

@@ -75,7 +75,7 @@ class HexParser:
         (Solution number, hex energy,..) also extract 16 numbers of
         the transformation matrix and put them into 4 by 4 numeric
         array.
-        
+
         @return: Complex created from the output from Hex
         @rtype: Complex
         """
@@ -152,7 +152,7 @@ class HexParser:
     def _nextBlock(self):
         """
         return all lines describing next complex in the Hex output file.
-        
+
         @return: list of information strings
         @rtype: [str]
         """
@@ -176,7 +176,7 @@ class HexParser:
     def parseHex(self):
         """
         Create one Complex Object for each paragraph in hex output file.
-        
+
         @return: ComplexList with all complexes from the Hex output
         @rtype: ComplexList
         """
@@ -194,30 +194,30 @@ class HexParser:
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test case"""
 
     def test_hexParser(self):
-	"""Dock.hexParser test"""
+        """Dock.hexParser test"""
 
-        rec_dic = t.Load( t.testRoot() + "/dock/rec/1A2P_model.dic" )
-        lig_dic = t.Load( t.testRoot() + "/dock/lig/1A19_model.dic" )
+        rec_dic = t.load( t.testRoot() + "/dock/rec/1A2P_model.dic" )
+        lig_dic = t.load( t.testRoot() + "/dock/lig/1A19_model.dic" )
 
         self.h = HexParser( t.testRoot() + "/dock/hex/1A2P-1A19_hex.out",
                             rec_dic, lig_dic)
-        
+
         c_lst = self.h.parseHex()
 
         if self.local:
             print c_lst[1].info
-            
+
             globals().update( locals() )
-        
+
 
         self.assertEqual( c_lst[1].info.keys(),
-			  ['soln', 'rms', 'hex_clst', 'hex_eshape',
-			   'model2', 'model1', 'hex_etotal', 'date'] )
+                          ['soln', 'rms', 'hex_clst', 'hex_eshape',
+                           'model2', 'model1', 'hex_etotal', 'date'] )
 
 if __name__ == '__main__':
 

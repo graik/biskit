@@ -49,7 +49,7 @@ def findTransformation(x, y):
     @type  x: array('f')
     @param y: second set of coordinates
     @type  y: array('f')
-    
+
     @return: rotation matrix (3x3) and translation vector (1x3)
     @rtype:  array, array
     """
@@ -66,7 +66,7 @@ def findTransformation(x, y):
 
     ## build rotation matrix and translation vector
     r = N.dot(v, u)
-    
+
     t = x_av - N.dot(r, y_av)
 
     return r, t
@@ -76,7 +76,7 @@ def match(x, y, n_iterations=1, z=2, eps_rmsd=0.5, eps_stdv=0.05):
     """
     Matches two arrays onto each other, while iteratively removing outliers.
     Superimposed array y would be C{ N.dot(y, N.transpose(r)) + t }.
-    
+
     @param n_iterations: number of calculations::
                            1 .. no iteration 
                            0 .. until convergence
@@ -87,7 +87,7 @@ def match(x, y, n_iterations=1, z=2, eps_rmsd=0.5, eps_stdv=0.05):
     @type  eps_rmsd: float
     @param eps_stdv: tolerance in standard deviations (default: 0.05)
     @type  eps_stdv: float
-    
+
     @return: (r,t), [ [percent_considered, rmsd_for_it, outliers] ]
     @rtype: (array, array), [float, float, int]
     """
@@ -131,7 +131,7 @@ def match(x, y, n_iterations=1, z=2, eps_rmsd=0.5, eps_stdv=0.05):
         perc = round(float(N.sum(mask)) / float(len(mask)), 2)
 
         ## throw out non-matching rows
-	mask = N.logical_and(mask, N.less(d, rmsd + z * stdv))
+        mask = N.logical_and(mask, N.less(d, rmsd + z * stdv))
         outliers = N.nonzero( N.logical_not( mask ) )
         iter_trace.append([perc, round(rmsd, 3), outliers])
 
@@ -147,12 +147,12 @@ def rowDistances( x, y ):
     """
     Calculate the distances between the items of two arrays (of same shape)
     after least-squares superpositioning.
-    
+
     @param x: first set of coordinates
     @type  x: array('f')
     @param y: second set of coordinates
     @type  y: array('f')  
-    
+
     @return: array( len(x), 'f' ), distance between x[i] and y[i] for all i
     @rtype: array
     """
@@ -171,7 +171,7 @@ def rowDistances( x, y ):
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test case"""
 
@@ -179,23 +179,23 @@ class Test(BT.BiskitTest):
         """rmsFit test"""
         import Biskit.tools as T
 
-        self.traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
+        self.traj = T.load( T.testRoot() + '/lig_pcr_00/traj.dat' )
 
         rt, rmsdLst = match( self.traj.ref.xyz, self.traj[-1].xyz)
 
         if self.local:
             print 'RMSD: %.2f' % rmsdLst[0][1]
-        
+
         # return rotation matrix
-	r = abs( N.sum( N.ravel( rt[0] )))
-	e = abs( N.sum( N.ravel( self.EXPECT )))
-	    
+        r = abs( N.sum( N.ravel( rt[0] )))
+        e = abs( N.sum( N.ravel( self.EXPECT )))
+
         self.assertAlmostEqual(r, e, 6)
 
     EXPECT = N.array( [[ 0.9999011,   0.01311352,  0.00508244,],
-		       [-0.01310219,  0.99991162, -0.00225578,],
-		       [-0.00511157,  0.00218896,  0.99998454 ]] )
-        
+                       [-0.01310219,  0.99991162, -0.00225578,],
+                       [-0.00511157,  0.00218896,  0.99998454 ]] )
+
 
 if __name__ == '__main__':
 

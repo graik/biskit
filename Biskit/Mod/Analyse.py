@@ -369,7 +369,7 @@ class Analyse:
             pdb_list = self.outFolder + self.F_TEMPLATE_FOLDER \
                        + "/%s"%template + self.F_PDBModels
 
-            pdb_list = T.Load(pdb_list)
+            pdb_list = T.load(pdb_list)
 
             template_rmsd_dic[template] = \
               pdb_list[0].compress(pdb_list[0].maskCA()).atoms["rmsd2ref_if"]
@@ -557,7 +557,7 @@ class Analyse:
         @type  template_folder: str
         """
         ##
-        pdb_list = T.Load(self.outFolder + self.F_MODELS)
+        pdb_list = T.load(self.outFolder + self.F_MODELS)
         model = PDBModel(pdb_list[0])
 
         ## 

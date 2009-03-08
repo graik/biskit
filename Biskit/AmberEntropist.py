@@ -370,7 +370,7 @@ class AmberEntropist( AmberCrdEntropist ):
 
             ref = Complex( m1, m2 )
         else:
-            ref = t.Load( fname )
+            ref = t.load( fname )
 
         if isinstance( ref, Trajectory ):
             ref = ref.ref
@@ -599,7 +599,7 @@ class AmberEntropist( AmberCrdEntropist ):
             f.write('1')
             f.close()
 
-            r = t.Load(fname)
+            r = t.load(fname)
 
         finally:
             t.tryRemove( flock )

@@ -64,7 +64,7 @@ if len( sys.argv ) < 2:
 input = absfile( sys.argv[1] )
 
 flushPrint( 'Loading...' )
-cl = Load( input )
+cl = load( input )
 flushPrint( '%i complexes read\n\n' % len( cl ) )
 
 

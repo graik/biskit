@@ -561,7 +561,7 @@ class TestCore(BT.BiskitTest):
         import time, os
         import os.path
 
-        ligDic = t.Load( t.testRoot() + '/multidock/lig/1A19_models.dic' )
+        ligDic = t.load( t.testRoot() + '/multidock/lig/1A19_models.dic' )
 
         ## in the test root the directories "multidock/rec" and
         ## "multidock/com" are symbolic links from "dock/rec" and
@@ -582,7 +582,7 @@ class TestCore(BT.BiskitTest):
                 os.unlink( com_dir )
             os.symlink( t.testRoot() + '/dock/com', com_dir )
             
-        recDic = t.Load( t.testRoot() + '/multidock/rec/1A2P_model.dic' )
+        recDic = t.load( t.testRoot() + '/multidock/rec/1A2P_model.dic' )
 
         self.d = Docker( recDic, ligDic, out=self.out_folder,
                          verbose=self.local )

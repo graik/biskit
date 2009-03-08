@@ -35,8 +35,8 @@ def go( f, fa ):
     fbahar = a.fluctuation( a.m_b )
 
     ## get xplor and amber trajectories
-    t_cx = Load(f  + '/com_pcr_00/traj_fluct.dat')
-    t_ca = Load(fa + '/com_pcr_00/traj_fluct.dat')
+    t_cx = load(f  + '/com_pcr_00/traj_fluct.dat')
+    t_ca = load(fa + '/com_pcr_00/traj_fluct.dat')
 
     t_cx = t_cx.compressAtoms( t_cx.ref.maskCA() )
     t_ca = t_ca.compressAtoms( t_ca.ref.maskCA() )

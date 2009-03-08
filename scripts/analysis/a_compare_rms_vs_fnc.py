@@ -147,7 +147,7 @@ if __name__ == '__main__':
     options['if_bb'] = int( options['if_bb'] )
     
     ## Load complex dictionary
-    c_lst = T.Load( options['i'] )
+    c_lst = T.load( options['i'] )
     pkeys = T.toList( options['v'] )
     keys =  [ 'soln', 'rms', 'rms_if', 'rms_if_bb' ] + pkeys
               

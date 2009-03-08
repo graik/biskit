@@ -635,7 +635,7 @@ class Test(BT.BiskitTest):
     """EnsembleTraj test"""
 
     def prepare(self):
-        self.tr = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat')
+        self.tr = T.load( T.testRoot() + '/lig_pcr_00/traj.dat')
                 
     def test_EnsembleTraj( self ):
         """EnsembleTraj.fit/fitMembers/plotMembers test """

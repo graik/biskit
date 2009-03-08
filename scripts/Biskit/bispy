@@ -31,7 +31,7 @@ if len( args ) > 1:
                or (len( args[1] ) ==4 ):
             x = PDBModel( args[1] )
         else:
-            x = Load( args[1] )
+            x = load( args[1] )
             
         print "Loaded %s and put it into variable x." % args[1]
         

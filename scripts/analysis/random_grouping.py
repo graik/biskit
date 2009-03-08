@@ -134,7 +134,7 @@ def saveComplexes( cl, folder ):
         os.mkdir( folder )
         
     for i in range(len(cl)):
-        Dump( cl[i], '%s/random_%02i.complex' % (folder,i) )
+        dump( cl[i], '%s/random_%02i.complex' % (folder,i) )
 
 #######
 # MAIN
@@ -147,9 +147,9 @@ options = cmdDict( default_options )
 ## parameters
 try:
     fout = absfile( options['o'] )
-    cl   = Load( options['cl'] )
+    cl   = load( options['cl'] )
     n_cl = len( cl )
-    ref  = Load( options['ref'] )
+    ref  = load( options['ref'] )
     com_out = absfile( options['co'] )
 except:
     print "Missing or wrong option:"
@@ -169,14 +169,14 @@ flushPrint('%i orientations removed because of fnarc > 0.0\n' % (n_cl-len(cl)))
 
 cg = group( cl, 0.001, 0.0001 )
 
-Dump( cg, fout+'grouped.cg' )
+dump( cg, fout+'grouped.cg' )
 
 ## final selection
 nr_cl = selectClusters( cg, 10 )
 flushPrint(
     'dumping %i non-redundant, non-overlapping, non-native complexes\n'\
         % len( nr_cl ) )
-Dump( nr_cl, fout+'nr.cl')
+dump( nr_cl, fout+'nr.cl')
 
 flushPrint('Dumping random complexes.')
 saveComplexes( nr_cl, com_out )

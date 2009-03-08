@@ -76,7 +76,7 @@ class TrajCluster:
                  aMask=None, force=0 ):
         """
         Calculate new clusters.
-    
+
         @param n_clusters: number of clusters
         @type  n_clusters: int
         @param weight: fuzziness weigth
@@ -102,7 +102,7 @@ class TrajCluster:
             self.aMask = aMask
 
             self.fc = FuzzyCluster( self.__raveled(), self.n_clusters,
-                                       self.fcWeight )
+                                    self.fcWeight )
 
             self.fcCenters = self.fc.go( self.fcConverged,
                                          1000, nstep=10,
@@ -110,7 +110,7 @@ class TrajCluster:
 
 
     def calcClusterNumber( self, min_clst=5, max_clst=30, rmsLimit=1.0,
-                        weight=1.13, converged=1e-11, aMask=None, force=0 ):
+                           weight=1.13, converged=1e-11, aMask=None, force=0 ):
         """
         Calculate the approximate number of clusters needed to pass
         the average intra-cluster rmsd limit.
@@ -130,7 +130,7 @@ class TrajCluster:
         @param force: re-calculate even if parameters haven't changed
                       (default: 0)
         @type  force: 1|0
-        
+
         @return: number of clusters
         @rtype: int
 
@@ -164,7 +164,7 @@ class TrajCluster:
     def memberships( self ):
         """
         Get degree of membership of each frame to each cluster.
-        
+
         @return: N.array( n_clusters x n_frames )
         @rtype: array
         """
@@ -174,7 +174,7 @@ class TrajCluster:
     def maxMemberships(self):
         """
         Get maximum membership value for each frame.
-        
+
         @return: list of float
         @rtype: [float]
         """
@@ -185,7 +185,7 @@ class TrajCluster:
     def centers( self ):
         """
         Get 'center structure' for each cluster.
-        
+
         @return: N.array( n_clusters x n_atoms_masked x 3 )
         @rtype: array
         """
@@ -209,11 +209,11 @@ class TrajCluster:
         is guaranteed to belong, at least, to the cluster for which it has
         its maximum membership. If threshold > 0, it can additionally pop
         up in other clusters.
-        
+
         @param threshold: minimal cluster membership or 0 to consider
                           only max membership (default: 0)
         @type  threshold: float
-        
+
         @return: n_cluster, lst of lst of int, frame indices
         @rtype: [[int]]
         """
@@ -247,12 +247,12 @@ class TrajCluster:
     def membershipSort( self, frames, cluster ):
         """
         Sort given list of frame indices by their membership in cluster.
-        
+
         @param frames: list of frame indecies
         @type  frames: [int]
         @param cluster: cluster number
         @type  cluster: int
-        
+
         @return: indecies sorted by ther membership to cluster
         @rtype: [int]
         """
@@ -267,13 +267,13 @@ class TrajCluster:
         """
         Get trajectory with all frames belonging to this cluster, sorted
         by their membership-degree (highest first).
-        
+
         @param cluster: cluster number
         @type  cluster: int
         @param threshold: float 0-1, minimal cluster membership,
                           see L{memberFrames()}
         @type  threshold: float
-        
+
         @return: Trajectory with all members of a cluster, sorted by membership
         @rtype: Trajectory
         """
@@ -285,11 +285,11 @@ class TrajCluster:
         """
         Get member Trajectories for each cluster. Frames are sorted by their
         membership-degree (highest first).
-        
+
         @param threshold: float 0-1, minimal cluster membership,
                           see L{memberFrames()}
         @type  threshold:
-        
+
         @return: lst of Trajectories, with members of each cluster,
                  sorted by membership
         @rtype: [Trajectory]
@@ -302,7 +302,7 @@ class TrajCluster:
         """
         Claculate the average pairwise rmsd (in Angstrom) for members
         of a cluter.
-        
+
         @param cluster: cluster number
         @type  cluster: int       
         @param aMask: atom mask applied before calculation
@@ -332,7 +332,7 @@ class TrajCluster:
         """
         Claculate the rmsd (or average rmsd) of all frames belonging to a
         cluster to a reference structure (in Angstrom).
-        
+
         @param cluster: cluster number
         @type  cluster: int
         @param ref: reference structure
@@ -360,15 +360,15 @@ class TrajCluster:
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test Adaptive clustering"""
 
     def test_TrajCluster(self):
-	"""TrajCluster test"""
+        """TrajCluster test"""
         from Biskit.EnsembleTraj import traj2ensemble
 
-        traj = T.Load( T.testRoot()+'/lig_pcr_00/traj.dat')
+        traj = T.load( T.testRoot()+'/lig_pcr_00/traj.dat')
 
         traj = traj2ensemble( traj )
 
@@ -376,13 +376,13 @@ class Test(BT.BiskitTest):
 
         traj = traj.thin( 1 )
 
-	traj.fit( aMask, verbose=self.local )
-	self.tc = TrajCluster( traj, verbose=self.local )
+        traj.fit( aMask, verbose=self.local )
+        self.tc = TrajCluster( traj, verbose=self.local )
 
         ## check how many clusters that are needed with the given criteria
         n_clusters = self.tc.calcClusterNumber( min_clst=3, max_clst=15,
-						rmsLimit=0.7, aMask=aMask )
-        
+                                                rmsLimit=0.7, aMask=aMask )
+
         ## cluster
         self.tc.cluster( n_clusters, aMask=aMask )
 

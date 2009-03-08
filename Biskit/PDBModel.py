@@ -1160,7 +1160,7 @@ class PDBModel:
             for p in self.atoms:
                 self.atoms.setInfo( p, changed=0 )
 
-            T.Dump( self, str(path) )
+            T.dump( self, str(path) )
 
         except IOError, err:
             raise PDBError("Can't open %s for writing." % T.absfile(str(path)))

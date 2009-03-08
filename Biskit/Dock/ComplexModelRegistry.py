@@ -369,7 +369,7 @@ class Test(BT.BiskitTest):
         """Dock.ComplexModelRegistry test"""
         from Biskit.Dock import ComplexList
         
-        self.cl = T.Load( T.testRoot() +'/dock/hex/complexes.cl' )
+        self.cl = T.load( T.testRoot() +'/dock/hex/complexes.cl' )
         self.cl = self.cl.toList()
         
         self.r = ComplexModelRegistry()

@@ -347,7 +347,7 @@ class Test(BT.BiskitTest):
 
     def test_Ramachandran(self):
         """Ramachandran test"""
-        self.traj = T.Load( T.testRoot()+'/lig_pcr_00/traj.dat' )
+        self.traj = T.load( T.testRoot()+'/lig_pcr_00/traj.dat' )
 
         self.traj.ref.atoms.set('mass', self.traj.ref.masses() ) 
 

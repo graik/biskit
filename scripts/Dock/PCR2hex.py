@@ -125,7 +125,7 @@ def writeModelDic( modelDic, pdbcode, noSave=0 ):
                      
     ## pickle dictionary
     dumpName =  pdbcode + '_model.dic'    # model dump file name
-    Dump(modelDic, dumpName)    # dump all models to file
+    dump(modelDic, dumpName)    # dump all models to file
     
 
 ############################################

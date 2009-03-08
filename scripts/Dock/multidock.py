@@ -134,8 +134,8 @@ if __name__ == '__main__':
         running[ h ] = 0
 
     flushPrint( "Loading dictionaries..\n" )
-    rdic = Load( absfile( o['rdic'] ) )
-    ldic = Load( absfile( o['ldic'] ) )
+    rdic = load( absfile( o['rdic'] ) )
+    ldic = load( absfile( o['ldic'] ) )
 
     flushPrint( "Preparing docking..\n" )
     d = Docker(rdic, ldic, recPdb=o['rpdb'], ligPdb=o['lpdb'], comPdb=o['com'],
@@ -187,7 +187,7 @@ if __name__ == '__main__':
     d.waitForLastHex()
     
     flushPrint( "\nDumping result..\n")
-    Dump( d.result, d.out + '/complexes.cl')
+    dump( d.result, d.out + '/complexes.cl')
 
     flushPrint( "\nConsistency check..\n" )
 

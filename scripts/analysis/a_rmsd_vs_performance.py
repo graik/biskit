@@ -215,7 +215,7 @@ for f in options['i']:
 
     try:
         errWriteln('Loading %s...' % f)
-        cl = Load( absfile( f ) )
+        cl = load( absfile( f ) )
 
         errWriteln('Calculating docking scores...')
         scores, rec_nr, lig_nr = docking_scores( cl )

@@ -585,7 +585,7 @@ class Test(BT.BiskitTest):
 
     def test_Pymoler(self):
         """Pymoler test"""
-        self.traj = T.Load( T.testRoot() + '/lig_pcr_00/traj.dat' )
+        self.traj = T.load( T.testRoot() + '/lig_pcr_00/traj.dat' )
 
         self.pm = Pymoler( full=0, verbose=self.local )
         

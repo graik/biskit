@@ -56,7 +56,7 @@ class ROCalyzer( object ):
     We stick to the definition used here: [quote Lichtarge JMB 2007]
 
     Usage::
-    
+
       a = ROCalyzer( mask_labelling_positives )
 
       curve = a.roccurve( score )
@@ -67,15 +67,15 @@ class ROCalyzer( object ):
     """
 
     def __init__( self, positives ):
-	"""
+        """
 	@param positives: mask identifying all true positives
 	@type  positives: [ 1|0 ]
 	"""
-	self.positives = positives
-	
+        self.positives = positives
+
 
     def random_roccurves(self, score, n=100 ):
-	"""
+        """
 	Generate roc curves for randomized target masks.
 	@param score: sequence of score values for target sequence
 	@type  score: [ int ] or [ float ]
@@ -85,23 +85,23 @@ class ROCalyzer( object ):
 	         applied to random 'positive' items.
         @rtype: [ (sens, spec), ]
 	"""
-	N.random.seed()
-	r = []
-	for i in range(n):
-	    ref = copy.copy( self.positives )
-	    N.random.shuffle( ref )
+        N.random.seed()
+        r = []
+        for i in range(n):
+            ref = copy.copy( self.positives )
+            N.random.shuffle( ref )
 
-	    r += [ self.roccurve( score, ref=ref ) ]
+            r += [ self.roccurve( score, ref=ref ) ]
 
-	return r
+        return r
 
 
     def roccurve( self, score, ref=None ):
-	"""
+        """
 	Calculate the ROC curve of the given score.
         @todo: doesn't handle target containing only true positives or
         only true negatives
-	
+
 	@param score: sequence of score values for target sequence
 	@type  score: [ int ] or [ float ]
 	@param ref  : alternative mask of positives (overrides self.positives)
@@ -109,33 +109,33 @@ class ROCalyzer( object ):
 	@return: curve describing 1-specificity (1st column) versus sensitivity
 	@rtype: [ (specifity, false_positive_rate) ]
 	"""
-	if ref is None:
-	    ref = self.positives
+        if ref is None:
+            ref = self.positives
 
         if N.sum( ref ) == len( ref ) or N.sum(ref) == 0:
             raise ROCError,\
                   'Cannot compute Roc curves for all positive or all '+\
                   'negative target'
-	order = N.argsort( score ).tolist()
-	order.reverse()
+        order = N.argsort( score ).tolist()
+        order.reverse()
 
-	ref = N.take( ref, order )
+        ref = N.take( ref, order )
 
-	#: number of true positives identified with decreasing score
-	n_pos = N.add.accumulate( ref )
+        #: number of true positives identified with decreasing score
+        n_pos = N.add.accumulate( ref )
 
-	# number of false positives picked up with decreasing score
-	neg = N.logical_not( ref )
-	n_neg = N.add.accumulate( neg  )
+        # number of false positives picked up with decreasing score
+        neg = N.logical_not( ref )
+        n_neg = N.add.accumulate( neg  )
 
-	sensitivity = 1. * n_pos / n_pos[-1] ## true positive rate
-	specificity = 1. * n_neg / n_neg[-1] ## FP_rate = 1-specificity
+        sensitivity = 1. * n_pos / n_pos[-1] ## true positive rate
+        specificity = 1. * n_neg / n_neg[-1] ## FP_rate = 1-specificity
 
-	return zip( specificity, sensitivity )
+        return zip( specificity, sensitivity )
 
 
     def area( self, curve, start=0.0, stop=1.0 ):
-	"""
+        """
 	Numerically add up the area under the given curve.
 	The curve is a 2-D array or list of tupples as returned by roccurve().
 	The x-axis is the first column of this array (curve[:,0]).
@@ -149,35 +149,35 @@ class ROCalyzer( object ):
 	@return: the area underneath the curve between start and stop.
 	@rtype: float
  	"""
-	c = N.array( curve )
-	assert len( N.shape( c ) ) == 2
+        c = N.array( curve )
+        assert len( N.shape( c ) ) == 2
 
-	## apply boundaries  ## here we have a problem with flat curves
-	mask = N.greater_equal( c[:,0], start )
-	mask *= N.less( c[:,0], stop+1e-15 )
-	c = N.compress( mask, c, axis=0 )
+        ## apply boundaries  ## here we have a problem with flat curves
+        mask = N.greater_equal( c[:,0], start )
+        mask *= N.less( c[:,0], stop+1e-15 )
+        c = N.compress( mask, c, axis=0 )
 
-	## fill to boundaries -- not absolutely accurate: we actually should
-	## interpolate to the neighboring points instead
+        ## fill to boundaries -- not absolutely accurate: we actually should
+        ## interpolate to the neighboring points instead
         if c[0,0] > start:
             c = N.concatenate( (N.array([[start, c[0,1]],]), c) )
         if c[-1,0] < stop:
             c = N.concatenate( (c, N.array([[stop, c[-1,1]],])) )
-            
-	x = c[:,0]
-	y = c[:,1]
 
-	dx = x[1:] - x[:-1] # distance on x between points 
-	dy = y[1:] - y[:-1] # distance on y between points
+        x = c[:,0]
+        y = c[:,1]
 
-	areas1 = y[:-1] * dx  # the rectangles between all points
-	areas2 = dx * dy / 2.0 # the triangles between all points
+        dx = x[1:] - x[:-1] # distance on x between points 
+        dy = y[1:] - y[:-1] # distance on y between points
 
-	return N.sum(areas1) + N.sum(areas2)
+        areas1 = y[:-1] * dx  # the rectangles between all points
+        areas2 = dx * dy / 2.0 # the triangles between all points
+
+        return N.sum(areas1) + N.sum(areas2)
 
 
     def rocarea( self, score ):
-	"""
+        """
 	Calculate how much the score outperforms a perfect random score.
 	The measure used is the area underneath the ROC curve. A perfect
 	random score should, on average, form a diagonal roc curve with an
@@ -188,11 +188,11 @@ class ROCalyzer( object ):
 	@return: a.area( a.roccurve( score) ) - 0.5
 	@rtype: float
 	"""
-	return self.area( self.roccurve( score ) ) - 0.5
+        return self.area( self.roccurve( score ) ) - 0.5
 
 
     def isnoise( self, score, n_samples=1000 ):
-	"""
+        """
 	Test how a given score performs at predicting items in the
 	positive list compared to its 'performance' at  predicting random
 	elements. The result corresponds to a two-tailed P value.
@@ -205,26 +205,26 @@ class ROCalyzer( object ):
 	@return: probability P that the prediction success of score is just
 	         a random effect (1.0 means it's just perfectly random).
 	"""
-	from Biskit import EHandler
+        from Biskit import EHandler
 
-	## list of random deviations from diagonal area 0.5
-	a_rand = [ self.area(c)-0.5
-		   for c in self.random_roccurves(score,n_samples) ]
+        ## list of random deviations from diagonal area 0.5
+        a_rand = [ self.area(c)-0.5
+                   for c in self.random_roccurves(score,n_samples) ]
 
-	sd_rand = N.std( a_rand )
-	av_rand = N.mean(a_rand )
+        sd_rand = N.std( a_rand )
+        av_rand = N.mean(a_rand )
 
-	if round(av_rand,2) != 0.0:
-	    EHandler.warning( 'random sampling is skewed by %f'% (av_rand-0.0))
+        if round(av_rand,2) != 0.0:
+            EHandler.warning( 'random sampling is skewed by %f'% (av_rand-0.0))
 
-	a = self.rocarea( score )
-	z = a / sd_rand
+        a = self.rocarea( score )
+        z = a / sd_rand
 
-	## probability that a sample falls *within* z stdevs from the mean
-	p = L.erf( z / N.sqrt(2) )
+        ## probability that a sample falls *within* z stdevs from the mean
+        p = L.erf( z / N.sqrt(2) )
 
-	## probability that the score hits just at random
-	return 1.0 - p
+        ## probability that the score hits just at random
+        return 1.0 - p
 
     def utest( self, score ):
         """
@@ -252,7 +252,7 @@ class ROCalyzer( object ):
 
         p = stats.mannwhitneyu( sample1, sample2 )
         return p[1]
-        
+
 
 class ROCThreshold(object):
 
@@ -287,10 +287,10 @@ class ROCThreshold(object):
         ## order from highest to lowest
         ordered = N.take( self.target, N.argsort( self.target ) )
         ordered = ordered[::-1]
-        
+
         r = N.zeros( (len(self.target), 2) )
         r[:,0] = ordered
-        
+
         for n in range(len(self.target)-1):
             roc = ROCalyzer( self.target2mask( n+1 ) )
 
@@ -300,76 +300,76 @@ class ROCThreshold(object):
         return r
 
 
-    
+
 #############
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """
     Test class
     """
     def prepare( self ):
-	import Biskit.tools as T
+        import Biskit.tools as T
 
-	self.cl = T.Load( T.testRoot()+'/dock/hex/complexes.cl')
+        self.cl = T.load( T.testRoot()+'/dock/hex/complexes.cl')
 
-	self.score = self.cl.valuesOf('hex_eshape')
-	## convert hex energies into positive score
+        self.score = self.cl.valuesOf('hex_eshape')
+        ## convert hex energies into positive score
 ##  	self.score = N.array(self.cl.valuesOf('hex_etotal')) * -1
 
-	## define complexes with less the 6 A rmsd from reference as positives
-	self.hits = N.less( self.cl.valuesOf('rms'), 6 )
+        ## define complexes with less the 6 A rmsd from reference as positives
+        self.hits = N.less( self.cl.valuesOf('rms'), 6 )
 
     def test_roccurve(self):
-	"""Statistics.ROCalyzer test"""
-	from Biskit.gnuplot import plot
+        """Statistics.ROCalyzer test"""
+        from Biskit.gnuplot import plot
 
-	self.a = ROCalyzer( self.hits )
-	self.roc = self.a.roccurve( self.score )
+        self.a = ROCalyzer( self.hits )
+        self.roc = self.a.roccurve( self.score )
 
-	if self.local:
-	    plot( self.roc )
+        if self.local:
+            plot( self.roc )
 
     def test_noise(self):
-	"""Statistics.ROCalyzer.isnoise/utest test"""
-	a = ROCalyzer( self.hits )
+        """Statistics.ROCalyzer.isnoise/utest test"""
+        a = ROCalyzer( self.hits )
 
-	rand = a.random_roccurves( self.score, 500 )
-	self.avg = N.average( N.array( rand ), axis=0 )
+        rand = a.random_roccurves( self.score, 500 )
+        self.avg = N.average( N.array( rand ), axis=0 )
 
-	self.assertAlmostEqual( a.area(self.avg), 0.5, 1 )
+        self.assertAlmostEqual( a.area(self.avg), 0.5, 1 )
 
-	p1 = a.isnoise( self.score, n_samples=1000 )
+        p1 = a.isnoise( self.score, n_samples=1000 )
         p2 = a.utest( self.score )
 
         if self.local:
             print "\nsimulation  P: ", p1
             print "mannwithney P: ", p2
 
-	self.assertAlmostEqual( p1, 0.0, 3 )
+        self.assertAlmostEqual( p1, 0.0, 3 )
         self.assertAlmostEqual( p2, 0.0, 3 )
 
         r =  p1 / p2
         self.assert_( (r<3.25) and (r>0.75),
                       'isnoise P should be about twice that of utest')
-	
-	
-    def test_area(self):
-	"""Statistics.ROCalyzer.area test"""
-	a = ROCalyzer( self.hits )
 
-	perfect_y = N.arange(1.0, 0,   -1.0/len(self.score) )
-	perfect_x = N.arange(0.0, 1.0, +1.0/len(self.score) )
-	self.perfect = zip( perfect_x, perfect_y )
-	
-	self.assertAlmostEqual( a.area( self.perfect ), 0.5, 5 )
+
+    def test_area(self):
+        """Statistics.ROCalyzer.area test"""
+        a = ROCalyzer( self.hits )
+
+        perfect_y = N.arange(1.0, 0,   -1.0/len(self.score) )
+        perfect_x = N.arange(0.0, 1.0, +1.0/len(self.score) )
+        self.perfect = zip( perfect_x, perfect_y )
+
+        self.assertAlmostEqual( a.area( self.perfect ), 0.5, 5 )
 
 
     def test_threshold(self):
         """Statistics.ROCThreshold test"""
-	from Biskit.gnuplot import plot
+        from Biskit.gnuplot import plot
 
         target = 1./ N.array( self.cl.valuesOf('rms') )
 
@@ -383,7 +383,7 @@ class Test(BT.BiskitTest):
 
         self.assert_( max(self.t_curve[:,1]) > 0.4 )
 
-	
+
 if __name__ == '__main__':
 
     BT.localTest()

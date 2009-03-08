@@ -92,10 +92,10 @@ if __name__ == '__main__':
 cFile = os.path.abspath( options['i'] )
 
 flushPrint('Loading complex list \n')
-cList = Load( options['i'] )
+cList = load( options['i'] )
 
 flushPrint('Reducing complex list \n')
 new_cList = reduceList( cList )
 
-Dump( new_cList, absfile(options['o']) )
+dump( new_cList, absfile(options['o']) )
 

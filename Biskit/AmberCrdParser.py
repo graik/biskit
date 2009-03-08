@@ -231,7 +231,7 @@ class Test( BT.BiskitTest ):
         if self.local:
             print "Dumping result to ", self.fout
 
-        T.Dump( self.t, T.absfile(self.fout) )
+        T.dump( self.t, T.absfile(self.fout) )
 
         if self.local:
             print "Dumped Trajectory with %i frames and %i atoms." % \

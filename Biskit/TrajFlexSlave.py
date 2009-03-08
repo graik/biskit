@@ -76,7 +76,7 @@ class TrajFlexSlave( JobSlave ):
         if f in self.frame_cache:
             return self.frame_cache[ f ]
 
-        self.frame_cache[f] = T.Load(f)
+        self.frame_cache[f] = T.load(f)
 
         return self.frame_cache[ f ]
 

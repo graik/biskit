@@ -222,8 +222,8 @@ class XRefineComplex( Xplorer ):
 
 if __name__ == '__main__':
 
-##     cl = t.Load( '~/interfaces/c11/dock_xray/hex01/complexes_cont.cl' )
-    cl = t.Load( t.testRoot() + '/dock/hex/complexes.cl')
+##     cl = t.load( '~/interfaces/c11/dock_xray/hex01/complexes_cont.cl' )
+    cl = t.load( t.testRoot() + '/dock/hex/complexes.cl')
 
     c = cl[0]
 

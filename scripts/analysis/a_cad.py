@@ -291,9 +291,9 @@ outName_over = outDir + '/' + cName + '_model-CAD_overwiev.txt'
 
 ## load
 flushPrint('Loading complex list \n')
-cList = Load( options['cl'] )
+cList = load( options['cl'] )
 flushPrint('Loading bound complex \n')
-ref_com = Load( options['ref'] )
+ref_com = load( options['ref'] )
 
 ## get models
 rec_models, lig_models, rec_b_ref, lig_b_ref = get_models( cList, ref_com )

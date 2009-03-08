@@ -46,7 +46,7 @@ class ContactSlave(JobSlave):
     def version( self ):
         """
         Version of Dock.Complex
-        
+
         @return: version of class
         @rtype: str
         """
@@ -57,16 +57,16 @@ class ContactSlave(JobSlave):
         """
         Copy the parameters that ContactMaster is passing in as dict into
         fields of this class.
-        
+
         @param params: defined in L{ContactMaster}
         @type  params: dict
         """
         self.ferror = params['ferror']
-	self.log    = StdLog()
-	if params['log']:        ## log to same file as master
-	    self.log = LogFile( self.flog )
-	self.verbose = params['verbose']
-	
+        self.log    = StdLog()
+        if params['log']:        ## log to same file as master
+            self.log = LogFile( self.flog )
+        self.verbose = params['verbose']
+
         ## reference complex data
         self.c_ref_res_4_5 = self.c_ref_atom_4_5 = None
         self.c_ref_atom_10 = None
@@ -139,12 +139,12 @@ class ContactSlave(JobSlave):
     def __containsAny( self, lst_or_dic, *items ):
         """
         Check if dictionary or list contains items.
-        
+
         @param lst_or_dic: lokk for items in this
         @type  lst_or_dic: list OR dict
         @param items: items to look for
         @type  items: any
- 
+
         @return: result of test
         @rtype: 1|0
         """
@@ -158,12 +158,12 @@ class ContactSlave(JobSlave):
         """
         Determine the keys in an info dictionary of a complex that
         need to be calculated or updated
-        
+
         @param c: Complex
         @type  c: Complex
         @param keys: key or keys for c.infos dict
         @type  keys: str OR [str]
-        
+
         @return: 1 if the given value should be calculated for the
                  given complex
         @rtype: 1|0
@@ -183,14 +183,14 @@ class ContactSlave(JobSlave):
     def pickleError( self, o ):
         """
         Pickle object to disc.
-        
+
         @param o: object to pickle
         @type  o: any
         """
         try:
             fname = self.ferror + '_dat'
             if not os.path.exists( fname ):
-                T.Dump( o, fname )
+                T.dump( o, fname )
         except Exception, why:
             f = open('ErrorReportError_ContactSlave','a')
             f.write('Could not pickle error infos\n')
@@ -216,7 +216,7 @@ class ContactSlave(JobSlave):
                 ref = N.ravel( self.c_ref_atom_4_5 )
 
                 c['fnac_4.5'] = N.sum( N.ravel(contacts) * ref )\
-                                / float( N.sum(ref))
+                 / float( N.sum(ref))
 
             if self.requested(c, 'fnac_10') and self.c_ref_atom_10 != None:
 
@@ -225,7 +225,7 @@ class ContactSlave(JobSlave):
 
                 ref = N.ravel( self.c_ref_atom_10 )
                 c['fnac_10'] = N.sum( N.ravel(contacts) * ref ) \
-                               / float( N.sum(ref))
+                 / float( N.sum(ref))
 
             if self.requested(c, 'c_res_4.5') \
                or ( self.c_ref_res_4_5 != None \
@@ -235,13 +235,13 @@ class ContactSlave(JobSlave):
                                           cache=self.requested(c, 'c_res_4.5'))
 
                 if self.c_ref_res_4_5 != None \
-		   and self.requested(c, 'fnrc_4.5' ):
+                   and self.requested(c, 'fnrc_4.5' ):
                     ref = N.ravel( self.c_ref_res_4_5 )
                     c['fnrc_4.5'] = N.sum(N.ravel(res_cont)*ref) \
-                                    /float(N.sum(ref))
+                     /float(N.sum(ref))
 
                 if self.c_ref_res_4_5 != None \
-		   and self.requested(c, 'fnSurf_rec'):
+                   and self.requested(c, 'fnSurf_rec'):
                     r, l = c.fractionNativeSurface(res_cont,
                                                    self.c_ref_res_4_5 )
                     c['fnSurf_rec'] = r
@@ -251,7 +251,7 @@ class ContactSlave(JobSlave):
             m1 = m2 = s = 0
             try:
                 m1, m2, s = c.get('model1',0), c.get('model2',0),\
-                            c.get('soln',0)
+                  c.get('soln',0)
             except:
                 pass
             self.reportError('contact error (r %i : l %i, #%i)'%\
@@ -289,7 +289,7 @@ class ContactSlave(JobSlave):
             if self.c_ref_ratom_10 is not None:
                 ref = N.ravel( self.c_ref_ratom_10 )
                 c['fnarc_10'] = N.sum( N.ravel(contacts) * ref )\
-                                / float( N.sum(ref))
+                 / float( N.sum(ref))
 
         except:
             self.reportError('reduced contacts error', soln)
@@ -368,7 +368,7 @@ class ContactSlave(JobSlave):
         if self.requested( c,'ePairScore'):
             try:
                 pairScore = c.contPairScore(cutoff=6.0, log=self.log,
-					    verbose=self.verbose )
+                                            verbose=self.verbose )
                 c['ePairScore'] = pairScore
             except:
                 c['ePairScore'] = None
@@ -389,7 +389,7 @@ class ContactSlave(JobSlave):
         if self.requested( c, method):
             try:
                 c[method] = c.conservationScore( method, log=self.log,
-						 verbose=self.verbose )
+                                                 verbose=self.verbose )
             except:
                 self.reportError('Conservation score Error', soln)
 
@@ -413,11 +413,11 @@ class ContactSlave(JobSlave):
     def go(self, cmplxDic):
         """
         Obtain contact matrix for all complexes.
-        
+
         @param cmplxDic: dictionary of complexes::
                          {soln:Complex, soln:Complex, ...} 
         @type  cmplxDic: {int:Complex}
-        
+
         @return: similar dictionary with Complex.info['soln'] as keys and
                  file names of matrices as value::
                  { soln : fname, soln : fname ....}
@@ -432,7 +432,7 @@ class ContactSlave(JobSlave):
             T.flushPrint( "%i," % soln )
 
 ##             if not os.path.exists( T.absfile('~/debug.dic') ):
-##                 T.Dump( cmplxDic,  T.absfile('~/debug.dic') )
+##                 T.dump( cmplxDic,  T.absfile('~/debug.dic') )
 
             self.calcContacts( soln, c )
 
@@ -460,7 +460,7 @@ class ContactSlave(JobSlave):
             c.slim()
 
 ##             if not os.path.exists(T.absfile('~/debug_afterslave.dic') ):
-##                 T.Dump( cmplxDic,  T.absfile('~/debug_afterslave.dic') )
+##                 T.dump( cmplxDic,  T.absfile('~/debug_afterslave.dic') )
 
 
         print "\navg time for last %i complexes: %f s" %\
@@ -470,7 +470,7 @@ class ContactSlave(JobSlave):
 
 
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test ContactSlave locally without running the master.
 
@@ -482,50 +482,50 @@ class Test(BT.BiskitTest):
     TAGS = [ BT.PVM ]
 
     def prepare(self):
-	import tempfile
+        import tempfile
         self.cl_out = tempfile.mktemp('_test.cl')
 
     def test_ContactSlave(self):
-	"""Dock.ContactSlave test (local)"""
-	import os
-	from Biskit.Dock.ContactMaster import ContactMaster
+        """Dock.ContactSlave test (local)"""
+        import os
+        from Biskit.Dock.ContactMaster import ContactMaster
 
-	## load complex list (docking result) and reference complex
-        lst = T.Load( T.testRoot() + "/dock/hex/complexes.cl")
+        ## load complex list (docking result) and reference complex
+        lst = T.load( T.testRoot() + "/dock/hex/complexes.cl")
         lst = lst[:3]
-        refcom = T.Load( T.testRoot() + "/com/ref.complex")
+        refcom = T.load( T.testRoot() + "/com/ref.complex")
 
-	## let ContactMaster prepare everything but don't run it
+        ## let ContactMaster prepare everything but don't run it
         self.master = ContactMaster( lst, verbose = self.local,
-				     log=self.log,
-				     refComplex = refcom,
-				     outFile = self.cl_out )
+                                     log=self.log,
+                                     refComplex = refcom,
+                                     outFile = self.cl_out )
 
-	jobs = self.master.data
+        jobs = self.master.data
 
-	self.slave = ContactSlave()
-	self.slave.initialize( self.master.getInitParameters(1) )
+        self.slave = ContactSlave()
+        self.slave.initialize( self.master.getInitParameters(1) )
 
-	if self.local or self.VERBOSITY > 2:
-	    self.log.writeln("Currently available info records (from hex):")
-	    self.log.writeln( repr(jobs[0].info.keys()) )
-	    self.log.writeln( "Calculating all scores for %i complexes..." \
-			      % len(jobs) )
+        if self.local or self.VERBOSITY > 2:
+            self.log.writeln("Currently available info records (from hex):")
+            self.log.writeln( repr(jobs[0].info.keys()) )
+            self.log.writeln( "Calculating all scores for %i complexes..." \
+                              % len(jobs) )
 
-	self.result = self.slave.go( jobs )
+        self.result = self.slave.go( jobs )
 
-	if self.local or self.VERBOSITY > 2:
-	    self.log.writeln("info records after contacting: ")
-	    self.log.writeln( repr(jobs[0].info.keys()) )
-	if self.local:
-	    print "new scores are available in 'result[0-2].info'"
+        if self.local or self.VERBOSITY > 2:
+            self.log.writeln("info records after contacting: ")
+            self.log.writeln( repr(jobs[0].info.keys()) )
+        if self.local:
+            print "new scores are available in 'result[0-2].info'"
 
-	## verify fraction of native atom contacts for third complex
-	self.assertAlmostEqual( self.result[2]['fnac_10'],
-				0.11533600168527491, 7 )
+        ## verify fraction of native atom contacts for third complex
+        self.assertAlmostEqual( self.result[2]['fnac_10'],
+                                0.11533600168527491, 7 )
 
     def cleanUp(self):
-	T.tryRemove(  self.cl_out )
+        T.tryRemove(  self.cl_out )
 
 ## ## PROFILING:
 ## in slave window:

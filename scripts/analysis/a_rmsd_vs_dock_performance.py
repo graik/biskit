@@ -394,8 +394,8 @@ outName_score_dic = outDir + '/' + cName + '_model-rms_score.dic'
 
 ## load
 flushPrint('Loading complex list \n')
-cList = Load( options['cl'] )
-ref_com = Load( options['ref'] )
+cList = load( options['cl'] )
+ref_com = load( options['ref'] )
 
 ## get models
 rec_models, lig_models, rec_b_ref, lig_b_ref = get_models( cList, ref_com )
@@ -432,7 +432,7 @@ rank = docking_rank( performance )
 
 ## get docking info
 info_dic = get_info_dic(dta, performance, rec_rmsd_cont, lig_rmsd_cont)
-Dump( info_dic, outName_best_dic)
+dump( info_dic, outName_best_dic)
 
 out_file = open( outName_best, 'w')
 
@@ -553,7 +553,7 @@ score_dic['best'] = get_score_dic( dta[ info_dic['model_best_rec']-1 ]
 score_dic['all'] = get_score_dic( dta )
 
 ## dump dictionary
-Dump( score_dic, outName_score_dic )
+dump( score_dic, outName_score_dic )
 
 ## write text file    
 out_file = open( outName_score, 'w')

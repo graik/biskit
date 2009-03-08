@@ -96,4 +96,4 @@ traj.ref.disconnect()
 if options.has_key('f'):
     traj.fit()
 
-tools.Dump( traj, options['o'] )
+tools.dump( traj, options['o'] )

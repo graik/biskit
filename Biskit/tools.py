@@ -499,6 +499,10 @@ def dump(this, filename, gzip = 0, mode = 'w'):
     f.close()
 
 
+def Dump( this, filename, gzip = 0, mode = 'w'):
+    EHandler.warning('deprecated: tools.Dump has been renamed to tools.dump')
+    return dump( this, filename, gzip=gzip, mode=mode )
+
 def load(filename, gzip = 0):
     """
     Load dumped object from file.
@@ -546,6 +550,10 @@ def load(filename, gzip = 0):
     except ValueError, why:
         raise PickleError, 'Python pickle %s is corrupted.' % filename
 
+def Load( filename, gzip=0 ):
+    EHandler.warning('deprecated: tools.Load has been renamed to tools.load')
+    return load( filename, gzip=gzip )
+
 
 ## obsolete
 def getOnDemand( attr, dumpIt=1):
@@ -572,14 +580,14 @@ def getOnDemand( attr, dumpIt=1):
 
             ## file exists, try unpickling from it
             if type(fname)==type('') and osp.exists( attr[0] ):
-                return Load( fname )
+                return load( fname )
 
             ## pretend function exists, try to calculate return value
             result = function()
 
             ## pickle result if file would end up in a valid path
             if osp.exists( osp.dirname( fname )) and dumpIt:
-                Dump( result, fname )
+                dump( result, fname )
 
             return result
 

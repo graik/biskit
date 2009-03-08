@@ -911,7 +911,7 @@ traj_rec = Trajectory( rec_pdbs )
 traj_lig = Trajectory( lig_pdbs )
 
 ## reference (bound) rec and lig
-ref = Load( absfile( options['ref'] ) )
+ref = load( absfile( options['ref'] ) )
 ref.rec().remove( ref.rec().maskH() )
 ref.lig_model.remove( ref.lig().maskH() )
 ref.lig_transformed = None
@@ -983,7 +983,7 @@ for m in msk_surf:
 ##############################################################
 
 flushPrint('Loading complex list \n')
-cList = Load( options['cl'] )
+cList = load( options['cl'] )
 
 ## extract data from dictionary
 flushPrint('Extracting %s data  \n'%options['key'])
@@ -1212,7 +1212,7 @@ p_model.write_eps( dotPlotName )
 
 #######################
 ## dump plot data
-#Dump( {'diff_area':diff_area, 'rank_area':rank_area,
+#dump( {'diff_area':diff_area, 'rank_area':rank_area,
 #       'rmsd_all_dic':rmsd_all_dic, 'rmsd_surf_dic':rmsd_surf_dic} ,dumpFile )
 
 

@@ -41,7 +41,7 @@ Add/replace file names of frames to existing (pickled) Trajectory.
 
     print "Loading ", options['i']
     
-    traj = Load( options['i'] )
+    traj = load( options['i'] )
 
     if len( traj.frames ) != len( options['f']):
         print "ERROR: frame number != file name number"
@@ -55,7 +55,7 @@ Add/replace file names of frames to existing (pickled) Trajectory.
 
     print "Dumping ", options['o']
 
-    Dump( traj, options['o'] )
+    dump( traj, options['o'] )
 
     print "Done"
     

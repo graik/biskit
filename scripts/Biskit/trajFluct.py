@@ -55,7 +55,7 @@ if len (sys.argv) < 2:
 
 options = cmdDict( default )
 
-traj = Load( options['i'] )
+traj = load( options['i'] )
 
 traj.fit( prof='rms2avg', ref=traj.ref )
 traj.fit( prof='rms2avg' )
@@ -85,4 +85,4 @@ try:
 except ProfileError, why:
     errWriteln("Couldn't add ASA, ProfileError: ", why)
 
-Dump( traj, options['o'] )
+dump( traj, options['o'] )

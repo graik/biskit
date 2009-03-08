@@ -86,7 +86,7 @@ class PDBParsePickle( PDBParseModel ):
         try:
             if force or updateMissing or self.needsUpdate( model ):
 
-                s = T.Load( source )
+                s = T.load( source )
 
                 super( PDBParsePickle, self ).update(
                     model, s, skipRes=skipRes, updateMissing=updateMissing,

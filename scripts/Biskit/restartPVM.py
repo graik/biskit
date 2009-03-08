@@ -46,7 +46,7 @@ use()
 cmd = T.cmdDict()
 
 T.flushPrint('Loading restart data...')
-rst = T.Load( cmd['i'] )
+rst = T.load( cmd['i'] )
 
 hosts = []
 if 'a' in cmd:

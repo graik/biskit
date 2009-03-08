@@ -303,7 +303,7 @@ contourPlotName = os.path.dirname(cFile) + '/' + cName + '_contour_plot.eps'
 
 ## Load data
 flushPrint('Loading complex list \n')
-cList = Load( options['cl'] )
+cList = load( options['cl'] )
 
 ## extract data
 flushPrint('Extracting %s data  \n'%options['key'])

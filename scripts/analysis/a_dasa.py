@@ -25,8 +25,8 @@ from Biskit import *
 
 def use():
     print """Calculate change in access. and molecular surface upon binding.
-    Syntax:   a_dasa.py -r |rec_model| -l |lig_model| -c |com_model|
-    """
+          Syntax:   a_dasa.py -r |rec_model| -l |lig_model| -c |com_model|
+          """
     sys.exit()
 
 def area( m ):
@@ -46,9 +46,9 @@ if len( sys.argv ) < 2:
 
 o = cmdDict({})
 
-rec = Load(o['r'])
-lig = Load(o['l'])
-com = Load(o['c'])
+rec = load(o['r'])
+lig = load(o['l'])
+com = load(o['c'])
 
 diff_ASA = area( rec ) + area( lig ) - area( com )
 diff_MS  = MS( rec ) + MS( lig ) - MS( com )

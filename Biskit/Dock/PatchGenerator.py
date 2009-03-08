@@ -137,8 +137,8 @@ if __name__ == '__main__':
     from Biskit.Dock import Complex
 
     print "Loading"
-##     m_com = Load( testRoot() + '/com_wet/dry_com.model' )
-    m_com = Load( testRoot() + '/com/ref.complex').model()
+##     m_com = load( testRoot() + '/com_wet/dry_com.model' )
+    m_com = load( testRoot() + '/com/ref.complex').model()
     m_com._resIndex = None   ## HACK, something wrong with legacy _resIndex
     
     doper = PDBDope( m_com )

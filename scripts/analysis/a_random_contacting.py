@@ -375,7 +375,7 @@ if options.get('rout',0):
 prefix = options.get('prefix', '')
 
 ## native reference complex
-ref_nat = Load( absfile( options['ref'] ) )
+ref_nat = load( absfile( options['ref'] ) )
 
 ## collect dict with fnac, score, rms for three docking runs from each list
 result = []
@@ -384,7 +384,7 @@ rec_models = lig_models = None
 try:
 
     errWrite('\nLoading natively contacted list...')
-    cl = Load( absfile( cl_file_native ) )
+    cl = load( absfile( cl_file_native ) )
     if maxSoln:
         cl = cl.filter('soln', (0, maxSoln) )
         
@@ -421,7 +421,7 @@ try:
 
         errWrite('\nLoading list...')
 
-        cl = Load( absfile( cl_f ) )
+        cl = load( absfile( cl_f ) )
         if maxSoln:
             cl = cl.filter('soln', (0, maxSoln) )
 
