@@ -330,3 +330,6 @@ class Model( object ):
         r.info = copy.deepcopy( self.info )
 
         return r
+
+
+
