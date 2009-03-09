@@ -96,6 +96,8 @@ class Feature(object):
         
         @param i: feature indices
         @type  i: [ int ] or N.array of int
+        
+        @return: a new Feature connected to the same Polymer
         """
         rmap = N.take( self.map, i )
         return self.__class__( self.model, rmap, add2model=add2model )
@@ -104,7 +106,12 @@ class Feature(object):
     def concat( self, *others ):
         """
         Concatenate this with one or more other features (of the same 
-        Polymer).
+        Polymer). Example::
+        
+            feature123 = feature1.concat( feature2, feature3 )
+        
+        @return: a new Feature
+        @rtype : Feature OR sub-class (same class as this Feature)
         """
         if len( others ) == 0:
             return self
@@ -263,11 +270,13 @@ class Polymer( Model ):
         self.features = []
         
         if sequences:
-            self.addSequence( *sequences )
+            self.addSequences( sequences )
+            
+        self.__version__ = self.version()
 
     
     def version( self ):
-        return Model.version(self) + '; Polymer $Revision$'
+        return 'Polymer $Revision$'
 
     def __newChain( self ):
         """
