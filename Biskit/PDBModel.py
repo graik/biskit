@@ -1601,7 +1601,7 @@ class PDBModel:
         ## (1) repeat position of first atom in each residue as often as there
         ## are atoms in this residue. (2) add a range array so that numbers
         ## are increasing from each atom to the next but (3) reset the added
-        ## range to 0 at each residue starting position .
+        ## range to 0 at each residue starting position (-delta).
 
         ri    = N.repeat( ifrom,  rangelen )
         delta = N.repeat( rindex, rangelen )

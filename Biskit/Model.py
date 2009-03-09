@@ -310,13 +310,17 @@ class Model( object ):
         
         ## more tricky: rescue residue borders and extract residue profiles
         new_resmap  = N.take( self.resMap(), i )
+        ## Note: this erases ordering information and fails for repeated residues
+        ## -- see PDBModel version for fix
         r._resIndex = map2index( new_resmap )
 
         i_res      = N.take( new_resmap, r._resIndex )
         r.residues = self.residues.take( i_res )
 
-        ## now the same with chain borders (and later profiles)
+        ## now the same with chains
         new_chainmap  = N.take( self.chainMap(), i )
+        ## Note: this erases ordering information and fails for repeated residues
+        ## -- see PDBModel version for fix
         r._chainIndex = map2index( new_chainmap )
         
         i_chains = N.take( new_chainmap, r._chainIndex )
