@@ -83,6 +83,10 @@ try:
     from Ramachandran import Ramachandran
     from CommandLine import CommandLine
 
+    from Model import Model
+    from Polymer import Polymer
+    from Polymer import Feature
+    
 ## PVM-dependent modules
 
     from QualMaster import QualMaster
