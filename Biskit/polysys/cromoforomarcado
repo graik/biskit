@@ -1,0 +1,447 @@
+#!/usr/local/bin/vmd
+# VMD script written by save_state $Revision: 1.41 $
+# VMD version: 1.8.6
+set viewplist {}
+set fixedlist {}
+proc vmdrestoremymaterials {} {
+  set mlist { Opaque Transparent BrushedMetal Diffuse Ghost Glass1 Glass2 Glossy HardPlastic MetallicPastel Steel Translucent }
+  set mymlist [material list]
+  foreach mat $mlist {
+    if { [lsearch $mymlist $mat] == -1 } { 
+      material add $mat
+    }
+  }
+  material change ambient Opaque 0.000000
+  material change specular Opaque 0.500000
+  material change diffuse Opaque 0.650000
+  material change shininess Opaque 0.534020
+  material change opacity Opaque 1.000000
+  material change ambient Transparent 0.000000
+  material change specular Transparent 0.500000
+  material change diffuse Transparent 0.650000
+  material change shininess Transparent 0.534020
+  material change opacity Transparent 0.300000
+  material change ambient BrushedMetal 0.080000
+  material change specular BrushedMetal 0.340000
+  material change diffuse BrushedMetal 0.390000
+  material change shininess BrushedMetal 0.150000
+  material change opacity BrushedMetal 1.000000
+  material change ambient Diffuse 0.000000
+  material change specular Diffuse 0.000000
+  material change diffuse Diffuse 0.700000
+  material change shininess Diffuse 0.530000
+  material change opacity Diffuse 1.000000
+  material change ambient Ghost 0.000000
+  material change specular Ghost 1.000000
+  material change diffuse Ghost 0.000000
+  material change shininess Ghost 0.230000
+  material change opacity Ghost 0.100000
+  material change ambient Glass1 0.000000
+  material change specular Glass1 0.650000
+  material change diffuse Glass1 0.500000
+  material change shininess Glass1 0.530000
+  material change opacity Glass1 0.150000
+  material change ambient Glass2 0.520000
+  material change specular Glass2 0.220000
+  material change diffuse Glass2 0.760000
+  material change shininess Glass2 0.590000
+  material change opacity Glass2 0.680000
+  material change ambient Glossy 0.000000
+  material change specular Glossy 1.000000
+  material change diffuse Glossy 0.650000
+  material change shininess Glossy 0.880000
+  material change opacity Glossy 1.000000
+  material change ambient HardPlastic 0.000000
+  material change specular HardPlastic 0.280000
+  material change diffuse HardPlastic 0.560000
+  material change shininess HardPlastic 0.690000
+  material change opacity HardPlastic 1.000000
+  material change ambient MetallicPastel 0.000000
+  material change specular MetallicPastel 0.550000
+  material change diffuse MetallicPastel 0.260000
+  material change shininess MetallicPastel 0.190000
+  material change opacity MetallicPastel 1.000000
+  material change ambient Steel 0.250000
+  material change specular Steel 0.380000
+  material change diffuse Steel 0.000000
+  material change shininess Steel 0.320000
+  material change opacity Steel 1.000000
+  material change ambient Translucent 0.000000
+  material change specular Translucent 0.600000
+  material change diffuse Translucent 0.700000
+  material change shininess Translucent 0.300000
+  material change opacity Translucent 0.800000
+}
+vmdrestoremymaterials
+# Atom selection macros
+atomselect macro at {resname ADE A THY T
+}
+atomselect macro acidic {resname ASP GLU
+}
+atomselect macro cyclic {resname HIS PHE PRO TRP TYR
+}
+atomselect macro acyclic {protein and not cyclic
+}
+atomselect macro aliphatic {resname ALA GLY ILE LEU VAL
+}
+atomselect macro alpha {protein and name CA
+}
+atomselect macro amino {protein
+}
+atomselect macro aromatic {resname HIS PHE TRP TYR
+}
+atomselect macro basic {resname ARG HIS LYS HSP
+}
+atomselect macro bonded {numbonds > 0
+}
+atomselect macro buried {resname ALA LEU VAL ILE PHE CYS MET TRP
+}
+atomselect macro cg {resname CYT C GUA G
+}
+atomselect macro charged {basic or acidic
+}
+atomselect macro hetero {not (protein or nucleic)
+}
+atomselect macro hydrophobic {resname ALA LEU VAL ILE PRO PHE MET TRP
+}
+atomselect macro small {resname ALA GLY SER
+}
+atomselect macro medium {resname VAL THR ASP ASN PRO CYS ASX PCA HYP
+}
+atomselect macro large {protein and not (small or medium)
+}
+atomselect macro neutral {resname VAL PHE GLN TYR HIS CYS MET TRP ASX GLX PCA HYP
+}
+atomselect macro polar {protein and not hydrophobic
+}
+atomselect macro purine {resname ADE A GUA G
+}
+atomselect macro pyrimidine {resname CYT C THY T URA U
+}
+atomselect macro surface {protein and not buried
+}
+atomselect macro lipid {resname DLPE DMPC DPPC GPC LPPC PALM PC PGCL POPC POPE
+}
+atomselect macro lipids {lipid
+}
+atomselect macro ion {resname AL BA CA CAL CD CES CLA CL CO CS CU CU1 CUA HG IN IOD K MG MN3 MO3 MO4 MO5 MO6 NA NAW OC7 PB POT PT RB SOD TB TL WO4 YB ZN ZN1 ZN2
+}
+atomselect macro ions {ion
+}
+atomselect macro sugar {resname AGLC
+}
+atomselect macro solvent {not (protein or sugar or nucleic or lipid)
+}
+atomselect macro carbon {name "C.*" and not ion
+}
+atomselect macro hydrogen {name "[0-9]?H.*"
+}
+atomselect macro nitrogen {name "N.*"
+}
+atomselect macro oxygen {name "O.*"
+}
+atomselect macro sulfur {name "S.*" and not ion
+}
+atomselect macro noh {not hydrogen
+}
+atomselect macro heme {resname HEM HEME
+}
+atomselect macro conformationall {altloc ""
+}
+atomselect macro conformationA {altloc "" or altloc "A"
+}
+atomselect macro conformationB {altloc "" or altloc "B"
+}
+atomselect macro conformationC {altloc "" or altloc "C"
+}
+atomselect macro conformationD {altloc "" or altloc "D"
+}
+atomselect macro conformationE {altloc "" or altloc "E"
+}
+atomselect macro conformationF {altloc "" or altloc "F"
+}
+atomselect macro unparametrized beta<1
+atomselect macro addedmolefacture {occupancy 0.8}
+# Display settings
+display eyesep       0.065000
+display focallength  2.000000
+display height       6.000000
+display distance     -2.000000
+display projection   Perspective
+display nearclip set 0.500000
+display farclip  set 10.000000
+display depthcue   off
+display cuestart   0.500000
+display cueend     10.000000
+display cuedensity 0.400000
+display cuemode    Exp2
+mol new 1huy.pdb type pdb first 0 last -1 step 1 filebonds 1 autobonds 1 waitfor all
+mol delrep 0 top
+mol representation Lines
+mol color Name
+mol selection {residue  65 66 67 }
+mol material Opaque
+mol addrep top
+mol selupdate 0 top 0
+mol colupdate 0 top 0
+mol scaleminmax top 0 0.000000 0.000000
+mol smoothrep top 0 0
+mol drawframes top 0 {now}
+mol clipplane center 0 0 top {0.0 0.0 0.0}
+mol clipplane color  0 0 top {0.5 0.5 0.5 }
+mol clipplane normal 0 0 top {0.0 0.0 1.0}
+mol clipplane status 0 0 top {0}
+mol clipplane center 1 0 top {0.0 0.0 0.0}
+mol clipplane color  1 0 top {0.5 0.5 0.5 }
+mol clipplane normal 1 0 top {0.0 0.0 1.0}
+mol clipplane status 1 0 top {0}
+mol clipplane center 2 0 top {0.0 0.0 0.0}
+mol clipplane color  2 0 top {0.5 0.5 0.5 }
+mol clipplane normal 2 0 top {0.0 0.0 1.0}
+mol clipplane status 2 0 top {0}
+mol clipplane center 3 0 top {0.0 0.0 0.0}
+mol clipplane color  3 0 top {0.5 0.5 0.5 }
+mol clipplane normal 3 0 top {0.0 0.0 1.0}
+mol clipplane status 3 0 top {0}
+mol clipplane center 4 0 top {0.0 0.0 0.0}
+mol clipplane color  4 0 top {0.5 0.5 0.5 }
+mol clipplane normal 4 0 top {0.0 0.0 1.0}
+mol clipplane status 4 0 top {0}
+mol clipplane center 5 0 top {0.0 0.0 0.0}
+mol clipplane color  5 0 top {0.5 0.5 0.5 }
+mol clipplane normal 5 0 top {0.0 0.0 1.0}
+mol clipplane status 5 0 top {0}
+mol rename top 1huy.pdb
+set viewpoints([molinfo top]) {{{1.000000 0.000000 0.000000 -25.776901} {0.000000 1.000000 0.000000 -28.054321} {0.000000 0.000000 1.000000 -39.019787} {0.000000 0.000000 0.000000 1.000000}} {{-0.841458 -0.522142 0.139025 0.000000} {0.197276 -0.057340 0.978674 0.000000} {-0.503033 0.850940 0.151256 0.000000} {0.000000 0.000000 0.000000 1.000000}} {{0.145411 0.000000 0.000000 0.000000} {0.000000 0.145411 0.000000 0.000000} {0.000000 0.000000 0.145411 0.000000} {0.000000 0.000000 0.000000 1.000000}} {{1.000000 0.000000 0.000000 0.000000} {0.000000 1.000000 0.000000 0.000000} {0.000000 0.000000 1.000000 0.000000} {0.000000 0.000000 0.000000 1.000000}}}
+lappend viewplist [molinfo top]
+set topmol [molinfo top]
+# done with molecule 0
+foreach v $viewplist {
+  molinfo $v set {center_matrix rotate_matrix scale_matrix global_matrix} $viewpoints($v)
+}
+foreach v $fixedlist {
+  molinfo $v set fixed 1
+}
+unset viewplist
+unset fixedlist
+mol top $topmol
+unset topmol
+proc vmdrestoremycolors {} {
+color scale colors RWB {1.0 0.0 0.0} {1.0 1.0 1.0} {0.0 0.0 1.0}
+color scale colors BWR {0.0 0.0 1.0} {1.0 1.0 1.0} {1.0 0.0 0.0}
+color scale colors RGryB {1.0 0.0 0.0} {0.5 0.5 0.5} {0.0 0.0 1.0}
+color scale colors BGryR {0.0 0.0 1.0} {0.5 0.5 0.5} {1.0 0.0 0.0}
+color scale colors RGB {1.0 0.0 0.0} {0.0 1.0 0.0} {0.0 0.0 1.0}
+color scale colors BGR {0.0 0.0 1.0} {0.0 1.0 0.0} {1.0 0.0 0.0}
+color scale colors RWG {1.0 0.0 0.0} {1.0 1.0 1.0} {0.0 1.0 0.0}
+color scale colors GWR {0.0 1.0 0.0} {1.0 1.0 1.0} {1.0 0.0 0.0}
+color scale colors GWB {0.0 1.0 0.0} {1.0 1.0 1.0} {0.0 0.0 1.0}
+color scale colors BWG {0.0 0.0 1.0} {1.0 1.0 1.0} {0.0 1.0 0.0}
+color scale colors BlkW {0.0 0.0 0.0} {0.5 0.5 0.5} {1.0 1.0 1.0}
+color scale colors WBlk {1.0 1.0 1.0} {0.5 0.5 0.5} {0.0 0.0 0.0}
+  color scale method RWB
+  set colorcmds {
+    {color Display {BackgroundTop} black}
+    {color Display {BackgroundBot} blue2}
+    {color Display {FPS} white}
+    {color Element {X} cyan}
+    {color Element {Ac} ochre}
+    {color Element {Ag} ochre}
+    {color Element {Al} ochre}
+    {color Element {Am} ochre}
+    {color Element {Ar} ochre}
+    {color Element {As} ochre}
+    {color Element {At} ochre}
+    {color Element {Au} ochre}
+    {color Element {B} ochre}
+    {color Element {Ba} ochre}
+    {color Element {Be} ochre}
+    {color Element {Bh} ochre}
+    {color Element {Bi} ochre}
+    {color Element {Bk} ochre}
+    {color Element {Br} ochre}
+    {color Element {Ca} ochre}
+    {color Element {Cd} ochre}
+    {color Element {Ce} ochre}
+    {color Element {Cf} ochre}
+    {color Element {Cl} ochre}
+    {color Element {Cm} ochre}
+    {color Element {Co} ochre}
+    {color Element {Cr} ochre}
+    {color Element {Cs} ochre}
+    {color Element {Cu} ochre}
+    {color Element {Db} ochre}
+    {color Element {Ds} ochre}
+    {color Element {Dy} ochre}
+    {color Element {Er} ochre}
+    {color Element {Es} ochre}
+    {color Element {Eu} ochre}
+    {color Element {F} ochre}
+    {color Element {Fe} ochre}
+    {color Element {Fm} ochre}
+    {color Element {Fr} ochre}
+    {color Element {Ga} ochre}
+    {color Element {Gd} ochre}
+    {color Element {Ge} ochre}
+    {color Element {He} ochre}
+    {color Element {Hf} ochre}
+    {color Element {Hg} ochre}
+    {color Element {Ho} ochre}
+    {color Element {Hs} ochre}
+    {color Element {I} ochre}
+    {color Element {In} ochre}
+    {color Element {Ir} ochre}
+    {color Element {K} ochre}
+    {color Element {Kr} ochre}
+    {color Element {La} ochre}
+    {color Element {Li} ochre}
+    {color Element {Lr} ochre}
+    {color Element {Lu} ochre}
+    {color Element {Md} ochre}
+    {color Element {Mg} ochre}
+    {color Element {Mn} ochre}
+    {color Element {Mo} ochre}
+    {color Element {Mt} ochre}
+    {color Element {Na} ochre}
+    {color Element {Nb} ochre}
+    {color Element {Nd} ochre}
+    {color Element {Ne} ochre}
+    {color Element {Ni} ochre}
+    {color Element {No} ochre}
+    {color Element {Np} ochre}
+    {color Element {Os} ochre}
+    {color Element {Pa} ochre}
+    {color Element {Pb} ochre}
+    {color Element {Pd} ochre}
+    {color Element {Pm} ochre}
+    {color Element {Po} ochre}
+    {color Element {Pr} ochre}
+    {color Element {Pt} ochre}
+    {color Element {Pu} ochre}
+    {color Element {Ra} ochre}
+    {color Element {Rb} ochre}
+    {color Element {Re} ochre}
+    {color Element {Rf} ochre}
+    {color Element {Rg} ochre}
+    {color Element {Rh} ochre}
+    {color Element {Rn} ochre}
+    {color Element {Ru} ochre}
+    {color Element {Sb} ochre}
+    {color Element {Sc} ochre}
+    {color Element {Se} ochre}
+    {color Element {Sg} ochre}
+    {color Element {Si} ochre}
+    {color Element {Sm} ochre}
+    {color Element {Sn} ochre}
+    {color Element {Sr} ochre}
+    {color Element {Ta} ochre}
+    {color Element {Tb} ochre}
+    {color Element {Tc} ochre}
+    {color Element {Te} ochre}
+    {color Element {Th} ochre}
+    {color Element {Ti} ochre}
+    {color Element {Tl} ochre}
+    {color Element {Tm} ochre}
+    {color Element {U} ochre}
+    {color Element {V} ochre}
+    {color Element {W} ochre}
+    {color Element {Xe} ochre}
+    {color Element {Y} ochre}
+    {color Element {Yb} ochre}
+    {color Element {Zr} ochre}
+    {color Resname {CRO} silver}
+    {color Resname {HOH} green}
+    {color Chain {A} blue}
+    {color Chain {X} red}
+    {color Segname {} blue}
+    {color Conformation {all} blue}
+    {color Molecule {0} blue}
+    {color Structure {3_10_Helix} blue}
+    {color Surface {Grasp} gray}
+    {color Labels {Springs} orange}
+    {color Stage {Even} gray}
+    {color Stage {Odd} silver}
+  }
+  foreach colcmd $colorcmds {
+    set val [catch {eval $colcmd}]
+  }
+  color change rgb 0 0.0 0.0 1.0
+  color change rgb 2 0.34999999404 0.34999999404 0.34999999404
+  color change rgb 3 1.0 0.5 0.0
+  color change rgb 4 1.0 1.0 0.0
+  color change rgb 5 0.5 0.5 0.20000000298
+  color change rgb 6 0.600000023842 0.600000023842 0.600000023842
+  color change rgb 7 0.0 1.0 0.0
+  color change rgb 9 1.0 0.600000023842 0.600000023842
+  color change rgb 11 0.649999976158 0.0 0.649999976158
+  color change rgb 12 0.5 0.899999976158 0.40000000596
+  color change rgb 13 0.899999976158 0.40000000596 0.699999988079
+  color change rgb 14 0.5 0.300000011921 0.0
+  color change rgb 15 0.5 0.5 0.75
+  color change rgb 17 0.879999995232 0.97000002861 0.019999999553
+  color change rgb 18 0.550000011921 0.899999976158 0.019999999553
+  color change rgb 19 0.0 0.899999976158 0.0399999991059
+  color change rgb 20 0.0 0.899999976158 0.5
+  color change rgb 21 0.0 0.879999995232 1.0
+  color change rgb 22 0.0 0.759999990463 1.0
+  color change rgb 23 0.019999999553 0.379999995232 0.670000016689
+  color change rgb 24 0.00999999977648 0.0399999991059 0.930000007153
+  color change rgb 25 0.270000010729 0.0 0.980000019073
+  color change rgb 26 0.449999988079 0.0 0.899999976158
+  color change rgb 27 0.899999976158 0.0 0.899999976158
+  color change rgb 28 1.0 0.0 0.660000026226
+  color change rgb 29 0.980000019073 0.0 0.230000004172
+  color change rgb 30 0.810000002384 0.0 0.0
+  color change rgb 31 0.889999985695 0.34999999404 0.0
+  color change rgb 32 0.959999978542 0.72000002861 0.0
+}
+vmdrestoremycolors
+label textsize 1.0
+label add Atoms 0/520
+label textoffset Atoms 0 {0.0 0.0}
+label textformat Atoms 0 %i
+label add Atoms 0/519
+label textoffset Atoms 1 {0.0 0.0}
+label textformat Atoms 1 %i
+label add Atoms 0/517
+label textoffset Atoms 2 {0.0 0.0}
+label textformat Atoms 2 %i
+label add Atoms 0/515
+label textoffset Atoms 3 {0.0 0.0}
+label textformat Atoms 3 %i
+label add Atoms 0/514
+label textoffset Atoms 4 {0.0 0.0}
+label textformat Atoms 4 %i
+label add Atoms 0/516
+label textoffset Atoms 5 {0.0 0.0}
+label textformat Atoms 5 %i
+label add Atoms 0/518
+label textoffset Atoms 6 {0.0 0.0}
+label textformat Atoms 6 %i
+label add Atoms 0/513
+label textoffset Atoms 7 {0.0 0.0}
+label textformat Atoms 7 %i
+label add Atoms 0/509
+label textoffset Atoms 8 {0.0 0.0}
+label textformat Atoms 8 %i
+label add Atoms 0/505
+label textoffset Atoms 9 {0.0 0.0}
+label textformat Atoms 9 %i
+label add Atoms 0/504
+label textoffset Atoms 10 {0.0 0.0}
+label textformat Atoms 10 %i
+label add Atoms 0/506
+label textoffset Atoms 11 {0.0 0.0}
+label textformat Atoms 11 %i
+label add Atoms 0/507
+label textoffset Atoms 12 {0.0 0.0}
+label textformat Atoms 12 %i
+label add Atoms 0/508
+label textoffset Atoms 13 {0.0 0.0}
+label textformat Atoms 13 %i
+label add Atoms 0/510
+label textoffset Atoms 14 {0.0 0.0}
+label textformat Atoms 14 %i
+label add Atoms 0/503
+label textoffset Atoms 15 {0.0 0.0}
+label textformat Atoms 15 %i
