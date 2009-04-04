@@ -11,23 +11,6 @@ import random
 
 
 
-class FRETProtein (PDBModel,BlockEntity):
-	def __init__ (self,name,source, qy = 0, lt = 0,chromophore = None):
-		PDBModel.__init__(self,source)
-		BlockEntity.__init__(self,name)
-		self.quantumYield=qy
-		self.lifetime = lt
-		self.name = name
-		if chromophore == None:
-			self.chromophore = chromophore
-		else:
-			self.chromophore = Chromophore("UndefChromophore")
-	
-	def __str__(self):
-		return BlockEntity.__str__(self)
-
-	def onInsertion(self,myassembly=None):
-		
 
 
 class UndefProtein (BlockEntity):
@@ -223,6 +206,56 @@ class Protein (PDBModel, BlockEntity):
 	
 	def run(self):
 		return self
+		
+class FRETProtein (Protein):
+	def __init__ (self,name):
+		
+		self._loadFromDB(name)
+		self.name = name
+		
+		Protein.__init__(self,self.source)
+		
+		
+		#~ if self.chromophore == None:
+			#~ self.chromophore = chromophore
+		#~ else:
+			#~ self.chromophore = Chromophore("UndefChromophore")
+	
+	def __str__(self):
+		#~ str = Protein.__str__(self)
+		str= "\n["+self.name+","+self.lifetime+","+self.abswl+","+self.emwl+","+self.quantumYield+","+self.source+"]"
+		return str
+		
+	def onInsertion(self,myassembly=None):
+		pass
+		
+	def _loadFromDB(self,name):
+		f = open ('./fret_prots_db/single_parameters.db',"r")
+		lineas = f.readlines()
+		f.close()
+		line = -1
+		
+		if len(lineas)<=1:
+			print "[WARNING FRETProtein _loadFromDB (__init__)] "+name+" is not an available name in database (empty or bad format database?)." 
+		else:
+			for i in range(len(lineas)):
+				if name in lineas[i]:
+					line = i 
+		if line == -1 :
+			print "[WARNING FRETProtein _loadFromDB (__init__)] "+name+" is not an available name in database (name not found)." 
+			return
+		
+		parameters = lineas[line].split('\t',7)
+		
+		print parameters
+		self.lifetime = parameters[1]
+		self.abswl = parameters[2]
+		self.emwl = parameters[3]
+		self.quantumYield = parameters[4]
+		self.source = parameters[5]+".pdb"
+		self.notes = parameters[6]
+		
+		
 #~ p = Protein("testProtein",'2Q57.pdb')
 #~ p.onInsertion()
 
@@ -234,3 +267,7 @@ class Protein (PDBModel, BlockEntity):
 
 #~ print p.sequenceCorrelation("GVVPILKELDG","")
 #~ print p.sequenceAlignment("GVVPILKELDG","")
+
+f = FRETProtein('mCitrine')
+print f
+
