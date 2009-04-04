@@ -1,4 +1,3 @@
-
 from FRETProtein import BlockEntity
 
 class UndefLink (BlockEntity):

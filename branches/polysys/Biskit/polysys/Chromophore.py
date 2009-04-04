@@ -17,7 +17,7 @@ class Chromophore(BlockEntity):
 		Gets chromophore model structure from atoms
 		"""
 		if (self.indexes == None):
-			print "[Polysys.Chromophore ERROR] Noatomic info available."
+			print "[Polysys.Chromophore ERROR] No atomic info available."
 		else:
 			#get the atom info from model
 			self.atoms_pos = p.indicesFrom('serial_number', a)
