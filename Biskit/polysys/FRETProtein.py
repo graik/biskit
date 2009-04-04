@@ -1,6 +1,6 @@
- 
 from Biskit import PDBModel
 from numpy import*
+
 
 class Interval:
 	
@@ -39,10 +39,11 @@ class Interval:
 			return -1
 
 class BlockEntity:
-	def __init__(self,name= "Unnamed",father=None):
+	def __init__(self,name= "Empty",father=None):
 		self.name = name
 		self.sons = []
 		self.father = father
+		
 
 	def __str__(self):
 		return "[Entity: "+self.name+"]"
@@ -51,7 +52,9 @@ class BlockEntity:
 		pass
 	
 	def run(self):
-		pass
+		# As it's empty it tries to return its father
+		# An absolute empty entity has no sense otherwise.
+		return self.father
 	
 class Block(object):
 	
@@ -134,19 +137,6 @@ class Block(object):
 		
 		return mystring
 	
-class FRETProtein (PDBModel,BlockEntity):
-	def __init__ (self,name,source, qy = 0, lt = 0,chromophore = None):
-		PDBModel.__init__(self,source)
-		BlockEntity.__init__(self,name)
-		self.quantumYield=qy
-		self.lifetime = lt
-		self.name = name
-		self.chromophore = chromophore
-	
-	def __str__(self):
-		return BlockEntity.__str__(self)
-
-
 
 
 class ConstraintAngle:
@@ -194,12 +184,46 @@ class Constraint (object):
 		self.b = b
 		self.type = type
 		self.value = value
+		if not type in c_types:
+			print "[WARNING Constraint _init_] "+type + " is not an allowed type name."
+		if self.a == self.b:
+			print "[ERROR Constraint _init_] Entities of a constraint can not be the same."
 	
 	def sameOps (self, o):
 		return ((self.a == o.a and self.b == o.b)or (self.a == o.b and self.b == o.a))
 	
+	def triangularLink(self, c):
+		if c.type != "linked" or self.type != "linked" :
+			print "[WARNING Constraint triangularLink] "+str(c) + " is not a link constraint."
+			return False
+		
+		if self.a == c.a or self.b == c.b:
+			return True
+		else:
+			return False
+		
+	def linked (self,c):
+		if c.type != 'linked' or self.type != "linked":
+			print "[WARNING Constraint linked] (type)"+ c.type+"  "+str(c) + " is not a link constraint."
+			return False
+	
+		if self.b == c.a:
+			return True
+		else:
+			return False
+		
+	def ilinked (self,c):
+		if c.type != 'linked' or self.type != "linked":
+			print "[WARNING Constraint ilinked] (type)"+ c.type+"  "+str(c) + " is not a link constraint."
+			return False
+	
+		if self.a == c.b:
+			return True
+		else:
+			return False
+	
 	def __cmp__(self,o):
-		if self.value == o.value and self.type == o.type and ((self.a == o.a and self.b == o.b)or (self.a == o.b and self.b == o.a)) :
+		if self.value == o.value and self.type == o.type and self.sameOps(o) :
 			return 0
 		else:
 			return -1
@@ -213,121 +237,10 @@ class Constraint (object):
 			s+=self.b.name
 		return s
 
-		
-		
-		
-		
-class Assembly :
-	def __init__(self,name):
-		self.blocks = []
-		self.constraints = []
-		self.name = name
-		self.engines = []
-		
-	def addBlock(self, f):
-		self.blocks.append(f)
-		if self.blocks[-1].entity != None:
-			self.blocks[-1].entity.onInsertion(self)
-	
-	def remBlock(self,f):
-		if isinstance(f,Block):
-			self.blocks.remove(f)
+	def __contains__(self, c):	
+		if self.a == c or self.b == c :
+			return True
 		else:
-			self.blocks.remove(Block(f))
+			return False
 		
-	def addConstraint(self,c):
-		self.constraints.append(c)
-	
-	def remConstraint(self,c):
-		self.constraints.remove(c)
-	
-	def addEngine(self,e):
-		self.engines.append(e)
-	
-	def remEngine(self,e):
-		self.engines.remove(e)
-		
-	def addAssembly(self,a,addEngines= False):
-		self.blocks.extend (a.blocks)
-		self.constraints.extend (a.constraints)
-		if (addEngines ):
-			self.engines.extend (a.engines)
-	
-	def run(self):
-		#Check blocks
-		reblocks =  []
-		for i in range(len(self.blocks)-1):
-			reblocks.append(self.blocks[i])
-			
-			if reblocks.count(self.blocks[i])>1 :
-				print "[WARNING Polymer _build] Duplicated Block("+self.blocks[i].name+ ").Merging its intervals"
-				pos = reblocks.index(self.blocks[i])
-				for j in self.blocks[i].intervals:
-					reblocks[pos].addBlock(blocks[i].intervals[j])
-				
-		#Check constraint coherence
-		for i in range (len(self.constraints)-1):
-			for j in range(i+1,len(self.constraints)-1):
-				clash = ConstraintClash(self.constraints[i].type,self.constraints[j].type)
-				if( clash in c_clashes ) :
-					#Solve possible constraint clash
-					if self.constraints[i].type == "distance":
-						if  clash == ConstraintClash("distance","distance"):
-							pass
-							
-						elif self.constraints[i].type == "distance"  and clash == ConstraintClash("distance","glued"):
-							pass
-							
-						else:
-							print "[ERROR Constraint _build] Unhandled clash descriptor (" +clash.__str__() +")." 
-					
-					elif self.constraints[i].type == "orientation":
-						pass
-						
-					elif self.constraints[i].type == "glued":
-						pass
-						
-					else:
-						print "[ERROR Constraint _build] Unhandled constraint descriptor (" +self.constraints[i].type +")." 
-		
-		if( self.engines != []):
-			for e in self.engines:
-				e.run(self)
-		
-		
-	def __str__(self):
-		mystring = ""
-		mystring+= "------------------------------------\n"
-		mystring+= "Assembly:"+self.name+"\n"
-		mystring+= "------------------------------------\n"
-		
-		if self.blocks != []:
-			for i in self.blocks:
-				mystring+= i.__str__()+"\n"
-					
-		if self.constraints != []:
-			for i in self.constraints:
-				mystring+= i.__str__()+"\n"
-		mystring+= "------------------------------------\n"
-		
-		return mystring
-			
-
-
-class Engine(object):
-	def __init__(self,a):
-		self.myAssembly = a
-	
-	def run (self):
-		pass
-	
-class CreateLinkEngine( Engine ):
-	def __init__ (self,a):
-		Engine.__init__(self,a)
-		
-	def run (self):
-		Engine.run(self)
-		#And then, let's do something
-
-
 

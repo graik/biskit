@@ -1,13 +1,38 @@
 from Biskit import *
-from FRETProtein import *
+from FRETProtein import BlockEntity,Block,Interval,Constraint
+from Assembly import Assembly
 import re
 from Biskit import molUtils as mu
 from numpy import *
 from string import *
 from Bio import pairwise2
+from ResiduePicker import *
+import random
+
+
+
+class FRETProtein (PDBModel,BlockEntity):
+	def __init__ (self,name,source, qy = 0, lt = 0,chromophore = None):
+		PDBModel.__init__(self,source)
+		BlockEntity.__init__(self,name)
+		self.quantumYield=qy
+		self.lifetime = lt
+		self.name = name
+		if chromophore == None:
+			self.chromophore = chromophore
+		else:
+			self.chromophore = Chromophore("UndefChromophore")
+	
+	def __str__(self):
+		return BlockEntity.__str__(self)
+
+	def onInsertion(self,myassembly=None):
+		
+
 
 class UndefProtein (BlockEntity):
-	def __init__(self,sequence = ""):
+	def __init__(self,name,sequence = ""):
+		BlockEntity.__init__(self,name)
 		self.sequence = sequence
 		
 	def setSequence(self,sequence):
@@ -15,9 +40,31 @@ class UndefProtein (BlockEntity):
 		
 	def run (self):
 		BlockEntity.run(self)
+		#get residue database status
+		try:
+			f = open ('./residues_db/residues',"r")
+			total_res = cPickle.load(f)
+
+		except (cPickle.UnpicklingError, IOError,EOFError):
+			f = open ('./residues_db/residues',"w")
+			total_res = {}
+
+		f.close()
 		#create atomic data from sequence and return a PDBModel
 		
-		
+		if self.sequence != "" and  total_res != {} :
+			flip = True
+			c = self.sequence[0]
+			n = random.randint(1, total_res[c])
+			p_a = PDBModel("./residues_db/"+c+"/"+c+str(n)+".pdb")
+			
+			for c in self.sequence[1:]:
+				n = random.randint(1, total_res[c])
+				p_b = PDBModel("./residues_db/"+c+"/"+c+str(n)+".pdb")
+				p_a = stickAAs(p_a,p_b,flip)
+				flip = not flip
+				
+		return p_a
 
 class Protein (PDBModel, BlockEntity):
 	
@@ -70,16 +117,16 @@ class Protein (PDBModel, BlockEntity):
 			
 			if (self.method == 'correlation'):
 				alignment =  self.sequenceCorrelation(chain_string,self.__prot_chains_sequences[chain_number])
-				print alignment
+				#~ print alignment
 				start = int(alignment[1][0])
 				end = start + len(self.takeChains( [chain_number] ).sequence())
-				print start,end, len(chain_string)
+				#~ print start,end, len(chain_string)
 				
 			elif (self.method =='alignment'):
 				alignment = self.sequenceAlignment(chain_string,self.__prot_chains_sequences[chain_number])
 				start = alignment[0]
 				end = alignment[1]
-				print start,end, len(chain_string)
+				#~ print start,end, len(chain_string)
 			else:
 				print '[ERROR Protein __Init__] Unsupported method name:',method
 			
@@ -90,22 +137,27 @@ class Protein (PDBModel, BlockEntity):
 				e1=None;e2=None;e3=None
 				if start >0:
 					#create the proximal undefined seq
-					e1 = BlockEntity(self.name+"_undef_chain_start_"+self.__prot_chains[chain_number])
+					e1 = UndefProtein(self.name+"_chain_start_"+self.__prot_chains[chain_number],self.__prot_chains_sequences[chain_number][0:start])
 					bstart = Block(self.name+"_undef_chain_start_"+self.__prot_chains[chain_number],e1,self)
-					bstart.addInterval(Interval(0,start-1))
+					bstart.addInterval(Interval(0,start))
 					a.blocks.append(bstart)
 				if end<len:
 					#create distal undef seq
-					e2 = BlockEntity(self.name+"_undef_chain_end_"+self.__prot_chains[chain_number])
+					e2 = UndefProtein(self.name+"_chain_end_"+self.__prot_chains[chain_number],self.__prot_chains_sequences[chain_number][end:len(self.__prot_chains_sequences[chain_number])])
 					bend = Block(self.name+"_undef_chain_end_"+self.__prot_chains[chain_number],e2,self)
-					bend.addInterval(Interval(end+1,len(self.__prot_chains_sequences[chain_number])-1))
+					bend.addInterval(Interval(end,len(self.__prot_chains_sequences[chain_number])))
 					a.blocks.append(bend)
 				#create chain seq
 				e3 = BlockEntity(self.name+"_def_chain_"+self.__prot_chains[chain_number])
 				bchain = Block(self.name+"_def_chain_"+self.__prot_chains[chain_number],e3,self)
-				bchain.addInterval(Interval(start,start+len(chain_string)))
+				bchain.addInterval(Interval(start+1,start+len(chain_string)))
 				a.blocks.append(bchain)
 				chains.append(bchain)
+				
+				#~ print self.__prot_chains_sequences[chain_number][0:start]
+				#~ print self.__prot_chains_sequences[chain_number][end:len(self.__prot_chains_sequences[chain_number])]
+				#~ print  self.__prot_chains_sequences[chain_number]
+				#~ print chain_string
 				
 				#add constraints
 				if e1!=None:
@@ -136,7 +188,7 @@ class Protein (PDBModel, BlockEntity):
 		if (b ==""):
 			b= self.takeChains( [0] ).sequence()
 		
-		print a, b
+		#~ print a, b
 		
 		for i in a:
 			al+= [float(ord(i)) or 0]
@@ -169,7 +221,8 @@ class Protein (PDBModel, BlockEntity):
 	def __str__(self):
 		return BlockEntity.__str__(self)+PDBModel.__str__(self)
 	
-
+	def run(self):
+		return self
 #~ p = Protein("testProtein",'2Q57.pdb')
 #~ p.onInsertion()
 

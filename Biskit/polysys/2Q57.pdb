@@ -8,14 +8,16 @@ COMPND   4 ENGINEERED: YES;
 COMPND   5 MUTATION: YES                                                        
 SOURCE    MOL_ID: 1;                                                            
 SOURCE   2 ORGANISM_SCIENTIFIC: AEQUOREA VICTORIA;                              
-SOURCE   3 ORGANISM_COMMON: JELLYFISH;                                          
+SOURCE   3 ORGANISM_TAXID: 6100;                                                
 SOURCE   4 EXPRESSION_SYSTEM: ESCHERICHIA COLI;                                 
-SOURCE   5 EXPRESSION_SYSTEM_STRAIN: M15;                                       
-SOURCE   6 EXPRESSION_SYSTEM_VECTOR_TYPE: PLASMID;                              
-SOURCE   7 EXPRESSION_SYSTEM_PLASMID: PQE-9                                     
+SOURCE   5 EXPRESSION_SYSTEM_TAXID: 562;                                        
+SOURCE   6 EXPRESSION_SYSTEM_STRAIN: M15;                                       
+SOURCE   7 EXPRESSION_SYSTEM_VECTOR_TYPE: PLASMID;                              
+SOURCE   8 EXPRESSION_SYSTEM_PLASMID: PQE-9                                     
 KEYWDS    BETA BARREL, FLUORESCENT PROTEIN                                      
 EXPDTA    X-RAY DIFFRACTION                                                     
 AUTHOR    G.D.MALO                                                              
+REVDAT   2   24-FEB-09 2Q57    1       VERSN                                    
 REVDAT   1   27-NOV-07 2Q57    0                                                
 JRNL        AUTH   G.D.MALO,L.J.POUWELS,M.WANG,A.WEICHSEL,                      
 JRNL        AUTH 2 W.R.MONTFORT,M.A.RIZZO,D.W.PISTON,R.M.WACHTER                
@@ -23,10 +25,12 @@ JRNL        TITL   X-RAY STRUCTURE OF CERULEAN GFP: A
 JRNL        TITL 2 TRYPTOPHAN-BASED CHROMOPHORE USEFUL FOR                      
 JRNL        TITL 3 FLUORESCENCE LIFETIME IMAGING.                               
 JRNL        REF    BIOCHEMISTRY                  V.  46  9865 2007              
-JRNL        REFN   ASTM BICHAW  US ISSN 0006-2960                               
+JRNL        REFN                   ISSN 0006-2960                               
+JRNL        PMID   17685554                                                     
+JRNL        DOI    10.1021/BI602664C                                            
 REMARK   1                                                                      
 REMARK   2                                                                      
-REMARK   2 RESOLUTION. 2.00 ANGSTROMS.                                          
+REMARK   2 RESOLUTION.    2.00 ANGSTROMS.                                       
 REMARK   3                                                                      
 REMARK   3 REFINEMENT.                                                          
 REMARK   3   PROGRAM     : REFMAC 5.2.0019                                      
@@ -52,8 +56,8 @@ REMARK   3   FREE R VALUE TEST SET COUNT      : 791
 REMARK   3                                                                      
 REMARK   3  FIT IN THE HIGHEST RESOLUTION BIN.                                  
 REMARK   3   TOTAL NUMBER OF BINS USED           : 20                           
-REMARK   3   BIN RESOLUTION RANGE HIGH           : 2.00                         
-REMARK   3   BIN RESOLUTION RANGE LOW            : 2.05                         
+REMARK   3   BIN RESOLUTION RANGE HIGH       (A) : 2.00                         
+REMARK   3   BIN RESOLUTION RANGE LOW        (A) : 2.05                         
 REMARK   3   REFLECTION IN BIN     (WORKING SET) : 1071                         
 REMARK   3   BIN COMPLETENESS (WORKING+TEST) (%) : 98.45                        
 REMARK   3   BIN R VALUE           (WORKING SET) : 0.1720                       
@@ -61,7 +65,10 @@ REMARK   3   BIN FREE R VALUE SET COUNT          : 70
 REMARK   3   BIN FREE R VALUE                    : 0.2470                       
 REMARK   3                                                                      
 REMARK   3  NUMBER OF NON-HYDROGEN ATOMS USED IN REFINEMENT.                    
-REMARK   3   ALL ATOMS                : 1939                                    
+REMARK   3   PROTEIN ATOMS            : 1790                                    
+REMARK   3   NUCLEIC ACID ATOMS       : 0                                       
+REMARK   3   HETEROGEN ATOMS          : 0                                       
+REMARK   3   SOLVENT ATOMS            : 149                                     
 REMARK   3                                                                      
 REMARK   3  B VALUES.                                                           
 REMARK   3   FROM WILSON PLOT           (A**2) : 14.95                          
@@ -124,10 +131,10 @@ REMARK   3   SPHERICITY; FREE ATOMS         (A**2):  NULL ;  NULL ;  NULL
 REMARK   3   SPHERICITY; BONDED ATOMS       (A**2):  NULL ;  NULL ;  NULL       
 REMARK   3                                                                      
 REMARK   3  NCS RESTRAINTS STATISTICS                                           
-REMARK   3   NUMBER OF DIFFERENT NCS GROUPS : 0                                 
+REMARK   3   NUMBER OF DIFFERENT NCS GROUPS : NULL                              
 REMARK   3                                                                      
 REMARK   3  TLS DETAILS                                                         
-REMARK   3   NUMBER OF TLS GROUPS  : 0                                          
+REMARK   3   NUMBER OF TLS GROUPS  : NULL                                       
 REMARK   3                                                                      
 REMARK   3  BULK SOLVENT MODELLING.                                             
 REMARK   3   METHOD USED : MASK                                                 
@@ -139,16 +146,16 @@ REMARK   3
 REMARK   3  OTHER REFINEMENT REMARKS: HYDROGENS HAVE BEEN ADDED IN THE          
 REMARK   3  RIDING POSITIONS                                                    
 REMARK   4                                                                      
-REMARK   4 2Q57 COMPLIES WITH FORMAT V. 3.1, 1-AUG-2007                         
+REMARK   4 2Q57 COMPLIES WITH FORMAT V. 3.15, 01-DEC-08                         
 REMARK 100                                                                      
-REMARK 100 THIS ENTRY HAS BEEN PROCESSED BY RCSB.                               
+REMARK 100 THIS ENTRY HAS BEEN PROCESSED BY RCSB ON 20-JUN-07.                  
 REMARK 100 THE RCSB ID CODE IS RCSB043163.                                      
 REMARK 200                                                                      
 REMARK 200 EXPERIMENTAL DETAILS                                                 
 REMARK 200  EXPERIMENT TYPE                : X-RAY DIFFRACTION                  
-REMARK 200  DATE OF DATA COLLECTION        : 08-APR-2006                        
-REMARK 200  TEMPERATURE           (KELVIN) : 100.0                              
-REMARK 200  PH                             : 5.00                               
+REMARK 200  DATE OF DATA COLLECTION        : 08-APR-06                          
+REMARK 200  TEMPERATURE           (KELVIN) : 100                                
+REMARK 200  PH                             : 5.0                                
 REMARK 200  NUMBER OF CRYSTALS USED        : 1                                  
 REMARK 200                                                                      
 REMARK 200  SYNCHROTRON              (Y/N) : Y                                  
@@ -207,9 +214,9 @@ REMARK 290
 REMARK 290      SYMOP   SYMMETRY                                                
 REMARK 290     NNNMMM   OPERATOR                                                
 REMARK 290       1555   X,Y,Z                                                   
-REMARK 290       2555   1/2-X,-Y,1/2+Z                                          
-REMARK 290       3555   -X,1/2+Y,1/2-Z                                          
-REMARK 290       4555   1/2+X,1/2-Y,-Z                                          
+REMARK 290       2555   -X+1/2,-Y,Z+1/2                                         
+REMARK 290       3555   -X,Y+1/2,-Z+1/2                                         
+REMARK 290       4555   X+1/2,-Y+1/2,-Z                                         
 REMARK 290                                                                      
 REMARK 290     WHERE NNN -> OPERATOR NUMBER                                     
 REMARK 290           MMM -> TRANSLATION VECTOR                                  
@@ -234,13 +241,12 @@ REMARK 290
 REMARK 290 REMARK: NULL                                                         
 REMARK 300                                                                      
 REMARK 300 BIOMOLECULE: 1                                                       
-REMARK 300 SEE REMARK 350 FOR THE AUTHOR PROVIDED AND PROGRAM                   
+REMARK 300 SEE REMARK 350 FOR THE AUTHOR PROVIDED AND/OR PROGRAM                
 REMARK 300 GENERATED ASSEMBLY INFORMATION FOR THE STRUCTURE IN                  
 REMARK 300 THIS ENTRY. THE REMARK MAY ALSO PROVIDE INFORMATION ON               
 REMARK 300 BURIED SURFACE AREA.                                                 
-REMARK 300                                                                      
-REMARK 300 REMARK: THE BIOLOGICAL ASSEMBLY IS A MONOMER AND THERE IS            
-REMARK 300 ONE MONOMER PER ASSYMETRIC UNIT.                                     
+REMARK 300 REMARK: THE BIOLOGICAL ASSEMBLY IS A MONOMER AND THERE IS ONE        
+REMARK 300 MONOMER PER ASSYMETRIC UNIT.                                         
 REMARK 350                                                                      
 REMARK 350 COORDINATES FOR A COMPLETE MULTIMER REPRESENTING THE KNOWN           
 REMARK 350 BIOLOGICALLY SIGNIFICANT OLIGOMERIZATION STATE OF THE                
@@ -249,7 +255,7 @@ REMARK 350 GIVEN BELOW.  BOTH NON-CRYSTALLOGRAPHIC AND
 REMARK 350 CRYSTALLOGRAPHIC OPERATIONS ARE GIVEN.                               
 REMARK 350                                                                      
 REMARK 350 BIOMOLECULE: 1                                                       
-REMARK 350 AUTHOR DETERMINED BIOLOGICAL UNIT: MONOMER                           
+REMARK 350 AUTHOR DETERMINED BIOLOGICAL UNIT: MONOMERIC                         
 REMARK 350 APPLY THE FOLLOWING TO CHAINS: A                                     
 REMARK 350   BIOMT1   1  1.000000  0.000000  0.000000        0.00000            
 REMARK 350   BIOMT2   1  0.000000  1.000000  0.000000        0.00000            
@@ -258,9 +264,9 @@ REMARK 465
 REMARK 465 MISSING RESIDUES                                                     
 REMARK 465 THE FOLLOWING RESIDUES WERE NOT LOCATED IN THE                       
 REMARK 465 EXPERIMENT. (M=MODEL NUMBER; RES=RESIDUE NAME; C=CHAIN               
-REMARK 465 IDENTIFIER; SSEQ=SEQUENCE NUMBER; I=INSERTION CODE.)                 
+REMARK 465 IDENTIFIER; SSSEQ=SEQUENCE NUMBER; I=INSERTION CODE.)                
 REMARK 465                                                                      
-REMARK 465   M RES C  SSEQI                                                     
+REMARK 465   M RES C SSSEQI                                                     
 REMARK 465     MET A   -17                                                      
 REMARK 465     ARG A   -16                                                      
 REMARK 465     GLY A   -15                                                      
@@ -294,18 +300,18 @@ REMARK 470 THE FOLLOWING RESIDUES HAVE MISSING ATOMS(M=MODEL NUMBER;
 REMARK 470 RES=RESIDUE NAME; C=CHAIN IDENTIFIER; SSEQ=SEQUENCE NUMBER;          
 REMARK 470 I=INSERTION CODE):                                                   
 REMARK 470   M RES CSSEQI  ATOMS                                                
-REMARK 470     GLU A 132    CG    CD    OE1   OE2                               
-REMARK 470     ASP A 133    CG    OD1   OD2                                     
-REMARK 470     LYS A 156    CG    CD    CE    NZ                                
-REMARK 470     GLN A 157    CG    CD    OE1   NE2                               
-REMARK 470     LYS A 158    CG    CD    CE    NZ                                
+REMARK 470     GLU A 132    CG   CD   OE1  OE2                                  
+REMARK 470     ASP A 133    CG   OD1  OD2                                       
+REMARK 470     LYS A 156    CG   CD   CE   NZ                                   
+REMARK 470     GLN A 157    CG   CD   OE1  NE2                                  
+REMARK 470     LYS A 158    CG   CD   CE   NZ                                   
 REMARK 500                                                                      
 REMARK 500 GEOMETRY AND STEREOCHEMISTRY                                         
 REMARK 500 SUBTOPIC: CLOSE CONTACTS IN SAME ASYMMETRIC UNIT                     
 REMARK 500                                                                      
 REMARK 500 THE FOLLOWING ATOMS ARE IN CLOSE CONTACT.                            
 REMARK 500                                                                      
-REMARK 500  ATM1  RES C  SSEQI   ATM2  RES C  SSEQI                             
+REMARK 500  ATM1  RES C  SSEQI   ATM2  RES C  SSEQI           DISTANCE          
 REMARK 500   O    ASN A   144     O    HOH A   353              1.90            
 REMARK 500                                                                      
 REMARK 500 REMARK: NULL                                                         
@@ -412,6 +418,8 @@ SHEET    9   A12 TYR A  92  PHE A 100 -1  N  GLU A  95   O  GLN A 184
 SHEET   10   A12 ASN A 105  GLU A 115 -1  O  TYR A 106   N  ILE A  98           
 SHEET   11   A12 THR A 118  ILE A 128 -1  O  VAL A 120   N  LYS A 113           
 SHEET   12   A12 VAL A  11  VAL A  22  1  N  ASP A  21   O  GLY A 127           
+LINK         C   LEU A  64                 N26 NYC A  66     1555   1555  1.35  
+LINK         C   NYC A  66                 N   VAL A  68     1555   1555  1.34  
 CISPEP   1 MET A   88    PRO A   89          0         1.38                     
 CRYST1   51.232   63.339   69.821  90.00  90.00  90.00 P 21 21 21    4          
 ORIGX1      1.000000  0.000000  0.000000        0.00000                         
@@ -2359,11 +2367,12 @@ HETATM 1936  O   HOH A 375     -13.979   3.722   1.350  1.00 25.66           O
 HETATM 1937  O   HOH A 376      -5.838   5.071   5.896  1.00 32.39           O  
 HETATM 1938  O   HOH A 377     -11.047  -3.141  -1.942  1.00 30.45           O  
 HETATM 1939  O   HOH A 378      -9.490  -6.695  -5.564  1.00 26.94           O  
+CONECT  472  482                                                                
 CONECT  478  479                                                                
 CONECT  479  478  480  481                                                      
 CONECT  480  479                                                                
 CONECT  481  479  482  483                                                      
-CONECT  482  481                                                                
+CONECT  482  472  481                                                           
 CONECT  483  481  484  498                                                      
 CONECT  484  483  485                                                           
 CONECT  485  484  486  496                                                      
@@ -2381,7 +2390,8 @@ CONECT  496  485  497  498
 CONECT  497  496                                                                
 CONECT  498  483  496  499                                                      
 CONECT  499  498  500                                                           
-CONECT  500  499  501                                                           
+CONECT  500  499  501  502                                                      
 CONECT  501  500                                                                
-MASTER      311    0    1    5   12    0    0    6 1938    1   24   20          
+CONECT  502  500                                                                
+MASTER      313    0    1    5   12    0    0    6 1938    1   26   20          
 END                                                                             
