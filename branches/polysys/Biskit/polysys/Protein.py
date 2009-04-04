@@ -10,9 +10,6 @@ from ResiduePicker import *
 import random
 
 
-
-
-
 class UndefProtein (BlockEntity):
 	def __init__(self,name,sequence = ""):
 		BlockEntity.__init__(self,name)
@@ -23,6 +20,7 @@ class UndefProtein (BlockEntity):
 		
 	def run (self):
 		BlockEntity.run(self)
+		
 		#get residue database status
 		try:
 			f = open ('./residues_db/residues',"r")
@@ -33,8 +31,8 @@ class UndefProtein (BlockEntity):
 			total_res = {}
 
 		f.close()
-		#create atomic data from sequence and return a PDBModel
 		
+		#create atomic data from sequence and return a PDBModel
 		if self.sequence != "" and  total_res != {} :
 			flip = True
 			c = self.sequence[0]
@@ -46,7 +44,6 @@ class UndefProtein (BlockEntity):
 				p_b = PDBModel("./residues_db/"+c+"/"+c+str(n)+".pdb")
 				p_a = stickAAs(p_a,p_b,flip)
 				flip = not flip
-				
 		return p_a
 
 class Protein (PDBModel, BlockEntity):
@@ -211,19 +208,13 @@ class FRETProtein (Protein):
 	def __init__ (self,name):
 		
 		self._loadFromDB(name)
-		self.name = name
+		Protein.__init__(self,name,self._source+'.pdb')
 		
-		Protein.__init__(self,self.source)
-		
-		
-		#~ if self.chromophore == None:
-			#~ self.chromophore = chromophore
-		#~ else:
-			#~ self.chromophore = Chromophore("UndefChromophore")
+		self.chromophore = Chromophore(name+'_Cromophore',_source)
 	
 	def __str__(self):
-		#~ str = Protein.__str__(self)
-		str= "\n["+self.name+","+self.lifetime+","+self.abswl+","+self.emwl+","+self.quantumYield+","+self.source+"]"
+		str = Protein.__str__(self)
+		str+= "\n["+self.name+", lifetime: "+self.lifetime+", abso. wavelenth: "+self.abswl+", emis. wavelenth: "+self.emwl+", quantum yield: "+self.quantumYield+", PDB source file: "+self._source+"]"
 		return str
 		
 	def onInsertion(self,myassembly=None):
@@ -237,24 +228,28 @@ class FRETProtein (Protein):
 		
 		if len(lineas)<=1:
 			print "[WARNING FRETProtein _loadFromDB (__init__)] "+name+" is not an available name in database (empty or bad format database?)." 
+			return False
 		else:
 			for i in range(len(lineas)):
 				if name in lineas[i]:
 					line = i 
 		if line == -1 :
 			print "[WARNING FRETProtein _loadFromDB (__init__)] "+name+" is not an available name in database (name not found)." 
-			return
+			return False
 		
 		parameters = lineas[line].split('\t',7)
 		
-		print parameters
 		self.lifetime = parameters[1]
 		self.abswl = parameters[2]
 		self.emwl = parameters[3]
-		self.quantumYield = parameters[4]
-		self.source = parameters[5]+".pdb"
-		self.notes = parameters[6]
+		self.epsilon = parameters[4]
+		self.quantumYield = parameters[5]
+		self._source = parameters[6]
+				
+		if len(parameters)>6:
+			self.notes = parameters[7]
 		
+		return True
 		
 #~ p = Protein("testProtein",'2Q57.pdb')
 #~ p.onInsertion()
