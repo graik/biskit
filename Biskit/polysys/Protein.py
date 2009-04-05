@@ -8,7 +8,7 @@ from string import *
 from Bio import pairwise2
 from ResiduePicker import *
 import random
-
+from Chromophore import Chromophore
 
 class UndefProtein (BlockEntity):
 	def __init__(self,name,sequence = ""):
@@ -205,21 +205,33 @@ class Protein (PDBModel, BlockEntity):
 		return self
 		
 class FRETProtein (Protein):
-	def __init__ (self,name):
+	def __init__ (self,name="FRETProtein"):
 		
-		self._loadFromDB(name)
-		Protein.__init__(self,name,self._source+'.pdb')
+		self.name = name
 		
-		self.chromophore = Chromophore(name+'_Cromophore',_source)
+		if self.name != "FRETProtein":
+			
+			self._loadFromDB(name)
+			
+			self.chromophore = Chromophore(self.name+'_Cromophore',self._source,self)
+			
+			Protein.__init__(self,name,self._source+'.pdb')
+			
+			
+			if not self.chromophore.defined:
+				print "[WARNING FRETProtein __init__] Chromophore not defined. Defaulting." 
+				self.chromophore = None
 	
 	def __str__(self):
-		str = Protein.__str__(self)
-		str+= "\n["+self.name+", lifetime: "+self.lifetime+", abso. wavelenth: "+self.abswl+", emis. wavelenth: "+self.emwl+", quantum yield: "+self.quantumYield+", PDB source file: "+self._source+"]"
-		return str
+		desc = Protein.__str__(self)
+		desc += "\n["+str(self.name)+", lifetime: "+str(self.lifetime)+", abso. wavelenth: "+str(self.abswl)+", emis. wavelenth: "+str(self.emwl)+", quantum yield: "+str(self.quantumYield)+", PDB source file: "+self._source+"]"
+		return desc
 		
 	def onInsertion(self,myassembly=None):
 		pass
 		
+	
+	
 	def _loadFromDB(self,name):
 		f = open ('./fret_prots_db/single_parameters.db',"r")
 		lineas = f.readlines()
@@ -239,11 +251,11 @@ class FRETProtein (Protein):
 		
 		parameters = lineas[line].split('\t',7)
 		
-		self.lifetime = parameters[1]
-		self.abswl = parameters[2]
-		self.emwl = parameters[3]
-		self.epsilon = parameters[4]
-		self.quantumYield = parameters[5]
+		self.lifetime = float(parameters[1])
+		self.abswl = float(parameters[2])
+		self.emwl = float(parameters[3])
+		self.epsilon = float(parameters[4])
+		self.quantumYield = float(parameters[5])
 		self._source = parameters[6]
 				
 		if len(parameters)>6:
@@ -263,6 +275,8 @@ class FRETProtein (Protein):
 #~ print p.sequenceCorrelation("GVVPILKELDG","")
 #~ print p.sequenceAlignment("GVVPILKELDG","")
 
-f = FRETProtein('mCitrine')
+f = FRETProtein('mCitrine',)
 print f
 
+print f.chromophore
+print f.chromophore.getTransMoment()
