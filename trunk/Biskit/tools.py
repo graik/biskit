@@ -1154,7 +1154,7 @@ class PseudoClass(object):
     
 import new
 
-def tryImport( module, cls, as=None, namespace=None ):
+def tryImport( module, cls, old_as=None, namespace=None ):
     """
     Try to import a class from a module. If that fails, 'import' a
     default class of the same name that raises an exception when used.
@@ -1169,20 +1169,20 @@ def tryImport( module, cls, as=None, namespace=None ):
     @return: True if import succeeded, False otherwise
     @rtype: bool
     """
-    as = as or cls
+    old_as = old_as or cls
     g = namespace or globals()
     try:
-        exec 'from %s import %s as %s' % (module, cls, as) in g
+        exec 'from %s import %s as %s' % (module, cls, old_as) in g
         return True
     
     except ImportError, e:
 
         Cls = new.classobj( cls,(PseudoClass,),{'error':e} )
-        g.update( {as: Cls} )
+        g.update( {old_as: Cls} )
 
     return False
 
-def tryImportModule( module, as=None, namespace=None ):
+def tryImportModule( module, old_as=None, namespace=None ):
     """
     Try to import a class from a module. If that fails, 'import' a
     default class of the same name that raises an exception when used.
@@ -1195,18 +1195,18 @@ def tryImportModule( module, as=None, namespace=None ):
     @return: True if import succeeded, False otherwise
     @rtype: bool
     """
-    as = as or module
+    old_as = old_as or module
     g = namespace or globals()
     try:
-        exec 'import %s as %s' % (module, as) in g
+        exec 'import %s as %s' % (module, old_as) in g
         return True
     
     except ImportError, e:
 
-        m = new.module( as, doc='Pseudo module. Import of real one failed.' )
+        m = new.module( old_as, doc='Pseudo module. Import of real one failed.' )
         m.error = str(e)
         
-        g.update( {as: m} )
+        g.update( {old_as: m} )
 
     return False
 
