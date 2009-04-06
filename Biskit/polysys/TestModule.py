@@ -88,7 +88,7 @@ d1 = Interval(2,5)
 
 pol3 = Assembly("BasicEngineTest")
 
-p = Protein("testProtein",'2Q57_clean.pdb')
+p = Protein("testProtein",'2Q57.pdb')
 
 undef1 = UndefProtein("first","ASFEASSDS")
 undef2 = UndefProtein("second","FESDFSFG")
@@ -106,4 +106,11 @@ pol3.addEngine(BasicEngine())
 print pol3
 
 pol3.run()
+
+#~ pol4 = Assembly("FRETProtein Test")
+
+#~ f = FRETProtein('mCerulean')
+#~ pol4.addBlock(Block("myFRETProtein",f))
+
+#~ print pol4
 

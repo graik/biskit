@@ -8,7 +8,8 @@ from string import *
 from Bio import pairwise2
 from ResiduePicker import *
 import random
-from Chromophore import Chromophore
+from Chromophore import Chromophore,DBpre
+
 
 class UndefProtein (BlockEntity):
 	def __init__(self,name,sequence = ""):
@@ -220,7 +221,7 @@ class FRETProtein (Protein):
 			
 			if not self.chromophore.defined:
 				print "[WARNING FRETProtein __init__] Chromophore not defined. Defaulting." 
-				self.chromophore = None
+				
 	
 	def __str__(self):
 		desc = Protein.__str__(self)
@@ -228,7 +229,10 @@ class FRETProtein (Protein):
 		return desc
 		
 	def onInsertion(self,myassembly=None):
-		pass
+		if self.chromophore.defined:
+			chromo = Block(self.chromophore.name,self.chromophore,self)
+			chromo.addInterval(self.chromophore.atomrange[0],self.chromophore.atomrange[1])
+			myassembly.addBlock(chromo)
 		
 	
 	
@@ -251,13 +255,17 @@ class FRETProtein (Protein):
 		
 		parameters = lineas[line].split('\t',7)
 		
-		self.lifetime = float(parameters[1])
-		self.abswl = float(parameters[2])
-		self.emwl = float(parameters[3])
-		self.epsilon = float(parameters[4])
-		self.quantumYield = float(parameters[5])
+		self.lifetime = DBpre(parameters[1],'float')
+		self.abswl = DBpre(parameters[2],'float',-1)
+		self.emwl = DBpre(parameters[3],'float',-1)
+		self.epsilon = DBpre(parameters[4],'float')
+		self.quantumYield = DBpre(parameters[5],'float')
+		
 		self._source = parameters[6]
-				
+		if self._source =='X' or self.abswl == -1 or self.emwl == -1:
+			print "[ERROR FRETProtein _loadFromDB (__init__)] some mandatory parameters are not defined (X) in DB." 
+			return False
+		
 		if len(parameters)>6:
 			self.notes = parameters[7]
 		
@@ -275,8 +283,8 @@ class FRETProtein (Protein):
 #~ print p.sequenceCorrelation("GVVPILKELDG","")
 #~ print p.sequenceAlignment("GVVPILKELDG","")
 
-f = FRETProtein('mCitrine',)
-print f
+#~ f = FRETProtein('mCitrine')
+#~ print f
 
-print f.chromophore
-print f.chromophore.getTransMoment()
+#~ print f.chromophore
+#~ print f.chromophore.getTransMoment()
