@@ -4,6 +4,23 @@ import numpy as N
 from Biskit.PDBModel import *
 from  FRETProtein import *
 
+
+def DBpre (str,type='int',default=0):
+	if   'X' in str:
+		return default
+
+	if type == 'int':
+		return int(str)
+	elif type== 'float':
+		return float(str)
+	elif type == 'int_range':
+		aux = str.split(',')
+		return [int(aux[0]),int(aux[1])]
+	else:
+		print "[ERROR DBpre] Type not known ( "+type+" )."
+		return default
+
+
 # This class may not be accessible to the end user
 class Chromophore(BlockEntity):
 	
@@ -16,7 +33,7 @@ class Chromophore(BlockEntity):
 		self.vector = array([0,0,0])
 		self.points = []
 		self.modifiers = []
-		
+		self.atomrange = [0,0]
 		
 		if not self._loadFromDB(source):
 			print "[WARNING Chromophore __init__] Couldn't create the chromophore." 
@@ -35,7 +52,7 @@ class Chromophore(BlockEntity):
 		else:
 			#get the atom info from model
 			p = self.father
-			self.atoms_pos = p.indicesFrom('serial_number', a)
+			self.atoms_pos = p.indicesFrom('serial_number', self.atomrange)
 			mask = N.zeros( len(p) )
 			N.put( mask, self.atoms_pos, 1 )
 			self.atoms = p.compress (mask)
@@ -45,6 +62,11 @@ class Chromophore(BlockEntity):
 	
 		
 	def getTransMoment(self):
+		
+		if not self.defined:
+			print "[ERROR FRETProtein getTransMoment] Transition moment is not defined."
+			return [0,0,0]
+		
 		k = 0
 		print self.points
 		print self.modifiers
@@ -60,7 +82,7 @@ class Chromophore(BlockEntity):
 		return BlockEntity.__str__(self)
 
 	def _loadFromDB(self,source):
-		f = open ('./fret_prots_db/Chromophores.db',"r")
+		f = open ('./fret_prots_db/chromophores.db',"r")
 		lineas = f.readlines()
 		f.close()
 		line = -1
@@ -81,10 +103,17 @@ class Chromophore(BlockEntity):
 		if len(parameters)<2:
 			return False
 			
-			
-		vectors = parameters[3:]
 		
-		self.apppoint = parameters[2]
+		vectors = parameters[4:]
+		
+		self.apppoint = DBpre(parameters[3],'int')
+		
+		
+		self.atomrange = DBpre( parameters[2],'int_range',[0,0])
+		if 'X' in parameters[2]:
+			print "[ERROR Chromophore _loadFromDB (__init__)] some mandatory parameters are not defined (X) in DB, Chromophore will not be defined." 
+			return False
+		
 		if len(vectors) %2 != 0:
 			print "[ERROR Chromophore _loadFromDB (__init__)] Error in vector description in "+source+" record" 
 			return False
@@ -95,10 +124,9 @@ class Chromophore(BlockEntity):
 		for i in range(len(vectors)):
 			j = i/2
 			if i%2 == 0:
-				self.modifiers[j] = float(vectors[i])
+				self.modifiers[j] = DBpre(vectors[i],'float')
 			else:
-				aux =  vectors[i].split(',')
-				self.points[j] = [int(aux[0]),int(aux[1])]
+				self.points[j] = DBpre (vectors[i],'int_range',[0,0])
 		
 		print self.points
 		print self.modifiers
