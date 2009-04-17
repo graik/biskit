@@ -293,13 +293,13 @@ class Intervor( Executor ):
         result = []
         
         try:
-            l = f = None
+            r = f = None
             f = open( fname )
 
             lines = f.readlines()
             lines = ''.join( lines )
-            
-            records = lines.split( 'FBeg' )
+
+            records = lines.split( 'FBIeg' )
             records = [ r for r in records if len( r ) > 10 ]
 
             result = B.DictList( [ self.__parseFacetRecord(r) for r in records ] )
@@ -309,7 +309,7 @@ class Intervor( Executor ):
                       % (fname, why))
         except Exception, why:
             raise IntervorError, 'Error parsing intervor output file %r: %r'\
-                  % (fname, why) + '\nThe offending line is: ' + repr(l)
+                  % (fname, why) + '\nThe offending line is: ' + repr(r) + '\n'
 
         return result
     
@@ -501,7 +501,7 @@ class TestDry(BT.BiskitTest):
 
 if __name__ == '__main__':
 
-    BT.localTest(debug=1)
+    BT.localTest(debug=0)
 
 ##     pm = x.visualize( profile='so_min', xwat=[2], wat=[3] )
 ##     pm.run()
