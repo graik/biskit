@@ -39,6 +39,12 @@ class FRETPair (object) :
 		return 0
 
 	def getEnergyTransferRate(self):
+		
 		fretCalculator= FRET ()
 	
+	def _loadFromDB(self,name):
+		f = open ('./fret_prots_db/single_parameters.db',"r")
+		lineas = f.readlines()
+		f.close()
+		line = -1
 	

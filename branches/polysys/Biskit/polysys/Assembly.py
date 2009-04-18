@@ -1,5 +1,6 @@
 from FRETProtein import *
-from ResiduePicker import concatenateAAChains
+import ResiduePicker
+
 
 class Assembly :
 	def __init__(self,name):
@@ -7,6 +8,7 @@ class Assembly :
 		self.constraints = []
 		self.name = name
 		self.engines = []
+		
 		
 	def addBlock(self, f):
 		self.blocks.append(f)
@@ -112,6 +114,7 @@ class Engine(object):
 class BasicEngine( Engine):
 	def __init__ (self):
 		Engine.__init__(self,"Basic Engine")
+		self.picker = ResiduePicker.residuePicker()
 		
 	def run(self,myAssembly):
 		Engine.run(self,myAssembly)
@@ -202,7 +205,7 @@ class BasicEngine( Engine):
 			print "\t - Creating chain "+ chains[i]+ "...",
 			a = crow[0].a.run()
 			for c in crow:
-				a = concatenateAAChains(a,c.b.run())
+				a = self.picker.concatenateAAChains(a,c.b.run())
 			a['chain_id'] = a.lenAtoms() * [chains[i]]
 			a.writePdb(chains[i]+".pdb")
 			i = i+1
