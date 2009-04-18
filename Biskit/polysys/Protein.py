@@ -6,15 +6,17 @@ from Biskit import molUtils as mu
 from numpy import *
 from string import *
 from Bio import pairwise2
-from ResiduePicker import *
+import ResiduePicker 
 import random
 from Chromophore import Chromophore,DBpre
+import cPickle
 
 
 class UndefProtein (BlockEntity):
 	def __init__(self,name,sequence = ""):
 		BlockEntity.__init__(self,name)
 		self.sequence = sequence
+		self.picker = ResiduePicker.residuePicker()
 		
 	def setSequence(self,sequence):
 		self.sequence = sequence
@@ -43,7 +45,7 @@ class UndefProtein (BlockEntity):
 			for c in self.sequence[1:]:
 				n = random.randint(1, total_res[c])
 				p_b = PDBModel("./residues_db/"+c+"/"+c+str(n)+".pdb")
-				p_a = stickAAs(p_a,p_b,flip)
+				p_a = self.picker.stickAAs(p_a,p_b,flip)
 				flip = not flip
 		return p_a
 
@@ -234,8 +236,6 @@ class FRETProtein (Protein):
 			chromo.addInterval(self.chromophore.atomrange[0],self.chromophore.atomrange[1])
 			myassembly.addBlock(chromo)
 		
-	
-	
 	def _loadFromDB(self,name):
 		f = open ('./fret_prots_db/single_parameters.db',"r")
 		lineas = f.readlines()

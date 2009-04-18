@@ -1,3 +1,74 @@
+
+from math import cos, sin, tan, sqrt, atan2,acos
+from numpy import matrix
+
+def norm ( v ):
+	return sqrt(v[0]**2 + v[1]**2 + v[2]**2)
+	
+def vectorangle( v1, v2 ):
+	return acos( (v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])/ (norm(v1)*norm(v2))) 
+
+def rotation (alpha=0.,beta=0.,gamma=0.):
+	#alpha -> z gamma -> x beta ->y
+	cos_alpha = cos(alpha); sin_alpha = sin(alpha)
+	cos_beta  = cos(beta);  sin_beta  = sin(beta)
+	cos_gamma = cos(gamma); sin_gamma = sin(gamma)
+	R = matrix([[0.,0.,0.],[0.,0.,0.],[0.,0.,0.]])
+	
+	R[0,0] = cos_alpha*cos_beta
+	R[0,1] = cos_alpha*sin_beta*sin_gamma - sin_alpha*cos_gamma
+	R[0,2] = cos_alpha*sin_beta*cos_gamma + sin_gamma * sin_alpha
+
+	R[1,0] = sin_alpha * cos_beta
+	R[1,1] =  sin_alpha * sin_beta * sin_gamma  + cos_gamma * cos_alpha
+	R[1,2] =  cos_gamma * sin_beta * sin_alpha - cos_alpha * sin_gamma
+
+	R[2,0] = -sin_beta 
+	R[2,1] = cos_beta * sin_gamma
+	R[2,2] = cos_beta * cos_gamma
+	
+	return R
+	
+def normalized(a):
+	norm = sqrt(a[0]*a[0]+a[1]*a[1]+a[2]*a[2])
+	return [a[0]/norm,a[1]/norm,a[2]/norm]
+
+def vectpermatrix(a,b):
+	res = [0.,0.,0.]
+	
+	res[0] = a[0]*b[0][0]+a[1]*b[1][0]+a[2]*b[2][0]
+	res[1] = a[0]*b[0][1]+a[1]*b[1][1]+a[2]*b[2][1]
+	res[2] = a[0]*b[0][2]+a[1]*b[1][2]+a[2]*b[2][2]
+	
+	return res
+
+def sphericalAngles( coord= [1.,0.,0.]):
+	
+	aX= atan2(abs(coord[2] ),abs(coord[1]))
+	if coord[2] < 0. :
+		aX =  - aX
+	
+	norm = sqrt(coord[1]*coord[1] + coord[0]*coord[0])
+	
+	if norm < 0.00001 :
+		aZ = 0.
+		
+	else:
+		norm2 =  coord[1] /norm
+		if  norm2>1:
+			norm2 = 1
+		if  norm2<-1:
+			norm2 = -1
+		
+		aZ = acos(norm2)
+		if coord[0] <0:
+			aZ = 2*pi - aZ
+			
+	print "angles",aX*180./pi,aZ*180./pi
+	return (aX ,aZ)
+
+
+
 """ 
 cbrt(x) = x^{1/3}, if x >= 0 = -|x|^{1/3}, if x < 0 
 """ 
