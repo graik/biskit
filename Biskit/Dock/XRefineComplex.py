@@ -81,7 +81,7 @@ class XRefineComplex( Xplorer ):
         self.ene_out = tempfile.mktemp("energies.out")
 
         ## location of additional XPlor scripts, required by refine.inp
-        self.path = t.projectRoot() +'/external/xplor/inpRefine/'
+        self.path = t.dataRoot() + '/xplor/inpRefine/'
 
         if len( self.path ) > 80-16:
             self.__localizeParams( params )
@@ -111,7 +111,7 @@ class XRefineComplex( Xplorer ):
 
         try:
             t.tryRemove( self.path, tree=True )
-            shutil.copytree( t.projectRoot() +'/external/xplor/inpRefine',
+            shutil.copytree( t.dataRoot() + '/xplor/inpRefine',
                              self.path )
         except OSError, why:
             raise XRefineError('cannot copy parameter folder to working'+\
@@ -229,7 +229,7 @@ if __name__ == '__main__':
 
     x = XRefineComplex(c, ##"~/data/tmp",
                        inp=\
-                       t.projectRoot() + '/external/xplor/inpRefine/refine.inp',
+                       t.dataRoot() + '/xplor/inpRefine/refine.inp',
 ##                        xout = 'test_xplor.log',
                        debug=1,
                        verbose=1,

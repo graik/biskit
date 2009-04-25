@@ -36,7 +36,7 @@ ssh_bin is not actually defined in settings.py. Instead, the value is
 taken from C{~/.biskit/settings.cfg} -- which should have an entry
 like C{ssh_bin=/bin/ssh # comment}. If this entry (or the config file)
 is not found, settings.py uses the default value from
-C{biskit/external/defaults/settings.cfg}.
+C{biskit/Biskit/data/defaults/settings.cfg}.
 
 If missing, the user configuration file C{~/.biskit/settings.cfg} is
 created automatically during the startup of Biskit (i.e. for any
@@ -52,7 +52,7 @@ Summary for Biskit users
 Summary for Biskit developpers
 ------------------------------
   If you want to create a new user-adjustable parameter, do so in
-  C{biskit/external/defaults/settings.cfg}.
+  C{biskit/Biskit/data/defaults/settings.cfg}.
 
 Summary for all
 ---------------
@@ -64,7 +64,7 @@ import Biskit.SettingsManager as M
 
 import user, sys
 
-__CFG_DEFAULT = T.projectRoot() + '/external/defaults/settings.cfg'
+__CFG_DEFAULT = T.dataRoot() + '/defaults/settings.cfg'
 __CFG_USER    = user.home + '/.biskit/settings.cfg'
 
 ## BISKIT_PATH = T.projectRoot()  ## Hack to make test suite path independent
@@ -83,7 +83,7 @@ except Exception, why:
 python_bin = sys.executable
 projectRoot= T.projectRoot()
 
-pymol_scripts = projectRoot + '/external/pymol/'
+pymol_scripts = T.dataRoot() + '/pymol/'
 
 
 ###################################

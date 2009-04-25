@@ -75,7 +75,7 @@ class Modeller( Executor ):
     """
 
     MODEL_SCRIPT      = 'model_mult.py'
-    MODEL_SCRIPT_PATH = T.projectRoot() + '/external/modeller/' + MODEL_SCRIPT
+    MODEL_SCRIPT_PATH = T.dataRoot() + '/modeller/' + MODEL_SCRIPT
 
     F_RESULT_FOLDER = '/modeller'
 ##     F_MOD_SCRIPT = 'modeller.top'

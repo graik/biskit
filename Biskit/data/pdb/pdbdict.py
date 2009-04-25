@@ -38,7 +38,7 @@ class ResidueTranslator( object ):
     Translate between PDB version 2.3 and 3.0 residue/atom names
     """
 
-    FTABLE = T.projectRoot() + '/external/pdb/master_hash.txt'
+    FTABLE = T.dataRoot() + '/pdb/master_hash.txt'
 
     def __init__(self, ftable=FTABLE ):
         self.ftable = ftable

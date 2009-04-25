@@ -44,8 +44,8 @@ options = {'f':0,
            'r':'.',
            'n':0,
            'h':'localhost',
-           'i':projectRoot() + '/external/xplor/inpPcr',
-           'parm':projectRoot() + '/external/xplor/toppar',
+           'i':dataRoot() + '/xplor/inpPcr',
+           'parm':dataRoot() + '/xplor/toppar',
            'nstep':'500',
           }
 
@@ -92,7 +92,7 @@ class Runner:
 
     def __init__(self, force, resultFolder, psfFolder,
                  host='localhost', nice=0,
-                 inpFolder=projectRoot()+'/external/xplor/inpPcr',
+                 inpFolder=dataRoot() + '/xplor/inpPcr',
                  **options ):
         """
         force - int, force constant for PCR-Runs

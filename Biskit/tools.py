@@ -614,6 +614,13 @@ def projectRoot():
     f = osp.split( f )[0] + '/../'
     return absfile( f )
 
+def dataRoot():
+    """
+    Root of Biskit data directory (formerly 'biskit/Biskit/data').
+    @return: absolute path
+    @rtype: string    
+    """
+    return os.path.join( projectRoot(), 'Biskit', 'data' )
 
 def testRoot():
     """
@@ -879,7 +886,7 @@ def colorSpectrum( nColors, firstColor='FF0000', lastColor='FF00FF' ):
     @rtype: [int]
     """
     spec = []
-    out = os.popen( projectRoot() + '/external/spectrum.pl ' +str(nColors) +
+    out = os.popen( dataRoot() + '/spectrum.pl ' +str(nColors) +
                     ' ' + str(firstColor) + ' ' +  str(lastColor) ).readlines()
 
     for s in out:    
@@ -907,7 +914,7 @@ def hexColors( nColors, firstColor='FF0000', lastColor='FF00FF' ):
     @rtype: [ str ]
     """
     spec = []
-    out = os.popen( projectRoot() + '/external/spectrum.pl ' +str(nColors) +
+    out = os.popen( dataRoot() + '/spectrum.pl ' +str(nColors) +
                     ' ' + str(firstColor) + ' ' +  str(lastColor) ).readlines()
 
     for s in out:    

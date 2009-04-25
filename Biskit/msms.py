@@ -86,10 +86,10 @@ class Pdb2xyzrn( Executor ):
         ## gpdb_to_xyzrn have to be run i the local directory where
         ##   it resides. Otherwise it will not find the data file 
         ##   called "atmtypenumbers".
-        if not os.path.exists( T.projectRoot() +'/external/msms/'):
-            raise Pdb2xyzrnError, 'Cannot find msms directory. This should reside in ~biskit/external/msms'
+        if not os.path.exists( T.dataRoot() + '/msms/'):
+            raise Pdb2xyzrnError, 'Cannot find msms directory. This should reside in ~biskit/Biskit/data/msms'
 	
-        fmsms =  T.projectRoot() +'/external/msms/'
+        fmsms =  T.dataRoot() + '/msms/'
 
 	## use biskit-version of pdb_to_xyzrn by default
 	exe = ExeConfigCache.get('pdb2xyzrn', strict=1)

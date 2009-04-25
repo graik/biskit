@@ -190,7 +190,7 @@ class Test( BT.BiskitTest ):
         self.fpdb = T.testRoot() + '/amber/1HPT_0.pdb'
         self.fparm = tempfile.mktemp('.parm', 'top_')
         self.flog  = tempfile.mktemp('.log', 'leap_')
-        self.template = T.projectRoot()+'/external/amber/leap/solvate_box.leap'
+        self.template = T.dataRoot() + '/amber/leap/solvate_box.leap'
         
     def cleanUp(self):
         T.tryRemove( self.fparm )

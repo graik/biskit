@@ -191,7 +191,7 @@ class SurfaceRacer( Executor ):
             if not os.path.exists( binlnk ):
                 os.symlink( self.exe.bin, binlnk )
 
-            radii_txt = T.projectRoot() + '/external/surface_racer_3/radii.txt'
+            radii_txt = T.dataRoot() + '/surface_racer_3/radii.txt'
 
             target = os.path.join(folder, 'radii.txt')
             if not os.path.exists( target ):

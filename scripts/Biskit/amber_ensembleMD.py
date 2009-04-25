@@ -32,7 +32,7 @@ from Biskit import PDBModel
 host_list = nodes_own
 
 def defaultOptions():
-    return {'template':projectRoot()+'/external/amber/template_pme_ensemble',
+    return {'template':dataRoot() + '/amber/template_pme_ensemble',
             'parm':'',
             'crd':'',
             'out':'.',

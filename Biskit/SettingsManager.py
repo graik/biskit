@@ -49,9 +49,9 @@ class SettingsManager:
 
     The default configurations should be located in:
 
-    * C{biskit/external/defaults/settings.cfg}      --> L{B.settings}
-    * C{biskit/external/defaults/settings_Mod.cfg}  --> L{B.Mod.settings}
-    * C{biskit/external/defaults/settings_Dock.cfg} --> L{B.Dock.settings}
+    * C{biskit/Biskit/data/defaults/settings.cfg}      --> L{B.settings}
+    * C{biskit/Biskit/data/defaults/settings_Mod.cfg}  --> L{B.Mod.settings}
+    * C{biskit/Biskit/data/defaults/settings_Dock.cfg} --> L{B.Dock.settings}
 
     The user configurations are expected in files of the same name in
     C{~/.biskit/}.
@@ -259,7 +259,7 @@ class Test(BT.BiskitTest):
     def test_SettingsManager(self):
         """SettingsManager test"""
 
-        f_in = T.projectRoot()+'/external/defaults/settings.cfg'
+        f_in = T.dataRoot() + '/defaults/settings.cfg'
         self.f_out =  T.tempDir() + '/settings.cfg'
 
         self.m = SettingsManager( f_in, self.f_out,
