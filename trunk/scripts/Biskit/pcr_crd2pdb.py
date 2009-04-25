@@ -80,8 +80,7 @@ class Runner:
 ##        self.xbin  = settings.xplorpcr_bin
 
         ## template for xplor input
-        self.ftemplate = absfile( projectRoot()+
-                                  '/external/xplor/pcr_crd2pdb.inp')
+        self.ftemplate = absfile( dataRoot() + '/xplor/pcr_crd2pdb.inp')
 
         self.afterzip = zip
 

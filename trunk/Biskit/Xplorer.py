@@ -42,7 +42,7 @@ class Xplorer(Executor):
 
     @see: L{Executor} for detailed documentation!
 
-    @note: Command configuration in: biskit/external/defaults/exe_xplor.dat
+    @note: Command configuration in: biskit/Biskit/data/defaults/exe_xplor.dat
     """
 
     def __init__( self, template, pipes=None, **params):
@@ -200,7 +200,7 @@ stop
         """Xplorer test"""
 
         ## input template variables
-        param = T.projectRoot() + '/external/xplor/toppar/param19.pro'
+        param = T.dataRoot() + '/xplor/toppar/param19.pro'
         pdb_out = self.dir_out +'/lig.pdb'
         log_out = self.dir_out +'/test.out'
         pdb_in = T.testRoot() + '/lig/1A19.pdb' 

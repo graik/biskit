@@ -63,7 +63,7 @@ class AmberParmBuilder:
          both xplor and amber-formatted PDBs as input.
 
     Requires the amber programs C{tleap} and C{ambpdb}.
-    Requires leap template files in C{biskit/external/amber/leap/}.
+    Requires leap template files in C{biskit/Biskit/data/amber/leap/}.
 
     @note: The design of AmberParmBuilder is less than elegant. It
            would make more sense to split it into two classes that
@@ -86,11 +86,11 @@ class AmberParmBuilder:
     ss_bond = "bond p.%i.SG p.%i.SG\n"
 
     ## leap script for solvated topology
-    F_leap_in = t.projectRoot() + '/external/amber/leap/solvate_box.leap'
+    F_leap_in = t.dataRoot() + '/amber/leap/solvate_box.leap'
     ## PDB with ACE capping residue
-    F_ace_cap = t.projectRoot() + '/external/amber/leap/ace_cap.pdb'
+    F_ace_cap = t.dataRoot() + '/amber/leap/ace_cap.pdb'
     ## PDB with NME capping residue
-    F_nme_cap = t.projectRoot() + '/external/amber/leap/nme_cap.pdb'
+    F_nme_cap = t.dataRoot() + '/amber/leap/nme_cap.pdb'
 
     def __init__( self, model,
                   leap_template=F_leap_in,
@@ -392,7 +392,7 @@ class AmberParmBuilder:
         m = self.m.clone()
         m.xplor2amber()
 
-        cleaner = PDBCleaner( m, log=self.log )
+        cleaner = PDBCleaner( m, log=self.log, verbose=self.verbose )
         m = cleaner.process( keep_hetatoms=hetatm, amber=1 )
 
         m.renumberResidues( addChainId=1 )

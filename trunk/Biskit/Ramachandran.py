@@ -290,8 +290,8 @@ class Ramachandran:
         @rtype: [ biggles.Point ]
         """
         bg = []
-        mat = biggles.read_matrix( T.projectRoot() +
-                                   '/external/biggles/ramachandran_bg.dat')
+        mat = biggles.read_matrix( T.dataRoot() +
+                                   '/biggles/ramachandran_bg.dat')
         x, y = N.shape(mat)
         for i in range(x):
             for j in range(y):

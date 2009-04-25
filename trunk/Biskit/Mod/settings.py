@@ -37,7 +37,7 @@ ssh_bin is not actually defined in settings.py. Instead, the value is
 taken from C{~/.biskit/settings_Mod.cfg} -- which should have an entry
 like C{ssh_bin=/bin/ssh # comment}. If this entry (or the config file)
 is not found, settings.py uses the default value from
-C{biskit/external/defaults/settings_Mod.cfg}.
+C{biskit/Biskit/data/defaults/settings_Mod.cfg}.
 
 If missing, the user configuration file C{~/.biskit/settings_Mod.cfg} is
 created automatically during the startup of Biskit.Mod (i.e. for any
@@ -54,7 +54,7 @@ Summary for Biskit users
 Summary for Biskit developpers
 ------------------------------
   If you want to create a new user-adjustable parameter, do so in
-  C{biskit/external/defaults/settings_Mod.cfg}.
+  C{biskit/Biskit/data/defaults/settings_Mod.cfg}.
 
 Summary for all
 ---------------
@@ -66,7 +66,7 @@ import Biskit.SettingsManager as M
 
 import user, sys
 
-__CFG_DEFAULT = T.projectRoot() + '/external/defaults/settings_Mod.cfg'
+__CFG_DEFAULT = T.dataRoot() + '/defaults/settings_Mod.cfg'
 __CFG_USER    = user.home + '/.biskit/settings_Mod.cfg'
 
 try:

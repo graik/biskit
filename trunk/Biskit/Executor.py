@@ -68,7 +68,7 @@ class Executor:
                            (call parent cleanup!)
            
           Additionally, you should provide a simple program configuration file
-          in biskit/external/defaults/. See L{Biskit.ExeConfig} for
+          in biskit/Biskit/data/defaults/. See L{Biskit.ExeConfig} for
           details and examples!
 
       2.  Use Executor directly.

@@ -57,7 +57,7 @@ class ExeConfig( object ):
     ExeConfig is initialised with a program name and expects to find
     the configuration for this program in
     C{ ~/.biskit/exe_|name|.dat }. Only if nothing is found there, it looks
-    for C{ external/defaults/exe_|name|.dat } in the biskit installation
+    for C{ Biskit/data/defaults/exe_|name|.dat } in the biskit installation
     folder.  If neither of the two files are found, an error is raised
     (strict=1) or the binary is assumed to be |name| and must be
     accessible in the search path (strict=0).
@@ -115,7 +115,7 @@ class ExeConfig( object ):
 
     ## static fields
     PATH_CONF   = user.home + '/.biskit'
-    PATH_CONF_DEFAULT = os.path.join( T.projectRoot(), 'external/defaults' )
+    PATH_CONF_DEFAULT = os.path.join( T.dataRoot(), 'defaults' )
     SECTION_BIN = 'BINARY'
     SECTION_ENV = 'ENVIRONMENT'
 

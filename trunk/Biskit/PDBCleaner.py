@@ -45,7 +45,7 @@ class PDBCleaner:
     Remove non-standard atoms from standard AA residues (and more).
     """
 
-    def __init__( self, fpdb, log=None ):
+    def __init__( self, fpdb, log=None, verbose=True ):
         """
         @param fpdb: pdb file OR PDBModel
         @type  fpdb: str
@@ -54,6 +54,7 @@ class PDBCleaner:
         """
         self.model = PDBModel( fpdb )
         self.log = log
+        self.verbose = verbose
 
 
     def logWrite( self, msg, force=1 ):
@@ -67,8 +68,9 @@ class PDBCleaner:
         """
         Keep only atoms with alternate A field (well, or no alternate).
         """
-        self.logWrite( self.model.pdbCode +
-                       ': Removing multiple occupancies of atoms ...')
+        if self.verbose:
+            self.logWrite( self.model.pdbCode +
+                           ': Removing multiple occupancies of atoms ...')
 
         i = 0
         to_be_removed = []
@@ -87,13 +89,15 @@ class PDBCleaner:
                     else:
                         if float( a['occupancy'] ) < 1.0:
                             to_be_removed += [ i ]
-                            self.logWrite(
-                                'removing %s (%s %s)' % (str_id,a['alternate'],
+                            if self.verbose:
+                                self.logWrite(
+                                    'removing %s (%s %s)' % (str_id,a['alternate'],
                                                          a['occupancy']))
                         else:
-                            self.logWrite(
-                                ('keeping non-A duplicate %s because of 1.0 '+
-                                'occupancy') % str_id )
+                            if self.verbose:
+                                self.logWrite(
+                                    ('keeping non-A duplicate %s because of 1.0 '+
+                                     'occupancy') % str_id )
 
                 except:
                     self.logWrite("Error removing duplicate: "+t.lastError() )
@@ -101,10 +105,12 @@ class PDBCleaner:
 
         try:
             self.model.remove( to_be_removed )
-            self.logWrite('Removed %i atoms' % len( to_be_removed ) )
+            if self.verbose:
+                self.logWrite('Removed %i atoms' % len( to_be_removed ) )
 
         except:
-            self.logWrite('No atoms with multiple occupancies to remove' )
+            if self.verbose:
+                self.logWrite('No atoms with multiple occupancies to remove' )
 
 
     def replace_non_standard_AA( self, amber=0, keep=[] ):
@@ -124,8 +130,9 @@ class PDBCleaner:
 
         replaced = 0
 
-        self.logWrite(self.model.pdbCode +
-                      ': Looking for non-standard residue names...')
+        if self.verbose:
+            self.logWrite(self.model.pdbCode +
+                          ': Looking for non-standard residue names...')
 
         resnames = self.model['residue_name']
         for i in self.model.atomRange():
@@ -136,19 +143,22 @@ class PDBCleaner:
                 if resname in MU.nonStandardAA:
                     resnames[i] = MU.nonStandardAA[ resname ]
 
-                    self.logWrite('renamed %s %i to %s' % \
-                                  (resname, i, MU.nonStandardAA[ resname ]))
+                    if self.verbose:
+                        self.logWrite('renamed %s %i to %s' % \
+                                      (resname, i, MU.nonStandardAA[ resname ]))
                 else:
                     resnames[i] = 'ALA'
 
                     self.logWrite('Warning: unknown residue name %s %i: ' \
                                   % (resname, i ) )
-                    self.logWrite('\t->renamed to ALA.')
+                    if self.verbose:
+                        self.logWrite('\t->renamed to ALA.')
 
                 replaced += 1
 
-        self.logWrite('Found %i atoms with non-standard residue names.'% \
-                      replaced )
+        if self.verbose:
+            self.logWrite('Found %i atoms with non-standard residue names.'% \
+                          replaced )
 
 
     def __standard_res( self, resname ):
@@ -183,8 +193,9 @@ class PDBCleaner:
         @rtype: int
         """
         mask = []
-
-        self.logWrite("Checking content of standard amino-acids...")
+        
+        if self.verbose:
+            self.logWrite("Checking content of standard amino-acids...")
 
         for res in self.model.resList():
 
@@ -196,9 +207,10 @@ class PDBCleaner:
                 n = a['name']
                 if not n in standard and MU.atomSynonyms.get(n,0) in standard:
                     a['name'] = MU.atomSynonyms[n]
-                    self.logWrite('%s: renaming %s to %s in %s %i' %\
-                                  ( self.model.pdbCode, n, a['name'],
-                                    a['residue_name'], a['residue_number'] ) )
+                    if self.verbose:
+                        self.logWrite('%s: renaming %s to %s in %s %i' %\
+                                      ( self.model.pdbCode, n, a['name'],
+                                        a['residue_name'], a['residue_number']))
 
             anames   = [ a['name'] for a in res ]
             keep = 1
@@ -220,17 +232,19 @@ class PDBCleaner:
 
                 if a['name'] not in standard:
                     mask += [1]
-                    self.logWrite('%s: removing atom %s in %s %i '%\
-                                  ( self.model.pdbCode, a['name'],
-                                    a['residue_name'], a['residue_number'] ) )
+                    if self.verbose:
+                        self.logWrite('%s: removing atom %s in %s %i '%\
+                                      ( self.model.pdbCode, a['name'],
+                                        a['residue_name'], a['residue_number']))
                 else:
                     mask += [0]
 
         self.model.remove( mask )
-
-        self.logWrite('Removed ' + str(N.sum(mask)) +
-                      ' atoms because they were non-standard' +
-                      ' or followed a missing atom.' )
+        
+        if self.verbose:
+            self.logWrite('Removed ' + str(N.sum(mask)) +
+                          ' atoms because they were non-standard' +
+                          ' or followed a missing atom.' )
 
         return N.sum( mask )
 

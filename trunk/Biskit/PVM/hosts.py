@@ -11,7 +11,7 @@ Each host must be accessible via ssh w/o password.
 This is **NOT** the place to add your custom host list! Biskit.PVM.hosts
 only serves as a mirror to read in the local host list configuration
 from ~/.biskit/hosts.py or (if this doesn't exist) from
-biskit/external/defaults/hosts.py. It publishes the following fields
+biskit/Biskit/data/defaults/hosts.py. It publishes the following fields
 to the rest of Biskit:
 
 -  nodes_* .. lists with one entry per computer
@@ -30,7 +30,7 @@ import Biskit.tools as T
 import Biskit as B
 import os, user
 
-__CFG_DEFAULT = T.projectRoot() + '/external/defaults/hosts.py'
+__CFG_DEFAULT = T.dataRoot() + '/defaults/hosts.py'
 __CFG_USER    = user.home + '/.biskit/hosts.py'
 
 class HostsError( B.BiskitError ):

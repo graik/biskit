@@ -353,7 +353,7 @@ class Test(BT.BiskitTest):
 
     def test_SettingsParser(self):
 	"""SettingsManager test"""
-        p = SettingsParser( T.projectRoot()+'/external/defaults/settings.cfg')
+        p = SettingsParser( T.dataRoot() + '/defaults/settings.cfg')
 
         p.parse()
 

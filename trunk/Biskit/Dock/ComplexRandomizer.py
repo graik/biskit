@@ -208,11 +208,11 @@ class ComplexMinimizer( Xplorer ):
         self.lig_out = tempfile.mktemp( "lig_out.pdb" )
         self.rec_out = tempfile.mktemp( "rec_out.pdb" )
 
-        self.inp_template = t.projectRoot() +\
-                            '/external/xplor/rb_minimize_complex.inp'
+        self.inp_template = t.dataRoot() +\
+                            '/xplor/rb_minimize_complex.inp'
 
-        self.param19 = t.projectRoot() + \
-                        '/external/xplor/toppar/param19.pro'
+        self.param19 = t.dataRoot() + \
+                        '/xplor/toppar/param19.pro'
 
         self.result = None
 

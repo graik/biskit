@@ -81,7 +81,7 @@ Options:
     -mod_template |file|
                Provide a different input script template (see Modeller.py).
                You can use either old style modeller.top files or new-style
-               python scripts -- see biskit/external/modeller for an example.
+               python scripts -- see biskit/Biskit/data/modeller for an example.
 
     Further options are passed on to the Executor parent class, for
     example:

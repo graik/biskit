@@ -288,7 +288,7 @@ class Xplor (XplorInput):
 def _defaultOptions():
     return {
         'o':'.',
-        't':projectRoot()+'/external/xplor/templates/param19',
+        't':dataRoot() + '/xplor/templates/param19',
         'c':'0',
         'thickness':'9',
 	'pw_dist':'3.5',
