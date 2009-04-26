@@ -124,14 +124,16 @@ class PDBError(BiskitError):
     pass
 
 class PDBModel:
-    """ 
-    Store and manipulate coordinates and atom infos stemming from a PDB
-    file. Coordinates are stored in the Numeric array 'xyz'; the additional
-    atom infos from the PDB (name, residue_name, and many more) are stored in
-    a L{PDBProfiles} instance 'aProfiles' which can be used to also associate
-    arbitrary other data to the atoms. Moreover, a field 'rProfiles' can hold
-    data associated to residues. A normal dictionary 'info' is there to accept
-    any information about the whole model.
+    """
+    Store and manipulate coordinates and atom infos stemming from a
+    PDB file. Coordinates are stored in the Numeric array 'xyz'; the
+    additional atom infos from the PDB (name, residue_name, and many
+    more) are stored in a L{PDBProfiles} instance 'atoms' which can be
+    used to also associate arbitrary other data to the
+    atoms. Moreover, a similar collection 'residues' can hold data
+    associated to residues (but is initially empty).  A normal
+    dictionary 'info' is there to accept any information about the
+    whole model.
 
     For detailed documentation,
     see http://biskit.pasteur.fr/doc/handling_structures/PDBModel
