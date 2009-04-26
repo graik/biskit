@@ -1,3 +1,4 @@
+## Note, this setup.py has been adapted from the one shipped with django
 from distutils.core import setup
 from distutils.command.install import INSTALL_SCHEMES
 import os
@@ -8,6 +9,7 @@ import sys
 # http://groups.google.com/group/comp.lang.python/browse_thread/thread/35ec7b2fed36eaec/2105ee4d9e8042cb
 for scheme in INSTALL_SCHEMES.values():
     scheme['data'] = scheme['purelib']
+
 
 # Compile the list of packages available, because distutils doesn't have
 # an easy way to do this.
@@ -55,7 +57,7 @@ if len(sys.argv) > 1 and sys.argv[1] == 'bdist_wininst':
     for file_info in data_files:
         file_info[0] = '/PURELIB/%s' % file_info[0]
 
-print "Warning: setup.py is work in progress!"
+
 
 setup(
     name = "Biskit",
