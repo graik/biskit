@@ -1,0 +1,7 @@
+include README.txt
+include license.txt
+include MANIFEST.in
+recursive-include Biskit/data *
+recursive-include Biskit/testdata *
+recursive-include docs *
+recursive-include scripts *

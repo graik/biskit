@@ -21,13 +21,26 @@ and Hmmer; interfaces to further software can be added
 easily. Moreover, Biskit simplifies the parallelisation of
 calculations via PVM (Parallel Virtual Machine).
 
-In this document:  * Release 2.2
+In this document:  * Release 2.3
+                   * Release 2.2
 		   * Release 2.1.0-beta
 		   * Release 2.0.1
 		   * Release 2.0.0
 		   * Installation
 		   * License
 		   * Open issues
+
+Release 2.3
+-----------
+
+* easy setup.py installation
+
+* fixed Intervor wrapper
+
+* some minor bug fixes
+
+* some work-in-progress packages
+
 
 Release 2.2
 ------------
@@ -164,7 +177,7 @@ The up-to-date list of open issues can be found at:
 field if the above link shouldn't work).
 
 
-* most pickles in test/ are still using the older versions of
+* most pickles in testdata/ are still using the older versions of
   PDBModel, this is partly intentional (ensuring backwards compability).
 
 * not all scripts are tested
@@ -178,8 +191,7 @@ field if the above link shouldn't work).
     We haven't yet written test cases for the AmberCrdEntropist,
     AmberEntropist, AmberParmBuilder. These classes are used for the
     entropy calculations in the Gruenberg et. al (2006) Structure
-    paper. They should work with Amber 8. I (Raik) plan to migrate
-    them to Amber 9 and write a proper entropy howto sometime in 2007.
+    paper. They should work with Amber 8. 
 
 * the parallel versions of the Mod scripts may have bugs
 
@@ -189,7 +201,7 @@ field if the above link shouldn't work).
 
 * API-Documentation issues
 
-    The online API-documentation is usually lacking behind quite a
+    The online API-documentation is usually lagging behind quite a
     bit. Also, epydoc gets confused by our practise to override the
     name of modules in the Biskit namespace with the classes they define.
 
