@@ -667,10 +667,10 @@ class Test(BT.BiskitTest):
         S.assert_( S.l.formatted() == S.l.local() )
 
         ## Example 4; create from existing path with automatic substitution
-        S.l.set_path( T.projectRoot() + '/test/com' )
+        S.l.set_path( T.testRoot() + '/com' )
         S.path += [ 'Example 4:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
         S.assertEqual( S.l.formatted(),
-                       '{%s|$projectRoot}/test/com' % T.projectRoot())
+                       '{%s|$projectRoot}/Biskit/testdata/com' % T.projectRoot())
 
         ## Example 5; rule out stray substitutions
         S.l.set_path( T.projectRoot() + '/tmp/com', maxSub=1, TMP='/tmp' )

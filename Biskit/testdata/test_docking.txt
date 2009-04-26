@@ -1,0 +1,168 @@
+DOCKING TEST
+============
+This text file describes a docking run starting from free receptor
+and ligand pdb files and ends up in a complex list. During the 
+docking the known structure of the bound complex is used for scoring.
+The use of a bound reference complex is of coures optional.
+
+Preparation:
+-----------
+
+Check that you have all 4 required starting structures in your 
+~biskit/test folder.
+
+  lig/1A19_lig_original.pdb
+ 
+  rec/1A2P_rec_original.pdb
+
+  com/1BGS_edited.pdb
+      1BGS_original.pdb
+
+
+Run the test:
+------------
+
+There are three options to running the test. 
+
+(1) You can execute the shell script test_docking.zsh in the
+    ~biskit/test folder::
+
+    ./test_docking.zsh
+
+(2) You can use the following variant for a quick 'dry run' that does
+    not depend on external applications (mainly intended for debugging
+    and re-creating pickles for various test cases)::
+
+    ./test_docking.zsh dry clean
+
+(3) Or you can run the commands one by one (see commands and comments below).
+
+
+Manual test:
+------------
+
+Retrieve free receptor and ligand coordinate files (currently only pdb format
+supported) and optionally a bound reference complex. In this example we have
+downloader barnase (1A19), barstar (1A2P) and the complex (1BGS). You'll find 
+the files in the tarball test_docking.tar
+
+Prepare the structures for X-plor (this also corrects alot of things with the
+pdb files that would cause problems in a simulation).
+
+NOTE!!   The name of the input pdb file to pdb2xplor has to be 
+            - at least 5 characters long (the first 4 characters will be used
+	    as a name for the cleaned pdb file)
+            - has to start with a number.
+
+cd rec
+pdb2xplor.py -i 1A2P_rec_original.pdb -exe
+  Note: 1A2P_rec_original.log contains information on the changes done to the 
+  input file (removed chains, detected chain breaks, residues with multiple
+  occuopancies etc.). In this case the pdb file contained three identical 
+  chains(three molecules in the unit cell) and therefore two was removed. 
+  A zinc ion was alos removed as well as a number of residues with alternate 
+  positions (the one with the highest occupancy was kept).
+
+  Note: If you dont want that the pdb2xplor script should run the
+  XPLOR job for you just omitt the -exe option and then run XPLOR
+  manually like this:
+
+    xplor-nih < 1A2P_rec_original_generate.inp > 1A2P_rec_original_generate.log
+
+  
+cd lig
+pdb2xplor.py -i 1A19_lig_original.pdb -c 1 -exe
+ Note: The option "-c 1" sets the chainId of the ligand to B matching 
+ that in the complex
+
+
+cd com
+pdb2xplor.py -i 1BGS_original.pdb -cmask 1 0 0 1 0 0 -exe
+ Note: Here the script was not able to clean the original pdb file automatically. 
+ In this case the structure contained six chains A,B,C,D,E and F and the 
+ separate complexes within the file are A-D, B-E and C-F. The script can not 
+ currently handle this configuration of chains (A-B, C-D and E-F would have 
+ been cleaned though). Therefor we use the -cmask option that hete specifies that
+ the first and fourth chain should be kept. Optionally you may edit the pdb-file
+ manually (deleting chains B,C,E and F). 
+
+pdb2complex.py -c 1BGS.pdb  -r 0 -l 1
+  Note: Here we also create a reference complex object, that we will need later.
+
+
+mkdir dock/rec
+cd dock/rec
+PCR2hex.py -psf ../../rec/1A2P.psf -pdb ../../rec/1A2P.pdb
+  Write a Hex compatible pdb file, model and a model dictionary. If you are 
+  running a multidocking project (docking more than one ligand against 
+  more than one receptor) this script will read multiple pdb files and
+  write the anme number of models and Hex compatible pdb files.
+
+dope.py -s ../../rec/1A2P.pdb -so ../../rec/1A2P_dry.model -i 1A2P.model -dic 1A2P_model.dic
+  Adds various profiles and data to the earliest possible source, to the original source (so)
+  data that doesn't change with the coordinates is added.
+     - conservation redidue profile derived (Hmmer.py)
+  To the input models (-i) that have changed coordinates in all cases but the one 
+  receprot vs. one ligand docking described here the following is added:
+     - surface masks (atom profile) 
+     - Fold-X energies (FoldX.py)
+     - surface curvature profiles, molecular surface (MS) profiles, 
+       accessible surface (AS) profiles and relative AS atom profiles (SurfaceRacer.py) 
+  
+
+mkdir ../lig
+cd ../lig
+PCR2hex.py -psf ../../lig/1A19.psf -pdb ../../lig/1A19.pdb
+dope.py -s ../../lig/1A19.pdb  -so ../../lig/1A19_dry.model -i 1A19.model  -dic 1A19_model.dic
+
+mkdir ../com
+cd ../com
+PCR2hex.py -psf ../../com/1BGS.psf -pdb ../../com/1BGS.pdb
+dope.py -s ../../com/1BGS.pdb  -so ../../com/1BGS_dry.model -i 1BGS.model  -dic 1BGS_model.dic
+
+
+mkdir ../hex
+cd ../hex
+hexInput.py -r ../rec/1A2P_hex.pdb -l ../lig/1A19_hex.pdb -c ../com/1BGS_hex.pdb
+  This will create a hex macro file (1A2P-1A19_hex.mac). If you want change any
+  settings controlling the hex docking you may edit this file manualy (for example 
+  turning on post-processing).
+  
+hex < 1A2P-1A19_hex.mac > 1A2P-1A19_hex.log
+  Run Hex docking (if you have a dual cpu machine run "hex -ncpu 2 < ...")
+  Output from Hex: - 1A2P-1A19_hex.out, a list with the top 512 scoring solutions
+                   - 1A2P-1A19_hex_cluster.out, hex rmsd clustering list  
+		   - 1A2P-1A19_hex.log, std out from the program
+
+hex2complex.py -rec ../rec/1A2P_model.dic -lig ../lig/1A19_model.dic -hex 1A2P-1A19_hex.out -p
+  Parse the output file from hex (containing the top 512 scoring solutions) and create
+  a complex list object. A simple plot of hex clusters vs. the rmsd to the reference structure
+  and the size of the clusters is displayed using the -p flag.
+
+pvm  
+  Start pvm
+  
+contacter.py -i complexes.cl -a -ref ../../com/ref.complex
+  Go through all complexes and add calculate various data. For all the calculations to run
+  trough you need to have Hmmer, Fold-X, Prosa2003 installed and properly configured. The
+  calculations are didtributed over many nodes and therefore also require that you have pvm 
+  installed and running. The data calculated are:
+  - fnac (fraction native atom contacts) requires that a reference complex is given
+  - prosa energy
+  - foldX binding energy (free-bound difference)
+  - conservation score
+  - pairwise contact score (from observed contacts in protein-protein intarfaces)
+  - xplor noe enregies (restraints file as argument -restr)
+  The contacted complex list is saved as complexes_cont.cl and any errors are reported in 
+  contacting_errors.txt
+  
+inspectComplexList.py complexes_cont.cl
+  To check that everything got calculated.  
+
+a_compare_rms_vs_fnc.py -i complexes_cont.cl
+  This is a simple analysis script that compares different methods of measuring
+  how close the docking solutions are to the native complex. The result of
+  this script are 4 plots that highlights the differences brtween interface rmsd 
+  and our favorite measure fraction of native atom contacts (fnac). There are 
+  more scripts in ~biskit/scripts/anaysis/ that can serve as examples to how 
+  biskit can be used. 
