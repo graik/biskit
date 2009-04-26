@@ -484,19 +484,29 @@ def dump(this, filename, gzip = 0, mode = 'w'):
     @param mode: file handle mode (default w)
     @type  mode: str
     """
+    import Biskit
+    
     filename = osp.expanduser(filename)
 
-    if not mode in ['w', 'a']:
-        raise "mode has to be 'w' (write) or 'a' (append)"
+    ## special case: do not slim PDBModels that are pickled to override
+    ## their own source
+    if isinstance( this, Biskit.PDBModel ) and not this.forcePickle \
+       and osp.samefile( str(this.source), filename ):
+        this.saveAs( filename )
 
-    if gzip:
-        f = gzopen(filename, "wb")
     else:
-        f = open(filename, mode)
 
-    cPickle.dump(this, f, 1)
+        if not mode in ['w', 'a']:
+            raise PickleError, "mode has to be 'w' (write) or 'a' (append)"
 
-    f.close()
+        if gzip:
+            f = gzopen(filename, "wb")
+        else:
+            f = open(filename, mode)
+
+        cPickle.dump(this, f, 1)
+
+        f.close()
 
 
 def Dump( this, filename, gzip = 0, mode = 'w'):
@@ -629,7 +639,7 @@ def testRoot():
     @return: absolute path
     @rtype: string    
     """
-    return projectRoot() + '/test'
+    return os.path.join( projectRoot(), 'Biskit', 'testdata' )
 
 
 def isBinary( f ):
