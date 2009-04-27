@@ -164,18 +164,18 @@ def plot3DFRETEfficiencySphere( data = [] ,cycle = 0,filename= "",saveData = Fal
 	
 	@param data: list of tuples containing the acceptor transition dipole moment (those in @acceptors) and its
 		FRET Transfer Efficiency.
-	@type: tuple list
+	@type data: tuple list
 	@param cycle:  Lenght of a sphere contour in points
-	@type: int 
+	@type cycle: int 
 	@param filename:  Name of PNG file for the plot to be saved
-	@type: int 
+	@type filename: int 
 	@param saveData:  If @True it also saves the gnuplot script and data used to do the plot ("plotspherescript" and
 				"spherescriptdata").
-	@type: int 
+	@type saveData: int 
 	@param more:  First part of the gnuplot script.
-	@type: string iterable 
+	@type more: string iterable 
 	@param script:  Gnuplot script to be used.
-	@type: string iterable
+	@type script: string iterable
 	"""
 	
 	import os
