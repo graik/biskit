@@ -1,4 +1,47 @@
-def dbPre (str ,type='int',default=0,mandatory = False):
+##
+## Biskit, a toolkit for the manipulation of macromolecular structures
+## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License as
+## published by the Free Software Foundation; either version 2 of the
+## License, or any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+## General Public License for more details.
+##
+## You find a copy of the GNU General Public License in the file
+## license.txt along with this program; if not, write to the Free
+## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+##
+##
+## last $Author: graik $
+## last $Date: 2009-03-09 09:10:46 +0100 (Mon, 09 Mar 2009) $
+## $Revision: 660 $
+
+# MAIN AUTHOR: Victor Gil Sepulveda
+# STATUS: Work in Progress
+
+"""
+Support functions for FRET Module. 
+"""
+
+
+def dbPre (str ,type='int',default=0):
+	"""
+	Internal use function for database string conversion. 
+	
+	@param str: string number to be converted, read from db 
+	@type  str: string
+	@param type: 
+	@type  type: { 'name' : list/array }
+	@param infos:    dictionary of existing meta infos
+	@type  infos:    { 'name' : { 'date' : ... } }
+	"""
+	
+	
 	if   'X' in str:
 		return default
 
@@ -14,6 +57,28 @@ def dbPre (str ,type='int',default=0,mandatory = False):
 		return default
 
 def overlapCalc ( wl,acc_spectra,don_spectra, e_cof ):
+	"""
+	Calculates the overlap integral for two spectra.
+	
+	@param wl: Iterable container with wavelength range (in nm).  
+			Ex . [300,301,302]
+	@type wl: float list
+	@param acc_spectra: Iterable container with (normalized to the peak) acceptor absortion spectra. May
+					have the same length that @wl.
+					Ex. [0.3,1.0,0.4]
+	@type acc_spectra: float list
+	@param don_spectra: iterable container with (normalized to the peak) donor emision spectra. May
+					have the same length that @wl.
+					Ex. [1.0,0.5,0.4]
+	@type don_spectra: float list
+	@param e_cof: Extinction coefficient of the acceptor at maximum absorvance (in M^-1 cm^-1). 
+				Ex. 43e3
+	@type e_cof: float
+	
+	@return: Overlap integral 
+	@rtype: float
+	"""
+	
 	from numpy import sum
 	
 	area = sum(don_spectra)
@@ -25,6 +90,21 @@ def overlapCalc ( wl,acc_spectra,don_spectra, e_cof ):
 	return sum( wl**4*don_spectra*e_spectra)
 	
 def sphericalVectors( latdeg =0.087266462599716474  , longdeg = 0.087266462599716474):
+	"""
+	Calculates the overlap integral for two spectra. It returns a lists of vectors where each vector can
+	be defined as the vector which starts in the center of an unit radius sphere and a point of its surface.
+	Surface points are used every latdeg and longdeg degrees for latitude and longitude
+	
+	@param latdeg: Number of degrees for each latitude division. 
+				Default value is 5 degrees, so defined sphere will have 360/5 latitude divisions.
+	@type latdeg: float 
+	@param longdeg: Number of degrees for each longitude division.
+				Default value is 5 degrees, so defined sphere will have 360/5 longitude divisions.
+	@type longdeg: float 
+		
+	@return: Overlap integral 
+	@rtype: vector list
+	"""
 	from emath import rotation
 	from math import pi
 	from numpy import array,matrix
@@ -48,6 +128,18 @@ def sphericalVectors( latdeg =0.087266462599716474  , longdeg = 0.08726646259971
 	return vectors, cycle
 
 def create3DFRETEfficiencySphere(  f = None,distance=(1,0,0),donor = (1,0,0), acceptors = []):
+	"""
+	Calculates the FRET efficiency for two chromophores. 
+	
+	@param f: FRET object for parameter storage
+	@type latdeg: FRET 
+	@param longdeg: Number of degrees for each longitude division.
+				Default value is 5 degrees, so defined sphere will have 360/5 longitude divisions.
+	@type longdeg: float 
+		
+	@return: Overlap integral 
+	@rtype: vector list
+	"""
 	from emath import norm
 	
 	r = norm(distance)
@@ -59,7 +151,7 @@ def create3DFRETEfficiencySphere(  f = None,distance=(1,0,0),donor = (1,0,0), ac
 	
 	return results
 
-def plot3DFRETEfficiencySphere( data = [] ,cycle = 0,filename= "",saveData = False ,more =("",),script = ("set hidden\n","set hidden3d\n","set pm3d\n","set pm3d depthorder\n","set ticslevel 0\n","splot \"spherescriptdata\" w l title \"Efficiency\"\n","pause 5\n",\
+def plot3DFRETEfficiencySphere( data = [] ,cycle = 0,filename= "",saveData = False ,more =("",),script = ("set hidden\n","set hidden3d\n","set pm3d\n","set pm3d depthorder\n","set ticslevel 0\n","set size square\n","splot \"spherescriptdata\" w l title \"Efficiency\"\n","pause 5\n",\
 																							"set terminal png\n","set output \"myout\"\n","replot" )):
 	import os
 	
@@ -87,24 +179,3 @@ def plot3DFRETEfficiencySphere( data = [] ,cycle = 0,filename= "",saveData = Fal
 	if not saveData:
 		os.system("rm plotspherescript")
 		os.system("rm myout")
-
-
-
-from FRET import FRET
-
-
-overlap = 959732990869504
-qyD = 0.62
- 
-f = FRET( overlap, qyD,44e3)
-
-acceptors , cycle = sphericalVectors( )
-
-#~ print acceptors
-
-results  = create3DFRETEfficiencySphere(  f, [0.,60.,0.] ,[0.,0.,1.], acceptors  )
-
-#~ print results
-
-
-plot3DFRETEfficiencySphere(results,cycle,"lol",True,("set view map\n",))

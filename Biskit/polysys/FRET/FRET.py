@@ -2,6 +2,7 @@ from math import cos
 from emath import vectorangle,norm
 
 class FRET:
+	WaterRefractionRoom = 1.3342
 	
 	def __init__(self, overlap, qyD,epsilon,kappa2 = 2./3, tauA = 0., tauD =1., tauDA = 0., refr_index=None):
 		

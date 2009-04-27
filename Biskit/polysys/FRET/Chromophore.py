@@ -1,5 +1,3 @@
-
-
 import numpy as N
 from Biskit.PDBModel import *
 from  FRETProtein import *

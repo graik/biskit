@@ -22,6 +22,7 @@
 ## $Revision: 658 $
 
 # MAIN AUTHOR: Victor Gil Sepulveda
+# DESCRIPTION: Used for calculating the spectral integral overlap for 2 chromophores.
 # STATUS: Finished and tested
 # TESTS: 	- Non-existing data files.
 #		- No numeric extinction coefficient
@@ -42,7 +43,7 @@ if __name__ == '__main__':
 		print "\nUsage: exe arg1 arg2 arg3\n"
 		print "arg1->  Normalized (to the peak) donor emission spectra file"
 		print "arg2->  Normalized (to the peak) acceptor absortion spectra file"
-		print "arg3->  Acceptor maximum extinction coefficient"
+		print "arg3->  Acceptor maximum extinction coefficient\n"
 		print "Note: Emission spectra file and absortion spectra file must to be defined for the same wavelength range."
 		exit( -1 )
 	
