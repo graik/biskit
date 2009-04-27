@@ -60,18 +60,27 @@ if len(sys.argv) > 1 and sys.argv[1] == 'bdist_wininst':
 
 
 setup(
-    name = "Biskit",
+    name = "biskit",
     version = "2.3",
     url = 'http://biskit.pasteur.fr',
     download_url = 'https://sourceforge.net/project/platformdownload.php?group_id=150896',
     author = 'Raik Gruenberg & Johan Leckner',
     author_email = 'raik.gruenberg@crg.es',
     description = 'A Python platform for structural bioinformatics',
+
+    ## available on PyPi
     requires=['numpy', 'ScientificPython', 'scipy', 'biopython' ],
+##     install_requires=['numpy', 'ScientificPython', 'biopython' ],
+
+    ## not available on PyPi
+##     dependency_links = \
+##     # biggles
+##       ['http://downloads.sourceforge.net/biggles/python2-biggles-1.6.5.tar.gz',
+##     # scipy -- is registered on pypi but the download doesn't work
+##        'https://sourceforge.net/project/showfiles.php?group_id=27747&package_id=19531'],
 
     packages = packages,
     data_files = data_files,
-##     data_files = {'Biskit' : ['Biskit/data'] },
     scripts = ['scripts/Biskit/bispy'],
 
     classifiers= ['License :: OSI Approved :: GNU General Public License (GPL)',
