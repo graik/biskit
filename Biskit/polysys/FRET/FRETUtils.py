@@ -91,9 +91,9 @@ def overlapCalc ( wl,acc_spectra,don_spectra, e_cof ):
 	
 def sphericalVectors( latdeg =0.087266462599716474  , longdeg = 0.087266462599716474):
 	"""
-	Calculates the overlap integral for two spectra. It returns a lists of vectors where each vector can
-	be defined as the vector which starts in the center of an unit radius sphere and a point of its surface.
-	Surface points are used every latdeg and longdeg degrees for latitude and longitude
+	It returns a lists of vectors where each vector can be defined as the vector which starts in the center of an 
+	unit radius sphere and a point of its surface.
+	Surface points are generated every latdeg and longdeg degrees for latitude and longitude
 	
 	@param latdeg: Number of degrees for each latitude division. 
 				Default value is 5 degrees, so defined sphere will have 360/5 latitude divisions.
@@ -102,8 +102,8 @@ def sphericalVectors( latdeg =0.087266462599716474  , longdeg = 0.08726646259971
 				Default value is 5 degrees, so defined sphere will have 360/5 longitude divisions.
 	@type longdeg: float 
 		
-	@return: Overlap integral 
-	@rtype: vector list
+	@return: Overlap integral and lenght of a sphere contour in points
+	@rtype: tuple {vector list, int}
 	"""
 	from emath import rotation
 	from math import pi
@@ -129,16 +129,22 @@ def sphericalVectors( latdeg =0.087266462599716474  , longdeg = 0.08726646259971
 
 def create3DFRETEfficiencySphere(  f = None,distance=(1,0,0),donor = (1,0,0), acceptors = []):
 	"""
-	Calculates the FRET efficiency for two chromophores. 
+	Calculates the FRET efficiency of one chromophore trans. dipole moment with a list of other chromophore's 
+	transition dipole moments
 	
-	@param f: FRET object for parameter storage
+	@param f: FRET object for parameter storage and calculations
 	@type latdeg: FRET 
-	@param longdeg: Number of degrees for each longitude division.
-				Default value is 5 degrees, so defined sphere will have 360/5 longitude divisions.
-	@type longdeg: float 
-		
-	@return: Overlap integral 
-	@rtype: vector list
+	@param distance: Distance from the start of one chromophore dipole to the start of the dipole moment
+				of the other chromophore.
+	@type distance: float tuple
+	@param donor: Transition dipole moment of one chromophore.
+	@type donor: float tuple
+	@param acceptors: List of transition dipole moments (of the other chromophore involved)
+	@type acceptors: float tuple	
+	
+	@return: list of tuples containing the acceptor transition dipole moment (those in @acceptors) and its
+		FRET Transfer Efficiency.
+	@rtype: tuple list
 	"""
 	from emath import norm
 	
@@ -153,6 +159,25 @@ def create3DFRETEfficiencySphere(  f = None,distance=(1,0,0),donor = (1,0,0), ac
 
 def plot3DFRETEfficiencySphere( data = [] ,cycle = 0,filename= "",saveData = False ,more =("",),script = ("set hidden\n","set hidden3d\n","set pm3d\n","set pm3d depthorder\n","set ticslevel 0\n","set size square\n","splot \"spherescriptdata\" w l title \"Efficiency\"\n","pause 5\n",\
 																							"set terminal png\n","set output \"myout\"\n","replot" )):
+	"""
+	Wrapper around gnuplot to make FRET Efficiency 3D plots. It will display it 5s by default, the save it to a file.
+	
+	@param data: list of tuples containing the acceptor transition dipole moment (those in @acceptors) and its
+		FRET Transfer Efficiency.
+	@type: tuple list
+	@param cycle:  Lenght of a sphere contour in points
+	@type: int 
+	@param filename:  Name of PNG file for the plot to be saved
+	@type: int 
+	@param saveData:  If @True it also saves the gnuplot script and data used to do the plot ("plotspherescript" and
+				"spherescriptdata").
+	@type: int 
+	@param more:  First part of the gnuplot script.
+	@type: string iterable 
+	@param script:  Gnuplot script to be used.
+	@type: string iterable
+	"""
+	
 	import os
 	
 	# Gen. data file
