@@ -1,4 +1,9 @@
 ## Note, this setup.py has been adapted from the one shipped with django
+
+## building source distro : python setup.py sdist
+## building windows distro: python setup.py bdist_wininst
+## install source distro  : python setup.py install
+
 from distutils.core import setup
 from distutils.command.install import INSTALL_SCHEMES
 import os
@@ -70,7 +75,7 @@ setup(
 
     ## available on PyPi
     requires=['numpy', 'ScientificPython', 'scipy', 'biopython' ],
-##     install_requires=['numpy', 'ScientificPython', 'biopython' ],
+    install_requires=['numpy', 'ScientificPython', 'biopython', 'scipy' ],
 
     ## not available on PyPi
 ##     dependency_links = \
