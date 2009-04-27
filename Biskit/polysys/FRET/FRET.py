@@ -2,7 +2,11 @@ from math import cos
 from emath import vectorangle,norm
 
 class FRET:
-	WaterRefractionRoom = 1.3342
+	
+	"""
+	Refraction coefficient of water at room temperature.
+	"""
+	WATER_REFRACTION_COEF = 1.3342
 	
 	def __init__(self, overlap, qyD,epsilon,kappa2 = 2./3, tauA = 0., tauD =1., tauDA = 0., refr_index=None):
 		
@@ -12,12 +16,10 @@ class FRET:
 		self.overlap = overlap
 		self.epsilon = epsilon
 		self.qyD = qyD
-		self.WaterRefractionRoom = 1.3342
-		
 		self.k2 = kappa2
 		
 		if refr_index == None:
-			self.refr_index = self.WaterRefractionRoom
+			self.refr_index = self.WATER_REFRACTION_COEF
 		else:
 			self.refr_index = refr_index
 	
