@@ -33,7 +33,26 @@ In this document:  * Release 2.3
 Release 2.3
 -----------
 
-* easy setup.py installation
+Release 2.3 simplifies the installation of Biskit. The package can now
+be installed system-wide with the standard 'python setup.py install'
+command. This required a change to Biskit's directory layout: The
+'test' and the 'external' folder were moved from the project root into
+the Biskit python package. That means:
+
+  old               ->    new
+* biskit/external   ->    biskit/Biskit/data
+* biskit/test       ->    biskit/Biskit/testdata
+
+The idea here was to have all extra folders nicely bundled with the
+python package rather than spreading them accross your system. This
+also applies to the scripts and docs folder. These two remain at the
+project root, but are copied into the package folder during system
+installations. 
+
+The advantage of this new setup is that we can now start creating
+Debian, RPM and even Windows installation packages.
+
+Other changes: 
 
 * fixed Intervor wrapper
 
@@ -140,13 +159,20 @@ Up-to-date installation instructions can be found online:
 
 (Some older instructions are still kept in docs/.)
 
-The biskit python library (module) biskit/Biskit needs to be in your
-$PYTHONPATH and depends on other python libraries (numpy,
-Scientific, biggles) which in turn depend on a few additional
-libraries or programs (netcdf, gnuplot, Numeric).
+The biskit python library (module) depends on other python libraries (numpy,
+ScientificPython, biggles) which in turn depend on a few additional
+libraries or programs (netcdf, gnuplot, plotutils). Some functions of 
+Biskit moreover rely on scipy and on biopython, although we try to
+keep this dependence optional.
 
 The complete list is given here:
    http://biskit.pasteur.fr/install/short/
+
+You can now install Biskit by running:
+   python setup.py install
+in the root of the project's directory. Alternatively,
+you can simply copy or link the Biskit folder (the one containing
+__init__.py) into your $PYTHONPATH.
 
 More detailed instructions for installing the different third-party
 packages can be found here:
