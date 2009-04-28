@@ -17,9 +17,9 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## last $Author: graik $
-## last $Date: 2009-03-09 09:10:46 +0100 (Mon, 09 Mar 2009) $
-## $Revision: 660 $
+## last $Author$
+## last $Date$
+## $Revision$
 
 # MAIN AUTHOR: Victor Gil Sepulveda
 # STATUS: Work in Progress
