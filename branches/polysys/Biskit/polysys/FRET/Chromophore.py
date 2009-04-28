@@ -1,3 +1,30 @@
+##
+## Biskit, a toolkit for the manipulation of macromolecular structures
+## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License as
+## published by the Free Software Foundation; either version 2 of the
+## License, or any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+## General Public License for more details.
+##
+## You find a copy of the GNU General Public License in the file
+## license.txt along with this program; if not, write to the Free
+## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+##
+##
+## last $Author: graik $
+## last $Date: 2009-03-09 09:10:46 +0100 (Mon, 09 Mar 2009) $
+## $Revision: 660 $
+
+# MAIN AUTHOR: Victor Gil Sepulveda
+# STATUS: Work in Progress
+# TODO: Test cases 
+
 import numpy as N
 from Biskit.PDBModel import *
 from  FRETProtein import *
