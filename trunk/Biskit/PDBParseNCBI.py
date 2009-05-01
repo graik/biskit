@@ -28,7 +28,6 @@ Parse a in-memory PDBModel instance into a new PDBModel
 @see L{PDBModel}
 @see L{PDBParserFactory}
 """
-from Bio import File
 import numpy.oldnumeric as N
 import urllib, re, tempfile, os
 
@@ -110,7 +109,7 @@ class PDBParseNCBI( PDBParseModel ):
                 else:
                     return open(f)
 
-        raise PDBParseError( "Couldn't find PDB file locally.")
+        raise PDBParserError( "Couldn't find PDB file locally.")
 
 
     def getRemotePDBHandle( self, id, rcsb_url=settings.rcsb_url ):
@@ -128,12 +127,19 @@ class PDBParseNCBI( PDBParseModel ):
 
         @raise PDBParserError: if couldn't retrieve PDB file
         """
+        try:
+            from Bio import File
+        except:
+            raise PDBParserError('Could not find Biopython - ' + \
+                               'remote fetching of PDBs is not supported.')
+
+        
         handle = urllib.urlopen( rcsb_url% (id,id) )
 
         uhandle = File.UndoHandle(handle)
 
         if not uhandle.peekline():
-            raise PDBParseError( "Couldn't retrieve ", rcsb_url )
+            raise PDBParserError( "Couldn't retrieve ", rcsb_url )
 
         return uhandle
 
