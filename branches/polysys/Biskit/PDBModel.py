@@ -230,7 +230,7 @@ class PDBModel:
         called for unpickling the object.
         """
         ## until 2.0.1 PDBModel.atoms contained a list of dictionaries
-        ## now we merged this info into PDBModel.aProfiles and renamed
+        ## now we cod this info into PDBModel.aProfiles and renamed
         ## aProfiles back to .atoms
         if 'atoms' in state and type( state['atoms'] ) in [list, type(None)] :
             state['old_atoms'] = state['atoms']
