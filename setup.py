@@ -28,7 +28,10 @@
 ##
 ## installing a local .deb file -- other Debian:
 ## http://wiki.clug.org.za/wiki/How_do_I_install_a_.deb_file_I_downloaded_without_compromising_dependencies%3F
-## install source distro  : python setup.py install
+
+import sys
+
+sys.path += ['Biskit']
 from ez_setup import use_setuptools
 use_setuptools()
 

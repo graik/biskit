@@ -1,4 +1,11 @@
-## Note, this setup.py has been adapted from the one shipped with django
+## This is an alternative setup.py which is using the python built-in
+## distutils rather than the setuptools package. The standard distutils
+## are not quite as convenient as setuptools and we need additional
+## tricks to collect files and data.
+## This setup.py has been adapted from the one shipped with django.
+## 
+## Use: rename setup_distutils.py and MANIFEST_distutils.in to
+##      setup.py and MANIFEST.in; run 'python setup.py install' as normal.
 
 ## building source distro : python setup.py sdist
 ## building windows distro: python setup.py bdist_wininst
@@ -75,15 +82,6 @@ setup(
 
     ## available on PyPi
     requires=['numpy', 'ScientificPython', 'scipy', 'biopython' ],
-    install_requires=['numpy', 'ScientificPython', 'biopython', 'scipy' ],
-
-    ## not available on PyPi
-##     dependency_links = \
-##     # biggles
-##       ['http://downloads.sourceforge.net/biggles/python2-biggles-1.6.5.tar.gz',
-##     # scipy -- is registered on pypi but the download doesn't work
-##        'https://sourceforge.net/project/showfiles.php?group_id=27747&package_id=19531'],
-
     packages = packages,
     data_files = data_files,
     scripts = ['scripts/Biskit/bispy'],
