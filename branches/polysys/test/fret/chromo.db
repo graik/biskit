@@ -1,0 +1,8 @@
+#model	#name	#modatomrang	#app_point	#vectors	
+
+2Q57	mCerulean	478,501	478	1	478,501	0.5	478,479
+1HUY	mCitrine	507,520	507	1	507,520
+FAKE1	Mandatory1	X	X	X	X
+FAKE2	Vector		1,1	2	3
+FAKE	LoadTest	1,1	2	3	4,5
+FOOO	foo	1,1	2	3	4,5
