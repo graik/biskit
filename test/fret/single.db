@@ -1,0 +1,7 @@
+#name	#lift	#abs #emi	#epsi	#QY	#src	#Notes		
+LoadTest	1	2	3	4	5	FAKE	A comment
+Mandatory1	1	X	2	3	4	LILA
+Mandatory2	1	2	3	4	5	X
+mCerulean2	3.5	433	475	44e3	0.62	2Q57	mCerulean V.2, changes in lifetime
+mCitrine2	3.6	516	529	90e3	0.62	1HUY	mCitrine V.2, changes in epsilon (latest)
+
