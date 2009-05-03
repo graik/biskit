@@ -121,7 +121,7 @@ class Test(BT.BiskitTest):
         self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P_dry.model')
 
         self.assertAlmostEqual( N.sum( self.m.centerOfMass() ),
-                                 114.18036673321811, 7)
+                                114.18037, 5)
 
 if __name__ == '__main__':
    
