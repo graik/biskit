@@ -39,22 +39,46 @@ command. This required a change to Biskit's directory layout: The
 'test' and the 'external' folder were moved from the project root into
 the Biskit python package. That means:
 
-  old               ->    new
+  old project             new project
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 * biskit/external   ->    biskit/Biskit/data
 * biskit/test       ->    biskit/Biskit/testdata
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The idea here was to have all extra folders nicely bundled with the
 python package rather than spreading them accross your system. This
 also applies to the scripts and docs folder. These two remain at the
-project root, but are copied into the package folder during system
-installations. 
+project root, but are copied into the package folder during
+installation:
 
-The advantage of this new setup is that we can now start creating
-Debian, RPM and even Windows installation packages.
+  svn project             after installation in site-packages
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* biskit/Biskit    ->     site-packages/Biskit
+* biskit/scripts   ->     site-pacakges/Biskit/scripts
+* biskit/docs      ->     site-packages/Biskit/docs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The new setup.py will attempt to automatically fetch, compile and
+install missing Python modules (numpy, ScientificPython, scipy,
+biggles, BioPython). That means, in the ideal case, you can install
+Biskit and all dependencies with a single command. 
+
+However, the compilation of these modules from source depends on
+non-Python C libraries like netcdf (for ScientificPython) and
+plotutils (for biggles) and it requires that your system has the
+standard make and compiler tools as well as Python development files
+(headers) installed. You may thus be better off to install these
+dependencies beforehand from binary packages. 
+
+Another advantage of the new setup is that we can now start creating
+Debian, RPM and even Windows installation packages -- these should be
+considered experimental. Please report success or failures!
 
 Other changes: 
 
 * fixed Intervor wrapper
+
+* Python 2.6 compatibility
 
 * some minor bug fixes
 
@@ -92,7 +116,7 @@ previous beta release:
 Release 2.1.0-beta
 ------------------
 
-Release 2.1.0 introduces a lot changes to the very core of Biskit:
+Release 2.1.0 introduces a lot of changes to the very core of Biskit:
 
 * PDBModel overhaul -- the atom dictionaries are gone and all the
   information is now unified into `atoms` and `residues`
