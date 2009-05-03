@@ -361,7 +361,7 @@ class AmberParmBuilder:
         m_chain = m_chain.concat( m_nme.resModels()[-1] )
 
         ## should be obsolete now
-        if m_chain._PDBModel__terAtoms != []:
+        if getattr( m_chain, '_PDBModel__terAtoms', []) != []:
             m_chain._PDBModel__terAtoms = [ len( m_chain ) - 1 ]
 
         ## re-assemble whole model
