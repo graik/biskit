@@ -200,6 +200,8 @@ import Biskit.test as BT
 class Test(BT.BiskitTest):
     """Test class"""
 
+    TAGS = [ BT.LONG ]
+
     def prepare( self ):
         self.f = os.path.join( tools.testRoot(), 'eedensity/3tgi.ezd.gz' )
         self.p = None
