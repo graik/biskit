@@ -427,6 +427,12 @@ class PDBModel:
 
         self.info = getattr( self, 'info', { 'date':T.dateSortString() } )
 
+        ## fix previous bug; old PDBModel pickles often have stray terAtoms
+        ## records
+        if getattr( self, '_PDBParseFile__terAtoms', None) is not None:
+            del self._PDBParseFile__terAtoms
+
+
 
     def __defaults(self ):
         """
@@ -478,6 +484,7 @@ class PDBModel:
             N.put( mask, ter_atoms, 1 )
             self.atoms.set('after_ter', mask,
                            comment='rebuilt from old PDBModel.__terAtoms')
+        if ter_atoms is not 0:
             del self.__terAtoms
 
         ## biskit <= 2.0.1 cached a volatile index in __resIndex & __chainIndex
@@ -493,6 +500,14 @@ class PDBModel:
         self.__maskCA = getattr( self, '__maskCA', None )
         self.__maskBB = getattr( self, '__maskBB', None )
         self.__maskHeavy = getattr( self, '__maskHeavy', None )
+
+        ## test cases of biskit < 2.3 still contain Numeric arrays
+        if self.xyz is not None and type( self.xyz ) is not N.ndarray:
+            self.xyz = N.array( self.xyz )
+        if self._resIndex is not None and type( self._resIndex ) is not N.ndarray:
+            self._resIndex = N.array( self._resIndex )
+        if self._chainIndex is not None and type(self._chainIndex) is not N.ndarray:
+            self._chainIndex = N.array( self._chainIndex )
 
         try:
             del self.caMask, self.bbMask, self.heavyMask
