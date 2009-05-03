@@ -495,7 +495,7 @@ class TestDry(BT.BiskitTest):
         self.x = Intervor( self.m, [0], debug=self.DEBUG, verbose=self.local,
                            catch_err=1 )
         
-        self.x.f_prefix = T.testRoot() + '/intervor/tmpNoUFoi'
+        self.x.f_prefix = T.testRoot() + '/intervor/1vfb'
 
         self.x.finish()
 
