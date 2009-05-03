@@ -52,11 +52,11 @@ class TrajError( BiskitError ):
 
 
 class TrajProfiles( ProfileCollection ):
-    
+
     def version( self ):
         """
         Version of class.
-        
+
         @return: version
         @rtype: str
         """
@@ -84,7 +84,7 @@ class Trajectory:
         PDB files in the list have an identical atom content/layout and the
         same re-ordering / removing is applied to all of them. Set castAll
         to 1, in order to check each PDB seperately.
-        
+
         @param pdbs: file names of all conformations OR PDBModels
         @type  pdbs: [ str ] OR [ PDBModel ]
         @param refpdb: file name of reference pdb
@@ -116,7 +116,7 @@ class Trajectory:
     def version( self ):
         """
         Version of class.
-        
+
         @return: version
         @rtype: str
         """
@@ -126,7 +126,7 @@ class Trajectory:
     def __create( self, pdbs, refpdb, rmwat=0, castAll=0 ):
         """
         Initiate and create necessary variables.
-        
+
         @param pdbs: file names of all conformations OR PDBModels
         @type  pdbs: [ str ] OR [ PDBModel ]
         @param refpdb: file name of reference pdb
@@ -161,7 +161,7 @@ class Trajectory:
     def __getitem__( self, i ):
         """
         Get a single frame and facilitete slicing of tajectories. 
-        
+
         @param i: index OR SliceTyp
         @type  i: int OR [int]
 
@@ -191,7 +191,7 @@ class Trajectory:
     def __len__( self ):
         """
         Number of frames in the trajectory.
-        
+
         @return: length
         @rtype: int
         """
@@ -214,10 +214,11 @@ class Trajectory:
         self.pc = getattr( self, 'pc', None )
         self.frameNames = getattr( self, 'frameNames', None)
         self.profiles = getattr( self, 'profiles', TrajProfiles() )
-        try:
-            pass  ## self.frames.savespace()
-        except:
-            pass
+
+        if type( self.frames ) is not N.ndarray:
+            self.frames = N.array( self.frames )
+        if type( self.resIndex ) is not N.ndarray:
+            self.resIndex = N.array( self.resIndex )
 
 
     def __getstate__(self):
@@ -238,7 +239,7 @@ class Trajectory:
         """
         Returna a PDBModel with coordinates that are the average of
         all frames.
-        
+
         @return: PDBModel with average structure of trajectory (no fitting!) 
                  this trajectory's ref is the source of result model
         @rtype: PDBModel
@@ -252,13 +253,13 @@ class Trajectory:
     def __collectFrames( self, pdbs, castAll=0 ):
         """
         Read coordinates from list of pdb files.
-        
+
         @param pdbs: list of file names
         @type  pdbs: [str]
         @param castAll: analyze atom content of each frame for casting
                         (default: 0)
         @type  castAll: 0|1
-        
+
         @return: frames x (N x 3) Numpy array (of float)
         @rtype: array
         """
@@ -320,10 +321,10 @@ class Trajectory:
     def setRef( self, refModel ):
         """
         Assign new reference model.
-        
+
         @param refModel: PDBModel with same number of atoms as in the frames.
         @type  refModel: PDBModel
-        
+
         @return: old reference PDBModel
         @rtype: PDBModel
         """
@@ -344,7 +345,7 @@ class Trajectory:
         new Trajectory is a 'semi-deep' copy of this trajectorie's model.
         (see L{PDBModel.take()} )::
            concat( traj [, traj2, traj3, ..] ) -> Trajectory 
-        
+
         @param traj: one or more Trajectory with identical atoms as this one
         @type  traj: Trajectories
 
@@ -424,14 +425,14 @@ class Trajectory:
     def atomMask( self, what ):
         """
         Get atom mask.
-        
+
         @param what: Create the mask using::
                       - funct( self.ref.atoms[i] ) -> int
                       - list int ( indices )
                       - mask
                       - list of str (atom names)
         @type  what: any
-        
+
         @return: list of 1|0  1 x N_atoms
         @rtype: list[1|0]
         """
@@ -442,10 +443,10 @@ class Trajectory:
         """
         A list with residue numbers mapped to each position. i.e.
         C{ [00001111222222222333..] }
-        
+
         @param force: calculate even if it already been calculated
         @type  force: 1|0
-        
+
         @return: list of int
         @rtype:  [int]
         """
@@ -458,10 +459,10 @@ class Trajectory:
     def takeFrames( self, indices ):
         """
         Return a copy of the trajectory containing only the specified frames.
-        
+
         @param indices: positions to take
         @type  indices: [int]
-        
+
         @return: copy of this Trajectory (fewer frames, semi-deep copy of ref)
         @rtype: Trajectory
         """
@@ -492,7 +493,7 @@ class Trajectory:
     def clone( self ):
         """
         Copy trajectory.
-        
+
         @return: Trajectory (or sub-class), copy of this trajectory
         @rtype: Trajectory
         """
@@ -502,7 +503,7 @@ class Trajectory:
     def compressFrames( self, mask ):
         """
         Compress trajectory with a frame mask. 
-        
+
         @param mask: frame mask, 1 x N_frames
         @type  mask: [1|0]
 
@@ -530,7 +531,7 @@ class Trajectory:
     def keepFrames( self, indices ):
         """
         in-place version of L{takeFrames}. keepFrames( indices ) -> None
-        
+
         @param indices: frame numbers
         @type  indices: [int]
         """
@@ -541,7 +542,7 @@ class Trajectory:
     def removeFrames( self, indices ):
         """
         Remove given frames from this trajectory object.
-        
+
         @param indices: frame numbers
         @type  indices: [int]
         """
@@ -554,7 +555,7 @@ class Trajectory:
         """
         Take atoms from frames::
           takeAtoms( indices, type=None ) -> copy of Trajectory
-        
+
         @param indices: list of atom indices
         @type  indices: [int]
         @param returnClass: default: None, same class as this object
@@ -588,13 +589,13 @@ class Trajectory:
     def compressAtoms( self, aMask, returnClass=None ):
         """
         Get copy of this trajectory with only atoms marked 1 in aMask.
-        
+
         @param aMask: atom mask [10011100101111...],
                       lst 1 x N_atoms of 1(keep) or 0
         @type  aMask: [1|0]
         @param returnClass: default: None, same class as this object
         @type  returnClass: class
-        
+
         @return: copy of Trajectory with fewer atoms
         @rtype: Trajectory
         """
@@ -616,7 +617,7 @@ class Trajectory:
         """
         Remove atoms from all frames of trajectory and from reference
         structure.
-        
+
         @param what: Specify what atoms to remove::
                       - function( atom_dict ) -> 1 || 0    or (1..remove)
                       - list of int [4, 5, 6, 200, 201..], indices of atoms
@@ -626,7 +627,7 @@ class Trajectory:
                       - int, remove atom with this index
         @type  what: any
 
-        
+
         @return: N.array(1 x N_atoms_old) of 0||1, mask used to compress the
                  atoms and xyz arrays. This mask can be used to apply the
                  same change to another array of same dimension as the
@@ -644,12 +645,12 @@ class Trajectory:
     def takeChains(self, chainLst, returnClass=None ):
         """
         Extract some chains from complete Trajectory.
-        
+
         @param chainLst: chains to isolate
         @type  chainLst: [int]
         @param returnClass: default: None, same class as this object
         @type  returnClass: class
-        
+
         @return: Trajectory  with only those chains
         @rtype: Trajectory
         """
@@ -667,7 +668,7 @@ class Trajectory:
         values in a profile. If n_it > 1, the fraction of atoms considered
         for the fit is put into a profile called |prof|_considered
         (i.e. by default 'rms_considered').
-        
+
         @param mask: atom mask, atoms to consider default: [all]
         @type  mask: [1|0]
         @param ref: use as reference, default: None, average Structure
@@ -708,7 +709,7 @@ class Trajectory:
 
             if n_it != 1:
                 (r, t), rmsdList = rmsFit.match( refxyz,
-                                    N.compress( mask, xyz, 0), n_it)
+                                                 N.compress( mask, xyz, 0), n_it)
                 iterations.append( len( rmsdList ) )
                 non_outliers.append( rmsdList[-1][0] )
 
@@ -718,14 +719,14 @@ class Trajectory:
 
             else:
                 r, t = rmsFit.findTransformation( refxyz,
-                                    N.compress( mask, xyz, 0))
-                
+                                                  N.compress( mask, xyz, 0))
+
                 xyz_transformed = N.dot( xyz, N.transpose(r)) + t
 
                 d = N.sqrt(N.sum(N.power( N.compress(mask, xyz_transformed,0)\
-                                         - refxyz, 2), 1))
+                                          - refxyz, 2), 1))
 
-                    
+
                 rms += [ N.sqrt( N.average(d**2) ) ]
 
 
@@ -739,8 +740,8 @@ class Trajectory:
 
         if non_outliers:
             self.setProfile( prof+'_considered', non_outliers,
-                   n_iterations=n_it,
-                   comment='fraction of atoms considered for iterative fit' )
+                             n_iterations=n_it,
+                             comment='fraction of atoms considered for iterative fit' )
 
         if verbose: T.errWrite( 'done\n' )
 
@@ -748,7 +749,7 @@ class Trajectory:
     def transform( self, *rt ):
         """
         Apply given transformation to all frames (in place).
-        
+
         @param rt: rotation translation matrix
         @type  rt: array( 4 x 4 ) OR array(3 x 3), array(3 x 1)
         """
@@ -818,7 +819,7 @@ class Trajectory:
     def writePdb( self, index, fname):
         """
         Write (possibly transformed) coordinates back to pdb.
-        
+
         @param index: frame index in trajectory
         @type  index: int
         @param fname: name of new file
@@ -833,7 +834,7 @@ class Trajectory:
     def writePdbs( self, fname, frames=None):
         """
         Write coordinates to an NMR-style MODEL/ENDMDL pdb file.
-        
+
         @param fname: name of new file
         @type  fname: str
         @param frames: frame indices (default: None, all)
@@ -872,7 +873,7 @@ class Trajectory:
     def writeCrd( self, fname, frames=None ):
         """
         Write frames to Amber crd file (w/o box info).
-        
+
         @param fname: output file name
         @type  fname: str
         @param frames: frame indices (default: all)
@@ -913,7 +914,7 @@ class Trajectory:
     def getPDBModel( self, index ):
         """
         Get PDBModel object for a particular frame of the trajectory.
-        
+
         @param index: frame index
         @type  index: int
 
@@ -929,12 +930,12 @@ class Trajectory:
                     comment=None, **moreInfo ):
         """
         Add/override profile.
-        
+
         @param name: profile name
         @type  name: str
         @param prof: list of values
         @type  prof: [any]
-        
+
         @param mask: list 1 x N_items of 0|1, if there are less values
                      than items, provide mask for missing values,
                      N.sum(mask)==N_items
@@ -948,7 +949,7 @@ class Trajectory:
         @type  comment: str
         @param moreInfo: additional key-value pairs for info[name]
         @type  moreInfo:
-        
+
         @raise ProfileError: if length of prof != N_residues
         """
         self.profiles.set( name, prof, mask, default, asarray=asarray,
@@ -959,12 +960,12 @@ class Trajectory:
         """
         Get the values of a profile::
           get( name ) -> list of values
-        
+
         @param name: profile name
         @type  name: str
         @param default: default result if no profile is found
         @type  default: any
-        
+
         @raise ProfileError: if no profile is found with |name|
         """
         return self.profiles.get( name, default )
@@ -978,7 +979,7 @@ class Trajectory:
 
         @param name: profile name
         @type  name: str
-        
+
         @raise ProfileError: if no profile is found with |name|
         """
         return self.profiles.getInfo( name )
@@ -991,7 +992,7 @@ class Trajectory:
 
         @param name: profile name
         @type  name: str
-        
+
         @raise ProfileError: if no profile is found with |name|
         """
         self.profiles.setInfo( name, **args )
@@ -1007,7 +1008,7 @@ class Trajectory:
         @type  cutoff_min: float
         @param cutoff_max: upper cutoff value (default: None)
         @type  cutoff_max: float
-        
+
         @return: mask lenFrames x 1|0
         @rtype: [1|0]
         """
@@ -1022,7 +1023,7 @@ class Trajectory:
 
         @param name: profile name
         @type  name: str
-        
+
         @return: plot object
         @rtype: biggles.FramedPlot
         """
@@ -1032,7 +1033,7 @@ class Trajectory:
     def pairwiseRmsd( self, aMask=None, noFit=0 ):
         """
         Calculate rmsd between each 2 coordinate frames.
-        
+
         @param aMask: atom mask
         @type  aMask: [1|0]
         @return: frames x frames array of float
@@ -1051,7 +1052,7 @@ class Trajectory:
                 if noFit:
                     d = N.sqrt(N.sum(N.power(frames[i]-frames[j], 2), 1))
                     result[i,j] = result[j,i] = N.sqrt( N.average(d**2) )
-                    
+
                 else:
                     rt, rmsdLst = rmsFit.match( frames[i], frames[j], 1 )
                     result[i,j] = result[j,i] = rmsdLst[0][1]
@@ -1063,11 +1064,11 @@ class Trajectory:
         """
         Get RMS of each atom from it's average position in trajectory.
         The frames should be superimposed (fit() ) to a reference.
-        
+
         @param mask: N x 1 list/Numpy array of 0|1, (N=atoms),
                      atoms to be considered.
         @type  mask: [1|0]
-        
+
         @return: Numpy array ( N_unmasked x 1 ) of float.
         @rtype: array
         """
@@ -1086,7 +1087,7 @@ class Trajectory:
         """
         Get indices of all atoms of a residue and some atoms of its
         neighboring residues (if they belong to the same chain).
-        
+
         @param res: residue index
         @type  res: int
         @param n_neighbores: number of residues to include right and left
@@ -1098,7 +1099,7 @@ class Trajectory:
         @type  left_allowed: array 
         @param rchainMap: array 1 x N_residues of int, chain id of each res
         @type  rchainMap: array
-        
+
         @return: atoms of res, atoms of neighbores
         @rtype: [ int ], [ int ]
         """
@@ -1140,7 +1141,7 @@ class Trajectory:
         Get mean displacement of each atom from it's average position after
         fitting of each residue to the reference backbone coordinates of itself
         and selected atoms of neighboring residues to the right and left.
-        
+
         @param mask: N_atoms x 1 array of 0||1, atoms for which fluctuation
                      should be calculated
         @type  mask: array
@@ -1150,7 +1151,7 @@ class Trajectory:
         @type  left_atoms: [str]
         @param right_atoms: atoms (names) to use from these neighbore residues
         @type  right_atoms: [str]
-        
+
         @return: Numpy array ( N_unmasked x 1 ) of float
         @rtype: array
         """
@@ -1172,7 +1173,7 @@ class Trajectory:
         for res in residues:
 
             i_res, i_border = self.__resWindow(res, border_res, rchainMap,
-                                          fit_atoms_left, fit_atoms_right)
+                                               fit_atoms_left, fit_atoms_right)
 
             try:
                 if not len( i_res ): raise PDBError, 'empty residue'
@@ -1210,12 +1211,12 @@ class Trajectory:
         Take list of value per atom, return list where all atoms of any
         residue are set to the highest value of any atom in that residue.
         (after applying mask)
-        
+
         @param atomValues: list 1 x N, values per atom
         @type  atomValues: [ float ]
         @param mask: list 1 x N, 0|1, 'master' atoms of each residue
         @type  mask: [1|0]
-        
+
         @return: Numpy array 1 x N of float
         @rtype: array
         """
@@ -1245,11 +1246,11 @@ class Trajectory:
         """
         Set value of all atoms of each residue to fluctuation of
         its gamma atom ( CG, SG, OG ).
-        
+
         @param fluctList: 1x N, precalculated list of values or
                           None (will be calculated new)
         @type  fluctList: [float]
-        
+
         @return: Numpy array 1 x N of float
         @rtype: [float]
         """
@@ -1268,10 +1269,10 @@ class Trajectory:
         """
         Convert list of atomic fluctuations to list of residue
         fluctuation.
-        
+
         @param atomFluctList: array 1 x N_atoms of float
         @type  atomFluctList: [float]
-        
+
         @return: array 1 x N_residues of float
         @rtype: [float]
 
@@ -1300,12 +1301,12 @@ class Trajectory:
     def __cmpLists( self, l1, l2 ):
         """
         Compare to lists by their first, then second, etc item.
-        
+
         @param l1: list
         @type  l1: [float]
         @param l2: list
         @type  l2: [float]
-        
+
         @return:  result of comparison (-1 == l1[i] < l2[i])
         @rtype: [-1|0|1]
         """
@@ -1323,12 +1324,12 @@ class Trajectory:
         regular expression L{ex_numbers} (or as strings, if no numbers are
         found)::
            f1, f2 - strings, e.g. 'frame_1_188.pdb'
-        
+
         @param f1: file name
         @type  f1: str
         @param f2: file name
         @type  f2: str
-        
+
         @return: result of comparison (-1 == f1 < f2)
         @rtype: -1|0|+1
         """
@@ -1350,24 +1351,24 @@ class Trajectory:
 
 
     def argsortFrames( self ):
-       """
+        """
        Prepare sorting list by file names. Assuming the file names contains
        some numbers seperated by non-number characters. Sorting is done after
        Nr1 then Nr2 then..
-       
+
        @return: list of frame sort order
        @rtype: [int]
        """
-       names = self.frameNames
+        names = self.frameNames
 
-       result = range(0, len(names) )
+        result = range(0, len(names) )
 
-       ## sort result but use items of names for the comparison
-       f_cmp = lambda i,j, ns=names: self.__cmpFileNames( ns[i], ns[j]) 
+        ## sort result but use items of names for the comparison
+        f_cmp = lambda i,j, ns=names: self.__cmpFileNames( ns[i], ns[j]) 
 
-       result.sort( f_cmp )
+        result.sort( f_cmp )
 
-       return result
+        return result
 
 
     def sortFrames( self, sortList=None ):
@@ -1377,7 +1378,7 @@ class Trajectory:
 
         @param sortList: list to sort after (default: None)
         @type  sortList: [int]
-        
+
         @raise TrajError: if sortList doesn't fit number of frames or names
         """
         if sortList == None:
@@ -1394,12 +1395,12 @@ class Trajectory:
     def sortAtoms( self, f_cmp=None ):
         """
         Sorts atoms B{WITHIN} residues in reference and all frames.
-        
+
         @param f_cmp: atom comparison function
                       C{ f_cmp( atoms[i], atoms[j]) -> -1|0|+1 }
                       (default: alphabetic ordering by atom['name'] )
         @type  f_cmp: function
-        
+
         @raise PDBModelError: if sorting has changed number of atoms in
                               reference
         """
@@ -1457,7 +1458,7 @@ class Trajectory:
         @param fit: fit to average structure before doing the PC analysis
                     (default: 1)
         @type  fit: 1|0
-        
+
         @return: Dictionary with results from the PC analysis::
                    dic {'p': projection of each frame in PC space,
                         'e': list of eigen values,
@@ -1471,9 +1472,9 @@ class Trajectory:
 
         ## return chached result if parameters haven't changed
         if pc != None and pc['fMask'] == fMask and pc['fit'] == fit and \
-               aMask == pc['aMask']:
+           aMask == pc['aMask']:
 
-                return pc
+            return pc
 
         evectors, proj, evalues = self.pca( aMask, fMask, fit )
 
@@ -1493,7 +1494,7 @@ class Trajectory:
     def pca( self, atomMask=None, frameMask=None, fit=1 ):
         """
         Calculate principal components of trajectory frames.
-        
+
         @param atomMask: 1 x N_atoms, [111001110..] atoms to consider
                          (default: all)
         @type  atomMask: [1|0]
@@ -1533,7 +1534,7 @@ class Trajectory:
         """
         Morph between the two extreme values of a single principal
         component.
-        
+
         @param ev: EigenVector to visualize
         @type  ev: int
         @param steps: number of intermediate frames
@@ -1545,7 +1546,7 @@ class Trajectory:
         @param morph: morph between min and max (1) or take real values (0)
                       (default: 1)
         @type  morph: 1|0
-        
+
         @return: Trajectory with frames visualizing the morphing.
         @rtype: Trajectory
         """
@@ -1598,7 +1599,7 @@ class Trajectory:
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test Adaptive clustering"""
 
@@ -1637,7 +1638,7 @@ class Test(BT.BiskitTest):
         ## fit backbone of frames to reference structure
         self.traj.fit( ref=self.traj.ref,
                        mask=self.traj.ref.maskBB(), verbose=self.local )
-        
+
         self.assertAlmostEqual( N.sum( self.traj.profile('rms') ),
                                 58.101235746353879, 2 )
 
