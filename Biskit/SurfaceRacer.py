@@ -257,7 +257,7 @@ class SurfaceRacer( Executor ):
         """
         curv = [] ## average curvature
         ms   = [] ## molecular surface area
-        as   = [] ## accessible surface area
+        asa  = [] ## accessible surface area
 
         try:
             out_file = open( self.f_out_name )
@@ -280,11 +280,11 @@ class SurfaceRacer( Executor ):
         for i in range( end ):
             curv += [ float( string.strip( lines[i][-11:-1] ) ) ]
             ms   += [ float( string.strip( lines[i][-17:-11] ) ) ]
-            as   += [ float( string.strip( lines[i][-24:-17] ) ) ]
+            asa  += [ float( string.strip( lines[i][-24:-17] ) ) ]
 
         result = {'curvature':N.array(curv),
                   'MS':N.array(ms),
-                  'AS':N.array(as),
+                  'AS':N.array(asa),
                   'surfaceRacerInfo':{'probe_radius':self.probe,
                                   'vdw_set':self.vdw_set}
                   }
