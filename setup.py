@@ -48,15 +48,23 @@ setup(
     description = 'A Python platform for structural bioinformatics',
 
     ## available on PyPi
-    install_requires=['numpy', 'ScientificPython', 'biopython', 'scipy',
-                      'biggles' ],
+    install_requires=['biggles', 'scipy', 'biopython', 'ScientificPython',
+                      'numpy' ],
 
     ## not available on PyPi
     dependency_links = \
-    # biggles
-      ['http://downloads.sourceforge.net/biggles/python2-biggles-1.6.5.tar.gz',
+    # biggles -- not available on PyPi
+     ['http://biskit.pasteur.fr/install/mirror/biggles-1.6.5.tar.gz',
+
+    # numpy, patched against issue #860 (overrides the PyPi download)
+    # http://projects.scipy.org/numpy/ticket/860
+      'http://biskit.pasteur.fr/install/mirror/numpy-1.3.0-patched.tar.gz',
+
+    # ScientificPython -- registered on PyPi but download doesn't work
+      'http://biskit.pasteur.fr/install/mirror/ScientificPython-2.8.tar.gz',
+
     # scipy -- is registered on pypi but the download doesn't work
-      'https://sourceforge.net/project/showfiles.php?group_id=27747'],
+      'http://biskit.pasteur.fr/install/mirror/scipy-0.7.0.tar.gz'],
 
     packages = find_packages(),
     include_package_data = True,
