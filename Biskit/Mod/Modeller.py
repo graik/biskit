@@ -74,7 +74,8 @@ class Modeller( Executor ):
        - info['mod_pdb'] contains the file name of the raw modeller PDB 
     """
 
-    MODEL_SCRIPT      = 'model_mult.py'
+    ## non-.py ending to prevent byte-compilation of template
+    MODEL_SCRIPT      = 'model_mult.py_'  
     MODEL_SCRIPT_PATH = T.dataRoot() + '/modeller/' + MODEL_SCRIPT
 
     F_RESULT_FOLDER = '/modeller'
