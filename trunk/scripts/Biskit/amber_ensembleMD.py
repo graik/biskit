@@ -242,7 +242,7 @@ class AmberController:
         each file."""
         if os.path.isdir( fname ):
 
-            if stripFilename( fname ) != 'CVS':
+            if stripFilename( fname ) not in ['CVS','.svn']:
 
                 files = os.listdir( fname )
                 for f in files:
@@ -250,6 +250,8 @@ class AmberController:
                 
         else:
             if not os.path.islink( fname ):
+                if fname[-9:] == '_template':
+                    os.rename( fname, fname[:-9] )
                 self.fillTemplate( fname, fname, self.__dict__ )
             
 
