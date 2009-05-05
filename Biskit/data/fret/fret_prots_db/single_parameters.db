@@ -1,0 +1,14 @@
+#name	#lift	#abs #emi	#epsi	#QY	#src	#Notes		
+
+Cerulean	3.3  	433 	475	43e3	0.62		
+Cerulean2 	3.42	433 	475	43e3	0.62		Cerulean V.2, changes in lifetime
+mCerulean	3.4 	433	475	44e3	0.62 	2Q57
+mCerulean2	3.5 	433	475	44e3	0.62	2Q57	mCerulean V.2, changes in lifetime
+
+Citrine	3.61	516	529	77e3	0.76		
+mCitrine	3.6 	516 	529 	77e3 	0.76	1HUY	
+mCitrine2	3.6	516	529	90e3	0.62	1HUY	mCitrine V.2, changes in epsilon (latest)
+
+Cherry	X	X	X	X	X		Not defined	(no data found)		
+mCherry	1.4	587	610	72e3	0.22		
+mCherry2	1.4	587	610	78e3	0.22		mCherry V.2, changes in epsilon parameter (latest)

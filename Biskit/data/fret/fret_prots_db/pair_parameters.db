@@ -1,0 +1,7 @@
+#acceptor	#donor     	#lifetime(ns) #overlap(nm^6)	#forsterDist(nm)	#Notes
+
+mCitrine	Cerulean	2.5	X	X		
+mCherry	GFP	1.99	X	X
+mCitrine	mCerulean	2.89	959732990869504	1.33	Using Short Linker (incorrect F distance?)
+mCitrine	mCerulean	3.37	959732990869504	1.33	Using Long Linker 
+mCherry	mCitrine	X	4020875636506624	X
