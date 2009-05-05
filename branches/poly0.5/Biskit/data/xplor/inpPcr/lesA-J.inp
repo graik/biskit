@@ -1,0 +1,15 @@
+REMARK Roger Abseher, Mar 1999
+REMARK 10 non-interacting segments named ( A B C D E F G H I J )
+
+cons
+interaction ( segid 0* ) ( segid 0* ) weights * 1.0 end
+interaction ( segid 1* ) ( segid 1* ) weights * 1.0 end
+interaction ( segid 2* ) ( segid 2* ) weights * 1.0 end
+interaction ( segid 3* ) ( segid 3* ) weights * 1.0 end
+interaction ( segid 4* ) ( segid 4* ) weights * 1.0 end
+interaction ( segid 5* ) ( segid 5* ) weights * 1.0 end
+interaction ( segid 6* ) ( segid 6* ) weights * 1.0 end
+interaction ( segid 7* ) ( segid 7* ) weights * 1.0 end
+interaction ( segid 8* ) ( segid 8* ) weights * 1.0 end
+interaction ( segid 9* ) ( segid 9* ) weights * 1.0 end
+end

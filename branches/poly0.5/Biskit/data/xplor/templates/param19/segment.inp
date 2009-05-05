@@ -1,0 +1,33 @@
+# use with pdb2xplor
+# generate one segment
+#
+#! $Revision$
+#! last $Date$
+#! last $Author$
+
+segment
+   name="%(segment_id)s"    
+   chain
+
+	LINK PEPP    HEAD - *     TAIL + PRO     END  { LINK to PRO }
+	LINK PEPT    HEAD - *     TAIL + *       END
+ 
+	FIRSt PROP                TAIL + PRO     END { nter for PRO }
+        FIRSt NACE                TAIL + ACE     END { don't patch ACE }
+	FIRSt NTER                TAIL + *       END
+ 
+	LAST  CNME   HEAD - NME			 END { don't patch NME }
+	LAST  CCBX   HEAD - CBX			 END { don't patch CBX }
+	LAST  CTER   HEAD - *                    END
+ 
+ 	SET ECHO=TRUE END     
+ 
+    ! load sequence from pdb
+    coordinates @%(segment_pdb)s
+   end
+end
+
+vector do (name="CD1") (name "CD"  and resname "ILE")  { rename ILE CD to CD1 }
+
+! load structure
+coordinates @%(segment_pdb)s

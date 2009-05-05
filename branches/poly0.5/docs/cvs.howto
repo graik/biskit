@@ -1,0 +1,76 @@
+last $Author$
+
+A more up-to-date version of this HowTo is on http://biskit.pasteur.fr.
+
+Project setup:
+--------------
+
+1) change into your project home directory
+2) set CVSROOT
+	> export CVSROOT=:pserver:raik@sheridan:/home/cvsroot
+3) login to the cvs server (cvs) with your password 
+	> cvs login
+4) import your project (called my-project) into the cvs server
+	> cvs import -d my-project my-project start
+	fill in message string and quit save vi (:qw OR CTRL-ZZ)
+
+Without setting CVSROOT
+-----------------------
+(e.g. to use several different cvs servers)
+cvs -d :pserver:raik@cvs:/home/cvsroot login
+cvs -d :pserver:raik@cvs:/home/cvsroot co biskit
+
+
+Changing, adding, removing files:
+--------------------------------
+
+o creating a complete local copy of the project into the current directory:
+	> cvs co my-project
+
+o commit changes to the server
+	1) update local copy to include all changes on the server and check for
+	   clashes
+		> cvs update -d -P
+		(checks all files in current dir and sub directories, ignores
+		empty directories)
+	2) commit new version to server
+		> cvs ci
+
+o add new file to the project
+	1) > cvs add file-name
+	2) > cvs ci
+
+o to remove file
+	1) remove local copy
+	2) > cvs rm file-name
+	3) > cvs ci
+
+	-> cvsrm.py automates 1 & 2
+
+Track statistics inside files:
+------------------------------
+
+$Author$	... inserts last author
+$Date$	... inserts last date
+$Revision$	... inserts last revision
+
+handle binary files:
+--------------------
+
+binary files get messed up when updated (keyword replacement)
+use option -kb to prevent that:
+
+cvs add -kb bin_file
+
+if the file is already checked in:
+
+cvs admin -kb bin_file
+
+access external CVS servers
+---------------------------
+
+export CVS_RSH=ssh
+
+Check out project:
+cvs -z3 -d:ext:graik@cvs.sourceforge.net:/cvsroot/crow co -P crow
+
