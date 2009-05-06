@@ -68,7 +68,7 @@ non-Python C libraries like netcdf (for ScientificPython) and
 plotutils (for biggles) and it requires that your system has the
 standard make and compiler tools as well as Python development files
 (headers) installed. You may thus be better off to install these
-dependencies beforehand from binary packages. 
+dependencies beforehand from pre-compiled packages. 
 
 Another advantage of the new setup is that we can now start creating
 Debian, RPM and even Windows installation packages -- these should be
@@ -79,6 +79,10 @@ Other changes:
 * fixed Intervor wrapper
 
 * Python 2.6 compatibility
+
+* no need of installing the old Numeric next to the new numpy
+
+* remove last depencies on old Numeric package from test data
 
 * some minor bug fixes
 
