@@ -1,0 +1,17 @@
+Source: biskit
+Maintainer: Raik Gruenberg & Johan Leckner <raik.gruenberg@crg.es>
+Section: python
+Priority: optional
+Build-Depends: python-setuptools (>= 0.6b3), python-all-dev (>= 2.3.5-11), debhelper (>= 5.0.38), python-central (>= 0.5.6)
+Standards-Version: 3.7.2
+XS-Python-Version: >= 2.5, << 3.0
+
+Package: python-biskit
+Architecture: all
+Depends: python-numpy, python-biopython, plotutils, gnuplot, pvm, pvm-dev, python-scipy, python-scientific, python (>= 2.4), python (<< 2.7), python-scipy, python-scientific
+Recommends: pymol
+Suggests: 
+XB-Python-Version: ${python:Versions}
+Provides: ${python:Provides}
+Description: Biskit - A Python platform for structural bioinformatics
+
