@@ -27,7 +27,7 @@
 from numpy import zeros,array
 from fretutils import dbPre
 from freterrorhandler import FRETErrorHandler
-
+import Biskit.tools as T
 
 
 class Chromophore:
@@ -35,7 +35,7 @@ class Chromophore:
 	Class for chromophore data storage, mainly the transition dipole moment references. It tries to load is parameters from DB.
 	"""
 	
-	DEFAULT_DB = './fret_prots_db/chromophores.db' # default value for database file
+	DEFAULT_DB = T.dataRoot()+'/fret/fret_prots_db/chromophores.db' # default value for database file
 	
 	def __init__(self,name,source,database="", verbose = True):
 		"""

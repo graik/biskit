@@ -2,28 +2,31 @@
 import math
 from numpy import *
 from emath import *
-from PolymerModel import PolymerModel
+from polymermodel import PolymerModel
 
 
 
 class WormLikeChainModel (PolymerModel):
 	
 	def __init__ ( self ):
+		"""
+		Instantiation function.
+		"""
 		PolymerModel.__init__(self)
 		self.Lc = 0.
-		self.p = 0 .
+		self.p = 0.
 	
 	
 	def getContourLengthFromX (self) :
 		"""
 		Self explanatory name. It returns polymer length for a given start to end separation.
 	
-		Input:
+		- Input:
 			p = persistence length (A)
 			x = start to end distance (A)
 			T = temperature, defaulted to rommtemperature (K)
 	
-		Output: 
+		- Output: 
 			Contour Length (A)
 	
 		Very accurate solver for large values of x.
@@ -31,8 +34,11 @@ class WormLikeChainModel (PolymerModel):
 		
 		PolymerModel.getContourLengthFromX(self)
 		
+		x = self.x; T = self.T;p=self.p; F= self.F
+		
 		k = 0.138 #K Boltzmann in pN  * A
-		Ec = (k * T) /(4.*p)
+		
+		Ec = (k * T) /(4.0*p)
 		
 		## x^3+ax^2+bx+c =0
 		a = -2.*x*(F+3.*Ec)/F
@@ -49,6 +55,8 @@ class WormLikeChainModel (PolymerModel):
 		"""
 		
 		PolymerModel.getContourLengthFromX(self)
+		
+		x = self.x; T = self.T;p=self.p; F= self.F
 		
 		k = 0.138 #pN A
 		Ec = (k * T) /(4.*p)
@@ -88,37 +96,60 @@ class WormLikeChainModel (PolymerModel):
 		"""
 		Worm Like Chain basic equation.
 		
-		Input:
+		- Input:
 			p = persistence length (A)
 			Lc = Contour Length (A)
 			x = start to end distance (A)
 			T = temperature, defaulted to rommtemperature (K)
 		
-		-Output: 
+		- Output: 
 			Force (pN)
 		"""
 		
 		PolymerModel.getForceFromX(self)
 		
 		k = 0.138 #pN * A
-		Ec = (k * T )/(4.*p)
+
+		Ec = (k * T )/(4.0*p)
 		
 		return Ec*(((1.-(x/Lc))**-2) - 1+(4*x/Lc))
 
+##############
+## Test
+##############
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+	""" Test cases for Polyfret"""
 	
+	def prepare(self):
+		pass
 
-#~ p = 4.;Lc = 5280.; x = 0.75*5280 
+	def cleanUp( self ):
+		pass
+	
+	def test_WLC(self):
+		"""WLC test cases"""
+		p = 4.;Lc = 5280.; x = 0.75*5280 
+		
+		wlc = WormLikeChainModel()
+		
+		wlc.p = p;wlc.Lc=Lc;wlc.x=x;wlc.T = 298.
+		
+		F =  wlc.getForceFromX(p,Lc,x)
+		
+		wlc.F = F
+		
+		Lc2 =  wlc.getContourLengthFromX()
+		Lc3 =  wlc.getContourLengthFromX2()
 
-#~ wlc = WormLikeChainModel()
+		self.assertEqual(Lc2[0] - Lc <2.,True)
+		self.assertEqual(Lc3[1] - Lc <2.,True)
+		
+		
+		
+if __name__ == '__main__':
+    BT.localTest()	
 
 
-#~ F=  wlc.getForceFromX(p,Lc,x)
-
-#~ Lc2=  wlc.getContourLengthFromX(p,x,F)
-#~ Lc3=  wlc.getContourLengthFromX2(p,x,F)
-
-#~ #print F, Lc, Lc2 ,Lc3
-
-#~ for i in range(0, 4000):
-	#~ print i, wlc.getForceFromX(p,Lc,i)
 	
