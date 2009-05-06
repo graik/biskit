@@ -30,6 +30,7 @@ from fretentity import FRETEntity
 from fretutils import dbPre
 from freterrorhandler import FRETErrorHandler, FRETFatal, FRETError
 from emath import norm
+import Biskit.tools as T
 
 class FRETPair (object) :
 	"""
@@ -39,7 +40,7 @@ class FRETPair (object) :
 	about the database see FRETPair::_loadFromDB doc.
 	"""
 	
-	DEFAULT_DB = './fret_prots_db/pair_parameters.db' # default value for database file
+	DEFAULT_DB = T.dataRoot()+'/fret/fret_prots_db/pair_parameters.db' # default value for database file
 	
 	
 	def __init__(self, donor,acceptor,database="", verbose = True):

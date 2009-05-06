@@ -191,7 +191,7 @@ class Block(object):
 		r  = []
 		if self.entity:
 			for i in self.intervals:
-				r += range(i.start,i.end)
+				r += i.getRange()
 			
 			self.entity.getStructData(r)
 

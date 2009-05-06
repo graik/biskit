@@ -47,12 +47,13 @@ class Interval:
 		rtype: bool
 		"""
 		for i in others:
-			if (not ((self.end > i.end and self.start > i.end) or (self.start<i.start and self.end < i.start))):
+			if not ( (self.end > i.end and self.start > i.end) or (self.start<i.start and self.end < i.start) ):
 				return True
+		
 		return False
 		
 	def __len__(self):
-		return self.end - self.end
+		return self.end +1 - self.start
 	
 	def __str__(self):
 		"""
@@ -67,13 +68,78 @@ class Interval:
 		"""
 		Interval comparison.
 		
-		@return: True if the two ntervals have the samestart and ending points.
+		@return: True if the two intervals have the same start and ending points.
 		@rtype: bool
 		"""
-		if o.start == self.start and o.end == self.end :
-			return 0
-		else :
+		if isinstance(o,Interval):
+			if o.start == self.start and o.end == self.end :
+				return 0
+			else :
+				return -1
+		elif isinstance(o,Spots):
+			return cmp(o,self)
+		else:
 			return -1
+	
+	def getRange( self ):
+		"""
+		Creates a list containing the vlaues of the range defined by start and end (where end is included!)
+		"""
+		return range(self.start,self.end+1)
+
+class Spots :
+	"""
+	Spots is a class for describing properties wich can be defined in lots of sectors of the structure. It can also
+	be used as an interval, or even as a group of intervals, but it's not recommended.
+	"""
+	
+	def __init__(self, mylist = []):
+		"""
+		Creation function.
+		
+		@param mylist: list containing an ensemble of spots for the propertie (for instance the index of all
+					Ca carbons.
+		@type mylst: int list
+		"""
+		self.desclist = mylist
+		
+	def __cmp__(self,o):
+		"""
+		Spot comparison.
+		
+		@return: True if the two spots are exactly the same.
+		@rtype: bool
+		"""
+		if isinstance(o,Spots):
+			if self.desclist == o.desclist :
+				return 0
+			else :
+				return -1
+		elif isinstance(o,Interval):
+			if len(self) == len(o) and self.desclist[0] == o.start:
+				return 0
+			else:
+				return -1
+		else:
+			return -1
+			
+	def __len__(self):
+		return len(self.desclist)
+	
+	def __str__(self):
+		"""
+		Returns a string representation of a Spots.
+		
+		@return : String representation.
+		@rtype: string
+		"""
+		return str(self.desclist)+"\n"
+		
+	def getRange( self ):
+		"""
+		Returns the list
+		"""
+		return self.desclist
 
 ##############
 ## Test
@@ -101,7 +167,7 @@ class Test(BT.BiskitTest):
 		e = Interval(5,9)
 		m = Interval(1,4)
 		n = Interval(9,10)
-		self.assertEqual (  c.checkOverlap([m,n]), False )
+		self.assertEqual (  c.checkOverlap([m,n]), True )
 		self.assertEqual (  c.checkOverlap([a,b]), False )
 		self.assertEqual (  c.checkOverlap([b]), False )
 		self.assertEqual (  c.checkOverlap([d1]),True )
@@ -120,6 +186,23 @@ class Test(BT.BiskitTest):
 			
 		a = Interval(3,1,False)
 		self.assertEqual ( "Swapping start and end" in a.ehandler.lastWarning,True)
+		
+		
+	def test_Spots(self):
+		"""Spots test cases """
+		
+		s1 = Spots(range(0,31))
+		s2 = Spots(range(0,31))
+		s3 = Spots(range(0,6))
+		c = Interval(0,5)
+		self.assertEqual (   len(s1), 31)
+		self.assertEqual (  s1, s2)
+		self.assertNotEqual (  s1, s3)
+		self.assertNotEqual (  s1 ,c)
+		self.assertNotEqual (  c , s1)
+		self.assertNotEqual (  c , s2)
+		self.assertEqual (  c , s3)
+		self.assertEqual (  s3, c)
 		
 if __name__ == '__main__':
 
