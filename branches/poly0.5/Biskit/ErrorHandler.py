@@ -53,7 +53,7 @@ class ErrorHandler( object ):
         self.lastError =  ""
         self.lastWarning = ""
         self.verbose = verbose   # report errors to log; set to False for silent mode
-	self.fails = True
+        self.fails = True
 
     def __reportException( self, error=True, trace=True ):
         """
@@ -94,7 +94,9 @@ class ErrorHandler( object ):
                 
         if self.verbose:
             self.log.add(s)
-        raise FatalError, s
+        
+        if fails:
+            raise FatalError, s
 
 
     def error( self, message, error=True, trace=True ):
@@ -117,7 +119,9 @@ class ErrorHandler( object ):
 
         if self.verbose:
             self.log.add(s)
-        raise NormalError, s
+            
+        if fails:
+            raise NormalError, s
 
 
     def warning( self, message, error=1, trace=0 ):
