@@ -1,3 +1,10 @@
+"""
+Comments from Raik:
+* I moved the docstrings into the def: ...
+* documentation missing for some.
+* some tests?
+"""
+
 
 from math import cos, sin, tan, sqrt, atan2,acos
 from numpy import matrix
@@ -69,11 +76,11 @@ def sphericalAngles( coord= [1.,0.,0.]):
 
 
 
-""" 
-cbrt(x) = x^{1/3}, if x >= 0 = -|x|^{1/3}, if x < 0 
-""" 
 
 def cbrt(x): 
+	""" 
+	cbrt(x) = x^{1/3}, if x >= 0 = -|x|^{1/3}, if x < 0 
+	""" 
 	from math import pow 
 	if x >= 0: 
 		return pow(x, 1.0/3.0) 
@@ -82,19 +89,19 @@ def cbrt(x):
 	
 
 	
-""" 
-Convert from polar (r,w) to rectangular (x,y) x = r cos(w) y = r sin(w)
-""" 
 def rect(r, w, deg=0): # radian if deg=0; degree if deg=1 
+	""" 
+	Convert from polar (r,w) to rectangular (x,y) x = r cos(w) y = r sin(w)
+	""" 
 	from math import cos, sin, pi 
 	if deg: 
 		w = pi * w / 180.0 
 		return r * cos(w), r * sin(w) 
 		
-"""
-Convert from rectangular (x,y) to polar (r,w) r = sqrt(x^2 + y^2) w = arctan(y/x) = [-\pi,\pi] = [-180,180] 
-""" 
 def polar(x, y, deg=0): # radian if deg=0; degree if deg=1 
+	"""
+	Convert from rectangular (x,y) to polar (r,w) r = sqrt(x^2 + y^2) w = arctan(y/x) = [-\pi,\pi] = [-180,180] 
+	""" 
 	from math import hypot, atan2, pi 
 	if deg: 
 		return hypot(x, y), 180.0 * atan2(y, x) / pi 
@@ -102,11 +109,11 @@ def polar(x, y, deg=0): # radian if deg=0; degree if deg=1
 		return hypot(x, y), atan2(y, x) 
 		
 
-""" 
-x^2 + ax + b = 0 (or ax^2 + bx + c = 0) By substituting x = y-t and t = a/2,
-the equation reduces to y^2 + (b-t^2) = 0 which has easy solution y = +/- sqrt(t^2-b) 
-""" 
 def quadratic(a, b, c=None): 
+	""" 
+	x^2 + ax + b = 0 (or ax^2 + bx + c = 0) By substituting x = y-t and t = a/2,
+	the equation reduces to y^2 + (b-t^2) = 0 which has easy solution y = +/- sqrt(t^2-b) 
+	""" 
 	import math, cmath 
 	if c: # (ax^2 + bx + c = 0) 
 		a, b = b / float(a), c / float(a)
@@ -119,21 +126,21 @@ def quadratic(a, b, c=None):
 	y2 = -y1 
 	return y1 - t, y2 - t 
 	
-"""
-x^3 + ax^2 + bx + c = 0  (or ax^3 + bx^2 + cx + d = 0)
-With substitution x = y-t and t = a/3, the cubic equation reduces to    
-    y^3 + py + q = 0,
-where p = b-3t^2 and q = c-bt+2t^3.  Then, one real root y1 = u+v can
-be determined by solving 
-    w^2 + qw - (p/3)^3 = 0
-where w = u^3, v^3.  From Vieta's theorem,
-    y1 + y2 + y3 = 0
-    y1 y2 + y1 y3 + y2 y3 = p
-    y1 y2 y3 = -q,
-the other two (real or complex) roots can be obtained by solving
-    y^2 + (y1)y + (p+y1^2) = 0
-"""
 def cubic(a, b, c, d=None):
+	"""
+	x^3 + ax^2 + bx + c = 0  (or ax^3 + bx^2 + cx + d = 0)
+	With substitution x = y-t and t = a/3, the cubic equation reduces to    
+		y^3 + py + q = 0,
+	where p = b-3t^2 and q = c-bt+2t^3.  Then, one real root y1 = u+v can
+	be determined by solving 
+		w^2 + qw - (p/3)^3 = 0
+	where w = u^3, v^3.  From Vieta's theorem,
+		y1 + y2 + y3 = 0
+		y1 y2 + y1 y3 + y2 y3 = p
+		y1 y2 y3 = -q,
+	the other two (real or complex) roots can be obtained by solving
+		y^2 + (y1)y + (p+y1^2) = 0
+	"""
 	from math import cos
 	if d:			# (ax^3 + bx^2 + cx + d = 0)
 		a, b, c = b / float(a), c / float(a), d / float(a)
