@@ -1,4 +1,3 @@
-##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
 ##
@@ -24,7 +23,7 @@
 """
 Default Error Handler for Biskit classes.
 """
-    
+
 import Biskit.tools as T
 from Biskit.LogFile import ErrLog
 from Biskit.Errors import HandledError, NormalError, FatalError
@@ -34,53 +33,90 @@ class ErrorHandler( object ):
     Default Error Handler for Biskit classes.
     """
 
-    def __init__( self, log=None ):
+    def __init__( self, log=None, verbose=True ):
         """
         @param log: target of error messages, None->StdErr (default: None)
         @type  log: LogFile
+        @param verbose: report errors to log,if False, errors are only silently 
+                        written to ErrorHandler.lastError and .lastWarning
+                        (default: True)
+        @type verbose: bool
         """
         self.log = log or ErrLog()
+        self.lastError =  ""
+        self.lastWarning = ""
+        self.verbose = verbose   # report errors to log; set to False for silent mode
 
 
-    def fatal( self, message ):
+    def __reportException( self, error=True, trace=True ):
+        """
+        Re-format and report last exception in backtrace.
+        @param error: report Exception with line (default: 1)
+        @type  error: 1||0
+        @param trace: report error trace of last exception (if any)
+        @type  trace: bool
+        @return: str, Line of error
+        """
+        r = ''
+        try:
+            if error:
+                r += '\n\t' + T.lastError() + '\n'
+            if trace:
+                r += 'TraceBack: \n' + T.lastErrorTrace() + '\n'
+        except AttributeError, err:
+            ## no exception in stack
+            pass
+        return r
+        
+    def fatal( self, message, error=True, trace=True ):
         """
         Handle a fatal error (likely a bug), stop program execution.
-        
+
         @param message: message to be given to user
         @type  message: str
-        
+        @param error: report Exception with line (default: 1)
+        @type  error: 1||0
+        @param trace: report error trace of last exception (if any)
+        @type  trace: bool
+
         @raise FatalError: 
         """
         s = '\nFatal Error: '+str(message)
-        s += '\n\t' + T.lastError() + '\n'
-        s += 'TraceBack: \n' + T.lastErrorTrace() + '\n'
+        s += self.__reportException( error=error, trace=trace )
+        self.lastError = s
+                
+        if self.verbose:
+            self.log.add(s)
+        raise FatalError, s
 
-        self.log.add(s)
-        raise FatalError
 
-
-    def error( self, message ):
+    def error( self, message, error=True, trace=True ):
         """
         Handle a normal error (like non-existing file) that is not
         necessarily a bug.
-        
+
         @param message: message to be given to user
         @type  message: str
-        
+        @param error: report Exception with line (default: 1)
+        @type  error: 1||0
+        @param trace: report error trace of last exception, if any (default: 1)
+        @type  trace: bool
+
         @raise NormalError: 
         """
         s = '\nError: '+str(message)
-        s += '\n\t' + T.lastError()
-        s += '\nTraceBack: \n' + T.lastErrorTrace() + '\n'
+        s += self.__reportException( error=error, trace=trace )
+        self.lastError = s
 
-        self.log.add(s)
-        raise NormalError
+        if self.verbose:
+            self.log.add(s)
+        raise NormalError, s
 
 
     def warning( self, message, error=1, trace=0 ):
         """
         Issue a warning. No exception is raised.
-        
+
         @param message: message to be given to user
         @type  message: str
         @param error: report Exception with line (default: 1)
@@ -89,16 +125,11 @@ class ErrorHandler( object ):
         @type  trace: 1||0
         """
         s = '\nWarning (ignored): '+str(message)
-        try:
-            if trace: error = 1
-            if error:
-                s += '\n\t' + T.lastError() + '\n'
-            if trace:
-                s += '\nTraceBack: \n' + T.lastErrorTrace() + '\n'
-        except:
-            pass
+        s += self.__reportException( error=error, trace=trace )
+        self.lastWarning = s
 
-        self.log.add(s)
+        if self.verbose:
+            self.log.add(s)
 
 
 
@@ -109,31 +140,31 @@ import Biskit.test as BT
 
 class Test(BT.BiskitTest):
     """ErrorHandler test"""
-    
+
     def prepare(self):
         import tempfile
-	self.f_out = tempfile.mktemp( '_test_ErrorHandler' )
+        self.f_out = tempfile.mktemp( '_test_ErrorHandler' )
 
     def cleanUp(self):
         T.tryRemove( self.f_out )
-            
+
     def test_ErrorHandler( self ):
         """ErrorHandler test"""
         from Biskit.LogFile import LogFile
-        
+
         self.err_log = LogFile( self.f_out )
-        
+
         self.e = ErrorHandler( log=self.err_log )
         self.e.warning( 'A warning' )
 
         if self.local:
             print 'An error log file was written to %s'%self.f_out
 
-	lines = open(self.err_log.fname).readlines()
-	self.assertEquals(lines[-1],'Warning (ignored): A warning\n')
-        
+        lines = open(self.err_log.fname).readlines()
+        self.assertEquals(lines[-1],'Warning (ignored): A warning\n')
+
 if __name__ == '__main__':
 
     BT.localTest(debug=0)
-    
+
 
