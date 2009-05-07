@@ -31,6 +31,13 @@ from Biskit.Errors import HandledError, NormalError, FatalError
 class ErrorHandler( object ):
     """
     Default Error Handler for Biskit classes.
+    
+    Note: When the parameter "fails" is set to False then no exception is raised. 
+    Its purpose is only for error hunting in test cases, which means that you want
+    to see if an error occurred and this is not treated as a program failure.
+    "fails" parameter musn't be used by a final user, only for those contributors
+    who want to do their own test cases.
+    
     """
 
     def __init__( self, log=None, verbose=True ):
@@ -46,7 +53,7 @@ class ErrorHandler( object ):
         self.lastError =  ""
         self.lastWarning = ""
         self.verbose = verbose   # report errors to log; set to False for silent mode
-
+	self.fails = True
 
     def __reportException( self, error=True, trace=True ):
         """
