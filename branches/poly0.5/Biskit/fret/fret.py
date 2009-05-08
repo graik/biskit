@@ -163,9 +163,9 @@ class FRET:
         n4 = self.refr_index **4
         
         if kappa2 == None:
-            k2 = kappa2
-        else:
             k2 = self.k2
+        else:
+            k2 = kappa2 
         
         self.R0 = (8.79e-5*k2*self.qyD*self.overlap/n4) ** (1./6) 
         
@@ -196,9 +196,6 @@ class Test(BT.BiskitTest):
 		#efficiency at Forster distance is 0.5
 		self.assertAlmostEqual( 0.5 , self.fret.energyTransferEfficiency(self.fret.calcR0()),2)
 		
-		#k2 may be overwritten
-		self.fret.energyTransferEfficiency(50.,3.)
-		self.assertEqual(self.fret.k2,3.)
 		
 	def test_K2(self):
 		"""K2 calculation test (mCerulean- mCitrine)"""
