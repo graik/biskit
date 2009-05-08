@@ -89,13 +89,12 @@ class ErrorHandler( object ):
         @raise FatalError: 
         """
         s = '\nFatal Error: '+str(message)
-        s += self.__reportException( error=error, trace=trace )
-        self.lastError = s
-                
+        self.lastError = s 
         if self.verbose:
+            s += self.__reportException( error=error, trace=trace )
             self.log.add(s)
         
-        if fails:
+        if self.fails:
             raise FatalError, s
 
 
@@ -114,13 +113,12 @@ class ErrorHandler( object ):
         @raise NormalError: 
         """
         s = '\nError: '+str(message)
-        s += self.__reportException( error=error, trace=trace )
         self.lastError = s
-
         if self.verbose:
+            s += self.__reportException( error=error, trace=trace )
             self.log.add(s)
             
-        if fails:
+        if self.fails:
             raise NormalError, s
 
 
@@ -136,8 +134,9 @@ class ErrorHandler( object ):
         @type  trace: 1||0
         """
         s = '\nWarning (ignored): '+str(message)
-        s += self.__reportException( error=error, trace=trace )
         self.lastWarning = s
+        s += self.__reportException( error=error, trace=trace )
+        
 
         if self.verbose:
             self.log.add(s)
