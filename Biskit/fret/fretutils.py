@@ -28,31 +28,6 @@
 Support functions for FRET Module. 
 """
 
-"""
-Comments from Raik: Looks good!
-
-* overlapCalc: no print statements in methods, please!
-* plot3D...: should really use an Executor instance. os.system-style code
-             is notoriously difficult to maintain.
-* tests?
-"""
-## Example of Gnuplot Executor:
-
-from Biskit import Executor
-
-class Gnuplotter( Executor ):
-	"""
-	should work like this...
-	See Xplorer.py for a full example
-	
-	You can provide the script as a string and the completed script will be
-	piped into the program -- in this case you won't even touch the hard disk.
-	"""
-
-	def __init__( self, template='', **kw ):
-		super( Gnuplotter, self).init( 'gnuplot', template=template, **kw)
-
-
 
 def dbPre (str ,type='int',default=0,ehandler = None):
 	"""
@@ -65,6 +40,7 @@ def dbPre (str ,type='int',default=0,ehandler = None):
 	@param infos:    dictionary of existing meta infos
 	@type  infos:    { 'name' : { 'date' : ... } }
 	"""
+	
 	
 	if   'X' in str:
 		return default
@@ -108,10 +84,10 @@ def overlapCalc ( wl,acc_spectra,don_spectra, e_cof ):
 	from numpy import sum
 	
 	area = sum(don_spectra)
-	print  "Area: "+str(area)	
+	#~ print  "Area: "+str(area)	
 	don_spectra = don_spectra/area
 	newintegral =sum(don_spectra)
-	print "Now area is: "+str(newintegral)
+	#~ print "Now area is: "+str(newintegral)
 	e_spectra =acc_spectra*e_cof
 	return sum( wl**4*don_spectra*e_spectra)
 	
