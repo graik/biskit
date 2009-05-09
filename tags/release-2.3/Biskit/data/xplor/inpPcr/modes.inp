@@ -1,0 +1,77 @@
+REMARK heat ensemble for 0.1 ps at 25 K and write out ensemble trajectory
+REMARK Michael Nilges, IP, 05-APR-2002
+
+system echo '"'`pwd`'"' > pwd
+system echo '"'`cd ..; pwd`'"' > pwdRoot
+
+evaluate ($projectroot = @@pwdRoot )
+evaluate ($structureid = @@segid )
+evaluate ($projectroot = $projectroot + "/")
+
+evaluate ($trajoutfile = "traj.temp")
+evaluate ($nstep = @@nstep )
+evaluate ($nstep = $nstep / 2)
+
+! read in psf file for a monomer
+evaluate ($structurefile = $projectroot + $structureid + "/" + $structureid + ".psf")
+
+structure @@$structurefile end
+
+evaluate ($startpdbfile  = $projectroot + $structureid + "/" + $structureid + ".pdb")
+coor @@$startpdbfile
+
+! calculate number of modes for this structure and generate a uniform eigenvalue file
+eval ($evalfile = $structureid + "_" + "uniform" + "_" + "eval.dat")
+coor select  @@atomselection  end
+delete selection= (not @@atomselection ) end
+
+evaluate ($Nresidues = $select)
+evaluate ($Nmodes = min(250,3*$Nresidues))
+
+evaluate ($temperature = 1/ $kboltz)
+
+coor @@$startpdbfile 
+coor copy end 
+
+evaluate ($count = 0) 
+while ($count lt $nstep) loop writ
+   evaluate ($count = $count + 1)
+   evaluate ($INfile = "temp" + encode($count) + ".pdb")
+   coor @@$INfile
+   coor sele= @@atomselection  fit end
+   if ($count eq 1) then
+     write traj
+        ascii true
+        output= $trajOUTfile
+     end
+   else
+     write traj next end
+   end if
+end loop writ
+close $trajoutfile end
+
+eval ($evecfile = "evec.temp")
+eval ($evalfile = "eval.temp")
+eval ($averfile = "aver.temp")
+eval ($gmodfile = "gmod.temp")
+
+!set message debug end
+
+dyna anal mode
+   ascii true
+   input $trajoutfile
+   begin 1   skip 1   stop $nstep
+   group = @@atomselection
+   nmod = $nmodes
+   fout = $evalfile
+   eout = $evecfile
+   cout = $averfile
+   mout = $gmodfile
+   temp $temperature 
+   qprint true
+   qharm false
+end
+
+stop
+
+

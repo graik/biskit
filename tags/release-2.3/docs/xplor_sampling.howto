@@ -1,0 +1,379 @@
+.. ===================================================================
+.. Biskit, a toolkit for the manipulation of macromolecular structures
+.. Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
+..
+.. This program is free software; you can redistribute it and/or
+.. modify it under the terms of the GNU General Public License as
+.. published by the Free Software Foundation; either version 2 of the
+.. License, or any later version.
+..
+.. This program is distributed in the hope that it will be useful,
+.. but WITHOUT ANY WARRANTY; without even the implied warranty of
+.. MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+.. General Public License for more details.
+..
+.. You find a copy of the GNU General Public License in the file
+.. license.txt along with this program; if not, write to the Free
+.. Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+..
+..
+.. last $Author$
+.. last $Date$
+.. $Revision$
+.. ===================================================================
+.. See also: http://biskit.pasteur.fr/use/workflows/sampling-xplor
+
+
+This document describes how to sample conformal space for a protein 
+using Biskit and Xplor. 
+
+The default setting of the Xplor structure sampling script is to run
+ten independent trajectories of 50 ps length each with the structure 
+embedded in a 9 A layer of explicit water.
+
+Large-scale correlated motions usually escape the sampling of MD simulations. 
+A second alternate approach is to run the simulation with an identical 
+protocol, except a weak restraint is used to alleviate this problem. 
+Large-scale, correlated motions typically occur along small gradients in 
+the energy landscape. They are hence slow, but, on the other hand, they can 
+be boosted by small interventions. The restraint acts on the ensemble of ten 
+concurrent trajectories as a whole and increases the variability along 
+the major principal components of motion. The computational cost of this 
+principal component restrained simulation (PCR-MD) is similar to the 
+classic approach described above, but the ensemble is considerably more 
+diverse.
+
+ Technical rap (extracted from `Grunberg, Leckner and Nilges (2004)`_):
+  Simulations are performed with a modified version of X-PLOR 
+  by using the CHARMM19 force field and an electrostatic cutoff of 
+  12 A with force shifting. The protein is surrounded by a 9 A layer of 
+  TIP3 water molecules, and the solvent is briefly equilibrated.
+  Ten copies will be the starting point for parallel simulations of 50 ps 
+  length, summing up to 500 ps total simulation time per system (default setting). 
+  SHAKE constraints are put on all bonds to hydrogens and on all TIP3 waters. 
+  Each copy is heated from 100 to 300 K in 50 K steps of 1 ps each, followed 
+  by additional 5 ps of equilibration with continued reassignment of 
+  velocities every 1 ps. The temperature is kept constant by explicit 
+  coupling to a heat bath via Langevin dynamics and a friction coefficient 
+  of 20 ps^-1 for water oxygens and between 0.5 and 5.5 ps^-1 for protein 
+  atoms, dependent on their solvent accessible area. A time step of 2 fs 
+  is used. 
+
+  The principal component restrained simulation are performed with identical 
+  setup but by adding an additional force onto the potential acting along 
+  the principle components of motion, basically as described by 
+  `Abseher and Nilges (2000)`_. In difference to the published method, we 
+  redefined the principal components iteratively during the calculation. 
+
+
+**None:**
+To run this you need a modified version of XPLOR that is 
+available upon request.
+
+
+--------------------------------------------------------------------
+
+========
+Contents	
+========
+
+- `Preparing the structure`_
+- `Conformal sampling without PCR`_
+- `Conformal sampling with PCR`_
+- `Create a trajectory`_
+- `Cluster the trajectory frames`_
+
+--------------------------------------------------------------------
+
+
+Preparing the structure
+=======================
+
+As you probably are aware of, pdb-files are quite often a mess 
+-- missing atoms, none-standard amino acids, alternate positions 
+of atoms ... in summary there are a lot of things that protein-protein 
+docking programs and molecular dynamics programs can't handle. To 
+remedy this we have written a script, *pdb2xplor.py*,  that take care 
+of the most common problems. The task of the script is to prepare a 
+pdb-file for XPLOR (which like all MD programs is a quite picky about 
+the structures you feed it). Furthermore, XPLOR is used to add missing 
+atoms (according to the CHARMm19force field).
+
+Changes made "cleaning" the pdb-file include:
+
+- Consecutive numbering of residues
+- Missing atoms are added
+- Alternate positions of residues are discarded (most populated position is used)
+- None standard residues are replaced with closest standard residue
+- chain breaks are detected
+- crystall waters are collected
+- All HETATM records are lost (`Note 1`_)
+- Tries to remove redundant chains. For example, if the pdb-file contains 4
+  identical peptide chains the script will assume that there are 4 in the
+  assymetric unit and it will discard 3 of them. (`Note 2`_)
+
+
+Calling *pdb2xplor.py* without any options will give you all the available arguments.
+The arguments we will use here are::
+
+          -i           the input pdb-file
+          -c        .. start chain labeling at position c in the alphabet.
+                       (i.e. -c 3 means, chains are labeled D, E, etc.)
+          -cmask    .. chain mask for overriding the default sequence identity
+                       based cleaning (e.g. 1 0 0 1 0 0 )
+          -exe      .. also execute XPLOR, write log to file
+
+
+**NOTE** The name of the input pdb-file has to be:
+
+- at least 5 characters long (the first 4 characters will be used
+  as a name for the cleaned pdb file)
+- has to start with a number.
+
+If your structure meet the criteria above you can now run
+the *pdb2xplor.py* script for your structure. In this example 
+we'll assume that you have a pdb file called *1structure.pdb*
+in a folder called *project_folder*.
+
+>>> cd project_folder
+>>> pdb2xplor.py -i 1structure.pdb -exe
+
+ Comment: 
+ The *-exe* option tells the script to start the XPLOR job before exiting 
+ (this assumes  that you have setup the path to XPLOR-NIH correctly in your 
+ *~/.biskit/settings.dat* file). The XPLOR job might take quite some time 
+ depending on your hardware. Running the script without the *-exe* option 
+ is much quicker but then you will have to run the minimization manualy 
+ before continuing to the next step.
+
+>>> xplor-nih < 1structure.inp > 1structure.log
+
+You have now three cleaned and minimized structures with corresponding psf-files::
+
+ project_folder/1STR.pdb  and  1STR.psf
+
+
+Note 1
+------
+If you want to keep HETATM records in your pdb-files you will have to edit the
+generate.inp file manually. I addition you will also need to find or create a parameter 
+and topology files for the CHARMm19 forcefield. A good start for locating parameters is
+the HIC-Up server (http://xray.bmc.uu.se/hicup/).
+
+You will have to add something like this to your generate.inp file::
+
+ topology                  
+    @@/home/myself/substrate.top
+ end
+
+ parameter                  
+    @@/home/myself/substrate.par
+ end
+
+ segment name="SUBS"
+    chain
+     coordinates @/home/myself/substrate.PDB
+    end
+ end
+ coordinates @/home/myself/substrate.PDB
+
+
+Note 2
+------
+By default *pdb2xplor.py* compares the pairwise sequence identity between all
+chains and uses this info to guess which chains to remove. This behavior can be overridden 
+by giving the script a chain map as an command line option.
+
+Example:
+You have a pdb-file with 4 chains -- A,B,C and D. Your protein is a homodimer 
+and the dimers are A-B and C-D. Then you should call *pdb2xplor.py* like this:
+
+>>> pdb2xplor.py -i 1structure.pdb -cmap 1 1 0 0
+
+
+--------------------------------------------------------------------
+
+
+Conformal sampling without PCR
+==============================
+
+This example starts a simulation on localhost without any principal 
+component restraints. The simulation will run 10 MD simulations in 
+parallell (for greater ensemble diversity) and will result in 500 
+shapshots (separated by 1 ps, 500 x 2 fs time steps).
+
+**NOTE:** 
+This is a time consuming step! Depending on the size of your system and 
+the hardware you are using the simulation will take anything from days to 
+months. 
+
+Extracted from the *runPCR.py* help screen::
+
+ Syntax: runPCR -t |psfFolder| -h |host|
+                [-f |Force| -r |resultFolder| -n |nice| -i |inpFolder| ]
+
+ Options:
+        -f      force constant for PCR restraint
+        -r      base folder for result (sub-folders will be created)
+        -t      folder with topology (psf, pdb)
+        -n      nice value
+        -h      host computer (accessible via ssh)
+        -i      folder with all input files, must contain restart_h2o.inp'
+        -parm   folder with param19.* files
+
+ Default options:
+        - f     0
+        - i     ~/biskit/external/xplor/inpPcr
+        - h     localhost
+        - parm  ~/biskit/external/xplor/toppar
+        - n     0
+        - r     .
+        - nstep 500
+
+Create an output foldre for the simulation.
+
+>>> mkdir str_pcr_00
+
+Now start the simulation. If you want to run it on another host than 
+the localhost you need `pasword free ssh access`_ to that machine.
+
+>>> runPcr.py -t project_folder \
+>>>           -r str_pcr_00 \
+>>>           -h localhost
+
+The script returns information about the simulation that is usefull
+if you need to stop or restart the simulation::
+
+    host: localhost
+    pid:  14500
+    nice: 0
+    binary:        /shared_bin/xplor/ifcxplor
+    result folder: /mnt/data/shared_bin/biskit/project_folder/str_pcr_00/pcr_00
+    topology:      /mnt/data/shared_bin/biskit/project_folder/
+    force:         0
+
+
+--------------------------------------------------------------------
+
+
+Conformal sampling with PCR
+===========================
+
+This example starts a simulation on localhost with principal 
+component restraints. The simulation will run 10 MD simulations in 
+parallell (for greater ensemble diversity) and will result in 500 
+shapshots (separated by 1 ps, 500 x 2 fs time steps).
+
+The pcr force is specified by the *-f* argument to *runPcr.py*. 
+A resonable value for the pcr force is something close to 0.2 times 
+the number of amino acids. Here we will assume that the protein
+we want to sample has 200 amino acids and therefore we'll give
+a pcr force of 40.
+
+**NOTE:** 
+This is a time consuming step! Depending on the size of your system and 
+the hardware you are using the simulation will take anything from days to 
+months. 
+
+
+Create an output foldre for the simulation.
+
+>>> mkdir str_pcr_40
+
+Now start the simulation. If you want to run it on another host than 
+the localhost you need `pasword free ssh access`_ to that machine.
+
+>>> runPcr.py -t project_folder \
+>>>           -r str_pcr_40  \
+>>>           -f 40 -h localhost
+
+The script returns information about the simulation that is usefull
+if you need to stop or restart the simulation::
+
+    host: localhost
+    pid:  14800
+    nice: 0
+    binary:        /shared_bin/xplor/ifcxplor
+    result folder: /mnt/data/shared_bin/biskit/project_folder/str_pcr_40/pcr_40
+    topology:      /mnt/data/shared_bin/biskit/project_folder/
+    force:         0
+
+--------------------------------------------------------------------
+
+Create a trajectory
+===================
+
+The following step is to collect the simulation snapshots into
+a trajectory object. This is quite time consuming and has therefore been 
+parallellized through PVM. The first step is thus to start the 
+pvm deamon (if not already running).
+
+>>> pvm  
+
+Create a *model* folder in the *str_pcr_40*  folder
+
+>>> cd ~/project_folder/str_pcr_40
+>>> mkdir model
+
+*pdb2model.py* is a parallellized script that converts all the pdb 
+snapshots into PDBModels. The script reads the pdb files from the 
+*str_pcr_40* folder, strips of any water molecules and writes PDBModels 
+into the model folder. 
+
+>>> pdb2model.py -i str_pcr_40/*.pdb \
+>>>              -a -wat -o model/
+
+*pdb2traj.py* collects the PDBModels created by *pdb2model.py* and fits 
+them all to a given reference structure, deletes the waters and 
+writes a trajectory output file: *traj.dat*
+
+>>> pdb2traj.py -i model/*.model \
+>>>             -r ../1STR.pdb -wat -f
+  
+
+--------------------------------------------------------------------
+
+Cluster the trajectory frames
+=============================
+We don't want to use all 500 snapshots for the docking, rather we
+want to select representative structures from the ensemble. In this
+example we select 10 conformers and we do this by means of 
+fuzzy clustering, where each picked structure is a cluster center.
+
+*selectModels.py* will cluster the trajectory snapshots in ten clusters. 
+The structure closest to the center of each cluster will be written 
+to disc as a PDBModel and a model dictionary.
+
+>>> mkdir project_folder/clustered
+>>> cd project_folder/clustered
+
+>>> selectModels.py -i ../str_pcr_40/traj.dat \    
+>>>		    -n 10 
+
+  **Comment:** 
+  This creates n pickled Biskit.PDBModel instances and a
+  pickled dictionary that contains all of them indexed by cluster
+  number. The dictionary is the input to the Biskit docking routines.
+
+If you need PDB files...
+
+>>> model2pdb.py -i *model
+
+--------------------------------------------------------------------
+
+.. ============================================================================
+.. ========== following this line are reStructuredText links ==================
+
+.. _`Abseher and Nilges (2000)` : http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=pubmed&dopt=Abstract&list_uids=10737930&query_hl=3&itool=pubmed_docsum
+.. Abseher R, Nilges M. 
+.. Efficient sampling in collective coordinate space.
+.. Proteins. 2000 Apr 1;39(1):82-8. 
+
+.. _`Grunberg, Leckner and Nilges (2004)` : http://www.ncbi.nlm.nih.gov/entrez/query.fcgi?cmd=Retrieve&db=pubmed&dopt=Abstract&list_uids=15576027&query_hl=5&itool=pubmed_docsum
+.. Grunberg R, Leckner J, Nilges M.
+.. Complementarity of structure ensembles in protein-protein binding.
+.. Structure. 2004 Dec;12(12):2125-36.
+
+.. _`pasword free ssh access`: install/detailed-instructions/detailed-installation-instructions-for-biskit#note-4
+
+
