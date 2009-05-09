@@ -18,7 +18,8 @@
 ## building debian binary package
 ##   dpkg-source -x biskit_2.3-1.dsc
 ##   cd biskit-2.3/
-##   cp ../../distribution/control debian/  ## fix control; edit if needed
+##   cp ../../packaging/control debian/  ## fix control; edit if needed
+##   cp ../../packaging/copyright debian/
 ##   dpkg-buildpackage -rfakeroot -uc -b
 ##   (this may require: sudo apt-get install python-all-dev)
 ##   (deb file located in deb_dist/)
@@ -45,7 +46,7 @@ setup(
     download_url = 'https://sourceforge.net/project/platformdownload.php?group_id=150896',
     author = 'Raik Gruenberg, Johan Leckner, and more',
     author_email = 'raik.gruenberg@crg.es',
-    description = 'Biskit - A Python platform for structural bioinformatics',
+    description = 'A Python platform for structural bioinformatics',
 
     ## available on PyPi: biopython
     install_requires=['biggles', 'scipy', 'biopython', 'ScientificPython',
