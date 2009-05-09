@@ -9,7 +9,7 @@ import Biskit.molUtils as MU
 
 class residuePicker:
     
-    def __init__(self):
+    def __init__(self,databasepath = "./residues_db/"):
         """
         Initializes dictionaries and lists used by the residue picker:
         
@@ -23,41 +23,47 @@ class residuePicker:
         - reslib - Dictionary of lists with all the PDBModels for each residue in db.
 
         - clusters - Dictionary of lists of lists tracking backbone similarities.
+        
+        @param databasepath: Path of the db folder that is going to be used.
+        @type databasepath: string
+        
         """
-
+        
+        self.dbpath = databasepath
+        
         try:
-            f = open ('./residues_db/index.db',"r")
+            f = open (self.dbpath+'index.db',"r")
             self.index = cPickle.load(f)
 
         except (cPickle.UnpicklingError, IOError,EOFError):
-            if( not os.access("./residues_db/", os.F_OK)):
-                os.mkdir("./residues_db/")
-            f = open ('./residues_db/index.db',"w")
+            if( not os.access(self.dbpath, os.F_OK)):
+                os.mkdir(self.dbpath)
+            f = open (self.dbpath+'/index.db',"w")
             self.index = {}
         f.close()
         
         try:
-            f = open ('./residues_db/apvect.db',"r")
+            f = open (self.dbpath+'apvect.db',"r")
             self.apvect = cPickle.load(f)
 
         except (cPickle.UnpicklingError, IOError,EOFError):
-            f = open ('./residues_db/apvect.db',"w")
+            f = open (self.dbpath+'apvect.db',"w")
             self.apvect = {}
         f.close()
         
         try:
-            f = open ('./residues_db/clusters.db',"r")
+            f = open (self.dbpath+'clusters.db',"r")
             self.clusters = cPickle.load(f)
 
         except (cPickle.UnpicklingError, IOError,EOFError):
-            f = open ('./residues_db/clusters.db',"w")
+            f = open (self.dbpath+'clusters.db',"w")
             self.clusters = {}
         f.close()
         
         # Create directory structure
         for k in MU.allAACodes():
-            if not os.access("./residues_db/"+k, os.F_OK):
-                os.mkdir("./residues_db/"+k)
+            if not os.access(databasepath+k, os.F_OK):
+                os.mkdir(databasepath+k)
         
         self.last_res = {}
         self.reslib = {}
@@ -81,7 +87,7 @@ class residuePicker:
         #load all residues inside it
         for k in self.index.keys():
             for i in self.index[k]:
-                self.reslib[i]=PDBModel("./residues_db/"+i[0]+"/"+i+".pdb")
+                self.reslib[i]=PDBModel(self.dbpath+i[0]+"/"+i+".pdb")
         
         # create the cluster
         for k in MU.allAACodes():
@@ -95,18 +101,18 @@ class residuePicker:
         Saves the index, clusters and derived data of the dabase.
         """
         
-        f = open ('./residues_db/index.db',"w")
+        f = open (self.dbpath+'index.db',"w")
         cPickle.dump(self.index,f,cPickle.HIGHEST_PROTOCOL)
         f.close()
         
         for k in self.index:
             print k, len(self.index[k])
         
-        f = open ('./residues_db/apvect.db',"w")
+        f = open (self.dbpath+'apvect.db',"w")
         cPickle.dump(self.apvect,f,cPickle.HIGHEST_PROTOCOL)
         f.close()
         
-        f = open ('./residues_db/clusters.db',"w")
+        f = open (self.dbpath+'clusters.db',"w")
         cPickle.dump(self.clusters,f,cPickle.HIGHEST_PROTOCOL)
         f.close()
         
@@ -169,11 +175,13 @@ class residuePicker:
                             ## find further similarities to se if it is already in the list.
                             if bb:
                                 foundback = True
+                                
                                 for m in group:
                                     (bb,sd) = self.areTheSame(residue,self.reslib[m])
                                     if sd:
                                        foundsd= True 
                                        similarto = m 
+                                
                                 if foundsd:
                                     ## If backbone and sidechains are identical we don't need to 
                                     ## add the residue
@@ -204,7 +212,7 @@ class residuePicker:
                         # Save the residue
                         residue.renumberResidues()
                         residue['serial_number'] = range(1,residue.lenAtoms()+1)
-                        residue.writePdb("./residues_db/"+r+"/"+myindex+".pdb")
+                        residue.writePdb(self.dbpath+r+"/"+myindex+".pdb")
                         
                         # Add and index it
                         self.reslib[myindex]=residue
@@ -258,7 +266,7 @@ class residuePicker:
         
         return residue,C,N
         
-    def areTheSame(self,a,b,bckbthres = 0.1, sdthres= 0.2):
+    def areTheSame(self,a,b,bckbthres = 0.2, sdthres= 0.3):
         """
         It compares two residues to see if they are too similar to be stored in the database.
         First it compares backbone, and then it compares the sidechain. One can choose the 
@@ -300,7 +308,7 @@ class residuePicker:
             if  asd.rms(bsd)<= sdthres:
                 sdsim = True
                 
-        #~ print "rmsds:",abk.rms(bbk),asd.rms(bsd)
+        print "rmsds:",abk.rms(bbk),asd.rms(bsd)
         return bcbsim , sdsim
 
     
@@ -453,15 +461,49 @@ class residuePicker:
             
         
         return mystring
-    
+
+
+
+##############
+## Test
+##############
+import Biskit.test as BT
 import Biskit.tools as T
-r = residuePicker()
-print r
+from Biskit.PDBModel import PDBModel
+import os
+
+class Test(BT.BiskitTest):
+    """ Test cases for Polyfret"""
+
+    def prepare(self):
+        pass
+
+    def cleanUp( self ):
+        os.system("rm -rf "+T.testRoot()+"/polysys/residues_db")
+        pass
+    def test_DB_Creation(self):
+        """DB Creation test cases"""
+
+        r = residuePicker(T.testRoot()+"/polysys/residues_db/")
+        r.extractFromPDB(T.testRoot()+"/polysys/FAKE2.pdb")
+
+        if self.local:
+            print r
+
+
+#~ self.assertEqual(b121.father.father.name,"my_level1_block")
+if __name__ == '__main__':
+    BT.localTest()    
+
+
+#~ import Biskit.tools as T
+#~ r = residuePicker()
+#~ print r
 #~ r.extractFromPDB(T.testRoot()+"/polysys/FAKE.pdb")
 #~ r.extractFromPDB(T.testRoot()+"/polysys/1GZX.pdb")
 #~ r.extractFromPDB(T.testRoot()+"/polysys/1HUY.pdb")
 #~ r.extractFromPDB(T.testRoot()+"/polysys/2Q57.pdb")
-print r
+#~ print r
 
 #~ r.extractFromPDB ( '1HUY.pdb')
 #~ extractFromPDB ( '1CV7.pdb')
