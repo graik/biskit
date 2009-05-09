@@ -8,12 +8,9 @@
 ## (requires stdeb: http://github.com/astraw/stdeb/tree/master)::
 ##
 ##   python -c "import stdeb; execfile('setup.py')" \
-##          sdist_dsc --extra-cfg-file distribution/stdeb.cfg
+##          sdist_dsc --extra-cfg-file packaging/stdeb.cfg
 ##
 ##   cd deb_dist/
-##
-## optional - building source package:
-##   zip biskit-2.3-src.deb.zip *gz *dsc
 ##
 ## building debian binary package
 ##   dpkg-source -x biskit_2.3-1.dsc
