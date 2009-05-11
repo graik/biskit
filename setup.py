@@ -35,6 +35,30 @@ use_setuptools()
 
 from setuptools import setup, find_packages
 
+import os
+root_dir = os.path.dirname(__file__)
+
+data_files = []
+doc_dir    = os.path.join(root_dir, 'docs')
+script_dir = os.path.join(root_dir, 'scripts')
+## docs and scripts are moved from the root of the project into
+## the package folder. That's why the separate treatment.
+## First item in the data_files entry is the target folder, second item
+## is the relative path in the svn project.
+for dirpath, dirnames, filenames in os.walk( doc_dir ):
+    # Ignore dirnames that start with '.'
+    for i, dirname in enumerate(dirnames):
+        if dirname.startswith('.'): del dirnames[i]
+    data_files.append([os.path.join( 'Biskit', dirpath ),
+                       [os.path.join(dirpath, f) for f in filenames]])
+
+for dirpath, dirnames, filenames in os.walk( script_dir ):
+    # Ignore dirnames that start with '.'
+    for i, dirname in enumerate(dirnames):
+        if dirname.startswith('.'): del dirnames[i]
+    data_files.append([os.path.join( 'Biskit', dirpath ),
+                       [os.path.join(dirpath, f) for f in filenames]])
+
 
 setup(
     name = "biskit",
@@ -66,6 +90,8 @@ setup(
 
     packages = find_packages(),
     include_package_data = True,
+    data_files = data_files,
+
 
     scripts = ['scripts/Biskit/bispy'],
 
