@@ -14,7 +14,6 @@ Suggests:
 XB-Python-Version: ${python:Versions}
 Provides: ${python:Provides}
 Description: A Python platform for structural bioinformatics
- .
  Biskit is a modular, object-oriented Python library for structural
  bioinformatics research. It facilitates the manipulation and analysis
  of macromolecular structures, protein complexes, and molecular

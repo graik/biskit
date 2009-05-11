@@ -13,7 +13,6 @@
 ##   cd deb_dist/
 ##
 ## building debian binary package
-##   dpkg-source -x biskit_2.3-1.dsc
 ##   cd biskit-2.3/
 ##   cp ../../packaging/control debian/  ## fix control; edit if needed
 ##   cp ../../packaging/copyright debian/
@@ -36,7 +35,10 @@ use_setuptools()
 from setuptools import setup, find_packages
 
 import os
-root_dir = os.path.dirname(__file__)
+try:
+    root_dir = os.path.dirname(__file__)
+except:
+    root_dir = os.getcwd()
 
 data_files = []
 doc_dir    = os.path.join(root_dir, 'docs')
