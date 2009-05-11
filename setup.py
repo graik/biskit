@@ -34,14 +34,22 @@ use_setuptools()
 
 from setuptools import setup, find_packages
 
+from distutils.command.install import INSTALL_SCHEMES
 import os
+
+# Tell distutils to put the data_files in platform-specific installation
+# locations. See here for an explanation:
+# http://groups.google.com/group/comp.lang.python/browse_thread/thread/35ec7b2fed36eaec/2105ee4d9e8042cb
+for scheme in INSTALL_SCHEMES.values():
+    scheme['data'] = scheme['purelib']
+
 try:
     root_dir = os.path.dirname(__file__)
 except:
     root_dir = os.getcwd()
 
 data_files = []
-doc_dir    = os.path.join(root_dir, 'docs')
+doc_dir    = os.path.join(root_dir, 'doc')
 script_dir = os.path.join(root_dir, 'scripts')
 ## docs and scripts are moved from the root of the project into
 ## the package folder. That's why the separate treatment.
