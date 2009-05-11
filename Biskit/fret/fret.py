@@ -171,62 +171,62 @@ class FRET:
         
         return self.R0
 
-		
+        
 ##############
 ## Test
 ##############
 import Biskit.test as BT
 
 class Test(BT.BiskitTest):
-	""" Test cases for FRET """
-	
-	def prepare(self):
-		self.fret = None
+    """ Test cases for FRET """
+    
+    def prepare(self):
+        self.fret = None
 
-	def cleanUp( self ):
-		pass
-	
-	
-	def test_Efficiency(self):
-		"""FRET efficiency test (mCerulean- mCitrine)"""
-		
-		self.fret = FRET( 3.5, 959732990869504)
-		self.assertAlmostEqual( 0.799022 , self.fret.energyTransferEfficiency(50.),3)
-		
-		#efficiency at Forster distance is 0.5
-		self.assertAlmostEqual( 0.5 , self.fret.energyTransferEfficiency(self.fret.calcR0()),2)
-		
-		
-	def test_K2(self):
-		"""K2 calculation test (mCerulean- mCitrine)"""
-		
-		self.fret = FRET( 3.5, 959732990869504)
-		
-		#random test
-		self.assertAlmostEqual(self.fret.calcK2((0.1,0.3,0.3),(4.,1.,0),(10.,0.,0.)) ,0.077399380805,5)
-		
-		#parallel test
-		self.assertAlmostEqual(self.fret.calcK2((1.,0.,0.),(1.,0.,0.),(1.,0.,0.)),4.,5)
-		
-		#perpendicular test
-		self.assertAlmostEqual(self.fret.calcK2((1.,0.,0.),(0.,1.,0.),(1.,0.,0.)),0.)
-	
-	def test_R0(self):
-		"""R0 calculation test (mCerulean- mCitrine)"""
-		
-		self.fret = FRET( 3.5, 959732990869504)
-		# k2 is 2/3
-		self.assertEqual(self.fret.k2,2./3.)
-		
-		self.assertAlmostEqual(self.fret.calcR0(),62.9320757163)
-		
-		# k2 must be overwritten
-		self.fret.calcK2((1.,0.,0.),(1.,0.,0.),(1.,0.,0.))
-		
-		# so R0 may be different
-		self.assertAlmostEqual(self.fret.calcR0(),84.8328253872)
-		
-		
+    def cleanUp( self ):
+        pass
+    
+    
+    def test_Efficiency(self):
+        """FRET efficiency test (mCerulean- mCitrine)"""
+        
+        self.fret = FRET( 3.5, 959732990869504)
+        self.assertAlmostEqual( 0.799022 , self.fret.energyTransferEfficiency(50.),3)
+        
+        #efficiency at Forster distance is 0.5
+        self.assertAlmostEqual( 0.5 , self.fret.energyTransferEfficiency(self.fret.calcR0()),2)
+        
+        
+    def test_K2(self):
+        """K2 calculation test (mCerulean- mCitrine)"""
+        
+        self.fret = FRET( 3.5, 959732990869504)
+        
+        #random test
+        self.assertAlmostEqual(self.fret.calcK2((0.1,0.3,0.3),(4.,1.,0),(10.,0.,0.)) ,0.077399380805,5)
+        
+        #parallel test
+        self.assertAlmostEqual(self.fret.calcK2((1.,0.,0.),(1.,0.,0.),(1.,0.,0.)),4.,5)
+        
+        #perpendicular test
+        self.assertAlmostEqual(self.fret.calcK2((1.,0.,0.),(0.,1.,0.),(1.,0.,0.)),0.)
+    
+    def test_R0(self):
+        """R0 calculation test (mCerulean- mCitrine)"""
+        
+        self.fret = FRET( 3.5, 959732990869504)
+        # k2 is 2/3
+        self.assertEqual(self.fret.k2,2./3.)
+        
+        self.assertAlmostEqual(self.fret.calcR0(),62.9320757163)
+        
+        # k2 must be overwritten
+        self.fret.calcK2((1.,0.,0.),(1.,0.,0.),(1.,0.,0.))
+        
+        # so R0 may be different
+        self.assertAlmostEqual(self.fret.calcR0(),84.8328253872)
+        
+        
 if __name__ == '__main__':
 
     BT.localTest()

@@ -33,184 +33,184 @@ from emath import norm
 import Biskit.tools as T
 
 class FRETPair (object) :
-	"""
-	A FRETPair is a container for the two FRET Proteins involved in the energy transfer. It tries to load all parameters needed for FRET
-	calculations from the database.
-	Mandatory paramaters for a FRETPair definition in the DB are the Overlap Integral and the IDs of the pair (their names). For more info.
-	about the database see FRETPair::_loadFromDB doc.
-	"""
-	
-	DEFAULT_DB = T.dataRoot()+'/fret/fret_prots_db/pair_parameters.db' # default value for database file
-	
-	
-	def __init__(self, donor,acceptor,database=""):
-		"""
-		Creates an instance of a FRET Pair  
-		
-		@param donor:
-		@type donor:
-		@param acceptor:
-		@type acceptor:
-		@param database: If defined it will load data from this file instead. 
-		@type database: string
-		"""
-		self._donor = donor
-		self._acceptor = acceptor
-		self.ehandler = EHandler
-		self._loadFromDB(self._donor,self._acceptor,database)
-	
-	
-	def __getDonor(self):
-		"""
-		@return: Donor of the FRET pair.
-		@rtype: FRETProtein
-		"""
-		assert isinstance( self._donor,FRETEntity),\
-			'Donor is not well defined'
-		return self._donor
+    """
+    A FRETPair is a container for the two FRET Proteins involved in the energy transfer. It tries to load all parameters needed for FRET
+    calculations from the database.
+    Mandatory paramaters for a FRETPair definition in the DB are the Overlap Integral and the IDs of the pair (their names). For more info.
+    about the database see FRETPair::_loadFromDB doc.
+    """
+    
+    DEFAULT_DB = T.dataRoot()+'/fret/fret_prots_db/pair_parameters.db' # default value for database file
+    
+    
+    def __init__(self, donor,acceptor,database=""):
+        """
+        Creates an instance of a FRET Pair  
+        
+        @param donor:
+        @type donor:
+        @param acceptor:
+        @type acceptor:
+        @param database: If defined it will load data from this file instead. 
+        @type database: string
+        """
+        self._donor = donor
+        self._acceptor = acceptor
+        self.ehandler = EHandler
+        self._loadFromDB(self._donor,self._acceptor,database)
+    
+    
+    def __getDonor(self):
+        """
+        @return: Donor of the FRET pair.
+        @rtype: FRETProtein
+        """
+        assert isinstance( self._donor,FRETEntity),\
+            'Donor is not well defined'
+        return self._donor
 
-	
-	def __setDonor(self,donor):
-		"""
-		@param donor: Donor of the FRET pair.
-		@type donor: FRETProtein
-		"""
-		assert isinstance( self._donor,FRETEntity),\
-			'Donor must be a FRET protein'
-		self._donor = donor
-		self._loadFromDB(self._donor,self._acceptor)
-	
-	
-	"""Set or get the donor protein of the FRET pair.	"""
-	donor = property(fget=__getDonor,fset=__setDonor)
-	
-	
-	
-	def __getAcceptor(self):
-		"""
-		@return: Acceptor of the FRET pair.
-		@rtype: FRETProtein
-		"""
-		assert isinstance( self._acceptor,FRETEntity),\
-			'Acceptor is not well defined'
-		return self._acceptor
-	
-	
-	def __setAcceptor(self,acceptor):
-		"""
-		@param acceptor: Acceptor of the FRET pair.
-		@type acceptor: FRETProtein
-		"""
-		assert isinstance( self._acceptor,FRETEntity),\
-			'Acceptor must be a FRET protein'
-		self._acceptor = acceptor
-		self._loadFromDB(self._donor,self._acceptor)
+    
+    def __setDonor(self,donor):
+        """
+        @param donor: Donor of the FRET pair.
+        @type donor: FRETProtein
+        """
+        assert isinstance( self._donor,FRETEntity),\
+            'Donor must be a FRET protein'
+        self._donor = donor
+        self._loadFromDB(self._donor,self._acceptor)
+    
+    
+    """Set or get the donor protein of the FRET pair.	"""
+    donor = property(fget=__getDonor,fset=__setDonor)
+    
+    
+    
+    def __getAcceptor(self):
+        """
+        @return: Acceptor of the FRET pair.
+        @rtype: FRETProtein
+        """
+        assert isinstance( self._acceptor,FRETEntity),\
+            'Acceptor is not well defined'
+        return self._acceptor
+    
+    
+    def __setAcceptor(self,acceptor):
+        """
+        @param acceptor: Acceptor of the FRET pair.
+        @type acceptor: FRETProtein
+        """
+        assert isinstance( self._acceptor,FRETEntity),\
+            'Acceptor must be a FRET protein'
+        self._acceptor = acceptor
+        self._loadFromDB(self._donor,self._acceptor)
 
-	"""Set or get the acceptor protein of the FRET pair.	"""
-	acceptor = property(fget=__getAcceptor,fset=__setAcceptor)
-	
-	
-	def getChromoDistance(self):
-		"""
-		Calculates the distance between the starting points of the two dipole moments of the chromophores involved in 
-		the energy transfer in A.
-		"""
-		if  self.donor == None or self.acceptor== None :
-			self.ehandler.error ("Donor and acceptor may be defined before calculations")
-		
-		return self.acceptor.getAppPoint() - self.donor.getAppPoint()
-	
-	
-	def getEnergyTransferRate(self):
-		"""
-		Calculates the energy transfer rate ns^-1.
-		"""
+    """Set or get the acceptor protein of the FRET pair.	"""
+    acceptor = property(fget=__getAcceptor,fset=__setAcceptor)
+    
+    
+    def getChromoDistance(self):
+        """
+        Calculates the distance between the starting points of the two dipole moments of the chromophores involved in 
+        the energy transfer in A.
+        """
+        if  self.donor == None or self.acceptor== None :
+            self.ehandler.error ("Donor and acceptor may be defined before calculations")
+        
+        return self.acceptor.getAppPoint() - self.donor.getAppPoint()
+    
+    
+    def getEnergyTransferRate(self):
+        """
+        Calculates the energy transfer rate ns^-1.
+        """
 
-		distance = self.getChromoDistance()
-		
-		fretCalculator= FRET (self.overlap, self.donor.quantumYield,tauD = self.donor.lifetime)
-		
-		k2 = fretCalculator.calcK2( self.donor.getChromoTransMoment(),self.acceptor.getChromoTransMoment(),distance)
-	
-		return fretCalculator.energyTransferRate(norm(distance))
-		
-	def getEnergyTransferEfficiency(self):
-		"""
-		Calculates the energy transfer efficiency.
-		"""
-		distance = self.getChromoDistance()
-		
-		fretCalculator= FRET (self.overlap, self.donor.quantumYield)
-		
-		k2 = fretCalculator.calcK2( self.donor.getChromoTransMoment(),self.acceptor.getChromoTransMoment(),distance)
-	
-		return fretCalculator.energyTransferEfficiency(norm(distance))
-		
-	def getR0(self):
-		"""
-		Calculates Forster's distance in A.
-		"""
-		distance = self.getChromoDistance()
-		
-		fretCalculator= FRET (self.overlap, self.donor.quantumYield)
-		
-		k2 = fretCalculator.calcK2( self.donor.getChromoTransMoment(),self.acceptor.getChromoTransMoment(),distance)
-	
-		return fretCalculator.calcR0()
+        distance = self.getChromoDistance()
+        
+        fretCalculator= FRET (self.overlap, self.donor.quantumYield,tauD = self.donor.lifetime)
+        
+        k2 = fretCalculator.calcK2( self.donor.getChromoTransMoment(),self.acceptor.getChromoTransMoment(),distance)
+    
+        return fretCalculator.energyTransferRate(norm(distance))
+        
+    def getEnergyTransferEfficiency(self):
+        """
+        Calculates the energy transfer efficiency.
+        """
+        distance = self.getChromoDistance()
+        
+        fretCalculator= FRET (self.overlap, self.donor.quantumYield)
+        
+        k2 = fretCalculator.calcK2( self.donor.getChromoTransMoment(),self.acceptor.getChromoTransMoment(),distance)
+    
+        return fretCalculator.energyTransferEfficiency(norm(distance))
+        
+    def getR0(self):
+        """
+        Calculates Forster's distance in A.
+        """
+        distance = self.getChromoDistance()
+        
+        fretCalculator= FRET (self.overlap, self.donor.quantumYield)
+        
+        k2 = fretCalculator.calcK2( self.donor.getChromoTransMoment(),self.acceptor.getChromoTransMoment(),distance)
+    
+        return fretCalculator.calcR0()
 
-	def _loadFromDB(self,donor,acceptor,database= ""):
-		"""
-		Loads the pair parameters from the database. Mandatory paramaters for a FRETPair definition in the DB ( './fret_prots_db/pair_parameters.db')
-		are the Overlap Integral and the IDs of the pair (their names). 
-		
-		A line of the database file contains a total of 6 entries separated by tabs.
-		One example line is:
-		mCitrine	mCerulean	2.89	959732990869504	1.33	Using Short Linker (incorrect F distance?)
-		
-		Where 'mCitrine' and 'mCerulean' are the donor and acceptor. 2.89 (ns) is the lifetime of the donor in presence of the acceptor.
-		9.59e14 (nm^6) is the overlap integral. 1.33 is an experimental calculation of Forster's distance and the rest of the line is 
-		a comment.
-		
-		While comments are optional, all the other parameters must to be defined for each line. For unknown values one can define them
-		as 'X' and they will be defaulted if needed. However, as said before, Overlap Integral and pair IDs must to be defined for the 
-		FRETPair to be created.
-		
-		@param donor: Donor of the FRET pair.
-		@type donor: FRETProtein
-		@param acceptor: Acceptor of the FRET pair.
-		@type acceptor: FRETProtein
-		@param database: If defined it will load data from this file instead. 
-		@type database: string
-		"""
-		
-		if database == "" :
-			database = self.DEFAULT_DB
-		
-		f = open (database,"r")
-		lineas = f.readlines()
-		f.close()
-		
-		if len(lineas)<=1:
-			self.ehandler.fatal( "Empty or badly formatted database" )
-			return False
-		else:
-			for l in lineas:
-				parameters = l.split('\t',6)
-				
-				if self._acceptor.name == parameters[0] and self._donor.name == parameters[1] :
-					
-					self.lifetime = dbPre(parameters[2],"float",2.5,self.ehandler)
-					
-					self.overlap = dbPre(parameters[3],"float",-1,self.ehandler)
-					
-					if self.overlap == -1 :
-						self.ehandler.error( "Mandatory parameter undefined in database (overlap).")
-					
-					return
-		
-		self.ehandler.fatal( "This pair isn't defined in database.")
-				
-		
+    def _loadFromDB(self,donor,acceptor,database= ""):
+        """
+        Loads the pair parameters from the database. Mandatory paramaters for a FRETPair definition in the DB ( './fret_prots_db/pair_parameters.db')
+        are the Overlap Integral and the IDs of the pair (their names). 
+        
+        A line of the database file contains a total of 6 entries separated by tabs.
+        One example line is:
+        mCitrine	mCerulean	2.89	959732990869504	1.33	Using Short Linker (incorrect F distance?)
+        
+        Where 'mCitrine' and 'mCerulean' are the donor and acceptor. 2.89 (ns) is the lifetime of the donor in presence of the acceptor.
+        9.59e14 (nm^6) is the overlap integral. 1.33 is an experimental calculation of Forster's distance and the rest of the line is 
+        a comment.
+        
+        While comments are optional, all the other parameters must to be defined for each line. For unknown values one can define them
+        as 'X' and they will be defaulted if needed. However, as said before, Overlap Integral and pair IDs must to be defined for the 
+        FRETPair to be created.
+        
+        @param donor: Donor of the FRET pair.
+        @type donor: FRETProtein
+        @param acceptor: Acceptor of the FRET pair.
+        @type acceptor: FRETProtein
+        @param database: If defined it will load data from this file instead. 
+        @type database: string
+        """
+        
+        if database == "" :
+            database = self.DEFAULT_DB
+        
+        f = open (database,"r")
+        lineas = f.readlines()
+        f.close()
+        
+        if len(lineas)<=1:
+            self.ehandler.fatal( "Empty or badly formatted database" )
+            return False
+        else:
+            for l in lineas:
+                parameters = l.split('\t',6)
+                
+                if self._acceptor.name == parameters[0] and self._donor.name == parameters[1] :
+                    
+                    self.lifetime = dbPre(parameters[2],"float",2.5,self.ehandler)
+                    
+                    self.overlap = dbPre(parameters[3],"float",-1,self.ehandler)
+                    
+                    if self.overlap == -1 :
+                        self.ehandler.error( "Mandatory parameter undefined in database (overlap).")
+                    
+                    return
+        
+        self.ehandler.fatal( "This pair isn't defined in database.")
+                
+        
 
 ##############
 ## Test
