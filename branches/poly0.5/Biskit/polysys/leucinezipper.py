@@ -1,98 +1,199 @@
 import Biskit.molUtils as MU
 from numpy import correlate,array, corrcoef,where
 
+
 class LeuZip:
-    props = [   ["LEU","ILE","ALA"], ##a , nonpolar
-                ["ILE","PHE","VAL","LEU","TRP","MET","ALA","GLY","CYS","TYR","PRO"], ##b , hidrophilic
-                ["ILE","PHE","VAL","LEU","TRP","MET","ALA","GLY","CYS","TYR","PRO"], ##c , hidrophilic
-                ["LEU","ILE","ALA"], ##d , nonpolar
-                ["GLU","GLN"], ##e , polar electrostatic
-                ["ILE","PHE","VAL","LEU","TRP","MET","ALA","GLY","CYS","TYR","PRO"], ##f , hidrophilic
-                ["GLU","GLN","ARG","LYS"]] ##g , polar electrostatic
+    """
+    Tentative class for Leucine Zipper registry analysis.
+    An heptad registry is given by a sequence of letters from a to g,
+    where a corresponds to the first residue and g to the last.
+    Ex.
     
-    scores = [  [1.5,.9,.8], ##a , nonpolar
-                [.8,.75,.7,.65,.6,.55,.5,.4,.3,.2,.1], ##b , hidrophilic
-                [.8,.75,.7,.65,.6,.55,.5,.4,.3,.2,.1], ##c , hidrophilic
-                [1.,.9,.8], ##d , nonpolar
-                [.9,.9], ##e , polar electrostatic
-                [.8,.75,.7,.65,.6,.55,.5,.4,.3,.2,.1], ##f , hidrophilic
-                [.8,.8,.9,.9]] ##g , polar electrostatic
+    LQAIEKQ
+    abcdefg
+    
+    """
     
     window_length = 7
     
-    def __init__(self):
-        pass
+    def __init__(self,db = ""):
+        """
+        Instantiation function. It loads a score table from disk. Lines of the score 
+        table must have this format:
+        
+        (aminoacid 3 letter code) (probability of this aa to be in position 'a') (prob of being in position b)...
+        
+        Ex.
+        
+        LEU 0.321 0.035 0.045 0.311 0.067 0.034 0.045
+        
+        @param db: Path of the scores file.
+        @type db: string
+        
+        """
+        
+        ## Load data from file
+        f = open (db,"r")
+        lineas = f.readlines()
+        f.close() 
+        
+        for i in range(0,len(lineas)):
+            if lineas[i][-1]=="\n" :
+                lineas[i]  = lineas[i][0:len(lineas[i])-1]
+        
+        self.scores = {}
+        
+        for l in lineas:
+            aux = l.split()
+            self.scores[aux[0]] = aux[1:]
+            for i in range(0,len(self.scores[aux[0]])):
+                self.scores[aux[0]][i] = float(self.scores[aux[0]][i])
+        
     
-
-    
-    def findHeptads(self, chain, k=20):
+    def findHeptads(self, chain = "", k=10):
+        """
+        Function for discovering the heptad register of a LeuZip-kind protein.
+        
+        @param chain: Chain to be analyzed with aminoacids in single-letter code.
+        @type chain: string
+        @param k: Number of heptads to try to fit into the chain (if 1 it will only
+                try to fit the best scored one, if 2 it will also try with the second 
+                best scored... and so on. Best scored heptad is not allways the target
+                heptad, so k > 1 is recommended.
+        @type k: integer
+        
+        @return: A tuple consisting in:
+                - The best score and its corresponding heptad.
+                - Registry sequence for the whole chain
+                - Accumulated correlation for the best scored heptad
+        @rtype: tuple( tuple(float,string),string,list(float))
+        
+        """
+        
         tries  = 0
-        myscores = self.copyScores()
-        heptads = [""]*k
-        corr = []*k
-        while tries < k:
-            score = self.scoreHeptads(chain,myscores)
-            heptads[tries] = self.heptadize(score,chain)
-            #~ print heptads[tries]
-            myscores = self.lowContributions(heptads[tries],myscores)
-            lol = 0
-            for m in score:
-                print lol,m
-                lol = lol+1
-            #~ corr[tries] = correlate(chain,heptads[tries],mode= "full")
-            tries = tries+1
+        
+        score = self.scoreHeptads(chain)
+               
+        heptads = self.heptadize(score,chain,k)
+        
+        self.correlate(chain,heptads)
+        
+        indexes = {}
+        new_scores = [[0.,0.]]*len(heptads)
+        for i in range(len(heptads)):
+            index = heptads[i][1]
+            indexes[heptads[i][0]] = []
+            new_scores[i] = [0.,heptads[i][0]]
+            while index <len(chain):
+                new_scores[i][0] += score[index]
+                indexes[heptads[i][0]].append(index) 
+                index += self.window_length
+        
+        for i in range(len(heptads)):
+            index = heptads[i][1]- self.window_length
+            while index >=0:
+                new_scores[i][0] += score[index]
+                indexes[heptads[i][0]].append(index) 
+                index -= self.window_length
+            indexes[heptads[i][0]].sort()
+       
+        #~ print
+        
+        #~ for i in range(len(new_scores)):
+            #~ print new_scores[i][0],heptads[i]
+        
+        
+        #~ for i in chain :
+            #~ print i,"   ",
+        #~ print
+        
+        #~ for i in score:
+            #~ print "%0.2f " %(i),
+        #~ print
+        
+        ## And the best is...
+        l = sorted(new_scores,reverse=True)
+        
+        return (l[0][1],reg,
+        
+        
+    def correlate(self, chain, heptads):
+        """
+        
+        """
+        corr = []
+        for k in range(0,len(heptads)):
+            aux= None
+            for j in range(7):
+                (a,b,c) = self.sequenceCorrelation(chain,j,heptads[k])
+                corr.append(b)
+                if aux == None:
+                    aux = c
+                else:
+                    aux+=c
+                    
+                if k == 2:
+                    s=0
+                    for i in aux:
+                        print s,i
+                        s = s+1
+                    print
+             
+            
+    def sequenceCorrelation	(self, a="",channel=0,b = "",normalize = False):
+        al = []
+        bl = []
+        
+        pos= channel
+        for i in a:
+            al+= [self.scores[MU.single2longAA(i)[0]][pos] or 0]
+            pos = (pos+1)%self.window_length
+            
+        pos = 0
+        for i in b[0]:
+            bl+= [self.scores[MU.single2longAA(i)[0]][pos] or 0]
+            pos = pos+1
+
+        a1 = array(al)
+        b1 = array(bl)
+        ab = correlate(a1,b1,mode= "full")
+        
+        if normalize:
+            c = ab /(correlate(a1,a1,mode= "full")*correlate(b1,b1,mode= "full"))
+            return (max(c) , where(c == max(c)),ab)
+        else:
+            return (max(ab) , where(ab==max(ab)),ab)	
     
-    def heptadize(self,score,chain):
-        s = array(score)
-        top = max(score)
-        index = where(s == top)[0][0]
-        #~ print top
-        if index +7 >= len(chain):
-            return ""
-        return  chain[index:index+7]
     
-    def scoreHeptads(self, chain, scores):
+    def heptadize(self,score,chain,k):
+        
+        l = []
+        
+        for i in range(0,len(score)):
+            l.append((score[i],i))
+        
+        s = sorted(l,reverse=True)
+        heptads = []
+        for e in range(0,k):
+            index = s[e][1]
+            if not (index +7 >= len(chain)):
+                heptads.append((chain[index:index+7],index))
+        return heptads
+        
+        
+    def scoreHeptads(self, chain):
         window = 0
-        #~ print chain, len(chain)
-        score = [0]*len(chain)
+        score = [0.]*len(chain)
         while window + 7 <= len(chain):
             score[window] = 0
             for i in range(0,self.window_length):  
-                for j in range(0,len(self.props[i])):
-                    if MU.single2longAA(chain[window+i])[0] == self.props[i][j]:
-                        score[window] = score[window] + scores[i][j]
+                r = MU.single2longAA(chain[window+i])[0]
+                if  r in self.scores:
+                    score[window]+=self.scores[r][i]
             window = window+1
-            
-        #~ for m in score:
-            #~ print m
-        #~ print score
-        #~ print len(correlate(score,score,mode= "full"))
-        #~ for m in correlate(score,score,mode= "full"):
-            #~ print m
         return score
-        
-        
-    def copyScores(self):
-        copy = []
-        for i in self.scores:
-            copy.append([])
-            for j in i:
-                copy[-1].append(j)
-        #~ print copy
-        return copy
-        
-        
-    def lowContributions(self,heptad, scores):
-        window = 0
-        for c in heptad:
-            for k in range(0,len(self.props[window])):
-                #~ print MU.single2longAA(c) , self.props[window][k], window
-                if  MU.single2longAA(c)[0] == self.props[window][k]:
-                    scores[window][k] =  scores[window][k] - .1
-                    #~ print "*"
-            window = window +1
-        #~ print scores
-        return scores
+      
+    
 
 ##############
 ## Test
@@ -114,10 +215,10 @@ class Test(BT.BiskitTest):
     def test_search(self):
         """LeuZip pattern search test cases"""
 
-        l = LeuZip()
+        l = LeuZip("./data/leuzip/DADParry_scaled")
+        self.assertEqual(len(l.scores),20)
+        
         l.findHeptads("LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL")
-    
-
-
+        l.findHeptads("MKQLEKELKQLEKELQAIEKQLAQLQWKAQARKKKLAQLKKKLQA")
 if __name__ == '__main__':
     BT.localTest()    
