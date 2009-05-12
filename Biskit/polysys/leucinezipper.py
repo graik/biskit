@@ -14,7 +14,7 @@ class LeuZip:
     
     """
     
-    window_length = 7
+    window_length = 7 ## size of the window
     
     def __init__(self,db = ""):
         """
@@ -63,7 +63,7 @@ class LeuZip:
         @type k: integer
         
         @return: A tuple consisting in:
-                - The best score and its corresponding heptad.
+                - The best heptad.
                 - Registry sequence for the whole chain
                 - Accumulated correlation for the best scored heptad
         @rtype: tuple( tuple(float,string),string,list(float))
@@ -75,8 +75,6 @@ class LeuZip:
         score = self.scoreHeptads(chain)
                
         heptads = self.heptadize(score,chain,k)
-        
-        self.correlate(chain,heptads)
         
         indexes = {}
         new_scores = [[0.,0.]]*len(heptads)
@@ -99,8 +97,8 @@ class LeuZip:
        
         #~ print
         
-        #~ for i in range(len(new_scores)):
-            #~ print new_scores[i][0],heptads[i]
+        for i in range(len(new_scores)):
+            print new_scores[i][0],heptads[i]
         
         
         #~ for i in chain :
@@ -112,9 +110,18 @@ class LeuZip:
         #~ print
         
         ## And the best is...
-        l = sorted(new_scores,reverse=True)
+        best = sorted(new_scores,reverse=True)[0][1]
         
-        return (l[0][1],reg,
+        c = self.correlate(chain,[best])
+        print
+        print chain
+        print best, indexes[best][1]
+        reg1 = "abcdefg"[-(indexes[best][0] % self.window_length):]+\
+        "abcdefg"*((len(chain)-(indexes[best][0] % self.window_length))/7) 
+        reg2 =reg1+"abcdefg"[:len(chain)-len(reg1) ]
+        
+        
+        return (best, reg2, c)
         
         
     def correlate(self, chain, heptads):
@@ -131,16 +138,28 @@ class LeuZip:
                     aux = c
                 else:
                     aux+=c
-                    
-                if k == 2:
-                    s=0
-                    for i in aux:
-                        print s,i
-                        s = s+1
-                    print
-             
-            
+        return c
+    
+    
     def sequenceCorrelation	(self, a="",channel=0,b = "",normalize = False):
+        """
+        Version of polysys::Protein::sequenceCorrelation. It calculates the 
+        score correlation between 2 peptide chains.
+        
+        @param a: Chain of aminoacids in single-letter code.
+        @type a: string
+        @param channel: Registry frame of chain a to be used.
+        @type channel: integer
+        @param b: Chain of aminoacids in single-letter code.
+        @type b: string
+        @param normalize: If true the function returns normalized correlations.
+        @type normalize: bool
+        
+        @return: It returns the peak of correlation and the index where this peak
+                happens. Last value returned is the correlation list.
+        @rtype: tuple (float, [integer], list(float) )
+        """
+        
         al = []
         bl = []
         
@@ -166,9 +185,15 @@ class LeuZip:
     
     
     def heptadize(self,score,chain,k):
+        """
+        Function for retrieving the best k heptads from score calculations.
+        
+        @return: List of the k best heptads.
+        @rtype: list
+        
+        """
         
         l = []
-        
         for i in range(0,len(score)):
             l.append((score[i],i))
         
@@ -182,6 +207,14 @@ class LeuZip:
         
         
     def scoreHeptads(self, chain):
+        """
+        Function to calculate the score of each window in the chain.
+        
+        @return: List of scores for each position.
+        @rtype: list
+        
+        """
+        
         window = 0
         score = [0.]*len(chain)
         while window + 7 <= len(chain):
@@ -204,7 +237,7 @@ from Biskit.PDBModel import PDBModel
 import os
 
 class Test(BT.BiskitTest):
-    """ Test cases for Polyfret"""
+    """ Test cases for LeuZip"""
 
     def prepare(self):
         pass
@@ -218,7 +251,11 @@ class Test(BT.BiskitTest):
         l = LeuZip("./data/leuzip/DADParry_scaled")
         self.assertEqual(len(l.scores),20)
         
-        l.findHeptads("LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL")
+        (a,b,c) = l.findHeptads("MMLEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL")
+        if self.local:
+            print b
+        
         l.findHeptads("MKQLEKELKQLEKELQAIEKQLAQLQWKAQARKKKLAQLKKKLQA")
+        
 if __name__ == '__main__':
     BT.localTest()    
