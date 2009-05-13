@@ -30,6 +30,11 @@ In this document:  * Release 2.3
 		   * License
 		   * Open issues
 
+Release 2.3.1
+-------------
+
+Contains some fixes to the setup packaging.
+
 Release 2.3
 -----------
 
