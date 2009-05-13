@@ -1,4 +1,4 @@
-## normal installation from source:     python setup.py install --exclude-scripts
+## normal installation from source:  python setup.py install --exclude-scripts
 
 ## building source distro : python setup.py sdist
 
@@ -15,7 +15,7 @@
 ##   cd deb_dist/
 ##
 ## building debian binary package
-##   cd biskit-2.3/
+##   cd biskit-2.3.1/
 ##   cp ../../packaging/control debian/  ## fix control; edit if needed
 ##   cp ../../packaging/copyright debian/
 ##   dpkg-buildpackage -rfakeroot -uc -b
@@ -100,7 +100,7 @@ long_description = \
 
 setup(
     name = "biskit",
-    version = "2.3",
+    version = "2.3.1",
     url = 'http://biskit.pasteur.fr',
     download_url = 'https://sourceforge.net/project/platformdownload.php?group_id=150896',
     author = 'Raik Gruenberg, Johan Leckner, and more',
