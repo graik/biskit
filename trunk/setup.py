@@ -2,6 +2,8 @@
 
 ## building source distro : python setup.py sdist
 
+## building rpm distro: python setup.py bdist_rpm
+
 ## building windows distro: python setup.py bdist_wininst
 
 ## building debian source package
@@ -34,6 +36,12 @@ use_setuptools()
 
 from setuptools import setup, find_packages
 
+## The following code ensures that doc/ and scripts/ are transferred
+##  from the subversion project root into the Biskit python package
+##  during installation.
+##  Mostly taken from the django distutils setup.py
+##
+
 from distutils.command.install import INSTALL_SCHEMES
 import os
 
@@ -51,10 +59,10 @@ except:
 data_files = []
 doc_dir    = os.path.join(root_dir, 'doc')
 script_dir = os.path.join(root_dir, 'scripts')
-## docs and scripts are moved from the root of the project into
-## the package folder. That's why the separate treatment.
-## First item in the data_files entry is the target folder, second item
-## is the relative path in the svn project.
+# docs and scripts are moved from the root of the project into
+# the package folder. That's why the separate treatment.
+# First item in the data_files entry is the target folder, second item
+# is the relative path in the svn project.
 for dirpath, dirnames, filenames in os.walk( doc_dir ):
     # Ignore dirnames that start with '.'
     for i, dirname in enumerate(dirnames):
@@ -69,6 +77,26 @@ for dirpath, dirnames, filenames in os.walk( script_dir ):
     data_files.append([os.path.join( 'Biskit', dirpath ),
                        [os.path.join(dirpath, f) for f in filenames]])
 
+# Small hack for working with bdist_wininst.
+# See http://mail.python.org/pipermail/distutils-sig/2004-August/004134.html
+if len(sys.argv) > 1 and sys.argv[1] == 'bdist_wininst':
+    for file_info in data_files:
+        file_info[0] = '/PURELIB/%s' % file_info[0]
+
+##
+## End of doc/ + scripts/ transfer code
+
+long_description = \
+ """ Biskit is a modular, object-oriented Python library for structural
+ bioinformatics research. It facilitates the manipulation and analysis
+ of macromolecular structures, protein complexes, and molecular
+ dynamics trajectories. For efficient number crunching, Biskit objects
+ tightly integrate with numpy. Biskit also offers a platform for the
+ rapid integration of external programs and new algorithms into complex
+ workflows. Calculations are thus often delegated to established
+ programs like Xplor, Amber, Hex, Prosa, Fold-X, T-Coffee, Hmmer and
+ Modeller; interfaces to further software can be added easily."""
+
 
 setup(
     name = "biskit",
@@ -78,6 +106,7 @@ setup(
     author = 'Raik Gruenberg, Johan Leckner, and more',
     author_email = 'raik.gruenberg@crg.es',
     description = 'A Python platform for structural bioinformatics',
+    long_description = long_description,
 
     ## available on PyPi: biopython
     install_requires=['biggles', 'scipy', 'biopython', 'ScientificPython',
