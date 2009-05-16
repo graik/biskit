@@ -14,7 +14,7 @@
 ##
 ##   cd deb_dist/
 ##
-## building debian binary package
+## building debian binary package::
 ##   cd biskit-2.3.1/
 ##   cp ../../packaging/control debian/  ## fix control; edit if needed
 ##   cp ../../packaging/copyright debian/
@@ -22,7 +22,7 @@
 ##   (this may require: sudo apt-get install python-all-dev)
 ##   (deb file located in deb_dist/)
 ##
-## installing a local .deb file -- on Ubuntu:
+## installing a local .deb file -- on Ubuntu::
 ##   gdebi python-biskit_2.3-1_all.deb
 ##
 ## installing a local .deb file -- other Debian:
