@@ -1,3 +1,10 @@
+## This is the setuptools / easyinstall version of the Biskit
+## setup script. In theory, it should fetch and install python
+## dependencies automatically. In practise, I found the setuptools
+## process rather error prone. You may get duplicate installations
+## version conflicts, failed downloads, etc. pp.
+## It is still useful for creating Debian packages though.
+
 ## normal installation from source:  python setup.py install
 
 ## building source distro : python setup.py sdist
