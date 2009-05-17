@@ -1,4 +1,4 @@
-## normal installation from source:  python setup.py install --exclude-scripts
+## normal installation from source:  python setup.py install
 
 ## building source distro : python setup.py sdist
 
@@ -29,12 +29,14 @@
 ## http://wiki.clug.org.za/wiki/How_do_I_install_a_.deb_file_I_downloaded_without_compromising_dependencies%3F
 
 import sys
+## de-active setuptools' too fancy script wrapping
 
 sys.path += ['Biskit']
 from ez_setup import use_setuptools
 use_setuptools()
 
 from setuptools import setup, find_packages
+
 
 ## The following code ensures that doc/ and scripts/ are transferred
 ##  from the subversion project root into the Biskit python package
@@ -132,7 +134,7 @@ setup(
     data_files = data_files,
 
 
-    scripts = ['scripts/Biskit/bispy'],
+    scripts = ['scripts/Biskit/bis.py'],
 
     classifiers= ['License :: OSI Approved :: GNU General Public License (GPL)',
                   'Topic :: Scientific/Engineering :: Bio-Informatics',
