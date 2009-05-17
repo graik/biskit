@@ -30,7 +30,7 @@ root_dir = os.path.dirname(__file__)
 len_root_dir = len(root_dir)
 
 biskit_dir = os.path.join(root_dir, 'Biskit')
-doc_dir    = os.path.join(root_dir, 'docs')
+doc_dir    = os.path.join(root_dir, 'doc')
 script_dir = os.path.join(root_dir, 'scripts')
 
 for dirpath, dirnames, filenames in os.walk(biskit_dir):
