@@ -105,6 +105,6 @@ setup(
                   'Operating System :: POSIX',
                   'Operating System :: MacOS :: MacOS X',
                   'Intended Audience :: Science/Research',
-                  'Development Status :: Development Status :: 4 - Beta'
+                  'Development Status :: 4 - Beta'
                   ]
 )
