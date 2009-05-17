@@ -1,0 +1,31 @@
+REMARK NEUTRAL.INP
+REMARK modify charges on the charged sidechains by multiplying them with
+REMARK a scale factor
+REMARK Author: M. Nilges
+REMARK
+REMARK Feb 1996: atom name hn replaced by h
+REMARK Mar 1999: scaling of the termini (PH domain specific residue numbers!)
+
+eval ($scale = 0.3)  
+
+ vector do ( charge = charge * $scale )
+           ( resname LYS and not 
+           (name c or name n or name ca or bondedto (name n or name c)))
+ vector do ( charge = charge * $scale )
+           ( resname ARG and not
+           (name c or name n or name ca or bondedto (name n or name c)))
+ vector do ( charge = charge * $scale )
+           ( resname ASP and not
+           (name c or name n or name ca or bondedto (name n or name c)))
+ vector do ( charge = charge * $scale )
+           ( resname GLU and not
+           (name c or name n or name ca or bondedto (name n or name c)))
+ vector do ( charge = charge * $scale )
+           ( resname HIS and not
+           (name c or name n or name ca or bondedto (name n or name c)))
+ vector do ( charge = charge * $scale )
+           ( name h+ or name ht+
+             or (byresidue (name h+ or name ht+) and (name ca or name n)))
+ vector do ( charge = charge * $scale )
+           ( byres (name oxt or name ot+) 
+              and (name o or name c or name oxt or name ot+)) 
