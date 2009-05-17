@@ -21,7 +21,8 @@ and Hmmer; interfaces to further software can be added
 easily. Moreover, Biskit simplifies the parallelisation of
 calculations via PVM (Parallel Virtual Machine).
 
-In this document:  * Release 2.3
+In this document:  * Release 2.3.1
+                   * Release 2.3
                    * Release 2.2
 		   * Release 2.1.0-beta
 		   * Release 2.0.1
@@ -33,7 +34,14 @@ In this document:  * Release 2.3
 Release 2.3.1
 -------------
 
-Contains some fixes to the setup packaging.
+Reverts setup scripts back to using distutils. The setuptools /
+easyinstall version turned out to be too error prone.  This means that
+setup.py will not any longer attempt to install missing python
+dependencies. You have to install numpy, scientific python, and
+[optional but useful] biggles, BioPython, and scipy yourself.
+
+The setuptools version setup_ez.py is still used to build Debian
+packages.
 
 Release 2.3
 -----------
@@ -206,6 +214,10 @@ You can now install Biskit by running:
 in the root of the project's directory. Alternatively,
 you can simply copy or link the Biskit folder (the one containing
 __init__.py) into your $PYTHONPATH.
+
+We also provide rpm and debian packages for automatic resolution of
+dependencies. Please give them a try and report your success or
+failure!
 
 More detailed instructions for installing the different third-party
 packages can be found here:
