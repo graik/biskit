@@ -17,10 +17,8 @@
 ##   python -c "import stdeb; execfile('setup_ez.py')" \
 ##          sdist_dsc --extra-cfg-file packaging/stdeb.cfg
 ##
-##   cd deb_dist/
-##
 ## building debian binary package::
-##   cd biskit-2.3.1/
+##   cd deb_dist/biskit-2.3.1/
 ##   cp ../../packaging/control debian/  ## fix control; edit if needed
 ##   cp ../../packaging/copyright debian/
 ##   dpkg-buildpackage -rfakeroot -uc -b
