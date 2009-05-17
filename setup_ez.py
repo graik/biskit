@@ -10,7 +10,11 @@
 ## building debian source package
 ## (requires stdeb: http://github.com/astraw/stdeb/tree/master)::
 ##
-##   python -c "import stdeb; execfile('setup.py')" \
+##   py2dsc --extra-cfg-file packaging/stdeb.cfg dist/biskit-2.3.1.tar.gz
+##
+## or, alternatively::
+##
+##   python -c "import stdeb; execfile('setup_ez.py')" \
 ##          sdist_dsc --extra-cfg-file packaging/stdeb.cfg
 ##
 ##   cd deb_dist/
