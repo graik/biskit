@@ -101,11 +101,11 @@ class LeuZip:
                 heptad, so k > 1 is recommended.
         @type k: integer
         
-        @return: A tuple consisting in:
-                - The best heptad.
-                - Registry sequence for the whole chain
-                - Accumulated correlation for the best scored heptad
-        @rtype: tuple( tuple(float,string),string,list(float))
+        @return: A dictionary with entries:
+                - "heptad" for the best heptad (a tuple with score (int) and heptad chain (string)).
+                - "reg" for the registry sequence for the whole chain.
+                - "corr" for the accumulated correlation for the best scored heptad.
+        @rtype: Dictionary( "best":tuple(float,string), "reg":string, "corr":list(float))
         
         """
         
@@ -159,8 +159,12 @@ class LeuZip:
         "abcdefg"*((len(chain)-(indexes[best][0] % self.window_length))/7) 
         reg2 =reg1+"abcdefg"[:len(chain)-len(reg1) ]
         
+        retdic = {}
+        retdic["best"] = best
+        retdic["reg"] = reg2
+        retdic["corr"] = c
         
-        return (best, reg2, c)
+        return retdic
         
         
     def correlate(self, chain, heptads):
@@ -288,11 +292,14 @@ class Test(BT.BiskitTest):
         l = LeuZip()
         self.assertEqual(len(l.scores),20)
         
-        (a,b,c) = l.findHeptads("MMLEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL")
+        (a,b,c) = l.findHeptads("LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL")
         if self.local:
             print b
         
         l.findHeptads("MKQLEKELKQLEKELQAIEKQLAQLQWKAQARKKKLAQLKKKLQA")
-        
+        ##2B9C.pdb
+        l.findHeptads('ELDRAQERLATALQKLEEAEKAADESERGMKVIESRAQKDEEKMEIQEIQLKEAKHIAEDADRKYEEVARKLVIIESDLERAEERAELSEGKCAELEEELKTVTNNLKSLEDKVEELLSKNYHLENEVARLKKLVG')
+        l.findHeptads('QLVEEELDRAQERLATALQKLEEAEKAADESERGMKVIESRAQKDEEKMEIQEIQLKEAKHIAEDADRKYEEVARKLVIIESDLERAEERAELSEGKCAELEEELKTVTNNLKSLEDKVEELLSKNYHLENEVARLKKLVGE')
+        l.findHeptads('MERKISRIHLVSEPSITHFLQVSWEKTLESGFVITLTDGHSAWTGTVSESEISQEADDMAMEKGKYVGELRKALLSADVYTFNFSKESAYFFFEKNLKDVSFRLGSFNLEKVENPAEVIRELIAYALDTIAENQAKNEHLQKENERLLRDWNDVQGRFEKAVSAKEALETDLYKRFILVLNEKKTKIRSLHNKLLNAAQEREKDIKQ')
 if __name__ == '__main__':
     BT.localTest()    
