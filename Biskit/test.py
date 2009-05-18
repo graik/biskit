@@ -582,7 +582,7 @@ if __name__ == '__main__':
     defaults = {'i':'',
                 'e':'old',
                 'p':['Biskit', 'Biskit.Dock', 'Biskit.Mod', 'Biskit.PVM', 
-                     'Biskit.Statistics'],
+                     'Biskit.Statistics', 'Biskit.fret'],
                 'v':'2',
                 'log': '', ##T.testRoot()+'/test.log',
                 }

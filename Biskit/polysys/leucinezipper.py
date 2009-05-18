@@ -1,6 +1,35 @@
+##
+## Biskit, a toolkit for the manipulation of macromolecular structures
+## Copyright (C) 2009 Victor Gil & Raik Gruenberg
+##
+## This program is free software; you can redistribute it and/or
+## modify it under the terms of the GNU General Public License as
+## published by the Free Software Foundation; either version 3 of the
+## License, or any later version.
+##
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+## General Public License for more details.
+##
+## You find a copy of the GNU General Public License in the file
+## license.txt along with this program; if not, write to the Free
+## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+##
+##
+## last $Author$
+## last $Date: 2009-03-09 09:10:46 +0100 (Mon, 09 Mar 2009) $
+## $Revision$
+
 import Biskit.molUtils as MU
+from Biskit import BiskitError
 from numpy import correlate,array, corrcoef,where
 
+"""
+Comments from Raik:
+* print statements :(
+* return dict from findHeptads...
+"""
 
 class LeuZip:
     """
@@ -31,25 +60,35 @@ class LeuZip:
         @type db: string
         
         """
+        self.db = db or T.dataRoot() + '/coiledcoil/DADParry_scaled'
+
+        self.scores = self.parseScores( self.db )
         
+    
+    def parseScores( self, db="" ):
+        """
+        Load position scores from external file.
+        @param db: path to file with amino acid scores per position
+        @type  db: str
+        """
+        r = {}
+        db = db or self.db
         ## Load data from file
-        f = open (db,"r")
-        lineas = f.readlines()
-        f.close() 
+        try:
+            lineas = open(db,"r").readlines()
+        except IOError, msg:
+            raise BiskitError('cannot open score file %s.\n Error: %s' \
+                              % (db, msg ) )
         
-        for i in range(0,len(lineas)):
-            if lineas[i][-1]=="\n" :
-                lineas[i]  = lineas[i][0:len(lineas[i])-1]
-        
-        self.scores = {}
+        lineas = [ l.strip() for l in lineas ]
         
         for l in lineas:
             aux = l.split()
-            self.scores[aux[0]] = aux[1:]
-            for i in range(0,len(self.scores[aux[0]])):
-                self.scores[aux[0]][i] = float(self.scores[aux[0]][i])
-        
-    
+            r[aux[0]] = [ float( n ) for n in aux[1:] ]
+            
+        return r
+
+            
     def findHeptads(self, chain = "", k=10):
         """
         Function for discovering the heptad register of a LeuZip-kind protein.
@@ -233,8 +272,6 @@ class LeuZip:
 ##############
 import Biskit.test as BT
 import Biskit.tools as T
-from Biskit.PDBModel import PDBModel
-import os
 
 class Test(BT.BiskitTest):
     """ Test cases for LeuZip"""
@@ -248,7 +285,7 @@ class Test(BT.BiskitTest):
     def test_search(self):
         """LeuZip pattern search test cases"""
 
-        l = LeuZip("./data/leuzip/DADParry_scaled")
+        l = LeuZip()
         self.assertEqual(len(l.scores),20)
         
         (a,b,c) = l.findHeptads("MMLEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL")
