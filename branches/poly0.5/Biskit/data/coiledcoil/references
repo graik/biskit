@@ -1,0 +1,10 @@
+- DADParry_scaled 
+Coiled-coils in alpha-helix containing proteins: analysis of the residue types...
+David A. D. Parry 
+1982
+
+-SOCKET_antipar_norm 
+-SOCKET_par_norm 
+SOCKET: aprogram for identifying and analysing coiled-coil motifs within protein structures.
+John Walshaw and Derek N. Woolfson
+2001
