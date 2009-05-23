@@ -7,6 +7,8 @@ class CoiledAlign:
     for an unknown cc structure to do homology modelling.
     """
     
+    
+    
     def __init__(self,likeness_table = "BLOSSUM62"):
         
         self.like_scores, self.charge_scores = self.parseLikelyhood(likeness_table)
@@ -61,8 +63,9 @@ class CoiledAlign:
         charge_scores[("E","H")] = charge_scores[("H","E")] = -2
         
         return like_scores, charge_scores
-        
-        
+    
+    
+    
     def tryAlignment(self, a = "", b = "", reg_a = "", reg_b = ""):
         """
         
@@ -101,7 +104,9 @@ class CoiledAlign:
         
         assert( type in ["heptad","res_like","charges"] ), "Please choose a correct type (heptad,res_like,charges)." 
         print len(a) ,len(reg_a),  len(b), len(reg_b)
-        assert(len(a) == len(reg_a) and len(b) == len(reg_b) ),"No correspondence between chains and their registers."
+        
+        if type ==  "heptad":
+            assert(len(a) == len(reg_a) and len(b) == len(reg_b) ),"No correspondence between chains and their registers."
         
         a = a[where:where+len(b)]
         reg_a = reg_b[where:where+len(b)]
@@ -145,7 +150,7 @@ class CoiledAlign:
             return acc
             
             
-    def flatten (self, chain = "", register = ""):
+    def flatten (self, chain = "", register = "", window_length = 7):
         """
         This function returns a list with the scores of each heptad in chain.
         Incomplete heptads are not used.
@@ -160,7 +165,7 @@ class CoiledAlign:
         """
         #~ print chain , register
         start = register.find("a")
-        end  = start + len(chain[start:]) - len(chain[start:])%self.window_length
+        end  = start + len(chain[start:]) - len(chain[start:])%window_length
 
         scores = []
         pos = 0
@@ -174,3 +179,36 @@ class CoiledAlign:
                 ac = 1
 
         return scores
+        
+##############
+## Test
+##############
+import Biskit.test as BT
+import Biskit.tools as T
+from coiledcoil import CoiledCoil
+
+class Test(BT.BiskitTest):
+    """ Test cases for Coiled Coil Alignment"""
+
+    def prepare(self):
+        self.ca = CoiledAlign()
+
+    def cleanUp( self ):
+        pass
+        
+    def test_align(self):
+        """Best alignment search test cases"""
+        res = self.ca.tryAlignment("RRRLLLLLLLRRR","LRLRLRL","efgabcdefgabc","abcdefg")
+        print res
+        
+         
+    def test_fitness(self):
+        """getFitnessScore function test cases"""
+        #~ self.assertEqual( l2.getFitnessScore("heptad","XXXLLLLLLXXX","AAAAAA",3,"cdefgab"),7.0316)
+        self.assertEqual( self.ca.getFitnessScore("res_like","XXXLLLLLLLXXX","AAAAAAA",3),-7.0)
+        self.assertEqual( self.ca.getFitnessScore("charges","XXXLLLLLLLXXX","AAAAAAA",3),1.4)
+        
+       
+if __name__ == '__main__':
+    BT.localTest()    
+    

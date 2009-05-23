@@ -25,7 +25,7 @@ import Biskit.molUtils as MU
 from Biskit import BiskitError
 from numpy import correlate,array, corrcoef,where, sum
 from Bio.pairwise2 import align
-
+from coiledutils import getRegister
 
 
 
@@ -140,32 +140,22 @@ class CoiledCoil:
                 index -= self.window_length
             indexes[heptads[i][0]].sort()
        
-        #~ print
+        self.last_heptads = []
+        for i in range(len(new_scores)):
+            self.last_heptads.append( (new_scores[i][0],heptads[i]))
+        self.last_score = score
         
-        #~ for i in range(len(new_scores)):
-            #~ print new_scores[i][0],heptads[i]
-        
-        
-        #~ for i in chain :
-            #~ print i,"   ",
-        #~ print
-        
-        #~ for i in score:
-            #~ print "%0.2f " %(i),
-        #~ print
         
         ## And the winner is...
         best = sorted(new_scores,reverse=True)[0][1]
         
         c = self.correlate(chain,[best])
-        #~ print
-        #~ print chain
-        #~ print best, indexes[best][1]
         
+        self.indexes = indexes[best]
         
         retdic = {}
         retdic["best"] = best
-        retdic["reg"] = self.getRegister(indexes[best][0],chain)
+        retdic["reg"] = getRegister(best,chain)
         retdic["corr"] = c
         
         return retdic
@@ -187,19 +177,6 @@ class CoiledCoil:
                 else:
                     aux+=c
         return c
-    
-    
-    def getRegister(self, heptad="",chain=""):
-        
-        index = chain.find(heptad)
-        
-        reg1 = "abcdefg"[-(index % self.window_length):]+\
-        "abcdefg"*((len(chain)-(index % self.window_length))/7) 
-        reg2 =reg1+"abcdefg"[:len(chain)-len(reg1) ]
-        
-        print index,len(chain), len(reg2),"****"
-        return reg2
-    
     
     
     def sequenceCorrelation	(self, a="",channel=0,b = ""):
@@ -234,10 +211,10 @@ class CoiledCoil:
 
         a1 = array(al)
         b1 = array(bl)
-        ab = correlate(a1,b1,mode)
+        ab = correlate(a1,b1)
         
         
-            return (max(ab) , where(ab==max(ab)),ab)	
+        return (max(ab) , where(ab==max(ab)),ab)	
     
     
     def heptadize(self,score,chain,k):
@@ -282,7 +259,7 @@ class CoiledCoil:
             window = window+1
         return score
       
-   
+    
 
 ##############
 ## Test
@@ -291,7 +268,7 @@ import Biskit.test as BT
 import Biskit.tools as T
 
 class Test(BT.BiskitTest):
-    """ Test cases for LeuZip"""
+    """ Test cases for CoiledCoil"""
 
     def prepare(self):
         pass
@@ -299,78 +276,44 @@ class Test(BT.BiskitTest):
     def cleanUp( self ):
         pass
         
-    def test_search(self):
-        """LeuZip pattern search test cases"""
+    def test_general(self):
+        """Pattern search test cases"""
 
         l = CoiledCoil()
         l2 = CoiledCoil(T.dataRoot() + '/coiledcoil/SOCKET_par_norm')
         self.assertEqual(len(l.scores),20)
         
-        #~ ##TARGET
-        #~ target = 'LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL'
-        #~ res_1 = l.findHeptads(target)
-        #~ res_1 = l2.findHeptads(target)
+        ##TARGET
+        target = 'LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL'
+        res = l.findHeptads(target)
+        
+        if self.local:
+            print target
+            print res["reg"]
+            for i in l.last_heptads:
+                print i[0],i[1]
         
         
-        #~ ##1IK9
-        #~ chain = 'MERKISRIHLVSEPSITHFLQVSWEKTLESGFVITLTDGHSAWTGTVSESEISQEADDMAMEKGKYVGELRKALLSADVYTFNFSKESAYFFFEKNLKDVSFRLGSFNLEKVENPAEVIRELIAYALDTIAENQAKNEHLQKENERLLRDWNDVQGRFEKAVSAKEALETDLYKRFILVLNEKKTKIRSLHNKLLNAAQEREKDIKQ'
-        #~ res = l.findHeptads(chain)
-        #~ res = l2.findHeptads(chain)
-        #~ ##1IK9 cropped
-        #~ chain = 'VIRELIAYALDTIAENQAKNEHLQKENERLLRDWNDVQGRFEKAVSAKEALETDL'
-        #~ res = l.findHeptads(chain)
-        #~ res = l2.findHeptads(chain)
+        self.assertEqual(res["best"],"LRTRVAE")
+        self.assertEqual(len(res["reg"]),43)
         
-        #~ ##1NKN
-        #~ chain = 'MKEQLKQMDKMKEDLAKTERIKKELEEQNVTLLEQKNDLFGSMKQLEDKVEELLSKNYHLENEVARLKKLVGER'
-        #~ res = l.findHeptads(chain)
-        #~ res = l2.findHeptads(chain)
+        res = l2.findHeptads(target)
         
-        #~ ##1D7M
-        #~ chain = 'EMANRLAGLENSLESEKVSREQLIKQKDQLNSLLASLESEGAEREKRLRELEAKLDETLKNLELEKLARMELEARLAKTEKDRAILELKLAEAIDEKSKLE'
-        #~ res = l.findHeptads(chain)
-        #~ res = l2.findHeptads(chain)
+        if self.local:
+            print target
+            print res["reg"]
+            for i in target :
+                print i,"    ",
+            print
+            
+            for i in l2.last_score:
+                print "%.2f " %(i),
+            print
         
-        #~ ##1A93 A
-        #~ chain = 'CGGVQAEEQKLISEEDLLRKRREQLKHKLEQL'
-        #~ res = l.findHeptads(chain)
-        #~ res = l2.findHeptads(chain)
-        #~ ##1A93 B
-        #~ chain = 'CGGMRRKNDTHQQDIDDLKRQNALLEQQVRAL'
-        #~ res = l.findHeptads(chain)
-        #~ res = l2.findHeptads(chain)
-        
-        #~ ##2B9C
-        #~ chain = 'ELDRAQERLATALQKLEEAEKAADESERGMKVIESRAQKDEEKMEIQEIQLKEAKHIAEDADRKYEEVARKLVIIESDLERAEERAELSEGKCAELEEELKTVTNNLKSLEDKVEELLSKNYHLENEVARLKKLVG'
-        #~ res = l.findHeptads(chain)
-        #~ res = l2.findHeptads(chain)
-        #~ ##2B9C cropped
-        #~ chain = 'RGMKVIESRAQKDEEKMEIQEIQLKEAKHIAEDADRKYEEVARKLVIIESDLERAEERAELSEGKCAELEEELKTVTNNLKSLED'
-        #~ res = l.findHeptads(chain)
-        #~ res = l2.findHeptads(chain)
-        
-        #~ ##2Z5H
-        #~ chain = 'GELLSKNYHLENEVARLKKLVDDLEDELYAQKLKYKAISEELDHALNDM'
-        #~ res = l.findHeptads(chain)
-        #~ res = l2.findHeptads(chain)
-           
-        
-        ##2TMA
-        #~ chain = 'MDAIKKKMQMLKLDKENALDRAEQAEADKKAAEDRSKQLEDELVSLQKKLKGTEDELDKYSEALKDAQEKLELAEKKATDAEADVASLNRRIQLVEEELDRAQERLATALQKLEEAEKAADESERGMKVIESRAQKDEEKMEIQEIQLKEAKHIAEDADRKYEEVARKLVIIESDLERAEERAELSEGKCAELEEEIKTVTNNLKSLEAQAEKYSQKEDKYEEEIKVLSDKLKEAETRAEFAERSVTKLEKSIDDLEDELYAQKLKYKAISEELDHALNDMTSI'
-        #~ res = l.findHeptads(chain)
-        #~ res = l2.findHeptads(chain)
-        
-        
-        
-        #~ print 
-        #~ print l.getRegister("AAFLRRR","LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL")
-        
-        #~ self.assertEqual( l2.getFitnessScore("heptad","XXXLLLLLLXXX","AAAAAA",3,"cdefgab"),7.0316)
-        #~ self.assertEqual( l2.getFitnessScore("res_like","XXXLLLLLLLXXX","AAAAAAA",3),-7.0)
-        #~ self.assertEqual( l2.getFitnessScore("charges","XXXLLLLLLLXXX","AAAAAAA",3),1.4)
-        
-        #~ for r in res["corr"]:
-            #~ print r
+        self.assertEqual(res["best"],"VSQYETR")
+        self.assertEqual(len(res["reg"]),43)
+
+       
 if __name__ == '__main__':
     BT.localTest()    
     
