@@ -23,8 +23,7 @@
 
 import Biskit.molUtils as MU
 from Biskit import BiskitError
-from numpy import correlate,array, corrcoef,where, sum
-from Bio.pairwise2 import align
+from numpy import correlate,array, where, sum
 from coiledutils import getRegister
 
 
