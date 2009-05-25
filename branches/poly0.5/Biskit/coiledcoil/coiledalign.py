@@ -1,4 +1,9 @@
-
+from coiledcoil import CoiledCoil
+import Biskit.molUtils as MU
+from coiledutils import scores2String, scoreAlignFun
+from Bio.pairwise2 import align
+from numpy import array
+import Biskit.molUtils as MU
 
 
 class CoiledAlign:
@@ -9,10 +14,10 @@ class CoiledAlign:
     
     
     
-    def __init__(self,likeness_table = "BLOSSUM62"):
+    def __init__(self,cc = None, likeness_table = "BLOSSUM62"):
         
         self.like_scores, self.charge_scores = self.parseLikelyhood(likeness_table)
-    
+        self.mycc = cc or CoiledCoil()
 
     
     def parseLikelyhood(self,table = ""):
@@ -66,36 +71,44 @@ class CoiledAlign:
     
     
     
-    def tryAlignment(self, a = "", b = "", reg_a = "", reg_b = ""):
+    def alignChains(self, a = "", b = "", reg_a = "", reg_b = ""):
         """
         
         """
-        if len(a) < len(b):
-            aux =  b
-            b  = a
-            a = aux
-            aux =  reg_b
-            reg_b  = reg_a
-            reg_a = aux
+        assert(len(a) == len(reg_a) and len(b) == len(reg_b) ),"No correspondence between chains and their registers."
         
-        ## Score correlation
-        scores_a = self.flatten(a,reg_a)
-        scores_b = self.flatten(b,reg_b)
        
-        a,b = self.toStringChain(scores_a,scores_b)
+        ## Score alignment
+        scores_a = []
+        scores_b = []
+        
+        pos = "abcdefg".find(reg_a[0])
+        for c in a:
+            scores_a.append(self.mycc.scores[MU.single2longAA(c)[0]][pos])
+            pos = (pos+1) % 7
+        
+        pos = "abcdefg".find(reg_b[0])
+        for c in b:
+            scores_b.append(self.mycc.scores[MU.single2longAA(c)[0]][pos])
+            pos = (pos+1) % 7
+       
+        a_s,b_s = scores2String(scores_a,scores_b)
 
-        scc = align.localcs(a,b,self.scoreAlignFun,-1000,-1000)[0][2:4]
+        scc = align.localcs(a_s,b_s,scoreAlignFun,-1000,-1000)[0][2:4]
+        #~ print align.localcs(a_s,b_s,scoreAlignFun,-1000,-1000)
         
         ## Chain similarity
-        chs = align.localds(a, b, self.like_scores,-100,-100)[0][2:4]
-
-        ## Charges similarity
-        crs = align.localds(a, b, self.charge_scores,-100,-100)[0][2:4]
+       
+        chs = align.localds(a, b, self.like_scores,-1000,-1000)[0][2:4]
         
-        return {"heptad":scc , "res_like":chs , "charges":crs}
+        ## Charges similarity
+        crs = align.localds(a, b, self.charge_scores,-1000,-1000)[0][2:4]
+        
+        return {"heptad":(self.getFitnessScore("heptad",a,b,scc[1],reg_a,reg_b),scc[1]) \
+            , "res_like":(self.getFitnessScore("res_like",a,b,chs[1],reg_a,reg_b),chs[1]) \
+            , "charges": (self.getFitnessScore("charges",a,b,crs[1],reg_a,reg_b),crs[1])}
     
     def getFitnessScore(self,type = "heptad",a = "",b = "",where = 0,reg_a = "",reg_b=""):
-        
         """
         "heptad"
         "res_like"
@@ -103,39 +116,55 @@ class CoiledAlign:
         """
         
         assert( type in ["heptad","res_like","charges"] ), "Please choose a correct type (heptad,res_like,charges)." 
-        print len(a) ,len(reg_a),  len(b), len(reg_b)
+        
+        chain_a = a
+        chain_b = b
+        freg_a = reg_a
+        freg_b = reg_b
         
         if type ==  "heptad":
             assert(len(a) == len(reg_a) and len(b) == len(reg_b) ),"No correspondence between chains and their registers."
         
+        
         a = a[where:where+len(b)]
-        reg_a = reg_b[where:where+len(b)]
+        reg_a = reg_a[where:where+len(b)]
         
         if len(a)< len(b):
             b = b[0:len(a)]
             reg_b = reg_b[0:len(a)]
     
         if type ==  "heptad":
-        
-            ## get scores
-            a_s = []
-            b_s = []
+            scores_a = []
+            scores_b = []
             
-            pos = reg_a.find("abcdefg")
+            pos = "abcdefg".find(reg_a[0])
             for c in a:
-                a_s.append(self.scores[MU.single2longAA(c)[0]][pos])
-                pos = (pos+1)%self.window_length
+                scores_a.append(self.mycc.scores[MU.single2longAA(c)[0]][pos])
+                pos = (pos+1) % 7
             
-            
-            pos = reg_b.find("abcdefg")
+            pos = "abcdefg".find(reg_b[0])
             for c in b:
-                b_s.append(self.scores[MU.single2longAA(c)[0]][pos])
-                pos = (pos+1)%self.window_length
+                scores_b.append(self.mycc.scores[MU.single2longAA(c)[0]][pos])
+                pos = (pos+1) % 7
+       
+            #~ ## get scores
+            #~ scores_af = self.flatten(chain_a,freg_a)
+            #~ scores_bf = self.flatten(chain_b,freg_b)
+            #~ scores_a = self.flatten(a,reg_a)
+            #~ scores_b = self.flatten(b,reg_b)
             
-            a_sa = array(a_s)
-            b_sb = array(b_s)
+            #~ chain_as ,chain_bs = scores2String(scores_a+scores_af,scores_b+scores_bf) 
             
-            return (a_sa*b_sb).sum() 
+            chain_as ,chain_bs = scores2String(scores_a,scores_b)
+            
+            #~ chain_as2 = chain_as[:len(scores_a)]
+            #~ chain_bs2 = chain_bs[:len(scores_b)]
+            
+            total_score = 0
+            for i in range(len(chain_as)):
+                total_score += scoreAlignFun(chain_as[i],chain_bs[i])
+            
+            return total_score
             
         elif type == "res_like":
             acc = 0
@@ -163,50 +192,118 @@ class CoiledAlign:
         @return: A list with the scores of each heptad in chain.
         @rtype: list (float)
         """
-        #~ print chain , register
+        
         start = register.find("a")
         end  = start + len(chain[start:]) - len(chain[start:])%window_length
-
+      
+        
         scores = []
         pos = 0
-        ac = 1 ## So we don't want values smaller than 1 
+        ac = 0 
 
         for i in chain[start:end]:
-            ac+= self.scores[MU.single2longAA(i)[0]][pos] or 0
-            pos = (pos+1)%self.window_length
+            ac+= self.mycc.scores[MU.single2longAA(i)[0]][pos] or 0
+            pos = (pos+1)%window_length
             if pos == 0:
                 scores.append(ac)
-                ac = 1
-
+                ac = 0
+        
         return scores
+    
+    def alignRegisters(self,a = "",b = "",reg_a ="",reg_b =""):
+        """
+        """
+        ch_a=a;ch_b=b;bra=reg_a;brb=reg_b
+        
+        start_a = reg_a.find("a")
+        start_b = reg_b.find("a")
+        ## So we make it end with reg letter g
+        a = a[start_a:]
+        
+        if len(a)%7 != 0:
+            a = a[:(len(a)/7)*7]
+        
+        b = b[start_b:]
+        if len(b)%7 != 0:
+            b = b[:(len(b)/7)*7]
+       
+        
+        total_regs_a = len(a) / 7
+        total_regs_b = len(b)  / 7
+        
+        ## Scores
+        scores_a = self.flatten(a,"abcdefg"*total_regs_a)
+        scores_b = self.flatten(b,"abcdefg"*total_regs_b)
+        
+        a_s,b_s = scores2String(scores_a,scores_b)
+        
+        scc = align.localcs(a_s,b_s,scoreAlignFun,-1000,-1000)[0][2:4]
+
+        scc =( scc[0],start_a+scc[1]*7)
+        
+        
+        
+        ## Charges and residues
+        subvals_res = []
+        subvals_charge = []
+        for i in range(total_regs_a - total_regs_b +1):
+            pos = i*7
+            acc_charges = 0
+            acc_res = 0
+            for j in range(len(b)):
+                acc_res += self.like_scores[(a[pos+j],b[j])]
+                acc_charges += self.charge_scores[(a[pos+j],b[j])]
+            subvals_charge.append((acc_charges,start_a+pos))
+            subvals_res.append((acc_res,start_a+pos))
+        
+        crs = max(subvals_charge)
+        chs = max(subvals_res)
+        
+        #~ return {"heptad": scc, "charges": max(subvals_charge),"res_like": max(subvals_res)}
+        a = ch_a;b=ch_b;reg_a=bra;reg_b=brb
+        return {"heptad":(self.getFitnessScore("heptad",a,b,scc[1],reg_a,reg_b),scc[1]) \
+            , "res_like":(self.getFitnessScore("res_like",a,b,chs[1],reg_a,reg_b),chs[1]) \
+            , "charges": (self.getFitnessScore("charges",a,b,crs[1],reg_a,reg_b),crs[1])}
+    
         
 ##############
 ## Test
 ##############
 import Biskit.test as BT
 import Biskit.tools as T
-from coiledcoil import CoiledCoil
+
 
 class Test(BT.BiskitTest):
     """ Test cases for Coiled Coil Alignment"""
 
     def prepare(self):
-        self.ca = CoiledAlign()
+        self.cc = CoiledCoil(T.dataRoot() + '/coiledcoil/SOCKET_par_norm')
+        self.ca = CoiledAlign(self.cc)
 
     def cleanUp( self ):
         pass
         
     def test_align(self):
         """Best alignment search test cases"""
-        res = self.ca.tryAlignment("RRRLLLLLLLRRR","LRLRLRL","efgabcdefgabc","abcdefg")
-        print res
+        res = self.ca.alignChains("RRRLLLLLLLRRRRRRLLLLLLLRRR","LLLRLRL","efgabcdefgabcdefgabcdefgab","abcdefg")
+        self.assertEqual(res,{'res_like': (18.0, 7), 'charges': (3.6000000000000001, 20), 'heptad': (69898, 7)})
+    
+    
+    def test_align_regs(self):
+        """Best alignment for registers test cases"""
         
-         
+        res = self.ca.alignRegisters("RRRLLLLLLLRRRRRRLLLLLLLRRR", "LLLRRRR","efgabcdefgabcdefgabcdefgab","abcdefg")
+        self.assertEqual( res,{'res_like': (11.0, 17), 'charges': (2, 10), 'heptad': (69890, 3)})
+        res = self.ca.alignRegisters("RRRLLLLLLLRRRRRRLLLLLLLRRR", "RRRLLLL","efgabcdefgabcdefgabcdefgab","abcdefg")
+        self.assertEqual(res,{'res_like': (13.0, 10), 'charges': (3.2000000000000002, 10), 'heptad': (69975, 3)})
+        res = self.ca.alignRegisters("RRRLLLLLLLRRRRRRLLLLLLLRRR", "RRRRRRR","efgabcdefgabcdefgabcdefgab","abcdefg")
+        self.assertEqual( res,{'res_like': (28.0, 10), 'charges': (11, 10), 'heptad': (69865, 3)})
+        
     def test_fitness(self):
         """getFitnessScore function test cases"""
-        #~ self.assertEqual( l2.getFitnessScore("heptad","XXXLLLLLLXXX","AAAAAA",3,"cdefgab"),7.0316)
-        self.assertEqual( self.ca.getFitnessScore("res_like","XXXLLLLLLLXXX","AAAAAAA",3),-7.0)
-        self.assertEqual( self.ca.getFitnessScore("charges","XXXLLLLLLLXXX","AAAAAAA",3),1.4)
+        self.assertEqual( self.ca.getFitnessScore("heptad","RRRLLLLLLLRRRRRRLLLLLLLRRR","LLLRLRL",7,"efgabcdefgabcdefgabcdefgab","abcdefg"),69898)
+        self.assertEqual( self.ca.getFitnessScore("res_like","RRRLLLLLLLRRRRRRLLLLLLLRRR","LLLRLRL",7,"efgabcdefgabcdefgabcdefgab","abcdefg"),18.0)
+        self.assertEqual( self.ca.getFitnessScore("charges","RRRLLLLLLLRRRRRRLLLLLLLRRR","LLLRLRL",20,"efgabcdefgabcdefgabcdefgab","abcdefg"),3.6)
         
        
 if __name__ == '__main__':
