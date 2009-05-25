@@ -249,7 +249,7 @@ class Executor:
     def __init__( self, name, args='', template=None, f_in=None, f_out=None,
                   f_err=None, strict=1, catch_out=1, push_inp=1, catch_err=0,
                   node=None, nice=0, cwd=None, log=None, debug=0,
-                  verbose=None, **kw ):
+                  verbose=None, validate=1, **kw ):
 
         """
         Create Executor. *name* must point to an existing program configuration
@@ -299,6 +299,9 @@ class Executor:
         @type  debug: 0|1
         @param verbose: print progress messages to log (default: log != STDOUT)
         @type  verbose: 0|1
+        @param validate: validate binary and environment immedeatly (1=default)
+                         or only before execution (0)
+        @type validate: 1|0 
         @param kw: key=value pairs with values for template file or string
         @type  kw: key=value
         
@@ -306,7 +309,8 @@ class Executor:
                                the program
         """
         self.exe = ExeConfigCache.get( name, strict=strict )
-        self.exe.validate()
+        if validate:
+            self.exe.validate()
 
         self.f_out = t.absfile( f_out )
         if not f_out and catch_out:
@@ -436,6 +440,8 @@ class Executor:
         
         @raise RunError: see communicate()
         """
+        self.exe.validate() ##Check that binary and env variables are available
+        
         start_time = time.time()
 
         cmd = self.command()
