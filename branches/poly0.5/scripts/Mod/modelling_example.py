@@ -209,7 +209,7 @@ try:
     inp_dic = modUtils.parse_tabbed_file( outFolder +
                                           TemplateSearcher.F_NR +
                                           TemplateSearcher.F_CHAIN_INDEX )
-
+    
     cleaner.process_all( inp_dic )
 
     tools.flushPrint('Done.\n')
