@@ -150,21 +150,33 @@ class CCStudy:
     def chooseBest(self):
         ## First for each choose the best
         maxims = []
-        print self.alignments["DUMMY"].chain_alignments["heptads"] 
-        print self.alignments["DUMMY"].chain_alignments["charges"]
-        print self.alignments["DUMMY"].chain_alignments["res_like"] 
         for k in self.alignments.keys():
             print "key: ",k
+            self.alignments[k].normalizeScores()
             keys = self.alignments[k].chain_alignments.keys()
             maxacc = (0,0)
+            print keys[0]
             for t in self.alignments[k].chain_alignments[keys[0]]:
-                acc = ((t[0] + self._findInAlignment(self.alignments[k].chain_alignments[keys[1]],t[1])+ self._findInAlignment(self.alignments[k].chain_alignments[keys[1]],t[1]),t[1]))
+                print t[0],t[1]
+                acc = ((t[0] + self._findInAlignment(self.alignments[k].chain_alignments[keys[1]],t[1])+ self._findInAlignment(self.alignments[k].chain_alignments[keys[2]],t[1]),t[1]))
                 maxacc = max(maxacc,acc)
             maxims.append((maxacc,k))
         ## Then choose the best of all !!!
-        best = max(maxims)
+        best_chain = max(maxims)
         
-        return best
+        maxims = []
+        for k in self.alignments.keys():
+            keys = self.alignments[k].reg_alignments.keys()
+            maxacc = (0,0)
+            for t in self.alignments[k].reg_alignments[keys[0]]:
+                print t[0],t[1]
+                acc = ((t[0] + self._findInAlignment(self.alignments[k].reg_alignments[keys[1]],t[1])+ self._findInAlignment(self.alignments[k].reg_alignments[keys[2]],t[1]),t[1]))
+                maxacc = max(maxacc,acc)
+            maxims.append((maxacc,k))
+        ## Then choose the best of all !!!
+        best_reg = max(maxims)
+        
+        return best_chain, best_reg
     
     def _findInAlignment(self,where=[],what = 0):
         for i in range(len(where)):
@@ -196,6 +208,7 @@ class Test(BT.BiskitTest):
         """doStudy function test case"""
         cs = CCStudy(T.dataRoot() + '/coiledcoil/coils.dat')
         cs.doStudy()
+        
         print cs.chooseBest()
 if __name__ == '__main__':
     BT.localTest()    
