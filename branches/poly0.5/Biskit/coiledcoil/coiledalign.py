@@ -1,9 +1,7 @@
 from coiledcoil import CoiledCoil
+from coiledutils import scores2String, scoreAlignFun,alignd,alignf,flatten
 import Biskit.molUtils as MU
-from coiledutils import scores2String, scoreAlignFun
-from Bio.pairwise2 import align
-from numpy import array
-import Biskit.molUtils as MU
+
 
 
 class CoiledAlign:
@@ -15,14 +13,25 @@ class CoiledAlign:
     
     
     def __init__(self,cc = None, likeness_table = "BLOSSUM62"):
+        """
+        Instantiation of the aligner object. It loads needed data.
         
-        self.like_scores, self.charge_scores = self.parseLikelyhood(likeness_table)
+        @param cc: A coiled coil object containing score and heptad data. If none is 
+                given, then it defaults to a standard one.
+        @type cc: CoiledCoil
+        @param likeness_table: Name of the file used for loading the residues likeness table.
+        @type likeness_table: string
+        """
+        self.like_scores, self.charge_scores = self.createTables(likeness_table)
         self.mycc = cc or CoiledCoil()
-
+        self.chain_alignments = {}
+        self.reg_alignments = {}
+        
     
-    def parseLikelyhood(self,table = ""):
+    def createTables(self,table = ""):
         """
         Load residue likelyhood scores for BLOSSUM 62 table.
+        Creates from scratch a table for residue charge comparison.
         """
         try:
             lineas = open(T.dataRoot() + '/coiledcoil/'+table,"r").readlines()
@@ -73,11 +82,9 @@ class CoiledAlign:
     
     def alignChains(self, a = "", b = "", reg_a = "", reg_b = ""):
         """
-        
         """
         assert(len(a) == len(reg_a) and len(b) == len(reg_b) ),"No correspondence between chains and their registers."
         
-       
         ## Score alignment
         scores_a = []
         scores_b = []
@@ -93,123 +100,21 @@ class CoiledAlign:
             pos = (pos+1) % 7
        
         a_s,b_s = scores2String(scores_a,scores_b)
-
-        scc = align.localcs(a_s,b_s,scoreAlignFun,-1000,-1000)[0][2:4]
-        #~ print align.localcs(a_s,b_s,scoreAlignFun,-1000,-1000)
+        
+        self.chain_alignments["heptads"] = alignf(a_s,b_s,scoreAlignFun)
+        scc = max(self.chain_alignments["heptads"])
         
         ## Chain similarity
-       
-        chs = align.localds(a, b, self.like_scores,-1000,-1000)[0][2:4]
+        self.chain_alignments["res_like"] = alignd(a, b, self.like_scores)
+        chs = max(self.chain_alignments["res_like"])
         
         ## Charges similarity
-        crs = align.localds(a, b, self.charge_scores,-1000,-1000)[0][2:4]
+        self.chain_alignments["charges"] = alignd(a, b, self.charge_scores)
+        crs = max(self.chain_alignments["charges"])
         
-        return {"heptad":(self.getFitnessScore("heptad",a,b,scc[1],reg_a,reg_b),scc[1]) \
-            , "res_like":(self.getFitnessScore("res_like",a,b,chs[1],reg_a,reg_b),chs[1]) \
-            , "charges": (self.getFitnessScore("charges",a,b,crs[1],reg_a,reg_b),crs[1])}
+        return {"heptads": scc , "res_like": chs , "charges":  crs}
     
-    def getFitnessScore(self,type = "heptad",a = "",b = "",where = 0,reg_a = "",reg_b=""):
-        """
-        "heptad"
-        "res_like"
-        "charges"
-        """
-        
-        assert( type in ["heptad","res_like","charges"] ), "Please choose a correct type (heptad,res_like,charges)." 
-        
-        chain_a = a
-        chain_b = b
-        freg_a = reg_a
-        freg_b = reg_b
-        
-        if type ==  "heptad":
-            assert(len(a) == len(reg_a) and len(b) == len(reg_b) ),"No correspondence between chains and their registers."
-        
-        
-        a = a[where:where+len(b)]
-        reg_a = reg_a[where:where+len(b)]
-        
-        if len(a)< len(b):
-            b = b[0:len(a)]
-            reg_b = reg_b[0:len(a)]
-    
-        if type ==  "heptad":
-            scores_a = []
-            scores_b = []
-            
-            pos = "abcdefg".find(reg_a[0])
-            for c in a:
-                scores_a.append(self.mycc.scores[MU.single2longAA(c)[0]][pos])
-                pos = (pos+1) % 7
-            
-            pos = "abcdefg".find(reg_b[0])
-            for c in b:
-                scores_b.append(self.mycc.scores[MU.single2longAA(c)[0]][pos])
-                pos = (pos+1) % 7
-       
-            #~ ## get scores
-            #~ scores_af = self.flatten(chain_a,freg_a)
-            #~ scores_bf = self.flatten(chain_b,freg_b)
-            #~ scores_a = self.flatten(a,reg_a)
-            #~ scores_b = self.flatten(b,reg_b)
-            
-            #~ chain_as ,chain_bs = scores2String(scores_a+scores_af,scores_b+scores_bf) 
-            
-            chain_as ,chain_bs = scores2String(scores_a,scores_b)
-            
-            #~ chain_as2 = chain_as[:len(scores_a)]
-            #~ chain_bs2 = chain_bs[:len(scores_b)]
-            
-            total_score = 0
-            for i in range(len(chain_as)):
-                total_score += scoreAlignFun(chain_as[i],chain_bs[i])
-            
-            return total_score
-            
-        elif type == "res_like":
-            acc = 0
-            for i in range(len(a)):
-                acc += self.like_scores[(a[i],b[i])]
-            return acc
-            
-        else:
-            acc = 0
-            for i in range(len(a)):
-                acc += self.charge_scores[(a[i],b[i])]
-            return acc
-            
-            
-    def flatten (self, chain = "", register = "", window_length = 7):
-        """
-        This function returns a list with the scores of each heptad in chain.
-        Incomplete heptads are not used.
-        
-        @param chain: Chain to be flattened.
-        @type chain: string
-        @param register: Register ofthe chain.
-        @type heptad: string
-        
-        @return: A list with the scores of each heptad in chain.
-        @rtype: list (float)
-        """
-        
-        start = register.find("a")
-        end  = start + len(chain[start:]) - len(chain[start:])%window_length
-      
-        
-        scores = []
-        pos = 0
-        ac = 0 
 
-        for i in chain[start:end]:
-            ac+= self.mycc.scores[MU.single2longAA(i)[0]][pos] or 0
-            pos = (pos+1)%window_length
-            if pos == 0:
-                scores.append(ac)
-                ac = 0
-        
-        return scores
-    
     def alignRegisters(self,a = "",b = "",reg_a ="",reg_b =""):
         """
         """
@@ -217,6 +122,7 @@ class CoiledAlign:
         
         start_a = reg_a.find("a")
         start_b = reg_b.find("a")
+        
         ## So we make it end with reg letter g
         a = a[start_a:]
         
@@ -232,16 +138,20 @@ class CoiledAlign:
         total_regs_b = len(b)  / 7
         
         ## Scores
-        scores_a = self.flatten(a,"abcdefg"*total_regs_a)
-        scores_b = self.flatten(b,"abcdefg"*total_regs_b)
+        scores_a = flatten(a,"abcdefg"*total_regs_a,self.mycc)
+        scores_b = flatten(b,"abcdefg"*total_regs_b,self.mycc)
         
         a_s,b_s = scores2String(scores_a,scores_b)
         
-        scc = align.localcs(a_s,b_s,scoreAlignFun,-1000,-1000)[0][2:4]
-
-        scc =( scc[0],start_a+scc[1]*7)
+        scc = alignf(a_s,b_s,scoreAlignFun)
         
+        new_scc = []
+        for t in scc:
+            new_scc.append(( t[0], start_a+(t[1]*7) ))
         
+        scc = ( max(scc)[0], start_a+max(scc)[1]*7)
+        
+        self.reg_alignments["heptads"]= new_scc
         
         ## Charges and residues
         subvals_res = []
@@ -256,15 +166,52 @@ class CoiledAlign:
             subvals_charge.append((acc_charges,start_a+pos))
             subvals_res.append((acc_res,start_a+pos))
         
+        self.reg_alignments["charges"]=subvals_charge
+        self.reg_alignments["res_like"]=subvals_res
+        
         crs = max(subvals_charge)
         chs = max(subvals_res)
-        
+       
         #~ return {"heptad": scc, "charges": max(subvals_charge),"res_like": max(subvals_res)}
         a = ch_a;b=ch_b;reg_a=bra;reg_b=brb
-        return {"heptad":(self.getFitnessScore("heptad",a,b,scc[1],reg_a,reg_b),scc[1]) \
-            , "res_like":(self.getFitnessScore("res_like",a,b,chs[1],reg_a,reg_b),chs[1]) \
-            , "charges": (self.getFitnessScore("charges",a,b,crs[1],reg_a,reg_b),crs[1])}
+        return {"heptads":scc , "res_like":chs, "charges": crs } ##(self.getFitnessScore("charges",a,b,crs[1],reg_a,reg_b),crs[1])}
     
+    def normalizeScores(self):
+        """
+        Normalizes all the alignment scores to a 0-1 range.
+        """
+        for i in self.chain_alignments:
+            mymax = self.chain_alignments[i][0]
+            mymin = self.chain_alignments[i][0]
+            if len(self.chain_alignments[i]) >1:
+                for j in self.chain_alignments[i]:
+                    mymax = max(mymax,j)
+                    mymin = min(mymin,j)
+               
+                for k in range(len(self.chain_alignments[i])):
+                    self.chain_alignments[i][k] = ( (self.chain_alignments[i][k][0]-mymin[0]) / (mymax[0]-mymin[0]) , self.chain_alignments[i][k][1])
+        
+        for i in self.reg_alignments:
+            mymax = self.reg_alignments[i][0]
+            mymin = self.reg_alignments[i][0]
+            if len(self.reg_alignments[i]) >1:
+                for j in self.reg_alignments[i]:
+                    mymax = max(mymax,j)
+                    mymin = min(mymin,j)
+               
+                for k in range(len(self.reg_alignments[i])):
+                    self.reg_alignments[i][k] = ( (self.reg_alignments[i][k][0]-mymin[0]) / (mymax[0]-mymin[0]) , self.reg_alignments[i][k][1])
+
+    def copy(self):
+        """
+        Returns a copy where tables are referenced (and then not loaded again).
+        For speeding up purposes.
+        """
+        ca = CoiledAlign(self.mycc)
+        ca.like_scores = self.like_scores
+        ca.charge_scores = self.charge_scores
+        
+        return ca
         
 ##############
 ## Test
@@ -286,26 +233,44 @@ class Test(BT.BiskitTest):
     def test_align(self):
         """Best alignment search test cases"""
         res = self.ca.alignChains("RRRLLLLLLLRRRRRRLLLLLLLRRR","LLLRLRL","efgabcdefgabcdefgabcdefgab","abcdefg")
-        self.assertEqual(res,{'res_like': (18.0, 7), 'charges': (3.6000000000000001, 20), 'heptad': (69898, 7)})
+        self.assertEqual(res,{'res_like': (18.0, 7), 'charges': (2.6000000000000001, 7), 'heptads': (404, 7)})
     
     
     def test_align_regs(self):
         """Best alignment for registers test cases"""
         
         res = self.ca.alignRegisters("RRRLLLLLLLRRRRRRLLLLLLLRRR", "LLLRRRR","efgabcdefgabcdefgabcdefgab","abcdefg")
-        self.assertEqual( res,{'res_like': (11.0, 17), 'charges': (2, 10), 'heptad': (69890, 3)})
+        self.assertEqual(res["charges"],(2, 10))
         res = self.ca.alignRegisters("RRRLLLLLLLRRRRRRLLLLLLLRRR", "RRRLLLL","efgabcdefgabcdefgabcdefgab","abcdefg")
-        self.assertEqual(res,{'res_like': (13.0, 10), 'charges': (3.2000000000000002, 10), 'heptad': (69975, 3)})
+        self.assertEqual(res["charges"],(3.20, 10))
         res = self.ca.alignRegisters("RRRLLLLLLLRRRRRRLLLLLLLRRR", "RRRRRRR","efgabcdefgabcdefgabcdefgab","abcdefg")
-        self.assertEqual( res,{'res_like': (28.0, 10), 'charges': (11, 10), 'heptad': (69865, 3)})
+        self.assertEqual(res["charges"],(11, 10))
+    
+    def test_normalize(self):
+        """ Data normalization test_case """
+        data = {}
+        data["heptad"] =[ (1.,0),(3.,0),(10.,0), (-1.,0), (5.,0)]
+        data["charges"] =[ (1.,0),(3.,0),(10.,0), (-1.,0), (5.,0)]
+        data["res_like"] =[ (1.,0),(3.,0),(10.,0), (-1.,0), (5.,0)]
         
-    def test_fitness(self):
-        """getFitnessScore function test cases"""
-        self.assertEqual( self.ca.getFitnessScore("heptad","RRRLLLLLLLRRRRRRLLLLLLLRRR","LLLRLRL",7,"efgabcdefgabcdefgabcdefgab","abcdefg"),69898)
-        self.assertEqual( self.ca.getFitnessScore("res_like","RRRLLLLLLLRRRRRRLLLLLLLRRR","LLLRLRL",7,"efgabcdefgabcdefgabcdefgab","abcdefg"),18.0)
-        self.assertEqual( self.ca.getFitnessScore("charges","RRRLLLLLLLRRRRRRLLLLLLLRRR","LLLRLRL",20,"efgabcdefgabcdefgabcdefgab","abcdefg"),3.6)
+        data2 = {}
+        data2["heptad"] =[ (1.,0)]
+        data2["charges"] =[ (1.,0)]
+        data2["res_like"] =[ (1.,0)]
         
-       
+        self.ca.chain_alignments = data
+        self.ca.reg_alignments = data2
+        
+        self.ca.normalizeScores()
+        self.assertEqual( self.ca.chain_alignments["heptad"][0][0], (1.-(-1)) / (10-(-1))) 
+    
+    def test_copy(self):
+        """Copy test case"""
+        ca2 = CoiledAlign(self.cc)
+        ca3 = self.ca.copy()
+        
+        self.assertEqual( ca3.like_scores[("B","N")],3)
+    
 if __name__ == '__main__':
     BT.localTest()    
     

@@ -30,14 +30,13 @@ from coiledutils import getRegister
 
 class CoiledCoil:
     """
-    Tentative class for Leucine Zipper registry analysis.
+    Temptative class for Leucine Zipper registry analysis.
     An heptad registry is given by a sequence of letters from a to g,
     where a corresponds to the first residue and g to the last.
     Ex.
     
     LQAIEKQ
     abcdefg
-    
     """
     
     
@@ -163,19 +162,45 @@ class CoiledCoil:
         
     def correlate(self, chain, heptads):
         """
+        Function for calculating the accumulated correlation of a chain for a 
+        given set of heptads.
         
+        @param chain: Chain to be correlated with the heptads.
+        @type chain: string
+        @param heptads: List containing the heptads we want to get the correlation
+            with @chain.
+        @type heptads: List (string)
+        
+        
+        @return: It returns a tuple of two structures:
+            
+            - Corr: Which is a dictionary indexed by the string representing
+                theresidues of the heptad (so these inside @heptads) and containing
+                for each position the peak of correlation
+            
+            while...
+            
+            - Acccum: Is another dictionary indexed in the same way containing the 
+                accumulated correlation values for each position. Usefull to see 
+                repeating structures.
+        
+        @rtype: Tuple(Dictionary,Dictionary)
         """
-        corr = []
+        
+        corr = {}
+        accum = {}
         for k in range(0,len(heptads)):
-            aux= None
+            aux= []
+            corr[heptads[k]] = []
             for j in range(7):
                 (a,b,c) = self.sequenceCorrelation(chain,j,heptads[k])
-                corr.append(b)
-                if aux == None:
+                corr[heptads[k]].append(b)
+                if aux == []:
                     aux = c
                 else:
                     aux+=c
-        return c
+            accum[heptads[k]] = aux
+        return corr,accum
     
     
     def sequenceCorrelation	(self, a="",channel=0,b = ""):
@@ -222,7 +247,6 @@ class CoiledCoil:
         
         @return: List of the k best heptads.
         @rtype: list
-        
         """
         
         l = []
@@ -246,7 +270,6 @@ class CoiledCoil:
         @rtype: list
         
         """
-        
         window = 0
         score = [0.]*len(chain)
         while window + 7 <= len(chain):
@@ -257,7 +280,6 @@ class CoiledCoil:
                     score[window]+=self.scores[r][i]
             window = window+1
         return score
-      
     
 
 ##############
@@ -312,7 +334,10 @@ class Test(BT.BiskitTest):
         self.assertEqual(res["best"],"VSQYETR")
         self.assertEqual(len(res["reg"]),43)
 
-       
+    def test_correlation(self):
+        """Correlation test case"""
+        print "WARNING!!!!!!!!! & REMEMBER!!!!! You HAVE TO implement this test case, as correlation isn't fully tested yet!!!!"
+        
 if __name__ == '__main__':
     BT.localTest()    
     
