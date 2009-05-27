@@ -25,15 +25,18 @@
 """
 Calculate and add various properties to PDBModel
 """
+import string
 
 import numpy.oldnumeric as N
 import Biskit.tools as T
 
+from Biskit import BiskitError
 from Biskit.WhatIf import WhatIf 
 from Biskit.Hmmer import Hmmer
 from Biskit.DSSP import Dssp
 from Biskit.Fold_X import Fold_X
 from Biskit.SurfaceRacer import SurfaceRacer
+from Biskit.coiledcoil import CoiledCoil
 
 
 class PDBDope:
@@ -72,7 +75,7 @@ class PDBDope:
                nessesary any more. SurfaceRacer now also adds a profile
                'relAS' (conataining relative solvent accessible surf) and
                'relMS' (relative molecular surface).
-        
+
         @raise ProfileError: if WhatIf-returned atom/residue lists don't match.
                              Usually that means, WhatIf didn't recognize some
                              residue name
@@ -89,20 +92,20 @@ class PDBDope:
         normalRes = self.m.atom2resMask( normalAtoms )
 
         self.m.atoms.set( 'relASA', atomRelAcc, ## normalAtoms, 0,
-                               comment='relative accessible surface area in %',
-                               version= T.dateString() + ' ' + self.version() )
+                          comment='relative accessible surface area in %',
+                          version= T.dateString() + ' ' + self.version() )
 
         self.m.residues.set( 'ASA_total', resASA[:,0], normalRes, 0,
-                              comment='accessible surface area in A^2',
-                              version= T.dateString() + ' ' + self.version() )
+                             comment='accessible surface area in A^2',
+                             version= T.dateString() + ' ' + self.version() )
 
         self.m.residues.set( 'ASA_sc', resASA[:,1], normalRes, 0,
-                           comment='side chain accessible surface area in A^2',
-                           version= T.dateString() + ' ' + self.version() )
+                             comment='side chain accessible surface area in A^2',
+                             version= T.dateString() + ' ' + self.version() )
 
         self.m.residues.set( 'ASA_bb', resASA[:,2], normalRes, 0,
-                           comment='back bone accessible surface area in A^2',
-                           version= T.dateString() + ' ' + self.version() )
+                             comment='back bone accessible surface area in A^2',
+                             version= T.dateString() + ' ' + self.version() )
 
 
     def addSurfaceMask( self, pname='relAS' ):
@@ -117,8 +120,8 @@ class PDBDope:
         """
         r = self.m.profile2mask( pname, cutoff_min=40 )
         self.m.residues.set( 'surfMask',  self.m.atom2resMask(r),
-                              comment='residues with any atom > 40% exposed',
-                              version= T.dateString() + ' ' + self.version() )
+                             comment='residues with any atom > 40% exposed',
+                             version= T.dateString() + ' ' + self.version() )
 
 
     def addSecondaryStructure( self ):
@@ -139,11 +142,11 @@ class PDBDope:
         """
         dssp = Dssp( self.m )
         ss = dssp.run()
-        
+
         self.m.residues.set( 'secondary',  ss,
-                              comment='secondary structure from DSSP',
-                              version= T.dateString() + ' ' + self.version() )
-        
+                             comment='secondary structure from DSSP',
+                             version= T.dateString() + ' ' + self.version() )
+
 
     def addConservation( self, pfamEntries=None, verbose=0, log=None):
         """
@@ -152,7 +155,7 @@ class PDBDope:
 	entropy of the residue distribution with respect to the background 
 	distribution of amino acids (Kullback-Leibler distance) in swissprot.
 	See PMID 16916457.
-        
+
         @param pfamEntries: External hmmSearch result, list of
                             (non-overlapping) profile hits.
                             (default: None, do the search) Example::
@@ -167,16 +170,16 @@ class PDBDope:
         @type  verbose: 1|0
         @param log: Log file for messages [STDOUT]
         @type  log: Biskit.LogFile
-        
+
         @raise ExeConfigError: if external application is missing
         """
         ## mask out solvent and other troublemakers
-	mask = self.m.maskProtein()
-	resmask = self.m.atom2resMask( mask )
-	
-	m = self.m
-	if not N.alltrue( mask ):
-	    m = self.m.compress( mask )
+        mask = self.m.maskProtein()
+        resmask = self.m.atom2resMask( mask )
+
+        m = self.m
+        if not N.alltrue( mask ):
+            m = self.m.compress( mask )
 
         h = Hmmer( verbose=verbose, log=log )
         h.checkHmmdbIndex()
@@ -184,22 +187,22 @@ class PDBDope:
         p, hmmHits = h.scoreAbsSum( m, hmmNames=pfamEntries )
 
         self.m.residues.set( 'cons_abs', p, hmmHits=hmmHits, mask=resmask,
-              comment="absolute sum of all 20 hmm scores per position",
-              version= T.dateString() + ' ' + self.version() )
+                             comment="absolute sum of all 20 hmm scores per position",
+                             version= T.dateString() + ' ' + self.version() )
 
         p, hmmHits = h.scoreMaxAll( m, hmmNames=hmmHits )
 
         self.m.residues.set( 'cons_max', p, hmmHits=hmmHits, mask=resmask,
-              comment="max of 20 hmm scores (-average / SD) per position",
-              version= T.dateString() + ' ' + self.version() )
+                             comment="max of 20 hmm scores (-average / SD) per position",
+                             version= T.dateString() + ' ' + self.version() )
 
         p,  hmmHits = h.scoreEntropy( m, hmmNames=hmmHits )
 
         self.m.residues.set( 'cons_ent', p, hmmHits=hmmHits, mask=resmask,
-              comment="relative entropy (Kullback-Leibler distance) between "\
-	      +"observed and background amino acid distribution "\
-	      +"(high -> high conservation/discrimination)",
-              version= T.dateString() + ' ' + self.version() )
+                             comment="relative entropy (Kullback-Leibler distance) between "\
+                             +"observed and background amino acid distribution "\
+                             +"(high -> high conservation/discrimination)",
+                             version= T.dateString() + ' ' + self.version() )
 
 
     def addDensity( self, radius=6, minasa=None, profName='density' ):
@@ -207,7 +210,7 @@ class PDBDope:
         Count the number of heavy atoms within the given radius.
         Values are only collected for atoms with |minasa| accessible surface
         area.
-        
+
         @param minasa: relative exposed surface - 0 to 100%
         @type  minasa: float
         @param radius: in Angstrom
@@ -234,8 +237,8 @@ class PDBDope:
             contacts += [ N.sum( N.less(dist, radius**2 )) -1]
 
         self.m.atoms.set( profName, contacts, mSurf, default=-1,
-                               comment='atom density radius %3.1fA' % radius,
-                               version= T.dateString() + ' ' + self.version() )
+                          comment='atom density radius %3.1fA' % radius,
+                          version= T.dateString() + ' ' + self.version() )
 
     def addFoldX( self ):
         """
@@ -253,14 +256,14 @@ class PDBDope:
            curvature - average curvature (or curvature_1.4 if probe_suffix=1)
            MS - molecular surface area   (or MS_1.4 if probe_suffix=1)
            AS - accessible surface area  (or AS_1.4 if probe_suffix=1)
-           
+
         If the probe radii is 1.4 Angstrom and the Richards vdw radii
         set is used the following two profiles are also added::
            relAS - Relative solvent accessible surface
            relMS - Relative molecular surface
-           
+
         See {Biskit.SurfaceRacer}
-        
+
         @param probe: probe radius
         @type  probe: float
         @param vdw_set: defines what wdv-set to use (1-Richards, 2-Chothia)
@@ -276,43 +279,43 @@ class PDBDope:
 
         ## hydrogens + waters are not allowed during FastSurf calculation
         mask = self.m.maskHeavy() * N.logical_not( self.m.maskSolvent() )
-        
+
         fs = SurfaceRacer( self.m, probe, vdw_set=vdw_set )
         fs_dic = fs.run()
 
         fs_info= fs_dic['surfaceRacerInfo']
 
         self.m.atoms.set( name_MS, fs_dic['MS'], mask, 0,
-                               comment='Molecular Surface area in A',
-                               version= T.dateString() + ' ' + self.version(),
-                               **fs_info )
+                          comment='Molecular Surface area in A',
+                          version= T.dateString() + ' ' + self.version(),
+                          **fs_info )
 
         self.m.atoms.set( name_AS, fs_dic['AS'], mask, 0,
-                               comment='Accessible Surface area in A',
-                               version= T.dateString() + ' ' + self.version(),
-                               **fs_info )
+                          comment='Accessible Surface area in A',
+                          version= T.dateString() + ' ' + self.version(),
+                          **fs_info )
 
         self.m.atoms.set( name_curv, fs_dic['curvature'], mask, 0,
-                               comment='Average curvature',
-                               version= T.dateString() + ' ' + self.version(),
-                               **fs_info )
+                          comment='Average curvature',
+                          version= T.dateString() + ' ' + self.version(),
+                          **fs_info )
 
         if round(probe, 1) == 1.4 and vdw_set == 1 and 'relAS' in fs_dic:
             self.m.atoms.set( 'relAS', fs_dic['relAS'], mask, 0,
-                                   comment='Relative solvent accessible surf.',
-                                   version= T.dateString()+' ' +self.version(),
-                                   **fs_info )
+                              comment='Relative solvent accessible surf.',
+                              version= T.dateString()+' ' +self.version(),
+                              **fs_info )
 
             self.m.atoms.set( 'relMS', fs_dic['relMS'], mask, 0,
-                                   comment='Relative molecular surf.',
-                                   version= T.dateString()+' '+self.version(),
-                                   **fs_info )
+                              comment='Relative molecular surf.',
+                              version= T.dateString()+' '+self.version(),
+                              **fs_info )
 
 
     def addIntervor( self, cr=[0], cl=None, mode=2, breaks=0, **kw ):
         """
         Triangulate a protein-protein interface with intervor.
-        
+
         @param model: Structure of receptor, ligand and water
         @type  model: Biskit.PDBModel
         @param cr: receptor chains (default: [0] = first chain)
@@ -327,12 +330,64 @@ class PDBDope:
         @return: Intervor instance
         @rtype: Biskit.Dock.Intervor
         """
-	from Biskit.Dock.Intervor import Intervor
+        from Biskit.Dock.Intervor import Intervor
 
         x = Intervor( self.m, cr=cr, cl=cl, mode=mode, breaks=breaks, **kw)
         x.run()
-        
+
         return x
+    
+    def addCoiledCoil( self, db=None, k=10, mask=None ):
+        """
+        Find the most likely coiled-coil heptade register. 
+        CC heptades are described by recurring positions 'abcdefg'.
+        The Biskit.coiledcoil package scans the residue sequence against 
+        residue propensity tables for each position and identifies (1) which
+        7 amino acids are fitting best into the heptade pattern, (2) which
+        is the most likely overall register, assuming no gaps or insertions.
+
+        @param db: path to alternative scores file (default: DADParry_scaled)
+        @type db: str
+        @param k: number of consequtive heptads to look for (default: 10)
+        @type  k: int
+        @param mask: apply atom or residue mask to limit coiled coil search
+                     Note, a protein-only mask is applied automatically 
+        @type  mask: numpy.array of 1|0 or True|False
+        """
+        m = self.m
+
+        ## convert atom mask to residue mask and kick out non-protein residues
+        if mask:
+            if len(mask) == len(m):
+                mask = self.m.atom2resMask( mask )
+            if len(mask) != m.lenResidues():
+                raise BiskitError, 'mask does not match residue or atom length'
+
+            mask = N.logical_and(mask, 
+                                 m.atom2resMask( m.maskProtein(standard=True)))
+
+        else:
+            mask = m.atom2resMask( m.maskProtein( standard=True ) )
+
+        m = m.compressResidues( mask )
+            
+        ## coiled-coil calculation
+        cc = CoiledCoil( db=db )
+        r = cc.findHeptads( m.sequence(), k=k )
+        
+        ## map results into residue profiles
+        self.m.residues.set( 'ccregister', r['reg'], mask=mask, default='-',
+                             comment='coiledcoil register' )
+        self.m.residues.set( 'ccscore', r['corr'], mask=mask, default=0,
+                             comment='coiledcoil heptade correlation' )
+        
+        ## provide numeric register (0...7 rather than a...g)
+        char2num = dict( zip( string.letters, range(len(string.letters))))
+        register  = [ char2num[ letter ] for letter in r['reg'] ] 
+        
+        self.m.residues.set( 'ccregister_n', register, mask=mask, default=-1,
+                             comment='coiledcoil register in numbers from 0=a to 7=g')
+        
 
 #############
 ##  TESTING        
@@ -343,7 +398,7 @@ class Test(BT.BiskitTest):
     """Test class """
 
     TAGS = [ BT.EXE ]
-    
+
     M     = None #: cache processed PDB between tests
 
     def prepare(self):
@@ -356,7 +411,7 @@ class Test(BT.BiskitTest):
             Test.M = self.M.compress( Test.M.maskProtein() )
 
             if self.local: print "Done"
-        
+
         self.d = PDBDope( self.M )
 
     def test_addFoldX( self ):
@@ -395,10 +450,10 @@ class Test(BT.BiskitTest):
             print '\nData added to info record of model (key -- value):'
             for k in self.d.m.info.keys():
                 print '%s -- %s'%(k, self.d.m.info[k])
-                
+
             print '\nAdded atom profiles:'
             print self.M.atoms
-            
+
             print '\nAdded residue  profiles:'
             print self.M.residues
 
@@ -411,7 +466,7 @@ class Test(BT.BiskitTest):
             #ref = [ m_ref.atoms[i][k] for i in m_ref.atomRange() ]
             #mod = [ self.M.atoms[i][k] for i in self.M.atomRange() ]
             self.assert_( N.all( m_ref[k] == self.M[k]) )
-                
+
         ## display in Pymol
         if self.local:
             print "Starting PyMol..."
@@ -433,7 +488,7 @@ class LongTest( BT.BiskitTest ):
 
         self.M = PDBModel( self.f )
         self.M = self.M.compress( self.M.maskProtein() )
-        
+
         self.d = PDBDope( self.M )
 
     def test_conservation(self):
@@ -475,7 +530,20 @@ class OldTest( BT.BiskitTest ):
 
 if __name__ == '__main__':
 
-    BT.localTest()  ## pushes test PDBDope instance as 'd' into namespace
+    from Biskit import PDBModel, Pymoler
+
+    m = PDBModel( '3G1E' )
+    d = PDBDope( m )
+    d.addCoiledCoil()
+    
+    pm = Pymoler()
+    pm.addPdb( m, 'cc' )
+    pm.colorRes( 'cc', m['ccregister_n'] )
+    pm.run()
+    
+
+
+#    BT.localTest()  ## pushes test PDBDope instance as 'd' into namespace
 
 ##     from Biskit import PDBModel
 ##     f = T.testRoot() + '/com/1BGS.pdb'
@@ -483,16 +551,16 @@ if __name__ == '__main__':
 ##     M = PDBModel( f )
 ##     M = M.compress( M.maskProtein() )
 
-    
+
 ##     d = PDBDope( M )
 
 ##     d.addSecondaryStructure()
 
 ##     d.addFoldX()
-    
+
 ##     d.addDensity()
-    
+
 ##     d.addSurfaceRacer( probe=1.4 )
 
 ##     d.addSurfaceMask()
-    
+
