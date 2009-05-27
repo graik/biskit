@@ -36,6 +36,8 @@ class CCStudy:
     
     def doStudy(self):
         ca = CoiledAlign(self.mycc)
+        
+        
         ## Statistics
         sources = ["CC","Pa","Pair","Paper","So"]
         hits = {}
@@ -53,11 +55,10 @@ class CCStudy:
             for k in self.data[d].keys():
                 if k in sources:
                     heptads[d][k] = self.data[d][k]
-        print
+        
         
         for h in heptads.keys():
             score = {}
-            #~ print h
             there = heptads[h].keys()
             there.remove("seq")
             for k in there:
@@ -78,7 +79,7 @@ class CCStudy:
                     if sameRegister(one,the_other,heptads[h]["seq"]):
                         score[k] += 1
             
-            #~ print score    
+            
             priorities = {"CC":4,"Pa":2,"Pair":4,"Paper":5,"So":3}
 
             best = (score.keys()[0],0)
@@ -90,7 +91,7 @@ class CCStudy:
                         best  = (k2,score[k2])
             
             heptads[h]["best"] = best
-            #~ print best
+            
         
         for h in heptads.keys():
             there = heptads[h].keys()
@@ -110,12 +111,12 @@ class CCStudy:
                 if sameRegister(one,the_other,heptads[h]["seq"]):
                     hits[k] += 1
             
-        scores = {}
+        self.scores = {}
         for k in hits.keys():
-            scores[k] = float(hits[k])/tries[k]
+            self.scores[k] = (float(hits[k])/tries[k],hits[k],tries[k])
         
         
-        print scores
+        print self.scores
         
         
         ## Get Alignment values
@@ -128,60 +129,54 @@ class CCStudy:
         target_reg=getRegister(target_hep,target)
         
         
-        cross_scores_chain = {}
-        cross_scores_reg = {}
+        self.alignments = {}
         
-        for h in ["2Z5H"]:##heptads.keys():
+        for h in ["DUMMY"]:##heptads.keys():
+            ## Vigilar aqui cual escoger segun la tabla!!
+            self.alignments[h] = ca.copy()
             print h
             other_hep = heptads[h][heptads[h]["best"][0]]
             if heptads[h]["best"][0]== "Paper":
                 other_hep = heptads[h][heptads[h]["best"][0]][0]
             other = heptads[h]["seq"]
             other_reg=getRegister(other_hep,other)
-            #~ print "l",len(other_reg),len(other)
-            #~ print other, target, other_reg, target_reg
-            
-            res = ca.alignChains(other, target, other_reg, target_reg)
-            res2 = ca.alignRegisters(other, target, other_reg, target_reg)
-            print res
-            print res2
-            
-            cross_scores_chain[h]={}
-            for i in ["heptad","res_like","charges"]:
-                for j in ["heptad","res_like","charges"]:
-                    cross_scores_chain[h][(i,j)] = ca.getFitnessScore(j,other,target,res[j][1], other_reg,target_reg)
                 
-            print cross_scores_chain[h]
+            self.alignments[h].alignChains(other, target, other_reg, target_reg)
+            self.alignments[h].alignRegisters(other, target, other_reg, target_reg)
             
-            cross_scores_reg[h]={}
-            for i in ["heptad","res_like","charges"]:
-                for j in ["heptad","res_like","charges"]:
-                    cross_scores_reg[h][(i,j)]=  ca.getFitnessScore(j,other,target,res2[j][1], other_reg,target_reg)
-                
-            print cross_scores_reg[h]
+        return self.scores, self.alignments
+            
+    
+    def chooseBest(self):
+        ## First for each choose the best
+        maxims = []
+        print self.alignments["DUMMY"].chain_alignments["heptads"] 
+        print self.alignments["DUMMY"].chain_alignments["charges"]
+        print self.alignments["DUMMY"].chain_alignments["res_like"] 
+        for k in self.alignments.keys():
+            print "key: ",k
+            keys = self.alignments[k].chain_alignments.keys()
+            maxacc = (0,0)
+            for t in self.alignments[k].chain_alignments[keys[0]]:
+                acc = ((t[0] + self._findInAlignment(self.alignments[k].chain_alignments[keys[1]],t[1])+ self._findInAlignment(self.alignments[k].chain_alignments[keys[1]],t[1]),t[1]))
+                maxacc = max(maxacc,acc)
+            maxims.append((maxacc,k))
+        ## Then choose the best of all !!!
+        best = max(maxims)
         
+        return best
+    
+    def _findInAlignment(self,where=[],what = 0):
+        for i in range(len(where)):
+            if where[i][1] == what:
+                return where[i][0]
+        return 0
         
-        ## primero eliminar los offsets de 0, luego normalizar a 1
+    def createDataFile(self, struct_file = "",file="a.dat"):
         
-        #~ for k in ["2Z5H"]:##cross_scores_chain:
-            #~ for i in ["heptad","res_like","charges"]:
-                #~ mymax = cross_scores_chain[k][(i,"heptad")]
-                #~ for j in ["heptad","res_like","charges"]:
-                    #~ if mymax < cross_scores_chain[k][(i,j)]:
-                        #~ mymax = cross_scores_chain[k][(i,j)]
-                #~ for j in ["heptad","res_like","charges"]:
-                    #~ cross_scores_chain[k][(i,j)] /= mymax
+        pass
+        
 
-                
-       
-        for k in ["2Z5H"]:##cross_scores_chain:
-            print "\n        h\tr\tc"
-            for i in ["heptad","res_like","charges"]:
-                print "%-8s"%(i),
-                for j in ["heptad","res_like","charges"]:
-                    print "%.2f / %.2f"%(cross_scores_chain[k][(i,j)],cross_scores_reg[h][(i,j)] ),
-                print
-            
 ##############
 ## Test
 ##############
@@ -201,7 +196,7 @@ class Test(BT.BiskitTest):
         """doStudy function test case"""
         cs = CCStudy(T.dataRoot() + '/coiledcoil/coils.dat')
         cs.doStudy()
-        
+        print cs.chooseBest()
 if __name__ == '__main__':
     BT.localTest()    
        
