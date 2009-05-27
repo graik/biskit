@@ -147,7 +147,7 @@ class CoiledCoil:
         ## And the winner is...
         best = sorted(new_scores,reverse=True)[0][1]
         
-        c = self.correlate(chain,[best])
+        c = self.correlate(chain,[best])[1]
         
         self.indexes = indexes[best]
         
@@ -175,7 +175,7 @@ class CoiledCoil:
         @return: It returns a tuple of two structures:
             
             - Corr: Which is a dictionary indexed by the string representing
-                theresidues of the heptad (so these inside @heptads) and containing
+                the residues of the heptad (so these inside @heptads) and containing
                 for each position the peak of correlation
             
             while...
@@ -200,7 +200,8 @@ class CoiledCoil:
                 else:
                     aux+=c
             accum[heptads[k]] = aux
-        return corr,accum
+        
+        return corr , accum
     
     
     def sequenceCorrelation	(self, a="",channel=0,b = ""):

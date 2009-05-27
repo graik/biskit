@@ -378,8 +378,8 @@ class PDBDope:
         ## map results into residue profiles
         self.m.residues.set( 'ccregister', r['reg'], mask=mask, default='-',
                              comment='coiledcoil register' )
-        self.m.residues.set( 'ccscore', r['corr'], mask=mask, default=0,
-                             comment='coiledcoil heptade correlation' )
+        self.m.residues.set( 'ccscore', r['corr'][r['best']], mask=mask, default=0,
+                             comment='coiledcoil best heptade correlation' )
         
         ## provide numeric register (0...7 rather than a...g)
         char2num = dict( zip( string.letters, range(len(string.letters))))

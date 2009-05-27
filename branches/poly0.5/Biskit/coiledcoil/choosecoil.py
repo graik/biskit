@@ -129,9 +129,18 @@ class CCStudy:
         target_reg=getRegister(target_hep,target)
         
         
+        ## Filter sequences smaller than the target one
+        all = heptads.keys()
+        all.remove("TARGET")
+        
+        for h in heptads.keys():
+            if len(heptads[h]['seq']) < len(target):
+                all.remove(h)
+        
         self.alignments = {}
         
-        for h in ["DUMMY"]:##heptads.keys():
+        
+        for h in all:
             ## Vigilar aqui cual escoger segun la tabla!!
             self.alignments[h] = ca.copy()
             print h
@@ -150,6 +159,7 @@ class CCStudy:
     def chooseBest(self):
         ## First for each choose the best
         maxims = []
+       
         for k in self.alignments.keys():
             print "key: ",k
             self.alignments[k].normalizeScores()
@@ -157,7 +167,6 @@ class CCStudy:
             maxacc = (0,0)
             print keys[0]
             for t in self.alignments[k].chain_alignments[keys[0]]:
-                print t[0],t[1]
                 acc = ((t[0] + self._findInAlignment(self.alignments[k].chain_alignments[keys[1]],t[1])+ self._findInAlignment(self.alignments[k].chain_alignments[keys[2]],t[1]),t[1]))
                 maxacc = max(maxacc,acc)
             maxims.append((maxacc,k))
@@ -169,7 +178,6 @@ class CCStudy:
             keys = self.alignments[k].reg_alignments.keys()
             maxacc = (0,0)
             for t in self.alignments[k].reg_alignments[keys[0]]:
-                print t[0],t[1]
                 acc = ((t[0] + self._findInAlignment(self.alignments[k].reg_alignments[keys[1]],t[1])+ self._findInAlignment(self.alignments[k].reg_alignments[keys[2]],t[1]),t[1]))
                 maxacc = max(maxacc,acc)
             maxims.append((maxacc,k))
@@ -206,7 +214,8 @@ class Test(BT.BiskitTest):
         
     def test_Study(self):
         """doStudy function test case"""
-        cs = CCStudy(T.dataRoot() + '/coiledcoil/coils.dat')
+        cs = CCStudy(T.dataRoot() + '/coiledcoil/example_coils.dat')
+        print
         cs.doStudy()
         
         print cs.chooseBest()
