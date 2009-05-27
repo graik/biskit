@@ -1387,7 +1387,7 @@ class PDBModel:
         """
         Short cut for mask containing all atoms of amino acids.
 
-        @param standard: only standard residue names (not CYX, NME,..)
+        @param standard: only standard residue names (not CYX, NME, ACE..)
                          (default 0)
         @type  standard: 0|1
 
@@ -1933,6 +1933,12 @@ class PDBModel:
 
         @param i: atomIndices, positions to take in the order to take
         @type  i: list/array of int
+        @param rindex: alternative residue index
+        @type  rindex: numpy.array of int
+        @param cindex: alternative chain index
+        @type  cindex: numpy.array of int
+        Additional arguments and keyword arguments are passed to the 
+        constructor of the new object (mostly for internal use).
 
         @return: PDBModel / sub-class
         @rtype: PDBModel
@@ -2026,6 +2032,19 @@ class PDBModel:
         """
         return self.take( N.nonzero( mask ), *initArgs, **initKw )
 
+    def compressResidues( self, mask ):
+        """
+        Compress PDBmodel using residue mask.
+        compressResidues( mask ) -> PDBModel
+
+        @param mask: N.array( 1 x N_residues of 1 or 0 )
+                     1 .. keep this residue
+        @type  mask: array
+
+        @return: compressed PDBModel using mask
+        @rtype: PDBModel
+        """
+        return self.takeResidues( N.nonzero( mask ) )
 
     def remove( self, what ):
         """        
