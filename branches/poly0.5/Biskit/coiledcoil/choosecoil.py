@@ -91,7 +91,7 @@ class CCStudy:
                         best  = (k2,score[k2])
             
             heptads[h]["best"] = best
-            
+            print "BEST:",best
         
         for h in heptads.keys():
             there = heptads[h].keys()
@@ -123,11 +123,13 @@ class CCStudy:
         
         
         target_hep = heptads["TARGET"][heptads["TARGET"]["best"][0]]
+       
         if heptads["TARGET"]["best"][0]== "Paper":
             target_hep = heptads["TARGET"][heptads["TARGET"]["best"][0]][0]
+        print "target_hep:",target_hep
         target = heptads["TARGET"]["seq"]
         target_reg=getRegister(target_hep,target)
-        
+        print target_reg
         
         ## Filter sequences smaller than the target one
         all = heptads.keys()
@@ -148,11 +150,14 @@ class CCStudy:
             if heptads[h]["best"][0]== "Paper":
                 other_hep = heptads[h][heptads[h]["best"][0]][0]
             other = heptads[h]["seq"]
-            other_reg=getRegister(other_hep,other)
-                
+            other_reg = getRegister(other_hep,other)
+            print other_hep
+            print other_reg
+            
+            
             self.alignments[h].alignChains(other, target, other_reg, target_reg)
             self.alignments[h].alignRegisters(other, target, other_reg, target_reg)
-            
+            print self.alignments["1NKN"].reg_alignments
         return self.scores, self.alignments
             
     
@@ -202,6 +207,7 @@ class CCStudy:
 ##############
 import Biskit.test as BT
 import Biskit.tools as T
+from alignment import PirAlignment
 
 class Test(BT.BiskitTest):
     """ Test cases for Coiled Coil Utils"""
@@ -212,13 +218,25 @@ class Test(BT.BiskitTest):
     def cleanUp( self ):
         pass
         
-    def test_Study(self):
-        """doStudy function test case"""
-        cs = CCStudy(T.dataRoot() + '/coiledcoil/example_coils.dat')
-        print
-        cs.doStudy()
+    #~ def test_Study(self):
+        #~ """doStudy function test case"""
+        #~ cs = CCStudy(T.dataRoot() + '/coiledcoil/example_coils.dat')
+        #~ print
+        #~ cs.doStudy()
         
+        #~ print cs.chooseBest()
+        
+    def test_problem_case(self):
+        """ Test a problematic case"""
+        cs = CCStudy(T.testRoot() + '/coiledcoil/coils1.dat')
+        cs.doStudy()
         print cs.chooseBest()
+        
+        a = PirAlignment([(cs.data['1NKN']['seq'],cs.data['TARGET']['seq'])],[35])
+        print a
+        
+        print len("MKEQLKQMDKMKEDLAKTERIKKELEEQNVTLLEQKNDLFGSMKQLEDKVEELLSKNYHLENEVARLKKLVGER----")
+        
 if __name__ == '__main__':
     BT.localTest()    
        
