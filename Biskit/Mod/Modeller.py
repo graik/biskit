@@ -99,16 +99,24 @@ class Modeller( Executor ):
         """
         Create Executor instance for one modeller run.
 
-        @param projectFolder: base folder for Modeller input and output 
-                          (default: L{F_RESULT_FOLDER})
+        @param projectFolder: base folder for default input and output
+                              locations in pipeline mode (default: '.')
         @type  projectFolder: str
+        @param resultFolder : alternative output folder for results,
+                              will be created if it doesn't exists
+                              (default: |projectFolder|/modeller)
+        @type  resultFolder : str
         @param mod_template   : template file/str for modeller input script
+                                (default: Biskit/data/model_mult.py_)
         @type  mod_template   : str
         @param fasta_target   : file with target sequence
+                                (default: |projectFolder|/target.fasta)
         @type  fasta_target   : str
         @param template_folder: folder containing template PDBs for modeller
+                                (default: |projecFolder|/templates/modeller)
         @type  template_folder: str
         @param f_pir         : file containing alignment
+                               (default:|projectFolder|/t_coffee/final.pir_aln)
         @type  f_pir         : str
         @param starting_model: first homology model to report [1]
         @type  starting_model: int
