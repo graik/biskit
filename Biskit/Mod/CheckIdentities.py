@@ -63,11 +63,11 @@ class CheckIdentities:
         """
         self.outFolder = T.absfile( outFolder )
         self.verbose = verbose
-	self.f_aln = alignment or self.outFolder + self.F_INPUT_ALNS
+        self.f_aln = alignment or self.outFolder + self.F_INPUT_ALNS
         self.sequences_name=["target"]
 
-	#: will hold result dict after go()
-	self.result = None
+        #: will hold result dict after go()
+        self.result = None
 
 
     def get_lines(self, aln_file = None):
@@ -113,7 +113,7 @@ class CheckIdentities:
         @type  string_lines: [str]
         @param aln_length: length of alignment
         @type  aln_length: int
-        
+
         @return: alignment dictionary
                  e.g. {'name':'target, 'seq': 'sequence of the target'}
         @rtype: dict
@@ -145,7 +145,7 @@ class CheckIdentities:
         @type  string_lines: [str]
         @param aln_dict: alignment dictionary
         @type  aln_dict: dict
-     
+
         @return: template alignment dictionary
                  e.g. { str :{'name':str, 'seq': str} }
         @rtype: dict
@@ -184,7 +184,7 @@ class CheckIdentities:
 
         @param aln_dictionary: alignment dictionary
         @type  aln_dictionary: dict
-        
+
         @return: a dictionary of dictionaries with the sequence name as the
         top key. Each sub dictionary then has the keys: 
          - 'name' - str, sequence name
@@ -254,14 +254,14 @@ class CheckIdentities:
                 nb_cov_res = N.sum( N.greater(template_info, 0) )
 
                 ## calculate identities
-		info_ID[y] = ID[y] = cov_ID[y] = 0
-		## RAIK: Hack, nb_of_... can turn 0 for fragmented alignments
-		if nb_of_template:
-		    info_ID[y] = 100. * nb_of_identities / nb_of_template
-		if nb_of_residues:
-		    ID[y]      = 100. * nb_of_identities / nb_of_residues
-		if nb_cov_res:
-		    cov_ID[y]  = 100. * nb_of_identities / nb_cov_res
+                info_ID[y] = ID[y] = cov_ID[y] = 0
+                ## RAIK: Hack, nb_of_... can turn 0 for fragmented alignments
+                if nb_of_template:
+                    info_ID[y] = 100. * nb_of_identities / nb_of_template
+                if nb_of_residues:
+                    ID[y]      = 100. * nb_of_identities / nb_of_residues
+                if nb_cov_res:
+                    cov_ID[y]  = 100. * nb_of_identities / nb_cov_res
 
             aln_dictionary[i]["info_ID"] = info_ID 
             aln_dictionary[i]["ID"] = ID
@@ -302,8 +302,8 @@ class CheckIdentities:
 
 
     def write_identities(self, identities_file = None,
-                          identities_info_file = None,
-                          identities_cov_file = None):
+                         identities_info_file = None,
+                         identities_cov_file = None):
         """
         Writes three files to disk with identity info about the current
         multiple alignment.
@@ -332,11 +332,11 @@ class CheckIdentities:
         """
         ## filenames to create
         identities_file = identities_file or \
-                          self.outFolder + self.F_OUTPUT_IDENTITIES
+                        self.outFolder + self.F_OUTPUT_IDENTITIES
         identities_info_file =  identities_info_file or \
-                               self.outFolder + self.F_OUTPUT_IDENTITIES_INF
+                             self.outFolder + self.F_OUTPUT_IDENTITIES_INF
         identities_cov_file = identities_cov_file or \
-                              self.outFolder + self.F_OUTPUT_IDENTITIES_COV
+                            self.outFolder + self.F_OUTPUT_IDENTITIES_COV
 
         head_ID = """Pairwise sequence identity in percent (excluding deletions
 in the reference) -- for that reason, the matrix is *not* symetric and
@@ -347,7 +347,7 @@ should be read row-wise (the first line is the most interesting one).
 
         head_conv_ID ="Sequence identity in percent comparing a sequence to another \n(excluding deletions and insertions in the first sequence but only \nwhen the first sequence doesn't match any other sequence in the \nmultiple alignment )"
 
-	assert self.result is not None, 'no alignment result to write, call go() first'
+        assert self.result is not None, 'no alignment result to write, call go() first'
 
         self.__writeId( identities_file, self.result,
                         'ID' , head_ID )
@@ -360,7 +360,7 @@ should be read row-wise (the first line is the most interesting one).
     def go(self, output_folder = None):
         """
         Perform sequence comparison.
-        
+
         @param output_folder: output folder
         @type  output_folder: str
         """
@@ -372,12 +372,12 @@ should be read row-wise (the first line is the most interesting one).
 
         ## get information about the target sequence from the alignment
         self.result = self.get_aln_sequences( string_lines,
-					      aln_length )
+                                              aln_length )
 
         ## add information about the aligned templates from the alignment
         self.result = self.get_aln_templates( string_lines,
-					      self.result,
-					      aln_length )
+                                              self.result,
+                                              aln_length )
 
         self.result = self.identities( self.result )
 
@@ -396,34 +396,34 @@ class Test(BT.BiskitTest):
     """
     Test class
     """
-    
+
     def prepare(self):
         import tempfile
         import shutil
-        
-	## collect the input files needed
-	self.outfolder = tempfile.mkdtemp( '_test_CheckIdentities' )
-	os.mkdir( self.outfolder +'/t_coffee' )
 
-	shutil.copy( T.testRoot() + '/Mod/project/t_coffee/final.pir_aln',
-		     self.outfolder + '/t_coffee' )    
+        ## collect the input files needed
+        self.outfolder = tempfile.mkdtemp( '_test_CheckIdentities' )
+        os.mkdir( self.outfolder +'/t_coffee' )
+
+        shutil.copy( T.testRoot() + '/Mod/project/t_coffee/final.pir_aln',
+                     self.outfolder + '/t_coffee' )    
 
     def test_CheckIdentities(self):
-	"""Mod.CheckIdentities test"""
-	self.m = CheckIdentities( self.outfolder )
-	self.result = self.m.go()
-	self.m.write_identities()
+        """Mod.CheckIdentities test"""
+        self.m = CheckIdentities( self.outfolder )
+        self.result = self.m.go()
+        self.m.write_identities()
 
-	if self.local and self.DEBUG:
-	    self.log.add("""The result from the template comparison can be found in the three files %s, %s and %s that reside in the folder %s"""\
-	    %(self.m.F_OUTPUT_IDENTITIES[1:],
-	      self.m.F_OUTPUT_IDENTITIES_INF[1:],
-	      self.m.F_OUTPUT_IDENTITIES_COV[1:],
-	      self.outfolder ) )
+        if self.local and self.DEBUG:
+            self.log.add("""The result from the template comparison can be found in the three files %s, %s and %s that reside in the folder %s"""\
+                         %(self.m.F_OUTPUT_IDENTITIES[1:],
+                           self.m.F_OUTPUT_IDENTITIES_INF[1:],
+                           self.m.F_OUTPUT_IDENTITIES_COV[1:],
+                           self.outfolder ) )
 
     def cleanUp(self):
-	T.tryRemove( self.outfolder, tree=1 )
-    
+        T.tryRemove( self.outfolder, tree=1 )
+
 
 if __name__ == '__main__':
 
