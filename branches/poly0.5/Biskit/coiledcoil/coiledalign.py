@@ -147,9 +147,10 @@ class CoiledAlign:
         
         new_scc = []
         for t in scc:
-            new_scc.append(( t[0], start_a+(t[1]*7) ))
+            new_scc.append(( t[0], (start_a-start_b)+(t[1]*7) ))
         
-        scc = ( max(scc)[0], start_a+max(scc)[1]*7)
+        
+        scc = ( max(scc)[0], (start_a-start_b)+max(scc)[1]*7)
         
         self.reg_alignments["heptads"]= new_scc
         
@@ -163,8 +164,8 @@ class CoiledAlign:
             for j in range(len(b)):
                 acc_res += self.like_scores[(a[pos+j],b[j])]
                 acc_charges += self.charge_scores[(a[pos+j],b[j])]
-            subvals_charge.append((acc_charges,start_a+pos))
-            subvals_res.append((acc_res,start_a+pos))
+            subvals_charge.append((acc_charges,(start_a-start_b)+pos))
+            subvals_res.append((acc_res,(start_a-start_b)+pos))
         
         self.reg_alignments["charges"]=subvals_charge
         self.reg_alignments["res_like"]=subvals_res
