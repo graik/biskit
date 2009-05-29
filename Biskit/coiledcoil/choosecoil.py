@@ -91,7 +91,7 @@ class CCStudy:
                         best  = (k2,score[k2])
             
             heptads[h]["best"] = best
-            print "BEST:",best
+           
         
         for h in heptads.keys():
             there = heptads[h].keys()
@@ -126,10 +126,10 @@ class CCStudy:
        
         if heptads["TARGET"]["best"][0]== "Paper":
             target_hep = heptads["TARGET"][heptads["TARGET"]["best"][0]][0]
-        print "target_hep:",target_hep
+        
         target = heptads["TARGET"]["seq"]
         target_reg=getRegister(target_hep,target)
-        print target_reg
+        
         
         ## Filter sequences smaller than the target one
         all = heptads.keys()
@@ -145,19 +145,17 @@ class CCStudy:
         for h in all:
             ## Vigilar aqui cual escoger segun la tabla!!
             self.alignments[h] = ca.copy()
-            print h
+            print "Key (Study): ", h
             other_hep = heptads[h][heptads[h]["best"][0]]
             if heptads[h]["best"][0]== "Paper":
                 other_hep = heptads[h][heptads[h]["best"][0]][0]
             other = heptads[h]["seq"]
             other_reg = getRegister(other_hep,other)
-            print other_hep
-            print other_reg
+            
             
             
             self.alignments[h].alignChains(other, target, other_reg, target_reg)
             self.alignments[h].alignRegisters(other, target, other_reg, target_reg)
-            print self.alignments["1NKN"].reg_alignments
         return self.scores, self.alignments
             
     
@@ -166,15 +164,15 @@ class CCStudy:
         maxims = []
        
         for k in self.alignments.keys():
-            print "key: ",k
+            print "Key (Choose): ",k
             self.alignments[k].normalizeScores()
             keys = self.alignments[k].chain_alignments.keys()
             maxacc = (0,0)
-            print keys[0]
             for t in self.alignments[k].chain_alignments[keys[0]]:
                 acc = ((t[0] + self._findInAlignment(self.alignments[k].chain_alignments[keys[1]],t[1])+ self._findInAlignment(self.alignments[k].chain_alignments[keys[2]],t[1]),t[1]))
                 maxacc = max(maxacc,acc)
             maxims.append((maxacc,k))
+            
         ## Then choose the best of all !!!
         best_chain = max(maxims)
         
@@ -186,6 +184,8 @@ class CCStudy:
                 acc = ((t[0] + self._findInAlignment(self.alignments[k].reg_alignments[keys[1]],t[1])+ self._findInAlignment(self.alignments[k].reg_alignments[keys[2]],t[1]),t[1]))
                 maxacc = max(maxacc,acc)
             maxims.append((maxacc,k))
+            
+        
         ## Then choose the best of all !!!
         best_reg = max(maxims)
         
@@ -235,7 +235,6 @@ class Test(BT.BiskitTest):
         a = PirAlignment([(cs.data['1NKN']['seq'],cs.data['TARGET']['seq'])],[35])
         print a
         
-        print len("MKEQLKQMDKMKEDLAKTERIKKELEEQNVTLLEQKNDLFGSMKQLEDKVEELLSKNYHLENEVARLKKLVGER----")
         
 if __name__ == '__main__':
     BT.localTest()    

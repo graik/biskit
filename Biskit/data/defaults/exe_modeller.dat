@@ -3,7 +3,7 @@
 comment=Modeller
 
 ## binary
-bin=modeller
+bin=mod9v6
 
 ## working directory
 cwd=
