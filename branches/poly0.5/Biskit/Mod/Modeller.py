@@ -87,10 +87,10 @@ class Modeller( Executor ):
     F_PDBModels = '/PDBModels.list'
 
     #: standard file name output for Objective Function
-    F_SCORE_OUT = F_RESULT_FOLDER + '/Modeller_Score.out'
+    F_SCORE_OUT = '/Modeller_Score.out'
 
 
-    def __init__( self, outFolder='.', mod_template=None,
+    def __init__( self, projectFolder='.', resultFolder=None, mod_template=None,
                   fasta_target=None, template_folder=None, f_pir=None,
                   starting_model=1, ending_model=10,
                   zfilter=None, idfilter=None,
@@ -99,9 +99,9 @@ class Modeller( Executor ):
         """
         Create Executor instance for one modeller run.
 
-        @param outFolder: base folder for Modeller output 
+        @param projectFolder: base folder for Modeller input and output 
                           (default: L{F_RESULT_FOLDER})
-        @type  outFolder: str
+        @type  projectFolder: str
         @param mod_template   : template file/str for modeller input script
         @type  mod_template   : str
         @param fasta_target   : file with target sequence
@@ -123,8 +123,11 @@ class Modeller( Executor ):
         @param disc_report : keep logs, write ordered pdbs to model_xx.pdb [1]
         @type  disc_report : bool
         """
-        self.outFolder = T.absfile( outFolder )
-        cwd = self.outFolder + self.F_RESULT_FOLDER
+        self.projectFolder= T.absfile( projectFolder )
+        self.resultFolder = T.absfile( resultFolder or \
+                                       self.projectFolder+self.F_RESULT_FOLDER)
+        
+        cwd = self.resultFolder
 
         mod_template = mod_template or self.MODEL_SCRIPT_PATH
 
@@ -141,9 +144,9 @@ class Modeller( Executor ):
                           cwd= cwd,
                           **kw)
 
-        self.fasta_target= fasta_target or self.outFolder + SS.F_FASTA_TARGET
-        self.template_folder= template_folder or self.outFolder + TC.F_MODELLER
-        self.f_pir = f_pir or self.outFolder + Aligner.F_FINAL_ALN
+        self.fasta_target= fasta_target or self.projectFolder + SS.F_FASTA_TARGET
+        self.template_folder= template_folder or self.projectFolder + TC.F_MODELLER
+        self.f_pir = f_pir or self.projectFolder + Aligner.F_FINAL_ALN
 
         self.target_id = None   # will be assigned in prepare()
         self.starting_model = starting_model
@@ -153,7 +156,8 @@ class Modeller( Executor ):
         self.knowns_top = None
         self.knowns_py  = None 
 
-        self.aln_info = CheckIdentities( self.outFolder )
+        self.aln_info = CheckIdentities( outFolder=self.resultFolder,  
+                                         alignment=self.f_pir )
         self.z_filter = zfilter
         self.id_filter = idfilter
 
@@ -167,10 +171,10 @@ class Modeller( Executor ):
         """
         Create needed output folders if they don't exist.
         """
-        if not os.path.exists( self.outFolder + self.F_RESULT_FOLDER ):
-            os.mkdir( self.outFolder + self.F_RESULT_FOLDER )
+        if not os.path.exists( self.resultFolder ):
+            os.mkdir( self.resultFolder )
             if self.verbose:
-                self.log.add('Creating '+self.outFolder + self.F_RESULT_FOLDER)
+                self.log.add('Creating '+self.resultFolder )
 
 
     def generateInp( self ):
@@ -396,7 +400,7 @@ class Modeller( Executor ):
         @param model_folder: ouput folder
         @type  model_folder: str
         """
-        file_output = open(self.outFolder+self.F_SCORE_OUT,'w')
+        file_output = open(self.resultFolder+self.F_SCORE_OUT,'w')
         file_output.write("The models from modeller with their Score:\n")
 
         for model in pdb_list:
@@ -487,6 +491,8 @@ class Modeller( Executor ):
             m.disconnect()
 
         T.dump(pdb_list, '%s'%(model_folder + self.F_PDBModels))
+        if self.verbose:
+            self.log.add('writing model list to %s' % (model_folder + self.F_PDBModels))
 
 
     def postProcess( self ):
@@ -501,14 +507,14 @@ class Modeller( Executor ):
         Detect wether the modeller process failed to finish. (overrides
         Executor method)
         """
-        r = self.pdb_list( self.outFolder + self.F_INPUT_FOLDER )
+        r = self.pdb_list( self.resultFolder )
         return len( r ) < 1
 
     def cleanup( self ):
         Executor.cleanup( self )
 
         if not self.disc_report:
-            T.tryRemove( self.outfolder + self.F_RESULT_FOLDER, tree=1 )
+            T.tryRemove( self.resultFolder, tree=1 )
 
 
     def finish(self):
@@ -525,7 +531,7 @@ class Modeller( Executor ):
                              (default: None -> L{F_INPUT_FOLDER})
         @type  model_folder: str
         """
-        model_folder = self.outFolder + self.F_RESULT_FOLDER
+        model_folder = self.resultFolder
 
         model_files = self.pdb_list(model_folder)
 
@@ -568,18 +574,18 @@ class TestBase(BT.BiskitTest):
         import shutil
 
         ## collect the input files needed
-        self.outfolder = tempfile.mkdtemp( '_test_Modeller' )
-        os.mkdir( self.outfolder +'/templates' )
-        os.mkdir( self.outfolder +'/t_coffee' )
+        self.projectFolder = tempfile.mkdtemp( '_test_Modeller' )
+        os.mkdir( self.projectFolder +'/templates' )
+        os.mkdir( self.projectFolder +'/t_coffee' )
 
         shutil.copytree( T.testRoot() + '/Mod/project/templates/modeller',
-                         self.outfolder + '/templates/modeller' )
+                         self.projectFolder + '/templates/modeller' )
 
         shutil.copy( T.testRoot() + '/Mod/project/t_coffee/final.pir_aln',
-                     self.outfolder + '/t_coffee' )    
+                     self.projectFolder + '/t_coffee' )    
 
         shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
-                     self.outfolder  )
+                     self.projectFolder  )
 
 
     def runmodeller( self, run=0 ):
@@ -588,7 +594,7 @@ class TestBase(BT.BiskitTest):
         @type  run: 1|0
         """
 
-        self.m = Modeller( self.outfolder, verbose=self.local,
+        self.m = Modeller( self.projectFolder, verbose=self.local,
                            ending_model=2 )
 
 ##         self.m.prepare_modeller( )
@@ -600,14 +606,65 @@ class TestBase(BT.BiskitTest):
 
             if self.DEBUG and self.VERBOSITY > 2:
                 self.log.add('The modelling result id in %s/modeller'\
-                             %self.outfolder)
+                             %self.projectFolder)
 
-            result = T.load( self.outfolder + '/modeller/PDBModels.list' )
+            result = T.load( self.projectFolder + '/modeller/PDBModels.list' )
             self.assertEqual( len(result), 2 )
 
     def cleanUp(self):
-        T.tryRemove( self.outfolder, tree=1 )
+        T.tryRemove( self.projectFolder, tree=1 )
 
+class TestStandalone( BT.BiskitTest ):
+    """
+    Test Modeller outside of pipeline = no default input and no default folders
+    """
+    
+    def prepare( self ):
+        import tempfile
+        import shutil
+
+        ## create input folder
+        self.in_folder = tempfile.mkdtemp( '_test_Modeller_in' )
+
+        ## do *not* create output folder ... just prepare name
+        self.out_folder = tempfile.mktemp( '_test_Modeller_out' )
+
+        ## collect the input files needed
+        shutil.copytree( T.testRoot() + '/Mod/project/templates/modeller',
+                         self.in_folder + '/templates' )
+
+        shutil.copy( T.testRoot() + '/Mod/project/t_coffee/final.pir_aln',
+                     self.in_folder + '/templates.pir_aln')    
+
+        shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
+                     self.in_folder + '/target01.fasta' )
+        
+    
+    def test_standalone( self ):
+        """
+        Modeller standalone test 
+        """
+        self.m = Modeller( projectFolder  ='.',
+                           resultFolder   =self.out_folder,
+                           fasta_target   =self.in_folder + '/target01.fasta', 
+                           template_folder=self.in_folder + '/templates', 
+                           f_pir          =self.in_folder + '/templates.pir_aln',
+                           starting_model=1, ending_model=1,
+                           zfilter=None, idfilter=None,
+                           disc_report=1,
+                           verbose=self.local,
+                           validate=False)
+        self.m.run()
+
+        result = T.load( self.out_folder + '/PDBModels.list' )
+        self.assertEqual( len(result), 1 )
+
+    
+    def cleanUp(self):
+        T.tryRemove( self.in_folder,  tree=1 )
+        T.tryRemove( self.out_folder, tree=1 )
+
+        
 class TestDry( TestBase ):
     """Incomplete test case without running Modeller"""
 
@@ -629,4 +686,4 @@ class Test( TestBase ):
 
 if __name__ == '__main__':
 
-    BT.localTest(verbosity=3, debug=1)
+    BT.localTest(verbosity=3, debug=0)
