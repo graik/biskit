@@ -1,5 +1,5 @@
 
-from math import cos, sin, tan, sqrt, atan2,acos
+from math import cos, sin, tan, sqrt, atan2,acos, pi
 from numpy import matrix
 
 def norm ( v ):
@@ -69,7 +69,7 @@ def sphericalAngles( coord= [1.,0.,0.]):
 		if coord[0] <0:
 			aZ = 2*pi - aZ
 			
-	print "angles",aX*180./pi,aZ*180./pi
+	#~ print "angles",aX*180./pi,aZ*180./pi
 	return (aX ,aZ)
 
 
