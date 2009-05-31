@@ -134,13 +134,48 @@ class CheckIdentities:
 
         return aln_dictionary
 
-
-    def get_aln_templates(self, string_lines, aln_dict, aln_length):
+    def split_pir( self, lines ):
+        """
+        Take list of text lines and return list of lists with one pir alignment
+        record after the other.
+        """
+        r = []
+        i = -1
+        
+        for l in lines:
+            if l[:4] == '>P1;':
+                i += 1
+                r += [[]]
+            r[i] += [ l ]
+        
+        return r
+    
+    def parse_pir( self, lines ):
+        """
+        @return dict of dicts indexed by entry name, for example:
+            {'target' : {'seq' : '---MSELELK--KL-', 'what': 'structure' }, }
+        """
+        records = self.split_pir( lines )
+        r = {}
+        
+        for rec in records:
+            key = rec[0][4:].strip()    ## entry name
+            what= rec[1].split(':')[0]  ## 'structure' or 'sequence'
+            seq = ''.join( [ l.strip() for l in rec[2:] ] )  ## collect x lines
+            r[key] = { 'what' : what, 'seq':seq }
+        
+        return r
+            
+    
+    def get_aln_templates(self, lines, aln_dict, aln_length):
         """
         Add information about the name of the template sequences and
         the sequence that is aligned to the template. Data taken from
         the T-Coffee alignment (final.pir_aln).
 
+        Historic code.... the original parsing from Olivier is replaced
+        but I still return his slightly redundant dict
+        
         @param string_lines: aln file as list of string
         @type  string_lines: [str]
         @param aln_dict: alignment dictionary
@@ -150,29 +185,10 @@ class CheckIdentities:
                  e.g. { str :{'name':str, 'seq': str} }
         @rtype: dict
         """
-        r1 = re.compile(r'>P1;\d')
-
-        z = 0
-        for string in string_lines[:]:
-            if(r1.match(string)):
-
-                pdb_name =""             
-                for w in string[4:]:
-
-                    for letters in w:
-                        if(letters!='\n'):
-                            pdb_name += w
-                        else: break
-
-                template_sequence = ""
-                for lines in string_lines[z+2:z+2+aln_length]:
-                    template_sequence += lines[:-1]
-
-                self.sequences_name.append("%s"%pdb_name)
-                aln_dict["%s"%pdb_name] = {'name':'%s'%pdb_name,
-                                           'seq':template_sequence}
-
-            z+=1
+        for name, rec in self.parse_pir( lines ).items():
+            if rec['what'] == 'structure':
+                aln_dict[name] = {'name':name, 'seq':rec['seq'] }
+                self.sequences_name += [ name ]
 
         return aln_dict
 
