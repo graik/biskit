@@ -4,8 +4,10 @@ import cPickle
 import os
 from math import acos,sqrt,atan2
 import emath 
+from emath import vectorangle
 from quaternion import rotquat, rotmat
 import Biskit.molUtils as MU 
+
 
 class residuePicker:
     
@@ -32,13 +34,16 @@ class residuePicker:
         self.dbpath = databasepath
         
         try:
+            print "db  ", self.dbpath+'index.db'
             f = open (self.dbpath+'index.db',"r")
+            print f.readlines()
             self.index = cPickle.load(f)
 
         except (cPickle.UnpicklingError, IOError,EOFError):
+  
             if( not os.access(self.dbpath, os.F_OK)):
                 os.mkdir(self.dbpath)
-            f = open (self.dbpath+'/index.db',"w")
+            f = open (self.dbpath+'index.db',"w")
             self.index = {}
         f.close()
         
@@ -60,14 +65,14 @@ class residuePicker:
             self.clusters = {}
         f.close()
         
-        # Create directory structure
+        ## Create directory structure
         for k in MU.allAACodes():
             if not os.access(databasepath+k, os.F_OK):
                 os.mkdir(databasepath+k)
         
         self.last_res = {}
         self.reslib = {}
-        # Initialize them
+        ## Initialize them
         for k in MU.allAACodes():
             if not k in self.apvect.keys():
                 self.apvect[k] = []
@@ -76,20 +81,20 @@ class residuePicker:
             self.last_res[k] = 0
             
     
-        #then see what the last used id was for each residue type
+        ## Then see what the last used id was for each residue type
         
         for k in self.index.keys():
             if self.index[k]!=[]:
                 self.last_res[k] = int(self.index[k][-1][1:])
     
-        # Create reslib
+        ## Create reslib
        
-        #load all residues inside it
+        ## load all residues inside it
         for k in self.index.keys():
             for i in self.index[k]:
                 self.reslib[i]=PDBModel(self.dbpath+i[0]+"/"+i+".pdb")
         
-        # create the cluster
+        ## create the cluster
         for k in MU.allAACodes():
             if not k in self.clusters:
                 self.clusters[k]=[]
@@ -100,10 +105,19 @@ class residuePicker:
         """
         Saves the index, clusters and derived data of the dabase.
         """
+        try:
+            f = open (self.dbpath+'index.db',"w")
+            cPickle.dump(self.index,f,cPickle.HIGHEST_PROTOCOL)
+            f.close()
+        except:
+            print "ERROR"
         
-        f = open (self.dbpath+'index.db',"w")
-        cPickle.dump(self.index,f,cPickle.HIGHEST_PROTOCOL)
-        f.close()
+        try:
+            f = open (self.dbpath+'index.db',"r")
+            self.index = cPickle.load(f)
+        except (cPickle.UnpicklingError, IOError,EOFError):
+            print "ERROR2"
+          
         
         for k in self.index:
             print k, len(self.index[k])
@@ -122,14 +136,13 @@ class residuePicker:
         """
         
         """
-        # Clean the structure a bit
-        modelraw = PDBModel(path)
-        model = modelraw.compress( modelraw.maskProtein())
+        ## Clean the structure a bit
+        model = PDBModel(path)
+        model = model.compress( model.maskProtein())
         
-        # Also remove all hidrogens
-        #~ mask = where(array(modelwh.atoms['element']) != "H")[0]
-        #~ model = modelwh.compress(mask)
-        #~ not necessary 'cause you're counting for atom numbers later
+        ## Also remove all hidrogens
+        model = model.compress(model.maskHeavy())
+        
 
         model.report()
         for c in range( model.lenChains() ):
@@ -147,6 +160,7 @@ class residuePicker:
                 ## Fetch the next residue
                 if i<len(residuos)-1 :
                     nextres = residuos[i+1]
+                    rnext = nextres.sequence()
                 else:
                     nextres = None
                 
@@ -154,27 +168,33 @@ class residuePicker:
                 iNC= where(residue.maskFrom( 'name', ['N','CA','C'] ))
                 if nextres != None:
                     iNC2= where(residue.maskFrom( 'name', ['N','CA','C'] ))
-                
+                else:
+                    iNC2 = None
+                    
                 ## First purge: it has all the needed atoms?
                 if len(residue.xyz) == len(MU.aaAtoms[MU.single2longAA(r)[0]])-1:
                                         
-                    (residue,C,N) = self.doReorientation(residue,iNC)
-                    
-                    
+                    (residue,vector) = self.doReorientation(residue,iNC,nextres,iNC2)
+ 
+                    add_it = False
                     foundback = False
-                    foundsd = False
-                    add_it = True
-                    
+                    exit = False
                     ## Second purge: RMSD and clusterization
                     for group in self.clusters[r]:
-                            
                             ## We compare with the first
                             (bb,sd) = self.areTheSame(residue,self.reslib[group[0]])
                             
                             ## If it has the same backbone than the group head, then we have to 
                             ## find further similarities to se if it is already in the list.
-                            if bb:
+                            foundsd = False
+                           
+                            
+                            if bb and not exit:
+                                
                                 foundback = True
+                                
+                                exit = True ## if we have found the bck then the next step is to search for sd inside
+                                            ## this group
                                 
                                 for m in group:
                                     (bb,sd) = self.areTheSame(residue,self.reslib[m])
@@ -188,10 +208,10 @@ class residuePicker:
                                     addit=False
                                     print "Too similar to other ("+ similarto +")"
                                     
-                                if not foundsd:
+                                else:##if not foundsd:
                                     group.append(myindex)
                                     add_it = True
-                                    print "Backbone found but different sidechain"
+                                    print "Backbone found but different sidechain:adding"
                                     
                     if not foundback:
                         ## We haven't found the backbone so we need to create a new
@@ -199,31 +219,40 @@ class residuePicker:
                         self.clusters[r].append([myindex])
                         add_it = True
                         print "New group (backbone not found)"
-               
+                    
+
                     if add_it:
-                        if nextres  != None :
-                            N2 = nextres.xyz[iNC2[0][0]]
-                            N = residue.xyz[iNC[0][0]]
-                            if not nextres.sequence() in self.apvect.keys():
-                                self.apvect[nextres.sequence()] = [ ]
-    
-                            self.apvect[nextres.sequence()].append((r ,myindex,N2-C,N2-N))
-                        
-                        # Save the residue
+                        ## Save the residue
                         residue.renumberResidues()
                         residue['serial_number'] = range(1,residue.lenAtoms()+1)
                         residue.writePdb(self.dbpath+r+"/"+myindex+".pdb")
                         
-                        # Add and index it
+                        ## Add and index it
                         self.reslib[myindex]=residue
                         self.index[r].append(myindex)
                         self.last_res[r]+=1
-                        
+                    
+                    if nextres  != None :
+                        key = (r,rnext)
+                        new_entry =  (myindex,vector)
+                        if not key in self.apvect.keys():
+                            ## if the key isn't we just add the new register
+                            self.apvect[key] = [ new_entry ]   
+                            
+                        else:
+                            ## else we have to see if there's something similar inside
+                            foundsimilar = False
+                            for i in self.apvect[key]:
+                                
+                                if vectorangle(vector[0],i[1][0]) < 0.045:
+                                    foundsimilar = True
+                            if foundsimilar == False:
+                                self.apvect[key].append(new_entry)
                 else:
-                    print "diferent number of atoms"
+                    print "Diferent number of atoms."
         self.save()
     
-    def doReorientation (self,residue = None, iNC = [0,1,2]):
+    def doReorientation (self,residue = None, iNC = [0,1,2], nextres = None, iNC2 = [0,1,2]):
         """
         Reorients a residue along the C-Ca axis and C-N axis.
         It's used for having an standard base orientation for all the residues.
@@ -237,13 +266,24 @@ class residuePicker:
         @rtype: PDBModel
         """
 
+        if nextres  != None :
+            N2 = nextres.xyz[iNC2[0][0]]
+
         N = residue.xyz[iNC[0][0]]
+        if nextres  == None :
+            N2 = N
         
-        # Center
+        C = residue.xyz[iNC[0][2]]
+        vector = N2 - C
+        
+        ## Center
         residue.xyz = residue.xyz - N
         
-        # Rotation
+        ## Rotation
         C = residue.xyz[iNC[0][2]]
+        
+        
+        
         Ca = residue.xyz[iNC[0][1]]
         nNCNCa = emath.normalized(cross(C,Ca))	
         NC = array([[0.,0.,0.],[0.,0.,0.],nNCNCa])
@@ -253,6 +293,8 @@ class residuePicker:
         for i in range(len(residue.xyz)):
             residue.xyz[i] = residue.xyz[i] * R
         residue.update()
+        
+        vector = vector * R
         
         C = residue.xyz[iNC[0][2]]
         Cnorm = emath.normalized(C)
@@ -264,7 +306,10 @@ class residuePicker:
             residue.xyz[i] = residue.xyz[i] * R
         residue.update()
         
-        return residue,C,N
+        vector = vector * R
+        
+
+        return residue,array(vector)
         
     def areTheSame(self,a,b,bckbthres = 0.2, sdthres= 0.3):
         """
@@ -308,7 +353,7 @@ class residuePicker:
             if  asd.rms(bsd)<= sdthres:
                 sdsim = True
                 
-        print "rmsds:",abk.rms(bbk),asd.rms(bsd)
+        
         return bcbsim , sdsim
 
     
@@ -479,53 +524,32 @@ class Test(BT.BiskitTest):
         pass
 
     def cleanUp( self ):
-        os.system("rm -rf "+T.testRoot()+"/polysys/residues_db")
+        #~ os.system("rm -rf "+T.testRoot()+"/polysys/residues_db")
         pass
+    
     def test_DB_Creation(self):
         """DB Creation test cases"""
-
-        r = residuePicker(T.testRoot()+"/polysys/residues_db/")
-        r.extractFromPDB(T.testRoot()+"/polysys/FAKE2.pdb")
-
+        print T.testRoot()+"\\polysys\\residues_db\\"
+        r = residuePicker(T.testRoot()+"\\polysys\\residues_db\\")
+        
         if self.local:
             print r
+            
+            
+        r.extractFromPDB(T.testRoot()+"/polysys/FAKE.pdb")
+        if self.local:
+            print r
+        #~ print r.apvect
+        r.extractFromPDB(T.testRoot()+"/polysys/FAKE.pdb")
+        
+        if self.local:
+            print r
+        #~ print r.apvect 
+        #~ print vectorangle([-1.11594935, -0.00334113, -0.72240529] ,[-1.11594935, -0.00334113, -0.72240529])
 
-
-#~ self.assertEqual(b121.father.father.name,"my_level1_block")
 if __name__ == '__main__':
     BT.localTest()    
 
 
-#~ import Biskit.tools as T
-#~ r = residuePicker()
-#~ print r
-#~ r.extractFromPDB(T.testRoot()+"/polysys/FAKE.pdb")
-#~ r.extractFromPDB(T.testRoot()+"/polysys/1GZX.pdb")
-#~ r.extractFromPDB(T.testRoot()+"/polysys/1HUY.pdb")
-#~ r.extractFromPDB(T.testRoot()+"/polysys/2Q57.pdb")
-#~ print r
 
-#~ r.extractFromPDB ( '1HUY.pdb')
-#~ extractFromPDB ( '1CV7.pdb')
-#~ extractFromPDB ( '1GZX.pdb')
-#~ flip = True
-#~ ab = stickAAs( PDBModel('E1.pdb'),PDBModel('E6.pdb'),flip )
-#~ ac = stickAAs( ab,PDBModel('E8.pdb'),False )
-#~ ad = stickAAs( ac,PDBModel('E8.pdb'),flip )
-#~ ad.writePdb("concat.pdb")
-#~ ad.report()
-
-#~ print ad._chainIndex
- 
-#~ class a:
-    #~ def __init__(self, m):
-        #~ self.x = m
-
-#~ b = a(1)
-#~ c = a(2)
-#~ d = a(3)
-#~ l = [b,c,d]
-#~ f = open ('list',"w")
-#~ cPickle.dump(list,f,cPickle.HIGHEST_PROTOCOL)
-#~ f.close()
 

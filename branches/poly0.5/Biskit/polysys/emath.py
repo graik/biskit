@@ -6,8 +6,13 @@ def norm ( v ):
 	return sqrt(v[0]**2 + v[1]**2 + v[2]**2)
 	
 def vectorangle( v1, v2 ):
-	return acos( (v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])/ (norm(v1)*norm(v2))) 
-
+	
+	a = (norm(v1)*norm(v2))
+	
+	b = (v1[0]*v2[0]+v1[1]*v2[1]+v1[2]*v2[2])
+	
+	return acos(max(-1.0,min(b/a,1.0)))
+	
 def rotation (alpha=0.,beta=0.,gamma=0.):
 	#alpha -> z gamma -> x beta ->y
 	cos_alpha = cos(alpha); sin_alpha = sin(alpha)
