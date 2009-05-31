@@ -33,18 +33,18 @@ class residuePicker:
         
         self.dbpath = databasepath
         
-        try:
-            print "db  ", self.dbpath+'index.db'
-            f = open (self.dbpath+'index.db',"r")
-            print f.readlines()
-            self.index = cPickle.load(f)
+        #~ try:
+        print "db  ", self.dbpath+'index.db'
+        f = open (self.dbpath+'index.db',"r")
+        print f.readlines()
+        self.index = cPickle.load(f)
 
-        except (cPickle.UnpicklingError, IOError,EOFError):
+        #~ except (cPickle.UnpicklingError, IOError,EOFError):
   
-            if( not os.access(self.dbpath, os.F_OK)):
-                os.mkdir(self.dbpath)
-            f = open (self.dbpath+'index.db',"w")
-            self.index = {}
+        if( not os.access(self.dbpath, os.F_OK)):
+            os.mkdir(self.dbpath)
+        f = open (self.dbpath+'index.db',"w")
+        self.index = {}
         f.close()
         
         try:
@@ -115,7 +115,7 @@ class residuePicker:
         try:
             f = open (self.dbpath+'index.db',"r")
             self.index = cPickle.load(f)
-        except (cPickle.UnpicklingError, IOError,EOFError):
+        except :
             print "ERROR2"
           
         
