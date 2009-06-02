@@ -4,6 +4,8 @@ from numpy import compress,transpose,where,cross,array,greater,matrix,array,grea
 import Biskit.molUtils as MU 
 from emath import norm,sphericalAngles
 import cPickle 
+import os
+from resTools import doReorientation
 
 class FoldDataCreator:
     
@@ -92,8 +94,9 @@ class FoldDataCreator:
         ## Reorient the whole molecule
         model = mymodel.clone()
         
-        ## Get the sphere data for a sphere of radius d
+        model = doReorientation(mymodel)
         
+        ## Get the sphere data for a sphere of radius d
         ## All interesting points inside the sphere centered in Ca 
         residue = model.resModels()[res]
         center = residue.xyz[1]
@@ -165,14 +168,14 @@ import Biskit.tools as T
 
 
 class Test(BT.BiskitTest):
-    """ Test cases for Polyfret"""
+    """ Test cases for fold data creation"""
 
     def prepare(self):
         self.f = FoldDataCreator()
         
 
     def cleanUp( self ):
-        #~ os.system("rm -rf "+T.testRoot()+"/polysys/residues_db")
+        
         pass
     
     def test_DB_Creation(self):
@@ -192,6 +195,8 @@ class Test(BT.BiskitTest):
         f2 = FoldDataCreator()
         f2.restore("./this")
         self.assertEqual(self.f.res_char,f2.res_char)
-
+        os.remove("./this")
+        
+        
 if __name__ == '__main__':
     BT.localTest()    

@@ -1,5 +1,5 @@
 from Biskit.PDBModel import PDBModel
-from numpy import compress,transpose,where,cross,array,matrix,array
+from numpy import compress,transpose,where,cross,array,matrix,array,cross, dot
 import cPickle 
 import os
 from math import acos,sqrt,atan2
@@ -7,11 +7,13 @@ import emath
 from emath import vectorangle
 from quaternion import rotquat, rotmat
 import Biskit.molUtils as MU 
-
+from resTools import doAAReorientation, calcPlane
+from tools import lendepth
+import random
 
 class residuePicker:
     
-    def __init__(self,databasepath = "./residues_db/"):
+    def __init__(self,databasepath = "./residues_db/",verbose = False):
         """
         Initializes dictionaries and lists used by the residue picker:
         
@@ -28,40 +30,39 @@ class residuePicker:
         
         @param databasepath: Path of the db folder that is going to be used.
         @type databasepath: string
-        
+        @param verbose: If True the screen fills with lots of usefull text.
+        @type verbose: bool
         """
-        
+        self.verbose = verbose
         self.dbpath = databasepath
         
-        #~ try:
-        print "db  ", self.dbpath+'index.db'
-        f = open (self.dbpath+'index.db',"r")
-        print f.readlines()
-        self.index = cPickle.load(f)
+        try:
+            f = open (self.dbpath+'index.db',"rb")
+            self.index = cPickle.load(f)
 
-        #~ except (cPickle.UnpicklingError, IOError,EOFError):
+        except (cPickle.UnpicklingError, IOError,EOFError):
   
-        if( not os.access(self.dbpath, os.F_OK)):
-            os.mkdir(self.dbpath)
-        f = open (self.dbpath+'index.db',"w")
-        self.index = {}
+            if( not os.access(self.dbpath, os.F_OK)):
+                os.mkdir(self.dbpath)
+            f = open (self.dbpath+'index.db',"wb")
+            self.index = {}
         f.close()
         
         try:
-            f = open (self.dbpath+'apvect.db',"r")
+            f = open (self.dbpath+'apvect.db',"rb")
             self.apvect = cPickle.load(f)
 
         except (cPickle.UnpicklingError, IOError,EOFError):
-            f = open (self.dbpath+'apvect.db',"w")
+            f = open (self.dbpath+'apvect.db',"wb")
             self.apvect = {}
         f.close()
         
         try:
-            f = open (self.dbpath+'clusters.db',"r")
+            f = open (self.dbpath+'clusters.db',"rb")
             self.clusters = cPickle.load(f)
 
         except (cPickle.UnpicklingError, IOError,EOFError):
-            f = open (self.dbpath+'clusters.db',"w")
+            f = open (self.dbpath+'clusters.db',"wb")
             self.clusters = {}
         f.close()
         
@@ -105,32 +106,24 @@ class residuePicker:
         """
         Saves the index, clusters and derived data of the dabase.
         """
-        try:
-            f = open (self.dbpath+'index.db',"w")
-            cPickle.dump(self.index,f,cPickle.HIGHEST_PROTOCOL)
-            f.close()
-        except:
-            print "ERROR"
         
-        try:
-            f = open (self.dbpath+'index.db',"r")
-            self.index = cPickle.load(f)
-        except :
-            print "ERROR2"
-          
+        f = open (self.dbpath+'index.db',"wb")
+        cPickle.dump(self.index,f,cPickle.HIGHEST_PROTOCOL)
+        f.close()
         
-        for k in self.index:
-            print k, len(self.index[k])
+        if self.verbose:
+            for k in self.index:
+                print k, len(self.index[k])
         
-        f = open (self.dbpath+'apvect.db',"w")
+        f = open (self.dbpath+'apvect.db',"wb")
         cPickle.dump(self.apvect,f,cPickle.HIGHEST_PROTOCOL)
         f.close()
         
-        f = open (self.dbpath+'clusters.db',"w")
+        f = open (self.dbpath+'clusters.db',"wb")
         cPickle.dump(self.clusters,f,cPickle.HIGHEST_PROTOCOL)
         f.close()
-        
-        print self.clusters
+        if self.verbose:
+            print "Clusters: ",self.clusters
 
     def extractFromPDB ( self,path = "" ):
         """
@@ -143,42 +136,64 @@ class residuePicker:
         ## Also remove all hidrogens
         model = model.compress(model.maskHeavy())
         
-
-        model.report()
+        if self.verbose:
+            model.report()
+            
         for c in range( model.lenChains() ):
             
             chain = model.takeChains( [c] )
             
             residuos = chain.resModels()
             
-            for i in range(len(residuos)) :
-                print "-"+ residuos[i].sequence() + str(self.last_res[residuos[i].sequence()])
+            for i in range(0,len(residuos)-1) :
+                if self.verbose:
+                    print "-"+ residuos[i].sequence() + str(self.last_res[residuos[i].sequence()])
                 r = residuos[i].sequence()
                 residue = residuos[i]
                 myindex = r+str(self.last_res[r])
                 
-                ## Fetch the next residue
-                if i<len(residuos)-1 :
-                    nextres = residuos[i+1]
-                    rnext = nextres.sequence()
-                else:
-                    nextres = None
+                ## Fetch neighbouring residues
+                nextres = residuos[i+1]
+                rnext = nextres.sequence()
                 
-                ## Hunt for N & C to reorient the aa
-                iNC= where(residue.maskFrom( 'name', ['N','CA','C'] ))
-                if nextres != None:
-                    iNC2= where(residue.maskFrom( 'name', ['N','CA','C'] ))
-                else:
-                    iNC2 = None
                     
                 ## First purge: it has all the needed atoms?
                 if len(residue.xyz) == len(MU.aaAtoms[MU.single2longAA(r)[0]])-1:
-                                        
-                    (residue,vector) = self.doReorientation(residue,iNC,nextres,iNC2)
- 
+                    
+                    ## Hunt for N & C to reorient the aa
+                    int_atoms = ['N','CA','C']
+                    sel_atoms= where(residue.maskFrom( 'name', int_atoms ))
+                    sel_atoms_next= where(nextres.maskFrom( 'name', int_atoms ))
+                    Ni  = residue.xyz[sel_atoms[0][0]]
+                    Ca = residue.xyz[sel_atoms[0][1]]
+                    C  = residue.xyz[sel_atoms[0][2]]
+                    Ninext  = nextres.xyz[sel_atoms_next[0][0]]
+                    Canext = nextres.xyz[sel_atoms_next[0][1]]
+                    Cnext  = nextres.xyz[sel_atoms_next[0][2]]
+    
+                    
+                    Translation = Ninext-Ni
+                    Plane = [(C-Ni),(Ca-Ni)]
+                    Plane_next=[(Cnext-Ninext),(Canext-Ninext)]
+                    residue , R , rv = doAAReorientation(residue)
+                    
+                    ## Convert the obtained vectors
+                    Translation = Translation*R
+                    Translation = [Translation[0,0],Translation[0,1],Translation[0,2]]
+                    Plane[0]= Plane[0]*R
+                    Plane[0] = [Plane[0][0,0],Plane[0][0,1],Plane[0][0,2]]
+                    Plane[1]= Plane[1]*R
+                    Plane[1] = [Plane[1][0,0],Plane[1][0,1],Plane[1][0,2]]
+                    Plane_next[0]= Plane_next[0]*R
+                    Plane_next[0] = [Plane_next[0][0,0],Plane_next[0][0,1],Plane_next[0][0,2]]
+                    Plane_next[1]= Plane_next[1]*R
+                    Plane_next[1] = [Plane_next[1][0,0],Plane_next[1][0,1],Plane_next[1][0,2]]
+                    
+                    Plane_angle = emath.vectorangle(cross(Plane[0],Plane[1]),cross(Plane_next[0],Plane_next[1]))
                     add_it = False
                     foundback = False
                     exit = False
+                    
                     ## Second purge: RMSD and clusterization
                     for group in self.clusters[r]:
                             ## We compare with the first
@@ -206,19 +221,23 @@ class residuePicker:
                                     ## If backbone and sidechains are identical we don't need to 
                                     ## add the residue
                                     addit=False
-                                    print "Too similar to other ("+ similarto +")"
+                                    if self.verbose:
+                                        print "Too similar to other ("+ similarto +")"
+                                    myindex = similarto
                                     
                                 else:##if not foundsd:
                                     group.append(myindex)
                                     add_it = True
-                                    print "Backbone found but different sidechain:adding"
+                                    if self.verbose:
+                                        print "Backbone found but different sidechain:adding"
                                     
                     if not foundback:
                         ## We haven't found the backbone so we need to create a new
                         ## group.
                         self.clusters[r].append([myindex])
                         add_it = True
-                        print "New group (backbone not found)"
+                        if self.verbose:
+                            print "New group (backbone not found)"
                     
 
                     if add_it:
@@ -232,84 +251,28 @@ class residuePicker:
                         self.index[r].append(myindex)
                         self.last_res[r]+=1
                     
-                    if nextres  != None :
-                        key = (r,rnext)
-                        new_entry =  (myindex,vector)
-                        if not key in self.apvect.keys():
-                            ## if the key isn't we just add the new register
-                            self.apvect[key] = [ new_entry ]   
-                            
-                        else:
-                            ## else we have to see if there's something similar inside
-                            foundsimilar = False
-                            for i in self.apvect[key]:
-                                
-                                if vectorangle(vector[0],i[1][0]) < 0.045:
-                                    foundsimilar = True
-                            if foundsimilar == False:
-                                self.apvect[key].append(new_entry)
+                    
+                    key = (r,rnext)
+                    new_entry =  {'index':myindex,'translation':Translation,'plane_next':Plane_next,'planes_angle':Plane_angle}
+                    if not key in self.apvect.keys():
+                        ## if the key isn't we just add the new register
+                        self.apvect[key] = [ new_entry ]   
+                    else:
+                        ## else we have to see if there's something similar inside
+                        foundsimilar = False
+                        for i in self.apvect[key]:
+                            #~ print new_entry,i
+                            if vectorangle(new_entry['translation'],i['translation']) < 0.06 and abs(new_entry['planes_angle']-i['planes_angle']) < 0.06:
+                                foundsimilar = True
+                                print "Found Similar"
+                        if foundsimilar == False:
+                            self.apvect[key].append(new_entry)
                 else:
-                    print "Diferent number of atoms."
+                    if self.verbose:
+                        print "Diferent number of atoms."
         self.save()
     
-    def doReorientation (self,residue = None, iNC = [0,1,2], nextres = None, iNC2 = [0,1,2]):
-        """
-        Reorients a residue along the C-Ca axis and C-N axis.
-        It's used for having an standard base orientation for all the residues.
-        
-        @param residue: Residue to be reoriented.
-        @type residue: PDBModel
-        @param iNC: Atom indexes of the N, CA,C atoms.
-        @type iNC: list of int
-        
-        @return: The residue reoriented.
-        @rtype: PDBModel
-        """
-
-        if nextres  != None :
-            N2 = nextres.xyz[iNC2[0][0]]
-
-        N = residue.xyz[iNC[0][0]]
-        if nextres  == None :
-            N2 = N
-        
-        C = residue.xyz[iNC[0][2]]
-        vector = N2 - C
-        
-        ## Center
-        residue.xyz = residue.xyz - N
-        
-        ## Rotation
-        C = residue.xyz[iNC[0][2]]
-        
-        
-        
-        Ca = residue.xyz[iNC[0][1]]
-        nNCNCa = emath.normalized(cross(C,Ca))	
-        NC = array([[0.,0.,0.],[0.,0.,0.],nNCNCa])
-        NC2 = array([[0.,0.,0.],[0.,0.,0.],[0.,0.,-1.]])	
-        q= rotquat(NC,NC2)[2]
-        R = transpose(matrix(rotmat(q)))				
-        for i in range(len(residue.xyz)):
-            residue.xyz[i] = residue.xyz[i] * R
-        residue.update()
-        
-        vector = vector * R
-        
-        C = residue.xyz[iNC[0][2]]
-        Cnorm = emath.normalized(C)
-        NC = array([[0.,0.,0.],[0.,0.,0.],Cnorm])
-        NC2 = array([[0.,0.,0.],[0.,0.,0.],[0.,1.,0.]])
-        q= rotquat(NC,NC2)[2]
-        R = transpose(matrix(rotmat(q)))
-        for i in range(len(residue.xyz)):
-            residue.xyz[i] = residue.xyz[i] * R
-        residue.update()
-        
-        vector = vector * R
-        
-
-        return residue,array(vector)
+    
         
     def areTheSame(self,a,b,bckbthres = 0.2, sdthres= 0.3):
         """
@@ -357,135 +320,88 @@ class residuePicker:
         return bcbsim , sdsim
 
     
-    def returnRandomRes(self, resname = 'A'):
+    def randomRes(self, res = 'A'):
         """
         Returns a random residue loaded from the library of type resname.
         
         @param resname: Single letter code of aa.
         @type resname: string
         
-        @return: True if the too residues are very similar in conformation.
+        @return: A residue model from the database.
         @rtype: PDBModel
         """
+        if isinstance(res,list):
+            choosen = res[random.randrange(len(res))]
+        else:
+            choosen = self.index[res][random.randrange(len(self.index[res]))]
+       
+    
+        return choosen
+    
+    def chooseRes(self,r='A',rnext = 'A',translation = [0,0,0])
+        candidates = self.apvect[(res_ant,res)]
+        
+        sim = []
+        for i in candidates: # hacerlo por indices
+            sim.append((self.__similarity(reg,c),i))
+        
+        return candidates(max(sim)[1])
+    
+    def __similarity(self,reg1,reg2):
+        return 30
+    
+    def genPoints(self,model,chain = 0):
+        #hacer lo mismo que en folddatacreator
         pass
+    
+    def createChain(self,seq="AA",points=[[0,0,0]])
         
+        T=[0,0,0]
         
-    def rotateAA (self, paa='',v1 = [0.,0.,0.],v2 = [0.,0.,0.],writeIt = False,name=''):
+        r = seq[0]
+        chain = PDBModel(self.dbpath+r+"/"+self.randomRes(r)+".pdb")
         
-        if not isinstance(paa,PDBModel):
-            aa = PDBModel(paa)
-        else:
-            aa = paa
+        ## Suponiendo siempre queen xyx[0] tenemos N 
+        ## TODO no suponerlo
+        N = chain.xyz[0]
+        i = 0
+        for c in seq[1:]:
+            rnext = c
             
-        # we assume it's in the YZ plane ( it must be from DB )
-        
-        NC = array([[0.,0.,0.],[0.,0.,0.],v1])
-        NC2 = array([[0.,0.,0.],[0.,0.,0.],v2])
-        q= rotquat(NC,NC2)[2]
-        #~ print "q:",q,rotquat(NC,NC2)
-        R = transpose(matrix(rotmat(q)))	
-        #~ print R,v1,v2
-        for i in range(len(aa.xyz)):
-            aa.xyz[i] = aa.xyz[i] * R
-        aa.update()
-        
-        if writeIt :
-            aa.writePdb(name)
-        
-        return aa
+            trans_vector =  N - point[i]
+            nextres_reg = self.chooseRes(r,rnext,trans_vector)
+            
+            #####################################
+            ##### TODOOOOOOOOOOOOOOOOOOOOOOOOO ##
+            #####################################
+            ## nextres = randomres de su cluster (o elegir segun steric clashes)
+            
+            ## Cargarlo como PDBModel
+            res = PDBModel(self.dbpath+r+"/"+self.randomRes(r)+".pdb")
+            
+            ## Make rotationmatrix from this plane to the other
+            ## Generar una matriz que rote el otro plano al plano inicial (xz)
+            ## Y multiplicarlo todo por esa matriz
+            
+            nextres ,R = planarize(chain,reg_plane)
 
-    def stickAAs( self,a,b , flip ):
-        iC= where(a.maskFrom( 'name', ['C'] ))
-        #~ print a
-        #~ print b
-        
-        if flip :
+            ## Anyadirle el vector translación rotado
+            T = T + (trans*R)
             
-            b = self.rotateAA(b,[1.,0.,0.],[0.,0.,1.],True,'lol.pdb')
-            b = self.rotateAA(b,[0.,0.,1.],[-1.,0.,0.],True,'lol.pdb')
+            ## Sumarle la translacion al residuo 
+            res.xyz = res.xyz + T
             
-            T = array([0,0.56,1.27])
-        
-        else:
-            T = array([0,-0.56,-1.27])
+            ## Pegarlos
+            chain.concat(res)
             
-        C = a.xyz[iC[0][-1]]
-        
-        for i in range(len(b.xyz)):
-            b.xyz[i] = b.xyz[i] + T + C
-        b.update()
-        
-        
-        m = a.concat(b)
-        #~ print m
-        m.renumberResidues()
-        
-        m['serial_number'] = range(1,m.lenAtoms()+1)
-        m['chain_id'] = m.lenAtoms() * ['A']
-        
-        return m
-        
-    def concatenateAAChains (self,a,b) :
-        # temptative function for chain concatenation
-        # chains may not have TER o OXT
-        
-        #reorientation of the other molecule in the or. of the other (Nn->Cn to b's N1->C1)
-        iCa= where(a.maskFrom( 'name', ['C'] ))
-        iNa= where(a.maskFrom( 'name', ['N'] ))
-        
-        iCb= where(b.maskFrom( 'name', ['C'] ))
-        iNb= where(b.maskFrom( 'name', ['N'] ))
-        
-        #Residues are supposed to have the correct backbone at least
-        aCn = a.xyz[iCa[0][-1]] # Cn
-        aNn = a.xyz[iNa[0][-1]] # Nn
-        
-        aCnNn = emath.normalized(aCn - aNn)
-        
-        bC1 = b.xyz[iCb[0][0]] # C1
-        bN1 = b.xyz[iNb[0][0]] # N1
-        
-        bC1N1 = emath.normalized(bC1 - bN1)
-        
-        #center
-        a.xyz = a.xyz - aNn
-        b.xyz = b.xyz - bN1
-        #~ print "centered-",bN1,bC1,iCb[0][0],iCa[0][0]
-        #Reorient b 
-        b = self.rotateAA(b,bC1N1,aCnNn)
-        
-        c =self.stickAAs(a,b,False)
-        #~ print a 
-        #~ print b
-        #~ print c
-        return c
-
-
-    def calculateBulkRMS(self,aaname = 'A', writeIt = False):
-        
-           
-        if writeIt:
-            f = open ("./rmsd_"+aaname,"w")
-        
-        #load all aa of name aaname
-        for i in range(1,total_res[aaname]+1):
-            print "./residues_db/"+aaname+"/"+aaname+str(i)
-            residues.append(PDBModel("./residues_db/"+aaname+"/"+aaname+str(i)+".pdb"))
+            ## Y volver a empezar
+            r = rnext
+            i = i+1
+            N = res.xyz[0]
             
-        
-        
-        for i in range(total_res[aaname]):
-            for j in range(total_res[aaname]):
-                if i!= j:
-                    if writeIt:
-                        f.write(str(i)+" "+str(j)+ " " + str (residues[i].rms(residues[j]))+"\n")
-            f.write("\n")
-        
-        if writeIt:
-            f.close()
-        
-        
-
+    def attach(self, ):
+        pass
+    
     def __str__(self):
         """
         Returns a string with statistics of the database.
@@ -518,34 +434,97 @@ from Biskit.PDBModel import PDBModel
 import os
 
 class Test(BT.BiskitTest):
-    """ Test cases for Polyfret"""
+    """ Test cases for residuePicker"""
 
     def prepare(self):
         pass
 
-    def cleanUp( self ):
-        #~ os.system("rm -rf "+T.testRoot()+"/polysys/residues_db")
-        pass
+    #~ def cleanUp( self ):
+        #~ try:
+            #os.rmdir(T.testRoot()+"/polysys/residues_db")
+            #~ os.system("rm -rf "+T.testRoot()+"/polysys/residues_db")
+        #~ except:
+            #~ if self.local:
+                #~ print "ERROR: Database folder couldn't be removed."
     
-    def test_DB_Creation(self):
-        """DB Creation test cases"""
-        print T.testRoot()+"\\polysys\\residues_db\\"
-        r = residuePicker(T.testRoot()+"\\polysys\\residues_db\\")
+    #~ def test_DB_FileCreation(self):
+        #~ """Folder & Files creation testing"""
         
-        if self.local:
-            print r
-            
-            
-        r.extractFromPDB(T.testRoot()+"/polysys/FAKE.pdb")
-        if self.local:
-            print r
-        #~ print r.apvect
-        r.extractFromPDB(T.testRoot()+"/polysys/FAKE.pdb")
+        #~ r = residuePicker(T.testRoot()+"/polysys/residues_db/")
+        #~ r.extractFromPDB(T.testRoot()+"/polysys/FAKE.pdb")
+        #~ r.save()
         
-        if self.local:
-            print r
-        #~ print r.apvect 
-        #~ print vectorangle([-1.11594935, -0.00334113, -0.72240529] ,[-1.11594935, -0.00334113, -0.72240529])
+        #~ r2 = residuePicker(T.testRoot()+"/polysys/residues_db/")
+        
+        #~ ## r and r2 must be the same
+        #~ self.assertEqual(r.index,r2.index)
+        
+    #~ def test_DB_Processing(self):
+        #~ """DB Processing test cases"""
+        
+        #~ r = residuePicker(T.testRoot()+"/polysys/residues_db/")
+        #~ ## empty DB
+        #~ if self.local:
+            #~ print r
+  
+        #~ r.extractFromPDB(T.testRoot()+"/polysys/FAKE.pdb")
+        #~ ## DB with FAKE protein processed
+        #~ if self.local:
+            #~ print r
+       
+        #~ len1= len(r.index)
+        #~ lendata1= lendepth(r.apvect)
+        
+        #~ r.extractFromPDB(T.testRoot()+"/polysys/FAKE.pdb")
+        #~ ## Just the same DB!!
+        #~ if self.local:
+            #~ print r
+        #~ len2= len(r.index)
+        #~ lendata2= lendepth(r.apvect)
+        
+        #~ self.assertEqual(len1,len2)
+        #~ self.assertEqual(lendata1,lendata2)
+    
+    #~ def test_DB_FileCreation2(self):
+        #~ """ Extraction and processing Test"""
+        #~ r = residuePicker(T.testRoot()+"/polysys/residues_db/")
+        #~ r.extractFromPDB(T.testRoot()+"/polysys/1HUY.pdb")
+        #~ if self.local:
+            #~ print r
+        #~ path = T.testRoot()+"/polysys/residues_db/K/"
+        #~ files = os.listdir(path)
+        
+        #~ f = open(T.testRoot()+"/polysys/tots.pdb","w")
+        
+        #~ i=1
+        #~ for r in files:
+            #~ f2 =  open(path+r,"r")
+            #~ f.write("MODEL    %4d\n"%(i))
+            #~ f.writelines(f2.readlines()[:-1])
+            #~ f.write("ENDMDL\n")
+            #~ f2.close()
+            #~ i=i+1
+        #~ f.close
+            
+    #~ def test_randomres(self):
+        #~ """Test random res picker function"""
+        #~ r = residuePicker(T.testRoot()+"/polysys/residues_db/")
+        #~ r.extractFromPDB(T.testRoot()+"/polysys/FAKE.pdb")
+        #~ if self.local:
+            #~ print r.randomRes('L')
+            #~ print r.randomRes(r.index['L'])
+        #~ r.extractFromPDB(T.testRoot()+"/polysys/1HUY.pdb")
+        #~ if self.local:
+            #~ print r.randomRes('A')
+            #~ print r.randomRes(r.index['A'])
+            #~ print r.randomRes('A')
+            #~ print r.randomRes(r.index['A'])
+            #~ print r.randomRes('A')
+            #~ print r.randomRes(r.index['A'])
+            #~ print r.randomRes('A')
+            #~ print r.randomRes(r.index['A'])
+            #~ print r.randomRes('A')
+            #~ print r.randomRes(r.index['A'])
 
 if __name__ == '__main__':
     BT.localTest()    
