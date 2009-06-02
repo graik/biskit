@@ -118,7 +118,7 @@ def _dotv(vertices1, vertices2):
     Perform the dot product on arrays of 3-vectors.
 
     """
-
+    
     return np.sum(vertices1*vertices2, axis=-1)
 
 
@@ -127,7 +127,7 @@ def _normv(vertices):
     Normalize an array of 3-vectors.
 
     """
-
+    
     vertices = np.asarray(vertices)
     return vertices / np.sqrt(_dotv(vertices, vertices))[:,np.newaxis]
 
