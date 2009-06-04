@@ -1,52 +1,69 @@
 from quaternion import rotquat, rotmat, qmult
-from emath import normalized, norm,dot, vectorangle, vectorcos
 import numpy as N
-
+from vectors import normalized, norm,dot, angle, vcos, cross
 
 def planarize(model = None, orig_plane =[[1,0,0],[0,0,1]],orig_perp = False, target_plane=[[1,0,0],[0,0,-1]],target_perp = True,):
     
     ## We want perpendicular plane-defining vectors
     
     if orig_perp == False:
-        aux = N.cross(orig_plane[0],orig_plane[1])
-        orig_plane[1] = N.cross(orig_plane[0],aux)
-
+        aux = cross(orig_plane[0],orig_plane[1])
+        orig_plane[1] = cross(orig_plane[0],aux)
+    
+      
     if target_perp == False:
-        aux = N.cross(target_plane[0],target_plane[1])
+        aux = cross(target_plane[0],target_plane[1])
         target_plane[1] = N.cross(target_plane[0],aux)
     
     
-    v1 = N.array([N.array(normalized(orig_plane[0])),N.array([0,0,1]),N.array([0,0,1])])
-    v2 = N.array([N.array(normalized(target_plane[0])),N.array([0,0,1]),N.array([0,0,1])])
+    v1 = N.array([normalized(orig_plane[0]),[0,0,1],[0,0,1]])
+    v2 = N.array([normalized(target_plane[0]),[0,0,1],[0,0,1]])
     q  = rotquat(v1,v2)
     R = N.transpose(N.matrix(rotmat(q[0])))
     
-    orig_plane[1] = orig_plane[1] * R
+    aux = orig_plane[1] * R
+    orig_plane[1] =[aux[0,0],aux[0,1],aux[0,2]]
     
-    v1 = N.array([N.array(normalized(orig_plane[1])),N.array([0,0,1]),N.array([0,0,1])])
-    v2 = N.array([N.array(normalized(target_plane[1])),N.array([0,0,1]),N.array([0,0,1])])
+    
+    v1 = N.array([normalized(orig_plane[1]),[0,0,1],[0,0,1]])
+    v2 = N.array([normalized(target_plane[1]),[0,0,1],[0,0,1]])
     q  = rotquat(v1,v2)
 
     R = R * N.transpose(N.matrix(rotmat(q[0])))
     
     for i in range(len(model.xyz)):
         model.xyz[i] = model.xyz[i] * R
-   
-    
+        
     return model , R
     
-def calcPlane (residue):
+
     
-    sel_atoms = N.where(residue.maskFrom( 'name', ['N','CA','C'] ))
-    Npos = sel_atoms[0][0]
-    Capos= sel_atoms[0][1]
-    Cpos = sel_atoms[0][2]
+def calcPlane (residue,Ca=None,C = None):
     
-    Ni  = residue.xyz[Npos]
-    Ca = residue.xyz[Capos]
-    C  = residue.xyz[Cpos]
+    if C == None and Ca == None:
+        sel_atoms = N.where(residue.maskFrom( 'name', ['N','CA','C'] ))
+        Npos = sel_atoms[0][0]
+        Capos= sel_atoms[0][1]
+        Cpos = sel_atoms[0][2]
+        
+        Ni  = residue.xyz[Npos]
+        Ca = residue.xyz[Capos]
+        C  = residue.xyz[Cpos]
+        
+        return  [C-Ni,Ca-Ni]
+    else:
+        Ni = residue
+        return  [C-Ni,Ca-Ni]
+def genPoints(model,chain = 0,atomname ='N'):
+    model = model.compress( model.maskProtein())
     
-    return  C-Ni,Ca-Ni
+    try:
+        chain = model.takeChains([chain])
+    except:
+        return []
+    
+    return  chain.compress(chain.maskFrom( 'name', atomname )).xyz
+    
 
 def doAAReorientation (residue = None, vectors = []):
     """
@@ -75,10 +92,7 @@ def doAAReorientation (residue = None, vectors = []):
     
     ## Rotation
     
-    nc = C-Ni
-    nca = Ca-Ni
-    
-    residue, R = planarize(residue,N.array([nc,nca]))
+    residue, R = planarize(residue,calcPlane(residue))
     
     resvectors = []
     for v in vectors:
@@ -87,9 +101,9 @@ def doAAReorientation (residue = None, vectors = []):
     return residue, R, resvectors
 
 def flip (model = None, orig_plane =[[1,0,0],[0,0,1]],vectors = []):
-    target_plane = [[orig_plane[0][0],orig_plane[0][1],orig_plane[0][2]],[-orig_plane[1][0],-orig_plane[1][1],-orig_plane[1][2]-0.5]]
+    target_plane = [[orig_plane[0][0],orig_plane[0][1],orig_plane[0][2]],[-orig_plane[1][0],-orig_plane[1][1],-orig_plane[1][2]]]
     
-    model, R = planarize(model,N.array(orig_plane),False,N.array(target_plane),False)
+    model, R = planarize(model,orig_plane,False,target_plane,False)
     
     
     resvectors = []
@@ -203,6 +217,7 @@ class Test(BT.BiskitTest):
 
     def cleanUp( self ):
         pass
+    
     def test_vectors(self):
         """test some vector operations"""
         import random
@@ -229,7 +244,7 @@ class Test(BT.BiskitTest):
             residues[i].xyz = residues[i].xyz - residues[i].xyz[0]
             nc = residues[i].xyz[2]-residues[i].xyz[0]
             nca = residues[i].xyz[1]-residues[i].xyz[0]
-            planarize(residues[i],N.array([nc,nca]))[0].writePdb(T.testRoot()+"/polysys/"+str(i)+".pdb")
+            planarize(residues[i],[nc,nca])[0].writePdb(T.testRoot()+"/polysys/"+str(i)+".pdb")
             f2 =  open(T.testRoot()+"/polysys/"+str(i)+".pdb","r")
             f.write("MODEL    %4d\n"%(i+1))
             f.writelines(f2.readlines()[:-1])
@@ -240,17 +255,18 @@ class Test(BT.BiskitTest):
             print i
             doAAReorientation(residues[i])[0].writePdb(T.testRoot()+"/polysys/"+str(i)+".pdb")
             f2 =  open(T.testRoot()+"/polysys/"+str(i)+".pdb","r")
-            f.write("MODEL    %4d\n"%(i+1))
+            f.write("MODEL    %4d\n"%(i+1+11))
             f.writelines(f2.readlines()[:-1])
             f.write("ENDMDL\n")
             f2.close()
-            
+        
+        
         for i in range(len(residues)):
             print i
             res = residues[i].clone()
             flipAA(residues[i])[0].concat(flipAA(flipAA(res)[0])[0]).writePdb(T.testRoot()+"/polysys/"+str(i)+".pdb")
             f2 =  open(T.testRoot()+"/polysys/"+str(i)+".pdb","r")
-            f.write("MODEL    %4d\n"%(i+1))
+            f.write("MODEL    %4d\n"%(i+1+22))
             f.writelines(f2.readlines()[:-1])
             f.write("ENDMDL\n")
             f2.close()
