@@ -47,21 +47,25 @@ def dataFileCreation( candidates_file = ""  ,target_seq = "",target_type = ("hom
     basepath = lineas[0]
     
     
-    if try_all:
-        for 
-    else:
+    if not try_all:
         if target_type[1] == "parallel":
             ccdb = db or T.dataRoot() + '/coiledcoil/SOCKET_par_norm'
         elif:
             ccdb = db or T.dataRoot() + '/coiledcoil/SOCKET_antipar_norm'
         else:
             raise BiskitError("Options for target type are 'parallel' or 'antiparallel'." )
-    
+        cc = CoiledCoil(ccdb)
+        
     file = open(basepath+"/_data","w")
     for l in lineas[1:]:
         line = l.split()
         new_line = line[0][:-3]+" struct:"+line[0]
-        if 
+        if try_all:
+            for k in METHODS.keys():
+                new_line = new_line + " "+getRegisterByMethod(seq,k)
+                
+        else:
+            new_line = new_line + " Default:" + cc.findHeptads(seq)['best']
         file.writeline(new_line)
     file.close()
 
