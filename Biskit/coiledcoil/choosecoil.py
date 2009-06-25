@@ -1,6 +1,7 @@
 from coiledcoil import CoiledCoil
 from coiledalign import CoiledAlign
 from coiledutils import sameRegister, getRegister
+import methods
 
 class CCStudy:
     
@@ -63,7 +64,7 @@ class CCStudy:
         
         
         ## Statistics
-        sources = ["CC","Pa","Pair","Paper","So"]
+        ##sources = ["CC","Pa","Pair","Paper","So"]
         hits = {}
         tries = {}
         fails = {}
