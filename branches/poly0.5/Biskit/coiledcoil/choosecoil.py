@@ -167,7 +167,6 @@ class CCStudy:
         
         
         for h in all:
-            ## Vigilar aqui cual escoger segun la tabla!! (parallel or antiparallel)
             self.alignments[h] = ca.copy()
             print "Key (Study): ", h
             other_hep = heptads[h][heptads[h]["best"][0]]
