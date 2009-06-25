@@ -6,7 +6,7 @@ import Biskit.molUtils as MU
 
 class CoiledAlign:
     """
-    Class for coiled coil parameters study. Mainly it will be used for getting the better alignment
+    Class for coiled coil parameters study. Mainly it will be used for getting the best alignment
     for an unknown cc structure to do homology modelling.
     """
     
@@ -28,11 +28,20 @@ class CoiledAlign:
         self.reg_alignments = {}
         
     
-    def createTables(self,table = ""):
+    def createTables(self,table = "BLOSSUM62"):
         """
-        Load residue likelyhood scores for BLOSSUM 62 table.
+        Load residue likelyhood scores for BLOSSUM 62 table for residue/residue comparison.
         Creates from scratch a table for residue charge comparison.
+        The residue charge table returns a high value for equal residue hit,
+        a lesser value for equal charge hits (if charged) and a very small value 
+        for non-charged hits. It penalizes a charged/non-charged pair and also 
+        charged +/charged - pairs (whith an even worst score)
+        
+        @param table: Name of the residue/residue comparison table (BLOSSUM62) 
+                    by default.
+        @type table: string
         """
+        
         try:
             lineas = open(T.dataRoot() + '/coiledcoil/'+table,"r").readlines()
         except IOError, msg:
@@ -82,7 +91,30 @@ class CoiledAlign:
     
     def alignChains(self, a = "", b = "", reg_a = "", reg_b = ""):
         """
+        Finds the scores by residue for different types of similarity
+        (by residue, charges or probabilities).     
+        
+        @param a: Sequence to be compared. May be bigger or equal than b.
+        @type a: string
+        @param b: Target sequence.
+        @type b: string
+        @param reg_a: Whole register of seq. a
+        @type reg_a: string
+        @param reg_b: Whole register of seq. b
+        @type reg_b: string
+        
+        @return:Dictionary containing the position of the best score for all
+                the parameters ('heptads' for probabilities, 'charges' for charges
+                and 'res_like' for residue/resideu comparison). Each entry is a 
+                {float ,int} tuple where the int number is the place of 
+                maximum likelyhood and the float one is the score.
+                After running this function the values for each residue of the
+                chain are also stored in another dictionary (chain_alignments) indexed
+                in the same way.
+        @type: dictionary
+        
         """
+        
         assert(len(a) == len(reg_a) and len(b) == len(reg_b) ),"No correspondence between chains and their registers."
         
         ## Score alignment
@@ -117,6 +149,30 @@ class CoiledAlign:
 
     def alignRegisters(self,a = "",b = "",reg_a ="",reg_b =""):
         """
+        Finds the scores by residue for different types of similarity
+        (by residue, charges or probabilities). But it doesn't use single
+        residues but whole heptads to do the comparisons (and thus is more
+        useful).
+        
+        @param a: Sequence to be compared. May be bigger or equal than b.
+        @type a: string
+        @param b: Target sequence.
+        @type b: string
+        @param reg_a: Whole register of seq. a
+        @type reg_a: string
+        @param reg_b: Whole register of seq. b
+        @type reg_b: string
+        
+        @return:Dictionary containing the position of the best score for all
+                the parameters ('heptads' for probabilities, 'charges' for charges
+                and 'res_like' for residue/resideu comparison). Each entry is a 
+                {float ,int} tuple where the int number is the place of 
+                maximum likelyhood and the float one is the score.
+                After running this function the values for each residue of the
+                chain are also stored in another dictionary (reg_alignments) indexed
+                in the same way.
+        @type: dictionary
+        
         """
         ch_a=a;ch_b=b;bra=reg_a;brb=reg_b
         
@@ -148,8 +204,7 @@ class CoiledAlign:
         new_scc = []
         for t in scc:
             new_scc.append(( t[0], (start_a-start_b)+(t[1]*7) ))
-        
-        
+           
         scc = ( max(scc)[0], (start_a-start_b)+max(scc)[1]*7)
         
         self.reg_alignments["heptads"]= new_scc
@@ -173,9 +228,7 @@ class CoiledAlign:
         crs = max(subvals_charge)
         chs = max(subvals_res)
        
-        #~ return {"heptad": scc, "charges": max(subvals_charge),"res_like": max(subvals_res)}
-        a = ch_a;b=ch_b;reg_a=bra;reg_b=brb
-        return {"heptads":scc , "res_like":chs, "charges": crs } ##(self.getFitnessScore("charges",a,b,crs[1],reg_a,reg_b),crs[1])}
+        return {"heptads":scc , "res_like":chs, "charges": crs } 
     
     def normalizeScores(self):
         """
@@ -206,7 +259,7 @@ class CoiledAlign:
     def copy(self):
         """
         Returns a copy where tables are referenced (and then not loaded again).
-        For speeding up purposes.
+        Just for speeding up purposes.
         """
         ca = CoiledAlign(self.mycc)
         ca.like_scores = self.like_scores

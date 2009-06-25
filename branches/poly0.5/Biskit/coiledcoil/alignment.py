@@ -1,9 +1,6 @@
-
-
-
 class PirAlignment :
     """ 
-    Class for generating pairwise multichain alignments
+    Class for generating pairwise multichain alignments.
     """
     
     def __init__ (self, chains=[("","")],pos = [0]):
@@ -18,7 +15,7 @@ class PirAlignment :
             self.__padding()
             self.processed_a += self.chain_a
             self.processed_b += self.chain_b
-            self.fasta_b = += self.chain_b
+            self.fasta_b += self.chain_b
             if len(self.chains)-1!= c:
                 self.processed_a += "/"
                 self.processed_b += "/"
