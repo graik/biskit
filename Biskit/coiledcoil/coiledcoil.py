@@ -30,7 +30,7 @@ from coiledutils import getRegister
 
 class CoiledCoil:
     """
-    Temptative class for Leucine Zipper registry analysis.
+    Temptative class for Coiled Coil registry analysis.
     An heptad registry is given by a sequence of letters from a to g,
     where a corresponds to the first residue and g to the last.
     Ex.
@@ -40,7 +40,12 @@ class CoiledCoil:
     """
     
     
-    window_length = 7 ## size of the window
+    
+    """
+    Size of the window. While it's generally 7, another repeating structures
+    can happen so this is left as a constant just for completeness sake.
+    """
+    window_length = 7 
     
     
     
@@ -68,7 +73,9 @@ class CoiledCoil:
         
     def parseScores( self, db="" ):
         """
-        Load position scores from external file.
+        Load position scores from external file (probability for an aa X to be
+        in register position Y, so it's a 20x7 table).
+        
         @param db: path to file with amino acid scores per position
         @type  db: str
         """
@@ -95,7 +102,7 @@ class CoiledCoil:
     
     def findHeptads(self, chain = "", k=10):
         """
-        Function for discovering the heptad register of a LeuZip-kind protein.
+        Function for discovering the heptad register of a coiled coil protein.
         
         @param chain: Chain to be analyzed with aminoacids in single-letter code.
         @type chain: string
@@ -325,7 +332,7 @@ class Test(BT.BiskitTest):
             print target
             print res["reg"]
             for i in target :
-                print i,"    ",
+                print i,"   ",
             print
             
             for i in l2.last_score:

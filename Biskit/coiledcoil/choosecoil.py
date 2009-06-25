@@ -1,4 +1,3 @@
-
 from coiledcoil import CoiledCoil
 from coiledalign import CoiledAlign
 from coiledutils import sameRegister, getRegister
@@ -6,15 +5,31 @@ from coiledutils import sameRegister, getRegister
 class CCStudy:
     
     def __init__(self,data ="",cc = None):
+        """
+        Study instantiation. Loads needed data.
+        
+        @param data: File containing sequence templates and register info. See
+                    'parseData' for further information.
+        @type data: string
+        @param cc: Structure to store parameter tables. If not defined then a
+                default one is created.
+        @type cc: CoiledCoil
+        
+        """
         self.parseData(data)
         self.mycc = cc or CoiledCoil() 
         
     def parseData(self,dat = ""):
+        """
+        Opens a data file with sequence and register information.
+        Format:
         
+        
+        """
         try:
             lineas = open(dat,"r").readlines()
         except IOError, msg:
-            raise BiskitError('cannot open score file %s.\n Error: %s' \
+            raise BiskitError('cannot open data file %s.\n Error: %s' \
                               % (db, msg ) )
         
         lineas = [ l.strip() for l in lineas ]
@@ -35,6 +50,15 @@ class CCStudy:
             
     
     def doStudy(self):
+        """
+        Aligns all the chains and gets an idea of the success of each method for predicting
+        the registers (correct methods are the ones which match up many times).
+        
+        @return: Two dictionaries. One is the score of each method used for register prediction.
+                The other containsCoiledAlign objects with information of each alignment. 
+        @type: tuple {dictionary ,dictionary}
+        """
+        
         ca = CoiledAlign(self.mycc)
         
         
@@ -143,7 +167,7 @@ class CCStudy:
         
         
         for h in all:
-            ## Vigilar aqui cual escoger segun la tabla!!
+            ## Vigilar aqui cual escoger segun la tabla!! (parallel or antiparallel)
             self.alignments[h] = ca.copy()
             print "Key (Study): ", h
             other_hep = heptads[h][heptads[h]["best"][0]]
@@ -160,6 +184,14 @@ class CCStudy:
             
     
     def chooseBest(self):
+        """
+        Chooses the best alignment for the given templates.
+        
+        @return: Tuples whith the best ([0,1] normalized) score and position for chain alignment
+                and register (heptad) alignment. 
+        @type: tuple {tuple {float,int},tuple {float,int}}
+        """
+        
         ## First for each choose the best
         maxims = []
        
@@ -181,6 +213,9 @@ class CCStudy:
             keys = self.alignments[k].reg_alignments.keys()
             maxacc = (0,0)
             for t in self.alignments[k].reg_alignments[keys[0]]:
+                ## Better if one iterates over the number of keys -1
+                ## In this way one can add easily more parameters for
+                ## study
                 acc = ((t[0] + self._findInAlignment(self.alignments[k].reg_alignments[keys[1]],t[1])+ self._findInAlignment(self.alignments[k].reg_alignments[keys[2]],t[1]),t[1]))
                 maxacc = max(maxacc,acc)
             maxims.append((maxacc,k))
@@ -192,15 +227,26 @@ class CCStudy:
         return best_chain, best_reg
     
     def _findInAlignment(self,where=[],what = 0):
+        """
+        Finds the score value associated to one position.
+        
+        @param where: Array where we want to find what. Is an array of the
+                type returned by coiled coil alignment functions, so each element
+                is a score, position tuple.
+        @type where: list of tuples
+        @param what: Index we want to find the score.
+        @type what: integer
+        
+        @return: Score in 'what' position.
+        @type: float
+        """
+        
         for i in range(len(where)):
             if where[i][1] == what:
                 return where[i][0]
         return 0
         
-    def createDataFile(self, struct_file = "",file="a.dat"):
-        
-        pass
-        
+       
 
 ##############
 ## Test
@@ -218,21 +264,18 @@ class Test(BT.BiskitTest):
     def cleanUp( self ):
         pass
         
-    #~ def test_Study(self):
-        #~ """doStudy function test case"""
-        #~ cs = CCStudy(T.dataRoot() + '/coiledcoil/example_coils.dat')
-        #~ print
-        #~ cs.doStudy()
-        
-        #~ print cs.chooseBest()
-        
-    def test_problem_case(self):
-        """ Test a problematic case"""
-        cs = CCStudy(T.testRoot() + '/coiledcoil/coils1.dat')
+    def test_Study(self):
+        """doStudy function test case"""
+        cs = CCStudy(T.dataRoot() + '/coiledcoil/example_coils.dat')
+        print
         cs.doStudy()
+        
         print cs.chooseBest()
         
-        a = PirAlignment([(cs.data['1NKN']['seq'],cs.data['TARGET']['seq'])],[35])
+    def test_problem_align_case(self):
+        """ Test a problematic case"""
+        cs = CCStudy(T.dataRoot() + '/coiledcoil/example_coils.dat')
+        a = PirAlignment([(cs.data['1NKN']['seq'],cs.data['TARGET']['seq'])],[31])
         print a
         
         
