@@ -62,8 +62,7 @@ def dataFileCreation( candidates_file = ""  ,target_seq = "",target_type = ("hom
         new_line = line[0][:-3]+" struct:"+line[0]
         if try_all:
             for k in METHODS.keys():
-                new_line = new_line + " "+getRegisterByMethod(seq,k)
-                
+                new_line = new_line +" "+getRegisterByMethod(seq,k)
         else:
             new_line = new_line + " Default:" + cc.findHeptads(seq)['best']
         file.writeline(new_line)
