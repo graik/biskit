@@ -65,6 +65,8 @@ class CCStudy:
         
         ## Statistics
         ##sources = ["CC","Pa","Pair","Paper","So"]
+        sources = methods.sources
+        #~ print sources
         hits = {}
         tries = {}
         fails = {}

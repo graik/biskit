@@ -9,15 +9,19 @@ Methods overview:
 
 
 """
-
+def paircoil_method(pdb = None):
+    pass    
+    
+def socket_method(pdb = None):
+    pass  
 
 
 METHODS = {"Pair":("EXE","","Paircoil",paircoil_method),\
            "SPar":("TABLE","SOCKET_antipar_norm","Socket Parallel Score Table"),\
            "SAPar":("TABLE","SOCKET_antipar_norm","Socket Antiparallel Score Table"),\
            "Paper":("NONE","","Paper (reg+reference)"),\
-           "Parry":("TABLE","DADParry_scaled","D A Parry score table")\
-           "Sock":("EXE","","Socket",socket_method)\
+           "Parry":("TABLE","DADParry_scaled","D A Parry score table"),\
+           "Sock":("EXE","","Socket",socket_method),\
            "Default":("NONE","","Not defined method (just for using defaults)")
            }
 
@@ -45,4 +49,6 @@ def getRegisterByMethod( pdb = None, chain = 0, method = ""):
     elif METHODS[method][0] == "NONE":
         return sequence[0:7]+":if_paper_put_reference_here"
         ## ideally extract it from a papers library
-        
+
+
+  
