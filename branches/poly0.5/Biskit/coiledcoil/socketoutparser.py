@@ -125,6 +125,7 @@ class Test(BT.BiskitTest):
         r1 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex1')
         r2 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex2')
         r3 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex3')
+        r4 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex4')
         
         
         if self.local:
@@ -138,6 +139,10 @@ class Test(BT.BiskitTest):
             
             for o in r3:
                 print r3[o] 
+            print 
+            
+            for o in r4:
+                print r4[o] 
                  
         
             self.assertEqual(len(r3),2)
