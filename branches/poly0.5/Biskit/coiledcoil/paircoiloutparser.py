@@ -27,7 +27,31 @@ def parse(path):
     @return: Result of the parsing.
     @type: list {PairCoilResult}
     """
+    file = open(path,"r")
     
+    lines = file.readlines()
+    
+    file.close()
+    
+    
+    lineas = [ l.strip() for l in lines ]
+    result = PairCoilResult()
+    for l in lineas:
+        contents = l.split()
+        if len(contents) == 6:
+            result.chain += contents[1]
+            result.register += contents[2]
+            
+    return result
+    
+    
+def parseWeb(path):
+    """
+    Parsing for PairCoil2 regular Webserver output.
+    
+    @return: Result of the parsing.
+    @type: list {PairCoilResult}
+    """
     file = open(path,"r")
     
     lines = file.readlines()
@@ -38,7 +62,6 @@ def parse(path):
     lineas = [ l.strip() for l in lines ]
     
     
-    results = {}
     processing_seq = False
     processing_reg = False
     
@@ -82,8 +105,8 @@ class Test(BT.BiskitTest):
         
     def test_general(self):
         """General parsing"""
-        r1 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/paircoutex1')
-        r2 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/paircoutex2')
+        r1 =  parseWeb('/home/victor/poly0.5/Biskit/testdata/coiledcoil/paircoutex1')
+        r2 =  parseWeb('/home/victor/poly0.5/Biskit/testdata/coiledcoil/paircoutex2')
         
         if self.local:    
             print r1
@@ -94,8 +117,10 @@ class Test(BT.BiskitTest):
         self.assertEqual(r1.chain,'RMKQLEDKVEELLSKKYHLENEVARLKKLVGER')
         self.assertEqual(r1.register,'gabcdefgabcdefgabcdefgabcdefgabcd')
         
+        r3 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/pairoutex3')
         
-
+        if self.local: 
+            print r3
         
 if __name__ == '__main__':
     BT.localTest()    

@@ -1,6 +1,8 @@
 from Biskit import Executor,BiskitError
-
+from socketoutparser import parse
+from Biskit.DSSP import Dssp
 import tempfile
+import os
 
 class Socket_Error( BiskitError ):
     pass
@@ -15,7 +17,12 @@ class SocketCoil (Executor):
         self.f_dssp = tempfile.mktemp( '_sock.dssp')
         self.f_out = tempfile.mktemp( '_sock.out')
         
-        Executor.__init__( self, 'socketcoil',
+        print
+        print self.f_pdb
+        print self.f_dssp
+        print self.f_out
+        
+        Executor.__init__( self, 'socket',
                            args='-f %s -s %s'%(self.f_pdb,self.f_dssp),
                            catch_err=1, **kw )
                            
@@ -24,12 +31,13 @@ class SocketCoil (Executor):
         """
         Overrides Executor method.
         """
-        self.dssp = DSSP(self.model,f_out = self.f_dssp)
+        self.dssp = Dssp(self.model,f_out = self.f_dssp)
         self.dssp.run()
+        
         ## Check for output file
-        os.path.exists(self.f_dssp)
-        self.mask  = self.model.compress( self.model.maskProtein(standard=True))
-        self.resmask = self.model.atom2resMask( self.mask )
+        assert (os.path.exists(self.f_dssp)), "Error while creating dssp file."
+        
+        self.mask  = self.model.maskProtein(standard=True)
         self.model = self.model.compress( self.mask )
         self.model.writePdb( self.f_pdb )
 
@@ -43,15 +51,17 @@ class SocketCoil (Executor):
         if not self.debug:
             T.tryRemove( self.f_pdb )
             T.tryRemove( self.f_dssp )
+            T.tryRemove( self.f_out )
 
 
     def parse_result( self ):
-        pass
+        print "parsing"
+        print self.f_out
+        return parse(self.f_out)
     
     
     def isFailed(self):
-        
-        return "True if fails"
+        return False
     
     def finish( self ):
         """
@@ -59,8 +69,8 @@ class SocketCoil (Executor):
         """
         Executor.finish( self )
         ## Poner en el modelo como profile el registro model.['ccsocket'] ='abcd'
-        self.model.residues.set( 'ccsocket', profile, mask=self.resMask )
-        self.result = self.parse_result( )
+        ## self.model.residues.set( 'ccsocket', profile, mask=self.resMask )
+        self.result = self.parse_result()
         
         
 ##############
@@ -80,8 +90,10 @@ class Test(BT.BiskitTest):
         pass
     def test_execution(self):
         """ testing of execution"""
-        p = PDBModel(T.testRoot()+"/coiledcoil/pdbs/1VEW.pdb")
+        p = PDBModel(T.testRoot()+"/coiledcoil/1ZIJ.pdb")
         s = SocketCoil(p)
+        s.debug = True
+        s.run()
         
 if __name__ == '__main__':
     BT.localTest()    

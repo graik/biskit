@@ -1,0 +1,34 @@
+SOCKET v2.18 26-03-01 John Walshaw, University of Sussex
+using cutoff of  7.0 Angstroms for centre of mass distances
+
+Found beginning of residue data
+There are 198 alpha-helical residues in this structure
+
+chain A starts at residue  243
+chain B starts at residue  243
+coiled coil  0:  2 helices   0  1	frequency 16
+
+helix 0 is in a 2-stranded coiled coil
+helix 1 is in a 2-stranded coiled coil
+
+
+_  7.0 0 coiled coil (i) 0 (parallel 2-stranded, length max 96 mean 96.00):
+
+
+assigning heptad to helix 0 (X) 244-342:A
+extent of coiled coil packing: 244-339:A
+sequence MANRLAGLENSLESEKVSREQLIKQKDQLNSLLASLESEGAEREKRLRELEAKLDETLKNLELEKLARMELEARLAKTEKDRAILELKLAEAIDEKSKL
+register defgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefga   
+partner  ----Y--Y---Y----------------Y---Y-------------Y--Y---Y--Y---Y--Y------Y---Y--Y------Y---Y--Y-------
+knobtype ----4--4---4----------------4---4-------------4--4---4--4---4--4------2---4--4------4---4--4-------
+
+
+assigning heptad to helix 1 (Y) 244-342:B
+extent of coiled coil packing: 244-339:B
+sequence MANRLAGLENSLESEKVSREQLIKQKDQLNSLLASLESEGAEREKRLRELEAKLDETLKNLELEKLARMELEARLAKTEKDRAILELKLAEAIDEKSKL
+register defgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefga   
+partner  ----X--X---X--X------X------X---X-------------X--X---X--X---X--X----------X--X------X---X--X-------
+knobtype ----4--4---4--2------2------4---3-------------4--4---4--4---4--4----------4--4------4---4--4-------
+ c  7.00 e 0 result 1 COILED COILS PRESENT
+Finished
+
