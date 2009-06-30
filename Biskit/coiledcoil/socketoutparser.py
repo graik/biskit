@@ -56,7 +56,7 @@ def parse (path):
     for l in lineas:
         contents = l.split()
         
-        if len(contents)>2 and contents[0] == "coiled" and contents[1] == "coil" and not 'subset' in l:
+        if len(contents)>4 and contents[0] == "coiled" and contents[1] == "coil" and not 'subset' in l:
             
             result = SocketResult()
             

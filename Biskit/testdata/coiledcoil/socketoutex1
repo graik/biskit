@@ -1,0 +1,48 @@
+SOCKET v2.18 26-03-01 John Walshaw, University of Sussex
+using cutoff of  7.0 Angstroms for centre of mass distances
+
+Found beginning of residue data
+There are 331 alpha-helical residues in this structure
+
+chain P starts at residue   12
+chain T starts at residue    3
+chain A starts at residue    1
+chain B starts at residue    3
+residue 57 (GLU 166:A) has no 'end' atoms
+
+Using atom 461 (GLU 166A  CB ) as end atom for this residue
+residue 247 (GLN 571:A) has no 'end' atoms
+
+Using atom 2030 (GLN 571A  CB ) as end atom for this residue
+5 sidechains in contact with residue  195 (HIS   506A, helix  16)
+residue 195 (HIS 506:A) has > 4 contacts; looking for holes
+contacts: 0) ARG 518:A	1) ALA 521:A	2) LYS 522:A	3) ILE 525:A	4) TYR 526:A	
+- includes hole:
+ARG 518:A	ALA 521:A	LYS 522:A	ILE 525:A	
+
+coiled coil  0:  2 helices   7 10	frequency 2
+
+helix 7 is in a 2-stranded coiled coil
+helix 10 is in a 2-stranded coiled coil
+
+
+_ 7.0 0 coiled coil (i) 0 (antiparallel 2-stranded, length max 12 mean 12.00):
+
+
+assigning heptad to helix 7 (X) 236-260:A
+extent of coiled coil packing: 246-257:A
+sequence TKAIEELYVELAARRSELLRKLTET
+register           defgabcdefga   
+partner  --------------Y--Y---Y---
+knobtype --------------3--4---2---
+
+
+assigning heptad to helix 10 (Y) 377-399:A
+extent of coiled coil packing: 385-396:A
+sequence PEKQAAIDLIKEYLMIQKRIGQS
+register         defgabcdefga   
+partner  ------------X--X---X--X
+knobtype ------------3--4---2--2
+ c  7.00 e 0 result 1 COILED COILS PRESENT
+Finished
+

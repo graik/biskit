@@ -1,0 +1,107 @@
+SOCKET v2.18 26-03-01 John Walshaw, University of Sussex
+using cutoff of  7.0 Angstroms for centre of mass distances
+
+Found beginning of residue data
+There are 224 alpha-helical residues in this structure
+
+chain A starts at residue    1
+chain B starts at residue   21
+chain C starts at residue    1
+chain D starts at residue   21
+chain E starts at residue  139
+chain F starts at residue  266
+chain G starts at residue  140
+chain H starts at residue  265
+residue 4 (ARG 144:E) has no 'end' atoms
+
+Using atom 45 (ARG 144E  CB ) as end atom for this residue
+residue 17 (ARG 157:E) has no 'end' atoms
+
+Using atom 144 (ARG 157E  CB ) as end atom for this residue
+residue 60 (ARG 270:F) has no 'end' atoms
+
+Using atom 498 (ARG 270F  CB ) as end atom for this residue
+residue 102 (GLU 312:F) has no 'end' atoms
+
+Using atom 831 (GLU 312F  CB ) as end atom for this residue
+residue 106 (GLN 316:F) has no 'end' atoms
+
+Using atom 857 (GLN 316F  CB ) as end atom for this residue
+residue 109 (GLN 319:F) has no 'end' atoms
+
+Using atom 879 (GLN 319F  CB ) as end atom for this residue
+residue 112 (ARG 141:G) has no 'end' atoms
+
+Using atom 900 (ARG 141G  CB ) as end atom for this residue
+residue 113 (ILE 142:G) has no 'end' atoms
+
+Using atom 905 (ILE 142G  CB ) as end atom for this residue
+residue 172 (ARG 270:H) has no 'end' atoms
+
+Using atom 1394 (ARG 270H  CB ) as end atom for this residue
+residue 178 (SER 276:H) has no 'end' atoms
+
+Using atom 1436 (SER 276H  CB ) as end atom for this residue
+residue 196 (LYS 294:H) has no 'end' atoms
+
+Using atom 1590 (LYS 294H  CB ) as end atom for this residue
+residue 214 (GLU 312:H) has no 'end' atoms
+
+Using atom 1722 (GLU 312H  CB ) as end atom for this residue
+residue 218 (GLN 316:H) has no 'end' atoms
+
+Using atom 1748 (GLN 316H  CB ) as end atom for this residue
+residue 221 (GLN 319:H) has no 'end' atoms
+
+Using atom 1770 (GLN 319H  CB ) as end atom for this residue
+residue 222 (LYS 320:H) has no 'end' atoms
+
+Using atom 1775 (LYS 320H  CB ) as end atom for this residue
+coiled coil  0:  2 helices   0  1	frequency 8
+coiled coil  1:  2 helices   2  3	frequency 9
+
+helix 0 is in a 2-stranded coiled coil
+helix 1 is in a 2-stranded coiled coil
+helix 2 is in a 2-stranded coiled coil
+helix 3 is in a 2-stranded coiled coil
+
+
+_ 7.0 0 coiled coil (i) 0 (parallel 2-stranded, length max 33 mean 33.00):
+
+
+assigning heptad to helix 0 (X) 140-196:E
+extent of coiled coil packing: 158-190:E
+sequence RRIRRERNKMAAAKSRNRRRELTDTLQAETDQLEDEKSALQTEIANLLKEKEKLEFI
+register                   defgabcdefgabcdefgabcdefgabcdefga      
+partner  ----------------------Y--Y---Y--Y---Y--Y---Y--Y------Y---
+knobtype ----------------------4--4---4--4---3--4---4--4------2---
+
+
+assigning heptad to helix 1 (Y) 267-321:F
+extent of coiled coil packing: 282-314:F
+sequence KRMRNRIAASKSRKRKLERIARLEEKVKTLKAQNSELASTANMLREQVAQLKQKV
+register                defgabcdefgabcdefgabcdefgabcdefga       
+partner  -------------------X--X---X--X---X--X---X--X-----------
+knobtype -------------------4--4---4--4---4--4---4--4-----------
+
+
+  7.0 0 coiled coil (ii) 1 (parallel 2-stranded, length max 36 mean 36.00):
+
+
+assigning heptad to helix 2 (X) 141-197:G
+extent of coiled coil packing: 162-197:G
+sequence RIRRERNKMAAAKSRNRRRELTDTLQAETDQLEDEKSALQTEIANLLKEKEKLEFIL
+register                      abcdefgabcdefgabcdefgabcdefgabcdefga
+partner  ------------------------Y---Y--Y---Y--Y---Y--Y---Y--Y----
+knobtype ------------------------4---4--4---3--4---4--4---3--4----
+
+
+assigning heptad to helix 3 (Y) 267-321:H
+extent of coiled coil packing: 286-321:H
+sequence KRMRNRIAASKSRKRKLERIARLEEKVKTLKAQNSELASTANMLREQVAQLKQKV
+register                    abcdefgabcdefgabcdefgabcdefgabcdefga
+partner  -------------------X--X---X--X---X--X---X--X---X--X----
+knobtype -------------------2--4---4--4---4--4---4--4---4--4----
+ c  7.00 e 0 result 2 COILED COILS PRESENT
+Finished
+
