@@ -1,6 +1,6 @@
 from Biskit import Executor,BiskitError
-from 
 
+import tempfile
 
 class Socket_Error( BiskitError ):
     pass
