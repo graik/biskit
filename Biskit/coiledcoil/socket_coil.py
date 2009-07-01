@@ -9,18 +9,19 @@ class Socket_Error( BiskitError ):
 
 
 class SocketCoil (Executor):
-    def __init__(self,model,**kw):
+    def __init__(self,model = None,**kw):
         self.model = model
+        
         
         ## temporary pdb-file
         self.f_pdb = tempfile.mktemp( '_sock.pdb')
         self.f_dssp = tempfile.mktemp( '_sock.dssp')
         self.f_out = tempfile.mktemp( '_sock.out')
         
-        print
-        print self.f_pdb
-        print self.f_dssp
-        print self.f_out
+        #~ print
+        #~ print self.f_pdb
+        #~ print self.f_dssp
+        #~ print self.f_out
         
         Executor.__init__( self, 'socket',
                            args='-f %s -s %s'%(self.f_pdb,self.f_dssp),
@@ -31,14 +32,19 @@ class SocketCoil (Executor):
         """
         Overrides Executor method.
         """
+        
+        self.mask  = self.model.maskProtein(standard=True)
+        self.model = self.model.compress( self.mask )
+        self.model.renumberResidues()
+        
+        
         self.dssp = Dssp(self.model,f_out = self.f_dssp)
         self.dssp.run()
         
         ## Check for output file
         assert (os.path.exists(self.f_dssp)), "Error while creating dssp file."
         
-        self.mask  = self.model.maskProtein(standard=True)
-        self.model = self.model.compress( self.mask )
+        
         self.model.writePdb( self.f_pdb )
 
 
@@ -55,8 +61,8 @@ class SocketCoil (Executor):
 
 
     def parse_result( self ):
-        print "parsing"
-        print self.f_out
+        #~ print "parsing"
+        #~ print self.f_out
         return parse(self.f_out)
     
     
@@ -71,6 +77,7 @@ class SocketCoil (Executor):
         ## Poner en el modelo como profile el registro model.['ccsocket'] ='abcd'
         ## self.model.residues.set( 'ccsocket', profile, mask=self.resMask )
         self.result = self.parse_result()
+        #~ print self.result
         
         
 ##############
@@ -94,7 +101,20 @@ class Test(BT.BiskitTest):
         s = SocketCoil(p)
         s.debug = True
         s.run()
-        
+        if self.local:
+            print s.result
+            for cc in s.result.keys():
+                print s.result[cc]
+                
+        ## Error case
+        p = PDBModel("/home/victor/poly0.5/Biskit/testdata/coiledcoil/pdbs/2B9C_cropped.pdb")
+        s = SocketCoil(p)
+        s.debug = True
+        s.run()
+        if self.local:
+            for cc in s.result.keys():
+                print s.result[cc]
+            
 if __name__ == '__main__':
     BT.localTest()    
     

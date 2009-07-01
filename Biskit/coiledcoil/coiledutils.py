@@ -26,9 +26,19 @@ def scores2String(a=[],b=[],reversed = False):
 
     return ar,br
     
-    
+def getHeptad (chain = "", register = "" ):
+    """
+    Given a chain and the register for the whole chain it extracts a representing
+    heptad of the chain.
+    """
+    pos = register.find("a")
+    return chain[pos:pos+7]
+
 def getRegister(heptad="",chain="",window_length = 7):
-        
+    """
+    Given a chain and a representing heptad for the whole chain it returns
+    the register for the whole chain. 
+    """
     index = chain.find(heptad)
     if index % window_length == 0:
         head =""
@@ -161,6 +171,10 @@ class Test(BT.BiskitTest):
             print reg
         self.assertEqual(reg,"defgabcdefgabcdefgabcdefgabcdefgabcdefgabcd")
     
+    def test_getHeptad(self):
+        """getHeptad function test case"""
+        self.assertEqual( getHeptad("12345678901234567890","defgabcdefgabcdefgab"),'5678901')
+        
     def test_scores2String(self):
         """scores2String function test case"""
         if self.local:
