@@ -7,16 +7,18 @@ class SocketResult:
     - Oligomerization type (2 for dimers, 3 for trimers...)
     - Chain sequences for the coiled coils
     - Registers predicted for these sequences.
+    - Ranges (in residue numbers starting from 1) of chains.
     """
     
     def __init__(self):
         """
         Instantiation function.
         """
-        self.coilId = 0
+        self.coilId = "0"
         self.sense = "parallel"
         self.chains = {}
-        self.registers = {} 
+        self.registers = {}
+        self.ranges = {}
         self.oligomerization = 2
         
     def __str__ (self):
@@ -28,7 +30,8 @@ class SocketResult:
         mystr += "Oligo: " + str(self.oligomerization)+"\n"
         mystr += "Sense: " +str(self.sense)+"\n"
         mystr += "Chains: "+str(self.chains)+"\n"
-        mystr += "Register: "+str(self.registers)
+        mystr += "Register: "+str(self.registers)+"\n"
+        mystr += "Ranges: "+str(self.ranges)
         return mystr
 
 def parse (path):
@@ -88,7 +91,16 @@ def parse (path):
             for c in coils.keys():
                 if helix in coils[c]:
                     mycoil = c
-            
+        
+        if len(contents) > 2 and contents[0] == "extent" and contents[1] == "of":
+            if len(contents) == 6:
+                myrange = contents[5].split('-')
+                #~ print myrange
+                results[mycoil].ranges[helix] = (myrange[0],myrange[1].split(':')[0])
+            else:
+                results[mycoil].ranges[helix] = (contents[5][:-1],contents[6].split(':')[0])
+                #~ print results[mycoil].ranges[helix]
+               
         if len(contents)>1 and contents[0] == "sequence":
             mysequence = contents[1]
             
