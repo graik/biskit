@@ -185,14 +185,12 @@ class Dssp( Executor ):
 
         def __completeBB( res ):
             """
-            Check that residue have all backbone atoms
+            Check that residue have all backbone atoms.
             CA, N, C and O or OXT
             """
             atoms = [ a['name'] for a in res ]
-            count = atoms.count('CA') + atoms.count('N') + \
-                    atoms.count('C') + atoms.count('O')
-            if count == 4:
-                return 1
+            return ('CA' in atoms) and ('N' in atoms) and ('O' in atoms) and\
+                   ('C' in atoms)
 
         secStruc = []
         
@@ -255,6 +253,8 @@ class Test(BT.BiskitTest):
     
     def prepare(self):
         self.f = T.testRoot()+"/com/1BGS.pdb"
+        # f2: file with chain break and alternative conformations
+        self.f2= T.testRoot()+"/dssp/2B9C_cropped.pdb"
 	
 
     def test_DSSP( self ):
@@ -282,6 +282,20 @@ class Test(BT.BiskitTest):
 
     EXPECTED =  '.....SHHHHHHHHHHHSS..TTEE.HHHHHHHT..GGGT.HHHHSTT.EEEEEEE..TT..S...TT..EEEEE.S..SSS..S.EEEEETT..EEEESSSSSS.EE...EEEEETTT..SHHHHHHHHHHHHT..TT..SSHHHHHHHHHHT..SSEEEEEE.HHHHHHHTTTTHHHHHHHHHHHHHHT..EEEEE.'
 
+    def test_DSSP_2( self ):
+        from Biskit import PDBModel
+
+        if self.local: print 'Loading PDB...'
+        self.m = PDBModel(self.f2)
+        
+        self.mask = self.m.maskProtein(standard=True)
+        self.m = self.m.compress( self.mask )
+        self.m.renumberResidues()
+        
+        self.dssp = Dssp(self.m)
+        self.dssp.run()
+       
+    
 if __name__ == '__main__':
 
     BT.localTest()
