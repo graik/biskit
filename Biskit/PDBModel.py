@@ -1941,14 +1941,17 @@ class PDBModel:
         
         cindex = self.chainIndex( breaks=breaks )
 
-        ## simple removal of terminal OXT, make it more robust!
+        ## simple removal of terminal OXT and TER label, make it more robust!
         remove = []
         for i in chains:
             lastatom = cindex[i] - 1
             if self[ lastatom ]['name'] in ['OXT', 'OT2']:
                 remove += [ lastatom ]
+            self['after_ter'][lastatom+1] = 0 
+            
         self.remove( remove )
 
+        ## update chain index
         cindex = self.chainIndex( breaks=breaks )
 
         mask = N.ones( len( cindex ) )
