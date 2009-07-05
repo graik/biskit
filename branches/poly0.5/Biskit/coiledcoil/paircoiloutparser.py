@@ -33,11 +33,11 @@ def parse(path):
     
     file.close()
     
-    
     lineas = [ l.strip() for l in lines ]
     result = PairCoilResult()
     for l in lineas:
         contents = l.split()
+        
         if len(contents) == 6:
             result.chain += contents[1]
             result.register += contents[2]
