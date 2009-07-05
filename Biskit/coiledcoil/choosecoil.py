@@ -23,8 +23,20 @@ class CCStudy:
     def parseData(self,dat = ""):
         """
         Opens a data file with sequence and register information.
-        Format:
         
+        A data file contains several lines with this chuncks:
+        
+        First one MUST be the ID of the chain
+
+        and any order:
+        
+        "seq:X" - For the sequence.
+        "struct:X.pdb" - For the pdb file name.
+        
+        and then:
+        
+        "methodname:heptad" - Where methodname is a method in methods::METHODS
+            and heptad is the register representative.
         
         """
         try:
@@ -50,7 +62,7 @@ class CCStudy:
                         self.data[aux[0]][aux2[0]]= (aux2[1],aux2[2])
             
     
-    def doStudy(self):
+    def doStudy(self, socket_is_god = False):
         """
         Aligns all the chains and gets an idea of the success of each method for predicting
         the registers (correct methods are the ones which match up many times).
@@ -64,9 +76,8 @@ class CCStudy:
         
         
         ## Statistics
-        ##sources = ["CC","Pa","Pair","Paper","So"]
-        sources = methods.sources
-        #~ print sources
+        sources = methods.sources + ["Socket"]
+        
         hits = {}
         tries = {}
         fails = {}
@@ -83,21 +94,24 @@ class CCStudy:
                 if k in sources:
                     heptads[d][k] = self.data[d][k]
         
-        
         for h in heptads.keys():
+            
             score = {}
             there = heptads[h].keys()
             there.remove("seq")
+            
             for k in there:
                 com_keys = heptads[h].keys()
                 com_keys.remove(k)
                 com_keys.remove("seq")
                 score[k] = 0
                 for k2 in com_keys:
+                    
                     if k != "Paper":
                         one = heptads[h][k]
                     else:
                         one = heptads[h][k][0]
+                    
                     if k2 != "Paper":
                         the_other = heptads[h][k2]
                     else:
@@ -107,7 +121,7 @@ class CCStudy:
                         score[k] += 1
             
             
-            priorities = {"CC":4,"Pa":2,"Pair":4,"Paper":5,"So":3}
+            priorities = methods.priorities 
 
             best = (score.keys()[0],0)
             for k2 in score.keys():
@@ -140,7 +154,8 @@ class CCStudy:
             
         self.scores = {}
         for k in hits.keys():
-            self.scores[k] = (float(hits[k])/tries[k],hits[k],tries[k])
+            if tries[k]>0:
+                self.scores[k] = (float(hits[k])/tries[k],hits[k],tries[k])
         
         
         print self.scores

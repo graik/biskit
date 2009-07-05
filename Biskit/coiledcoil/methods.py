@@ -1,6 +1,8 @@
 import Biskit.tools as T
 import socket_coil as SC
 import paircoil as PC
+from coiledutils import getHeptad
+from coiledcoil import CoiledCoil
 
 
 
@@ -32,35 +34,55 @@ So it's a dictionary indexed by Id where:
 
 """
 
-def paircoil_method(seq = None):
+def paircoil_method(method,seq = None):
     """
     Function for retrieving and post processing results from 'Paircoil2'
     
     @param seq: Sequence to extract registers. 
     @type seq: string
     """
-    pc = PC.Paircoil(pdb)
-    pc.run()
-    result =  pc.result
-    
-
+    if len(seq) >= 28: ## has to be like the window to work
+        pc = PC.Paircoil(seq)
+        pc.debug = True
+        pc.run()
+        pc.result.register
+        return method+":"+getHeptad(pc.result.chain,pc.result.register)
+    else:
+        return ""
 
 """
 Methods description structure.
+
+Special methods:
+
+'Socket', method used by default. Always present.
+
+'Paper' When this method is used, the format must be : 'Paper:register:reference'
+    - 'reference' must not contain spaces.
+
 """
 METHODS = {"Pair":("EXE","","Paircoil",paircoil_method),\
            "SPar":("TABLE","SOCKET_antipar_norm","Socket Parallel Score Table"),\
            "SAPar":("TABLE","SOCKET_antipar_norm","Socket Antiparallel Score Table"),\
            "Paper":("NONE","","Paper (reg+reference)"),\
            "Parry":("TABLE","DADParry_scaled","D A Parry score table"),\
-           "Default":("NONE","","Not defined method (just for using defaults)")
+           "Default":("NONE","","Not defined method (just for using defaults)")\
            }
 
+
+priorities = {"Socket":5,## Socket is the reference  \ 
+            "Pair":3,\
+            "SPar":4,\
+            "SAPar":4,\
+            "Paper":5,\
+            "Parry":3,\
+            "Default":2\
+            }
 
 """
 Enumeration of methods available
 """
-sources = METHODS.keys()
+sources = METHODS.keys() 
 
 
 
@@ -73,24 +95,37 @@ def getRegisterByMethod( seq = "", method = ""):
     @type seq: string
     @param method: Method Id as stored in 'METHODS' structure 
     @type method: string
-    """
-    assert (not method in sources),"Not defined method."
     
-    sequence = pdb.takeChains([chain]).sequence()
+    @return: A string representing the method and the predicted heptad
+    @rtype: string
+    """
+    assert (method in sources),"Not defined method %s."%method
+    
     
     if METHODS[method][0] == "TABLE":
         ## The method relies in a score table in the data folder, so
         ## pick this table and calculate
-        cc = CoiledCoil(T.dataRoot()+"/"+METHODS[method][1])
-        
+        cc = CoiledCoil(T.dataRoot()+"/coiledcoil/"+METHODS[method][1])
         return method+":"+cc.findHeptads(seq)['best']
         
     elif METHODS[method][0] == "EXE":
-        return method+":"+METHODS[method][3](pdb)
+        return METHODS[method][3](method,seq)
     
     elif METHODS[method][0] == "NONE":
-        return sequence[0:7]+":if_paper_put_reference_here"
-        ## ideally extract it from a papers library
-
-
-  
+        return ""
+    
+    return ""
+    
+def getCoilByMethod(method = ""):
+    """
+    
+    
+    @param method: Method Id as stored in 'METHODS' structure 
+    @type method: string
+    """
+    if method != "" and METHODS[method][0] == "TABLE":
+        cc = CoiledCoil(T.dataRoot()+"/coiledcoil/"+METHODS[method][1])
+    else:
+        cc = CoiledCoil()
+        
+    return cc 
