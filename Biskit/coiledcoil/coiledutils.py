@@ -123,6 +123,42 @@ def flatten ( chain = "", register = "", mycc = None,window_length = 7):
     
     return scores
 
+def areEqual(chain_a="",chain_b="",margin = 4):
+    """
+    Tells if two sequences are equal, considering the possibility that a small sliding
+    of one over the other can be done.
+    
+    @param chain_a: First chain to be compared.
+    @type chain_a: string
+    @param chain_b: Second chain to be compared.
+    @type chain_b: string
+    
+    @result: If the two sequences are the same.
+    @rtype: boolean
+    """
+    
+    len_a = len(chain_a)
+    len_b = len(chain_b)
+    #~ print
+    
+    for i in range(0,margin+1):
+        slide_a = chain_a[i:]
+        slide_b = chain_b[:min(len(slide_a),len(chain_b))]
+        slide_a = slide_a[:min(len(slide_a),len(slide_b))]
+            
+        if slide_a == slide_b:
+            return True
+    
+    for i in range(0,margin+1):
+        slide_b = chain_b[i:]
+        slide_a = chain_a[:min(len(slide_b),len(chain_a))]
+        slide_b = slide_b[:min(len(slide_b),len(slide_a))]
+        
+        if slide_a == slide_b:
+            return True
+    
+    return False
+    
 
 ##############
 ## Test
@@ -138,6 +174,14 @@ class Test(BT.BiskitTest):
 
     def cleanUp( self ):
         pass
+    
+    def test_Homo(self):
+        """ Homology test """
+        self.assertEqual( areEqual( "345678",
+                        "1234567890"),True)
+        self.assertEqual( areEqual( "1234567890",
+                        "345678"),True)
+    
     def test_alignment(self):
         """ testing of mini-alignment functions"""
         from coiledalign import CoiledAlign
@@ -182,7 +226,8 @@ class Test(BT.BiskitTest):
             print scores2String([0.1,0.3,0.5,0.6],[1,1.5])
         self.assertEqual(scores2String([0.1,0.3,0.5,0.6],[1,1.5]),('emuy', 'O9'))
         self.assertEqual(scores2String([0.1,0.3,0.5,0.6],[1,1.5],True),('4WOK', 'ua'))
-
+    
+        
 if __name__ == '__main__':
     BT.localTest()    
     

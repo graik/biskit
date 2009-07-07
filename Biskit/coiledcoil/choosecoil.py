@@ -151,14 +151,42 @@ class CCStudy:
                 
                 if sameRegister(one,the_other,heptads[h]["seq"]):
                     hits[k] += 1
-            
+        
+        if socket_is_god:
+            tries = {}
+            hits = {}
+            for k in sources:
+                hits[k] = 0
+                tries[k] = 0
+            for h in heptads.keys():                
+                there = heptads[h].keys()
+                there.remove("seq")
+                there.remove("best")
+
+                if "Socket" in there:
+                    tries["Socket"] = 1
+                    hits["Socket"] = 1
+                    there.remove("Socket")
+                    
+                    one = heptads[h]["Socket"]
+                    for k in there:
+                        the_other = heptads[h][k]
+                        if k == "Paper":
+                            the_other = heptads[h][k][0]
+                        
+                        tries[k] += 1
+                        if sameRegister(one,the_other,heptads[h]["seq"]):
+                            hits[k] += 1
+
+                
+        
         self.scores = {}
         for k in hits.keys():
             if tries[k]>0:
                 self.scores[k] = (float(hits[k])/tries[k],hits[k],tries[k])
         
         
-        print self.scores
+        #~ print self.scores
         
         
         ## Get Alignment values

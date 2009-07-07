@@ -114,14 +114,18 @@ def getRegisterByMethod( seq = "", method = ""):
     elif METHODS[method][0] == "NONE":
         return ""
     
+    
     return ""
     
 def getCoilByMethod(method = ""):
     """
-    
+    Creates a CoiledCoil instance suitable for that particular method.
     
     @param method: Method Id as stored in 'METHODS' structure 
     @type method: string
+    
+    @return: CoiledCoil with correct scoring (table) info for a method.
+    @rtype: CoiledCoil
     """
     if method != "" and METHODS[method][0] == "TABLE":
         cc = CoiledCoil(T.dataRoot()+"/coiledcoil/"+METHODS[method][1])
