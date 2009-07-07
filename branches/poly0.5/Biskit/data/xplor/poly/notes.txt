@@ -1,0 +1,19 @@
+1) Generate PSF with complete sequence (domain, linker, domain, end)
+
+psfGen.seqToPSF(['Gly','Ser','Gly'], segName='LINK', seqType='protein' )
+
+protocol.genExtendedStructure()
+
+import pdbTool 
+pdb = pdbTool.PDBTool('xplorout.pdb')
+pdb.write()
+
+Problems:
+
+* project partial structure into sequence
+
+* how to minimize unknown part
+
+* import xplorpy from normal Python????
+
+* mailing list
