@@ -1,3 +1,5 @@
+from coiledutils import areEqual
+
 class SocketResult:
     """
     Class for socket results storage.
@@ -19,6 +21,7 @@ class SocketResult:
         self.chains = {}
         self.registers = {}
         self.ranges = {}
+        self.homo = "homo"
         self.oligomerization = 2
         
     def __str__ (self):
@@ -31,7 +34,8 @@ class SocketResult:
         mystr += "Sense: " +str(self.sense)+"\n"
         mystr += "Chains: "+str(self.chains)+"\n"
         mystr += "Register: "+str(self.registers)+"\n"
-        mystr += "Ranges: "+str(self.ranges)
+        mystr += "Ranges: "+str(self.ranges)+"\n"
+        mystr += "Homology:" +self.homo
         return mystr
 
 def parse (path):
@@ -114,9 +118,17 @@ def parse (path):
             results[mycoil].chains[helix] = inter
             results[mycoil].registers[helix] = myregister.split()[0]
             
+    return check_homology(results)
+
+def check_homology(results):
+    for r in results.keys():
+        keys = results[r].chains.keys()
+        for i in range(len(keys)-1):
+            if not areEqual(results[r].chains[keys[i]],results[r].chains[keys[i+1]]) and results[r].homo == "homo":
+                results[r].homo = "hetero"
+    
     return results
-
-
+        
 ##############
 ## Test
 ##############
@@ -158,7 +170,21 @@ class Test(BT.BiskitTest):
                  
         
             self.assertEqual(len(r3),2)
-
+    
+    def test_homology_cheching(self):
+        """check_homology test"""
+        r1 = SocketResult()
+        r2 = SocketResult()
+        
+        r1.chains = {'A':"1234567890",'B':"234567"}
+        r2.chains = {'A':"1234567890",'B':"423456"}
+        
+        results = {'1':r1,'2':r2}
+        
+        results = check_homology(results)
+        if self.local:
+            for r in results:
+                print results[r]
         
 if __name__ == '__main__':
     BT.localTest()    

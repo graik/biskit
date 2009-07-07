@@ -69,8 +69,11 @@ class PirAlignment :
         file = open(path,"w")
         
         file.write(">"+prot_name+"\n")
-        
-        file.writelines(self.crop(self.fasta_b,60))
+        line = ""
+        for c in self.fasta_b:
+            if c!= '-':
+                line +=c
+        file.writelines(self.crop(line,60))
         
         file.close()
         

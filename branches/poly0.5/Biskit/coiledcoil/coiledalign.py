@@ -193,18 +193,27 @@ class CoiledAlign:
         total_regs_a = len(a) / 7
         total_regs_b = len(b)  / 7
         
+        ## Once this is done it's possible that total_regs_a is smaller
+        ## than total_regs_b by one heptad, then it has to be cropped
+        
+        if total_regs_a < total_regs_b:
+            b = b[:len(b)-7]
+            total_regs_b = len(b)  / 7
+            
         ## Scores
         scores_a = flatten(a,"abcdefg"*total_regs_a,self.mycc)
         scores_b = flatten(b,"abcdefg"*total_regs_b,self.mycc)
         
         a_s,b_s = scores2String(scores_a,scores_b)
         
+        print a_s,b_s
+        
         scc = alignf(a_s,b_s,scoreAlignFun)
         
         new_scc = []
         for t in scc:
             new_scc.append(( t[0], (start_a-start_b)+(t[1]*7) ))
-           
+         
         scc = ( max(scc)[0], (start_a-start_b)+max(scc)[1]*7)
         
         self.reg_alignments["heptads"]= new_scc
@@ -243,6 +252,10 @@ class CoiledAlign:
                     mymin = min(mymin,j)
                
                 for k in range(len(self.chain_alignments[i])):
+                    if mymax[0]-mymin[0] <0.001:
+                        mymin = (0,mymin[1])
+                        if mymax[0] < 0.001:
+                            mymax = (1,mymax[1])
                     self.chain_alignments[i][k] = ( (self.chain_alignments[i][k][0]-mymin[0]) / (mymax[0]-mymin[0]) , self.chain_alignments[i][k][1])
         
         for i in self.reg_alignments:
@@ -252,8 +265,13 @@ class CoiledAlign:
                 for j in self.reg_alignments[i]:
                     mymax = max(mymax,j)
                     mymin = min(mymin,j)
-               
+                print mymax,mymin
+                print "reg",self.reg_alignments[i]
                 for k in range(len(self.reg_alignments[i])):
+                    if mymax[0]-mymin[0] <0.001:
+                        mymin = (0,mymin[1])
+                        if mymax[0] < 0.001:
+                            mymax = (1,mymax[1])
                     self.reg_alignments[i][k] = ( (self.reg_alignments[i][k][0]-mymin[0]) / (mymax[0]-mymin[0]) , self.reg_alignments[i][k][1])
 
     def copy(self):

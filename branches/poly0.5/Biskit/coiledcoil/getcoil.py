@@ -9,7 +9,7 @@ from Biskit.Mod import Modeller
 from alignment import PirAlignment
 CHAINS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
-def createCandidatesFile (filename = "", dir = "", symetric_offset = 0):
+def createCandidatesFile (filename = "", dir = ""):
     """
     Creates the candidates file.
     It reads a directory with pdb files containing possible coiled coils.
@@ -28,7 +28,7 @@ def createCandidatesFile (filename = "", dir = "", symetric_offset = 0):
     
     Then it's followed by several lines with this syntax:
     
-    PDB_FILE_NAME OL SENSE ID chain register_representative
+    PDB_FILE_NAME OL SENSE ID chain register_representative HOMO BIG
     
     Where:
     
@@ -44,6 +44,9 @@ def createCandidatesFile (filename = "", dir = "", symetric_offset = 0):
     
     - register_representative is... the register representative, so a 7 residues sentence
         which is defined by the "abcdefg" register.
+    
+    - HOMO can be "homo" or "hetero", defining if chains are all equal or not
+    
     """
     
     file = open(filename,"w")
@@ -58,9 +61,11 @@ def createCandidatesFile (filename = "", dir = "", symetric_offset = 0):
     file.writelines(dir+"\n")
     
     failed = []
+    total = len(pdbs)
+    done = 0
     for pdb in pdbs:
         try:
-            print "preparing"+ dir+"/"+pdb
+            #~ print "preparing"+ dir+"/"+pdb
             
             model = PDBModel(dir+"/"+pdb)
             sc = SocketCoil(model)
@@ -81,18 +86,22 @@ def createCandidatesFile (filename = "", dir = "", symetric_offset = 0):
                         if len(sc.result[cc].chains[h])>7:
                             line += sc.result[cc].ranges[h][0] + " " +sc.result[cc].ranges[h][1] + " "
                             line += sc.result[cc].chains[h] + " " +getHeptad(sc.result[cc].chains[h],sc.result[cc].registers[h])+" "
+                            line += sc.result[cc].homo 
                         
                         file.writelines(line+"\n")
             
             del sc 
         except:
-            print "failed"
+            #~ print "failed"
             failed.append(pdb)
-    
+        done = done+1
+        if done%10 ==0 :
+            print "Parsed:",done,"Total:",total,"Failed:",len(failed)
+            
     file.close()
 
 
-def dataFileCreation( data_file = "",candidates_file = ""  ,target_seq = "",target_type = ("homo","parallel",2), method = "All"):
+def dataFileCreation( data_file = "",candidates_file = ""  ,target_seq = "",target_type = ("hetero","parallel",2), method = "All", use_big = 0):
     """
     Parses the candidates file and gets the master data file.
     See choosecoil::parseData for more info about the format.
@@ -111,6 +120,14 @@ def dataFileCreation( data_file = "",candidates_file = ""  ,target_seq = "",targ
     @param method: 'All','Any' or just the name of the method as defined in 
         methods.'METHODS' .
     @type method: string
+    @param use_big: Uses a longer chain than the one described to do heptad searching. A longer
+        sequence can help methods to get better hits. If it's set to something higher than 0 then 
+        the sequence minimun length becomes 'use_big'.
+        A sequence of length lesser than 28 can't be used by paircoil, so forcing a sequence to be like
+        this helps to gather more data.
+    @type use_big: int
+    
+    
     """
     
     assert (target_type[0]=="homo" or target_type[0]=="hetero"),"Options for target type are 'heterodimer' or 'homodimer'." 
@@ -134,17 +151,69 @@ def dataFileCreation( data_file = "",candidates_file = ""  ,target_seq = "",targ
         
         contents = l.split()
         
-        ## Filtering
-        if len(contents[6])>=len(target_seq) and contents[2] == target_type[1]  and int(contents[1]) == target_type[2]:
+        ## Filtering:
+        ## Catch all sequences of length bigger or equal than the target one and forming part of a
+        ## coiled coil with the same sense (parallel/antiparallel), homology of the chains and 
+        ## oligomerization state.
+        
+        if len(contents[6])>=len(target_seq) and contents[2] == target_type[1]  and int(contents[1]) == target_type[2]\
+            and contents[8] == target_type[0]:
               
             new_line = contents[0][:-4]+"@"+contents[4]+" struct:"+contents[0]
             new_line += " seq:"+contents[6]+" Socket:"+contents[7]
+            print contents[0]
+            if use_big>0:
+                
+                sequence = _expandSequence(basepath+"/"+contents[0],int(contents[4]),int(contents[5]),use_big)
+                realsec = contents[6]
+                if method == 'All':
+                    for k in methods.sources:
+                        reg = methods.getRegisterByMethod(sequence,k)
+                        basereg = reg
+                        if reg != "":
+                            reg = reg.split(":")[1]
+                            #~ print "Initial for all",reg,k
+                            ## get first position
+                            pos = sequence.find(reg)
+                            while pos > 0:
+                                pos = pos -7
+                            
+                            #~ print sequence[pos:pos+7]
+                            pos = pos +7
+                            while not reg in realsec:
+                                reg = sequence[pos:pos+7]
+                                #~ print reg
+                                pos=pos+7
+                            
+                            reg = k+":"+reg
+                            #~ print "Final",reg
+                        new_line += " "+reg
+                elif method != 'Any':
+                    reg = methods.getRegisterByMethod(sequence,k)
+                    if reg != "":
+                        reg = reg.split(":")[1]
+                        
+                        ## get first position
+                        pos = sequence.find(reg)
+                        while pos > 0:
+                            pos = pos -7
+                        pos = pos +7
+                        while not reg in realsec:
+                            reg = sequence[pos:pos+7]
+                            pos=pos+7
+                        
+                        reg = k+":"+reg
+                    new_line += " "+reg
             
-            if method == 'All':
-                for k in methods.sources:
-                    new_line += " "+methods.getRegisterByMethod(contents[6],k)
-            elif method != 'Any':
-                new_line +=  " "+methods.getRegisterByMethod(contents[6],method) 
+            else: 
+                
+                sequence = contents[6]
+                
+                if method == 'All':
+                    for k in methods.sources:
+                        new_line += " "+methods.getRegisterByMethod(sequence,k)
+                elif method != 'Any':
+                    new_line +=  " "+methods.getRegisterByMethod(sequence,method) 
             
             file.writelines(new_line+"\n")
     
@@ -160,8 +229,34 @@ def dataFileCreation( data_file = "",candidates_file = ""  ,target_seq = "",targ
 
     file.close()
 
+def _expandSequence(pdb,start,end, extension):
+    #~ print "PDB",pdb
+    model = PDBModel(pdb)
+    ### Do same preprocessing as in socket 
+    mask  = model.maskProtein(standard=True)
+    model = model.compress(mask )
+    model.renumberResidues()
+    
+    add = 0
+    if (end-start +1)<extension:
+        add = int((extension - (end-start +1)) / 2 )
+    
+    if start - add <0 : 
+        start = 0
+    else:
+        start = start-add
+    
+    if end + add >len(model.sequence()): 
+        end = len(model.sequence())
+    else:
+        end = end+add
+    
+    coil = model.takeResidues(range(start,end))
+    
+    #~ print coil.sequence()
+    return coil.sequence()
 
-def getBestHit ( type = ("parallel","homodimer"), datafile ="",method = "",sequences=[]):
+def getBestHit ( datafile ="",method = "",sequences=[]):
     """
     Function for coiled coil prediction.
     """
@@ -170,12 +265,13 @@ def getBestHit ( type = ("parallel","homodimer"), datafile ="",method = "",seque
     
     cc = methods.getCoilByMethod(method)
     study = CCStudy(data = datafile, cc = cc)
-    study.doStudy()
-    mystudy= study.chooseBest()
+    s,a = study.doStudy(True)
+    print s
+    best= study.chooseBest()
+    #~ print best
+    return study,best
     
-    return mystudy,best
-    
-def doHomologyModelling ( id = "" ,pos = 0, candidates_file = "",  sequences = [],study = None):
+def doHomologyModelling ( id = "" ,candidates_file = "",  sequences = [],study = None):
     """
     Retrieves the structure predicted by homology modelling.
     
@@ -209,15 +305,15 @@ def doHomologyModelling ( id = "" ,pos = 0, candidates_file = "",  sequences = [
         contents = l.split()
         if contents[0] == name+".pdb" and contents[4] == first:
             coilid = contents[3]
-    print coilid
+    #~ print coilid
     for l in lineas[1:]:
         contents = l.split()
         if contents[0] == name+".pdb" and contents[3] == coilid:
             candidates.append(l)
-    print candidates    
+
     model = PDBModel(lineas[0]+"/"+name+".pdb")
     
-    ### Do same filtering as in socket 
+    ### Do same preprocessing as in socket 
     mask  = model.maskProtein(standard=True)
     model = model.compress(mask )
     model.renumberResidues()
@@ -231,47 +327,105 @@ def doHomologyModelling ( id = "" ,pos = 0, candidates_file = "",  sequences = [
         pass ## the folder is already created
         
     i = 0;
-    
+    heptads =[]
     for c in candidates:
         contents = c.split()
-        coil = model.takeResidues(range(int(contents[4]),int(contents[5])+1))
+        ## WARNING
+        ## Is socket using a residue range starting from 0 even if the pdb starts
+        ## somewhere else? As the preprocessing makes residue range start on 1, range
+        ## goes from x-1 to y instead of xto y+1 as would be logical. Errors can appear
+        ## here later.
+        coil = model.takeResidues(range(int(contents[4])-1,int(contents[5])))
         coil.renumberResidues()
         coil.atoms['serial_number'] = range(1,len(coil.atoms['serial_number'])+1)
         coil.atoms['chain_id'] = [CHAINS[i]]*len(coil.atoms['serial_number'])
         coils.append(coil)
+        heptads.append(contents[7])
         coil.writePdb(templatepath+"/"+CHAINS[i]+".pdb")
+        #~ print "*", coil.sequence()
+
         i = i+1
     
-    chains = []
+    
+    ## There must be the same number of coiled coils and sequences
+    assert(len(coils) == len(sequences)),"You must provide as sequences as there are in the template coiled coil."
+    
+    ## Get pairs coil sequence / target sequence
+    chains =[]
     positions = []
     
+    ## Use the same aligner
+    aligner = study.alignments[id]
+    cc = study.mycc
+    
+    i=0
+    data={}
+    for c in coils:
+        data[CHAINS[i]] = {}
+        data[CHAINS[i]]["seq"] = coils[i].sequence()
+        data[CHAINS[i]]["Socket"] = heptads[i]
+        i = i+1
+   
+    
+    #### ATENCION A LOS HEPTADS
+    #~ print data        
+    i=0
+    template = None
+    while len(sequences) > 0:
+        results = []
+        for s in sequences:
+            data["TARGET"] = {"seq":s,"Default":cc.findHeptads(s)['best']}
+            
+            #~ print cc.findHeptads(s)['best'],data["TARGET"]
+            study.data =  data
+            study.doStudy(True)
+            res = study.chooseBest()
+            results.append((res[1],s))
+            del data["TARGET"]
+            i=i+1
+        best = max(results)
+        
+        #~ print best
+        chains.append((coils[CHAINS.find(best[0][1])].sequence(),best[1]))
+        
+        if template == None:
+            template = coils[CHAINS.find(best[0][1])].clone()
+        else:
+            template= template.concat(coils[CHAINS.find(best[0][1])])
+            
+        
+        positions.append(best[0][0][1])
+        print positions
+        
+        sequences.remove(best[1])
+        del data[best[0][1]]
+    
+    
+    template.renumberResidues()
+    template.atoms['serial_number'] = range(1,len(template.atoms['serial_number'])+1)
+    template.atoms['chain_id'] = [' ']*len(template.atoms['serial_number'])
+    template.writePdb(templatepath+"/template.pdb")
+        
+        
+    print chains    
     ## alignment.pir creation
     al = PirAlignment(chains,positions)
     
+    ## alignment.pir creation
+    al.writePir(templatepath+"/alignment.pir","template")
     
-    chains =[sequences[0]]
-    positions = [best[1][0][1]]
-    
-    ## Use the same aligner
-    aligner = mystudy.reg_alignments[id]
-    cc = mystudy.mycc
-    
-    i=1
-    data={}
-    for s in sequences[1:]:
-        data[CHAINS[i]] = {}
-        data[CHAINS[i]]["seq"] = coils[i].sequence()
-        data[CHAINS[i]]["Socket"] = cc.findHeptads(data[CHAINS[i]]["seq"])[0]
-        i=i+1
-        
     ## target.fasta creation
-    al.writeFasta(templatepath+"/target.fasta")
+    al.writeFasta(templatepath+"/target.fasta","target")
     
-    mod = Modeller(projectFolder = templatepath, resultFolder=templatepath, 
-                  fasta_target=templatepath+"/target.fasta", template_folder=templatepath, f_pir=templatepath+"/alignment.pir",
-                  starting_model=1, ending_model=i)
+    mod = Modeller( projectFolder = templatepath,
+                    resultFolder=templatepath+"/results", 
+                    fasta_target=templatepath+"/target.fasta", 
+                    template_folder=templatepath, 
+                    f_pir=templatepath+"/alignment.pir",
+                    starting_model=1, ending_model=1)
 
-
+    mod.run()
+    
 ##############
 ## Test
 ##############
@@ -288,15 +442,16 @@ class Test(BT.BiskitTest):
     def cleanUp( self ):
         pass
     
-    #~ def test_candidates(self):
-        #~ """ testing of candidates file creation"""
-        #~ createCandidatesFile(T.testRoot()+"/coiledcoil/candidates_micro",T.testRoot()+"/coiledcoil/pdbs_micro")
+    def test_candidates(self):
+        """ testing of candidates file creation"""
+        createCandidatesFile(T.testRoot()+"/coiledcoil/candidates",T.testRoot()+"/coiledcoil/pdbs")
     
-    def test_datafilecretion(self):
-        """ testing of data file creation"""
-        dataFileCreation(T.testRoot()+"/coiledcoil/data",T.testRoot()+"/coiledcoil/candidates_micro",target_seq = "ASDFGHVKKLRER")    
-        best = getBestHit( datafile = T.testRoot()+"/coiledcoil/data")
-        doHomologyModelling ( candidates_file = T.testRoot()+"/coiledcoil/candidates_micro")
+    #~ def test_datafilecretion(self):
+        #~ """ testing of data file creation"""
+        #~ dataFileCreation(T.testRoot()+"/coiledcoil/data",T.testRoot()+"/coiledcoil/candidates",target_type = ("homo","parallel",2),target_seq = "LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL",use_big=32)    
+        #~ study,best = getBestHit( datafile = T.testRoot()+"/coiledcoil/data")
+        #~ print best
+        #~ doHomologyModelling ( "2Z5H_clean@52", T.testRoot()+"/coiledcoil/candidates",["LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL","LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL"],study)
 
 if __name__ == '__main__':
     BT.localTest()    
