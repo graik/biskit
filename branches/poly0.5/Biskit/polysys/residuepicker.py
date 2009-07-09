@@ -3,17 +3,19 @@ from numpy import compress,transpose,where,cross,array,matrix,array,cross, dot
 import cPickle 
 import os
 from math import acos,sqrt,atan2,pi
-import emath 
-
 from quaternion import rotquat, rotmat
 import Biskit.molUtils as MU 
-from resTools import doAAReorientation, calcPlane, genPoints,planarize
-from tools import lendepth
+from restools import linearize,expandedPoints,doAAReorientation, scorePlane,calcPlane, genPoints,planarize,points2Pdb
+from tools import lendepth, pad 
 import random
-
-from vectors import angle,add, sub
+import Biskit.tools as T
+from vectors import angle,add, sub, norm, matrix2list, minus
 
 class residuePicker:
+    
+    VMD_SCRIPT = "./data/scripts/vmdscript"
+    NAMD_SCRIPT = "./data/scripts/namdscript"
+    
     
     def __init__(self,databasepath = "./residues_db/",verbose = False):
         """
@@ -146,6 +148,8 @@ class residuePicker:
             chain = model.takeChains( [c] )
             
             residuos = chain.resModels()
+            lastkey = None
+            
             
             for i in range(0,len(residuos)-1) :
                 if self.verbose:
@@ -153,12 +157,11 @@ class residuePicker:
                 r = residuos[i].sequence()
                 residue = residuos[i]
                 myindex = r+str(self.last_res[r])
-                
+                                
                 ## Fetch neighbouring residues
                 nextres = residuos[i+1]
                 rnext = nextres.sequence()
-                
-                    
+                 
                 ## First purge: it has all the needed atoms?
                 if len(residue.xyz) == len(MU.aaAtoms[MU.single2longAA(r)[0]])-1:
                     
@@ -170,6 +173,8 @@ class residuePicker:
                     Ca = residue.xyz[sel_atoms[0][1]]
                     C  = residue.xyz[sel_atoms[0][2]]
                     Ninext  = nextres.xyz[sel_atoms_next[0][0]]
+                    #~ print i,len(residuos),r, rnext
+                    
                     Canext = nextres.xyz[sel_atoms_next[0][1]]
                     Cnext  = nextres.xyz[sel_atoms_next[0][2]]
     
@@ -178,21 +183,15 @@ class residuePicker:
                     Translation = [Translation[0],Translation[1],Translation[2]]
                     Plane = [(C-Ni),(Ca-Ni)]
                     Plane_next=[(Cnext-Ninext),(Canext-Ninext)]
-                    residue , R , rv = doAAReorientation(residue)
+                    residue , R = doAAReorientation(residue)
                     
                     ## Convert the obtained vectors
-                    Translation = Translation*R
-                    Translation = [Translation[0,0],Translation[0,1],Translation[0,2]]
-                    Plane[0]= Plane[0]*R
-                    Plane[0] = [Plane[0][0,0],Plane[0][0,1],Plane[0][0,2]]
-                    Plane[1]= Plane[1]*R
-                    Plane[1] = [Plane[1][0,0],Plane[1][0,1],Plane[1][0,2]]
-                    Plane_next[0]= Plane_next[0]*R
-                    Plane_next[0] = [Plane_next[0][0,0],Plane_next[0][0,1],Plane_next[0][0,2]]
-                    Plane_next[1]= Plane_next[1]*R
-                    Plane_next[1] = [Plane_next[1][0,0],Plane_next[1][0,1],Plane_next[1][0,2]]
+                    Translation = matrix2list(Translation*R)
+                    Plane_next_planed=[[],[]]
+                    Plane_next_planed[0] = matrix2list(Plane_next[0]*R)
+                    Plane_next_planed[1] = matrix2list(Plane_next[1]*R)
                     
-                    Plane_angle = angle(cross(Plane[0],Plane[1]),cross(Plane_next[0],Plane_next[1]))
+                    Plane_angle = angle(cross([1,0,0],[0,0,-1]),cross(Plane_next_planed[0],Plane_next_planed[1]))
                     add_it = False
                     foundback = False
                     exit = False
@@ -245,7 +244,9 @@ class residuePicker:
                         if self.verbose:
                             print "New group (backbone not found)"
                     
-
+                    #~ myindex = r+str(self.last_res[r])
+                    #~ print myindex,
+                    #~ add_it = True
                     if add_it:
                         ## Save the residue
                         residue.renumberResidues()
@@ -256,27 +257,56 @@ class residuePicker:
                         self.reslib[myindex]=residue
                         self.index[r].append(myindex)
                         self.last_res[r]+=1
+                        #~ print lastkey
                     
                     
+                    ## aunqu no lo anyadas, se usa el similar ya anyadido
+                    if lastkey != None:
+                        self.apvect[lastkey[0]][lastkey[1]]["next"] = myindex
+                
                     key = (r,rnext)
-                    new_entry =  {'index':myindex,'next':rnext,'cluster':mycluster,'translation':Translation,'plane_next':Plane_next,'planes_angle':Plane_angle}
+                    new_entry =  {'index':myindex,'next':rnext,'cluster':mycluster,'translation':Translation,'Plane':Plane,'Plane_next':Plane_next,'Plane_next_planed':Plane_next_planed,'planes_angle':Plane_angle}
+                    
                     
                     if not key in self.apvect.keys():
                         ## if the key isn't we just add the new register
                         self.apvect[key] = [ new_entry ]   
+                        lastkey = (key,-1)
                     else:
                         ## else we have to see if there's something similar inside
                         foundsimilar = False
+                        lastkey = None
+                        j=  0
+                        #~ print key
+                        
                         for i in self.apvect[key]:
-                            #~ print new_entry,i
+                            #~ print "*"
                             if angle(new_entry['translation'],i['translation']) < 0.06 and abs(new_entry['planes_angle']-i['planes_angle']) < 0.06:
                                 foundsimilar = True
-                                print "Found Similar"
+                                if len(i['next'])<=1:
+                                    lastkey = (key,j)
+                                    #~ print "substituyendo"
+                                #~ print "Found Similar:", key, angle(new_entry['translation'],i['translation']),abs(new_entry['planes_angle']-i['planes_angle'])
+                                #~ print lastkey
+                                #~ print i['next']
+                                #~ print "values:",i['next'],new_entry['next']
+                                
+                                ## Sin embargo.. es posible cambiarle a este el "next" si no lo tiene completo?
+                            j = j+1
+                            
                         if foundsimilar == False:
                             self.apvect[key].append(new_entry)
+                            
+                            lastkey = (key,-1)
+                            #~ print (key,-1),self.apvect[lastkey[0]][lastkey[1]]["next"]
+                            #~ print "-"
+                        #~ else:
+                            #~ print "simfound"
                 else:
                     if self.verbose:
                         print "Diferent number of atoms."
+        
+        
         self.save()
     
     
@@ -327,7 +357,7 @@ class residuePicker:
         return bcbsim , sdsim
 
     
-    def randomRes(self, res = 'A'):
+    def randomRes(self, res = ''):
         """
         Returns a random residue loaded from the library of type resname.
         
@@ -337,98 +367,157 @@ class residuePicker:
         @return: A residue model from the database.
         @rtype: PDBModel
         """
-        if isinstance(res,list):
-            choosen = res[random.randrange(len(res))]
+        if self.reslib == None:
+            res= 'A'
+            
+        if res == '' :
+            choosen = None
+            choosen  = random.choice(self.reslib.keys())
+            
         else:
-            choosen = self.index[res][random.randrange(len(self.index[res]))]
+            if isinstance(res,list):
+                choosen = res[random.randrange(len(res))]
+            else:
+                choosen = self.index[res][random.randrange(len(self.index[res]))]
        
     
         return choosen
     
     def chooseRes(self,r='A',rnext = 'A',reg = {},simfun=None):
-        candidates = self.apvect[(r,rnext)]
+    
+        if (r,rnext) in self.apvect:
+            candidates = self.apvect[(r,rnext)]
+        else:
+            candidates = self.apvect[self.apvect.keys()[int(len(self.apvect.keys())*random.random())]]
+            print "No apvec saved for this key (",(r,rnext),")"
+            
+        
+       
         
         sim = []
         
-        for i in range(len(candidates)): # hacerlo por indices
+        for i in range(len(candidates)): 
             sim.append((simfun(reg,candidates[i]),i))
         
-         
-        #####################################
-        ##### TODOOOOOOOOOOOOOOOOOOOOOOOOO ##
-        #####################################
-        ## devolver  randomres de su cluster? Dar la opcion (o elegir segun steric clashes)
-            
-        return candidates[max(sim)[1]]
+        return candidates[min(sim)[1]]
     
     def defaultSimFun(self,reg1,reg2):
-        return angle(reg1['translation'],reg2['translation']) / pi
+        #~ print "angle",abs(angle(reg1['translation'],reg2['translation']))
+        #~ print "plane",scorePlane(reg1['Plane'],reg2['Plane'])
+        return abs(angle(reg1['translation'],reg2['translation']))*0.9+scorePlane(reg1['Plane'],reg2['Plane'])*1.1
+    
+    def forceSimFun(self,reg1,reg2):
+        return abs(angle(reg1['translation'],reg2['translation']))*0.7+scorePlane(reg1['Plane'],reg2['Plane'])*0.3
+     
+    
+
         
-    
-    
     def createChain(self,seq="AA",points=[[0,0,0]],simfun = None):
         print "\n\n\n\n\n"
-        T=array([0,0,0])
+        
+        
         if simfun == None:
             simfun = self.defaultSimFun
         
-        r = seq[0]
-        chain = PDBModel(self.dbpath+r+"/"+self.randomRes(r)+".pdb")
-        
-        ## Suponiendo siempre que en xyx[0] tenemos N 
-        ## TODO no suponerlo
-        N = chain.xyz[0]
         i = 0
-        print "points ",len(points)
-        for c in seq[1:len(seq)]:
-            rnext = c
-            print i
-            reg ={"translation":list(N - points[i])}
-            nextres_reg = self.chooseRes(r,rnext,reg,simfun)
-            print "Key: (",r,",",rnext,") Next:", nextres_reg
-            
-            ## Cargarlo como PDBModel
-            ## !!!!!!!!!!!!!!!! Nohay manera de saber el ID completo de next
-            ## a no ser que se haga el procesado en dos tiradas.La segunda se conoce
-            ## las IDs propias o del representante
-            res = PDBModel(self.dbpath+rnext+"/"+self.randomRes(nextres_reg['next'])+".pdb")
-            
-            ## Make rotationmatrix from this plane to the other
-            ## Generar una matriz que rote el otro plano al plano inicial (xz)
-            ## Y multiplicarlo todo por esa matriz
-            Nlast = chain.compress(chain.maskFrom( 'name', 'N' )).xyz[-1]
-            Calast = chain.compress(chain.maskFrom( 'name', 'CA' )).xyz[-1]
-            Clast = chain.compress(chain.maskFrom( 'name', 'C' )).xyz[-1]
-            ## Mejor ir arrastrando los valores de N etc
-            
-            chain, R = planarize(chain,calcPlane(Nlast,Calast,Clast))
-
-            ## Center chain
-            for j in range(len(chain.xyz)):
-                chain.xyz[j] = chain.xyz[j] - Nlast
-            
-            ## Rotar el residuo a su plano original
-            
-            res , R= planarize(res,[[1,0,0],[0,0,-1]],True,nextres_reg["plane_next"],False)
-            
-            ## Sumarle la translacion al residuo 
-            for j in range(len(res.xyz)):
-                res.xyz[j] = res.xyz[j] + nextres_reg["translation"]
-            
-            ## Pegarlos
-            chain = chain.concat(res)
-            
-            ## Rotar los puntos 
-            
-            
-            ## Y volver a empezar
-            r = rnext
-            i = i+1
-            N = res.xyz[0]
-            # sacar tb valor de Ca, C
-        return chain
+        N = array([ points[i][0], points[i][1], points[i][2]])
+        chain = None
+        #~ print "\n\n\n"
+        nextplane = [[1,0,0],[0,0,-1]]
+        R = matrix([[1.,0.,0.],[0.,1.,0.],[0.,0.,1.]])
         
+        for c in range(len(seq)-1):
+               
+            r = seq[c]
+            rnext = seq[c+1]
+             
+            #~ print i,r,rnext
+            
+            ## Buscar candidato
+            reg ={"translation":array([points[i+1][0], points[i+1][1], points[i+1][2]]),'Plane':nextplane}
+            
+           
+            nextres_reg = self.chooseRes(r,rnext,reg,simfun)
+            print nextres_reg['index'],
+            nextplane = nextres_reg['Plane_next']
+            ## Cargarlo como PDBModel
+            res = PDBModel(self.reslib[nextres_reg["index"]]).clone()
+            
+            ## Forzar la orientacion hacia el punto
+            plane = calcPlane (res)
+            Rforcing = linearize(res,nextres_reg["translation"],points[i+1],plane[1])
+            
+            ## Pegarlo a la cadena
+            if chain == None:
+                chain = res
+            else:
+                chain = chain.concat(res)
+            
+            
+            
+            ## Preparamos la cadena para pegar el siguiente
+            ## Centrar cadena
+            next_point = array([ points[i+1][0], points[i+1][1], points[i+1][2]])   
+               
+            
+            for j in range(len(chain.xyz)):
+                chain.xyz[j] = chain.xyz[j] - next_point
+            ## Centrar los puntos
+            for j in range(len(points)): 
+                points[j] = points[j] - next_point
+            
+            ## Giramos la cadena al plano del siguiente residuo
+            ## Aplicamos al plano siguiente la pequenya transformacion hecha para encajar
+            plane = [matrix2list(nextres_reg["Plane_next_planed"][0]*Rforcing),matrix2list(nextres_reg["Plane_next_planed"][1]*Rforcing)]
+            
+            chain,R = planarize(chain,plane)
+            
+            ## Y giramos solidariamente los puntos
+            for j in range(len(points)): 
+                points[j] = matrix2list(points[j] * R)
+            
+               
+            
+            ## Limpiamos memoria...
+            del res
+            del R
+            del reg
+            
+            ## Y seguimos...    
+            i = i+1
+            
+            
+            
+        #~ ###########
+        file = open("points.pdb","w")
+        file.writelines(points2Pdb(points,'B'))
+        file.close()
+        #~ ############
+        
+        chain.renumberResidues()
+        chain['serial_number'] = range(1,len(chain.xyz)+1)
+        chain['chain_id'] ='A'*len(chain.xyz)
+        
+        print
+        return chain #self.doRefinement(chain)
 
+    def doRefinement(self,chain=None):
+        chain.writePdb("in.pdb")
+        os.system("vmd  -e "+self.VMD_SCRIPT)
+        
+        #~ os.system("cp out.pdb in.pdb")
+        #~ os.system("cp out.psf in.psf")
+        #~ os.system("rm in.pdb in.psf out.log")
+        
+        os.system("/home/victor/NAMD_2.7b1_Linux-x86/namd2 "+self.NAMD_SCRIPT)
+        os.system("cp out_min.coor out_min.pdb")
+        model = PDBModel("out_min.pdb")
+        model.renumberResidues()
+        model['serial_number'] = range(1,len(model.xyz)+1)
+        model = model.compress(model.maskHeavy())
+        #~ os.system("rm in.pdb")
+        return model.compress(model.maskProtein())
+    
     def createStericChain(self):
        ## Lo mismo, pero en lugar de montarla primero crea una lista de modelos
        ## y los va juntando por backtracking
@@ -463,7 +552,7 @@ class residuePicker:
 ## Test
 ##############
 import Biskit.test as BT
-import Biskit.tools as T
+
 from Biskit.PDBModel import PDBModel
 import os
 
@@ -473,13 +562,13 @@ class Test(BT.BiskitTest):
     def prepare(self):
         pass
 
-    def cleanUp( self ):
-        try:
-            #~ #os.rmdir(T.testRoot()+"/polysys/residues_db")
-            os.system("rm -rf "+T.testRoot()+"/polysys/residues_db")
-        except:
-            if self.local:
-                print "ERROR: Database folder couldn't be removed."
+    #~ def cleanUp( self ):
+        #~ try:
+            #os.rmdir(T.testRoot()+"/polysys/residues_db")
+            #~ os.system("rm -rf "+T.testRoot()+"/polysys/residues_db")
+        #~ except:
+            #~ if self.local:
+                #~ print "ERROR: Database folder couldn't be removed."
     
     #~ def test_DB_FileCreation(self):
         #~ """Folder & Files creation testing"""
@@ -562,13 +651,37 @@ class Test(BT.BiskitTest):
     
     def test_chaincreation(self):
         """Test chain creation function"""
+           
         r = residuePicker(T.testRoot()+"/polysys/residues_db/")
-        p = PDBModel(T.testRoot()+"/polysys/FAKE3.pdb")
-        #~ r.verbose = True
-        r.extractFromPDB(p)
-        chain = r.createChain("DPM",genPoints(p))
-        chain.writePdb(T.testRoot()+"/polysys/chain.pdb")
         
+        r.verbose = True
+        
+        r.extractFromPDB(T.testRoot()+"/polysys/1HUY.pdb")
+        
+        
+        print r
+        
+        
+        seq3  = "DPM"
+        seq4  = "DPMV"
+        seq10 = "DPMVSKGEEL"
+        seq20 = "DPMVSKGEELFTGVVPILV"
+        seq24 = 'DPMVSKGEELFTGVVPILVELDGDV'
+        seq40 = "DPMVSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEG"
+        seq   = "DPMVSKGEELFTGVVPILVELDGDVNGHKFSVSGEGEGDATYGKLTLKFICTTGKLPVPWPTLVTTFTLMCFARYPDHMKRHDFFKSAMPEGYVQERTIFFKDDGNYKTRAEVKFEGDTLVNRIELKGIDFKEDGNILGHKLEYNYNSHNVYIMADKQKNGIKVNFKIRHNIEDGSVQLADHYQQNTPIGDGPVLLPDNHYLSYQSALSKDPNEKRDHMVLLEFVTAAGI"
+        seq_error = 'LVELDG'
+        seq_error2 = 'GEELFTGVVPILVELDG'
+        seq_error3 = 'DPMVSKGEELFTGVVPILVELDG'
+        
+        points = array([array([0.,0,0]),array([4.,0,0]),array([8.,0,0]),array([12.,0,0]),array([16.,0,0]),array([20.,0,0]),array([20.,4,0]),array([20.,8,0]),array([20.,12,0]),array([20.,16,0]),array([20.,20,0])])
+        
+        chain = r.createChain(seq,genPoints(PDBModel(T.testRoot()+"/polysys/1HUY.pdb")),simfun = r.defaultSimFun )
+        
+        chain = r.doRefinement(chain) 
+        
+        chain.writePdb(T.testRoot()+"/polysys/final.pdb")
+        
+            
 if __name__ == '__main__':
     BT.localTest()    
 
