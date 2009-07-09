@@ -100,7 +100,7 @@ def createCandidatesFile (filename = "", dir = ""):
             failed.append(pdb)
         done = done+1
         if done%10 ==0 :
-            print "Parsed:",done,"Total:",total,"Failed:",len(failed),"( no coils:",no_coils,")")
+            print "Parsed:",done,"Total:",total,"Failed:",len(failed),"( no coils:",no_coils,")"
             
     file.close()
 
