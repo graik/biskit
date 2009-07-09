@@ -48,6 +48,7 @@ def createCandidatesFile (filename = "", dir = ""):
     - HOMO can be "homo" or "hetero", defining if chains are all equal or not
     
     """
+    print "Starting candidates file generation"
     
     file = open(filename,"w")
     
@@ -63,6 +64,7 @@ def createCandidatesFile (filename = "", dir = ""):
     failed = []
     total = len(pdbs)
     done = 0
+    no_coils = 0
     for pdb in pdbs:
         try:
             #~ print "preparing"+ dir+"/"+pdb
@@ -72,6 +74,8 @@ def createCandidatesFile (filename = "", dir = ""):
             sc.debug = True
             sc.run()
             
+            if (sc.result == {}):
+                no_coils++
             assert (sc.result != {})
             
             #~ for cc in sc.result.keys():
@@ -96,7 +100,7 @@ def createCandidatesFile (filename = "", dir = ""):
             failed.append(pdb)
         done = done+1
         if done%10 ==0 :
-            print "Parsed:",done,"Total:",total,"Failed:",len(failed)
+            print "Parsed:",done,"Total:",total,"Failed:",len(failed),"( no coils:",no_coils,")")
             
     file.close()
 
