@@ -1,3 +1,6 @@
+from vectors import normalized
+from math import cos, sin
+
 #-----------------------------------------------------------------------------
 #
 #  Copyright (c) 2006 by Enthought, Inc.
@@ -13,6 +16,17 @@
 
 # Major library imports.
 import numpy as np
+
+
+def quaternion(vector, angle):
+    u = cos(angle/2)
+    
+    vector=normalized(vector)
+    x=vector[0]*sin(angle/2)
+    y=vector[1]*sin(angle/2)
+    z=vector[2]*sin(angle/2)
+    
+    return [u,x,y,z]
 
 
 def normq(quat):
@@ -80,13 +94,13 @@ def rotquat(vhat1, vhat2):
 
     # Compute the bisectors
     bisector = _normv(vhat1 + vhat2)
-
+    
     # Compute the scalar part
     cost2 = _dotv(vhat1, bisector)
-
+    
     # Compute the vector part
     sint2v = _crossv(vhat1, bisector)
-
+    
     # NOTE: This is an expanded version of the old version of numpy's
     # 'column_stack' function.
     tup = (cost2, np.transpose(sint2v))
@@ -122,12 +136,13 @@ def _dotv(vertices1, vertices2):
     return np.sum(vertices1*vertices2, axis=-1)
 
 
+import tools
 def _normv(vertices):
     """
     Normalize an array of 3-vectors.
-
+    
     """
     
     vertices = np.asarray(vertices)
-    return vertices / np.sqrt(_dotv(vertices, vertices))[:,np.newaxis]
-
+    return  vertices / np.sqrt(_dotv(vertices, vertices))[:,np.newaxis]
+    
