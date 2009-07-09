@@ -75,7 +75,7 @@ def createCandidatesFile (filename = "", dir = ""):
             sc.run()
             
             if (sc.result == {}):
-                no_coils++
+                no_coils += 1
             assert (sc.result != {})
             
             #~ for cc in sc.result.keys():
