@@ -67,7 +67,7 @@ def orientVectors(model,vorig,vdest):
     """
     mydot = vcos(vorig,vdest)
     
-    if 1 - abs(mydot) < 0.01:
+    if 1 - abs(mydot) < 0.01: 
         
         ## Entonces son o iguales o opuestos y el mod de cuaterniones falla
         if mydot >=0.99 and mydot <=1.01:
@@ -91,7 +91,7 @@ def orientVectors(model,vorig,vdest):
         for i in range(len(model.xyz)):
             model.xyz[i] = model.xyz[i] * R
     
-    return R
+    return model,R
     
 
 def scorePlane( planea,planeb):

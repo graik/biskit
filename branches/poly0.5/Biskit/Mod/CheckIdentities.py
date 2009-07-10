@@ -129,6 +129,8 @@ class CheckIdentities:
 
         for s in string_lines[y+2:y+2+aln_length]:
             target_sequence += s[:-1]
+        
+        target_sequence = target_sequence.replace('/','')
 
         aln_dictionary["target"] = {'name':'target','seq':target_sequence}
 

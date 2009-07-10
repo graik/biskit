@@ -161,7 +161,7 @@ class PDBModel:
                  'residue_name' : (str, ''),
                  'after_ter' : (int, 0),
                  'serial_number' : (int, -1),
-                 'type' : (str, ''),
+                 'type' : (str, ' '),
                  'temperature_factor' : (float, 0) }
 
     def __init__( self, source=None, pdbCode=None, noxyz=0, skipRes=None ):
