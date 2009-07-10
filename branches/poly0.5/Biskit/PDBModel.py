@@ -148,6 +148,22 @@ class PDBModel:
                 'segment_id', 'charge', 'residue_name', 'after_ter',
                 'serial_number', 'type', 'temperature_factor']
 
+    PDB_KEYS = {'name' : (str, ''),
+                 'residue_number' : (int, -1),
+                 'insertion_code' : (str, ''),
+                 'alternate' : (str, ''),
+                 'name_original': (str, ''),
+                 'chain_id' : (str, ''),
+                 'occupancy' : (float, 0),
+                 'element' : (str, ''),
+                 'segment_id' : (str, ''),
+                 'charge' : (float, 0),
+                 'residue_name' : (str, ''),
+                 'after_ter' : (int, 0),
+                 'serial_number' : (int, -1),
+                 'type' : (str, ''),
+                 'temperature_factor' : (float, 0) }
+
     def __init__( self, source=None, pdbCode=None, noxyz=0, skipRes=None ):
         """
         - PDBModel() creates an empty Model to which coordinates (field xyz)
@@ -1883,6 +1899,89 @@ class PDBModel:
         r = [ p[ rI[res] : rE[res]+1 ] for res in range( self.lenResidues() ) ]
         return r
     
+
+    def __newChain( self ):
+        """
+        Prepare adding a new chain/molecule to this model.
+        """
+
+        if self._chainIndex is None:
+            self._chainIndex = N.array( [0] )
+        else:
+            self._chainIndex = N.concatenate( (self._chainIndex, 
+                                               [ self.lenAtoms() ] ) )
+
+    def __extendProfile( self, collection, key, n_items ):
+        """
+        Add n_items default values to profile key in collection.
+        """
+        collection[key].extend( [collection[key, 'default']] * n_items )
+
+        
+    def concatSequence( self, sequence, newchain=True, defaults={},
+                        xyz=[0.,0.,0.] ):
+        """
+        @param sequence: sequence, 1-letter coded or list of 3-letter names
+        @type  sequences: str or [ str ]
+        @param newchain: put added residues into a new chain [True]
+        @type  newchain: bool
+        @param default: default values to add to existing profiles [None]
+        @type  default: {str:any} ({profile_name: default})        
+        """
+        anames  = []         # atom names for atom profile
+        rnames  = []         # residue names for atom profile
+        elements= []         # element codes for atom profile
+
+        if newchain and len( sequence ) > 0:
+            self.__newChain()
+
+        resIndex= self._resIndex
+        i_res = 0                      # pointer to current residue position
+        if resIndex is None and len(sequence) > 0:
+            resIndex = N.array( [], int )
+        else:
+            i_res = self.lenAtoms()
+   
+        if type( sequence ) is str:
+                sequence = molUtils.single2longAA( sequence )
+        
+        atoms = []
+
+        for res in sequence:
+            i_res = i_res + len(atoms) ## number of atoms found in previous it.
+            resIndex = N.concatenate( (resIndex, [ i_res ]) )
+
+            atoms = molUtils.atomDic[ res ][:-1]
+            anames.extend( atoms )  ## include all atoms but last OXT
+            rnames.extend( [res] * len( atoms ) )  ## append residue_names
+        
+            ## too simple minded but there is no good dictionary in molUtlis
+            elements.extend( [ a[0] for a in atoms ] )
+
+        ## add terminal OXT
+        anames.append( molUtils.atomDic[res][-1] )
+        rnames.append( res )
+        elements.append( molUtils.atomDic[res][-1][0] )
+
+        anames = N.concatenate( (self['name'], anames) )
+        rnames = N.concatenate( (self['residue_name'], rnames) )
+        elements= N.concatenate( (self['element'], elements) )
+        self._resIndex = resIndex
+
+        self.xyz = N.concatenate( (self.xyz, xyz * len(atoms) ) )
+        self.xyz_changed = True
+        
+        for k in self.atoms.keys():
+            if not k in ['name', 'residue_name', 'element']:
+                self.__extendProfile( self.atoms, k, len(atoms) )
+
+        for k in self.residues.keys():
+            self.__extendProfile( self.residues, k, len(sequence) )
+        
+        self.__maskCA = self.__maskBB = self.__maskHeavy = None
+        self.__chainBreaks = None
+
+
     
     def concat( self, *models ):
         """
@@ -3436,5 +3535,6 @@ def clock( s, ns=globals() ):
     return r
 
 if __name__ == '__main__':
-
-    BT.localTest()
+    m = PDBModel( T.testRoot()+'/com/1BGS.pdb')
+    pass
+##     BT.localTest()
