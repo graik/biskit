@@ -432,13 +432,14 @@ class Modeller( Executor ):
         @type  model_folder: str
         """
         template_info =  self.aln_info.result["target"]["template_info"]
-
+        
         for model in pdb_list:
 
             model.residues.set("n_templates", template_info,
                                comment="number of templates for each residue")
 
         rmask = pdb_list[0].profile2mask("n_templates", 1,1000)
+        
         amask = pdb_list[0].res2atomMask(rmask)
 
         for m in pdb_list:
