@@ -222,7 +222,7 @@ REMEDY: run the script fixAtomIndices.py
         xyz   = []
 
         aProfs = {}
-        for k in B.PDBModel.PDB_KEYS:
+        for k in B.PDBModel.PDB_KEYS.keys():
             aProfs[k] = list()
 
         f = IO.PDBFile( fname )

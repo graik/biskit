@@ -57,7 +57,14 @@ def planarize(modela = None, orig_plane =[[1,0,0],[0,0,1]],orig_perp = False, ta
     return model , R
 
     
-def linearize (model,vorig,vdest,axis=[0.,0.,-1.]):
+def orientVectors(model,vorig,vdest):
+    """
+    Orient first vector so that has same direction as second vector.
+    model - PDBModel
+    vorig - (x,y,z), origin vector
+    vdest - (x,y,z), second vector
+    
+    """
     mydot = vcos(vorig,vdest)
     
     if 1 - abs(mydot) < 0.01:

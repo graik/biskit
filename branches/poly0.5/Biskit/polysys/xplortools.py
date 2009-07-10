@@ -34,8 +34,8 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = ""
         cm2 = b.centerOfMass()
     
     
-    linearize(a, a.xyz[-1]-cm1,[0,0,1])
-    linearize(b, b.xyz[0]-cm2,[0,0,-1])
+    orientVectors(a, a.xyz[-1]-cm1,[0,0,1])
+    orientVectors(b, b.xyz[0]-cm2,[0,0,-1])
     
     a.writePdb("lol1.pdb")
     b.writePdb("lol2.pdb")
@@ -48,7 +48,7 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = ""
     ## Link creation
     link = PDBModel()
 
-    for k in PDBModel.PDB_KEYS:
+    for k in PDBModel.PDB_KEYS.keys():
         link[k] = 5 * ['']  
 
     link['name'] = 5 * ['CA']
