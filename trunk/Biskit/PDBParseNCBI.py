@@ -90,7 +90,7 @@ class PDBParseNCBI( PDBParseModel ):
         @raise PDBParserError: if couldn't find PDB file
         """
         id = string.lower( id )
-        filenames = ['%s.pdb' % id,
+        filenames = [os.path.join( db_path, '%s.pdb' % id),
                      db_path + '/pdb%s.ent' % id,
                      db_path + '/%s/pdb%s.ent.Z' %( id[1:3], id ) ]
 
