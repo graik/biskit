@@ -1,7 +1,7 @@
 
 from Biskit import PDBModel
 import psfGen
-from restools import linearize
+from restools import orientVectors
 import numpy as N
 from vectors import norm,normalized
 from wormlikechain import WormLikeChainModel
@@ -36,8 +36,8 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "G
         cm2 = b.centerOfMass()
     
     
-    linearize(a, a.xyz[-1]-cm1,[0,0,1])
-    linearize(b, b.xyz[0]-cm2,[direction[0]*-1,direction[1]*-1,direction[2]*-1])
+    orientVectors(a, a.xyz[-1]-cm1,[0,0,1])
+    orientVectors(b, b.xyz[0]-cm2,[direction[0]*-1,direction[1]*-1,direction[2]*-1])
     
     ## Go to the origin!
     a.xyz -= cm1
