@@ -571,17 +571,21 @@ class ProfileCollection:
             ## autodetect type
             if asarray == 1:
 
+##                 if isinstance( prof, N.ndarray ):
+##                     return self.__picklesave_array( prof )
+
+##                 if type( prof ) is str:  # tolerate strings as profiles
+##                     return list( prof )
+    
                 if isinstance( prof, N.ndarray ):
                     return self.__picklesave_array( prof )
+                
+                return self.__picklesave_array( N.array( prof ) )
 
-                if type( prof ) is str:  # tolerate strings as profiles
-                    return list( prof )
-    
-                p = self.__picklesave_array( N.array( prof ) )
-                if p.dtype.char not in ['O','c','S']: ## no char or object arrays!
-                    return p
+##                 if p.dtype.char not in ['O','c','S']: ## no char or object arrays!
+##                     return p
 
-                return list( prof )
+##                 return list( prof )
 
             ## force list
             if asarray == 0:
