@@ -1,6 +1,5 @@
 
 from Biskit import PDBModel
-import psfGen
 from restools import orientVectors
 import numpy as N
 from vectors import norm,normalized
@@ -118,4 +117,4 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "G
     final.writePdb("lol.pdb")
 
 
-linkProteins(a = PDBModel('2AWT.pdb') , b= PDBModel('2CQJ.pdb'),distance = 70 )
+linkProteins(a = PDBModel('2AWT') , b= PDBModel('2CQJ'),distance = 70 )
