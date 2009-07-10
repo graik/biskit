@@ -108,7 +108,7 @@ class PDBProfiles( ProfileCollection ):
         if r is None and (update or updateMissing):
 
             ## only read PDB source if this is indeed useful
-            if not name in PDBModel.PDB_KEYS and \
+            if not name in PDBModel.PDB_KEYS.keys() and \
                PDBParseFile.supports( self.model.validSource() ):
                 return None
 
@@ -481,12 +481,12 @@ class PDBModel:
         if not atoms is 0:
             ## atoms to be fetched from external source
             if atoms is None:
-                for k in self.PDB_KEYS:
+                for k in self.PDB_KEYS.keys():
                     self.atoms.set( k, None, changed=0 )
 
             else:
                 atoms = B.DictList( atoms )
-                for k in self.PDB_KEYS:
+                for k in self.PDB_KEYS.keys():
                     self.atoms.set( k, atoms.valuesOf( k ), 
                                     changed=getattr(self, 'atomsChanged',1) )
 

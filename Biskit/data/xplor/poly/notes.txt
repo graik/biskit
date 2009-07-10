@@ -17,3 +17,9 @@ Problems:
 * import xplorpy from normal Python????
 
 * mailing list
+
+
+2) Workaround:
+--------------
+
+create a single PDB with domain 1, unknown linker with 0 coordinates, domain 2

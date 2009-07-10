@@ -174,7 +174,18 @@ class Test(BT.BiskitTest):
         self.filtered = self.f.get_filtered()
 
         self.assertEqual( self.filtered, ['1K2H_A', '1M31_A', '1K8U_A'] )
+        
+    def test_singleTemplate(self):
+        from CheckIdentities import CheckIdentities
+        import Biskit.tools as T
+
+        self.single_aln = CheckIdentities( alignment = T.testRoot() + \
+                                           '/Mod/templatefilter/al.pir' )
+        self.f1 = TemplateFilter( self.single_aln, verbose=self.local )
+        self.single  = self.f1.get_filtered()
+        
 
 if __name__ == '__main__':
 
+   
     BT.localTest()
