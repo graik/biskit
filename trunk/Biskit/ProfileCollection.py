@@ -672,13 +672,13 @@ class ProfileCollection:
         @raise ProfileError: if mask is given but N.sum(mask) != len(prof)
         """
         if prof is None:
-           self.profiles[ name ] = None
-           self.infos[name] = {}
+            self.profiles[ name ] = None
+            self.infos[name] = {}
 
-           if not 'changed' in moreInfo: moreInfo['changed'] = 0
-           self.setInfo( name, asarray=asarray, comment=comment,
+            if not 'changed' in moreInfo: moreInfo['changed'] = 0
+            self.setInfo( name, asarray=asarray, comment=comment,
                          **moreInfo )           
-           return
+            return
 
         ## consistency check
         if mask is not None and N.sum(mask) != len(prof):
