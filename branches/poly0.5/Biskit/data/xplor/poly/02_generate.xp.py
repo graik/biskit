@@ -63,25 +63,5 @@ flags
 end
 """)
 
-xplor.command("write psf output=new.psf end")
-pdbTool.PDBTool("min.pdb").write()
-
-import ivm
-
-I = ivm.IVM()
-I.group( AtomSel( 'resid 1:107' ) )
-I.group( AtomSel( 'resid 122:338') )
-
-protocol.torsionTopology( I )
-
-from potList import PotList
-
-protocol.initDynamics( ivm=I,
-                       bathTemp=500,
-                       finalTime=1,
-                       numSteps=5000,
-                       printInterval=10,
-                       )
-xplor.command( """flags include * end""")
-I.run()
-pdbTool.PDBTool("dyn.pdb").write()
+xplor.command("write psf output=03_system.psf end")
+pdbTool.PDBTool("03_min.pdb").write()
