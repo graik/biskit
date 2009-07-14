@@ -86,9 +86,11 @@ def parse (path):
             results[result.coilId] = result
         
         
-        if len(contents)>3 and contents[2] == "coiled" and contents[3] == "coil" :
+        if len(contents)>3 and contents[3] == "coiled" and contents[4] == "coil" :
+            print l
             if not contents[4] == "packing:":
-                results[contents[5]].sense = contents[6][1:]
+                results[contents[6]].sense = contents[7][1:]
+                
                 
         if len(contents)>2 and contents[0] == "assigning" and contents[1] == "heptad":
             helix = contents[4]

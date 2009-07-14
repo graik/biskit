@@ -1,11 +1,30 @@
-
-from Biskit import PDBModel
 from restools import orientVectors
 import numpy as N
 from vectors import norm,normalized
 from wormlikechain import WormLikeChainModel
 from Biskit.molUtils import single2longAA
+from Biskit.PDBModel import PDBModel 
+import os
 
+
+import Biskit.tools as T
+import Biskit.molUtils as MU
+from Biskit import PDBCleaner
+
+def cleanPdbs(m1,m2):
+    print m1,m2
+    ## cleanup structures
+    m1 = m1.compress( m1.maskProtein() * m1.maskHeavy() )
+    m2 = m2.compress( m2.maskProtein() * m2.maskHeavy() )
+
+    m1.remove( m1.indicesFrom( 'name', ['OXT'] ) )
+    m2.remove( m2.indicesFrom( 'name', ['OXT'] ) )
+
+    m1 = PDBCleaner( m1 ).process()
+    m2 = PDBCleaner( m2 ).process()
+
+    return m1,m2
+    
 def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "GSGSGSGSA",direction = [0,0,1],distance = 0):
     """
     Links two proteins with a flexible peptide of repeating pattern linkseq.
@@ -34,10 +53,20 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "G
     else:
         cm2 = b.centerOfMass()
     
+    a,b = cleanPdbs(a,b)
     
-    orientVectors(a, a.xyz[-1]-cm1,[0,0,1])
-    orientVectors(b, b.xyz[0]-cm2,[direction[0]*-1,direction[1]*-1,direction[2]*-1])
     
+    a_ending = a.resModels()[-1].centerOfMass()
+    b_ending = b.resModels()[-1].centerOfMass()
+    
+    
+    ## Orient
+    orientVectors(a, a_ending-cm1,direction)
+    orientVectors(b, b_ending-cm2,[direction[0]*-1,direction[1]*-1,direction[2]*-1])
+    
+    a_ending = a.resModels()[-1].centerOfMass()
+    b_ending = b.resModels()[-1].centerOfMass()
+        
     ## Go to the origin!
     a.xyz -= cm1
     b.xyz -= cm2
@@ -45,10 +74,6 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "G
     a.writePdb("lol1.pdb")
     b.writePdb("lol2.pdb")
     
-    ## Translation
-    ## - Real distance is from a's ending residue to b's starting residue
-    total_distance = distance+norm(cm1)+norm(cm2)
-    b.xyz += N.array([direction[0]*total_distance,direction[1]*total_distance,direction[2]*total_distance]) 
     
     ## Link creation
     ## - Get distance
@@ -87,13 +112,8 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "G
     link['residue_number'] = N.arange( nres ) + 1
     link['serial'] = N.arange( nres ) + 1
     
-    ## Make triangular Calpha-trace
-    linkdist_2 = linkdist / 2.
-    
-    dist_2 = distance / 2.
-    
-    
-    
+        
+
     ## Concatenation
     
     ## - Residue renumbering
@@ -108,13 +128,31 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "G
     link.atoms['chain_id'] = [" "]*len(link.atoms['chain_id'])
     b.atoms['chain_id'] = [" "]*len(b.atoms['chain_id'])
     
-    a.atoms['segment_id'] = ["A"]*len(a.atoms['chain_id'])
+    a.atoms['segment_id'] = ["p1"]*len(a.atoms['chain_id'])
     link.atoms['segment_id'] = ["L"]*len(link.atoms['chain_id'])
-    b.atoms['segment_id'] = ["B"]*len(b.atoms['chain_id'])
+    b.atoms['segment_id'] = ["p1"]*len(b.atoms['chain_id'])
     
-    final = a.concat(link).concat(b)
+    a['serial'] = range( len(a) )
+    b['serial'] = range( len(b) )
+    
+    final = a.concat(b)
     final.report()
-    final.writePdb("lol.pdb")
-
-
-linkProteins(a = PDBModel('2AWT') , b= PDBModel('2CQJ'),distance = 70 )
+    final.writePdb("aux_in.pdb")
+    
+    a.writePdb( '01_domain1.pdb' )
+    b.writePdb( '01_domain2.pdb' )
+    
+    open("01_sequence.txt","w").write(a.sequence()+link.sequence()+b.sequence())
+    open("01_link_sequence.txt","w").write(link.sequence())
+    open('01_resid_a.txt',"w").write("resid "+str(a.atoms['residue_number'][0])+":"+str(a.atoms['residue_number'][-1]))
+    open('01_resid_b.txt',"w").write("resid "+str(b.atoms['residue_number'][0])+":"+str(b.atoms['residue_number'][-1]))
+    open('01_resid_link.txt',"w").write("resid "+str(link.atoms['residue_number'][0])+":"+str(link.atoms['residue_number'][-1]))
+    
+    os.system("xplor -py xplor_rebuild_script.py")
+    #~ link = PDBModel("aux_link.pdb")
+    #~ ap = link.centerOfMass()
+    #~ bp = link.resModels()[-1].centerOfMass()
+    #~ orientVectors(link,bp-ap,direction)
+    
+    
+linkProteins(a = PDBModel('2AWT.pdb') , b= PDBModel('2CQJ.pdb'),distance = 70 )

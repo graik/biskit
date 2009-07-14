@@ -108,7 +108,7 @@ class PDBProfiles( ProfileCollection ):
         if r is None and (update or updateMissing):
 
             ## only read PDB source if this is indeed useful
-            if not name in PDBModel.PDB_KEYS.keys() and \
+            if not name in PDBModel.PDB_KEYS and \
                PDBParseFile.supports( self.model.validSource() ):
                 return None
 
@@ -148,17 +148,17 @@ class PDBModel:
                 'segment_id', 'charge', 'residue_name', 'after_ter',
                 'serial_number', 'type', 'temperature_factor']
 
-    PDB_KEYS = {'name' : (str, ''),
+    PDB_KEYS = {'name' : (str, ' '),
                  'residue_number' : (int, -1),
-                 'insertion_code' : (str, ''),
-                 'alternate' : (str, ''),
-                 'name_original': (str, ''),
-                 'chain_id' : (str, ''),
+                 'insertion_code' : (str, ' '),
+                 'alternate' : (str, ' '),
+                 'name_original': (str, ' '),
+                 'chain_id' : (str, ' '),
                  'occupancy' : (float, 0),
-                 'element' : (str, ''),
-                 'segment_id' : (str, ''),
+                 'element' : (str, ' '),
+                 'segment_id' : (str, ' '),
                  'charge' : (float, 0),
-                 'residue_name' : (str, ''),
+                 'residue_name' : (str, ' '),
                  'after_ter' : (int, 0),
                  'serial_number' : (int, -1),
                  'type' : (str, 'ATOM'),
@@ -481,12 +481,12 @@ class PDBModel:
         if not atoms is 0:
             ## atoms to be fetched from external source
             if atoms is None:
-                for k in self.PDB_KEYS.keys():
+                for k in self.PDB_KEYS:
                     self.atoms.set( k, None, changed=0 )
 
             else:
                 atoms = B.DictList( atoms )
-                for k in self.PDB_KEYS.keys():
+                for k in self.PDB_KEYS:
                     self.atoms.set( k, atoms.valuesOf( k ), 
                                     changed=getattr(self, 'atomsChanged',1) )
 
@@ -2165,9 +2165,10 @@ class PDBModel:
 
         @raise PDBError: if what is neither of above
         """
-        mask = N.logical_not( self.mask( what ) )
-        self.keep( N.nonzero(mask) )
-        return mask
+        if  what != []:
+            mask = N.logical_not( self.mask( what ) )
+            self.keep( N.nonzero(mask) )
+            return mask
 
 
     def takeResidues( self, i ):
