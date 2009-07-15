@@ -449,7 +449,8 @@ class Test(BT.BiskitTest):
     def test_candidates(self):
         """ testing of candidates file creation"""
         #~ createCandidatesFile(T.testRoot()+"/coiledcoil/candidates",T.testRoot()+"/coiledcoil/pdbs")
-        createCandidatesFile("coil","/home/victor/synplexity/synplexity/structures/hypercycle/templates/coiledcoildimantipar")
+        #~ createCandidatesFile("coil","/home/victor/synplexity/synplexity/structures/hypercycle/templates/coiledcoildimantipar")
+        createCandidatesFile("coil","/home/victor/synplexity/synplexity/structures/hypercycle/templates/coils")
     
     #~ def test_datafilecretion(self):
         #~ """ testing of data file creation"""
