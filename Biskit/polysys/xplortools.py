@@ -11,21 +11,20 @@ import Biskit.tools as T
 import Biskit.molUtils as MU
 from Biskit import PDBCleaner
 
-def cleanPdbs(m1,m2):
-    print m1,m2
+def cleanPdb(m1):
+    print m1
     ## cleanup structures
     m1 = m1.compress( m1.maskProtein() * m1.maskHeavy() )
-    m2 = m2.compress( m2.maskProtein() * m2.maskHeavy() )
-
-    m1.remove( m1.indicesFrom( 'name', ['OXT'] ) )
-    m2.remove( m2.indicesFrom( 'name', ['OXT'] ) )
-
-    m1 = PDBCleaner( m1 ).process()
-    m2 = PDBCleaner( m2 ).process()
-
-    return m1,m2
     
-def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "GSGSGSGSA",direction = [0,0,1],distance = 0):
+    m1.remove( m1.indicesFrom( 'name', ['OXT'] ) )
+    m1.remove( m1.indicesFrom( 'name', ['OT1'] ) )
+    m1["name"][ m1.indicesFrom( 'name', ['OT2'] )] = 'O'
+    
+    m1 = PDBCleaner( m1 ).process()
+    
+    return m1
+    
+def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],distance = 0):
     """
     Links two proteins with a flexible peptide of repeating pattern linkseq.
     If distance is 0 then it tries to use the whole peptide.
@@ -46,36 +45,25 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "G
     
     direction = N.array(normalized(direction))
     
-    if(residues_a != []):
-        cm1 = a.takeResidues(residues_a).centerOfMass()
-    else:
-        cm1 = a.centerOfMass()
-        
-    if(residues_b != []):
-        cm2 = b.takeResidues(residues_b).centerOfMass()
-    else:
-        cm2 = b.centerOfMass()
+    cm1 = a.centerOfMass()
     
-    a,b = cleanPdbs(a,b)
+    cm2 = b.centerOfMass()
+    
+    a = cleanPdb(a)
+    b = cleanPdb(b)
     
     
-    a_ending = a.resModels()[-1].centerOfMass()
-    b_ending = b.resModels()[0].centerOfMass()
-    
-    
-    ## Orient
-    orientVectors(a, a_ending-cm1,direction)
-    orientVectors(b, b_ending-cm2,[direction[0]*-1,direction[1]*-1,direction[2]*-1])
-    
-    a_ending = a.resModels()[-1].centerOfMass()
-    b_ending = b.resModels()[-1].centerOfMass()
-        
     ## Go to the origin!
     a.xyz -= cm1
     b.xyz -= cm2
     
-    #~ a.writePdb("lol1.pdb")
-    #~ b.writePdb("lol2.pdb")
+    
+    ## Orient
+    b_start = b.xyz[N.where(b.maskFrom( 'name', ['N'] ))[0][0]]
+    a_ending = a.xyz[N.where(a.maskFrom( 'name', ['C'] ))[0][-1]]
+    
+    orientVectors(a, a_ending-cm1,direction)
+    orientVectors(b, b_start-cm2,[direction[0]*-1,direction[1]*-1,direction[2]*-1])
     
     
     ## Link creation
@@ -98,55 +86,40 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "G
     print nres
 
     ## - Create link structure
-    link = PDBModel()
-    link.xyz = N.zeros( (nres,3), float )
-    
-    for k in PDBModel.PDB_KEYS:
-        link[k] = nres * [PDBModel.PDB_KEYS[k][1]]  
-    
-    link['name'] = nres * ['CA']
-    
-    linkseq3 = single2longAA(linkseq)
-
-    reslist = []
-    for i in range(len(link['name'])):
-        reslist.append(linkseq3[i%len(linkseq)])
-    link['residue_name'] = reslist
-    link['residue_number'] = N.arange( nres ) + 1
-    link['serial'] = N.arange( nres ) + 1
-    
+    linkseq = ""
+    for i in range(nres):
+        linkseq += link_seq[i%len(link_seq)]
         
+    print "Link sequence:", linkseq
+
     ## Concatenation
-     
     ## - Change chains and segments
     a.atoms['chain_id'] = ["A"]*len(a.atoms['chain_id'])
-    link.atoms['chain_id'] = ["B"]*len(link.atoms['chain_id'])
-    b.atoms['chain_id'] = ["C"]*len(b.atoms['chain_id'])
+    b.atoms['chain_id'] = ["A"]*len(b.atoms['chain_id'])
     
     a.atoms['segment_id'] = ["p1"]*len(a.atoms['chain_id'])
-    link.atoms['segment_id'] = ["L"]*len(link.atoms['chain_id'])
     b.atoms['segment_id'] = ["p1"]*len(b.atoms['chain_id'])
     
     a['serial'] = range( len(a) )
     b['serial'] = range( len(b) )
     
-    
-    a.writePdb( '01_domain1.pdb' )
-    b.writePdb( '01_domain2.pdb' )
-    
-    #~ open("01_sequence.txt","w").write(a.sequence()+link.sequence()+b.sequence())
-    open("01_link_sequence.txt","w").write(link.sequence())
-    open('01_resid_a.txt',"w").write("resid "+str(a.atoms['residue_number'][0])+":"+str(a.atoms['residue_number'][-1]))
-    open('01_resid_b.txt',"w").write("resid "+str(b.atoms['residue_number'][0])+":"+str(b.atoms['residue_number'][-1]))
-    open('01_resid_link.txt',"w").write("resid "+str(link.atoms['residue_number'][0])+":"+str(link.atoms['residue_number'][-1]))
+    open("01_sequence.txt","w").write(a.sequence()+linkseq+b.sequence())
+    open("01_link_sequence.txt","w").write(linkseq)
+    #~ open('01_resid_a.txt',"w").write("resid "+str(a.atoms['residue_number'][0])+":"+str(a.atoms['residue_number'][-1]))
+    #~ open('01_resid_b.txt',"w").write("resid "+str(b.atoms['residue_number'][0])+":"+str(b.atoms['residue_number'][-1]))
+    #~ open('01_resid_link.txt',"w").write("resid "+str(link.atoms['residue_number'][0])+":"+str(link.atoms['residue_number'][-1]))
     
     ## Create and 'link' the peptide
     os.system("xplor -py xplor_build_link.py")
     link = PDBModel("01_extended_link.pdb")
-    ap = link.centerOfMass()
-    bp = link.resModels()[-1].centerOfMass()
-    orientVectors(link,bp-ap,direction)
-    
+    link.xyz -= link.centerOfMass()
+    link_end = link.xyz[N.where( link.maskFrom( 'name', ['OT1'] ))[0][0]] 
+    link_start = link.xyz[N.where( link.maskFrom( 'name', ['HT2'] ))[0][0]] 
+    orientVectors(link,link_end-link_start,direction)
+    link_end = link.xyz[N.where( link.maskFrom( 'name', ['OT1'] ))[0][0]] 
+    link_start = link.xyz[N.where( link.maskFrom( 'name', ['HT2'] ))[0][0]] 
+    cleanPdb(link)
+        
     ## - Residue renumbering
     last = a.atoms['residue_number'][-1] 
     first = last+ 1 + nres
@@ -155,23 +128,37 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "G
     b.renumberResidues(start= first)
     
     ## Linking...
-    first_N = link.xyz[N.where(link.maskFrom( 'name', ['N'] ))[0][0]]
-    last_C = link.xyz[N.where(link.maskFrom( 'name', ['C'] ))[0][-1]]
     a_last_C = a.xyz[N.where(a.maskFrom( 'name', ['C'] ))[0][-1]]
-    b_first_N = b.xyz[N.where(b.maskFrom( 'name', ['C'] ))[0][-1]]
+    b_first_N = b.xyz[N.where(b.maskFrom( 'name', ['N'] ))[0][0]]
     
-    dist = norm(last_C-first_N)
-    dist_a = norm(a_last_C)
-    dist_b = norm(b_first_N)
+    a.xyz += link_start - a_last_C
+    b.xyz += link_end - b_first_N
     
-    b.xyz += direction*(dist+dist_a+dist_b+1)
-    link.xyz += (dist_a+2)*direction
-    
-    link.atoms['chain_id'] = ["B"]*len(link.atoms['chain_id'])
+    link.atoms['chain_id'] = ["A"]*len(link.atoms['chain_id'])
+    link.atoms['segment_id'] = ["L"]*len(link.atoms['chain_id'])
     
     final = a.concat(link).concat(b)
     final.report()
+    final =  cleanPdb(final)
     final.writePdb("final.pdb") 
     
     
 linkProteins(a = PDBModel('2AWT.pdb') , b= PDBModel('2CQJ.pdb'),distance = 70 )
+
+#~ link = PDBModel()
+#~ link.xyz = N.zeros( (nres,3), float )
+
+#~ for k in PDBModel.PDB_KEYS:
+    #~ link[k] = nres * [PDBModel.PDB_KEYS[k][1]]  
+
+#~ link['name'] = nres * ['CA']
+
+#~ linkseq3 = single2longAA(linkseq)
+
+#~ reslist = []
+#~ for i in range(len(link['name'])):
+    #~ reslist.append(linkseq3[i%len(linkseq)])
+#~ link['residue_name'] = reslist
+#~ link['residue_number'] = N.arange( nres ) + 1
+#~ link['serial'] = N.arange( nres ) + 1
+    
