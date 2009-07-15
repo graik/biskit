@@ -60,6 +60,7 @@ def parse (path):
     
     results = {}
     coils = {}
+    ckeys = []
     for l in lineas:
         contents = l.split()
         
@@ -70,7 +71,10 @@ def parse (path):
             result.coilId = contents[2][:-1]
             
             coils[contents[2][:-1]] = []
+           
             
+            ckeys.append(contents[2][:-1])
+            #~ print "keys",ckeys
             result.oligomerization =  int(contents[3])
             
             where = 0
@@ -84,19 +88,26 @@ def parse (path):
                 coils[contents[2][:-1]].append(contents[i])
                 
             results[result.coilId] = result
-        
+            #~ print coils
         
         if len(contents)>3 and contents[3] == "coiled" and contents[4] == "coil" :
-            print l
             if not contents[4] == "packing:":
                 results[contents[6]].sense = contents[7][1:]
-                
+                #~ print contents[6], results[contents[6]].sense
                 
         if len(contents)>2 and contents[0] == "assigning" and contents[1] == "heptad":
             helix = contents[4]
-            for c in coils.keys():
-                if helix in coils[c]:
+            #~ print "helix", helix
+            #~ print ckeys
+            go = True
+            for c in ckeys:
+                #~ print helix, coils[c],c,helix in coils[c]
+                if helix in coils[c] and go:
                     mycoil = c
+                    go = False ## Found!
+                
+            coils[mycoil].remove(helix)
+            #~ print coils
         
         if len(contents) > 2 and contents[0] == "extent" and contents[1] == "of":
             if len(contents) == 6:
@@ -148,45 +159,49 @@ class Test(BT.BiskitTest):
         
     def test_general(self):
         """General parsing"""
-        r1 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex1')
-        r2 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex2')
-        r3 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex3')
-        r4 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex4')
+        #~ r1 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex1')
+        #~ r2 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex2')
+        #~ r3 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex3')
+        #~ r4 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex4')
+        r5 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex5')
         
         
         if self.local:
-            for o in r1:
-                print r1[o] 
-            print
+            #~ for o in r1:
+                #~ print r1[o] 
+            #~ print
             
-            for o in r2:
-                print r2[o] 
-            print
+            #~ for o in r2:
+                #~ print r2[o] 
+            #~ print
             
-            for o in r3:
-                print r3[o] 
-            print 
+            #~ for o in r3:
+                #~ print r3[o] 
+            #~ print 
             
-            for o in r4:
-                print r4[o] 
+            #~ for o in r4:
+                #~ print r4[o] 
+            
+            for o in r5:
+                print r5[o] 
                  
         
-            self.assertEqual(len(r3),2)
+            #~ self.assertEqual(len(r3),2)
     
-    def test_homology_cheching(self):
-        """check_homology test"""
-        r1 = SocketResult()
-        r2 = SocketResult()
+    #~ def test_homology_cheching(self):
+        #~ """check_homology test"""
+        #~ r1 = SocketResult()
+        #~ r2 = SocketResult()
         
-        r1.chains = {'A':"1234567890",'B':"234567"}
-        r2.chains = {'A':"1234567890",'B':"423456"}
+        #~ r1.chains = {'A':"1234567890",'B':"234567"}
+        #~ r2.chains = {'A':"1234567890",'B':"423456"}
         
-        results = {'1':r1,'2':r2}
+        #~ results = {'1':r1,'2':r2}
         
-        results = check_homology(results)
-        if self.local:
-            for r in results:
-                print results[r]
+        #~ results = check_homology(results)
+        #~ if self.local:
+            #~ for r in results:
+                #~ print results[r]
         
 if __name__ == '__main__':
     BT.localTest()    

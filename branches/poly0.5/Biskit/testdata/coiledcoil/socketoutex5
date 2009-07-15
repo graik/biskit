@@ -1,0 +1,155 @@
+SOCKET v2.18 26-03-01 John Walshaw, University of Sussex
+using cutoff of  7.0 Angstroms for centre of mass distances
+
+attempting to open "death.pdb"
+opened "death.pdb" (input)
+opened "lol" (input)
+Found beginning of residue data
+There are 217 alpha-helical residues in this structure
+
+chain A starts at residue    1
+chain B starts at residue  208
+
+These are the knobs and holes:
+
+knobs in helix 0:
+knobs in helix 1:
+knobs in helix 2:
+1) 30 (ILE 123:A, helix 2) type 4	(hole:  ILE 324:B, LEU 327:B, ILE 328:B, ALA 331:B helix 5) packing angle   29.208
+2) 33 (ALA 126:A, helix 2) type 4	(hole:  ILE 328:B, ALA 331:B, LEU 332:B, ILE 335:B helix 5) packing angle   90.780
+3) 37 (ILE 130:A, helix 2) type 4	(hole:  ALA 331:B, THR 334:B, ILE 335:B, ASN 338:B helix 5) packing angle   30.556
+4) 40 (ASN 133:A, helix 2) type 4	(hole:  ILE 335:B, ASN 338:B, GLN 339:B, ASN 342:B helix 5) packing angle   87.980
+5) 44 (ASN 137:A, helix 2) type 4	(hole:  ASN 338:B, LYS 341:B, ASN 342:B, LEU 345:B helix 5) packing angle   29.027
+6) 47 (LEU 140:A, helix 2) type 4	(hole:  ASN 342:B, LEU 345:B, GLN 346:B, ASN 349:B helix 5) packing angle   99.264
+7) 61 (VAL 154:A, helix 2) type 4	(hole:  TRP 356:B, VAL 359:B, GLN 360:B, PHE 363:B helix 5) packing angle  105.441
+8) 68 (ALA 161:A, helix 2) type 4	(hole:  PHE 363:B, ALA 366:B, VAL 367:B, LYS 370:B helix 5) packing angle   85.798
+19) 94 (ILE 187:A, helix 2) type 4	(hole:  LYS 388:B, LYS 391:B, ILE 392:B, LEU 395:B helix 6) packing angle   30.778
+20) 97 (LEU 190:A, helix 2) type 4	(hole:  ILE 392:B, LEU 395:B, HIS 396:B, LEU 399:B helix 6) packing angle   99.301
+knobs in helix 3:
+knobs in helix 4:
+knobs in helix 5:
+9) 145 (ILE 328:B, helix 5) type 4	(hole:  ILE 119:A, LEU 122:A, ILE 123:A, ALA 126:A helix 2) packing angle   31.036
+10) 148 (ALA 331:B, helix 5) type 4	(hole:  ILE 123:A, ALA 126:A, LEU 127:A, ILE 130:A helix 2) packing angle   89.674
+11) 152 (ILE 335:B, helix 5) type 4	(hole:  ALA 126:A, THR 129:A, ILE 130:A, ASN 133:A helix 2) packing angle   28.911
+12) 155 (ASN 338:B, helix 5) type 4	(hole:  ILE 130:A, ASN 133:A, GLN 134:A, ASN 137:A helix 2) packing angle   95.484
+13) 159 (ASN 342:B, helix 5) type 4	(hole:  ASN 133:A, LYS 136:A, ASN 137:A, LEU 140:A helix 2) packing angle   30.549
+14) 162 (LEU 345:B, helix 5) type 4	(hole:  ASN 137:A, LEU 140:A, GLN 141:A, ASN 144:A helix 2) packing angle  103.387
+15) 176 (VAL 359:B, helix 5) type 4	(hole:  TRP 151:A, VAL 154:A, GLN 155:A, PHE 158:A helix 2) packing angle   97.135
+16) 183 (ALA 366:B, helix 5) type 4	(hole:  PHE 158:A, ALA 161:A, VAL 162:A, LYS 165:A helix 2) packing angle   95.492
+knobs in helix 6:
+23) 207 (ILE 392:B, helix 6) type 4	(hole:  LYS 183:A, LYS 186:A, ILE 187:A, LEU 190:A helix 2) packing angle   28.192
+24) 210 (LEU 395:B, helix 6) type 4	(hole:  ILE 187:A, LEU 190:A, HIS 191:A, LEU 194:A helix 2) packing angle   93.431
+holes in helix 0:
+holes in helix 1:
+holes in helix 2:
+ ILE 119:A, LEU 122:A, ILE 123:A, ALA 126:A (knob: 145 (ILE 328:B, helix 5))
+ ILE 123:A, ALA 126:A, LEU 127:A, ILE 130:A (knob: 148 (ALA 331:B, helix 5))
+ ALA 126:A, THR 129:A, ILE 130:A, ASN 133:A (knob: 152 (ILE 335:B, helix 5))
+ ILE 130:A, ASN 133:A, GLN 134:A, ASN 137:A (knob: 155 (ASN 338:B, helix 5))
+ ASN 133:A, LYS 136:A, ASN 137:A, LEU 140:A (knob: 159 (ASN 342:B, helix 5))
+ ASN 137:A, LEU 140:A, GLN 141:A, ASN 144:A (knob: 162 (LEU 345:B, helix 5))
+ TRP 151:A, VAL 154:A, GLN 155:A, PHE 158:A (knob: 176 (VAL 359:B, helix 5))
+ PHE 158:A, ALA 161:A, VAL 162:A, LYS 165:A (knob: 183 (ALA 366:B, helix 5))
+ LYS 183:A, LYS 186:A, ILE 187:A, LEU 190:A (knob: 207 (ILE 392:B, helix 6))
+ ILE 187:A, LEU 190:A, HIS 191:A, LEU 194:A (knob: 210 (LEU 395:B, helix 6))
+holes in helix 3:
+holes in helix 4:
+holes in helix 5:
+ ILE 324:B, LEU 327:B, ILE 328:B, ALA 331:B (knob: 30 (ILE 123:A, helix 2))
+ ILE 328:B, ALA 331:B, LEU 332:B, ILE 335:B (knob: 33 (ALA 126:A, helix 2))
+ ALA 331:B, THR 334:B, ILE 335:B, ASN 338:B (knob: 37 (ILE 130:A, helix 2))
+ ILE 335:B, ASN 338:B, GLN 339:B, ASN 342:B (knob: 40 (ASN 133:A, helix 2))
+ ASN 338:B, LYS 341:B, ASN 342:B, LEU 345:B (knob: 44 (ASN 137:A, helix 2))
+ ASN 342:B, LEU 345:B, GLN 346:B, ASN 349:B (knob: 47 (LEU 140:A, helix 2))
+ TRP 356:B, VAL 359:B, GLN 360:B, PHE 363:B (knob: 61 (VAL 154:A, helix 2))
+ PHE 363:B, ALA 366:B, VAL 367:B, LYS 370:B (knob: 68 (ALA 161:A, helix 2))
+holes in helix 6:
+ LYS 388:B, LYS 391:B, ILE 392:B, LEU 395:B (knob: 94 (ILE 187:A, helix 2))
+ ILE 392:B, LEU 395:B, HIS 396:B, LEU 399:B (knob: 97 (LEU 190:A, helix 2))
+
+knob   0 (residue 3 = ILE 52:A) type 1 order -1
+knob   1 (residue 30 = ILE 123:A) type 4 order 2
+knob   2 (residue 33 = ALA 126:A) type 4 order 2
+knob   3 (residue 37 = ILE 130:A) type 4 order 2
+knob   4 (residue 40 = ASN 133:A) type 4 order 2
+knob   5 (residue 44 = ASN 137:A) type 4 order 2
+knob   6 (residue 47 = LEU 140:A) type 4 order 2
+knob   7 (residue 61 = VAL 154:A) type 4 order 2
+knob   8 (residue 68 = ALA 161:A) type 4 order 2
+knob   9 (residue 145 = ILE 328:B) type 4 order 2
+knob  10 (residue 148 = ALA 331:B) type 4 order 2
+knob  11 (residue 152 = ILE 335:B) type 4 order 2
+knob  12 (residue 155 = ASN 338:B) type 4 order 2
+knob  13 (residue 159 = ASN 342:B) type 4 order 2
+knob  14 (residue 162 = LEU 345:B) type 4 order 2
+knob  15 (residue 176 = VAL 359:B) type 4 order 2
+knob  16 (residue 183 = ALA 366:B) type 4 order 2
+knob  17 (residue 187 = LYS 370:B) type 2 order -1
+knob  18 (residue 87 = LEU 180:A) type 2 order -1
+knob  19 (residue 94 = ILE 187:A) type 4 order 2
+knob  20 (residue 97 = LEU 190:A) type 4 order 2
+knob  21 (residue 188 = LEU 373:B) type 2 order -1
+knob  22 (residue 192 = LEU 377:B) type 1 order -1
+knob  23 (residue 207 = ILE 392:B) type 4 order 2
+knob  24 (residue 210 = LEU 395:B) type 4 order 2
+knob  25 (residue 214 = LEU 399:B) type 2 order -1
+knob  26 (residue 117 = ILE 259:B) type 1 order -1
+knob  27 (residue 128 = TYR 273:B) type 2 order -1
+
+coiled coil  0:  2 helices   2  5	frequency 8
+coiled coil  1:  2 helices   2  6	frequency 2
+
+helix 2 is in a 2-stranded coiled coil
+helix 5 is in a 2-stranded coiled coil
+helix 6 is in a 2-stranded coiled coil
+
+
+
+coiled coil  0:
+	angle between helices  2 and  5 is   18.876	parallel
+this coiled coil is parallel
+
+
+death.pdb  7.0 0 coiled coil (i) 0 (parallel 2-stranded, length max 47 mean 47.00):
+
+
+assigning heptad to helix 2 (X) 115-206:A
+extent of coiled coil packing: 119-165:A
+sequence PAEVIRELIAYALDTIAENQAKNEHLQKENERLLRDWNDVQGRFEKAVSAKEALETDLYKRFILVLNEKKTKIRSLHNKLLNAAQEREKDIK
+register     defgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefga                                         
+partner  --------Y--Y---Y--Y---Y--Y-------------Y------Y------------------!------!--!----------------
+knobtype --------4--4---4--4---4--4-------------4------4------------------2------4--4----------------
+
+
+assigning heptad to helix 5 (Y) 320-370:B
+extent of coiled coil packing: 324-370:B
+sequence PAEVIRELIAYALDTIAENQAKNEHLQKENERLLRDWNDVQGRFEKAVSAK
+register     defgabcdefgabcdefgabcdefgabcdefgabcdefgabcdefga
+partner  --------X--X---X--X---X--X-------------X------X---X
+knobtype --------4--4---4--4---4--4-------------4------4---2
+
+
+coiled coil  1:
+	angle between helices  2 and  6 is    7.420	parallel
+this coiled coil is parallel
+
+
+death.pdb  7.0 0 coiled coil (ii) 1 (parallel 2-stranded, length max 12 mean 12.00):
+
+
+assigning heptad to helix 2 (X) 115-206:A
+extent of coiled coil packing: 183-194:A
+sequence PAEVIRELIAYALDTIAENQAKNEHLQKENERLLRDWNDVQGRFEKAVSAKEALETDLYKRFILVLNEKKTKIRSLHNKLLNAAQEREKDIK
+register                                                                     defgabcdefga            
+partner  --------!--!---!--!---!--!-------------!------!------------------Y------Y--Y----------------
+knobtype --------4--4---4--4---4--4-------------4------4------------------2------4--4----------------
+
+
+assigning heptad to helix 6 (Y) 373-401:B
+extent of coiled coil packing: 388-399:B
+sequence LETDLYKRFILVLNEKKTKIRSLHNKLLN
+register                defgabcdefga  
+partner  X---X--------------X--X---X--
+knobtype 2---1--------------4--4---2--
+death.pdb c  7.00 e 0 result 2 COILED COILS PRESENT
+Finished

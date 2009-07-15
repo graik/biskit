@@ -32,7 +32,7 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "G
     
     @param a: First model to be linked.
     @type a: PDBModel
-    @param b: First model to be linked.
+    @param b: Second model to be linked.
     @type b: PDBModel
     @param residues_a: Residues to be used to get the center of mass of the first 
             operator.
@@ -43,6 +43,9 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "G
     
     TODO
     """
+    
+    direction = N.array(normalized(direction))
+    
     if(residues_a != []):
         cm1 = a.takeResidues(residues_a).centerOfMass()
     else:
@@ -57,7 +60,7 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "G
     
     
     a_ending = a.resModels()[-1].centerOfMass()
-    b_ending = b.resModels()[-1].centerOfMass()
+    b_ending = b.resModels()[0].centerOfMass()
     
     
     ## Orient
@@ -71,12 +74,12 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "G
     a.xyz -= cm1
     b.xyz -= cm2
     
-    a.writePdb("lol1.pdb")
-    b.writePdb("lol2.pdb")
+    #~ a.writePdb("lol1.pdb")
+    #~ b.writePdb("lol2.pdb")
     
     
     ## Link creation
-    ## - Get distance
+    ## - Get contour from distance
     
     wlc = WormLikeChainModel()
     p = 4.; x = distance 
@@ -113,20 +116,12 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "G
     link['serial'] = N.arange( nres ) + 1
     
         
-
     ## Concatenation
-    
-    ## - Residue renumbering
-    last = a.atoms['residue_number'][-1] 
-    first = last+ 1 + nres
-    a.renumberResidues() ## a starts from 1
-    link.renumberResidues(start = last+1)
-    b.renumberResidues(start= first)
-    
+     
     ## - Change chains and segments
-    a.atoms['chain_id'] = [" "]*len(a.atoms['chain_id'])
-    link.atoms['chain_id'] = [" "]*len(link.atoms['chain_id'])
-    b.atoms['chain_id'] = [" "]*len(b.atoms['chain_id'])
+    a.atoms['chain_id'] = ["A"]*len(a.atoms['chain_id'])
+    link.atoms['chain_id'] = ["B"]*len(link.atoms['chain_id'])
+    b.atoms['chain_id'] = ["C"]*len(b.atoms['chain_id'])
     
     a.atoms['segment_id'] = ["p1"]*len(a.atoms['chain_id'])
     link.atoms['segment_id'] = ["L"]*len(link.atoms['chain_id'])
@@ -135,24 +130,48 @@ def linkProteins(a = None,residues_a = [], b = None,residues_b = [],linkseq = "G
     a['serial'] = range( len(a) )
     b['serial'] = range( len(b) )
     
-    final = a.concat(b)
-    final.report()
-    final.writePdb("aux_in.pdb")
     
     a.writePdb( '01_domain1.pdb' )
     b.writePdb( '01_domain2.pdb' )
     
-    open("01_sequence.txt","w").write(a.sequence()+link.sequence()+b.sequence())
+    #~ open("01_sequence.txt","w").write(a.sequence()+link.sequence()+b.sequence())
     open("01_link_sequence.txt","w").write(link.sequence())
     open('01_resid_a.txt',"w").write("resid "+str(a.atoms['residue_number'][0])+":"+str(a.atoms['residue_number'][-1]))
     open('01_resid_b.txt',"w").write("resid "+str(b.atoms['residue_number'][0])+":"+str(b.atoms['residue_number'][-1]))
     open('01_resid_link.txt',"w").write("resid "+str(link.atoms['residue_number'][0])+":"+str(link.atoms['residue_number'][-1]))
     
-    os.system("xplor -py xplor_rebuild_script.py")
-    #~ link = PDBModel("aux_link.pdb")
-    #~ ap = link.centerOfMass()
-    #~ bp = link.resModels()[-1].centerOfMass()
-    #~ orientVectors(link,bp-ap,direction)
+    ## Create and 'link' the peptide
+    os.system("xplor -py xplor_build_link.py")
+    link = PDBModel("01_extended_link.pdb")
+    ap = link.centerOfMass()
+    bp = link.resModels()[-1].centerOfMass()
+    orientVectors(link,bp-ap,direction)
+    
+    ## - Residue renumbering
+    last = a.atoms['residue_number'][-1] 
+    first = last+ 1 + nres
+    a.renumberResidues() ## a starts from 1
+    link.renumberResidues(start = last+1)
+    b.renumberResidues(start= first)
+    
+    ## Linking...
+    first_N = link.xyz[N.where(link.maskFrom( 'name', ['N'] ))[0][0]]
+    last_C = link.xyz[N.where(link.maskFrom( 'name', ['C'] ))[0][-1]]
+    a_last_C = a.xyz[N.where(a.maskFrom( 'name', ['C'] ))[0][-1]]
+    b_first_N = b.xyz[N.where(b.maskFrom( 'name', ['C'] ))[0][-1]]
+    
+    dist = norm(last_C-first_N)
+    dist_a = norm(a_last_C)
+    dist_b = norm(b_first_N)
+    
+    b.xyz += direction*(dist+dist_a+dist_b+1)
+    link.xyz += (dist_a+2)*direction
+    
+    link.atoms['chain_id'] = ["B"]*len(link.atoms['chain_id'])
+    
+    final = a.concat(link).concat(b)
+    final.report()
+    final.writePdb("final.pdb") 
     
     
 linkProteins(a = PDBModel('2AWT.pdb') , b= PDBModel('2CQJ.pdb'),distance = 70 )

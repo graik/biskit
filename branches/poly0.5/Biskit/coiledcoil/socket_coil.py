@@ -97,35 +97,50 @@ class Test(BT.BiskitTest):
         pass
     def test_execution(self):
         """ testing of execution"""
-        p = PDBModel(T.testRoot()+"/coiledcoil/1ZIJ.pdb")
-        s = SocketCoil(p)
-        s.debug = True
-        s.run()
-        if self.local:
-            print s.result
-            for cc in s.result.keys():
-                print s.result[cc]
+        #~ p = PDBModel(T.testRoot()+"/coiledcoil/1ZIJ.pdb")
+        #~ s = SocketCoil(p)
+        #~ s.debug = True
+        #~ s.run()
+        #~ if self.local:
+            #~ print s.result
+            #~ for cc in s.result.keys():
+                #~ print s.result[cc]
                 
-        #~ ## Error case
-        p = PDBModel("/home/victor/poly0.5/Biskit/testdata/coiledcoil/pdbs/2B9C_cropped.pdb")
-        s = SocketCoil(p)
-        s.debug = True
-        s.run()
-        if self.local:
-            for cc in s.result.keys():
-                print s.result[cc]
+        ## Error case
+        #~ p = PDBModel("/home/victor/poly0.5/Biskit/testdata/coiledcoil/pdbs/2B9C_cropped.pdb")
+        #~ s = SocketCoil(p)
+        #~ s.debug = True
+        #~ s.run()
+        #~ if self.local:
+            #~ for cc in s.result.keys():
+                #~ print s.result[cc]
         
-        ## Antiparallel
+        #~ ## Antiparallel
+        #~ if self.local:
+            #~ print 
+            #~ print "Antiparallel:"            
+        #~ p = PDBModel(T.testRoot()+"/coiledcoil/1R48_proposmo_clean.pdb")
+        #~ s = SocketCoil(p)
+        #~ s.debug = True
+        #~ s.run()
+        #~ if self.local:
+            #~ for cc in s.result.keys():
+                #~ print s.result[cc]   
+                
+        ## False hetero
         if self.local:
             print 
-            print "Antiparallel:"            
-        p = PDBModel(T.testRoot()+"/coiledcoil/1R48_proposmo_clean.pdb")
+            print "Heterodimer:"            
+        p = PDBModel("death.pdb")
+        p.renumberResidues()
+        p.atoms['serial_number']=range(len(p))
         s = SocketCoil(p)
         s.debug = True
         s.run()
         if self.local:
             for cc in s.result.keys():
                 print s.result[cc]   
+    
 if __name__ == '__main__':
     BT.localTest()    
     
