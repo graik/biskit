@@ -183,7 +183,7 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
     final.report()
     final =  cleanPdb(final)
     final.writePdb("final.pdb") 
-    
+    final.writePdb("final_ini.pdb")
     #~ os.system('namd2 namdscript')
     #~ os.system('xplor -py xplor_fix_covalent.py')
     

@@ -1,0 +1,21 @@
+mol new in.pdb
+
+set mymol [atomselect top protein] 	 
+$mymol writepdb in.pdb 
+
+set file_in final.pdb
+set file_out_pdb in_min.pdb
+set file_out_psf in_min.psf
+
+package require psfgen
+topology /usr/local/lib/vmd/plugins/noarch/tcl/membrane1.0/top_all27_prot_lipid.inp 
+pdbalias residue HIS HSE
+pdbalias atom ILE CD1 CD
+segment U {pdb $file_in}
+regenerate angles dihedrals
+coordpdb $file_in U
+guesscoord
+writepdb $file_out_pdb
+writepsf $file_out_psf
+
+exit
