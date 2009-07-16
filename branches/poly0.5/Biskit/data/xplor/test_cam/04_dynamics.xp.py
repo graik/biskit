@@ -23,10 +23,14 @@ protocol.fixupCovalentGeom(maxIters=10,useVDW=1)
 
 dyn = ivm.IVM()
 
+## define fixed parts
 dyn.group( AtomSel( 'resid 1:69' ) )
 dyn.group( AtomSel( 'resid 84:145') )
 
-dyn.setTrajectory( 'rb_traj.log' )
+import trajFile
+
+t = trajFile.TrajFile( 'rb_traj.crd' )
+dyn.setTrajectory( t )
 
 protocol.torsionTopology( dyn )
 
@@ -45,8 +49,8 @@ init_t = 500
 protocol.initDynamics( ivm=dyn,
                        potList=pot,
                        bathTemp=init_t,
-                       finalTime=5,
-                       numSteps=1000,
+                       finalTime=10,
+                       numSteps=5000,
                        printInterval=10,
                        )
 dyn.setETolerance( init_t/100 )
