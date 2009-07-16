@@ -1,4 +1,4 @@
-from restools import orientVectors
+from restools import orientVectors, orientPlanes
 import numpy as N
 from vectors import norm,normalized
 from wormlikechain import WormLikeChainModel
@@ -95,10 +95,25 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
     ## Concatenation
     ## - Change chains and segments
     a.atoms['chain_id'] = ["A"]*len(a.atoms['chain_id'])
-    b.atoms['chain_id'] = ["A"]*len(b.atoms['chain_id'])
+    b.atoms['chain_id'] = ["C"]*len(b.atoms['chain_id'])
     
     a.atoms['segment_id'] = ["p1"]*len(a.atoms['chain_id'])
     b.atoms['segment_id'] = ["p1"]*len(b.atoms['chain_id'])
+    
+    ## fix everything but the 10% of the last and initial atoms
+    a.atoms['temperature_factor'] = [1.]*len(a)
+    b.atoms['temperature_factor'] = [1.]*len(b)
+    
+    where = int(0.9*a.lenResidues())
+    for i in range(len(a)):
+        if a.atoms['residue_number'][i]>= where:
+            a.atoms['temperature_factor'][i] = 0.
+    
+    where = int(0.1*b.lenResidues())
+    for i in range(len(b)):
+        if b.atoms['residue_number'][i]<= where:
+            b.atoms['temperature_factor'][i] = 0.
+    
     
     a['serial'] = range( len(a) )
     b['serial'] = range( len(b) )
@@ -127,6 +142,27 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
     link.renumberResidues(start = last+1)
     b.renumberResidues(start= first)
     
+    
+    ## Fix joining sites planarity
+ 
+    last_a_C = a.xyz[N.where(a.maskFrom( 'name', ['C'] ))[0][-1]]
+    last_a_O = a.xyz[N.where(a.maskFrom( 'name', ['O'] ))[0][-1]]
+    
+    ini_link_N = link.xyz[N.where(link.maskFrom( 'name', ['N'] ))[0][0]]
+    ini_link_Ca = link.xyz[N.where(link.maskFrom( 'name', ['CA'] ))[0][0]] 
+    
+    orientPlanes(modela = a, orig_plane = [last_a_O-last_a_C,ini_link_N-last_a_C], orig_perp = False, target_plane=[(last_a_C-ini_link_N),(ini_link_Ca-ini_link_N)],target_perp = False)
+   
+    ini_b_N = b.xyz[N.where(b.maskFrom( 'name', ['N'] ))[0][0]]
+    ini_b_Ca = b.xyz[N.where(b.maskFrom( 'name', ['CA'] ))[0][0]] 
+    
+    last_link_C = link.xyz[N.where(link.maskFrom( 'name', ['C'] ))[0][-1]]
+    last_link_O = link.xyz[N.where(link.maskFrom( 'name', ['O'] ))[0][-1]]
+    
+    orientPlanes(modela = b, orig_plane = [last_link_C-ini_b_N,ini_b_Ca-ini_b_N], orig_perp = False, target_plane=[(last_link_O-last_link_C) ,(ini_b_N-last_link_C)],target_perp = False)
+   
+    
+    
     ## Linking...
     a_last_C = a.xyz[N.where(a.maskFrom( 'name', ['C'] ))[0][-1]]
     b_first_N = b.xyz[N.where(b.maskFrom( 'name', ['N'] ))[0][0]]
@@ -134,13 +170,27 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
     a.xyz += link_start - a_last_C
     b.xyz += link_end - b_first_N
     
-    link.atoms['chain_id'] = ["A"]*len(link.atoms['chain_id'])
-    link.atoms['segment_id'] = ["L"]*len(link.atoms['chain_id'])
+    link.atoms['chain_id'] = ["B"]*len(link.atoms['chain_id'])
+    link.atoms['segment_id'] = ["p1"]*len(link.atoms['chain_id'])
+    ## not fixed atoms
+    link.atoms['temperature_factor'] = [0.]*len(link)
+    
+    
+    
     
     final = a.concat(link).concat(b)
+    final['serial'] = range( len(final) )
     final.report()
     final =  cleanPdb(final)
     final.writePdb("final.pdb") 
+    
+    #~ os.system('namd2 namdscript')
+    #~ os.system('xplor -py xplor_fix_covalent.py')
+    
+    os.system('vmd -dispdev text -e vmdscript')
+    for i in range(0,5):
+        os.system('namd2 namdscript')
+        os.system('cp out_min.coor final.pdb')
     
     
 linkProteins(a = PDBModel('2AWT.pdb') , b= PDBModel('2CQJ.pdb'),distance = 70 )
