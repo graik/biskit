@@ -1,5 +1,9 @@
 evaluate ($inputpsf   = "input.psf")
 evaluate ($inputpdb   = "input.pdb")
+evaluate ($param19    = "param19.pro" )
+evaluate ($nbonds_repel = "nbonds_repel.inp" )
+evaluate ($neutral19  = "neutral19.inp" )
+evaluate ($pdb_out    = "final.pdb" )
 
 structure @@$inputpsf end
 coor @@$inputpdb
@@ -18,7 +22,7 @@ parameter nbonds wmin 0.1 end end
 flags include bonds angles dihed improper vdw elec cdih end
 
 dynamics internal
-  trajectory= rb_dyna.dat nsavc= 5
+  trajectory= rb_dyna.dat nsavc= 5 ascii = true
   nprint= 10
 
   endtime= 10
@@ -26,7 +30,7 @@ dynamics internal
   
   etolerance= 5
 
-  tbath= 500
+  tbath= 300
   
   group= (resid 1:69)
   group= (resid 84:145)
@@ -36,3 +40,5 @@ dynamics internal
   itype= pc6
 
 end
+
+write coor output= $pdb_out end
