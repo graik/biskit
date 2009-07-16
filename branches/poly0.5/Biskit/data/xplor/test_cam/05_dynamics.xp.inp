@@ -1,0 +1,38 @@
+evaluate ($inputpsf   = "input.psf")
+evaluate ($inputpdb   = "input.pdb")
+
+structure @@$inputpsf end
+coor @@$inputpdb
+
+parameter
+  	reset
+        @@$param19
+	@@$nbonds_repel
+end
+parameter nbonds wmin 0.1 end end
+
+
+@$neutral19	!scale sicechain charges
+
+
+flags include bonds angles dihed improper vdw elec cdih end
+
+dynamics internal
+  trajectory= rb_dyna.dat nsavc= 5
+  nprint= 10
+
+  endtime= 10
+  nstep= 10000
+  
+  etolerance= 5
+
+  tbath= 500
+  
+  group= (resid 1:69)
+  group= (resid 84:145)
+
+  AUTO TORSion
+
+  itype= pc6
+
+end
