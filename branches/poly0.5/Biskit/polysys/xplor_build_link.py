@@ -33,10 +33,12 @@ def single2longAA( seq ):
        
     return result
     
+protocol.initTopology(('protein'))
+protocol.initParams(('protein'))
     
 seq = open('01_link_sequence.txt').read()
 seq2 = single2longAA(seq)
 psfGen.seqToPSF(seq2, segName='LINK', seqType='protein' )
 protocol.genExtendedStructure()
-#~ protocol.fixupCovalentGeom(maxIters=100)
+#~ protocol.fixupCovalentGeom(maxIters=100,useVDW=1)
 pdbTool.PDBTool("01_extended_link.pdb").write()

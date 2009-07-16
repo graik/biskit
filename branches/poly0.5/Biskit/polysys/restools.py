@@ -4,7 +4,7 @@ from vectors import normalized, norm,dot, angle, vcos, cross,sub,matrix2list,vco
 from tools import pad , cutdepth
 import Biskit.molUtils as MU 
 
-def planarize(modela = None, orig_plane =[[1,0,0],[0,0,1]],orig_perp = False, target_plane=[[1,0,0],[0,0,-1]],target_perp = True):
+def orientPlanes(modela = None, orig_plane =[[1,0,0],[0,0,1]],orig_perp = False, target_plane=[[1,0,0],[0,0,-1]],target_perp = True):
     
     ## We want perpendicular plane-defining vectors
     model = modela.clone()
