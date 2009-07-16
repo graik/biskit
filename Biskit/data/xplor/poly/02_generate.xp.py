@@ -20,6 +20,12 @@ xplor.command( 'vector do (z = %4.2f) (all)' % rand.random() )
 ## read structures
 protocol.initCoords( ['01_domain1.pdb', '01_domain2.pdb'] )
 
+xplor.command(\
+"""hbuild
+   selection=( hydrogen and (resid 1:107 or resid 122:338) ) 
+   phistep=10.0
+end""")
+
 protocol.fixupCovalentGeom(sel=AtomSel('(attr x=0.0) and resid 1:107'),
                            maxIters=20, verbose=1 )
 protocol.fixupCovalentGeom(sel=AtomSel('(attr x=0.0) and resid 122:338'),
