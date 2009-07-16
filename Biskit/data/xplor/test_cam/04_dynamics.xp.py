@@ -6,20 +6,22 @@ import pdbTool
 protocol.initTopology(('protein'))
 protocol.initParams(('protein'))
 
-protocol.loadPDB("1up5_cleaned.pdb")
-
+protocol.loadPDB( '1up5_cleaned.pdb' )
+    
 xplor.command(\
 """hbuild
    selection=( hydrogen ) 
    phistep=10.0
 end""")
 
-pdbTool.PDBTool("01_hbuild.pdb").write()
+
 protocol.addUnknownAtoms()
 
-pdbTool.PDBTool("02_addUnknown.pdb").write()
-
 protocol.fixupCovalentGeom(maxIters=10,useVDW=1)
+
+pdbTool.PDBTool( 'input.pdb' ).write()
+xplor.command("write psf output=input.psf end")
+
 
 dyn = ivm.IVM()
 
