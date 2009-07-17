@@ -104,15 +104,16 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
     a.atoms['temperature_factor'] = [1.]*len(a)
     b.atoms['temperature_factor'] = [1.]*len(b)
     
-    where = int(0.9*a.lenResidues())
-    for i in range(len(a)):
-        if a.atoms['residue_number'][i]>= where:
-            a.atoms['temperature_factor'][i] = 0.
+    #~ where = int(0.9*a.lenResidues())
+    #~ for i in range(len(a)):
+        #~ if a.atoms['residue_number'][i]>= where:
+            #~ a.atoms['temperature_factor'][i] = 0.
     
-    where = int(0.1*b.lenResidues())
-    for i in range(len(b)):
-        if b.atoms['residue_number'][i]<= where:
-            b.atoms['temperature_factor'][i] = 0.
+    #~ where = int(0.1*b.lenResidues())
+    #~ for i in range(len(b)):
+        #~ if b.atoms['residue_number'][i]<= where:
+            #~ b.atoms['temperature_factor'][i] = 0.
+    
     
     
     a['serial'] = range( len(a) )
@@ -179,21 +180,49 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
     
     
     final = a.concat(link).concat(b)
-    final['serial'] = range( len(final) )
+    final['serial_number'] = range( len(final) )
     final.report()
     final =  cleanPdb(final)
-    final.writePdb("final.pdb") 
-    final.writePdb("final_ini.pdb")
+    
     #~ os.system('namd2 namdscript')
     #~ os.system('xplor -py xplor_fix_covalent.py')
     
+    fixed = []
+    where = int(0.85*a.lenResidues())
+    fixed += range(where,a.lenResidues())
+    where = int(0.15*b.lenResidues())
+    fixed += range(link.atoms['residue_number'][-1],where+link.atoms['residue_number'][-1]+1)
+    fixed += range(link.atoms['residue_number'][0]-1,link.atoms['residue_number'][-1]+1)
+    print link.atoms['residue_number'][-1]
+    print fixed
+    
+    for i in range(len(final)):
+        if final.atoms['residue_number'][i] in fixed:
+            final.atoms['temperature_factor'][i] = 1.0
+        else:
+            final.atoms['temperature_factor'][i] = 0.0
+    
+    final.writePdb("initial.pdb")
+    
+    
     os.system('vmd -dispdev text -e vmdscript')
-    for i in range(0,5):
+    
+    final = PDBModel('in_min.pdb')
+    for i in range(len(final)):
+        if final.atoms['residue_number'][i] in fixed:
+            final.atoms['temperature_factor'][i] = 1.0
+        else:
+            final.atoms['temperature_factor'][i] = 0.0
+    final.writePdb("in_min.pdb") 
+    
+    for i in range(0,1):
         os.system('namd2 namdscript')
-        os.system('cp out_min.coor final.pdb')
+        os.system('cp out_min.coor in_min.pdb')
+    
+    os.system('cp out_min.coor final.pdb')
     
     
-linkProteins(a = PDBModel('2AWT.pdb') , b= PDBModel('2CQJ.pdb'),distance = 70 )
+linkProteins(a = PDBModel('2AWT.pdb') , b= PDBModel('2CQJ.pdb'),distance = 70)
 
 #~ link = PDBModel()
 #~ link.xyz = N.zeros( (nres,3), float )
