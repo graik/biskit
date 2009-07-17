@@ -55,4 +55,4 @@ langevin            off
 # Scripting
 
 minimize            200
-run 500 
+ 
