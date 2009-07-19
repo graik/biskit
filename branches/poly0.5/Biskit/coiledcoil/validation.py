@@ -1,8 +1,4 @@
-
-
-
 ## Statistics
-
 def file_stats(path):
     file = open(path)
     lineas = file.readlines()
@@ -56,7 +52,7 @@ def file_stats(path):
     
     
     
-def gen_table(file):
+#~ def gen_table(file):
     
     
     
