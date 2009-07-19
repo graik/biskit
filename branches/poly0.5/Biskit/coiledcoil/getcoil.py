@@ -92,7 +92,7 @@ def createCandidatesFile (filename = "", dir = ""):
                             line += sc.result[cc].chains[h] + " " +getHeptad(sc.result[cc].chains[h],sc.result[cc].registers[h])+" "
                             line += sc.result[cc].homo 
                         
-                        file.writelines(line+"\n")
+                            file.writelines(line+"\n")
             
             del sc 
         except:
@@ -101,7 +101,9 @@ def createCandidatesFile (filename = "", dir = ""):
         done = done+1
         if done%10 ==0 :
             print "Parsed:",done,"Total:",total,"Failed:",len(failed),"( no coils:",no_coils,")"
-            
+    
+    print "Parsed:",done,"Total:",total,"Failed:",len(failed),"( no coils:",no_coils,")"
+       
     file.close()
 
 
