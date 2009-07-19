@@ -64,7 +64,7 @@ def parse (path):
     for l in lineas:
         contents = l.split()
         
-        if len(contents)>4 and contents[0] == "coiled" and contents[1] == "coil" and not 'subset' in l:
+        if len(contents)>4  and contents[0] == "coiled" and contents[1] == "coil" and not 'subset' in l and not 'IGNORING' in l:
             
             result = SocketResult()
             
@@ -97,17 +97,17 @@ def parse (path):
                 
         if len(contents)>2 and contents[0] == "assigning" and contents[1] == "heptad":
             helix = contents[4]
-            #~ print "helix", helix
-            #~ print ckeys
+            print "helix", helix
+            print ckeys
             go = True
             for c in ckeys:
-                #~ print helix, coils[c],c,helix in coils[c]
+                print helix, coils[c],c,helix in coils[c]
                 if helix in coils[c] and go:
                     mycoil = c
                     go = False ## Found!
                 
             coils[mycoil].remove(helix)
-            #~ print coils
+            print coils
         
         if len(contents) > 2 and contents[0] == "extent" and contents[1] == "of":
             if len(contents) == 6:
@@ -164,6 +164,7 @@ class Test(BT.BiskitTest):
         #~ r3 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex3')
         #~ r4 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex4')
         r5 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex5')
+        r6 =  parse('/home/victor/poly0.5/Biskit/testdata/coiledcoil/socketoutex6')
         
         
         if self.local:
@@ -183,7 +184,11 @@ class Test(BT.BiskitTest):
                 #~ print r4[o] 
             
             for o in r5:
-                print r5[o] 
+                print r5[o]
+
+            print '--------------------'
+            for o in r6:
+                print r6[o] 
                  
         
             #~ self.assertEqual(len(r3),2)
