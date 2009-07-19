@@ -97,17 +97,17 @@ def parse (path):
                 
         if len(contents)>2 and contents[0] == "assigning" and contents[1] == "heptad":
             helix = contents[4]
-            print "helix", helix
-            print ckeys
+            #~ print "helix", helix
+            #~ print ckeys
             go = True
             for c in ckeys:
-                print helix, coils[c],c,helix in coils[c]
+                #~ print helix, coils[c],c,helix in coils[c]
                 if helix in coils[c] and go:
                     mycoil = c
                     go = False ## Found!
                 
             coils[mycoil].remove(helix)
-            print coils
+            #~ print coils
         
         if len(contents) > 2 and contents[0] == "extent" and contents[1] == "of":
             if len(contents) == 6:

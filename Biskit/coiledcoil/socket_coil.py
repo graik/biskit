@@ -128,10 +128,19 @@ class Test(BT.BiskitTest):
                 #~ print s.result[cc]   
                 
         ## False hetero
-        if self.local:
-            print 
-            print "Heterodimer:"            
-        p = PDBModel("death.pdb")
+        #~ if self.local:
+            #~ print 
+            #~ print "Heterodimer:"            
+        #~ p = PDBModel("death.pdb")
+        #~ p.renumberResidues()
+        #~ p.atoms['serial_number']=range(len(p))
+        #~ s = SocketCoil(p)
+        #~ s.debug = True
+        #~ s.run()
+        #~ if self.local:
+            #~ for cc in s.result.keys():
+                #~ print s.result[cc]   
+        p = PDBModel("1EK9.pdb")
         p.renumberResidues()
         p.atoms['serial_number']=range(len(p))
         s = SocketCoil(p)
