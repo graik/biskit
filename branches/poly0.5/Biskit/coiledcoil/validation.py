@@ -13,7 +13,7 @@ def file_stats(path):
     antip_hetero = 0
     seq_length = 0
     
-    for l in lineas:
+    for l in lineas[1:]:
         contents = l.split()
         if contents[0] in pdbs:
             pdbs[contents[0]] += 1./int(contents[1])
@@ -42,7 +42,8 @@ def file_stats(path):
     total_coils2 = 0   
     for c in coil_oligo:
         total_coils2 += coil_oligo[c]
-        
+    
+    print "Files parsed from:",lines[0]
     print "Total Coils (1):",total_coils
     print "Total Coils (2):",total_coils2
     print "Total Files:",total_files
