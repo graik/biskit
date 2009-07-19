@@ -191,16 +191,16 @@ splitInFiles('coils.db')
 ## homodimeric_parallel
 file_stats('homodimeric_parallel_can')
 t,v=generateValidationGroups('homodimeric_parallel_can',0.8)
-writeTable(normalizeTable(gen_table('homodimeric_parallel_can',v)),T.dataRoot()+'/coiledcoil/homodimeric_parallel')
+writeTable((gen_table('homodimeric_parallel_can',v)),T.dataRoot()+'/coiledcoil/homodimeric_parallel')
 writeValidationCandidates('homodimeric_parallel_can','homodimeric_parallel_val',v)
-dataFileCreation('homodimeric_parallel_dat','homodimeric_parallel_val',target_seq = "LLLLLLLLLLLL",target_type = ("homo","parallel",2), method = "All", use_big = 28)
+dataFileCreation('homodimeric_parallel_dat','homodimeric_parallel_val',target_seq = "LLLLLLLLLLLL",target_type = ("homo","parallel",2), method = "All", use_big = 0 )
 study = CCStudy(data = 'homodimeric_parallel_dat')
 s,a = study.doStudy(True)
 print s    
 
-file_stats('homodimeric_antiparallel')
-file_stats('heterodimeric_parallel')
-file_stats('heterodimeric_antiparallel')
+file_stats('homodimeric_antiparallel_can')
+file_stats('heterodimeric_parallel_can')
+file_stats('heterodimeric_antiparallel_can')
 
 
 #~ def gen_table(file):
