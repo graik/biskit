@@ -66,14 +66,16 @@ METHODS = {"Pair":("EXE","","Paircoil",paircoil_method),\
            "SAPar":("TABLE","SOCKET_antipar_norm","Socket Antiparallel Score Table"),\
            "Paper":("NONE","","Paper (reg+reference)"),\
            "Parry":("TABLE","DADParry_scaled","D A Parry score table"),\
+           "HomoPar":("TABLE",'homodimeric_parallel',"Home made table using socket"),\
            "Default":("NONE","","Not defined method (just for using defaults)")\
            }
 
 
 priorities = {"Socket":5,## Socket is the reference  \ 
-            "Pair":3,\
-            "SPar":4,\
-            "SAPar":4,\
+            "Pair":4,\
+            "SPar":3,\
+            "SAPar":3,\
+            "HomoPar":3,\
             "Paper":5,\
             "Parry":3,\
             "Default":2\
