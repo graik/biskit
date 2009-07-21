@@ -5,7 +5,7 @@ from wormlikechain import WormLikeChainModel
 from Biskit.molUtils import single2longAA
 from Biskit.PDBModel import PDBModel 
 import os
-
+from xtender import Xtender 
 
 import Biskit.tools as T
 import Biskit.molUtils as MU
@@ -63,7 +63,7 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
     a_ending = a.xyz[N.where(a.maskFrom( 'name', ['C'] ))[0][-1]]
     
     orientVectors(a, a_ending-cm1,direction)
-    orientVectors(b, b_start-cm2,[direction[0]*-1,direction[1]*-1,direction[2]*-1])
+    orientVectors(b, b_start-cm2,direction*-1)
     
     
     ## Link creation
@@ -86,62 +86,34 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
     print nres
 
     ## - Create link structure
+    
     linkseq = ""
     for i in range(nres):
         linkseq += link_seq[i%len(link_seq)]
         
-    print "Link sequence:", linkseq
+    #~ open("01_sequence.txt","w").write(a.sequence()+linkseq+b.sequence())
+    #~ open("01_link_sequence.txt","w").write(linkseq)
+    #~ os.system("xplor -py xplor_build_link.py")
+    #~ link = PDBModel("01_extended_link.pdb")
+    
+    link = Xtender(linkseq).run()
 
-    ## Concatenation
-    ## - Change chains and segments
-    a.atoms['chain_id'] = ["A"]*len(a.atoms['chain_id'])
-    b.atoms['chain_id'] = ["C"]*len(b.atoms['chain_id'])
-    
-    a.atoms['segment_id'] = ["p1"]*len(a.atoms['chain_id'])
-    b.atoms['segment_id'] = ["p1"]*len(b.atoms['chain_id'])
-    
-    ## fix everything but the 10% of the last and initial atoms
-    a.atoms['temperature_factor'] = [1.]*len(a)
-    b.atoms['temperature_factor'] = [1.]*len(b)
-    
-    #~ where = int(0.9*a.lenResidues())
-    #~ for i in range(len(a)):
-        #~ if a.atoms['residue_number'][i]>= where:
-            #~ a.atoms['temperature_factor'][i] = 0.
-    
-    #~ where = int(0.1*b.lenResidues())
-    #~ for i in range(len(b)):
-        #~ if b.atoms['residue_number'][i]<= where:
-            #~ b.atoms['temperature_factor'][i] = 0.
-    
-    
-    
-    a['serial'] = range( len(a) )
-    b['serial'] = range( len(b) )
-    
-    open("01_sequence.txt","w").write(a.sequence()+linkseq+b.sequence())
-    open("01_link_sequence.txt","w").write(linkseq)
-    #~ open('01_resid_a.txt',"w").write("resid "+str(a.atoms['residue_number'][0])+":"+str(a.atoms['residue_number'][-1]))
-    #~ open('01_resid_b.txt',"w").write("resid "+str(b.atoms['residue_number'][0])+":"+str(b.atoms['residue_number'][-1]))
-    #~ open('01_resid_link.txt',"w").write("resid "+str(link.atoms['residue_number'][0])+":"+str(link.atoms['residue_number'][-1]))
-    
-    ## Create and 'link' the peptide
-    os.system("xplor -py xplor_build_link.py")
-    link = PDBModel("01_extended_link.pdb")
+    ## Orientation
     link.xyz -= link.centerOfMass()
     link_end = link.xyz[N.where( link.maskFrom( 'name', ['OT1'] ))[0][0]] 
     link_start = link.xyz[N.where( link.maskFrom( 'name', ['HT2'] ))[0][0]] 
     orientVectors(link,link_end-link_start,direction)
     link_end = link.xyz[N.where( link.maskFrom( 'name', ['OT1'] ))[0][0]] 
     link_start = link.xyz[N.where( link.maskFrom( 'name', ['HT2'] ))[0][0]] 
-    cleanPdb(link)
-        
-    ## - Residue renumbering
-    last = a.atoms['residue_number'][-1] 
-    first = last+ 1 + nres
-    a.renumberResidues() ## a starts from 1
-    link.renumberResidues(start = last+1)
-    b.renumberResidues(start= first)
+    
+    
+    ## Linking... (1st step)
+    
+    a_last_C = a.xyz[N.where(a.maskFrom( 'name', ['C'] ))[0][-1]]
+    b_first_N = b.xyz[N.where(b.maskFrom( 'name', ['N'] ))[0][0]]
+    
+    a.xyz += link_start - a_last_C
+    b.xyz += link_end - b_first_N
     
     
     ## Fix joining sites planarity
@@ -152,68 +124,68 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
     ini_link_N = link.xyz[N.where(link.maskFrom( 'name', ['N'] ))[0][0]]
     ini_link_Ca = link.xyz[N.where(link.maskFrom( 'name', ['CA'] ))[0][0]] 
     
-    orientPlanes(modela = a, orig_plane = [last_a_O-last_a_C,ini_link_N-last_a_C], orig_perp = False, target_plane=[(last_a_C-ini_link_N),(ini_link_Ca-ini_link_N)],target_perp = False)
-   
+    a,R = orientPlanes(modela = a, orig_plane = [last_a_O-last_a_C,ini_link_N-last_a_C], orig_perp = False, target_plane=[(last_a_C-ini_link_N),(ini_link_Ca-ini_link_N)],target_perp = False)
+    
+    
     ini_b_N = b.xyz[N.where(b.maskFrom( 'name', ['N'] ))[0][0]]
     ini_b_Ca = b.xyz[N.where(b.maskFrom( 'name', ['CA'] ))[0][0]] 
     
     last_link_C = link.xyz[N.where(link.maskFrom( 'name', ['C'] ))[0][-1]]
     last_link_O = link.xyz[N.where(link.maskFrom( 'name', ['O'] ))[0][-1]]
     
-    orientPlanes(modela = b, orig_plane = [last_link_C-ini_b_N,ini_b_Ca-ini_b_N], orig_perp = False, target_plane=[(last_link_O-last_link_C) ,(ini_b_N-last_link_C)],target_perp = False)
-   
+    b,R = orientPlanes(modela = b, orig_plane = [last_link_C-ini_b_N,ini_b_Ca-ini_b_N], orig_perp = False, target_plane=[(last_link_O-last_link_C) ,(ini_b_N-last_link_C)],target_perp = False)
+       
     
-    
-    ## Linking...
+    ## Linking together... (2nd step)
+
     a_last_C = a.xyz[N.where(a.maskFrom( 'name', ['C'] ))[0][-1]]
     b_first_N = b.xyz[N.where(b.maskFrom( 'name', ['N'] ))[0][0]]
     
     a.xyz += link_start - a_last_C
     b.xyz += link_end - b_first_N
     
-    link.atoms['chain_id'] = ["B"]*len(link.atoms['chain_id'])
-    link.atoms['segment_id'] = ["p1"]*len(link.atoms['chain_id'])
-    ## not fixed atoms
-    link.atoms['temperature_factor'] = [0.]*len(link)
     
+    ## - Change chains and segments
+    a.atoms['chain_id'] = ["A"]*len(a)
+    b.atoms['chain_id'] = ["C"]*len(b)
+    link.atoms['chain_id'] = ["B"]*len(link)
     
-    
-    
+    link = cleanPdb(link)
     final = a.concat(link).concat(b)
+    final.renumberResidues()
     final['serial_number'] = range( len(final) )
+    final.atoms['segment_id'] = ["p1"]*len(final)
     final.report()
     final =  cleanPdb(final)
     
-    #~ os.system('namd2 namdscript')
-    #~ os.system('xplor -py xplor_fix_covalent.py')
+    #~ fixed = []
+    #~ where = int(0.9*a.lenResidues())
+    #~ fixed += range(where,a.lenResidues())
+    #~ where = int(0.1*b.lenResidues())
+    #~ fixed += range(link.atoms['residue_number'][-1],where+link.atoms['residue_number'][-1]+1)
+    #~ fixed += range(link.atoms['residue_number'][0]-1,link.atoms['residue_number'][-1]+1)
     
-    fixed = []
-    where = int(0.85*a.lenResidues())
-    fixed += range(where,a.lenResidues())
-    where = int(0.15*b.lenResidues())
-    fixed += range(link.atoms['residue_number'][-1],where+link.atoms['residue_number'][-1]+1)
-    fixed += range(link.atoms['residue_number'][0]-1,link.atoms['residue_number'][-1]+1)
-    print link.atoms['residue_number'][-1]
-    print fixed
-    
-    for i in range(len(final)):
-        if final.atoms['residue_number'][i] in fixed:
-            final.atoms['temperature_factor'][i] = 1.0
-        else:
-            final.atoms['temperature_factor'][i] = 0.0
+        
+    #~ for i in range(len(final)):
+        #~ if final.atoms['residue_number'][i] in fixed:
+            #~ final.atoms['temperature_factor'][i] = 1.0
+        #~ else:
+            #~ final.atoms['temperature_factor'][i] = 0.0
     
     final.writePdb("initial.pdb")
     
     
     os.system('vmd -dispdev text -e vmdscript')
+    os.system('namd2 namdscript')
     
-    final = PDBModel('in_min.pdb')
-    for i in range(len(final)):
-        if final.atoms['residue_number'][i] in fixed:
-            final.atoms['temperature_factor'][i] = 1.0
-        else:
-            final.atoms['temperature_factor'][i] = 0.0
-    final.writePdb("in_min.pdb") 
+    
+    #~ final = PDBModel('in_min.pdb')
+    #~ for i in range(len(final)):
+        #~ if final.atoms['residue_number'][i] in fixed:
+            #~ final.atoms['temperature_factor'][i] = 1.0
+        #~ else:
+            #~ final.atoms['temperature_factor'][i] = 0.0
+    #~ final.writePdb("in_min.pdb") 
     
     for i in range(0,1):
         os.system('namd2 namdscript')

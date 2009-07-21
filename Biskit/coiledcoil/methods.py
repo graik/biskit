@@ -67,6 +67,10 @@ METHODS = {"Pair":("EXE","","Paircoil",paircoil_method),\
            "Paper":("NONE","","Paper (reg+reference)"),\
            "Parry":("TABLE","DADParry_scaled","D A Parry score table"),\
            "HomoPar":("TABLE",'homodimeric_parallel',"Home made table using socket"),\
+           "HomoAntipar":("TABLE",'homodimeric_antiparallel',"Home made table using socket"),\
+           "HeteroPar":("TABLE",'heterodimeric_parallel',"Home made table using socket"),\
+           "HeteroAntipar":("TABLE",'heterodimeric_antiparallel',"Home made table using socket"),\
+           "AllTypes":("TABLE",'all_types',"Home made table using socket"),\
            "Default":("NONE","","Not defined method (just for using defaults)")\
            }
 
@@ -76,6 +80,10 @@ priorities = {"Socket":5,## Socket is the reference  \
             "SPar":3,\
             "SAPar":3,\
             "HomoPar":3,\
+            "HomoAntipar":3,\
+            "HeteroPar":3,\
+            "HeteroAntipar":3,\
+            "AllTypes":3,\
             "Paper":5,\
             "Parry":3,\
             "Default":2\

@@ -3,6 +3,7 @@ from coiledutils import getRegister
 import random
 from getcoil import dataFileCreation
 from choosecoil import CCStudy
+from Biskit.molUtils import allAA
 
 ## Statistics
 def file_stats(path):
@@ -29,8 +30,7 @@ def file_stats(path):
                 pdbs[contents[0]] = 1./int(contents[1])
             
             coil_oligo[contents[1]] += 1./int(contents[1])
-            if contents[1] == '6':
-                print l 
+            
             seq_length += (1./int(contents[1])) * len(contents[6])
             
             if contents[2] == 'parallel' and contents[8] == 'homo' :
@@ -110,7 +110,10 @@ def gen_table(path , exclusion_list=[]):
     lineas = [ l.strip() for l in lineas ]
     
     table ={}
-
+    for aa in allAA():
+        table[aa] = {'a':0,'b':0,'c':0,'d':0,'e':0,'f':0,'g':0}
+    
+    print table
     for l in lineas[1:]:
         contents = l.split()
         if len(contents) > 4 and len(contents[7])==7 and not contents[0] in exclusion_list:
@@ -118,13 +121,64 @@ def gen_table(path , exclusion_list=[]):
             for i in range(len(contents[7])):  
                 c = contents[7][i]
                 r = register[i]
-                if c in table:
-                    table[c][r] += 1
-                else:
-                    table[c] = {'a':0,'b':0,'c':0,'d':0,'e':0,'f':0,'g':0}
-                    table[c][r] = 1
+                table[c][r] += 1
+                
     return table
 
+def gen_table_samecontrib(path , exclusion_list=[]):
+    """
+    Same contribution.
+    """
+    
+    file = open(path)
+    lineas = file.readlines()
+    file.close()
+    lineas = [ l.strip() for l in lineas ]
+    
+    table ={}
+    for aa in allAA():
+        table[aa] = {'a':0,'b':0,'c':0,'d':0,'e':0,'f':0,'g':0}
+    
+    print table
+    for l in lineas[1:]:
+        contents = l.split()
+        if len(contents) > 4 and len(contents[7])==7 and not contents[0] in exclusion_list:
+            register = getRegister(contents[7],contents[6])
+            for i in range(len(contents[7])):  
+                c = contents[7][i]
+                r = register[i]
+                table[c][r] += 1./len(contents[7])
+            
+    return table
+
+def gen_table_samecontrib_no_redundant(path , exclusion_list=[]):
+    """
+    Same contribution.
+    """
+    
+    file = open(path)
+    lineas = file.readlines()
+    file.close()
+    lineas = [ l.strip() for l in lineas ]
+    
+    table ={}
+    for aa in allAA():
+        table[aa] = {'a':0,'b':0,'c':0,'d':0,'e':0,'f':0,'g':0}
+    
+    print table
+    for l in lineas[1:]:
+        contents = l.split()
+        if len(contents) > 4 and len(contents[7])==7 and not contents[0] in exclusion_list:
+            register = getRegister(contents[7],contents[6])
+            for i in range(len(contents[7])):  
+                c = contents[7][i]
+                r = register[i]
+                if contents[8] == 'hetero':
+                    table[c][r] += 1./len(contents[7])
+                else:
+                    table[c][r] += 1./(len(contents[7])*int( contents[1]))
+            
+    return table
 
 def normalizeTable(table):
     reg = 'abcdefg'
@@ -168,6 +222,23 @@ def generateValidationGroups(path,train_percent):
 
     return pdbs[0:int(train_percent*len(pdbs))],pdbs[int(train_percent*len(pdbs)):]
 
+
+def lengthFilter(path1,path2,length):
+    file2 = open(path2,"w")
+    
+    file1 = open(path1)
+    lineas = file1.readlines()
+    file1.close()
+    lineas = [ l.strip() for l in lineas ]
+    file2.write(lineas[0]+"\n")
+    pdbs = []
+    for l in lineas[1:]:
+        contents = l.split()
+        if len(contents) > 4 and len(contents[6])>=length:
+             file2.write(l+"\n")
+    file2.close()
+
+    
 def writeValidationCandidates(path1,path2,val=[]):
     file2 = open(path2,"w")
     
@@ -184,26 +255,76 @@ def writeValidationCandidates(path1,path2,val=[]):
     file2.close()
     
 
+import os
 ## All files
 file_stats('coils.db')   
-splitInFiles('coils.db') 
+
+
+lengthFilter('coils.db','coils_filtered.db',0)
+#~ file_stats('coils_long.db')  
+#~ splitInFiles('coils_long.db') 
+
+os.system("cp coils_filtered.db all")
+splitInFiles('all') 
+
 
 ## homodimeric_parallel
 file_stats('homodimeric_parallel_can')
 t,v=generateValidationGroups('homodimeric_parallel_can',0.8)
-writeTable((gen_table('homodimeric_parallel_can',v)),T.dataRoot()+'/coiledcoil/homodimeric_parallel')
+writeTable(normalizeTable(gen_table_samecontrib_no_redundant('homodimeric_parallel_can',v)),T.dataRoot()+'/coiledcoil/homodimeric_parallel')
 writeValidationCandidates('homodimeric_parallel_can','homodimeric_parallel_val',v)
 dataFileCreation('homodimeric_parallel_dat','homodimeric_parallel_val',target_seq = "LLLLLLLLLLLL",target_type = ("homo","parallel",2), method = "All", use_big = 0 )
 study = CCStudy(data = 'homodimeric_parallel_dat')
-s,a = study.doStudy(True)
-print s    
+s1,a = study.doStudy(True)
+  
 
-file_stats('homodimeric_antiparallel_can')
-file_stats('heterodimeric_parallel_can')
-file_stats('heterodimeric_antiparallel_can')
+#~ file_stats('homodimeric_antiparallel_can')
+#~ t,v=generateValidationGroups('homodimeric_antiparallel_can',0.8)
+#~ writeTable(normalizeTable(gen_table('homodimeric_antiparallel_can',v)),T.dataRoot()+'/coiledcoil/homodimeric_antiparallel')
+#~ writeValidationCandidates('homodimeric_antiparallel_can','homodimeric_antiparallel_val',v)
+#~ dataFileCreation('homodimeric_antiparallel_dat','homodimeric_antiparallel_val',target_seq = "LLLLLLLLLLLL",target_type = ("homo","antiparallel",2), method = "All", use_big = 0 )
+#~ study = CCStudy(data = 'homodimeric_antiparallel_dat')
+#~ s2,a = study.doStudy(True)
+  
+
+#~ file_stats('heterodimeric_parallel_can')
+#~ t,v=generateValidationGroups('heterodimeric_parallel_can',0.8)
+#~ writeTable(normalizeTable(gen_table('heterodimeric_parallel_can',v)),T.dataRoot()+'/coiledcoil/heterodimeric_parallel')
+#~ writeValidationCandidates('heterodimeric_parallel_can','heterodimeric_parallel_val',v)
+#~ dataFileCreation('heterodimeric_parallel_dat','heterodimeric_parallel_val',target_seq = "LLLLLLLLLLLL",target_type = ("hetero","parallel",2), method = "All", use_big = 0 )
+#~ study = CCStudy(data = 'heterodimeric_parallel_dat')
+#~ s3,a = study.doStudy(True)
+   
+
+#~ file_stats('heterodimeric_antiparallel_can')
+#~ t,v=generateValidationGroups('heterodimeric_antiparallel_can',0.8)
+#~ writeTable(normalizeTable(gen_table('heterodimeric_antiparallel_can',v)),T.dataRoot()+'/coiledcoil/heterodimeric_antiparallel')
+#~ writeValidationCandidates('heterodimeric_antiparallel_can','heterodimeric_antiparallel_val',v)
+#~ dataFileCreation('heterodimeric_antiparallel_dat','heterodimeric_antiparallel_val',target_seq = "LLLLLLLLLLLL",target_type = ("hetero","antiparallel",2), method = "All", use_big = 0 )
+#~ study = CCStudy(data = 'heterodimeric_antiparallel_dat')
+#~ s4,a = study.doStudy(True)
 
 
-#~ def gen_table(file):
-    
+
+#~ ## ALL
+#~ print "ALL","\n\n\n\n\n\n\n\n\n\n\n"
+#~ t,v=generateValidationGroups('all',0.8)
+#~ writeTable(normalizeTable(gen_table('all',v)),T.dataRoot()+'/coiledcoil/all_types')
+#~ writeValidationCandidates('all','all_val',v)
+#~ dataFileCreation('all_dat','all_val',target_seq = "LLLLLLLLLLLL",target_type = ("homo","parallel",2), method = "All", use_big = 0 )
+#~ study = CCStudy(data = 'all_dat')
+#~ s5,a = study.doStudy(True)
+
+file_stats('homodimeric_parallel_val')
+#~ file_stats('homodimeric_antiparallel_can')
+#~ file_stats('heterodimeric_parallel_can')
+#~ file_stats('heterodimeric_antiparallel_can')
+#~ file_stats('all')
+
+print "Homo par", s1 
+#~ print "Homo antipar",s2 
+#~ print "Hetero par",s3 
+#~ print "Hetero antipar",s4 
+#~ print "All",s5 
     
     

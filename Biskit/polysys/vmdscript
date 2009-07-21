@@ -3,7 +3,7 @@ mol new in.pdb
 set mymol [atomselect top protein] 	 
 $mymol writepdb in.pdb 
 
-set file_in final.pdb
+set file_in initial.pdb
 set file_out_pdb in_min.pdb
 set file_out_psf in_min.psf
 
