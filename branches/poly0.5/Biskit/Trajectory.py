@@ -295,7 +295,7 @@ class Trajectory:
                 m = m.take( atomCast )
 
             ## additional check on each 100st frame
-            if i%100 == 0 and m.atomNames() <> refNames:
+            if i%100 == 0 and list( m.atomNames() ) <> list(refNames):
                 raise TrajError("%s doesn't match reference pdb."%m.fileName )
 
             frameList.append( m.xyz )
