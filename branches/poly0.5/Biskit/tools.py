@@ -237,12 +237,15 @@ def splithome( filename ):
 
 def __pathsplit(p, rest=[]):
     """
-    from ASPN Python Cookbook
+    from ASPN Python Cookbook; fails if there is a trailing '/'
     """
+    if p[-1] == os.path.sep:
+        p = p[:-1]
     (h,t) = os.path.split(p)
     if len(h) < 1: return [t]+rest
     if len(t) < 1: return [h]+rest
     return __pathsplit(h,[t]+rest)
+
 
 def __commonpath(l1, l2, common=[]):
     """
