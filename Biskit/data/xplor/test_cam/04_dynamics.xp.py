@@ -19,8 +19,8 @@ protocol.addUnknownAtoms()
 
 protocol.fixupCovalentGeom(maxIters=10,useVDW=1)
 
-pdbTool.PDBTool( 'input.pdb' ).write()
-xplor.command("write psf output=input.psf end")
+pdbTool.PDBTool( 'input_protein.pdb' ).write()
+xplor.command("write psf output=input_protein.psf end")
 
 
 dyn = ivm.IVM()
