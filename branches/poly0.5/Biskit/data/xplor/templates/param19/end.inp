@@ -163,10 +163,10 @@ while ($xtrans < $xmtran) loop wat1
       segment
         name="    "
         chain
-          coordinates @@%(project_root)s/external/xplor/templates/param19/boxtyp20.pdb
+          coordinates @@%(project_root)s/Biskit/data/xplor/templates/param19/boxtyp20.pdb
         end
       end
-      coor @@%(project_root)s/external/xplor/templates/param19/boxtyp20.pdb 
+      coor @@%(project_root)s/Biskit/data/xplor/templates/param19/boxtyp20.pdb 
       vector do (segid=W000) (segid "    ")
       coor sele=(segid W000) translate vector = ($xtrans $ytrans $ztrans) end
 

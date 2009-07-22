@@ -7,14 +7,14 @@
 
 topology                        ! Read topology file
    reset
-   @@%(project_root)s/external/xplor/templates/param19/toph19.pro
-   @@%(project_root)s/external/xplor/templates/param19/toph19.sol
-   @@%(project_root)s/external/xplor/templates/param19/unpatch_caps.pro
+   @@%(project_root)s/Biskit/data/xplor/templates/param19/toph19.pro
+   @@%(project_root)s/Biskit/data/xplor/templates/param19/toph19.sol
+   @@%(project_root)s/Biskit/data/xplor/templates/param19/unpatch_caps.pro
 end
 
 parameter                       ! Read parameter file
    reset
-   @@%(project_root)s/external/xplor/templates/param19/param19.pro
-   @@%(project_root)s/external/xplor/templates/param19/param19.sol
+   @@%(project_root)s/Biskit/data/xplor/templates/param19/param19.pro
+   @@%(project_root)s/Biskit/data/xplor/templates/param19/param19.sol
 end
 
