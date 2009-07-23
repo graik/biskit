@@ -19,6 +19,7 @@ class CCStudy:
         """
         self.parseData(data)
         self.mycc = cc or CoiledCoil() 
+        self.mycc.find_style = "mean"
         
     def parseData(self,dat = ""):
         """

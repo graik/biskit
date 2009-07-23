@@ -62,8 +62,8 @@ Special methods:
 
 """
 METHODS = {"Pair":("EXE","","Paircoil",paircoil_method),\
-           "SPar":("TABLE","SOCKET_antipar_norm","Socket Parallel Score Table"),\
-           "SAPar":("TABLE","SOCKET_antipar_norm","Socket Antiparallel Score Table"),\
+           "SPar":("TABLE","SOCKET_antipar_norm_prob","Socket Parallel Score Table"),\
+           "SAPar":("TABLE","SOCKET_antipar_norm_prob","Socket Antiparallel Score Table"),\
            "Paper":("NONE","","Paper (reg+reference)"),\
            "Parry":("TABLE","DADParry_scaled","D A Parry score table"),\
            "HomoPar":("TABLE",'homodimeric_parallel',"Home made table using socket"),\
