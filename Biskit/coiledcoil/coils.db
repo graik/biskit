@@ -10702,10 +10702,10 @@
 2uxc.pdb 2 antiparallel 2 2325 2335 ALKIMRKAESL ALKIMRK hetero
 1qo0.pdb 2 parallel 0 871 892 ISEEMAKLKQKTEQLQDRIAGQ MAKLKQK homo
 1qo0.pdb 2 parallel 0 1060 1081 ISEEMAKLKQKTEQLQDRIAGQ MAKLKQK homo
-2zi7.pdb 3 antiparallel 5 272 279 QTYACLSR CLSR hetero
-2zi7.pdb 3 antiparallel 5 330 337 YQDWHDWM HDWM hetero
-2zi7.pdb 3 antiparallel 4 62 69 QTYACLSR CLSR hetero
-2zi7.pdb 3 antiparallel 4 113 120 YQDWHDWM HDWM hetero
+2zi7.pdb 2 antiparallel 5 272 279 QTYACLSR CLSR hetero
+2zi7.pdb 2 antiparallel 5 330 337 YQDWHDWM HDWM hetero
+2zi7.pdb 2 antiparallel 4 62 69 QTYACLSR CLSR hetero
+2zi7.pdb 2 antiparallel 4 113 120 YQDWHDWM HDWM hetero
 1ruz.pdb 3 parallel 2 885 903 IENLNKKVDDGFLDIWTYN IENLNKK homo
 1ruz.pdb 3 parallel 2 401 419 IENLNKKVDDGFLDIWTYN IENLNKK homo
 1ruz.pdb 3 parallel 2 1369 1387 IENLNKKVDDGFLDIWTYN IENLNKK homo

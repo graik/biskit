@@ -24,7 +24,7 @@
 import Biskit.molUtils as MU
 from Biskit import BiskitError
 from numpy import correlate,array, where, sum
-from coiledutils import getRegister
+from coiledutils import getRegister,flatten
 
 
 
@@ -72,7 +72,7 @@ class CoiledCoil:
 
         self.scores = self.parseScores( self.db )
         
-        self.find_style = find_style
+        self.find_style = "mean"
         
         
         
@@ -124,6 +124,7 @@ class CoiledCoil:
         @rtype: Dictionary( "best":tuple(float,string), "reg":string, "corr":list(float))
         
         """
+        #~ print self.find_style, self.db
         
         tries  = 0
         
@@ -131,37 +132,42 @@ class CoiledCoil:
                
         heptads = self.heptadize(score,chain,k)
         
-        indexes = {}
-        new_scores = [[0.,0.]]*len(heptads)
-        for i in range(len(heptads)):
-            index = heptads[i][1]
-            indexes[heptads[i][0]] = []
-            new_scores[i] = [0.,heptads[i][0]]
-            while index <len(chain):
-                new_scores[i][0] += score[index]
-                indexes[heptads[i][0]].append(index) 
-                index += self.window_length
-        
-        for i in range(len(heptads)):
-            index = heptads[i][1]- self.window_length
-            while index >=0:
-                new_scores[i][0] += score[index]
-                indexes[heptads[i][0]].append(index) 
-                index -= self.window_length
-            indexes[heptads[i][0]].sort()
-       
-        self.last_heptads = []
-        for i in range(len(new_scores)):
-            self.last_heptads.append( (new_scores[i][0],heptads[i]))
-        self.last_score = score
-        
-        
-        ## And the winner is...
-        best = sorted(new_scores,reverse=True)[0][1]
+        if self.find_style == "max":
+            indexes = {}
+            new_scores = [[0.,0.]]*len(heptads)
+            for i in range(len(heptads)):
+                index = heptads[i][1]
+                indexes[heptads[i][0]] = []
+                new_scores[i] = [0.,heptads[i][0]]
+                while index <len(chain):
+                    new_scores[i][0] += score[index]
+                    indexes[heptads[i][0]].append(index) 
+                    index += self.window_length
+            
+            for i in range(len(heptads)):
+                index = heptads[i][1]- self.window_length
+                while index >=0:
+                    new_scores[i][0] += score[index]
+                    indexes[heptads[i][0]].append(index) 
+                    index -= self.window_length
+                indexes[heptads[i][0]].sort()
+           
+            self.last_heptads = []
+            for i in range(len(new_scores)):
+                self.last_heptads.append( (new_scores[i][0],heptads[i]))
+            self.last_score = score
+            
+            
+            ## And the winner is...
+            best = sorted(new_scores,reverse=True)[0][1]
+            self.indexes = indexes[best]
+        else:
+            print "*"
+            best = sorted(score,reverse=True)[0][1]
         
         c = self.correlate(chain,[best])[1]
         
-        self.indexes = indexes[best]
+        
         
         retdic = {}
         retdic["best"] = best
@@ -294,14 +300,31 @@ class CoiledCoil:
                     if  r in self.scores:
                         score[window]+=self.scores[r][i]
                 window = window+1
+            #~ print score
             return score
         
         elif self.find_style == "mean":
+            print "*",
             candidates = []
-            max = min(7,len(chain))
+            score = []
             
-            for i in range(0,7):
-                pass
+            for i in range(0,len(chain)):
+                if i+7 <=len(chain):
+                    candidates.append(chain[i:i+7])
+            #~ print chain
+            #~ print candidates
+            for c in candidates:
+                reg = getRegister(c,chain)
+                scores = flatten(chain,reg,self)
+                total = 0.
+                for s in scores:
+                    total += s
+                mean = total /len(scores)
+                score.append((mean,c))
+            
+            score += [0.,""]*(len(chain)-len(score))
+            #~ print score, len(score),len(chain),len(candidates)
+            return score
         else:
             print "Error in CoiledCoil:%s is not an allowed \"find style\" method"%self.find_style 
             return []
@@ -321,52 +344,61 @@ class Test(BT.BiskitTest):
     def cleanUp( self ):
         pass
         
-    #~ def test_general(self):
-        #~ """Pattern search test cases"""
-
-        #~ l = CoiledCoil()
-        #~ l2 = CoiledCoil(T.dataRoot() + '/coiledcoil/SOCKET_par_norm')
-        #~ self.assertEqual(len(l.scores),20)
-        
-        #~ ##TARGET
-        #~ target = 'LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL'
-        #~ res = l.findHeptads(target)
-        
-        #~ if self.local:
-            #~ print target
-            #~ print res["reg"]
-            #~ for i in l.last_heptads:
-                #~ print i[0],i[1]
-        
-        
-        #~ self.assertEqual(res["best"],"LRTRVAE")
-        #~ self.assertEqual(len(res["reg"]),43)
-        
-        #~ res = l2.findHeptads(target)
-        
-        #~ if self.local:
-            #~ print target
-            #~ print res["reg"]
-            #~ for i in target :
-                #~ print i,"   ",
-            #~ print
+    def test_general(self):
+        """Pattern search test cases"""
+        l = CoiledCoil()
+        l2 = CoiledCoil(T.dataRoot() + '/coiledcoil/SOCKET_par_norm')
+        self.assertEqual(len(l.scores),20)
+        if  l.find_style == "max":
             
-            #~ for i in l2.last_score:
-                #~ print "%.2f " %(i),
-            #~ print
-        
-        #~ self.assertEqual(res["best"],"VSQYETR")
-        #~ self.assertEqual(len(res["reg"]),43)
+            
+            ##TARGET
+            target = 'LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL'
+            res = l.findHeptads(target)
+            
+            if self.local :
+                print target
+                print res["reg"]
+                for i in l.last_heptads:
+                    print i[0],i[1]
+            
+            
+            self.assertEqual(res["best"],"LRTRVAE")
+            self.assertEqual(len(res["reg"]),43)
+            
+            res = l2.findHeptads(target)
+            
+            if self.local:
+                print target
+                print res["reg"]
+                for i in target :
+                    print i,"   ",
+                print
+                
+                for i in l2.last_score:
+                    print "%.2f " %(i),
+                print
+            
+            self.assertEqual(res["best"],"VSQYETR")
+            self.assertEqual(len(res["reg"]),43)
 
-    #~ def test_correlation(self):
-        #~ """Correlation test case"""
-        #~ print "WARNING!!!!!!!!! & REMEMBER!!!!! You HAVE TO implement this test case, as correlation isn't fully tested yet!!!!"
+    def test_correlation(self):
+        """Correlation test case"""
+        print "WARNING!!!!!!!!! & REMEMBER!!!!! You HAVE TO implement this test case, as correlation isn't fully tested yet!!!!"
     
     def test_mean_scoring(self):
         """Mean scoring vs max scoring test case"""
         l = CoiledCoil()
-        print l.scores
-        
+        print
+        chain = ""
+        for i in range(len(MU.allAA())):
+            chain += MU.allAA()[i]
+        print chain
+        l.scoreHeptads(chain+chain)
+        print l.findHeptads(chain+chain)
+        l.find_style = "max"
+        l.scoreHeptads(chain+chain)
+
 if __name__ == '__main__':
     BT.localTest()    
     

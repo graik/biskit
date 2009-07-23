@@ -94,12 +94,12 @@ def alignf(a="",b="",fun=None):
 
 def flatten ( chain = "", register = "", mycc = None,window_length = 7):
     """
-    This function returns a list with the scores of each heptad in chain.
+    This function returns a list with the scores of each heptad inside the chain.
     Incomplete heptads are not used.
     
     @param chain: Chain to be flattened.
     @type chain: string
-    @param register: Register ofthe chain.
+    @param register: Register of the chain.
     @type heptad: string
     
     @return: A list with the scores of each heptad in chain.
@@ -122,6 +122,37 @@ def flatten ( chain = "", register = "", mycc = None,window_length = 7):
             ac = 0
     
     return scores
+
+def getAllHeptads ( chain = "", register = "",window_length = 7):
+    """
+    This function returns a list with all heptads in the chain.
+    Incomplete heptads are not used.
+    
+    @param chain: Chain to be flattened.
+    @type chain: string
+    @param register: Register of the chain.
+    @type register: string
+    
+    @return: A list with all heptad in chain.
+    @rtype: list (float)
+    """
+    
+    start = register.find("a")
+    end  = start + len(chain[start:]) - len(chain[start:])%window_length
+  
+    
+    heptads = []
+    pos = 0
+    ac = "" 
+
+    for i in chain[start:end]:
+        ac+= i
+        pos = (pos+1)%window_length
+        if pos == 0:
+            heptads.append(ac)
+            ac = ""
+    
+    return heptads
 
 def areEqual(chain_a="",chain_b="",margin = 4):
     """
@@ -218,7 +249,13 @@ class Test(BT.BiskitTest):
     def test_getHeptad(self):
         """getHeptad function test case"""
         self.assertEqual( getHeptad("12345678901234567890","defgabcdefgabcdefgab"),'5678901')
+    
+    def test_getAllHeptads(self):
+        """getAllHeptads function test case"""
+        print getAllHeptads("12345678901234567890","defgabcdefgabcdefgab",)
+        self.assertEqual( getAllHeptads("12345678901234567890","defgabcdefgabcdefgab"),['5678901', '2345678'])
         
+    
     def test_scores2String(self):
         """scores2String function test case"""
         if self.local:
@@ -226,6 +263,7 @@ class Test(BT.BiskitTest):
             print scores2String([0.1,0.3,0.5,0.6],[1,1.5])
         self.assertEqual(scores2String([0.1,0.3,0.5,0.6],[1,1.5]),('emuy', 'O9'))
         self.assertEqual(scores2String([0.1,0.3,0.5,0.6],[1,1.5],True),('4WOK', 'ua'))
+    
     
         
 if __name__ == '__main__':
