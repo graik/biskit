@@ -67,7 +67,7 @@ def createCandidatesFile (filename = "", dir = ""):
     no_coils = 0
     for pdb in pdbs:
         try:
-            #~ print "preparing"+ dir+"/"+pdb
+            print "preparing"+ dir+"/"+pdb
             
             model = PDBModel(dir+"/"+pdb)
             sc = SocketCoil(model)
@@ -96,7 +96,7 @@ def createCandidatesFile (filename = "", dir = ""):
             
             del sc 
         except:
-            #~ print "failed"
+            print "failed"
             failed.append(pdb)
         done = done+1
         if done%10 ==0 :
@@ -144,6 +144,7 @@ def dataFileCreation( data_file = "",candidates_file = ""  ,target_seq = "",targ
     file = open(candidates_file,"r")
     lineas = file.readlines()
     file.close()
+
     
     lineas = [ l.strip() for l in lineas ]
     basepath = lineas[0]

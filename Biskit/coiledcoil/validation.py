@@ -34,7 +34,7 @@ def file_stats(path):
         else:
             mypdb [contents[0]][0] =(mypdb [contents[0]][0]%mypdb [contents[0]][1])+1
         #~ print contents[0], mypdb [contents[0]]
-        
+        print l
         if len(contents) > 4:
             if contents[0] in pdbs:
                 pdbs[contents[0]] += 1./int(contents[1])
@@ -267,17 +267,17 @@ def openTable(path):
 
    
     
-import os
+#~ import os
 ## All files
-file_stats('coils.db')   
+#~ file_stats('coils.db')   
 
 ## Avoid incomplete heptads
 ## 
-incompleteHeptadFilter("coils.db","coils_nh.db")
-lengthFilter('coils.db','coils_nh.db',28)
+#~ incompleteHeptadFilter("coils.db","coils_nh.db")
+#~ lengthFilter('coils.db','coils_nh.db',28)
 #~ file_stats('coils_nh.db')  
-splitInFiles('coils_nh.db') 
-os.system("cp coils_nh.db all")
+#~ splitInFiles('coils_nh.db') 
+#~ os.system("cp coils_nh.db all")
 #~ splitInFiles('all') 
 #~ splitInFiles('coils.db','coils_filteredblah.db',14)
 ## length filter for candidates
@@ -340,7 +340,7 @@ os.system("cp coils_nh.db all")
 #~ study = CCStudy(data = 'all_dat')
 #~ s5,a = study.doStudy(True)
 
-file_stats('all_val')
+#~ file_stats('all_val')
 #~ file_stats('homodimeric_parallel_can')
 #~ file_stats('homodimeric_parallel_val')
 #~ file_stats('homodimeric_antiparallel_val')
