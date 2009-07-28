@@ -252,7 +252,10 @@ class CCStudy:
             maxims.append((maxacc,k))
             
         ## Then choose the best of all !!!
-        best_chain = max(maxims)
+        try:
+            best_chain = max(maxims) 
+        except:
+            best_chain = None
         
         maxims = []
         for k in self.alignments.keys():
@@ -268,7 +271,10 @@ class CCStudy:
             
         
         ## Then choose the best of all !!!
-        best_reg = max(maxims)
+        try:
+            best_reg = max(maxims) 
+        except:
+             best_reg = None
         
         return best_chain, best_reg
     

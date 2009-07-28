@@ -434,6 +434,8 @@ def doHomologyModelling ( id = "" ,candidates_file = "",  sequences = [],study =
 
     mod.run()
     
+    return templatepath
+    
 ##############
 ## Test
 ##############
