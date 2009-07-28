@@ -34,7 +34,7 @@ def file_stats(path):
         else:
             mypdb [contents[0]][0] =(mypdb [contents[0]][0]%mypdb [contents[0]][1])+1
         #~ print contents[0], mypdb [contents[0]]
-        print l
+       
         if len(contents) > 4:
             if contents[0] in pdbs:
                 pdbs[contents[0]] += 1./int(contents[1])
@@ -137,7 +137,7 @@ def gen_table(path , exclusion_list=[]):
     for l in lineas[1:]:
         contents = l.split()
         
-        if len(contents[6]) >= 13 and len(contents[7])==7 and not contents[0] in exclusion_list:
+        if len(contents[6]) >= 13 and len(contents[7])==7 and not contents[0][0:4] in exclusion_list:
             register = getRegister(contents[7],contents[6])
             heptads = getAllHeptads(contents[7],register)
             for h in heptads:

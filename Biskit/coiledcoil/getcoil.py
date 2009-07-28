@@ -162,10 +162,11 @@ def dataFileCreation( data_file = "",candidates_file = ""  ,target_seq = "",targ
         ## Catch all sequences of length bigger or equal than the target one and forming part of a
         ## coiled coil with the same sense (parallel/antiparallel), homology of the chains and 
         ## oligomerization state.
-        
+       
+
         if len(contents[6])>=len(target_seq) and contents[2] == target_type[1]  and int(contents[1]) == target_type[2]\
             and contents[8] == target_type[0]:
-              
+            
             new_line = contents[0][:-4]+"@"+contents[4]+" struct:"+contents[0]
             new_line += " seq:"+contents[6]+" Socket:"+contents[7]
             print contents[0]
