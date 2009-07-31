@@ -30,8 +30,13 @@ import tempfile
 
 class Xtender( Xplorer ):
     """
-    Generate structure for a loosely extended stretch of amino acids along x-axis.
-    (Uses xplor in Python mode)
+    Generate structure for a stretch of amino acids, loosely extended along 
+    x-axis. Xtender wraps the XPlor genExtendedStructure command. The resulting
+    chain is not fully extended and may still contain some vdw clashes --
+    the default 5000 minimization steps resolve most but not necessarily all
+    of these clashes. (Uses xplor in Python mode)
+    
+    Requires: Xplor-NIH
     """
 
     xplor_script = """
@@ -48,7 +53,7 @@ psfGen.seqToPSF(seq,seqType='prot',startResid=1, segName='')
 
 protocol.genExtendedStructure(maxFixupIters=50)
 
-xplor.command( "minimize powell nstep=%(min_cycles)i nprint 5 end")
+xplor.command( "minimize powell nstep=%(min_cycles)i nprint 10 end")
 
 pdbTool.PDBTool("%(f_pdb)s").write()
 """
@@ -83,9 +88,11 @@ pdbTool.PDBTool("%(f_pdb)s").write()
 
 if __name__ == '__main__':
 
-    x = Xtender( 'AGTSYTWDS', min_cycles=5000 )
+    x = Xtender( 10 * 'AGTSYTWDS', min_cycles=5000 )
     model = x.run()
     
+    x2 = Xtender( 3 * 'GSGSGSGSGSGSG', min_cycles=5000 )
+    model2 = x2.run()
 
     
     
