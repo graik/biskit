@@ -206,7 +206,7 @@ class CoiledAlign:
         
         a_s,b_s = scores2String(scores_a,scores_b)
         
-        print a_s,b_s
+        #~ print a_s,b_s
         
         scc = alignf(a_s,b_s,scoreAlignFun)
         
@@ -265,8 +265,8 @@ class CoiledAlign:
                 for j in self.reg_alignments[i]:
                     mymax = max(mymax,j)
                     mymin = min(mymin,j)
-                print mymax,mymin
-                print "reg",self.reg_alignments[i]
+                #~ print mymax,mymin
+                #~ print "reg",self.reg_alignments[i]
                 for k in range(len(self.reg_alignments[i])):
                     if mymax[0]-mymin[0] <0.001:
                         mymin = (0,mymin[1])
