@@ -194,7 +194,7 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
     os.system('cp out_min.coor final.pdb')
     
     
-linkProteins(a = PDBModel('2AWT.pdb') , b= PDBModel('2CQJ.pdb'),distance = 70)
+linkProteins(a = PDBModel('2AWT') , b= PDBModel('2CQJ'),distance = 70)
 
 #~ link = PDBModel()
 #~ link.xyz = N.zeros( (nres,3), float )
