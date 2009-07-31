@@ -627,23 +627,35 @@ def projectRoot():
     f = osp.split( f )[0] + '/../'
     return absfile( f )
 
-def dataRoot():
+def dataRoot( addpath='' ):
     """
-    Root of Biskit data directory (formerly 'biskit/Biskit/data').
+    Root of Biskit data directory ('biskit/Biskit/data').
+
+    @param addpath: additional path to be appended to data root
+    @type addpath: str
+    
     @return: absolute path
     @rtype: string    
     """
-    return os.path.join( projectRoot(), 'Biskit', 'data' )
+    r = os.path.join( projectRoot(), 'Biskit', 'data' )
+    if addpath:
+        r = os.path.join( r, addpath )
+    return r
 
-def testRoot():
+def testRoot( addpath='' ):
     """
-    Root of Biskit test directory.
+    Root of Biskit test directory ('biskit/Biskit/testdata').
+
+    @param addpath: additional path to be appended to test root
+    @type addpath: str
 
     @return: absolute path
     @rtype: string    
     """
-    return os.path.join( projectRoot(), 'Biskit', 'testdata' )
-
+    r = os.path.join( projectRoot(), 'Biskit', 'testdata' )
+    if addpath:
+        r = os.path.join( r, addpath )
+    return r
 
 def isBinary( f ):
     """
