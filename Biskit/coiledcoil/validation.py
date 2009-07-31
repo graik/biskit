@@ -25,16 +25,7 @@ def file_stats(path):
     for l in lineas[1:]:
         
         contents = l.split()
-        
-        
-       
-        if not contents[0] in mypdb:
-            mypdb [contents[0]] =[1,int(contents[1])]
-            
-        else:
-            mypdb [contents[0]][0] =(mypdb [contents[0]][0]%mypdb [contents[0]][1])+1
-        #~ print contents[0], mypdb [contents[0]]
-       
+
         if len(contents) > 4:
             if contents[0] in pdbs:
                 pdbs[contents[0]] += 1./int(contents[1])
@@ -78,10 +69,11 @@ def file_stats(path):
     print "A H:",antip_homo
     print "A Het:",antip_hetero 
     
-    for p in mypdb:
-        if mypdb[p][0] != mypdb[p][1] and mypdb[p][1] == 2:
-            print p
-
+    #~ for p in pdbs:
+        #~ if pdbs[p] - 1 -int(pdbs[p]) >0.1:
+            #~ print p, pdbs[p]-1 , int(pdbs[p]), pdbs[p] - 1-int(pdbs[p])
+        #~ print p, pdbs[p]
+        
 
 def splitInFiles(path,oligo = '2'):
     file = open(path)
@@ -137,7 +129,7 @@ def gen_table(path , exclusion_list=[]):
     for l in lineas[1:]:
         contents = l.split()
         
-        if len(contents[6]) >= 13 and len(contents[7])==7 and not contents[0][0:4] in exclusion_list:
+        if len(contents[6]) >= 13 and len(contents[7])==7 and not contents[0] in exclusion_list:
             register = getRegister(contents[7],contents[6])
             heptads = getAllHeptads(contents[7],register)
             for h in heptads:
@@ -276,7 +268,13 @@ def openTable(path):
 #~ incompleteHeptadFilter("coils.db","coils_nh.db")
 #~ lengthFilter('coils.db','coils_nh.db',28)
 #~ file_stats('coils_nh.db')  
-#~ splitInFiles('coils_nh.db') 
+#~ splitInFiles('coils.db',oligo = '3') 
+#~ file_stats('homodimeric_parallel_can')
+#~ lengthFilter('homodimeric_parallel_can','homodimeric_parallel_can20',40)
+#~ file_stats('homodimeric_parallel_can20')
+#~ file_stats('homodimeric_antiparallel_can')
+#~ lengthFilter('homodimeric_antiparallel_can','homodimeric_antiparallel_can20',40)
+#~ file_stats('homodimeric_antiparallel_can20')
 #~ os.system("cp coils_nh.db all")
 #~ splitInFiles('all') 
 #~ splitInFiles('coils.db','coils_filteredblah.db',14)
@@ -297,6 +295,7 @@ def openTable(path):
 
 
 #~ t,v=generateValidationGroups('homodimeric_parallel_can',0.6)
+#~ print v
 #~ writeTable(normalizeTable(gen_table('homodimeric_parallel_can',v)),T.dataRoot()+'/coiledcoil/homodimeric_parallel')
 #~ t,v=generateValidationGroups('homodimeric_antiparallel_can',0.6)
 #~ writeTable(normalizeTable(gen_table('homodimeric_antiparallel_can',v)),T.dataRoot()+'/coiledcoil/homodimeric_antiparallel')
@@ -340,6 +339,7 @@ def openTable(path):
 #~ study = CCStudy(data = 'all_dat')
 #~ s5,a = study.doStudy(True)
 
+#~ file_stats('all')
 #~ file_stats('all_val')
 #~ file_stats('homodimeric_parallel_can')
 #~ file_stats('homodimeric_parallel_val')

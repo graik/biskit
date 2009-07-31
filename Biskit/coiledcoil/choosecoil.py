@@ -203,12 +203,16 @@ class CCStudy:
         
         
         ## Filter sequences smaller than the target one
+        ## CHANGED (sequences are padded with W, the residue with lesser
+        ## probs in every reg position
         all = heptads.keys()
         all.remove("TARGET")
         
         for h in heptads.keys():
             if len(heptads[h]['seq']) < len(target):
-                all.remove(h)
+                #~ all.remove(h)
+                ## Pad with W
+               heptads[h]['seq']=heptads[h]['seq']+'W'*(len(target)-len(heptads[h]['seq'])+1)
         
         self.alignments = {}
         

@@ -279,7 +279,7 @@ def getBestHit ( datafile ="",method = "",sequences=[]):
     #~ print best
     return study,best
     
-def doHomologyModelling ( id = "" ,candidates_file = "",  sequences = [],study = None):
+def doHomologyModelling ( id = "" ,candidates_file = "",  sequences = [],heptads_p = [],study = None):
     """
     Retrieves the structure predicted by homology modelling.
     
@@ -318,7 +318,8 @@ def doHomologyModelling ( id = "" ,candidates_file = "",  sequences = [],study =
         contents = l.split()
         if contents[0] == name+".pdb" and contents[3] == coilid:
             candidates.append(l)
-
+    print "candidates",candidates
+    
     model = PDBModel(lineas[0]+"/"+name+".pdb")
     
     ### Do same preprocessing as in socket 
@@ -351,7 +352,6 @@ def doHomologyModelling ( id = "" ,candidates_file = "",  sequences = [],study =
         heptads.append(contents[7])
         coil.writePdb(templatepath+"/"+CHAINS[i]+".pdb")
         #~ print "*", coil.sequence()
-
         i = i+1
     
     
@@ -377,22 +377,28 @@ def doHomologyModelling ( id = "" ,candidates_file = "",  sequences = [],study =
     
     #### ATENCION A LOS HEPTADS
     #~ print data        
-    i=0
     template = None
     while len(sequences) > 0:
         results = []
+        j = 0 
+        
         for s in sequences:
-            data["TARGET"] = {"seq":s,"Default":cc.findHeptads(s)['best']}
             
+            if heptads_p != []:
+                data["TARGET"] = {"seq":s,"Default":heptads_p[j]}
+            else:
+                data["TARGET"] = {"seq":s,"Default":cc.findHeptads(s)['best']}
+            #~ print data
             #~ print cc.findHeptads(s)['best'],data["TARGET"]
-            study.data =  data
+            study.data = data
             study.doStudy(True)
             res = study.chooseBest()
             results.append((res[1],s))
             del data["TARGET"]
-            i=i+1
-        best = max(results)
+            j=j+1
         
+        best = max(results)
+        #~ print results
         #~ print best
         chains.append((coils[CHAINS.find(best[0][1])].sequence(),best[1]))
         
@@ -403,7 +409,7 @@ def doHomologyModelling ( id = "" ,candidates_file = "",  sequences = [],study =
             
         
         positions.append(best[0][0][1])
-        print positions
+        #~ print positions
         
         sequences.remove(best[1])
         del data[best[0][1]]
@@ -415,7 +421,7 @@ def doHomologyModelling ( id = "" ,candidates_file = "",  sequences = [],study =
     template.writePdb(templatepath+"/template.pdb")
         
         
-    print chains    
+    #~ print chains    
     ## alignment.pir creation
     al = PirAlignment(chains,positions)
     
@@ -434,7 +440,7 @@ def doHomologyModelling ( id = "" ,candidates_file = "",  sequences = [],study =
 
     mod.run()
     
-    return templatepath
+    return templatepath,templatepath+"/results"
     
 ##############
 ## Test
