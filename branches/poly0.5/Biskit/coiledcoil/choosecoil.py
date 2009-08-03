@@ -2,6 +2,7 @@ from coiledcoil import CoiledCoil
 from coiledalign import CoiledAlign
 from coiledutils import sameRegister, getRegister
 import methods
+from Biskit import BiskitError
 
 class CCStudy:
     
@@ -219,7 +220,7 @@ class CCStudy:
         
         for h in all:
             self.alignments[h] = ca.copy()
-            print "Key (Study): ", h
+            #~ print "Key (Study): ", h
             other_hep = heptads[h][heptads[h]["best"][0]]
             if heptads[h]["best"][0]== "Paper":
                 other_hep = heptads[h][heptads[h]["best"][0]][0]
@@ -235,7 +236,8 @@ class CCStudy:
     
     def chooseBest(self):
         """
-        Chooses the best alignment for the given templates.
+        Chooses the best alignment for the given templates (The best alignment starts
+        in the position with best score).
         
         @return: Tuples whith the best ([0,1] normalized) score and position for chain alignment
                 and register (heptad) alignment. 
@@ -246,7 +248,7 @@ class CCStudy:
         maxims = []
        
         for k in self.alignments.keys():
-            print "Key (Choose): ",k
+            #~ print "Key (Choose): ",k
             self.alignments[k].normalizeScores()
             keys = self.alignments[k].chain_alignments.keys()
             maxacc = (0,0)
@@ -279,6 +281,70 @@ class CCStudy:
             best_reg = max(maxims) 
         except:
              best_reg = None
+        
+        return best_chain, best_reg
+        
+    def chooseBestMean(self):
+        """
+        Chooses the best alignment for the given templates.
+        
+        @return: Tuples whith the best ([0,1] normalized) score and position for chain alignment
+                and register (heptad) alignment. 
+        @type: tuple {tuple {float,int},tuple {float,int}}
+        """
+        
+        print "CHOOSE BEST MEAN"
+
+        
+        ## First for each choose the best
+        global_scores = {}
+        mean_scores = {}
+        
+
+        for k in self.alignments.keys():
+            
+            #~ print k,"c",self.alignments[k].reg_alignments['charges']
+            #~ print k,"h",self.alignments[k].reg_alignments['heptads']
+            #~ print k,"r",self.alignments[k].reg_alignments['res_like']
+            
+            for t in self.alignments[k].reg_alignments['charges']:
+                acc = ((t[0] + self._findInAlignment(self.alignments[k].reg_alignments['heptads'],t[1])+ self._findInAlignment(self.alignments[k].reg_alignments['res_like'],t[1]),t[1]))
+                
+                try:
+                    global_scores[k].append(acc)
+                    
+                except:
+                    global_scores[k] = [acc]
+                    
+        
+        
+        for k in self.alignments.keys():
+            
+            total = 0
+            for i in global_scores[k]:
+                
+                total+= i[0]
+                
+            mean_scores[k] = float(total)/len(global_scores[k]) 
+        #~ print mean_scores
+        
+        ## Then choose the best of all !!!
+        try:
+            best_result = max(mean_scores.values())
+            for i in mean_scores:
+                if mean_scores[i] == best_result:
+                    best_reg = i
+            
+        except:
+            best_reg = None
+            
+        ## Then , once selected the best, find the best alignment
+        #~ print global_scores
+        #~ print best_reg
+        #~ print 
+        best_reg = (max(global_scores[best_reg]),best_reg)
+        
+        best_chain = None
         
         return best_chain, best_reg
     
@@ -322,17 +388,20 @@ class Test(BT.BiskitTest):
         
     def test_Study(self):
         """doStudy function test case"""
-        cs = CCStudy(T.dataRoot() + '/coiledcoil/example_coils.dat')
-        print
-        cs.doStudy()
+        cs = CCStudy(data = T.testRoot() + '/coiledcoil/pdbs_nano/datos2')
         
-        print cs.chooseBest()
         
-    def test_problem_align_case(self):
-        """ Test a problematic case"""
-        cs = CCStudy(T.dataRoot() + '/coiledcoil/example_coils.dat')
-        a = PirAlignment([(cs.data['1NKN']['seq'],cs.data['TARGET']['seq'])],[31])
-        print a
+        print cs.doStudy(True)
+        
+        print "BEST",cs.chooseBest()
+        
+        print "BEST MEAN",cs.chooseBestMean()
+        
+    #~ def test_problem_align_case(self):
+        #~ """ Test a problematic case"""
+        #~ cs = CCStudy(T.dataRoot() + '/coiledcoil/example_coils.dat')
+        #~ a = PirAlignment([(cs.data['1NKN']['seq'],cs.data['TARGET']['seq'])],[31])
+        #~ print a
         
         
 if __name__ == '__main__':

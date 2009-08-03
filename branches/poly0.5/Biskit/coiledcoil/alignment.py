@@ -1,9 +1,21 @@
 class PirAlignment :
     """ 
-    Class for generating pairwise multichain alignments.
+    Class for generating pairwise multichain alignments and writing the '.pir' and '.fasta' files
+    needed by modeller.
     """
     
     def __init__ (self, chains=[("","")],pos = [0]):
+        """
+        Class variables definition and creation.
+        
+        @param chains: Is the list of chain pairs, where the first sequence of the pair (A sequence) 
+            always belon to the same protein. So do the sequences corresponding to the second pos.
+            (B sequences).
+        @type chains: List{Tuple(string,string)}
+        @param pos: List of integers of length 'len(chains)' containing the index of the 
+            residue in which B sequences start superposition.
+        @type pos: List{int}
+        """
         self.chains = chains
         self.processed_a = ""
         self.processed_b = ""
@@ -21,6 +33,9 @@ class PirAlignment :
                 self.processed_b += "/"
     
     def __padding (self):
+        """
+        Adds '-' chars until normalizing the length of all the chains.
+        """
         len_a =  len( self.chain_a )
         len_b =  len( self.chain_b )
         
@@ -39,6 +54,15 @@ class PirAlignment :
         self.chain_b = ("-"*(self.pos))+self.chain_b
     
     def crop (self,what = "",where = 50):
+        """
+        Divides a sequence in n lines of 'where' length.
+        
+        @param what: Sequqnce to crop. 
+        @type what: string
+        @param where: Number of characters per line. Default is 50, as used in fasta format.
+        @type where: int
+        """
+        
         chains = []
         len_c = len(what)
         
@@ -54,6 +78,16 @@ class PirAlignment :
         return chains
         
     def writePir (self,path = "",prot_name='XXXX'):
+        """
+        Writes a '.pir' file using the sequences and superpositions previously define at 
+        '__init__'.
+        
+        @param path: Location and name of the file to be created.
+        @type path: string
+        @param prot_name: Name of the protein (4 chars code) as it will appear in the '.pir' file.
+        @type prot_name: string
+        """
+        
         file = open(path,"w")
         
         file.write(">P1;"+prot_name+"\n")
@@ -66,6 +100,15 @@ class PirAlignment :
         file.close()
         
     def writeFasta (self,path = "",prot_name='XXXX'):
+        """
+        Writes a fasta file using B sequences (so the sequences of the second protein as expressed
+        in '__init__' .
+        
+        @param path: Location and name of the file to be created.
+        @type path: string
+        @param prot_name: Name of the protein (4 chars code) as it will appear in the '.pir' file.
+        @type prot_name: string
+        """
         file = open(path,"w")
         
         file.write(">"+prot_name+"\n")
@@ -78,6 +121,11 @@ class PirAlignment :
         file.close()
         
     def __str__(self):
+        """
+        String conversion for the class.
+        
+        @rtype: string
+        """
         prot_name = "XXXX"
         str = ""
         str += ">P1;"+prot_name+"\n"

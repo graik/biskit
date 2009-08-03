@@ -134,6 +134,9 @@ def parse (path):
     return check_homology(results)
 
 def check_homology(results):
+    """
+    Checks if sequences in results are equal and fills the proper parameter.
+    """
     for r in results.keys():
         keys = results[r].chains.keys()
         for i in range(len(keys)-1):

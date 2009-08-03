@@ -3,6 +3,7 @@ from Biskit import PDBModel
 import os
 from getcoil import createCandidatesFile,dataFileCreation,getBestHit,doHomologyModelling
 from math import sqrt
+from Biskit.tmalign import TMAlign
 
 
 def getCoilStructs ( basepath ,candidates_file):
@@ -121,8 +122,8 @@ def massiveDimerRMSD(pdb1,pdb2):
     seq1 = pdb1.sequence()
     seq2 = pdb2.sequence()
     
-    print "seq1", seq1
-    print "seq2", seq2
+    #~ print "seq1", seq1
+    #~ print "seq2", seq2
     
     pdb1.renumberResidues()
     pdb2.renumberResidues()
@@ -137,17 +138,26 @@ def massiveDimerRMSD(pdb1,pdb2):
     seq2A = pdb2_chainA.sequence()
     seq2B = pdb2_chainB.sequence()
     
-    if len(seq1A) > len(seq2A):
+    changedA = changedB = False
+    
+    #~ print seq1A, seq1B
+    #~ print seq2A, seq2B
+    
+    if len(seq1A) >= len(seq2A):
         _1a = pdb1_chainA
         _2a = pdb2_chainA
     else:
+        changedA = True
+        #~ print "changing A"
         _1a = pdb2_chainA
         _2a = pdb1_chainA
     
-    if len(seq1B) > len(seq2B):    
+    if len(seq1B) >= len(seq2B):    
         _1b = pdb1_chainB
         _2b = pdb2_chainB
     else:
+        changedB = True
+        #~ print "changing B"
         _1b = pdb2_chainB
         _2b = pdb1_chainB
 
@@ -157,8 +167,8 @@ def massiveDimerRMSD(pdb1,pdb2):
         extraB = abs(len( _2a.sequence()) - len(_2b.sequence()))
         
         rmsd = []
-        print "First dimer",_1a.sequence(), _2a.sequence()
-        print "Second dimer",_2a.sequence(), _2b.sequence()
+        #~ print "First dimer",_1a.sequence(), _2a.sequence()
+        #~ print "Second dimer",_1b.sequence(), _2b.sequence()
         
         #~ print "extra",extra
         for i in range(extraA+1):
@@ -169,11 +179,29 @@ def massiveDimerRMSD(pdb1,pdb2):
             for j in range(extraB+1):
                 
                 s_1b=_1b.takeResidues(range(j,j+len(_2b.sequence())))
-                print s_1a.sequence(), s_1b.sequence()
-                print _2a.sequence(), _2b.sequence()
+                #~ print s_1a.sequence(), s_1b.sequence()
+                #~ print _2a.sequence(), _2b.sequence()
                 
+                if changedA and changedB:
+                    ## nothing happens
+                    pass
+                else:
+                    if changedB:
+                        #~ print "reordering Bs"
+                        aux = s_1b
+                        s_1b = _2b
+                        _2b = aux
+                    
+                    if changedA:
+                        #~ print "reordering As"
+                        aux = s_1a
+                        s_1a = _2a
+                        _2a = aux
+                
+                  
                 total1 = s_1a.concat(s_1b)
                 total2 = _2a.concat(_2b)
+                    
                 rmsd.append(total1.rms(total2))
         #~ print rmsd    
         return min(rmsd)
@@ -208,29 +236,20 @@ def validate(data_path,candidates_file):
    
     data_val_path = data_path+"_new"
     
-    rmsd = {}
+    rmsd_total = {}
     
     ## Do a massive RMSD
     
+    
     for s1 in structs:
         for s2 in structs:
-            rmsd[(s1,s2)]=massiveDimerRMSD(structs[s1].compress(structs[s1].maskCA()),structs[s2].compress(structs[s2].maskCA()))
-            print s1,s2,rmsd[(s1,s2)] 
+            mdrmsd = massiveDimerRMSD(structs[s1].compress(structs[s1].maskCA()),structs[s2].compress(structs[s2].maskCA()))
+            tmaligner = TMAlign( structs[s1], structs[s2] )
+            res = tmaligner.run()
+            rmsd_total[(s1,s2)]= {'shiftRMSD':mdrmsd,'tmalRMSD':res['rmsd'],'tmalTSCO':res['score']}
     
-    for s in rmsd:
-        print s , rmsd[s]
-    #~ for s1 in structs:
-        #~ for s2 in structs:
-            #~ print s1,s2, dimerMinRmsd(structs[s1].compress(structs[s1].maskCA()),structs[s2].compress(structs[s2].maskCA()))
-    #~ s1 = '1OCC@3'
-    #~ s2 = '2FHA@1'
-    #~ structs[s1].writePdb(basepath+'/a.pdb')
-    #~ structs[s2].writePdb(basepath+'/b.pdb')
-    
-    #~ print s1,s2,massiveDimerRMSD(structs[s1].compress(structs[s1].maskCA()),structs[s2].compress(structs[s2].maskCA()))
-    
-    return 
-    
+
+    rmsd = {}
     for pdb in structs:
         
         ## Extract one from data file and retarget
@@ -242,7 +261,7 @@ def validate(data_path,candidates_file):
             #~ print data_val_path, sequences[pdb]
             study, best = getBestHit ( datafile =data_val_path, method = "Parry",sequences=sequences[pdb])
             #~ print study, best
-            if best[0] != None and best[1] != None:
+            if best[1] != None:
                 #~ print pdb, best[1][1], sequences[pdb]
                 templa_path,result_path = doHomologyModelling ( id = best[1][1] ,candidates_file = candidates_file, sequences = sequences[pdb], study = study)
                 ## Get the result
@@ -256,19 +275,32 @@ def validate(data_path,candidates_file):
                 ## Make rmsd x.magicFit(p)
 
                 structs[pdb].writePdb(result_path+"/original.pdb")
-                rmsd[pdb] = structs[pdb].compress(structs[pdb].maskCA()).rms(resultpdb.compress(resultpdb.maskCA()))
+                myrmsd = structs[pdb].compress(structs[pdb].maskCA()).rms(resultpdb.compress(resultpdb.maskCA()))
+                tmaligner = TMAlign( structs[pdb], resultpdb )
+                res = tmaligner.run()
+                rmsd[pdb] = {'RMSD':myrmsd,'tmalRMSD':res['rmsd'],'tmalTSCO':res['score'],'selected':best[1][1]}
                 print "RMSD",rmsd[pdb]
                 ## Clean everything
                 os.system("rm -rf "+templa_path)
             else:
                 print pdb, "was unpredictable with this set"
-                #return 
+               
             #~ print best, pdb
             #~ return
         else:
             print pdb, "is not inside the data file"
+   
+
+    
+    
+    print "RMSDS TOTAL--------"
+    for r in rmsd_total:
+        print "%s -  shiftRMSD:%.3f tmalRMSD:%.3f tmalTSCO:%.3f"%(r, rmsd_total[r]['shiftRMSD'],rmsd_total[r]['tmalRMSD'],rmsd_total[r]['tmalTSCO']) 
+    
+    print "RMSDS--------"
     for r in rmsd:
-        print r, rmsd[r]
+        print "%s (%s)-  RMSD:%.3f tmalRMSD:%.3f tmalTSCO:%.3f  %.3f"%(r, rmsd[r]['selected'],rmsd[r]['RMSD'],rmsd[r]['tmalRMSD'],rmsd[r]['tmalTSCO'],abs(rmsd[r]['RMSD']-rmsd[r]['tmalRMSD'])) 
+    
         
 
 def extractPdbs(data_path):

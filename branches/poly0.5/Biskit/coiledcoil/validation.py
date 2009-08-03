@@ -5,8 +5,23 @@ from getcoil import dataFileCreation
 from choosecoil import CCStudy
 from Biskit.molUtils import allAA,single2longAA
 
-## Statistics
+
+""" 
+Collection of functions for validation and table generation.
+"""
+
+
 def file_stats(path):
+    
+    """
+    It extracts some statistics from one candidates file (see 
+    getcoil::createCandidatesFile  for more info about the format). Then
+    it prints the statistics.
+    
+    @param path: Absolute or relative path for the candidates file    
+    @type path: string
+    """
+    
     file = open(path)
     lineas = file.readlines()
     file.close()
@@ -76,6 +91,10 @@ def file_stats(path):
         
 
 def splitInFiles(path,oligo = '2'):
+    """
+    Generates 4 files corresponding to the different combinations between parallel/antiparallel and 
+    homo/hetero, filtering for the oligomerization number defined in parameter 'oligo'.
+    """
     file = open(path)
     lineas = file.readlines()
     file.close()
@@ -115,6 +134,30 @@ def splitInFiles(path,oligo = '2'):
 
 
 def gen_table(path , exclusion_list=[]):
+    """
+    Generates a probability table using candidates in one file.
+    
+    A probability table is a table with one line per aminoacid, so:
+    
+    - Each row starts with the aa. code and then it has 7 float values representing
+    the probability of this aa.to be in such position (from a(1)-g(7))
+    
+    - Each colum has the probabilities of all the aa.s to be in this position.
+    
+    So for theoretical aa. Documentin (DMT) and Pythonin (PTH) table would be:
+    
+    (line containing 'abcdefg' is not present in the table)
+    
+        (a   b   c   d   e   f)
+    DMT 0.9 0.0 0.0 0.9 0.5 0.2
+    PTH 0.1 0.2 0.3 0.3 0.2 0.1
+    
+    
+    @param path: Path for the candidates file.
+    @type path: string
+    @param exclusion_list: List of sequence ID's which are not going to be used.
+    @type exclusion_list: List{string}
+    """
     file = open(path)
     lineas = file.readlines()
     file.close()
@@ -148,6 +191,16 @@ def gen_table(path , exclusion_list=[]):
 
 
 def normalizeTable(table):
+    """
+    Normalizes each colum of a table to sum 1. 
+    So for the table from 'gen_table' doc:
+    
+        (a   b   c    d   e   f)
+    DMT 0.9 0.0 0.0 0.75 0.7 0.66
+    PTH 0.1 1.0 1.0 0.25 0.3 0.33
+         1.  1.  1.  1.   1.  1.
+    
+    """
     reg = 'abcdefg'
     for r in reg:
         total = 0
@@ -161,6 +214,9 @@ def normalizeTable(table):
     
     
 def writeTable(table,path):
+    """
+    Writes a probability table 'table' to the file "path".
+    """
     file = open(path,"w")
     for aa in table:
         line = single2longAA(aa)[0]
@@ -173,6 +229,13 @@ def writeTable(table,path):
 
 
 def generateValidationGroups(path,train_percent):
+    """
+    Generates a random list of Ids with length equals to the 'train_percent' percent of the number
+    of sequences in the candidates file.
+    
+    
+    """
+    
     file = open(path)
     lineas = file.readlines()
     file.close()
@@ -191,6 +254,10 @@ def generateValidationGroups(path,train_percent):
 
 
 def lengthFilter(path1,path2,length):
+    """
+    Writes in 'path2' the filtered candidates file in 'path1' which consists only in 
+    sequences greater than 'lenght'(int).
+    """
     file2 = open(path2,"w")
     
     file1 = open(path1)
@@ -208,6 +275,10 @@ def lengthFilter(path1,path2,length):
 
 
 def incompleteHeptadFilter( path1,path2):
+    """
+    Writes in 'path2' the filtered candidates file in 'path1' which consists only in 
+    sequences where the representative heptad length equals 7.
+    """
     file2 = open(path2,"w")
     
     file1 = open(path1)
@@ -226,6 +297,10 @@ def incompleteHeptadFilter( path1,path2):
 
     
 def writeValidationCandidates(path1,path2,val=[]):
+    """
+    Writes a candidates file filtering the sequences in 'path1' by sequences ID in 'val'
+    and then writes them to 'path2'.
+    """
     file2 = open(path2,"w")
     
     file1 = open(path1)
@@ -241,6 +316,9 @@ def writeValidationCandidates(path1,path2,val=[]):
     file2.close()
     
 def openTable(path):
+    """
+    Loads the table in 'path' and returns it.
+    """
     file1 = open(path)
     lineas = file1.readlines()
     file1.close()
@@ -257,11 +335,34 @@ def openTable(path):
         
     return r    
 
-   
+def errorFilter(path1,path2):
+    """
+    Writes in 'path2' the filtered candidates file in 'path1' which consists only in 
+    sequences where all the coils are completed (it means, dimers have 2 sequences, trimers 3 and 
+    so on... )
+    """
+    file2 = open(path2,"w")
+    
+    file1 = open(path1)
+    lineas = file1.readlines()
+    file1.close()
+    lineas = [ l.strip() for l in lineas ]
+    file2.write(lineas[0]+"\n")
+    pdbs = []
+    for l in lineas[1:]:
+        
+        contents = l.split()
+        
+        
+        if len(contents) > 4 and len(contents[7])==7:
+             file2.write(l+"\n")
+    file2.close()
+    
+    
     
 #~ import os
 ## All files
-#~ file_stats('coils.db')   
+file_stats('coils.db')   
 
 ## Avoid incomplete heptads
 ## 

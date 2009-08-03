@@ -22,7 +22,7 @@ class PairCoilResult:
 
 def parse(path):
     """
-    Parsing for PairCoil2 regular output files.
+    Parsing for PairCoil (v2) regular output files.
     
     @return: Result of the parsing.
     @type: list {PairCoilResult}
@@ -45,9 +45,9 @@ def parse(path):
     return result
     
     
-def parseWeb(path):
+def parse1(path):
     """
-    Parsing for PairCoil2 regular Webserver output.
+    Parsing for PairCoil (v1) regular Webserver output.
     
     @return: Result of the parsing.
     @type: list {PairCoilResult}

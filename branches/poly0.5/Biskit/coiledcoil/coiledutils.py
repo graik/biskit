@@ -2,12 +2,26 @@ from string import letters,digits
 from numpy import array
 import Biskit.molUtils as MU
 
+"""
+Library of functions for coiled coil managing.
+"""
+
 def scoreAlignFun(a,b):
+    """
+    Given two chars a and b, generates the score for this pair.
+    """
     printable = letters + digits
     return  len(printable) - abs(printable.find(a)-printable.find(b))
     
     
 def scores2String(a=[],b=[],reversed = False):
+    """
+    Given two lists of float with scores, returns two strings representing these lists 
+    where each score has been converted to a character. If 'reversed' is set, it generates
+    the inverse string (So if 0.5 is 'h' in a [0-3.2] range, the char returned will be the 
+    one corresponding to 3.2-0.5 instead).
+    Used mainly to quantumize floats.
+    """
     printable = letters + digits
     ar = "";br = ""
     maxp = max(a+b)
@@ -72,7 +86,10 @@ def sameRegister(hept1 = "",hept2 ="",chain=""):
 
 
 def alignd(a="",b="",dict={}):
-    
+    """
+    Calculates alignment scores for all possible superpositions of b over a. Scores are 
+    retrieved from a dictionary indexedby two element tuples.
+    """
     acc = []
     for pos in range(len(a)-len(b)+1):
         aux = 0
@@ -82,7 +99,9 @@ def alignd(a="",b="",dict={}):
     return sorted(acc,reverse = True)
 
 def alignf(a="",b="",fun=None):
-    
+    """
+    Same as 'alignd' but using a function for scoring instead.
+    """
     acc = []
     for pos in range(len(a)-len(b)+1):
         aux = 0

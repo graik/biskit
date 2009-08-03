@@ -44,6 +44,7 @@ class CoiledCoil:
     """
     Size of the window. While it's generally 7, another repeating structures
     can happen so this is left as a constant just for completeness sake.
+    (Not used)
     """
     window_length = 7 
     
@@ -162,7 +163,7 @@ class CoiledCoil:
             best = sorted(new_scores,reverse=True)[0][1]
             self.indexes = indexes[best]
         else:
-            print "*"
+            #~ print "*"
             best = sorted(score,reverse=True)[0][1]
         
         c = self.correlate(chain,[best])[1]
