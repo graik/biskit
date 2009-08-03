@@ -4,6 +4,10 @@ from alignment import PirAlignment
 import tempfile
 import os
 
+"""
+Wrapper for paircoil2 [ A.V. McDonnell, T. Jiang, A.E. Keating, B. Berger, "Paircoil2: 
+Improved prediction of coiled coils from sequence", Bioinformatics Vol. 22(3) (2006)]
+"""
 
 class Paircoil_Error( BiskitError ):
     pass

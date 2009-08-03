@@ -7,7 +7,35 @@ from Biskit import PDBModel
 from coiledutils import getHeptad
 from Biskit.Mod import Modeller
 from alignment import PirAlignment
+
+
+"""
+Library of functions for Coiled Coil sequence to structure prediction in a 
+pipeline fashion.
+
+To execute the whole pipeline just run the functions in this order, just 
+using the results of one to feed the next:
+
+ - createCandidatesFile
+ - dataFileCreation
+ - getBestHit
+ - doHomologyModelling
+ 
+ 
+It may work for any oligomerization state.
+
+"""
+
+
+
+
+
+"""
+String containing all possible chain Ids
+"""
 CHAINS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+
 
 def createCandidatesFile (filename = "", dir = ""):
     """
@@ -16,8 +44,8 @@ def createCandidatesFile (filename = "", dir = ""):
     For each one, it uses socket to create a 
     Please see 'dataFileCreation' for candidates file format description.
     
-    @param path: File name of the candidates file.
-    @type path:string
+    @param filename: File name of the candidates file.
+    @type filename:string
     @param dir: Path of the directory containing pdb template files
     @type dir: string
     
@@ -238,6 +266,17 @@ def dataFileCreation( data_file = "",candidates_file = ""  ,target_seq = "",targ
     file.close()
 
 def _expandSequence(pdb,start,end, extension):
+    """
+    Given a PDB model and a sequence defined by its starting and ending
+    points it expands the structure in the two directions to have "extension"
+    residues.
+    If sequence length is greater than 'extension' then nothing is done.
+    
+    It's not intended to be used by users.
+    
+    _expandSequence(PDBModel,int,int,int):
+    """
+    
     #~ print "PDB",pdb
     model = PDBModel(pdb)
     ### Do same preprocessing as in socket 
@@ -275,23 +314,26 @@ def getBestHit ( datafile ="",method = "",sequences=[]):
     study = CCStudy(data = datafile, cc = cc)
     s,a = study.doStudy(True)
     print s
-    best= study.chooseBest()
+    best= study.chooseBestMean()
     #~ print best
     return study,best
     
 def doHomologyModelling ( id = "" ,candidates_file = "",  sequences = [],heptads_p = [],study = None):
     """
-    Retrieves the structure predicted by homology modelling.
+    Retrieves the structure predicted by homology modelling. It uses modeller and
+    the result will be stored as described in the class Modeller.
     
-    @param id: 
-    @rtype id:
-    @param pos: 
-    @rtype pos:
+    @param id: Id present in the 'study' class (id of one coiled coil)
+    @rtype id: string
     @param candidates_file: Path for the candidates file.
     @type candidates_file: string
     @param sequences: List of the sequences forming part of the coiled coil.
         First sequence in the list must be 'TARGET' sequence.
     @type sequences: List{string}
+    @param heptads_p: Representative heptads of the sequences in "sequences".
+    @type heptads_p: List{string}
+    @param study: Study containing the alignments etc..
+    @type study: CCStudy
     """
     
     ## Retrieve complete data from candidates file
@@ -318,7 +360,7 @@ def doHomologyModelling ( id = "" ,candidates_file = "",  sequences = [],heptads
         contents = l.split()
         if contents[0] == name+".pdb" and contents[3] == coilid:
             candidates.append(l)
-    print "candidates",candidates
+    #~ print "candidates",candidates
     
     model = PDBModel(lineas[0]+"/"+name+".pdb")
     
@@ -392,7 +434,7 @@ def doHomologyModelling ( id = "" ,candidates_file = "",  sequences = [],heptads
             #~ print cc.findHeptads(s)['best'],data["TARGET"]
             study.data = data
             study.doStudy(True)
-            res = study.chooseBest()
+            res = study.chooseBestMean()
             results.append((res[1],s))
             del data["TARGET"]
             j=j+1
@@ -449,6 +491,9 @@ import Biskit.test as BT
 import Biskit.tools as T
 from Biskit import PDBModel
 
+## Provide your own dir with pdbs for this test
+## Ir requires using your own paths and files
+
 class Test(BT.BiskitTest):
     """ Test cases for Coiled Coil Utils"""
 
@@ -460,16 +505,17 @@ class Test(BT.BiskitTest):
     
     def test_candidates(self):
         """ testing of candidates file creation"""
-        #~ createCandidatesFile(T.testRoot()+"/coiledcoil/candidates",T.testRoot()+"/coiledcoil/pdbs")
-        #~ createCandidatesFile("coil","/home/victor/synplexity/synplexity/structures/hypercycle/templates/coiledcoildimantipar")
+        
+        createCandidatesFile(T.testRoot()+"/coiledcoil/candidates",T.testRoot()+"/coiledcoil/pdbs")
+        createCandidatesFile("coil","/home/victor/synplexity/synplexity/structures/hypercycle/templates/coiledcoildimantipar")
         createCandidatesFile("coil","/home/victor/synplexity/synplexity/structures/hypercycle/templates/coils")
     
-    #~ def test_datafilecretion(self):
-        #~ """ testing of data file creation"""
-        #~ dataFileCreation(T.testRoot()+"/coiledcoil/data",T.testRoot()+"/coiledcoil/candidates",target_type = ("homo","parallel",2),target_seq = "LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL",use_big=32)    
-        #~ study,best = getBestHit( datafile = T.testRoot()+"/coiledcoil/data")
-        #~ print best
-        #~ doHomologyModelling ( "2Z5H_clean@52", T.testRoot()+"/coiledcoil/candidates",["LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL","LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL"],study)
+    def test_datafilecretion(self):
+        """ testing of data file creation"""
+        dataFileCreation(T.testRoot()+"/coiledcoil/data",T.testRoot()+"/coiledcoil/candidates",target_type = ("homo","parallel",2),target_seq = "LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL",use_big=32)    
+        study,best = getBestHit( datafile = T.testRoot()+"/coiledcoil/data")
+        print best
+        doHomologyModelling ( "2Z5H_clean@52", T.testRoot()+"/coiledcoil/candidates",["LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL","LEIRAAFLRRRNTALRTRVAELRQRVQRLRNIVSQYETRYGPL"],study)
 
 if __name__ == '__main__':
     BT.localTest()    

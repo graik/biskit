@@ -4,6 +4,10 @@ from Biskit.DSSP import Dssp
 import tempfile
 import os
 
+"""
+Wrapper for SOCKET coiled coil analyzer [Walshaw & Woolfson, 2001]
+"""
+
 class Socket_Error( BiskitError ):
     pass
 
