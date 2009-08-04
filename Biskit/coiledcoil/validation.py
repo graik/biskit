@@ -4,6 +4,7 @@ import random
 from getcoil import dataFileCreation
 from choosecoil import CCStudy
 from Biskit.molUtils import allAA,single2longAA
+import os
 
 
 """ 
@@ -72,6 +73,7 @@ def file_stats(path):
     
     print "--------------------"
     print "Stats for ",path
+    print "Total lines parsed:",len(lineas)-1
     print "Files parsed from:",lineas[0]
     print "Total Coils (1):",total_coils
     print "Total Coils (2):",total_coils2
@@ -85,20 +87,20 @@ def file_stats(path):
     print "A Het:",antip_hetero 
  
 
-def splitInFiles(path,oligo = '2',basepath="./",files = ["homodimeric_parallel_can","homodimeric_antiparallel_can","heterodimeric_parallel_can","heterodimeric_antiparallel_can"]):
+def splitInFiles(path,oligo = '2',basepath=".",files = ["homodimeric_parallel_can","homodimeric_antiparallel_can","heterodimeric_parallel_can","heterodimeric_antiparallel_can"]):
     """
     Generates 4 files corresponding to the different combinations between parallel/antiparallel and 
     homo/hetero, filtering for the oligomerization number defined in parameter 'oligo'.
     """
-    file = open(path)
+    file = open(path,"r")
     lineas = file.readlines()
     file.close()
     lineas = [ l.strip() for l in lineas ]
-    
-    file_par_hom = open(basepath+files[0],"w")
-    file_anti_hom = open(basepath+files[1],"w")
-    file_par_het = open(basepath+files[2],"w")
-    file_anti_het = open(basepath+files[3],"w")
+
+    file_par_hom = open(basepath+"/"+files[0],"w")
+    file_anti_hom = open(basepath+"/"+files[1],"w")
+    file_par_het = open(basepath+"/"+files[2],"w")
+    file_anti_het = open(basepath+"/"+files[3],"w")
     
     file_par_hom.write(lineas[0]+"\n")
     file_anti_hom.write(lineas[0]+"\n")
@@ -107,8 +109,7 @@ def splitInFiles(path,oligo = '2',basepath="./",files = ["homodimeric_parallel_c
     
     for l in lineas[1:]:
         contents = l.split()
-        if len(contents) > 4 and contents[1] ==oligo:
-            
+        if len(contents) > 4 and int(contents[1]) == oligo:
             if contents[2] == 'parallel' and contents[8] == 'homo' :
                 file_par_hom.write(l+"\n")
             elif contents[2] == 'parallel' and contents[8] == 'hetero':
@@ -237,10 +238,13 @@ def generateValidationGroups(path,train_percent):
     seqs = []
     for l in lineas[1:]:
         contents = l.split()
-        
-        seqs.append(contents[0]+":"+contents[3])
+        seqs.append(contents[0]+":"+contents[4])
     
-    
+    random.seed()
+    random.shuffle(seqs)
+    random.seed()
+    random.shuffle(seqs)
+    random.seed()
     random.shuffle(seqs)
 
     return seqs[0:int(train_percent*len(seqs))],seqs[int(train_percent*len(seqs)):]
@@ -304,7 +308,7 @@ def writeValidationCandidates(path1,path2,val=[]):
    
     for l in lineas[1:]:
         contents = l.split()
-        if contents[0]+":"+contents[3] in val:
+        if contents[0]+":"+contents[4] in val:
             file2.write(l+"\n")
     file2.close()
     
@@ -358,24 +362,42 @@ def errorFilter(path1):
         print "No errors found."
 
 
-def validation(path,tries, target_type = ("homo","antiparallel",2)):
+def validation(path,tries, targettype ,tablename,methods):
     """
     Does the validation process for the candidates file 'path'.
     It makes 'tries' tables from randomly picked groups.
     """
-    t,v = generateValidationGroups(path,0.7)
+    file_stats(path)
+    t,v = generateValidationGroups(path,0.05)
+    print len(t), len(v)
     ## 30% used for validation
-    writeValidationCandidates(path,path+"_val",v)
+    print path+"_val"
+    writeValidationCandidates(path,path+"_val",t)
     file_stats(path+"_val")
+    writeValidationCandidates(path,path+"_train",v)
+    file_stats(path+"_train")
     ## 70% used for picking 'training' groups
+    results = []
     
     for i in range(0,tries):
-        ## from which 40% is used to generate the table    
-        t,v = generateValidationGroups(path+'_val',0.7)
-        writeTable(normalizeTable(gen_table(path+'_can',v)),path+"_table")
-        dataFileCreation(path+'_dat',path+"_val",target_seq = "LLLLLLLLLLLL",target_type, method = "All", use_big = 0)
+        ## from which 50% is used to generate the table    
+        t,v = generateValidationGroups(path+'_train',0.8)
+        writeValidationCandidates(path+'_train',path+"_can",v)
+        file_stats(path+"_can")
+        writeTable(normalizeTable(gen_table(path+'_can',v)),path+"_table_"+str(i))
+        os.system('cp '+path+"_table_"+str(i)+' '+T.dataRoot()+'/coiledcoil/'+tablename)
+        dataFileCreation(path+'_dat',path+"_val",target_seq = "LLLLLLLLLLLL",target_type =targettype, method = "All", use_big = 0)
         study = CCStudy(data = path+'_dat')
-        s2,a = study.doStudy(True)
+        s,a = study.doStudy(True)
+        results.append(s)
+    
+    i = 0
+    for r in results:
+        print
+        print "ITERATION ",str(i)+":",targettype[0],targettype[1],
+        for m in methods:
+            print m,"%.4f"%(r[m][0]),"(%d/%d)"%(r[m][1],r[m][2]),
+        i=i+1
 
 
 import Biskit.test as BT
@@ -406,108 +428,33 @@ class Test(BT.BiskitTest):
         file_stats(T.dataRoot()+'/coiledcoil/coils_20.db') 
         file_stats(T.dataRoot()+'/coiledcoil/coils_28.db') 
         
-        splitInFiles(T.dataRoot()+'/coiledcoil/coils_14.db',2,T.testRoot(),['hompar14','hompantipar14','hetpar14','hetantipar14']) 
-        splitInFiles(T.dataRoot()+'/coiledcoil/coils_20.db',2,T.testRoot(),['hompar20','hompantipar20','hetpar20','hetantipar20']) 
-        splitInFiles(T.dataRoot()+'/coiledcoil/coils_28.db',2,T.testRoot(),['hompar28','hompantipar28','hetpar28','hetantipar28']) 
+        splitInFiles(T.dataRoot()+'/coiledcoil/coils_14.db',2,T.testRoot()+'/coiledcoil',['hompar14','homantipar14','hetpar14','hetantipar14']) 
+        splitInFiles(T.dataRoot()+'/coiledcoil/coils_20.db',2,T.testRoot()+'/coiledcoil',['hompar20','homantipar20','hetpar20','hetantipar20']) 
+        splitInFiles(T.dataRoot()+'/coiledcoil/coils_28.db',2,T.testRoot()+'/coiledcoil',['hompar28','homantipar28','hetpar28','hetantipar28']) 
         
         
+        tries = 5
+        
+        validation(T.testRoot()+'/coiledcoil/hompar14',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
+        validation(T.testRoot()+'/coiledcoil/homantipar14',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SPar','AllTypes','HomoAntipar'])
+        validation(T.testRoot()+'/coiledcoil/hetpar14',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SAPar','AllTypes','HeteroPar'])
+        validation(T.testRoot()+'/coiledcoil/hetantipar14',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
+        
+        validation(T.testRoot()+'/coiledcoil/hompar20',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
+        validation(T.testRoot()+'/coiledcoil/homantipar20',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SPar','AllTypes','HomoAntipar'])
+        validation(T.testRoot()+'/coiledcoil/hetpar20',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SAPar','AllTypes','HeteroPar'])
+        validation(T.testRoot()+'/coiledcoil/hetantipar20',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
+        
+        validation(T.testRoot()+'/coiledcoil/hompar28',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
+        validation(T.testRoot()+'/coiledcoil/homantipar28',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SPar','AllTypes','HomoAntipar'])
+        validation(T.testRoot()+'/coiledcoil/hetpar28',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SAPar','AllTypes','HeteroPar'])
+        validation(T.testRoot()+'/coiledcoil/hetantipar28',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
         
         
 if __name__ == '__main__':
     BT.localTest()    
 
 
-#~ import os
-## All files
-#~ file_stats('coils.db')   
-#~ errorFilter('coils.db','coils2.db')
-## Avoid incomplete heptads
-## 
-#~ incompleteHeptadFilter("coils.db","coils_nh.db")
-#~ lengthFilter('coils.db','coils_nh.db',28)
-#~ file_stats('coils_nh.db')  
-#~ splitInFiles('coils.db',oligo = '3') 
-#~ file_stats('homodimeric_parallel_can')
-#~ lengthFilter('homodimeric_parallel_can','homodimeric_parallel_can20',40)
-#~ file_stats('homodimeric_parallel_can20')
-#~ file_stats('homodimeric_antiparallel_can')
-#~ lengthFilter('homodimeric_antiparallel_can','homodimeric_antiparallel_can20',40)
-#~ file_stats('homodimeric_antiparallel_can20')
-#~ os.system("cp coils_nh.db all")
-#~ splitInFiles('all') 
-#~ splitInFiles('coils.db','coils_filteredblah.db',14)
-## length filter for candidates
-#~ lengthFilter('homodimeric_parallel_val','homodimeric_parallel_val14',14)
-#~ lengthFilter('homodimeric_parallel_val','homodimeric_parallel_val14',14)
-#~ lengthFilter('homodimeric_parallel_val','homodimeric_parallel_val14',14)
-#~ lengthFilter('homodimeric_parallel_val','homodimeric_parallel_val14',14)
-#~ lengthFilter('all','all_val4',14)
 
 
-#~ ## normalize not normalized tables
-#~ table= openTable(T.dataRoot()+'/coiledcoil/SOCKET_antipar_norm')
-#~ table= openTable(T.dataRoot()+'/coiledcoil/SOCKET_par_norm')
-#~ writeTable(normalizeTable(openTable(T.dataRoot()+'/coiledcoil/SOCKET_par_norm')),T.dataRoot()+'/coiledcoil/SOCKET_par_norm_prob')
-#~ writeTable(normalizeTable(openTable(T.dataRoot()+'/coiledcoil/SOCKET_antipar_norm')),T.dataRoot()+'/coiledcoil/SOCKET_antipar_norm_prob')
-
-
-
-#~ t,v=generateValidationGroups('homodimeric_parallel_can',0.6)
-#~ print v
-#~ writeTable(normalizeTable(gen_table('homodimeric_parallel_can',v)),T.dataRoot()+'/coiledcoil/homodimeric_parallel')
-#~ t,v=generateValidationGroups('homodimeric_antiparallel_can',0.6)
-#~ writeTable(normalizeTable(gen_table('homodimeric_antiparallel_can',v)),T.dataRoot()+'/coiledcoil/homodimeric_antiparallel')
-#~ t,v=generateValidationGroups('heterodimeric_parallel_can',0.6)
-#~ writeTable(normalizeTable(gen_table('heterodimeric_parallel_can',v)),T.dataRoot()+'/coiledcoil/heterodimeric_parallel')
-#~ t,v=generateValidationGroups('heterodimeric_antiparallel_can',0.6)
-#~ writeTable(normalizeTable(gen_table('heterodimeric_antiparallel_can',v)),T.dataRoot()+'/coiledcoil/heterodimeric_antiparallel')
-#~ t,v=generateValidationGroups('all',0.6)
-#~ writeTable(normalizeTable(gen_table('all',v)),T.dataRoot()+'/coiledcoil/all_types')
-
-
-#~ writeValidationCandidates('homodimeric_parallel_can','homodimeric_parallel_val',v)
-#~ writeValidationCandidates('homodimeric_antiparallel_can','homodimeric_antiparallel_val',v)
-#~ writeValidationCandidates('heterodimeric_parallel_can','heterodimeric_parallel_val',v)
-#~ writeValidationCandidates('heterodimeric_antiparallel_can','heterodimeric_antiparallel_val',v)
-#~ writeValidationCandidates('all','all_val',v)
-
-
-
-#~ dataFileCreation('homodimeric_parallel_dat','homodimeric_parallel_val',target_seq = "LLLLLLLLLLLL",target_type = ("homo","parallel",2), method = "All", use_big = 0 )
-#~ study = CCStudy(data = 'homodimeric_parallel_dat')
-#~ s1,a = study.doStudy(True)
-
-
-#~ dataFileCreation('homodimeric_antiparallel_dat','homodimeric_antiparallel_val',target_seq = "LLLLLLLLLLLL",target_type = ("homo","antiparallel",2), method = "All", use_big = 0 )
-#~ study = CCStudy(data = 'homodimeric_antiparallel_dat')
-#~ s2,a = study.doStudy(True)
-  
-
-#~ dataFileCreation('heterodimeric_parallel_dat','heterodimeric_parallel_val',target_seq = "LLLLLLLLLLLL",target_type = ("hetero","parallel",2), method = "All", use_big = 0 )
-#~ study = CCStudy(data = 'heterodimeric_parallel_dat')
-#~ s3,a = study.doStudy(True)
-   
-
-#~ dataFileCreation('heterodimeric_antiparallel_dat','heterodimeric_antiparallel_val',target_seq = "LLLLLLLLLLLL",target_type = ("hetero","antiparallel",2), method = "All", use_big = 0 )
-#~ study = CCStudy(data = 'heterodimeric_antiparallel_dat')
-#~ s4,a = study.doStudy(True)
-
-#~ ## ALL
-#~ dataFileCreation('all_dat','all_val',target_seq = "LLLLLLLLLLLL",target_type = ("homo","parallel",2), method = "All", use_big = 0 )
-#~ study = CCStudy(data = 'all_dat')
-#~ s5,a = study.doStudy(True)
-
-#~ file_stats('all')
-#~ file_stats('all_val')
-#~ file_stats('homodimeric_parallel_can')
-#~ file_stats('homodimeric_parallel_val')
-#~ file_stats('homodimeric_antiparallel_val')
-#~ file_stats('heterodimeric_parallel_val')
-#~ file_stats('heterodimeric_antiparallel_val')
-
-#~ print "Homo par", s1 
-#~ print "Homo antipar",s2 
-#~ print "Hetero par",s3 
-#~ print "Hetero antipar",s4 
-#~ print "All",s5 
     
