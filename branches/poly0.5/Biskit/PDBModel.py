@@ -1693,6 +1693,20 @@ class PDBModel:
         return self.extendMask( resMask, self.resIndex(), self.lenAtoms() )
 
 
+    def __convert_negative_indices( self, indices, length ):
+        """
+        Replace negative indices by their positive equivalent.
+        """
+        indices = N.array( indices )
+
+        negatives = N.flatnonzero( indices < 0 )
+        indices = copy.copy( indices )
+        
+        for i in negatives:
+            indices[ i ] = length + indices[i] ## substract from end
+        
+        return indices
+    
     def res2atomIndices( self, indices ):
         """
         Convert residue indices to atom indices. Also return the starting
@@ -1704,16 +1718,20 @@ class PDBModel:
         @return: array of atom positions, new residue index
         @rtype: (N.array of int, N.array of int)
         """
-        if max( indices ) > self.lenResidues() or min( indices ) < 0:
-            raise PDBError, "invalid residue indices"
+        min_i = min( indices )
+        if max( indices ) > self.lenResidues() or min_i <= -self.lenResidues():
+            raise PDBError, "indices out of range"
 
+        if min_i < 0:
+            indices = self.__convert_negative_indices( indices, self.lenResidues() )
+            
         return self.extendIndex( indices, self.resIndex(), self.lenAtoms() )
 
 
     def atom2chainIndices( self, indices, breaks=0 ):
         """
         Convert atom indices to chain indices. Each chain is only
-        returned once.
+        returned once. Does not support re-ordering of chains.
 
         @param indices: list of atom indices
         @type  indices: list of int
@@ -3514,7 +3532,12 @@ class Test(BT.BiskitTest):
         self._m2.slim()
         self.assert_( self._m2.atoms.profiles['name'] is not None )
 
-
+    def test_res2atomIndices( self ):
+        """PDBModel.res2atomIndices test"""
+        rindices = range( 0, self.m.lenResidues() -10) + range( -10, 0 )
+        aindices, resindex = self.m.res2atomIndices( rindices )
+        
+        self.assert_( N.all( aindices == N.arange( 0, len( self.m ) ) ) )
 
 
 def clock( s, ns=globals() ):
@@ -3536,6 +3559,4 @@ def clock( s, ns=globals() ):
     return r
 
 if __name__ == '__main__':
-    m = PDBModel( T.testRoot()+'/com/1BGS.pdb')
-    pass
-##     BT.localTest()
+    BT.localTest()
