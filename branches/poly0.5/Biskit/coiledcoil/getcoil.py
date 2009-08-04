@@ -181,7 +181,8 @@ def dataFileCreation( data_file = "",candidates_file = ""  ,target_seq = "",targ
         file = open(basepath+"/_data","w")
     else:
         file = open(data_file,"w")
-        
+    
+    total_done = 0    
     for l in lineas[1:]:
         
         contents = l.split()
@@ -197,7 +198,7 @@ def dataFileCreation( data_file = "",candidates_file = ""  ,target_seq = "",targ
             
             new_line = contents[0][:-4]+"@"+contents[4]+" struct:"+contents[0]
             new_line += " seq:"+contents[6]+" Socket:"+contents[7]
-            print contents[0]
+            print contents[0],"(",total_done,"/",len(lineas)-1,")"
             if use_big>0:
                 
                 sequence = _expandSequence(basepath+"/"+contents[0],int(contents[4]),int(contents[5]),use_big)
@@ -252,7 +253,7 @@ def dataFileCreation( data_file = "",candidates_file = ""  ,target_seq = "",targ
                     new_line +=  " "+methods.getRegisterByMethod(sequence,method) 
             
             file.writelines(new_line+"\n")
-    
+        total_done = total_done +1
     new_line = "TARGET seq:"+target_seq+" "
     
     if method == 'All':
