@@ -83,14 +83,9 @@ def file_stats(path):
     print "P Het:",parallel_hetero
     print "A H:",antip_homo
     print "A Het:",antip_hetero 
-    
-    #~ for p in pdbs:
-        #~ if pdbs[p] - 1 -int(pdbs[p]) >0.1:
-            #~ print p, pdbs[p]-1 , int(pdbs[p]), pdbs[p] - 1-int(pdbs[p])
-        #~ print p, pdbs[p]
-        
+ 
 
-def splitInFiles(path,oligo = '2'):
+def splitInFiles(path,oligo = '2',basepath="./",files = ["homodimeric_parallel_can","homodimeric_antiparallel_can","heterodimeric_parallel_can","heterodimeric_antiparallel_can"]):
     """
     Generates 4 files corresponding to the different combinations between parallel/antiparallel and 
     homo/hetero, filtering for the oligomerization number defined in parameter 'oligo'.
@@ -100,10 +95,10 @@ def splitInFiles(path,oligo = '2'):
     file.close()
     lineas = [ l.strip() for l in lineas ]
     
-    file_par_hom = open("homodimeric_parallel_can","w")
-    file_anti_hom = open("homodimeric_antiparallel_can","w")
-    file_par_het = open("heterodimeric_parallel_can","w")
-    file_anti_het = open("heterodimeric_antiparallel_can","w")
+    file_par_hom = open(basepath+files[0],"w")
+    file_anti_hom = open(basepath+files[1],"w")
+    file_par_het = open(basepath+files[2],"w")
+    file_anti_het = open(basepath+files[3],"w")
     
     file_par_hom.write(lineas[0]+"\n")
     file_anti_hom.write(lineas[0]+"\n")
@@ -172,7 +167,7 @@ def gen_table(path , exclusion_list=[]):
     for l in lineas[1:]:
         contents = l.split()
         
-        if len(contents[6]) >= 13 and len(contents[7])==7 and not contents[0] in exclusion_list:
+        if len(contents[6]) >= 13 and len(contents[7])==7 and not contents[0]+":"+contents[3] in exclusion_list:
             register = getRegister(contents[7],contents[6])
             heptads = getAllHeptads(contents[7],register)
             for h in heptads:
@@ -232,8 +227,6 @@ def generateValidationGroups(path,train_percent):
     """
     Generates a random list of Ids with length equals to the 'train_percent' percent of the number
     of sequences in the candidates file.
-    
-    
     """
     
     file = open(path)
@@ -241,16 +234,16 @@ def generateValidationGroups(path,train_percent):
     file.close()
     lineas = [ l.strip() for l in lineas ]
     
-    pdbs = []
+    seqs = []
     for l in lineas[1:]:
         contents = l.split()
-        if not contents[0] in pdbs:
-            pdbs.append(contents[0])
-    print len(pdbs)
+        
+        seqs.append(contents[0]+":"+contents[3])
     
-    random.shuffle(pdbs)
+    
+    random.shuffle(seqs)
 
-    return pdbs[0:int(train_percent*len(pdbs))],pdbs[int(train_percent*len(pdbs)):]
+    return seqs[0:int(train_percent*len(seqs))],seqs[int(train_percent*len(seqs)):]
 
 
 def lengthFilter(path1,path2,length):
@@ -308,10 +301,10 @@ def writeValidationCandidates(path1,path2,val=[]):
     file1.close()
     lineas = [ l.strip() for l in lineas ]
     file2.write(lineas[0]+"\n")
-    pdbs = []
+   
     for l in lineas[1:]:
         contents = l.split()
-        if contents[0] in val:
+        if contents[0]+":"+contents[3] in val:
             file2.write(l+"\n")
     file2.close()
     
@@ -335,35 +328,99 @@ def openTable(path):
         
     return r    
 
-def errorFilter(path1,path2):
+def errorFilter(path1):
     """
-    Writes in 'path2' the filtered candidates file in 'path1' which consists only in 
-    sequences where all the coils are completed (it means, dimers have 2 sequences, trimers 3 and 
+    Prints on screen the files which have sequences with sequences where not all 
+    the coils are completed (it means, dimers have 2 sequences, trimers 3 and 
     so on... )
     """
-    file2 = open(path2,"w")
-    
+       
     file1 = open(path1)
     lineas = file1.readlines()
     file1.close()
     lineas = [ l.strip() for l in lineas ]
-    file2.write(lineas[0]+"\n")
-    pdbs = []
+        
+    coils = {}
     for l in lineas[1:]:
         
         contents = l.split()
         
+        if (contents[0],contents[3]) in coils:
+            coils[(contents[0],contents[3])][0] += 1            
+        else:
+            coils[(contents[0],contents[3])] = [1.,float(contents[1]),contents[1]] 
+
+    for k in coils:
+        if coils[k][0] != coils[k][1]:
+            print k,coils[k]
+    
+    if coils =={}:
+        print "No errors found."
+
+
+def validation(path,tries, target_type = ("homo","antiparallel",2)):
+    """
+    Does the validation process for the candidates file 'path'.
+    It makes 'tries' tables from randomly picked groups.
+    """
+    t,v = generateValidationGroups(path,0.7)
+    ## 30% used for validation
+    writeValidationCandidates(path,path+"_val",v)
+    file_stats(path+"_val")
+    ## 70% used for picking 'training' groups
+    
+    for i in range(0,tries):
+        ## from which 40% is used to generate the table    
+        t,v = generateValidationGroups(path+'_val',0.7)
+        writeTable(normalizeTable(gen_table(path+'_can',v)),path+"_table")
+        dataFileCreation(path+'_dat',path+"_val",target_seq = "LLLLLLLLLLLL",target_type, method = "All", use_big = 0)
+        study = CCStudy(data = path+'_dat')
+        s2,a = study.doStudy(True)
+
+
+import Biskit.test as BT
+import Biskit.tools as T
+
+class Test(BT.BiskitTest):
+    """ Test cases for Coiled Coil Utils"""
+    def prepare(self):
+        pass
+
+    def cleanUp( self ):
+        pass
         
-        if len(contents) > 4 and len(contents[7])==7:
-             file2.write(l+"\n")
-    file2.close()
-    
-    
-    
+    def test_and_try(self): 
+        """ Database cleaning """
+        print        
+        file_stats(T.dataRoot()+'/coiledcoil/coils.db')   
+        errorFilter(T.dataRoot()+'/coiledcoil/coils.db')
+        incompleteHeptadFilter( T.dataRoot()+'/coiledcoil/coils.db',T.dataRoot()+'/coiledcoil/coils_comphep.db')
+        
+        file_stats(T.dataRoot()+'/coiledcoil/coils_comphep.db') 
+        
+        lengthFilter(T.dataRoot()+'/coiledcoil/coils_comphep.db',T.dataRoot()+'/coiledcoil/coils_14.db',14)
+        lengthFilter(T.dataRoot()+'/coiledcoil/coils_comphep.db',T.dataRoot()+'/coiledcoil/coils_20.db',20)
+        lengthFilter(T.dataRoot()+'/coiledcoil/coils_comphep.db',T.dataRoot()+'/coiledcoil/coils_28.db',28)
+
+        file_stats(T.dataRoot()+'/coiledcoil/coils_14.db') 
+        file_stats(T.dataRoot()+'/coiledcoil/coils_20.db') 
+        file_stats(T.dataRoot()+'/coiledcoil/coils_28.db') 
+        
+        splitInFiles(T.dataRoot()+'/coiledcoil/coils_14.db',2,T.testRoot(),['hompar14','hompantipar14','hetpar14','hetantipar14']) 
+        splitInFiles(T.dataRoot()+'/coiledcoil/coils_20.db',2,T.testRoot(),['hompar20','hompantipar20','hetpar20','hetantipar20']) 
+        splitInFiles(T.dataRoot()+'/coiledcoil/coils_28.db',2,T.testRoot(),['hompar28','hompantipar28','hetpar28','hetantipar28']) 
+        
+        
+        
+        
+if __name__ == '__main__':
+    BT.localTest()    
+
+
 #~ import os
 ## All files
-file_stats('coils.db')   
-
+#~ file_stats('coils.db')   
+#~ errorFilter('coils.db','coils2.db')
 ## Avoid incomplete heptads
 ## 
 #~ incompleteHeptadFilter("coils.db","coils_nh.db")
