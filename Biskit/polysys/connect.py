@@ -24,7 +24,7 @@
 import os.path as osp
 from Biskit import PDBModel, BiskitError, PDBError
 import Biskit.tools as T
-from Biskit.Residue import Residue ## experimental
+## from Biskit.Residue import Residue ## experimental
 import numpy as N
 
 class FusionError( BiskitError ):
@@ -34,9 +34,9 @@ class FusionError( BiskitError ):
 class Fusion( object ):
     
     adapters = \
-        { 'helix'   : T.dataRoot('polysys/fusion/adapter_helix.model'),
-          'sheet'   : T.dataRoot('polysys/fusion/adapter_sheet.model'),
-          'extended': T.dataRoot('polysys/fusion/adapter_extended.model')
+        { 'helix'   : T.dataRoot('poly/fusion/adapter_helix.model'),
+          'sheet'   : T.dataRoot('poly/fusion/adapter_sheet.model'),
+          'extended': T.dataRoot('poly/fusion/adapter_extended.model')
           }
     
     adapter_root = T.dataRoot('/polysys/fusion/')
@@ -60,28 +60,41 @@ class Fusion( object ):
                 raise FusionError, 'invalid adapter argument: %r' % adapter
 
         except PDBError, why:
-            raise FusionError, 'cannot load adapter: ' + why
+            raise FusionError, 'cannot load adapter: %r' % why
     
     def select_atoms( self, m, rindex=0, names=[''] ):
         """
         Select atoms within a single residue
         """
-        rmask = N.zeros( m.lenResidues() )
-        rmask[rindex] = 1
+        a_indices, ri = m.res2atomIndices( [rindex] )
         
-        amask = N.zeros( m.lenAtoms() )
-        for atom in names:
-            amask += m['name'] == atom
+        r = [ i for i in a_indices if m['name'][i] in names ] 
+        
+        ## order by order of given atom names
+        name_index = dict( zip( names, range(len(names))))
+        mix = [ (name_index[ i ], i) for i in r ]
+        mix = zip( range( len(names) ), names )
+        mix.sort()
+        r = N.take( r, [ i[1] for i in mix ] ) 
+        
+        return r
+    
+        #rmask = N.zeros( m.lenResidues() )
+        #rmask[rindex] = 1
+        
+        #amask = N.zeros( m.lenAtoms() )
+        #for atom in names:
+            #amask += m['name'] == atom
 
-        return amask * m.res2atomMask( rmask )
+        #return amask * m.res2atomMask( rmask )
        
         
     def remove_atoms( self, m, rindex=-1, names=['O', 'OT1', 'OT2', 'OXT'] ):
         """
         Remove atoms with given name from given residue.
         """     
-        amask = self.select_atoms( m, rindex, names )
-        m.remove( N.flatnonzero( amask ) )
+        a_indices = self.select_atoms( m, rindex, names )
+        m.remove( a_indices )
 
         
     def fuse( self, m1, m2 ):
@@ -91,7 +104,7 @@ class Fusion( object ):
         m2 = m2.clone()
         
         self.remove_atoms( m1, rindex=-1, names=['O', 'OT1', 'OT2', 'OXT'] )
-        self.remove_atoms( m2, rindex=0,  names=['HT1', 'HT2', 'HT3'] )
+        self.remove_atoms( m2, rindex=0,  names=['H', 'HT1', 'HT2', 'HT3'] )
         
         ## fit adapter to C-terminal of model 1
         mask_1  = self.select_atoms( m1, rindex=-1, names=['N', 'CA', 'C'] )
@@ -101,7 +114,7 @@ class Fusion( object ):
         ref = m1.compress( mask_1 )
         
         assert( isinstance( self.adapter_model, PDBModel ) ) 
-        self.adapter_model.fit( ref, mask=mask_adapt ) 
+        self.adapter_model = self.adapter_model.fit( ref, mask=mask_adapt ) 
         
         ## fit N terminal model2 to C terminal of adapter        
         mask_2 = self.select_atoms( m2, rindex=0, names=['N', 'CA', 'C'] )
@@ -110,18 +123,20 @@ class Fusion( object ):
         
         ref = self.adapter_model.compress( mask_adapt )
         
-        m2.fit( ref, mask=mask_2 )
+        m2 = m2.fit( ref, mask=mask_2 )
         
         ## concatenate models
         assert( isinstance( m1, PDBModel ) )
         r = m1.concat( m2 )
-        r['chain_id'] = r['chain_id'][0] * len( r )
+        r['chain_id'] = [ r['chain_id'][0] ] * len( r )
+        r.renumberResidues()
         
         return r
     
 if __name__ == '__main__':
     
-    m1 = PDBModel( T.testRoot( 'polysys/spectrinr16.pdb' ) )
+    m1 = PDBModel( T.testRoot( 'polysys/fusion_1.pdb' ) )
+    m2 = PDBModel( T.testRoot( 'polysys/fusion_2.pdb' ) )
     
     f = Fusion( adapter='helix' )
-    r = f.fuse( m1, m1 )
+    r = f.fuse( m1, m2 )
