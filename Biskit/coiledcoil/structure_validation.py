@@ -289,9 +289,7 @@ def validate(data_path,candidates_file):
             #~ return
         else:
             print pdb, "is not inside the data file"
-   
 
-    
     
     print "RMSDS TOTAL--------"
     for r in rmsd_total:
