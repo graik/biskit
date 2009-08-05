@@ -368,7 +368,7 @@ def validation(path,tries, targettype ,tablename,methods):
     It makes 'tries' tables from randomly picked groups.
     """
     file_stats(path)
-    t,v = generateValidationGroups(path,0.05)
+    t,v = generateValidationGroups(path,0.5)
     print len(t), len(v)
     ## 30% used for validation
     print path+"_val"
@@ -380,8 +380,9 @@ def validation(path,tries, targettype ,tablename,methods):
     results = []
     
     for i in range(0,tries):
+        #~ print "ITERATION:",i
         ## from which 50% is used to generate the table    
-        t,v = generateValidationGroups(path+'_train',0.8)
+        t,v = generateValidationGroups(path+'_train',0.6)
         writeValidationCandidates(path+'_train',path+"_can",v)
         file_stats(path+"_can")
         writeTable(normalizeTable(gen_table(path+'_can',v)),path+"_table_"+str(i))
@@ -433,22 +434,22 @@ class Test(BT.BiskitTest):
         splitInFiles(T.dataRoot()+'/coiledcoil/coils_28.db',2,T.testRoot()+'/coiledcoil',['hompar28','homantipar28','hetpar28','hetantipar28']) 
         
         
-        tries = 5
+        tries = 100
         
-        validation(T.testRoot()+'/coiledcoil/hompar14',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
-        validation(T.testRoot()+'/coiledcoil/homantipar14',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SPar','AllTypes','HomoAntipar'])
-        validation(T.testRoot()+'/coiledcoil/hetpar14',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SAPar','AllTypes','HeteroPar'])
-        validation(T.testRoot()+'/coiledcoil/hetantipar14',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
+        #~ validation(T.testRoot()+'/coiledcoil/hompar14',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
+        #~ validation(T.testRoot()+'/coiledcoil/homantipar14',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SPar','AllTypes','HomoAntipar'])
+        #~ validation(T.testRoot()+'/coiledcoil/hetpar14',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SAPar','AllTypes','HeteroPar'])
+        #~ validation(T.testRoot()+'/coiledcoil/hetantipar14',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
         
         validation(T.testRoot()+'/coiledcoil/hompar20',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
         validation(T.testRoot()+'/coiledcoil/homantipar20',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SPar','AllTypes','HomoAntipar'])
         validation(T.testRoot()+'/coiledcoil/hetpar20',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SAPar','AllTypes','HeteroPar'])
         validation(T.testRoot()+'/coiledcoil/hetantipar20',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
         
-        validation(T.testRoot()+'/coiledcoil/hompar28',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
-        validation(T.testRoot()+'/coiledcoil/homantipar28',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SPar','AllTypes','HomoAntipar'])
-        validation(T.testRoot()+'/coiledcoil/hetpar28',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SAPar','AllTypes','HeteroPar'])
-        validation(T.testRoot()+'/coiledcoil/hetantipar28',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
+        #~ validation(T.testRoot()+'/coiledcoil/hompar28',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
+        #~ validation(T.testRoot()+'/coiledcoil/homantipar28',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SPar','AllTypes','HomoAntipar'])
+        #~ validation(T.testRoot()+'/coiledcoil/hetpar28',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SAPar','AllTypes','HeteroPar'])
+        #~ validation(T.testRoot()+'/coiledcoil/hetantipar28',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
         
         
 if __name__ == '__main__':
