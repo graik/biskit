@@ -380,7 +380,7 @@ def validation(path,tries, targettype ,tablename,methods):
     results = []
     
     for i in range(0,tries):
-        #~ print "ITERATION:",i
+        print "ITN:",i
         ## from which 50% is used to generate the table    
         t,v = generateValidationGroups(path+'_train',0.6)
         writeValidationCandidates(path+'_train',path+"_can",v)
