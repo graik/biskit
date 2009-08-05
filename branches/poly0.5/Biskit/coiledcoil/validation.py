@@ -436,19 +436,19 @@ class Test(BT.BiskitTest):
         
         tries = 100
         
-        #~ validation(T.testRoot()+'/coiledcoil/hompar14',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
-        #~ validation(T.testRoot()+'/coiledcoil/homantipar14',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SPar','AllTypes','HomoAntipar'])
-        #~ validation(T.testRoot()+'/coiledcoil/hetpar14',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SAPar','AllTypes','HeteroPar'])
-        #~ validation(T.testRoot()+'/coiledcoil/hetantipar14',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
+        validation(T.testRoot()+'/coiledcoil/hompar14',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
+        validation(T.testRoot()+'/coiledcoil/homantipar14',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HomoAntipar'])
+        validation(T.testRoot()+'/coiledcoil/hetpar14',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SPar','AllTypes','HeteroPar'])
+        validation(T.testRoot()+'/coiledcoil/hetantipar14',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
         
-        validation(T.testRoot()+'/coiledcoil/hompar20',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
-        validation(T.testRoot()+'/coiledcoil/homantipar20',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SPar','AllTypes','HomoAntipar'])
-        validation(T.testRoot()+'/coiledcoil/hetpar20',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SAPar','AllTypes','HeteroPar'])
-        validation(T.testRoot()+'/coiledcoil/hetantipar20',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
+        #~ validation(T.testRoot()+'/coiledcoil/hompar20',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
+        #~ validation(T.testRoot()+'/coiledcoil/homantipar20',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SPar','AllTypes','HomoAntipar'])
+        #~ validation(T.testRoot()+'/coiledcoil/hetpar20',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SAPar','AllTypes','HeteroPar'])
+        #~ validation(T.testRoot()+'/coiledcoil/hetantipar20',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
         
         #~ validation(T.testRoot()+'/coiledcoil/hompar28',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
-        #~ validation(T.testRoot()+'/coiledcoil/homantipar28',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SPar','AllTypes','HomoAntipar'])
-        #~ validation(T.testRoot()+'/coiledcoil/hetpar28',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SAPar','AllTypes','HeteroPar'])
+        #~ validation(T.testRoot()+'/coiledcoil/homantipar28',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HomoAntipar'])
+        #~ validation(T.testRoot()+'/coiledcoil/hetpar28',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SPar','AllTypes','HeteroPar'])
         #~ validation(T.testRoot()+'/coiledcoil/hetantipar28',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
         
         
