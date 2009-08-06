@@ -134,7 +134,11 @@ def flatten ( chain = "", register = "", mycc = None,window_length = 7):
     ac = 0 
 
     for i in chain[start:end]:
-        ac+= mycc.scores[MU.single2longAA(i)[0]][pos] or 0
+        try:
+            ac+= mycc.scores[MU.single2longAA(i)[0]][pos]
+        except:
+            pass
+            
         pos = (pos+1)%window_length
         if pos == 0:
             scores.append(ac)

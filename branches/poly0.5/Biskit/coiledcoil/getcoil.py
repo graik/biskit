@@ -118,8 +118,8 @@ def createCandidatesFile (filename = "", dir = ""):
                         if len(sc.result[cc].chains[h])>7:
                             line += sc.result[cc].ranges[h][0] + " " +sc.result[cc].ranges[h][1] + " "
                             line += sc.result[cc].chains[h] + " " +getHeptad(sc.result[cc].chains[h],sc.result[cc].registers[h])+" "
-                            line += sc.result[cc].homo 
-                        
+                            line += sc.result[cc].homo + " "
+                            line += sc.result[cc].sc.result[cc].registers[h]
                             file.writelines(line+"\n")
             
             del sc 

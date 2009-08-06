@@ -366,6 +366,9 @@ def validation(path,tries, targettype ,tablename,methods):
     """
     Does the validation process for the candidates file 'path'.
     It makes 'tries' tables from randomly picked groups.
+    
+    It opens the candidates file 'path' and does the study "tries" times,
+    generating each time a new table.
     """
     file_stats(path)
     t,v = generateValidationGroups(path,0.5)
@@ -379,23 +382,29 @@ def validation(path,tries, targettype ,tablename,methods):
     ## 70% used for picking 'training' groups
     results = []
     
+    ftimes = 0
+    
     for i in range(0,tries):
         print "ITN:",i
-        ## from which 50% is used to generate the table    
-        t,v = generateValidationGroups(path+'_train',0.6)
-        writeValidationCandidates(path+'_train',path+"_can",v)
-        file_stats(path+"_can")
-        writeTable(normalizeTable(gen_table(path+'_can',v)),path+"_table_"+str(i))
-        os.system('cp '+path+"_table_"+str(i)+' '+T.dataRoot()+'/coiledcoil/'+tablename)
-        dataFileCreation(path+'_dat',path+"_val",target_seq = "LLLLLLLLLLLL",target_type =targettype, method = "All", use_big = 0)
-        study = CCStudy(data = path+'_dat')
-        s,a = study.doStudy(True)
-        results.append(s)
+        ## from which 50% is used to generate the table 
+        try:        
+            t,v = generateValidationGroups(path+'_train',0.6)
+            writeValidationCandidates(path+'_train',path+"_can",v)
+            file_stats(path+"_can")
+            writeTable(normalizeTable(gen_table(path+'_can',v)),path+"_table_"+str(i))
+            os.system('cp '+path+"_table_"+str(i)+' '+T.dataRoot()+'/coiledcoil/'+tablename)
+            dataFileCreation(path+'_dat',path+"_val",target_seq = "LLLLLLLLLLLL",target_type =targettype, method = "All", use_big = 0)
+            study = CCStudy(data = path+'_dat')
+            s,a = study.doStudy(True)
+            results.append(s)
+        
+        except:
+            ftimes = ftimes+1
     
     i = 0
     for r in results:
         print
-        print "ITERATION ",str(i)+":",targettype[0],targettype[1],
+        print "ITERATION ",str(i)+":",targettype[0],targettype[1],"failed",ftimes,"times"
         for m in methods:
             print m,"%.4f"%(r[m][0]),"(%d/%d)"%(r[m][1],r[m][2]),
         i=i+1
@@ -436,21 +445,41 @@ class Test(BT.BiskitTest):
         
         tries = 100
         
-        validation(T.testRoot()+'/coiledcoil/hompar14',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
-        validation(T.testRoot()+'/coiledcoil/homantipar14',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HomoAntipar'])
-        validation(T.testRoot()+'/coiledcoil/hetpar14',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SPar','AllTypes','HeteroPar'])
-        validation(T.testRoot()+'/coiledcoil/hetantipar14',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
+        try:
+            validation(T.testRoot()+'/coiledcoil/hompar14',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
+        except:
+            print "FAILED HOMPAR14"
+        try:
+            validation(T.testRoot()+'/coiledcoil/homantipar14',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HomoAntipar'])
+        except:
+            print "FAILED HOMAPAR14"
+        try:
+            validation(T.testRoot()+'/coiledcoil/hetpar14',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SPar','AllTypes','HeteroPar'])
+        except:
+            print "FAILED HETPAR14"
+        try:
+            validation(T.testRoot()+'/coiledcoil/hetantipar14',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
+        except:
+            print "FAILED HETAPAR14"
         
-        #~ validation(T.testRoot()+'/coiledcoil/hompar20',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
-        #~ validation(T.testRoot()+'/coiledcoil/homantipar20',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SPar','AllTypes','HomoAntipar'])
-        #~ validation(T.testRoot()+'/coiledcoil/hetpar20',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SAPar','AllTypes','HeteroPar'])
-        #~ validation(T.testRoot()+'/coiledcoil/hetantipar20',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
         
-        #~ validation(T.testRoot()+'/coiledcoil/hompar28',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
-        #~ validation(T.testRoot()+'/coiledcoil/homantipar28',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HomoAntipar'])
-        #~ validation(T.testRoot()+'/coiledcoil/hetpar28',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SPar','AllTypes','HeteroPar'])
-        #~ validation(T.testRoot()+'/coiledcoil/hetantipar28',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
+        try:    
+            validation(T.testRoot()+'/coiledcoil/hompar28',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
+        except:
+            print "FAILED HOMPAR28"
         
+        try:    
+            validation(T.testRoot()+'/coiledcoil/homantipar28',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HomoAntipar'])
+        except:
+            print "FAILED HOMAPAR28"
+        try:    
+            validation(T.testRoot()+'/coiledcoil/hetpar28',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SPar','AllTypes','HeteroPar'])
+        except:
+            print "FAILED HETPAR28"
+        try:    
+            validation(T.testRoot()+'/coiledcoil/hetantipar28',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
+        except:
+            print "FAILED HETAPAR28"
         
 if __name__ == '__main__':
     BT.localTest()    
