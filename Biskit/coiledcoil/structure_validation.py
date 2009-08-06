@@ -7,6 +7,10 @@ from Biskit.tmalign import TMAlign
 
 
 def getCoilStructs ( basepath ,candidates_file):
+    """
+    Parses a candidates file in 'basepath' with name 'candidates_file' and returns 
+    an dictionary of coiled coil PDBModels indexed by coil ID.
+    """
     file = open(candidates_file)
     lineas = file.readlines()
     file.close()
@@ -54,6 +58,10 @@ def getCoilStructs ( basepath ,candidates_file):
 
 
 def delFromDataFile(data_path,data_val_path,who):
+    """
+    Removes all pdb entries with id "who" from the data file in data_path. I writes 
+    the resultant file in "data_val".
+    """
     file = open(data_path)
     lineas = file.readlines()
     file.close()
@@ -84,40 +92,13 @@ def delFromDataFile(data_path,data_val_path,who):
     
     return deleted
 
-def massiveRMSD(pdb1,pdb2):
-    ## Only for CA 
-    seq1 = pdb1.sequence()
-    seq2 = pdb2.sequence()
-    
-    pdb1.renumberResidues()
-    pdb2.renumberResidues()
-    
-    #~ print "longitudes",len(seq1),len(seq2)
-    #~ print seq1
-    #~ print seq2
-    if len(seq1) != len(seq2):
-        if len(seq1) >= len(seq2):
-            a = pdb1
-            b = pdb2
-        else:
-            a = pdb2
-            b = pdb1
-        
-        extra = abs(len(seq1)-len(seq2))
-        
-        rmsd = []
-        #~ print "extra",extra
-        for i in range(extra+1):
-            a_=a.takeResidues(range(i,i+len(b.sequence())))
-            #~ print a_.sequence()
-            #~ print b.sequence()
-            rmsd.append((a_.rms(b),a.concat(b)))
-        #~ print rmsd    
-        return min(rmsd)[0],len(b)
-    else:
-        return pdb1.rms(pdb2),float(len(pdb1.atoms))
 
 def massiveDimerRMSD(pdb1,pdb2):
+    """
+    Does a pairwise RMSD using a sliding window to best fitthe two PDBS.
+    This function is intennded to be used only with the c-alpha trace of coiled coil dimers.
+    """
+    
     ## Only for CA 
     seq1 = pdb1.sequence()
     seq2 = pdb2.sequence()
@@ -208,28 +189,11 @@ def massiveDimerRMSD(pdb1,pdb2):
     else:
         return pdb1.rms(pdb2)
 
-def dimerMinRmsd(pdb1,pdb2):
-    
-    pdb1_chainA = pdb1.takeChains([0]) 
-    pdb1_chainB = pdb1.takeChains([1])
-    pdb2_chainA = pdb2.takeChains([0])
-    pdb2_chainB = pdb2.takeChains([1])
-        
-    rmsaa,NAA = massiveRMSD(pdb1_chainA,pdb2_chainA)
-    rmsab,NAB = massiveRMSD(pdb1_chainA,pdb2_chainB)
-    rmsba,NBA = massiveRMSD(pdb1_chainB,pdb2_chainA)
-    rmsbb,NBB = massiveRMSD(pdb1_chainB,pdb2_chainB)
-    
-    dsumAA = NAA*rmsaa
-    dsumAB = NAB*rmsab
-    dsumBA = NBA*rmsba
-    dsumBB = NBB*rmsbb
-    
-    return sqrt((dsumAA+dsumBB)/(NAA+NBB)),sqrt((dsumAB+dsumBA)/(NAB+NBA)),min(sqrt((dsumAA+dsumBB)/(NAA+NBB)),sqrt((dsumAB+dsumBA)/(NAB+NBA)))
-    
-    
-
 def validate(data_path,candidates_file):
+    """
+    Does a pairwise rmsd of all structures defined in data_path and candidates_file and then
+    tries to do a cross-validation using rmsd as parameter.
+    """
     pdb_used = []
     
     structs, sequences, correspondences= getCoilStructs(basepath,candidates_file)
@@ -302,7 +266,6 @@ def validate(data_path,candidates_file):
         
 
 def extractPdbs(data_path):
-    
     file = open(data_path)
     lineas = file.readlines()
     file.close()
@@ -314,6 +277,7 @@ def extractPdbs(data_path):
     pdbs_s= set(pdbs)
     for p in pdbs_s:
         print "cp ./pdbs/"+p+" ./pdbs_nano/"+p 
+
 basepath = '/home/victor/poly0.5/Biskit/testdata/coiledcoil/pdbs_nano'
 
 #~ extractPdbs(basepath+"/datos_new")

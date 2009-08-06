@@ -10,8 +10,8 @@ import ResiduePicker
 import random
 import cPickle
 import re
-
-
+import xtender
+import xplortools
 class UndefProtein (BlockEntity):
     def __init__(self,name,sequence = ""):
         BlockEntity.__init__(self,name)
@@ -24,33 +24,12 @@ class UndefProtein (BlockEntity):
 
     def run (self):
         BlockEntity.run(self)
-
-        #get residue database status
-        try:
-            f = open ('./residues_db/residues',"r")
-            total_res = cPickle.load(f)
-
-        except (cPickle.UnpicklingError, IOError,EOFError):
-            f = open ('./residues_db/residues',"w")
-            total_res = {}
-
-        f.close()
-
-        #create atomic data from sequence and return a PDBModel
-        if self.sequence != "" and  total_res != {} :
-            flip = True
-            c = self.sequence[0]
-            n = random.randint(1, total_res[c])
-            p_a = PDBModel("./residues_db/"+c+"/"+c+str(n)+".pdb")
-
-            for c in self.sequence[1:]:
-                n = random.randint(1, total_res[c])
-                p_b = PDBModel("./residues_db/"+c+"/"+c+str(n)+".pdb")
-                p_a = self.picker.stickAAs(p_a,p_b,flip)
-                flip = not flip
-
-        self.structure = p_a
-        return p_a
+        
+        p_a = Xtender(linkseq).run()
+        
+        ## TODO: delete terminals etc 
+        self.structure = xplortools.cleanPDB(p_a)
+        return self.structure
 
 
 
