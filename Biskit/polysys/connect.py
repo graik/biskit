@@ -62,31 +62,23 @@ class Fusion( object ):
         except PDBError, why:
             raise FusionError, 'cannot load adapter: %r' % why
     
+
     def select_atoms( self, m, rindex=0, names=[''] ):
         """
-        Select atoms within a single residue
+        Select atoms within a single residue of model <m>.
+        @return: N.array of int, atom indices within residue <rindex> in same 
+                 order as atom <names>
         """
         a_indices, ri = m.res2atomIndices( [rindex] )
         
-        r = [ i for i in a_indices if m['name'][i] in names ] 
+        ## map atom names to atom indices
+        name2i = dict( zip( [ m['name'][i] for i in a_indices ],
+                          a_indices ) )
         
-        ## order by order of given atom names
-        name_index = dict( zip( names, range(len(names))))
-        mix = [ (name_index[ i ], i) for i in r ]
-        mix = zip( range( len(names) ), names )
-        mix.sort()
-        r = N.take( r, [ i[1] for i in mix ] ) 
+        ## return atom indices in same order as atom names input
+        r = [ name2i[name] for name in names if name in name2i ]
         
-        return r
-    
-        #rmask = N.zeros( m.lenResidues() )
-        #rmask[rindex] = 1
-        
-        #amask = N.zeros( m.lenAtoms() )
-        #for atom in names:
-            #amask += m['name'] == atom
-
-        #return amask * m.res2atomMask( rmask )
+        return N.array(r)
        
         
     def remove_atoms( self, m, rindex=-1, names=['O', 'OT1', 'OT2', 'OXT'] ):
@@ -96,9 +88,27 @@ class Fusion( object ):
         a_indices = self.select_atoms( m, rindex, names )
         m.remove( a_indices )
 
-        
-    def fuse( self, m1, m2 ):
+    def fitOverlap( self, m1, m2, r1=-1, r2=0, names=['N', 'CA', 'C'] ):
         """
+        Transform model m2 so that some atoms selected from residue r2 fit
+        on the corresponding atoms of m1's residue r1.
+        @return: PDBModel, transformed m2
+        """
+        sel_m1 = self.select_atoms( m1, rindex= r1, names= names )
+        sel_m2 = self.select_atoms( m2, rindex= r2, names= names )
+
+        ref = m1.take( sel_m1 )
+        probe = m2.take( sel_m2 )
+        
+        rt = probe.transformation( ref )        
+        return m2.transform( rt )
+        
+    
+    def fuseN2C( self, m1, m2 ):
+        """
+        Fuse C-terminal of m1 to N-terminal of m2.
+        @param m1: PDBModel, first protein
+        @param m2: PDBModel, second protein
         """
         m1 = m1.clone()
         m2 = m2.clone()
@@ -107,23 +117,14 @@ class Fusion( object ):
         self.remove_atoms( m2, rindex=0,  names=['H', 'HT1', 'HT2', 'HT3'] )
         
         ## fit adapter to C-terminal of model 1
-        mask_1  = self.select_atoms( m1, rindex=-1, names=['N', 'CA', 'C'] )
-        mask_adapt = self.select_atoms( self.adapter_model, 
-                                   rindex=0, names=['N', 'CA', 'C'] )
+        adapter = self.adapter_model
+        adapter = self.fitOverlap( m1, adapter, r1=-1, r2=0, 
+                                   names=['N', 'CA', 'C', 'CB'] ) ## note: not general
         
-        ref = m1.compress( mask_1 )
+        adapter.writePdb( '~/adapter.pdb' )
         
-        assert( isinstance( self.adapter_model, PDBModel ) ) 
-        self.adapter_model = self.adapter_model.fit( ref, mask=mask_adapt ) 
-        
-        ## fit N terminal model2 to C terminal of adapter        
-        mask_2 = self.select_atoms( m2, rindex=0, names=['N', 'CA', 'C'] )
-        mask_adapt = self.select_atoms( self.adapter_model, 
-                                        rindex=1, names=['N', 'CA', 'C'] )
-        
-        ref = self.adapter_model.compress( mask_adapt )
-        
-        m2 = m2.fit( ref, mask=mask_2 )
+        ## fit N terminal model2 to C terminal of adapter
+        m2 = self.fitOverlap( adapter, m2, r1=-1, r2=0, names=['N', 'CA', 'C', 'O'] )
         
         ## concatenate models
         assert( isinstance( m1, PDBModel ) )
@@ -139,4 +140,6 @@ if __name__ == '__main__':
     m2 = PDBModel( T.testRoot( 'polysys/fusion_2.pdb' ) )
     
     f = Fusion( adapter='helix' )
-    r = f.fuse( m1, m2 )
+    r = f.fuseN2C( m1, m2 )
+    
+    r.writePdb('~/fuse.pdb' )
