@@ -1884,17 +1884,23 @@ class PDBModel:
         return r
     
     
-    def concat( self, *models ):
+    def concat( self, *models, **kw ):
         """
         Concatenate atoms, coordinates and profiles. source and fileName
         are lost, so are profiles that are not available in all models.
         model0.concat( model1 [, model2, ..]) -> single PDBModel.
 
-        @param models: models to concatenate
-        @type  models: model OR list of models
+        @param models:   models to concatenate
+        @type  models:   one or more PDBModel instances
+        @param newRes:   treat beginning of second model as new residue (True)
+        @type  newRes:   bool
+        @param newChain: treat beginning of second model as new chain (True)
+        @type  newChain:   bool
 
         @note: info records of given models are lost.
         """
+        newRes = kw.get('newRes', True)
+        newChain=kw.get('newChain', True)
 
         if len( models ) == 0:
             return self
@@ -1915,11 +1921,56 @@ class PDBModel:
         r.residues.model = r
         r.atoms.model = r
 
-        r._resIndex   = N.concatenate(
-            (self.resIndex(), m.resIndex() + self.lenAtoms())) 
-        r._chainIndex =N.concatenate(
-            (self.chainIndex(), m.chainIndex() +self.lenAtoms()))
+        if newRes:
+            append_I = m.resIndex() + self.lenAtoms()
+        else:
+            append_I = m.resIndex()[1:] + self.lenAtoms()
 
+        r._resIndex  = N.concatenate((self.resIndex(), append_I ))
+
+        if newChain:
+            append_I = m.chainIndex() +self.lenAtoms()
+        else:
+            append_I = m.chainIndex()[1:] +self.lenAtoms()
+
+        r._chainIndex =N.concatenate((self.chainIndex(), append_I))
+
+        ## remove last traces of residue or chain breaks
+        if not newRes:
+            last_of_first = m.resIndex()[1] if m.lenResidues() > 1 \
+                                            else m.lenAtoms()
+                                            
+            i_scar = N.arange( 0, last_of_first ) + self.lenAtoms()
+
+            r['residue_number'][i_scar] = self['residue_number'][-1]
+            r['residue_name'][i_scar]   = self['residue_name'][-1]
+            r['chain_id'][i_scar]       = self['chain_id'][-1]
+            r['segment_id'][i_scar]     = self['segment_id'][-1]
+
+            ## doesn't yet adapt chain Index (needs to be shifted to end
+            ## of new residue
+
+            
+        if not newRes or not newChain:
+
+            r['after_ter'][len(self)]   = 0
+            r['serial_number'][len(self):] = N.arange(len(self),len(r))
+
+        if not newChain:
+            last_of_first = m.chainIndex()[1] if m.lenChains() > 1 \
+                                              else m.lenAtoms()
+
+            i_scar = N.arange( 0, last_of_first ) + self.lenAtoms()
+            
+            r['chain_id'][i_scar]       = self['chain_id'][-1]
+            r['segment_id'][i_scar]     = self['segment_id'][-1]
+
+            mask = N.zeros( len(r) )
+            N.put( mask, N.arange( len(self), len(r) ), 1 )
+
+            r.renumberResidues( mask, self.lenResidues()+1 )
+            
+            
         r.info = copy.deepcopy( self.info )
 
         return r.concat( *models[1:] )
