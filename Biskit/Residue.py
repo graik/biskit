@@ -110,7 +110,7 @@ class Residue(object):
     elements = {'N':'N', 'CA':'C', 'C':'C', 'O':'O', 'CB':'C', 
                 'H':'H', 'HA':'HA' }
     
-    #: residue is marked as hetatom
+    #: residue should be marked as hetatom
     hetatom = False
 
     #: residue is polar
@@ -209,7 +209,7 @@ class Residue(object):
 
     def _setSerial( self, value ):
         """Modify residue number within PDB file (doesn't move residue!)"""
-        assert self.model() is None, 'cannot modify non-attached residue'
+        assert self.model() is not None, 'cannot modify non-attached residue'
         self.model().atoms['residue_number'][self.from_atom : self.to_atom] \
             = [ value ] * self.to_atom - self.from_atom
     
@@ -225,7 +225,7 @@ class Residue(object):
     def _setChain( self, letter ):
         """Modify chain ID of underlying model at this residue position"""
         assert len( letter ) <= 1
-        assert self.model() is None, 'cannot modify non-attached residue'
+        assert self.model() is not None, 'cannot modify non-attached residue'
         self.model().atoms['chain_id'][self.from_atom : self.to_atom] \
             = [ letter ] * self.to_atom - self.from_atom
     
