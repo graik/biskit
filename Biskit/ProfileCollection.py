@@ -855,7 +855,7 @@ class ProfileCollection:
                 result.setInfo( key, **copy.deepcopy(self.getInfo(key)) )
 
         except Exception, why:
-            raise ProfileError( "Can't take sub-profile: "+str(why) )
+            raise ProfileError( "Can't take sub-profile %r: %r" % (key,why) )
 
         return result
 
