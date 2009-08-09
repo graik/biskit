@@ -1676,6 +1676,20 @@ class PDBModel:
         """
         return self.extendMask( resMask, self.resIndex(), self.lenAtoms() )
 
+    def __convert_negative_indices( self, indices, length ):
+        """
+        Replace negative indices by their positive equivalent.
+        """
+        indices = N.array( indices )
+
+        negatives = N.flatnonzero( indices < 0 )
+        indices = copy.copy( indices )
+        
+        for i in negatives:
+            indices[ i ] = length + indices[i] ## substract from end
+        
+        return indices
+
 
     def res2atomIndices( self, indices ):
         """
@@ -1883,6 +1897,141 @@ class PDBModel:
         r = [ p[ rI[res] : rE[res]+1 ] for res in range( self.lenResidues() ) ]
         return r
     
+    def mergeChains( self, c1, id='', segid='', rmOxt=True,
+                     renumberAtoms=False, renumberResidues=True):
+        """
+        Merge two adjacent chains. This merely removes the internal marker
+        for a chain boundary. Atom content or coordinates are not modified.
+
+        PDBModel tracks chain boundaries in an internal _chainIndex. However,
+        there are cases when this chainIndex needs to be re-built and new 
+        chain boundaries are then infered from jumps in chain- or segment 
+        labelling or residue numbering. mergeChains thus automatically
+        re-assigns PDB chain- and segment IDs as well as residue numbering
+        to prepare for this situation.
+        
+        @param c1   : first of the two chains to be merged
+        @type  c1   : int
+        @param id   : chain ID of the new chain (default: ID of first chain)
+        @type  id   : str
+        @param segid: segment ID of the new chain (default: SEGID of first chain)
+        @type  segid: str
+        @param renumberAtoms: rewrite PDB serial numbering of the adjacent chain 
+                              to be consequtive to the last atom of the first
+                              chain (default: True)
+        @type  renumberAtoms: bool
+        @param renumberResidues: shift PDB residue numbering so that the first
+                                 residue of the adjacent chain follows the
+                                 previous residue. Other than for atom numbering,
+                                 later jumps in residue numbering are preserved.
+                                 (default: True)
+        @type  renumberResidues: bool
+        """
+        c1 = self.__convert_negative_indices( [c1], self.lenChains() )[0]
+        
+        oldI = self.chainIndex()
+        assert len(oldI) > c1 + 1, 'no adjacent chain to be merged'
+        
+        ## remove chain boundary from chainIndex
+        self._chainIndex = N.concatenate( (oldI[:c1+1], oldI[c1+2:] ) ) 
+
+        ## starting and ending position of (old) second chain
+        i_start= oldI[ c1 ]
+        i_next = oldI[ c1+2 ] if len( oldI ) > c1+2 else len( self )
+        i_scar = oldI[ c1+1 ]     ## (old) starting position of second chain
+        n_atoms= i_next - i_start
+        
+        ## remove trace of PDB TER statement (if any)
+        self['after_ter'][ i_scar ] = 0
+
+        ## harmonize chain ID
+        id = id or self['chain_id'][i_scar-1]
+        self['chain_id'][ i_start : i_next ] = [ id ] * n_atoms
+        
+        ## harmonize segID
+        segid = segid or self['segment_id'][i_scar-1]
+        self['segment_id'][ i_start : i_next ] = [ segid ] * n_atoms
+        
+        ## harmonize PDB residue numbering (by *shifting* current numbers)
+        if renumberResidues:
+            first = self['residue_number'][ i_scar-1 ] + 1
+            delta = first - self['residue_number'][ i_scar ]
+
+            profile = self['residue_number'][i_scar:i_next] + delta
+            self['residue_number'][i_scar:i_next] = profile
+        
+        ## harmonize PDB atom numbering (by *rewriting* current numbers)
+        ## usually though, atoms already have consequtive numbering through the PDB
+        if renumberAtoms:
+            n = i_next - i_scar
+            first = self['serial_number'][ i_scar-1 ] + 1 
+            
+            self['serial_number'][i_scar:i_next] = N.arange(first, first + n)
+            
+        ## todo: remove OXT and OT2 if requested
+
+    def mergeResidues( self, r1, name='', residue_number=None, 
+                       chain_id='', segment_id='',
+                       renumberAtoms=False ):
+        """
+        Merge two adjacent residues.
+        @param r1: first of the two residues to be merged
+        @type  r1: int
+        @param name: name of the new residue (default: name of first residue)
+        @type  name: str
+        """
+        r1 = self.__convert_negative_indices( [r1], self.lenResidues() )[0]
+        
+        oldI = self.resIndex()
+        assert len(oldI) > r1 + 1, 'no adjacent residue to be merged'
+        
+        ## remove residue boundary from residue Index
+        self._resIndex = N.concatenate( (oldI[:r1+1], oldI[r1+2:] ) ) 
+
+        ## starting and ending position of new fused and (old) second residue
+        i_start= oldI[ r1 ]
+        i_next = oldI[ r1+2 ] if len( oldI ) > r1+2 else len( self )
+        i_scar = oldI[ r1+1 ]     ## (old) starting position of second residue
+        n_atoms= i_next - i_start
+        
+        ## move PDB TER statement (if any) to end of fused residue
+        if i_next < len( self ):
+            self['after_ter'][ i_next ] = self['after_ter'][ i_scar ]
+        self['after_ter'][ i_scar ] = 0
+
+        ## harmonize residue name
+        name = name or self['residue_name'][i_scar-1]
+        self['residue_name'][ i_start : i_next ] = [ name ] * n_atoms
+        
+        ## harmonize chain ID
+        id = chain_id or self['chain_id'][i_scar-1]
+        self['chain_id'][ i_start : i_next ] = [ id ] * n_atoms
+        
+        ## harmonize segID
+        segid = segment_id or self['segment_id'][i_scar-1]
+        self['segment_id'][ i_start : i_next ] = [ segid ] * n_atoms
+        
+        ## harmonize PDB residue numbering
+        residue_number = residue_number or self['residue_number'][i_scar-1]
+        self['residue_number'][i_start:i_next] = [residue_number] * n_atoms
+        
+        ## harmonize PDB atom numbering (by *rewriting* current numbers)
+        if renumberAtoms:
+            n = i_next - i_scar
+            first = self['serial_number'][ i_scar-1 ] + 1 
+            
+            self['serial_number'][i_scar:i_next] = N.arange(first, first + n)
+        
+        ## shift chain boundary (if any) to end of fused residue
+        ## unless it's the end of the model or there is already a boundary there
+        if i_scar in self.chainIndex():
+            i = N.flatnonzero( self._chainIndex == i_scar )[0]
+            if (not i_next in self._chainIndex) and (i_next != len(self)):
+                self._chainIndex[ i ] = i_next
+            else:
+                self._chainIndex = N.concatenate( self._chainIndex[:i],
+                                                  self._chainIndex[i+1:] )
+    
     
     def concat( self, *models, **kw ):
         """
@@ -1895,12 +2044,12 @@ class PDBModel:
         @param newRes:   treat beginning of second model as new residue (True)
         @type  newRes:   bool
         @param newChain: treat beginning of second model as new chain (True)
-        @type  newChain:   bool
+        @type  newChain: bool
 
         @note: info records of given models are lost.
         """
-        newRes = kw.get('newRes', True)
-        newChain=kw.get('newChain', True)
+        newRes  = kw.get('newRes', True)
+        newChain= kw.get('newChain', True)
 
         if len( models ) == 0:
             return self
@@ -1921,56 +2070,19 @@ class PDBModel:
         r.residues.model = r
         r.atoms.model = r
 
-        if newRes:
-            append_I = m.resIndex() + self.lenAtoms()
-        else:
-            append_I = m.resIndex()[1:] + self.lenAtoms()
-
+        append_I = m.resIndex() + self.lenAtoms()
         r._resIndex  = N.concatenate((self.resIndex(), append_I ))
 
-        if newChain:
-            append_I = m.chainIndex() +self.lenAtoms()
-        else:
-            append_I = m.chainIndex()[1:] +self.lenAtoms()
-
+        append_I = m.chainIndex() +self.lenAtoms()
         r._chainIndex =N.concatenate((self.chainIndex(), append_I))
 
-        ## remove last traces of residue or chain breaks
-        if not newRes:
-            last_of_first = m.resIndex()[1] if m.lenResidues() > 1 \
-                                            else m.lenAtoms()
-                                            
-            i_scar = N.arange( 0, last_of_first ) + self.lenAtoms()
-
-            r['residue_number'][i_scar] = self['residue_number'][-1]
-            r['residue_name'][i_scar]   = self['residue_name'][-1]
-            r['chain_id'][i_scar]       = self['chain_id'][-1]
-            r['segment_id'][i_scar]     = self['segment_id'][-1]
-
-            ## doesn't yet adapt chain Index (needs to be shifted to end
-            ## of new residue
-
-            
-        if not newRes or not newChain:
-
-            r['after_ter'][len(self)]   = 0
-            r['serial_number'][len(self):] = N.arange(len(self),len(r))
-
+        ## remove traces of residue or chain breaks
         if not newChain:
-            last_of_first = m.chainIndex()[1] if m.lenChains() > 1 \
-                                              else m.lenAtoms()
+            r.mergeChains( m.lenChains() - 1 )
+        
+        if not newRes:
+            r.mergeResidues( m.lenResidues() -1 )
 
-            i_scar = N.arange( 0, last_of_first ) + self.lenAtoms()
-            
-            r['chain_id'][i_scar]       = self['chain_id'][-1]
-            r['segment_id'][i_scar]     = self['segment_id'][-1]
-
-            mask = N.zeros( len(r) )
-            N.put( mask, N.arange( len(self), len(r) ), 1 )
-
-            r.renumberResidues( mask, self.lenResidues()+1 )
-            
-            
         r.info = copy.deepcopy( self.info )
 
         return r.concat( *models[1:] )
@@ -3481,7 +3593,31 @@ class Test(BT.BiskitTest):
         self._m2.slim()
         self.assert_( self._m2.atoms.profiles['name'] is not None )
 
+    def test_mergeChains( self ):
+        """PDBModel.mergeChains test"""
+        m = self.m.takeChains( [0] )
+        res_numbers = m['residue_number']
+        atm_numbers = m['serial_number']
+        chain_ids   = m['chain_id']
+        
+        m1 = m.takeResidues( range(3) )
+        m2 = m.takeResidues( range(3, m.lenResidues() ) )
 
+        m2.renumberResidues()
+        m2['chain_id'] = len(m2) * ['X']
+        
+        self.m1 = m1
+        self.m2 = m2
+
+        self.r = m1.concat( m2 )
+        r = self.r
+        self.assert_( r.lenChains() == m.lenChains() + 1 )
+        
+        r.mergeChains( 0 )
+        self.r = r
+        self.assert_( r.lenChains() == m.lenChains() )
+        self.assert_( N.all( N.array(r['chain_id']) == chain_ids ) )
+        self.assert_( N.all( N.array(r['residue_number']) == res_numbers ) )
 
 
 def clock( s, ns=globals() ):
@@ -3503,5 +3639,16 @@ def clock( s, ns=globals() ):
     return r
 
 if __name__ == '__main__':
+    
+    m = PDBModel( '3TGI' )
+    m1 = m.takeResidues( range( 3 ) )
+    m2 = m.takeResidues( range( 3, m.lenResidues() ) )
+    r = m1.concat( m2 )
+    
+    r.mergeResidues( 2 )
 
-    BT.localTest()
+    e = r.takeResidues( [r.lenResidues()-2, r.lenResidues()-1] )
+    e.mergeResidues( 0 )
+    
+    
+    ##BT.localTest()
