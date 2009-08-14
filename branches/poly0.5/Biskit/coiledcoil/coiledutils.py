@@ -212,7 +212,33 @@ def areEqual(chain_a="",chain_b="",margin = 4):
             return True
     
     return False
+
+def compareRegisters(a,b):
+    """
+    Gives the percentage of similarity between two registers of the same length.
     
+    """
+    
+    if len(a) != len(b):
+        return 0.
+    else:
+        score = 0.
+        for i in range(len(a)):
+            if a[i] == b[i]:
+                score =score + 1.
+        return score / float(len(a))
+
+def genRegularRegisters(to_this=100):
+    register = "abcdefg"
+    registers = []
+    
+    local_reg = register
+    
+    for i in range(1,to_this):
+        for j in range(7):
+            registers.append(local_reg[j:j+i])
+        local_reg +=register
+    return registers
 
 ##############
 ## Test
@@ -229,6 +255,20 @@ class Test(BT.BiskitTest):
     def cleanUp( self ):
         pass
     
+    
+    def test_regEquality(self):
+        a = "absgefdjfjaldfjlaishdfila"
+        b = "ssddsf"
+        print compareRegisters(a,b)
+        a = "abcdefgabcdefg"
+        b = "abceefgabceefg"
+        print compareRegisters(a,b)
+        a = "abcdefgabcdefg"
+        b = "abcdefgabcdefg"
+        print compareRegisters(a,b)
+        registers =  genRegularRegisters(10)
+        for r in registers:
+            print r
     def test_Homo(self):
         """ Homology test """
         self.assertEqual( areEqual( "345678",

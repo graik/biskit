@@ -1,4 +1,4 @@
-from block import BlockEntity,Block
+from block import BlockEntity,Block,SimpleBlockEntity 
 from Biskit.PDBModel import PDBModel
 from Biskit import molUtils as mu
 from Bio import pairwise2
@@ -6,17 +6,18 @@ from interval import Interval
 from constraint import Constraint
 from assembly import Assembly
 from numpy import array, correlate,where
-import ResiduePicker 
+#~ import ResiduePicker 
 import random
 import cPickle
 import re
 import xtender
 import xplortools
+
+
 class UndefProtein (BlockEntity):
     def __init__(self,name,sequence = ""):
         BlockEntity.__init__(self,name)
         self.sequence = sequence
-        self.picker = ResiduePicker.residuePicker()
         self.structure = None
 
     def setSequence(self,sequence):
@@ -25,10 +26,10 @@ class UndefProtein (BlockEntity):
     def run (self):
         BlockEntity.run(self)
         
-        p_a = Xtender(linkseq).run()
+        p_a = xtender.Xtender(self.sequence).run()
         
         ## TODO: delete terminals etc 
-        self.structure = xplortools.cleanPDB(p_a)
+        self.structure = xplortools.cleanPdb(p_a)
         return self.structure
 
 
@@ -44,7 +45,9 @@ class Protein (PDBModel, BlockEntity):
         self.__prot_chains = []
         self.__prot_chains_current = -1
         self.__prot_chains_sequences = []
-
+        
+        
+        
         #Get SEQRES sequence
 
         if(path!=None):
@@ -107,28 +110,30 @@ class Protein (PDBModel, BlockEntity):
                 if start >0:
                     #create the proximal undefined seq
                     e1 = UndefProtein(self.name+"_chain_start_"+self.__prot_chains[chain_number],self.__prot_chains_sequences[chain_number][0:start])
-                    bstart = Block(self.name+"_undef_chain_start_"+self.__prot_chains[chain_number],entity = e1,father = myblock)
+                    bstart = Block(self.name+"_undef_chain_start_"+self.__prot_chains[chain_number],entity = e1)
                     bstart.addInterval(Interval(0,start))
-
                     a.blocks.append(bstart)
+                    a.blockdict[bstart.name]=bstart
+                    
+                
                 if end<len:
                     #create distal undef seq
                     e2 = UndefProtein(self.name+"_chain_end_"+self.__prot_chains[chain_number],self.__prot_chains_sequences[chain_number][end:len(self.__prot_chains_sequences[chain_number])])
-                    bend = Block(self.name+"_undef_chain_end_"+self.__prot_chains[chain_number],entity = e2,father = myblock)
+                    bend = Block(self.name+"_undef_chain_end_"+self.__prot_chains[chain_number],entity = e2)
                     bend.addInterval(Interval(end,len(self.__prot_chains_sequences[chain_number])))
-
                     a.blocks.append(bend)
+                    a.blockdict[bend.name]=bend
+                    
+                
                 #create chain seq
-                e3 = BlockEntity(self.name+"_def_chain_"+self.__prot_chains[chain_number])
-                bchain = Block(self.name+"_def_chain_"+self.__prot_chains[chain_number],father = myblock)
+                e3 = SimpleBlockEntity(self.name+"_def_chain_"+self.__prot_chains[chain_number], self.takeChains([chain_number]))
+                bchain = Block(self.name+"_def_chain_"+self.__prot_chains[chain_number],entity = e3)
                 bchain.addInterval(Interval(start+1,start+len(chain_string)))
+                
                 a.blocks.append(bchain)
+                a.blockdict[bchain.name]=bchain
                 chains.append(bchain)
-
-                #~ print self.__prot_chains_sequences[chain_number][0:start]
-                #~ print self.__prot_chains_sequences[chain_number][end:len(self.__prot_chains_sequences[chain_number])]
-                #~ print  self.__prot_chains_sequences[chain_number]
-                #~ print chain_string
+                    
 
                 #add constraints
                 if e1!=None:
@@ -193,7 +198,7 @@ class Protein (PDBModel, BlockEntity):
         return BlockEntity.__str__(self)+PDBModel.__str__(self)
 
     def run(self):
-        return self
+        return None
 
     def getStructData(self,atoms):
         return self.take(atoms)
@@ -218,7 +223,7 @@ class Test(BT.BiskitTest):
         p = Protein ("MyProt",T.testRoot() + "/polysys/2Q57.pdb")
         a = Assembly ("myAssembly")
         a.addBlock(Block("myTestProt",entity = p))
-
+        a.run()
         if self.local:
             print a
         self.assertEqual(len(a.blocks),4)

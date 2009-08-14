@@ -1,5 +1,5 @@
 import Biskit.tools as T
-from coiledutils import getRegister, getAllHeptads
+from coiledutils import getRegister, getAllHeptads, genRegularRegisters , compareRegisters
 import random
 from getcoil import dataFileCreation
 from choosecoil import CCStudy

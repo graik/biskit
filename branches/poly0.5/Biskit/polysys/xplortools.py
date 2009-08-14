@@ -79,7 +79,7 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
     
     print linkdist
     
-    linkdist = 40 ## in A 
+    linkdist = 700 ## in A 
     
     ## - Get number of residues (3.5A for N to N)
     nres = int( linkdist / 3.5 )
@@ -158,25 +158,25 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
     final.report()
     final =  cleanPdb(final)
     
-    #~ fixed = []
-    #~ where = int(0.9*a.lenResidues())
-    #~ fixed += range(where,a.lenResidues())
-    #~ where = int(0.1*b.lenResidues())
-    #~ fixed += range(link.atoms['residue_number'][-1],where+link.atoms['residue_number'][-1]+1)
-    #~ fixed += range(link.atoms['residue_number'][0]-1,link.atoms['residue_number'][-1]+1)
+    fixed = []
+    where = int(0.9*a.lenResidues())
+    fixed += range(where,a.lenResidues())
+    where = int(0.1*b.lenResidues())
+    fixed += range(link.atoms['residue_number'][-1],where+link.atoms['residue_number'][-1]+1)
+    fixed += range(link.atoms['residue_number'][0]-1,link.atoms['residue_number'][-1]+1)
     
         
-    #~ for i in range(len(final)):
-        #~ if final.atoms['residue_number'][i] in fixed:
-            #~ final.atoms['temperature_factor'][i] = 1.0
-        #~ else:
-            #~ final.atoms['temperature_factor'][i] = 0.0
+    for i in range(len(final)):
+        if final.atoms['residue_number'][i] in fixed:
+            final.atoms['temperature_factor'][i] = 1.0
+        else:
+            final.atoms['temperature_factor'][i] = 0.0
     
     final.writePdb("initial.pdb")
     
     
-    os.system('vmd -dispdev text -e vmdscript')
-    os.system('namd2 namdscript')
+    #~ os.system('vmd -dispdev text -e vmdscript')
+    #~ os.system('namd2 namdscript')
     
     
     #~ final = PDBModel('in_min.pdb')
@@ -187,11 +187,11 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
             #~ final.atoms['temperature_factor'][i] = 0.0
     #~ final.writePdb("in_min.pdb") 
     
-    for i in range(0,1):
-        os.system('namd2 namdscript')
-        os.system('cp out_min.coor in_min.pdb')
+    #~ for i in range(0,3):
+        #~ os.system('namd2 namdscript')
+        #~ os.system('cp out_min.coor in_min.pdb')
     
-    os.system('cp out_min.coor final.pdb')
+    #~ os.system('cp out_min.coor final.pdb')
 
 
 def joinProteins(a = None, b = None):
@@ -278,9 +278,9 @@ def joinProteins(a = None, b = None):
     final.writePdb("initial.pdb")
     
     
-    os.system('vmd -dispdev text -e vmdscript')
+    #~ os.system('vmd -dispdev text -e vmdscript')
     
-    final = PDBModel('in_min.pdb')
+    #~ final = PDBModel('in_min.pdb')
     #~ for i in range(len(final)):
         #~ if final.atoms['residue_number'][i] in free_residues:
             #~ final.atoms['temperature_factor'][i] = 0.0
@@ -312,11 +312,11 @@ def joinProteins(a = None, b = None):
         #~ os.system('cp out_min.coor in_min.pdb')
     
     os.system('cp out_min.coor final.pdb')
-
+    return cleanPdb(PDBModel('final.pdb'))
 
 if __name__ == '__main__':    
     #~ linkProteins(a = PDBModel('2AWT') , b= PDBModel('2CQJ'),distance = 70)
-    joinProteins(a = PDBModel('2AWT.pdb') , b= PDBModel('2CQJ.pdb'))
+    #~ joinProteins(a = PDBModel('2AWT.pdb') , b= PDBModel('2CQJ.pdb'))
     #~ link = PDBModel()
     #~ link.xyz = N.zeros( (nres,3), float )
 
@@ -333,4 +333,54 @@ if __name__ == '__main__':
     #~ link['residue_name'] = reslist
     #~ link['residue_number'] = N.arange( nres ) + 1
     #~ link['serial'] = N.arange( nres ) + 1
-        
+    
+    p = cleanPdb(PDBModel('1JUN.pdb'))
+    
+    leu_A = p.takeChains([0])
+    leu_B = p.takeChains([1])
+    #~ linkProteins(a = PDBModel('1HUY.pdb') , b= leu_A, distance = 700)
+    #~ os.system("cp initial.pdb A.pdb")
+    #~ linkProteins(a = PDBModel('1HUY.pdb') , b= leu_B, distance = 700)
+    #~ os.system("cp initial.pdb B.pdb")
+    a = PDBModel('A.pdb')
+    b = PDBModel('B.pdb')
+    a_2 = a.takeChains([2])
+    b_2 = b.takeChains([2])
+    a.atoms['chain_index'] = ['A']*len(a)
+    b.atoms['chain_index'] = ['B']*len(b)
+    
+    a_2.writePdb('lel.pdb')
+    b_2.writePdb('lil.pdb')
+    
+    
+    #recover original position of the leuzip
+    
+    
+    av1 = leu_A.xyz[1]-leu_A.xyz[0]
+    av2 = leu_A.xyz[2]-leu_A.xyz[0]
+    
+    a_2v1 = a_2.xyz[1]-a_2.xyz[0]
+    a_2v2 = a_2.xyz[2]-a_2.xyz[0]
+    
+    
+    
+    newa,R = orientPlanes(modela = a, orig_plane = [a_2v1,a_2v2], orig_perp = False, target_plane=[av1,av2],target_perp = False)
+    a_2 = newa.takeChains([2])
+    
+    bv1 = leu_B.xyz[1]-leu_B.xyz[0]
+    bv2 = leu_B.xyz[2]-leu_B.xyz[0]
+    
+    b_2v1 = b_2.xyz[1]-b_2.xyz[0]
+    b_2v2 = b_2.xyz[2]-b_2.xyz[0]
+    
+    newb,R = orientPlanes(modela = b, orig_plane = [b_2v1,b_2v2], orig_perp = False, target_plane=[bv1,bv2],target_perp = False)
+    b_2 = newb.takeChains([2])
+    
+    cm_a = leu_A.centerOfMass()
+    cm_b = leu_B.centerOfMass()
+    
+    newa.xyz += cm_a - a_2.centerOfMass()
+    newb.xyz += cm_b - b_2.centerOfMass()
+    
+    newa.concat(newb).writePdb('result.pdb')
+    newa.writePdb('result2.pdb')

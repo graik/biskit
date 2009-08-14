@@ -1,4 +1,3 @@
-
 import math
 from numpy import *
 from emath import *
@@ -114,12 +113,7 @@ class WormLikeChainModel (PolymerModel):
         
         return Ec*(((1.-(x/Lc))**-2) - 1+(4*x/Lc))
 
-    def getFittedLc(self , maxF = 0.05):
-        self.Lc = self.x*100
-        while self.getForceFromX(self.p,self.Lc,self.x) < maxF:
-            self.Lc = self.Lc / 2
-            print self.Lc, self.getForceFromX(self.p,self.Lc,self.x)
-        return self.Lc
+   
 ##############
 ## Test
 ##############
@@ -134,23 +128,23 @@ class Test(BT.BiskitTest):
     def cleanUp( self ):
         pass
     
-    #~ def test_WLC(self):
-        #~ """WLC test cases"""
-        #~ p = 4.;Lc = 5280.; x = 0.75*5280 
+    def test_WLC(self):
+        """WLC test cases"""
+        p = 4.;Lc = 5280.; x = 0.75*5280 
         
-        #~ wlc = WormLikeChainModel()
+        wlc = WormLikeChainModel()
         
-        #~ wlc.p = p;wlc.Lc=Lc;wlc.x=x;wlc.T = 298.
+        wlc.p = p;wlc.Lc=Lc;wlc.x=x;wlc.T = 298.
         
-        #~ F =  wlc.getForceFromX(p,Lc,x)
+        F =  wlc.getForceFromX(p,Lc,x)
         
-        #~ wlc.F = F
+        wlc.F = F
         
-        #~ Lc2 =  wlc.getContourLengthFromX()
-        #~ Lc3 =  wlc.getContourLengthFromX2()
+        Lc2 =  wlc.getContourLengthFromX()
+        Lc3 =  wlc.getContourLengthFromX2()
 
-        #~ self.assertEqual(Lc2[0] - Lc <2.,True)
-        #~ self.assertEqual(Lc3[1] - Lc <2.,True)
+        self.assertEqual(Lc2[0] - Lc <2.,True)
+        self.assertEqual(Lc3[1] - Lc <2.,True)
         
     
         
