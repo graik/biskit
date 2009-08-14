@@ -41,23 +41,23 @@ class FRETEntity:
 
     def __init__ (self,name="FRETEntity",database="", structure = None,chromo_autodef = False):
 
-    """
-    Creates an instance of a FRET Protein ( or just a FRET entity if id parameter is defaulted).
-    Please see FRETProtein::_loadFromDB for DB data storage information .
-    Automatically creates its own Chromophore instance.
-    If encountered an error while loading data from database, it tries to default anything it can.
+        """
+        Creates an instance of a FRET Protein ( or just a FRET entity if id parameter is defaulted).
+        Please see FRETProtein::_loadFromDB for DB data storage information .
+        Automatically creates its own Chromophore instance.
+        If encountered an error while loading data from database, it tries to default anything it can.
 
-    @param name: ID  for the database search. If defaulted, an empty FRETEntity is created which can be filled with 
-            any kind of chromophore or data by hand.
-    @type name: string
-    @param database: If defined it will load data from this file instead. 
-    @type database: string
-    @param structure: Atomic structure of the fret entity. Must implement "take"and "xyz" (see PDBModel).
-    @type structure: PDBModel (by now...)
-    @param chromo_autodef: If False chromophore is not defined.
-    @type chromo_autodef: bool
+        @param name: ID  for the database search. If defaulted, an empty FRETEntity is created which can be filled with 
+                any kind of chromophore or data by hand.
+        @type name: string
+        @param database: If defined it will load data from this file instead. 
+        @type database: string
+        @param structure: Atomic structure of the fret entity. Must implement "take"and "xyz" (see PDBModel).
+        @type structure: PDBModel (by now...)
+        @param chromo_autodef: If False chromophore is not defined.
+        @type chromo_autodef: bool
 
-    """
+        """
 
         self.name = name
         

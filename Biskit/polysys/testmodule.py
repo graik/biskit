@@ -1,10 +1,9 @@
-
-from UndefLink import UndefLink
+#~ from undeflink import undeflink
 from Biskit import *
-from FRETProtein import *
-from mCitrineChromophore import *
-from Protein import *
-from Assembly import *
+from polyfret import *
+#~ from mCitrineChromophore import *
+from protein import *
+from assembly import *
 
 
 
@@ -75,22 +74,38 @@ from Assembly import *
 
 pol3 = Assembly("BasicEngineTest")
 
-p = Protein("testProtein",'2Q57.pdb')
+p1 = Protein("GFP1_en",'1HUY.pdb')
+p2 = Protein("GFP2_en",'2AWT.pdb')
+p3 = Protein("LeuZip_en",'1JUN.pdb')
 
-undef1 = UndefProtein("first","ASFEASSDS")
-undef2 = UndefProtein("second","FESDFSFG")
-undef3 = UndefProtein("third","ERERAFDSD")
-undef4 = UndefProtein("fourth","SFE")
 
-pol3.addConstraint(Constraint("linked",undef3,undef4))
-pol3.addConstraint(Constraint("linked",undef2,undef3))
-pol3.addConstraint(Constraint("linked",undef1,undef2))
+#~ undef1 = UndefProtein("first","ASFEASSDS")
+#~ undef2 = UndefProtein("second","FESDFSFG")
+#~ undef3 = UndefProtein("third","ERERAFDSD")
+#~ undef4 = UndefProtein("fourth","SFE")
 
-pol3.addBlock(Block("testProtein",p))
+#~ pol3.addConstraint(Constraint("linked",undef3,undef4))
+#~ pol3.addConstraint(Constraint("linked",undef2,undef3))
+#~ pol3.addConstraint(Constraint("linked",undef1,undef2))
+
+pol3.addBlock(Block("GFP1_b",entity=p1))
+pol3.addBlock(Block("GFP2_b",entity=p2))
+pol3.addBlock(Block("LeuZip_b",entity=p3))
+
+pol3.addConstraint(Constraint("linked",p1,p3))
+#~ pol3.addConstraint(Constraint("linked",p3,p1))
 
 pol3.addEngine(BasicEngine())
 
 print pol3
+
+#~ print pol3.blockdict['testProtein_undef_chain_start_A']
+
+
+
+#~ pol3.addConstraint(Constraint("linked",pol3.blockdict['testProtein_undef_chain_start_A'].entity,undef1))
+
+
 
 pol3.run()
 

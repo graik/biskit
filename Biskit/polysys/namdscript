@@ -40,9 +40,9 @@ pairlistdist            12
 
 # Multiple timestepping
 firsttimestep           0
-timestep                1 #2
-stepspercycle           1 #20
-nonbondedFreq           1 #2
+timestep                2
+stepspercycle           20
+nonbondedFreq           2
 fullElectFrequency      4
 
 # Temperature control
@@ -53,11 +53,11 @@ langevin            off
 
 #Forces
 
-constantForce yes
-consForceFile /home/victor/poly0.5/Biskit/polysys/in_min_forces.pdb
+#onstantForce yes
+#consForceFile /home/victor/poly0.5/Biskit/polysys/in_min_forces.pdb
 
 
 # Scripting
 
-minimize           20
-run 1 
+minimize           100
+#run 1 
