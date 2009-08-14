@@ -53,6 +53,11 @@ init_t = 500
 from monteCarlo import randomizeTorsions
 randomizeTorsions(dyn)
 
+## raw xplor program for energy outpyt
+## evaluate ($energy_out  = "outputfilename.out" )
+## set display=$energy_out end
+## display noe bond angl dihe impr vdw elec total
+
 pdbTool.PDBTool("05_random.pdb").write()
 
 
