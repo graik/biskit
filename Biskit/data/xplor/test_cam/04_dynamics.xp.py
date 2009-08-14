@@ -48,6 +48,16 @@ pot.append( XplorPot("IMPR") )
 
 init_t = 500
 
+## randomization
+
+from monteCarlo import randomizeTorsions
+randomizeTorsions(dyn)
+
+pdbTool.PDBTool("05_random.pdb").write()
+
+
+## try "normal" Torsion dynamics
+
 protocol.initDynamics( ivm=dyn,
                        potList=pot,
                        bathTemp=init_t,
