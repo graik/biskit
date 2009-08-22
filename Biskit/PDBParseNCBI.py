@@ -23,7 +23,7 @@
 ## last $Date: 2007-06-22 17:34:10 +0200 (Fri, 22 Jun 2007) $
 ## $Revision: 459 $
 """
-Parse a in-memory PDBModel instance into a new PDBModel
+Fetch a PDBModel from the remote or a local NCBI PDB database.
 
 @see L{PDBModel}
 @see L{PDBParserFactory}
@@ -54,7 +54,6 @@ class PDBParseNCBI( PDBParseModel ):
         >>>     ...
         
         @return: True if the given source is supported by this parser
-                 implementation (equivalent to isinstance( source, PDBModel) )
         @rtype: bool
         """
         r = isinstance( source, str )
