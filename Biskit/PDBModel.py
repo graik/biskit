@@ -1592,7 +1592,7 @@ class PDBModel:
         """
         Translate a list of positions that is defined, e.g., on residues
         (/chains) to a list of atom positions AND also return the starting
-        position of each residue (/chain) in the new list of atoms.
+        position of each residue (/chain) in the new sub-list of atoms.
 
         @param i : positions in higher level list of residues or chains
         @type  i : [ int ] or N.array of int
@@ -1604,6 +1604,11 @@ class PDBModel:
         @return: (ri, rindex) - atom positions & new index
         @rtype:  N.array of int, N.array of int
         """
+        ## catch invalid indices
+        i = self.__convert_negative_indices( i, len( index ) )
+        if max( i ) >= len( index ) or min( i ) < 0:
+            raise PDBError, "invalid indices"
+        
         ## last atom of each residue / chain
         stop = N.concatenate( (index[1:], [len_i]) ) - 1
 
@@ -1679,33 +1684,41 @@ class PDBModel:
     def __convert_negative_indices( self, indices, length ):
         """
         Replace negative indices by their positive equivalent.
+        @return: modified copy of indices (or unchanged indices itself)
+        @rtype: N.array of int
         """
-        indices = N.array( indices )
+        if min( indices ) >= 0:
+            return indices
+        
+        indices = copy.copy( N.array( indices ) )
 
         negatives = N.flatnonzero( indices < 0 )
-        indices = copy.copy( indices )
         
-        for i in negatives:
-            indices[ i ] = length + indices[i] ## substract from end
+        a = N.zeros( len( indices ) )
+        N.put( a, negatives, length )
+        
+        indices += a
+        
+        #for i in negatives:
+            #indices[ i ] = length + indices[i] ## substract from end
         
         return indices
 
 
     def res2atomIndices( self, indices ):
         """
-        Convert residue indices to atom indices. Also return the starting
-        position of each residue in the new list of atoms.
-
+        Convert residue indices to atom indices.
+        
         @param indices: list/array of residue indices
         @type  indices: list/array of int
 
-        @return: array of atom positions, new residue index
-        @rtype: (N.array of int, N.array of int)
+        @return: array of atom positions
+        @rtype: N.array of int
         """
         if max( indices ) > self.lenResidues() or min( indices ) < 0:
             raise PDBError, "invalid residue indices"
 
-        return self.extendIndex( indices, self.resIndex(), self.lenAtoms() )
+        return self.extendIndex( indices, self.resIndex(), self.lenAtoms() )[0]
 
 
     def atom2chainIndices( self, indices, breaks=0 ):
@@ -1763,20 +1776,19 @@ class PDBModel:
 
     def chain2atomIndices( self, indices, breaks=0 ):
         """
-        Convert chain indices into atom indices. Also return the starting
-        position of each chain in the new list of atoms.
-
+        Convert chain indices into atom indices.
+        
         @param indices: list/array of chain indices
         @type  indices: list/array of int
 
         @return: array of atom positions, new chain index
-        @rtype: (N.array of int, N.array of int)
+        @rtype: N.array of int
         """
         if max( N.absolute(indices) ) > self.lenChains( breaks=breaks ):
             raise PDBError, "invalid chain indices"
 
         return self.extendIndex( indices, self.chainIndex( breaks=breaks ),
-                                 self.lenAtoms() )
+                                 self.lenAtoms() )[0]
 
 
     def res2atomProfile( self, p ):
@@ -1969,6 +1981,7 @@ class PDBModel:
             self['serial_number'][i_scar:i_next] = N.arange(first, first + n)
             
         ## todo: remove OXT and OT2 if requested
+        
 
     def mergeResidues( self, r1, name='', residue_number=None, 
                        chain_id='', segment_id='',
@@ -2258,7 +2271,8 @@ class PDBModel:
         @return: PDBModel with given residues in given order
         @rtype: PDBModel / subclass
         """
-        i, index = self.res2atomIndices( i )
+        ##i, index = self.res2atomIndices( i )
+        i, index = self.extendIndex( i, self.resIndex(), self.lenAtoms() )
         return self.take( i, rindex=index )
 
 
@@ -2276,7 +2290,9 @@ class PDBModel:
         @return: PDBModel consisting of the given chains in the given order
         @rtype : PDBModel / subclass
         """
-        i, index = self.chain2atomIndices( chains, breaks=breaks )
+        ## i, index = self.chain2atomIndices( chains, breaks=breaks )
+        i, index = self.extendIndex( chains, self.chainIndex( breaks=breaks ),
+                                     self.lenAtoms() )
         return self.take( i, cindex=index )
 
 

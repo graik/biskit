@@ -122,7 +122,7 @@ class Residue(object):
     def __init__( self, model=None, index=None, terminal=False ):
         """
         @param model: PDBModel, parent model of this residue
-        @param index: int, position of this residue in model residue index
+        @param index: int, position of this residue in model's residue index
         """
         self.model = weakref.ref( model ) if model else returnNone
         self.i = index or 0
@@ -271,16 +271,18 @@ class Residue(object):
 
 ########### TEST
 
-from Biskit import *
+if __name__ == '__main__':
 
-m = PDBModel( '3TGI' )
-r = Residue( m, 3 )
-
-print r.from_atom, r.to_atom
-print r.chain
-print r.segid
-print r.xyz
-print r.serial
-
+    from Biskit import *
+    
+    m = PDBModel( '3TGI' )
+    r = Residue( m, 3 )
+    
+    print r.from_atom, r.to_atom
+    print r.chain
+    print r.segid
+    print r.xyz
+    print r.serial
+    
 
     
