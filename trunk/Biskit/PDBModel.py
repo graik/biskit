@@ -1980,7 +1980,13 @@ class PDBModel:
             
             self['serial_number'][i_scar:i_next] = N.arange(first, first + n)
             
-        ## todo: remove OXT and OT2 if requested
+        ## remove OXT and OT2 if requested
+        if rmOxt:
+            ## overkill: we actually would only need to look into last residue
+            anames = N.array( self.atoms['name'][i_start:i_scar] )
+            i_oxt = N.flatnonzero( N.logical_or( anames=='OXT', anames=='OT2' ))
+            if len( i_oxt ) > 0:
+                self.remove( i_oxt )
         
 
     def mergeResidues( self, r1, name='', residue_number=None, 
