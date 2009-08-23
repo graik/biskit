@@ -116,7 +116,7 @@ def lastErrorTrace( limit=None ):
     return result
 
 
-def dictAdd( dic, key, value ):
+def dictAdd( dic, key, value, forceList=False ):
     """
     Add value to dic, create list, if dic has already value in key.
 
@@ -135,7 +135,10 @@ def dictAdd( dic, key, value ):
                 dic[ key ] = old + [ value ]
 
     else:
-        dic[key] = value
+        if forceList and (type( value ) != list):
+            dic[key] = [ value ]
+        else:
+            dic[key] = value
 
 
 def absfile( filename, resolveLinks=1 ):

@@ -26,6 +26,23 @@ Attempt at a residue view to connect to PDBModel
 import numpy as N
 import weakref 
 
+def nextKey( lst, key ):
+    """
+    Fetch next free key in a list or dict. If 'key' already exists, return
+    'key_1', if 'key_1' already exists, return 'key_2' etc.
+    """
+    if not key in lst:
+        return key
+
+    l = key.split( '_' )
+    base = l[0]
+    if len( l ) < 2:
+        return nextKey( lst, '%s_%i' % (base, 1) )  ## start recursion
+
+    ext = int( l[1] ) + 1
+    return nextKey( lst, '%s_%i' % (base, ext) )  ## recursion until first free
+
+
 class ResidueFactory( object ):
     """
     Produce residue instance of a certain class given a residue name
@@ -137,7 +154,16 @@ class Residue(object):
         self._atom_index = None
         
     def _getAtomIndex( self ):
-        """Map atom name to position *within* residue, starting with 0"""
+        """
+        Map atom name to position *within* residue, starting with 0. This
+        creates a dictionary indexed by atom names and pointing to the position
+        of each atom within the residue.
+        If the same atom name occurs twice or more (due to alternate positions),
+        the second and third occurrence are indexed as 'name_1' and 'name_2'
+        respectively.
+        @return: dict connecting atom names to their position within residue
+        @rtype:  {str:int}
+        """
         if self._atom_index is None:
 
             self._atom_index = {}
@@ -145,9 +171,12 @@ class Residue(object):
         
             _from = self.from_atom
             _to = self.to_atom
+            
+            nr_names = []
+            for n in m.atoms['name'][_from:_to] :
+                nr_names.append( nextKey( nr_names, n ) )
 
-            self._atom_index = dict( zip( m.atoms['name'][_from : _to],
-                                     range( _to - _from ) ) )
+            self._atom_index = dict( zip( nr_names, range( _to - _from ) ) )
         
         return self._atom_index
 
@@ -269,14 +298,82 @@ class Residue(object):
         assert self.ref is not None, 'no reference residue defined'
         return self.ref.atomNames()
 
-########### TEST
 
+    def labelDuplicateAtoms( self ):
+        """
+        Ensure duplicate atoms are labelled with an alternate code.
+        """
+        import string
+        
+        m = self.model()
+        assert m is not None, 'un-attached residue'
+        
+        names = m.atoms['name'][self.from_atom : self.to_atom]
+
+        ## number of occurrences of each atom name
+        counts = [ names.count( n ) for n in names ]
+        if max( counts ) <= 1:
+            return  ## nothing to do
+        
+        ## dict with list of positions in which each atom is found
+        positions = {}
+        for i,n in enumerate(names):
+            T.dictAdd( positions, n, i, forceList=True )
+        
+        ## create new list of alternate codes
+        alt = []
+        for n, c in zip( names, counts ):
+            pos = positions[ n ]
+            
+            if c == 1:
+                alt.append( '' )
+            else:
+                alt.append( string.letters[ c - len( pos ) ].upper() )
+
+            pos.pop()  # remove one, discard
+
+        m.atoms['alternate'][self.from_atom : self.to_atom] = alt
+    
+        
+#############
+##  TESTING        
+#############
+import Biskit.test as BT
+        
+class Test(BT.BiskitTest):
+    """Test"""
+
+    M = None
+
+    def prepare( self ):
+        import Biskit as B
+        import Biskit.tools as T
+
+        self.M = self.M or T.load( T.testRoot() + '/lig/1A19_dry.model' )
+    
+    def test_atomIndex( self ):
+        """ProfileCollection test"""
+        m = self.M.clone()
+        r = Residue( m, 0 )
+
+        self.assertEqual( len( r.atom_index ), 15 )
+        
+        m.mergeResidues( 0 )
+        r.reset()
+        
+        self.assertEqual( len( r.atom_index ), 28 )
+        self.assert_( 'CA_1' in r.atom_index )
+
+    def test_properties( self ):
+        pass
+        
 if __name__ == '__main__':
 
     from Biskit import *
+    import Biskit.tools as T
     
-    m = PDBModel( '3TGI' )
-    r = Residue( m, 3 )
+    m = PDBModel( T.testRoot() + '/lig/1A19_dry.model'  )
+    r = Residue( m, 0 )
     
     print r.from_atom, r.to_atom
     print r.chain
@@ -284,5 +381,9 @@ if __name__ == '__main__':
     print r.xyz
     print r.serial
     
+    m.mergeResidues( 0 )
+    r.reset()
 
+    d = {}
+    T.dictAdd( d, 'a', 1, forceList=True )
     
