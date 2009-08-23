@@ -1993,7 +1993,8 @@ class PDBModel:
                        chain_id='', segment_id='',
                        renumberAtoms=False ):
         """
-        Merge two adjacent residues.
+        Merge two adjacent residues. Duplicate atoms are labelled with
+        alternate codes 'A' (first occurrence) to 'B' or later.
         @param r1: first of the two residues to be merged
         @type  r1: int
         @param name: name of the new residue (default: name of first residue)
@@ -2050,6 +2051,10 @@ class PDBModel:
             else:
                 self._chainIndex = N.concatenate( self._chainIndex[:i],
                                                   self._chainIndex[i+1:] )
+        
+        ## mark duplicate atoms in the 'alternate' field of the new residue
+        r = B.Residue( self, r1 )
+        r.labelDuplicateAtoms()
     
     
     def concat( self, *models, **kw ):
@@ -3459,6 +3464,7 @@ class Test(BT.BiskitTest):
     """Test class """
 
     #: load test PDB once into class rather than 3 times into every instance
+    ## for some reason doesn't actually work
     MODEL = None
 
     def prepare(self):
@@ -3640,6 +3646,24 @@ class Test(BT.BiskitTest):
         self.assert_( r.lenChains() == m.lenChains() )
         self.assert_( N.all( N.array(r['chain_id']) == chain_ids ) )
         self.assert_( N.all( N.array(r['residue_number']) == res_numbers ) )
+        
+    def test_mergeResidues( self ):
+        """PDBModel.mergeResidues test"""
+        m = self.m.clone()
+        gg_position = m.sequence().find( 'GG' )
+
+        len_r = m.lenResidues()
+        len_a = m.lenAtoms()
+
+        r_gly = B.Residue( m, gg_position )
+        
+        m.mergeResidues( gg_position )
+        r_gly.reset()
+        
+        self.assertEqual( m.lenResidues(), len_r - 1 )
+        self.assertEqual( m.lenAtoms(), len_a )
+        self.assertEqual( len( r_gly ), 2 * 5 )
+        
 
 
 def clock( s, ns=globals() ):
@@ -3662,15 +3686,5 @@ def clock( s, ns=globals() ):
 
 if __name__ == '__main__':
     
-    m = PDBModel( '3TGI' )
-    m1 = m.takeResidues( range( 3 ) )
-    m2 = m.takeResidues( range( 3, m.lenResidues() ) )
-    r = m1.concat( m2 )
     
-    r.mergeResidues( 2 )
-
-    e = r.takeResidues( [r.lenResidues()-2, r.lenResidues()-1] )
-    e.mergeResidues( 0 )
-    
-    
-    ##BT.localTest()
+    BT.localTest()   

@@ -23,8 +23,11 @@
 """
 Attempt at a residue view to connect to PDBModel
 """
+import Biskit.tools as T
+
 import numpy as N
 import weakref 
+import string
 
 def nextKey( lst, key ):
     """
@@ -219,6 +222,50 @@ class Residue(object):
     def __len__( self ):
         return self.to_atom - self.from_atom
     
+    def __letter2number( self, l ):
+        try:
+            return int( l )
+        except ValueError:
+            return string.letters.find( l.lower() )
+    
+    def __getitem__( self, key ):
+        """
+        res[ 'CA' ] ==> first atom with name CA
+        res[ 'CA', 1 ] ==> second atom with name CA
+        res[ 'CA', A ] ==> first atom with name CA
+        res[ 'CA', B ] ==> second atom with name CA
+        
+        res['temperature_factor'] ==> profile values for residue atoms
+        """
+        m = self.model() or self.ref
+
+        if type( key ) is str:
+            ## return profile values for residue or residue atoms
+            if key in m.atoms:
+                return m.atoms[key][self.from_atom : self.to_atom]
+            if key in m.residues:
+                return m.residues[key][self.i]
+            
+            ## return cross view of single atom of name 'key'
+            if key in self.atom_index:
+                return m[ self.atom_index[ key ] ]
+        
+        if type( key ) is tuple and len( key ) == 2:
+            ## interpret key as pair of atom name and alternate code
+            name, alt = key
+            alt = self.__letter2number( alt )
+            
+            try:
+                if alt == 0:
+                    return m[ self.atom_index[ name ] ]
+                
+                return m[ self.atom_index[ '%s_%i' % (name, alt) ] ]
+
+            except IndexError, why:
+                raise IndexError, 'atom not found: %r (%r)' % (name, alt)
+        
+        raise IndexError, 'No profile or atom name matches key ' + str( key )
+        
     def mass( self ):
         pass
     
@@ -301,12 +348,16 @@ class Residue(object):
 
     def labelDuplicateAtoms( self ):
         """
-        Ensure duplicate atoms are labelled with an alternate code.
+        Ensure duplicate atoms are labeled with an alternate code. Atoms
+        that have no duplicates receive alternate code ''. Atoms with one or
+        more duplicates within the same residue receive alternate codes
+        'A' (first one in list), 'B', and so on.
+        The original alternate code field from the PDB (if any) is deleted.
         """
         import string
         
         m = self.model()
-        assert m is not None, 'un-attached residue'
+        assert m is not None, 'residue is not attached to any PDBModel'
         
         names = m.atoms['name'][self.from_atom : self.to_atom]
 
@@ -364,8 +415,10 @@ class Test(BT.BiskitTest):
         self.assertEqual( len( r.atom_index ), 28 )
         self.assert_( 'CA_1' in r.atom_index )
 
-    def test_properties( self ):
-        pass
+    def test_invalidIndex( self ):
+        m = self.M.clone()
+        
+        r = Residue( m, m.lenResidues )
         
 if __name__ == '__main__':
 
@@ -384,6 +437,4 @@ if __name__ == '__main__':
     m.mergeResidues( 0 )
     r.reset()
 
-    d = {}
-    T.dictAdd( d, 'a', 1, forceList=True )
     
