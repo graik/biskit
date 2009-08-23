@@ -82,6 +82,9 @@ try:
     from ModelList import ModelList
     from Ramachandran import Ramachandran
     from CommandLine import CommandLine
+    
+## experimental modules
+    from residue import Residue
 
     from Model import Model
     from Polymer import Polymer
