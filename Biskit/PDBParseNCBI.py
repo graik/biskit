@@ -43,6 +43,8 @@ class PDBParseNCBI( PDBParseModel ):
     ex_resolution = re.compile(\
             'REMARK   2 RESOLUTION\. *([0-9\.]+|NOT APPLICABLE)' )
 
+    ## resolution assigned to NMR structures
+    NMR_RESOLUTION = 3.5
 
     @staticmethod
     def supports( source ):
