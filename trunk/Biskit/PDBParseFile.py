@@ -30,6 +30,7 @@ Parse a PDB file into a PDBModel.
 """
 import Scientific.IO.PDB as IO
 import numpy.oldnumeric as N
+import re
 
 import Biskit as B
 import Biskit.mathUtils as M
@@ -41,6 +42,12 @@ class PDBParseFile( PDBParser ):
 
     #: default values for missing atom records
     DEFAULTS = {}
+    
+    #: default regular expressions for parsing REMARK entries
+    RE_REMARKS = [ ('resolution', 
+                    '2 RESOLUTION\. *([0-9\.]+|NOT APPLICABLE)' ),
+                   
+                   ]
 
     @staticmethod
     def supports( source ):
@@ -91,7 +98,8 @@ class PDBParseFile( PDBParser ):
         return ''
 
 
-    def update( self, model, source, skipRes=None, updateMissing=0, force=0):
+    def update( self, model, source, skipRes=None, updateMissing=0, force=0,
+                remarksWanted={}):
         """
         Update empty or missing fields of model from the source. The
         model will be connected to the source via model.source.
@@ -107,6 +115,9 @@ class PDBParseFile( PDBParser ):
         @type  skipRes: [ str ]
         @param updateMissing: ignored
         @type  updateMissing: 1|0
+        @param remarksWanted: {searchFor : putIntoKey} extract given REMARKS
+        @type  remarksWanted: {str : str}
+
 
         @raise PDBParserError - if something is wrong with the source file
         """
@@ -115,7 +126,8 @@ class PDBParseFile( PDBParser ):
             ## atoms and/or coordinates need to be updated from PDB
             if force or self.needsUpdate( model ):
 
-                atoms, xyz = self.__collectAll( source, skipRes )
+                atoms, xyz, info = self.__collectAll( source, skipRes, 
+                                                      remarksWanted )
 
                 keys = M.union( atoms.keys(),  self.DEFAULTS.keys() )
 
@@ -136,8 +148,10 @@ class PDBParseFile( PDBParser ):
 
                 model.fileName = model.fileName or source
 
-                model.pdbCode = model.pdbCode or \
+                model.pdbCode = model.pdbCode or info.get('pdb_code', None) or \
                                 self.idFromName( model.fileName)
+
+                model.info.update( info )
                                
         except:
             msg = self.__xplorAtomIndicesTest( source ) or ' '
@@ -194,7 +208,32 @@ REMEDY: run the script fixAtomIndices.py
             return  aName[0]
 
 
-    def __collectAll( self, fname, skipRes=None ):
+    def __parseHeader( self, line_record ):
+        """
+        """
+        return line_record[1]
+
+    def __parseRemark( self, line_record, remarksWanted=[]):
+        """
+        """
+        l = line_record[1]
+        for i in range( len(remarksWanted)):
+            key, regex = remarksWanted[i]
+
+            match = regex.search( l )
+            if match:
+                try:
+                    value = None
+                    del remarksWanted[i]
+                    value = match.groups()[0]
+                    return { key : float( value ) }
+                except:
+                    return { key : value or l }
+
+        return {}
+        
+
+    def __collectAll( self, fname, skipRes=None, remarksWanted=[] ):
         """
         Parse ATOM/HETATM lines from PDB. Collect coordinates plus
         dictionaries with the other pdb records of each atom.
@@ -215,13 +254,21 @@ REMEDY: run the script fixAtomIndices.py
         @param skipRes: list with residue names that should be skipped
         @type  skipRes: list of str
 
-        @return: tuple of list of dictionaries from PDBFile.readline()
-                 and xyz array N x 3
+        @return: tuple of (1) dictionary of profiles
+                 and (2) xyz array N x 3
         @rtype: ( list, array )
         """
         xyz   = []
 
         aProfs = {}
+
+        info = {}
+
+        in_header = True
+        
+        remarksWanted = remarksWanted or self.RE_REMARKS
+        patterns = [ (key, re.compile(ex)) for key,ex in remarksWanted ]
+        
         for k in B.PDBModel.PDB_KEYS:
             aProfs[k] = list()
 
@@ -241,6 +288,14 @@ REMEDY: run the script fixAtomIndices.py
                     self.log.add('\tError: '+str(what) )
                     continue
 
+                ## header handling
+                if in_header and line[0] == 'HEADER':
+                    info.update( self.__parseHeader( line ) )
+
+                if in_header and line[0] == 'REMARK':
+                    info.update( self.__parseRemark( line, patterns ) )
+                    
+
                 ## preserve position of TER records
                 newChain = line[0] == 'TER'
                 if newChain:
@@ -248,6 +303,8 @@ REMEDY: run the script fixAtomIndices.py
 
                 if (line[0] in ['ATOM','HETATM'] ):
 
+                    if in_header: in_header = False  ## switch off HEADER parsing
+                    
                     a = line[1]
 
                     if skipRes and a['residue_name'] in skipRes:
@@ -291,7 +348,7 @@ REMEDY: run the script fixAtomIndices.py
             raise PDBParserError("Error parsing file "+fname+": "+
                             "Couldn't find any atoms.")
 
-        return aProfs, N.array( xyz, N.Float32 )
+        return aProfs, N.array( xyz, N.Float32 ), info
     
 #############
 ##  TESTING        

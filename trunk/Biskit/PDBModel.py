@@ -125,15 +125,13 @@ class PDBError(BiskitError):
 
 class PDBModel:
     """
-    Store and manipulate coordinates and atom infos stemming from a
-    PDB file. Coordinates are stored in the Numeric array 'xyz'; the
-    additional atom infos from the PDB (name, residue_name, and many
-    more) are stored in a L{PDBProfiles} instance 'atoms' which can be
-    used to also associate arbitrary other data to the
-    atoms. Moreover, a similar collection 'residues' can hold data
-    associated to residues (but is initially empty).  A normal
-    dictionary 'info' is there to accept any information about the
-    whole model.
+    Store and manipulate coordinates and atom infos stemming from a PDB file.
+    Coordinates are stored in the numpy array 'xyz'; the additional atom infos
+    from the PDB (name, residue_name, and many more) are efficiently stored in
+    a L{PDBProfiles} instance 'atoms' which can be used to also associate
+    arbitrary other data to the atoms. Moreover, a similar collection
+    'residues' can hold data associated to residues (but is initially empty).
+    A normal dictionary 'info' accepts any information about the whole model.
 
     For detailed documentation,
     see http://biskit.pasteur.fr/doc/handling_structures/PDBModel
@@ -148,7 +146,8 @@ class PDBModel:
                 'segment_id', 'charge', 'residue_name', 'after_ter',
                 'serial_number', 'type', 'temperature_factor']
 
-    def __init__( self, source=None, pdbCode=None, noxyz=0, skipRes=None ):
+    def __init__( self, source=None, pdbCode=None, noxyz=0, skipRes=None,
+                  remarksWanted={} ):
         """
         - PDBModel() creates an empty Model to which coordinates (field xyz)
           and PDB infos (field atoms) have still to be added.
@@ -164,6 +163,8 @@ class PDBModel:
         @type  pdbCode: str or None
         @param noxyz: 0 (default) || 1, create without coordinates
         @type  noxyz: 0||1
+        @param remarksWanted: {searchFor, putIntoKey} extract given REMARKS
+        @type  remarksWanted: {str : str}
 
         @raise PDBError: if file exists but can't be read
         """
@@ -208,7 +209,8 @@ class PDBModel:
         self.info = { 'date':T.dateSortString() }
 
         if source <> None:
-            self.update( skipRes=skipRes, updateMissing=1, force=1 )
+            self.update( skipRes=skipRes, updateMissing=1, force=1,
+                         remarksWanted=remarksWanted )
 
         if noxyz:
             ## discard coordinates, even when read from PDB file
@@ -515,7 +517,8 @@ class PDBModel:
             pass
 
 
-    def update( self, skipRes=None, updateMissing=0, force=0 ):
+    def update( self, skipRes=None, updateMissing=0, force=0, 
+                remarksWanted=[] ):
         """
         Read coordinates, atoms, fileName, etc. from PDB or
         pickled PDBModel - but only if they are currently empty.
@@ -527,6 +530,8 @@ class PDBModel:
         @type  updateMissing: 0|1
         @param force: ignore invalid source (0) or report error (1)
         @type  force: 0|1
+        @param remarksWanted: [(putIntoKey, regex)] extract given REMARKS
+        @type  remarksWanted: [(str, str)]
 
         @raise PDBError: if file can't be unpickled or read: 
         """
@@ -540,7 +545,8 @@ class PDBModel:
 
         parser = PDBParserFactory.getParser( source )
         parser.update(self, source, skipRes=skipRes,
-                      updateMissing=updateMissing, force=force )
+                      updateMissing=updateMissing, force=force,
+                      remarksWanted=remarksWanted )
 
 
     def setXyz(self, xyz ):
@@ -565,7 +571,7 @@ class PDBModel:
         """
         @param source: LocalPath OR PDBModel OR str
         """
-        if type( source ) == str:
+        if type( source ) == str and len( source ) <> 4:
             self.source = LocalPath( source )
         else:
             self.source = source
@@ -3685,6 +3691,5 @@ def clock( s, ns=globals() ):
     return r
 
 if __name__ == '__main__':
-    
-    
+
     BT.localTest()   
