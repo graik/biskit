@@ -67,7 +67,8 @@ class PDBParseModel( PDBParser ):
         return 'in-memory instances of PDBModel'
         
 
-    def update( self, model, source, skipRes=None, updateMissing=0, force=0 ):
+    def update( self, model, source, skipRes=None, updateMissing=0, force=0,
+                remarksWanted=[] ):
         """
         Update empty or missing fields of model from the source. The
         model will be connected to the source via model.source.
