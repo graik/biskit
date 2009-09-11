@@ -220,7 +220,7 @@ class PDBParseNCBI( PDBParseModel ):
         return m
 
     def update( self, model, source, skipRes=None, updateMissing=0, force=0,
-                remarksWanted=[]):
+                headPatterns=[]):
         """
         Update empty or missing fields of model from the source.
         

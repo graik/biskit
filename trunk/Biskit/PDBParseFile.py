@@ -99,7 +99,7 @@ class PDBParseFile( PDBParser ):
 
 
     def update( self, model, source, skipRes=None, updateMissing=0, force=0,
-                remarksWanted={}):
+                headPatterns=[]):
         """
         Update empty or missing fields of model from the source. The
         model will be connected to the source via model.source.
@@ -115,9 +115,8 @@ class PDBParseFile( PDBParser ):
         @type  skipRes: [ str ]
         @param updateMissing: ignored
         @type  updateMissing: 1|0
-        @param remarksWanted: {searchFor : putIntoKey} extract given REMARKS
-        @type  remarksWanted: {str : str}
-
+        @param headPatterns: [(putIntoKey, regex)] extract given REMARKS
+        @type  headPatterns: [(str, str)]
 
         @raise PDBParserError - if something is wrong with the source file
         """
@@ -127,7 +126,7 @@ class PDBParseFile( PDBParser ):
             if force or self.needsUpdate( model ):
 
                 atoms, xyz, info = self.__collectAll( source, skipRes, 
-                                                      remarksWanted )
+                                                      headPatterns )
 
                 keys = M.union( atoms.keys(),  self.DEFAULTS.keys() )
 
@@ -213,18 +212,18 @@ REMEDY: run the script fixAtomIndices.py
         """
         return line_record[1]
 
-    def __parseRemark( self, line_record, remarksWanted=[]):
+    def __parseRemark( self, line_record, headPatterns=[]):
         """
         """
         l = line_record[1]
-        for i in range( len(remarksWanted)):
-            key, regex = remarksWanted[i]
+        for i in range( len(headPatterns)):
+            key, regex = headPatterns[i]
 
             match = regex.search( l )
             if match:
                 try:
                     value = None
-                    del remarksWanted[i]
+                    del headPatterns[i]
                     value = match.groups()[0]
                     return { key : float( value ) }
                 except:
@@ -233,7 +232,7 @@ REMEDY: run the script fixAtomIndices.py
         return {}
         
 
-    def __collectAll( self, fname, skipRes=None, remarksWanted=[] ):
+    def __collectAll( self, fname, skipRes=None, headPatterns=[] ):
         """
         Parse ATOM/HETATM lines from PDB. Collect coordinates plus
         dictionaries with the other pdb records of each atom.
@@ -266,8 +265,8 @@ REMEDY: run the script fixAtomIndices.py
 
         in_header = True
         
-        remarksWanted = remarksWanted or self.RE_REMARKS
-        patterns = [ (key, re.compile(ex)) for key,ex in remarksWanted ]
+        headPatterns = headPatterns or self.RE_REMARKS
+        patterns = [ (key, re.compile(ex)) for key,ex in headPatterns ]
         
         for k in B.PDBModel.PDB_KEYS:
             aProfs[k] = list()
