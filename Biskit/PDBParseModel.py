@@ -68,7 +68,7 @@ class PDBParseModel( PDBParser ):
         
 
     def update( self, model, source, skipRes=None, updateMissing=0, force=0,
-                remarksWanted=[] ):
+                headPatterns=[] ):
         """
         Update empty or missing fields of model from the source. The
         model will be connected to the source via model.source.

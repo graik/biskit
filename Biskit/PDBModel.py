@@ -138,6 +138,7 @@ class PDBModel:
 
     @todo:
        * outsource validSource into PDBParserFactory
+       * prevent repeated loading of test PDB for each test
     """
 
     #: keys of all atom profiles that are read directly from the PDB file
@@ -147,12 +148,13 @@ class PDBModel:
                 'serial_number', 'type', 'temperature_factor']
 
     def __init__( self, source=None, pdbCode=None, noxyz=0, skipRes=None,
-                  remarksWanted={} ):
+                  headPatterns=[] ):
         """
+        Examples:
         - PDBModel() creates an empty Model to which coordinates (field xyz)
-          and PDB infos (field atoms) have still to be added.
+          and PDB records (atom profiles) have still to be added.
         - PDBModel( file_name ) creates a complete model with coordinates
-          and PDB infos taken from file_name (pdb, pdb.gz, pickled PDBModel)
+          and PDB records from file_name (pdb, pdb.gz, or pickled PDBModel)
         - PDBModel( PDBModel ) creates a copy of the given model
         - PDBModel( PDBModel, noxyz=1 ) creates a copy without coordinates
 
@@ -163,8 +165,8 @@ class PDBModel:
         @type  pdbCode: str or None
         @param noxyz: 0 (default) || 1, create without coordinates
         @type  noxyz: 0||1
-        @param remarksWanted: {searchFor, putIntoKey} extract given REMARKS
-        @type  remarksWanted: {str : str}
+        @param headPatterns: [(putIntoKey, regex)] extract given REMARK values
+        @type  headPatterns: [(str, str)]
 
         @raise PDBError: if file exists but can't be read
         """
@@ -210,7 +212,7 @@ class PDBModel:
 
         if source <> None:
             self.update( skipRes=skipRes, updateMissing=1, force=1,
-                         remarksWanted=remarksWanted )
+                         headPatterns=headPatterns )
 
         if noxyz:
             ## discard coordinates, even when read from PDB file
@@ -518,7 +520,7 @@ class PDBModel:
 
 
     def update( self, skipRes=None, updateMissing=0, force=0, 
-                remarksWanted=[] ):
+                headPatterns=[] ):
         """
         Read coordinates, atoms, fileName, etc. from PDB or
         pickled PDBModel - but only if they are currently empty.
@@ -530,8 +532,8 @@ class PDBModel:
         @type  updateMissing: 0|1
         @param force: ignore invalid source (0) or report error (1)
         @type  force: 0|1
-        @param remarksWanted: [(putIntoKey, regex)] extract given REMARKS
-        @type  remarksWanted: [(str, str)]
+        @param headPatterns: [(putIntoKey, regex)] extract given REMARKS
+        @type  headPatterns: [(str, str)]
 
         @raise PDBError: if file can't be unpickled or read: 
         """
@@ -546,7 +548,7 @@ class PDBModel:
         parser = PDBParserFactory.getParser( source )
         parser.update(self, source, skipRes=skipRes,
                       updateMissing=updateMissing, force=force,
-                      remarksWanted=remarksWanted )
+                      headPatterns=headPatterns )
 
 
     def setXyz(self, xyz ):
