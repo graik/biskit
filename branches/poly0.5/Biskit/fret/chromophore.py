@@ -68,7 +68,7 @@ class Chromophore:
         @return: String representation of a chromophre.
         @rtype: string
         """
-        return BlockEntity.__str__(self)
+        return self.name
 
     
     def _loadFromDB(self,source,database = ""):
