@@ -3040,16 +3040,10 @@ class PDBModel:
             m_this = self
         
         tm = B.TMAlign( m_this, refModel )
-        r = tm.run()        
-        result = self.transform( r['rt'] )
+        r = tm.run()
 
-        result.info['tm_score'] = r['score']
-        result.info['tm_id'] = r['id']
-        result.info['tm_len'] = r['len']
-        result.info['tm_rmsd']= r['rmsd']
-
-        return result
-
+        return tm.applyTransformation( self )
+    
 
     def centered( self, mask=None ):
         """
@@ -3720,9 +3714,12 @@ class TestExe( BT.Test ):
         ref = ref.takeChains( [0] )
         
         r = m.structureFit( ref )
-        self.assertEqual( r.info['tm_rmsd'], 1.76 )
-
         diff = r.centerOfMass() - ref.centerOfMass()
+
+        if self.local:
+            print 'center of mass deviation: \n%r' % diff
+
+        self.assertEqual( r.info['tm_rmsd'], 1.76 )
         self.assert_( N.all( N.absolute(diff) < 1 ),
                       'superposition failed: %r' % diff)
 

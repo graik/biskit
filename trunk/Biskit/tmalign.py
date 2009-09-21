@@ -181,6 +181,27 @@ class TMAlign( Executor ):
         Executor.finish( self )
         self.result = self.parse_tmalign( self.output )
 
+
+    def applyTransformation( self, model=None ):
+        """
+        Apply transformation from structure alignment to given model.
+        @param model: PDBModel, external model (default: input model)
+        @return: transformed PDBModel
+        @rtype: PDBModel
+        """
+        model = model or self.model
+        assert self.result, 'call TMAlign.run() first!'
+        
+        r = model.transform( self.result['rt'] )
+        r.info['tm_score'] = self.result['score']
+        r.info['tm_id'] = self.result['id']
+        r.info['tm_len'] = self.result['len']
+        r.info['tm_rmsd']= self.result['rmsd']
+
+        return r
+
+        
+
 #############
 ##  TESTING        
 #############
@@ -216,7 +237,27 @@ class Test(BT.BiskitTest):
                 print '\t', key, ':\t', value
             
         self.assertEqual( self.r['rmsd'], 1.76 )
+
+    def test_tmalignTransform( self ):
+        """TMAlign.applyTransformation test"""
+        m = T.load( T.testRoot( 'tmalign/1huy_citrine.model' ) )
+        ref = T.load( T.testRoot( 'tmalign/1zgp_dsred_dimer.model' ) )
+        ref = ref.takeChains( [0] )
+
+        tm = TMAlign( m, ref )
+        tm.run()
         
+        self.maligned = tm.applyTransformation()
+        
+        diff = self.maligned.centerOfMass() - ref.centerOfMass()
+
+        if self.VERBOSITY > 2 or self.local:
+            print 'center of mass deviation: \n%r' % diff
+            self.maligned.concat( ref ).plot()
+        
+        self.assert_( N.all( N.absolute(diff) < 1 ),
+                      'superposition failed: \n%r' % diff)
+
     
 
 if __name__ == '__main__':
