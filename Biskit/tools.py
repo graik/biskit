@@ -635,14 +635,16 @@ def dataRoot():
     """
     return os.path.join( projectRoot(), 'Biskit', 'data' )
 
-def testRoot():
+def testRoot( subfolder='' ):
     """
     Root of Biskit test directory.
+    
+    @param subfolder: str, optional sub-folder of test data folder
 
     @return: absolute path
     @rtype: string    
     """
-    return os.path.join( projectRoot(), 'Biskit', 'testdata' )
+    return os.path.join( projectRoot(), 'Biskit', 'testdata', subfolder )
 
 
 def isBinary( f ):
