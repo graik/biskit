@@ -3013,6 +3013,42 @@ class PDBModel:
         result = self.transform( r, t )
 
         return result
+    
+    def structureFit( self, refModel, mask=None ):
+        """
+        Structure-align this model onto a reference model using the external
+        TM-Align program (which needs to be installed).
+        structureFit( refModel [, mask] ) -> PDBModel (or subclass)
+        
+        The result model has additional TM-Align statistics in its info record:
+        r = m.structureFit( ref )
+        r.info['tm_score'] -> TM-Align score
+        the other keys are: 'tm_rmsd', 'tm_len', 'tm_id'
+        @see: Biskit.TMAlign
+
+        @param refModel: reference PDBModel
+        @type  refModel: PDBModel
+        @param mask: atom mask to use for the fit
+        @type  mask: list of int (1||0)
+
+        @return: fitted PDBModel or sub-class
+        @rtype: PDBModel
+        """
+        if mask is not None:
+            m_this = self.compress( mask )
+        else:
+            m_this = self
+        
+        tm = B.TMAlign( refModel, m_this )
+        r = tm.run()        
+        result = self.transform( r['rt'] )
+
+        result.info['tm_score'] = r['score']
+        result.info['tm_id'] = r['id']
+        result.info['tm_len'] = r['len']
+        result.info['tm_rmsd']= r['rmsd']
+
+        return result
 
 
     def centered( self, mask=None ):
@@ -3671,7 +3707,19 @@ class Test(BT.BiskitTest):
         self.assertEqual( m.lenResidues(), len_r - 1 )
         self.assertEqual( m.lenAtoms(), len_a )
         self.assertEqual( len( r_gly ), 2 * 5 )
+
+class TestExe( BT.Test ):
+    """PDBModel tests that rely on external applications"""
+    
+    TAGS = [BT.EXE]
+    
+    def test_structureFit( self ):
+        """PDBModel.structureFit test"""
+        m = T.load( T.testRoot( 'tmalign/1huy_citrine.model' ) )
+        ref = T.load( T.testRoot( 'tmalign/1zgp_dsred_dimer.model' ) )
         
+        r = m.structureFit( ref )
+        self.assertEqual( r.info['tm_rmsd'], 1.76 )
 
 
 def clock( s, ns=globals() ):

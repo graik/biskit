@@ -78,6 +78,7 @@ try:
     from DSSP import Dssp, Dssp_Error
     from FuzzyCluster import FuzzyCluster
     from PDBDope import PDBDope
+    from tmalign import TMAlign
 
     from ModelList import ModelList
     from Ramachandran import Ramachandran
