@@ -31,6 +31,14 @@ In this document:  * Release 2.3.1
 		   * License
 		   * Open issues
 
+Release 2.4 (upcoming)
+----------------------
+
+* TM-Align structure alignment wrapper and integration into PDBModel
+  - new class(Executor): TMAlign
+  - new method in PDBModel: structureFit()
+
+
 Release 2.3.1
 -------------
 
