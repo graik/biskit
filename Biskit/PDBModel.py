@@ -3039,7 +3039,7 @@ class PDBModel:
         else:
             m_this = self
         
-        tm = B.TMAlign( refModel, m_this )
+        tm = B.TMAlign( m_this, refModel )
         r = tm.run()        
         result = self.transform( r['rt'] )
 
@@ -3717,9 +3717,14 @@ class TestExe( BT.Test ):
         """PDBModel.structureFit test"""
         m = T.load( T.testRoot( 'tmalign/1huy_citrine.model' ) )
         ref = T.load( T.testRoot( 'tmalign/1zgp_dsred_dimer.model' ) )
+        ref = ref.takeChains( [0] )
         
         r = m.structureFit( ref )
         self.assertEqual( r.info['tm_rmsd'], 1.76 )
+
+        diff = r.centerOfMass() - ref.centerOfMass()
+        self.assert_( N.all( N.absolute(diff) < 1 ),
+                      'superposition failed: %r' % diff)
 
 
 def clock( s, ns=globals() ):
