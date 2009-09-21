@@ -114,8 +114,16 @@ class TMAlign( Executor ):
             T.tryRemove( self.f_pdbin )
             T.tryRemove( self.f_pdbref)
 
+    def __translate_rt( self, rt ):
+        """
+        TM-Align reports translation vector in first row -> push it to last row
+        """
+        rt = rt[:, (1,2,3,0)]
+        return rt
+
     def parse_tmalign( self, output ):
         """
+        Parse TM-Align output
         @param output: STDOUT result of TM-Align run
         @type  output: [str]
 
@@ -145,7 +153,7 @@ class TMAlign( Executor ):
                 'Could not find score values in TMAlign output')
         
         r.update( dict( zip( ['len', 'rmsd', 'score', 'id'], info ) ) )        
-        r['rt'] = N.array( (rt1, rt2, rt3), float )
+        r['rt'] = self.__translate_rt( N.array( (rt1, rt2, rt3), float ) )
         
         return r
 
