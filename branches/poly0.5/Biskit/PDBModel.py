@@ -2041,6 +2041,40 @@ class PDBModel:
 
         return r.concat( *models[1:] )
 
+    def removeChainBreaks( self, chains, breaks=False ):
+        """
+        Remove chain boundaries *before* given chain indices.
+        Example:
+           removeChainBreaks( [1,3] ) --> removes the first and third chain
+             break but keeps the second, e.g. this joins first and second chain
+             but also second and third chain.
+        Coordinates are not modified. removeChainBreaks( [0] ) doesn't make
+        sense.
+        @param chains: [ int ], chain breaks
+        """
+        if 0 in chains:
+            raise PDBError, 'cannot remove chain break 0'
+        
+        cindex = self.chainIndex( breaks=breaks )
+
+        ## simple removal of terminal OXT and TER label, make it more robust!
+        remove = []
+        for i in chains:
+            lastatom = cindex[i] - 1
+            if self[ lastatom ]['name'] in ['OXT', 'OT2']:
+                remove += [ lastatom ]
+            self['after_ter'][lastatom+1] = 0 
+            
+        self.remove( remove )
+
+        ## update chain index
+        cindex = self.chainIndex( breaks=breaks )
+
+        mask = N.ones( len( cindex ) )
+        N.put( mask, chains, 0 )
+
+        self._chainIndex = N.compress( mask, cindex )
+    
 
     def take( self, i, rindex=None, cindex=None,
               *initArgs, **initKw ):
