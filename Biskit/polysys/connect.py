@@ -132,7 +132,7 @@ class Fusion( object ):
         ## fit adapter to C-terminal of model 1
         adapter = self.adapter_model
         adapter = self.fitOverlap( m1, adapter, r1=-1, r2=0, 
-                                   names=['N', 'CA', 'C', 'O'] )
+                                   names=['N', 'CA', 'C', 'CB'] )
         
         ## remove both terminal Os because we wouldn't know which to choose
         self.removeAtoms( m1, rindex=-1, names=['O', 'OT1', 'OT2', 'OXT'] )
@@ -151,9 +151,6 @@ class Fusion( object ):
         ## concatenate models
         assert( isinstance( m1, PDBModel ) )
         r = m1.concat( m2, newChain=False )
-##        r['chain_id'] = [ r['chain_id'][0] ] * len( r )
-##        r.renumberResidues()
-        
         return r
     
 #############
