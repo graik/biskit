@@ -51,8 +51,8 @@ class TMAlign( Executor ):
     TMAlign takes two PDBModel instances as input and returns a dictionary 
     'result' with the following keys:
     
-        'rt'    ... rotation /translation matrix to superposition model on refmodel
-                    (numpy.array of float)
+        'rt'    ... rotation/translation matrix to superposition model on
+                    refmodel (numpy.array of float)
         'score' ... TM-Align score (float)
         'rmsd'  ... RMSD calculated by TM-Align (float)
         'len'   ... length (in residues) of the structure alignment (float)
@@ -64,11 +64,15 @@ class TMAlign( Executor ):
     @note: Command configuration: biskit/Biskit/data/defaults/exe_tmalign.dat
     """
     
-    re_rt1 = re.compile(' 1\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)')
-    re_rt2 = re.compile( ' 2\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)')
-    re_rt3 = re.compile( ' 3\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)')
+    re_rt1 = re.compile(
+        ' 1\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)')
+    re_rt2 = re.compile(
+        ' 2\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)')
+    re_rt3 = re.compile(
+        ' 3\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)')
     
-    re_info = re.compile( 'Aligned length=\s*([0-9]+), RMSD=\s*([0-9\.]+), TM-score=\s*([0-9\.]+), ID=\s*([0-9\.]+)')
+    re_info = re.compile(
+        'Aligned length=\s*([0-9]+), RMSD=\s*([0-9\.]+), TM-score=\s*([0-9\.]+), ID=\s*([0-9\.]+)')
 
     def __init__( self, model, refmodel, **kw ):
         """
@@ -149,6 +153,12 @@ class TMAlign( Executor ):
         except IndexError, why:
             raise TMAlignError(
                 'Could not find rotation matrix in TMAlign output')
+
+        ## workaround for numpy 1.0.4 bug:
+        rt1 = map( float, rt1 )
+        rt2 = map( float, rt2 )
+        rt3 = map( float, rt3 )
+        
         r = self.__translate_rt( N.array( (rt1, rt2, rt3), float ) )
         return r
 
