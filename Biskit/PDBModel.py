@@ -361,8 +361,9 @@ class PDBModel:
         r = self.__repr__()
         
         for c in range( self.lenChains() ):
-            r += '\n\t* chain %i: %s' % ( c,
-                        T.clipStr( self.takeChains( [c] ).sequence(), 60 ) )
+            chain = self.takeChains( [c] )
+            r += '\n\t* chain %i (%s): %s' % ( c, chain['chain_id'][0],
+                        T.clipStr( chain.sequence(), 60 ) )
 
         r += '\n source: ' + repr( self.source )
         r += '\n %2i atom profiles:    %s' % ( len( self.atoms ), 
@@ -787,7 +788,7 @@ class PDBModel:
 
             else:
 
-                if type( self.residues[ key ] ) is N.arraytype:
+                if type( self.residues[ key ] ) is N.ndarray:
                     self.residues.set( key, self.residues[key].tolist() )
 
         for key in self.atoms:
@@ -797,7 +798,7 @@ class PDBModel:
 
             else:
 
-                if type( self.atoms[ key ] ) is N.arraytype:
+                if type( self.atoms[ key ] ) is N.ndarray:
                     self.atoms.set( key, self.atoms[key].tolist() )
 
 
@@ -816,7 +817,7 @@ class PDBModel:
             if not self.xyzChangedFromDisc():
                 self.xyz = None
 
-            if type( self.xyz ) is N.arraytype and self.xyz.dtype.char != 'f':
+            if type( self.xyz ) is N.ndarray and self.xyz.dtype.char != 'f':
                 self.xyz = self.xyz.astype(N.Float32)
 
             self.__slimProfiles()
@@ -1472,7 +1473,7 @@ class PDBModel:
         if type( what ) is types.FunctionType:
             return N.nonzero( self.maskF( what) )
 
-        if type( what ) is list or type( what ) is N.arraytype:
+        if type( what ) is list or type( what ) is N.ndarray:
 
             ## atom names
             if type( what[0] ) == str:
@@ -1518,7 +1519,7 @@ class PDBModel:
         if type( what ) == types.FunctionType:
             return self.maskF( what )
 
-        if type( what ) == list or type( what ) is N.arraytype:
+        if type( what ) == list or type( what ) is N.ndarray:
 
             ## atom names
             if type( what[0] ) == str:
@@ -1825,7 +1826,7 @@ class PDBModel:
         if type( p ) is str:
             p = self.residues.get( p )
 
-        isArray = isinstance( p, N.arraytype )
+        isArray = isinstance( p, N.ndarray)
 
         resMap = self.resMap()
 
@@ -1855,7 +1856,7 @@ class PDBModel:
         if type( p ) is str:
             p = self.atoms.get( p )
 
-        isArray = isinstance( p, N.arraytype )
+        isArray = isinstance( p, N.ndarray)
 
         if not f:
             r = N.take( p, self.resIndex() )
@@ -2027,7 +2028,7 @@ class PDBModel:
         @type  c1   : int
         @param id   : chain ID of the new chain (default: ID of first chain)
         @type  id   : str
-        @param segid: ew chain's segid (default: SEGID of first chain)
+        @param segid: new chain's segid (default: SEGID of first chain)
         @type  segid: str
         @param renumberAtoms: rewrite PDB serial numbering of the adjacent
                               chain to be consequtive to the last atom of the
@@ -2073,8 +2074,8 @@ class PDBModel:
             profile = self['residue_number'][i_scar:i_next] + delta
             self['residue_number'][i_scar:i_next] = profile
         
-        ## harmonize PDB atom numbering (by *rewriting* current numbers)
-        ## usually though, atoms already have consequtive numbering through the PDB
+        ## harmonize PDB atom numbering (by *rewriting* current numbers),
+        ## usually, atoms already have consequtive numbering through the PDB
         if renumberAtoms:
             n = i_next - i_scar
             first = self['serial_number'][ i_scar-1 ] + 1 
@@ -2085,7 +2086,7 @@ class PDBModel:
         if rmOxt:
             ## overkill: we actually would only need to look into last residue
             anames = N.array( self.atoms['name'][i_start:i_scar] )
-            i_oxt = N.flatnonzero( N.logical_or( anames=='OXT', anames=='OT2' ))
+            i_oxt = N.flatnonzero( N.logical_or( anames=='OXT', anames=='OT2'))
             if len( i_oxt ) > 0:
                 self.remove( i_oxt )
         
@@ -2143,8 +2144,8 @@ class PDBModel:
             
             self['serial_number'][i_scar:i_next] = N.arange(first, first + n)
         
-        ## shift chain boundary (if any) to end of fused residue
-        ## unless it's the end of the model or there is already a boundary there
+        ## shift chain boundary (if any) to end of fused residue unless...
+        ## ...it's the end of the model or there is already a boundary there
         if i_scar in self.chainIndex():
             i = N.flatnonzero( self._chainIndex == i_scar )[0]
             if (not i_next in self._chainIndex) and (i_next != len(self)):
@@ -2203,14 +2204,14 @@ class PDBModel:
 
         ## remove traces of residue or chain breaks
         if not newChain:
-            r.mergeChains( m.lenChains() - 1 )
+            r.mergeChains( r.lenChains() - m.lenChains() - 1 )
         
         if not newRes:
-            r.mergeResidues( m.lenResidues() -1 )
+            r.mergeResidues( r.lenResidues() - m.lenResidues() -1 )
 
         r.info = copy.deepcopy( self.info )
 
-        return r.concat( *models[1:] )
+        return r.concat( *models[1:], **kw )
 
 
 ##     def removeChainBreaks( self, chains, breaks=False ):
@@ -2389,7 +2390,7 @@ class PDBModel:
 
         @raise PDBError: if what is neither of above
         """
-        if  what != []:
+        if  what is not []:
             mask = N.logical_not( self.mask( what ) )
             self.keep( N.nonzero(mask) )
             return mask
