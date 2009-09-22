@@ -617,9 +617,9 @@ def union( a, b ):
     @return: list
     @rtype: [any]    
     """
-    if type( a ) is N.arraytype:
+    if type( a ) is N.ndarray:
         a = a.tolist()
-    if type( b ) is N.arraytype:
+    if type( b ) is N.ndarray:
         b = b.tolist()
 
     return nonredundant( a + b )
