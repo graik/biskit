@@ -63,7 +63,7 @@ class Fusion( object ):
             raise FusionError, 'cannot load adapter: %r' % why
     
 
-    def select_atoms( self, m, rindex=0, names=[''] ):
+    def selectAtoms( self, m, rindex=0, names=[''] ):
         """
         Select atoms within a single residue of model <m>.
         @return: N.array of int, atom indices within residue <rindex> in same 
@@ -81,11 +81,11 @@ class Fusion( object ):
         return N.array(r)
        
         
-    def remove_atoms( self, m, rindex=-1, names=['O', 'OT1', 'OT2', 'OXT'] ):
+    def removeAtoms( self, m, rindex=-1, names=['O', 'OT1', 'OT2', 'OXT'] ):
         """
         Remove atoms with given name from given residue.
         """     
-        a_indices = self.select_atoms( m, rindex, names )
+        a_indices = self.selectAtoms( m, rindex, names )
         m.remove( a_indices )
 
     def fitOverlap( self, m1, m2, r1=-1, r2=0, names=['N', 'CA', 'C'] ):
@@ -94,14 +94,30 @@ class Fusion( object ):
         on the corresponding atoms of m1's residue r1.
         @return: PDBModel, transformed m2
         """
-        sel_m1 = self.select_atoms( m1, rindex= r1, names= names )
-        sel_m2 = self.select_atoms( m2, rindex= r2, names= names )
+        sel_m1 = self.selectAtoms( m1, rindex= r1, names= names )
+        sel_m2 = self.selectAtoms( m2, rindex= r2, names= names )
 
         ref = m1.take( sel_m1 )
         probe = m2.take( sel_m2 )
         
         rt = probe.transformation( ref )        
         return m2.transform( rt )
+
+    def removeChainBreakAt( self, m, position ):
+        """
+        Remove any chain break traces at the given atom position. 
+        """
+        m['after_ter'][position] = 0
+        
+        mask = (m._chainIndex != position)
+        m._chainIndex = N.compress( mask, m._chainIndex )
+        
+
+    def removeResBreakAt( self, m, position ):
+        """
+        Remove residue demarkation at the given atom position.
+        """
+        pass
         
     
     def fuseN2C( self, m1, m2 ):
@@ -113,13 +129,18 @@ class Fusion( object ):
         m1 = m1.clone()
         m2 = m2.clone()
         
-        self.remove_atoms( m1, rindex=-1, names=['O', 'OT1', 'OT2', 'OXT'] )
-        self.remove_atoms( m2, rindex=0,  names=['H', 'HT1', 'HT2', 'HT3'] )
+        ## remove both terminal Os because we wouldn't know which to choose
+        self.removeAtoms( m1, rindex=-1, names=['O', 'OT1', 'OT2', 'OXT'] )
+        self.removeAtoms( m2, rindex=0,  names=['H', 'HT1', 'HT2', 'HT3'] )
         
         ## fit adapter to C-terminal of model 1
         adapter = self.adapter_model
         adapter = self.fitOverlap( m1, adapter, r1=-1, r2=0, 
-                                   names=['N', 'CA', 'C', 'CB'] ) ## note: not general
+                                   names=['N', 'CA', 'C'] )
+        
+        ## add correct peptide O from adapter back to C-term
+        sel_o = self.selectAtoms( adapter, rindex=0, names=['O'] )
+        m1 = m1.concat( adapter.take( sel_o ) )
         
         adapter.writePdb( '~/adapter.pdb' )
         
@@ -134,12 +155,47 @@ class Fusion( object ):
         
         return r
     
+#############
+## TESTING ##
+import Biskit.test as BT
+import tempfile
+import Biskit.tools as T
+
+class Test( BT.BiskitTest ):
+    """Test AmberParmBuilder"""
+
+    def prepare(self):
+        pass
+
+    def cleanUp(self):
+        pass
+        
+    def __test_FuseN2C(self):
+        """
+        Fuse.fuseN2C test
+        """
+        self.m1 = PDBModel( T.testRoot( 'polysys/fusion_1.pdb' ) )
+        self.m2 = PDBModel( T.testRoot( 'polysys/fusion_2.pdb' ) )
+        
+        self.f = Fusion( adapter='helix' )
+        r = self.f.fuseN2C( self.m1, self.m2 )
+        
+        r.writePdb('~/fuse.pdb' )        
+
+    def test_FuseLarge( self ):
+        """
+        Fuse.fuse test 2
+        """
+        pass
+        
+
 if __name__ == '__main__':
     
-    m1 = PDBModel( T.testRoot( 'polysys/fusion_1.pdb' ) )
-    m2 = PDBModel( T.testRoot( 'polysys/fusion_2.pdb' ) )
+##     m1 = PDBModel( T.testRoot( 'polysys/1jun.pdb' ) )
+##     m2 = PDBModel( T.testRoot( 'polysys/fusion_2.pdb' ) )
     
-    f = Fusion( adapter='helix' )
-    r = f.fuseN2C( m1, m2 )
+##     f = Fusion( adapter='helix' )
+##     r = f.fuseN2C( m1, m2 )
     
-    r.writePdb('~/fuse.pdb' )
+##     r.writePdb('~/fuse.pdb' )        
+    BT.localTest()
