@@ -628,6 +628,8 @@ class TestStandalone( BT.BiskitTest ):
     Test Modeller outside of pipeline = no default input and no default folders
     """
     
+    TAGS = [BT.EXE, BT.LONG]
+
     def prepare( self ):
         import tempfile
         import shutil
@@ -691,7 +693,6 @@ class Test( TestBase ):
     def test_modeller(self):
         """Mod.Modeller complete test (ignore the 'import site' error!)"""
         self.runmodeller(run=1)
-
 
 if __name__ == '__main__':
 

@@ -116,7 +116,7 @@ def lastErrorTrace( limit=None ):
     return result
 
 
-def dictAdd( dic, key, value ):
+def dictAdd( dic, key, value, forceList=False ):
     """
     Add value to dic, create list, if dic has already value in key.
 
@@ -135,7 +135,10 @@ def dictAdd( dic, key, value ):
                 dic[ key ] = old + [ value ]
 
     else:
-        dic[key] = value
+        if forceList and (type( value ) != list):
+            dic[key] = [ value ]
+        else:
+            dic[key] = value
 
 
 def absfile( filename, resolveLinks=1 ):
@@ -642,20 +645,17 @@ def dataRoot( addpath='' ):
         r = os.path.join( r, addpath )
     return r
 
-def testRoot( addpath='' ):
+
+def testRoot( subfolder='' ):
     """
     Root of Biskit test directory ('biskit/Biskit/testdata').
-
-    @param addpath: additional path to be appended to test root
-    @type addpath: str
+    
+    @param subfolder: str, optional sub-folder of test data folder
 
     @return: absolute path
     @rtype: string    
     """
-    r = os.path.join( projectRoot(), 'Biskit', 'testdata' )
-    if addpath:
-        r = os.path.join( r, addpath )
-    return r
+    return os.path.join( projectRoot(), 'Biskit', 'testdata', subfolder )
 
 def isBinary( f ):
     """

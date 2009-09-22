@@ -8,10 +8,18 @@ XS-Python-Version: >= 2.5, << 3.0
 
 Package: python-biskit
 Architecture: all
-Depends: python-numpy, python-biopython, plotutils, gnuplot, pvm, pvm-dev, python-scipy, python-scientific, python (>= 2.4), python (<< 2.7), python-scipy, python-scientific
-Recommends: pymol
+Depends: python-numpy, gnuplot, python-scipy, python-scientific, python (>= 2.4), python (<< 2.7), python-scipy, python-biopython
+Recommends: plotutils, python-dev, libplot-dev, pvm, pvm-dev, pymol
 Suggests: 
 XB-Python-Version: ${python:Versions}
 Provides: ${python:Provides}
-Description: Biskit - A Python platform for structural bioinformatics
-
+Description: A Python platform for structural bioinformatics
+ Biskit is a modular, object-oriented Python library for structural
+ bioinformatics research. It facilitates the manipulation and analysis
+ of macromolecular structures, protein complexes, and molecular
+ dynamics trajectories. For efficient number crunching, Biskit objects
+ tightly integrate with numpy. Biskit also offers a platform for the
+ rapid integration of external programs and new algorithms into complex
+ workflows. Calculations are thus often delegated to established
+ programs like Xplor, Amber, Hex, Prosa, Fold-X, T-Coffee, Hmmer and
+ Modeller; interfaces to further software can be added easily.

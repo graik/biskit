@@ -78,10 +78,14 @@ try:
     from DSSP import Dssp, Dssp_Error
     from FuzzyCluster import FuzzyCluster
     from PDBDope import PDBDope
+    from tmalign import TMAlign
 
     from ModelList import ModelList
     from Ramachandran import Ramachandran
     from CommandLine import CommandLine
+    
+## experimental modules
+    from residue import Residue
 
     from Model import Model
     from Polymer import Polymer

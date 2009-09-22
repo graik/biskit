@@ -1,6 +1,6 @@
 [BINARY]
 
-comment=TMAlign http://zhang.bioinformatics.ku.edu/TM-align/
+comment=TM-Align (Zhang & Skolnick, Nucl. Acid Res.2005 33, 2303)
 
 ## binary
 bin=TMAlign
@@ -25,3 +25,4 @@ replaceEnv=0
 ## Empty entries mark variables that have to be specified from outside
 ##
 [ENVIRONMENT]
+

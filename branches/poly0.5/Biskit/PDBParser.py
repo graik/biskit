@@ -90,7 +90,8 @@ class PDBParser(object):
         raise NotImplementedError, 'description() is not implemented.'
         
 
-    def update( self, model, source, skipRes=None, updateMissing=0, force=0 ):
+    def update( self, model, source, skipRes=None, updateMissing=0, force=0,
+                headPatterns=[] ):
         """
         Update empty or missing fields of model from the source. The
         model will be connected to the source via model.source.
@@ -113,6 +114,8 @@ class PDBParser(object):
         @param updateMissing: check source for additional profiles that are not
                            yet known for the model [False]
         @type  updateMissing: 1 || 0
+        @param headPatterns: [(putIntoKey, regex)] extract given REMARKS
+        @type  headPatterns: [(str, str)]
         """
         raise NotImplementedError, 'update() is not implemented.'
 

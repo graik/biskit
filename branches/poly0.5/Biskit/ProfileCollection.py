@@ -342,6 +342,8 @@ class ProfileCollection:
 
             if getattr( v, 'astype', 0) and not isinstance( v, N.ndarray):
                 self.profiles[k] = N.array( v )
+            if type( v ) is list:
+                self.profiles[k] = N.array( v )
     
 
     def __getitem__( self, k ):
@@ -528,7 +530,7 @@ class ProfileCollection:
 
 
 
-    def __picklesave_array( self, prof ):
+    def __picklesave_array( self, prof, astype=None ):
         """
         Convert integer arrays to Int32 and float arrays to
         Float32. This function is needed because of Numeric issues
@@ -549,10 +551,13 @@ class ProfileCollection:
         if prof.dtype.char in ['f','d']:
             return prof.astype( 'f' )
 
+        if astype:
+            return prof.astype( astype )
+
         return prof
 
 
-    def array_or_list( self, prof, asarray ):
+    def array_or_list( self, prof, asarray, astype=None ):
         """
         Convert to array or list depending on asarray option
 
@@ -574,13 +579,13 @@ class ProfileCollection:
 ##                 if isinstance( prof, N.ndarray ):
 ##                     return self.__picklesave_array( prof )
 
-##                 if type( prof ) is str:  # tolerate strings as profiles
-##                     return list( prof )
+                if type( prof ) is str:  # tolerate strings as profiles
+                    return N.array( list( prof ), astype )
     
                 if isinstance( prof, N.ndarray ):
-                    return self.__picklesave_array( prof )
+                    return self.__picklesave_array( prof, astype )
                 
-                return self.__picklesave_array( N.array( prof ) )
+                return self.__picklesave_array( N.array( prof, astype ) )
 
 ##                 if p.dtype.char not in ['O','c','S']: ## no char or object arrays!
 ##                     return p
@@ -598,9 +603,9 @@ class ProfileCollection:
             ## force array
             if asarray == 2:
                 if isinstance( prof, N.ndarray ):
-                    return self.__picklesave_array( prof )
+                    return self.__picklesave_array( prof, astype )
                 
-                return self.__picklesave_array( N.array( prof ) )
+                return self.__picklesave_array( N.array( prof, astype ) )
 
         except TypeError, why:
             ## Numeric bug: N.array(['','','']) raises TypeError
@@ -645,7 +650,7 @@ class ProfileCollection:
         return prof
 
 
-    def set( self, name, prof, mask=None, default=None, asarray=1,
+    def set( self, name, prof, mask=None, default=None, asarray=1, astype=None,
              comment=None, **moreInfo ):
         """
         Add/override a profile. None is allowed as special purpose value - in
@@ -666,7 +671,13 @@ class ProfileCollection:
         @type  default: any
         @param asarray: store as list (0), as array (2) or store numbers as
                         array but everything else as list (1) (default: 1)
+                        Note: this is deprecated, everything will be stored
+                        as an array.
         @type  asarray: 0|1|2
+        @param astype: force numpy.array of given type. This allows to override
+                       the default type conversion of nympy.array.
+                       (default None)
+        @type  astype: type
         @param comment: goes into info[name]['comment']
         @type  comment: str
         @param moreInfo: additional key-value pairs for info[name]
@@ -676,13 +687,13 @@ class ProfileCollection:
         @raise ProfileError: if mask is given but N.sum(mask) != len(prof)
         """
         if prof is None:
-           self.profiles[ name ] = None
-           self.infos[name] = {}
+            self.profiles[ name ] = None
+            self.infos[name] = {}
 
-           if not 'changed' in moreInfo: moreInfo['changed'] = 0
-           self.setInfo( name, asarray=asarray, comment=comment,
+            if not 'changed' in moreInfo: moreInfo['changed'] = 0
+            self.setInfo( name, asarray=asarray, comment=comment,
                          **moreInfo )           
-           return
+            return
 
         ## consistency check
         if mask is not None and N.sum(mask) != len(prof):
@@ -690,7 +701,7 @@ class ProfileCollection:
                 "Mask doesn't match profile ( N.sum(mask)!=len(prof) ). " +
                 "%i != %i" % (N.sum(mask), len( prof ) ) )
 
-        prof = self.array_or_list( prof, asarray )
+        prof = self.array_or_list( prof, asarray, astype=astype )
 
         ## use default == 0 for arrays
         if not default and isinstance( prof, N.ndarray ):
@@ -699,10 +710,13 @@ class ProfileCollection:
         ## expand profile to have a value also for masked positions
         prof = self.expand( prof, mask, default )
 
-        l = self.profLength()
-        if l and len( prof ) != l:
-            raise ProfileError( "Profile %s has wrong length." % name )
-
+        try:
+            l = self.profLength()
+            if l and len( prof ) != l:
+                raise ProfileError( "Profile %s has wrong length." % name )
+        except Exception, why:
+            raise ProfileError( "Couldn't interpret profile: %s (%r)" % \
+                                (name, why))
         ## collect additional infos about this profile
         info = self.infos.get( name, {} )
 
@@ -859,7 +873,7 @@ class ProfileCollection:
                 result.setInfo( key, **copy.deepcopy(self.getInfo(key)) )
 
         except Exception, why:
-            raise ProfileError( "Can't take sub-profile: "+str(why) )
+            raise ProfileError( "Can't take sub-profile %r: %r" % (key,why) )
 
         return result
 
