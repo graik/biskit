@@ -288,6 +288,7 @@ class Intervor( Executor ):
 
     def __parseFacets( self, fname ):
         """
+        @return: [ {} ], list of dictionaries (one per facet)
         -> Biskit.DictList
         """
         result = []
@@ -302,7 +303,8 @@ class Intervor( Executor ):
             records = lines.split( 'FBIeg' )
             records = [ r for r in records if len( r ) > 10 ]
 
-            result = B.DictList( [ self.__parseFacetRecord(r) for r in records ] )
+            result = B.DictList( [ self.__parseFacetRecord(r)
+                                   for r in records ] )
 
         except IOError, why:
             raise IntervorError( 'Error accessing intervor output file %r: %r'\
@@ -334,7 +336,8 @@ class Intervor( Executor ):
             facet_profile[a2] += [ facet ]
         
         self.model.atoms.set('facets', facet_profile, comment=\
-                             'intervor facets this atom is involved in' )
+                             'intervor facets this atom is involved in',
+                             astype=object )
 
         self.model['n_facets'] = [ len(f or []) for f in facet_profile ]
         self.model['n_facets','comment'] = 'number of interface facets'
@@ -493,7 +496,7 @@ class TestDry(BT.BiskitTest):
 
     def test_IntervorDry(self):
         self.x = Intervor( self.m, [0], debug=self.DEBUG, verbose=self.local,
-                           catch_err=1 )
+                           catch_err=1, strict=0, validate=0 )
         
         self.x.f_prefix = T.testRoot() + '/intervor/1vfb'
 

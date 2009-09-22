@@ -23,7 +23,7 @@
 ## last $Date: 2007-06-22 17:34:10 +0200 (Fri, 22 Jun 2007) $
 ## $Revision: 459 $
 """
-Parse a in-memory PDBModel instance into a new PDBModel
+Fetch a PDBModel from the remote or a local NCBI PDB database.
 
 @see L{PDBModel}
 @see L{PDBParserFactory}
@@ -43,6 +43,7 @@ class PDBParseNCBI( PDBParseModel ):
     ex_resolution = re.compile(\
             'REMARK   2 RESOLUTION\. *([0-9\.]+|NOT APPLICABLE)' )
 
+    ## resolution assigned to NMR structures
     NMR_RESOLUTION = 3.5
 
     @staticmethod
@@ -55,7 +56,6 @@ class PDBParseNCBI( PDBParseModel ):
         >>>     ...
         
         @return: True if the given source is supported by this parser
-                 implementation (equivalent to isinstance( source, PDBModel) )
         @rtype: bool
         """
         r = isinstance( source, str )
@@ -91,7 +91,7 @@ class PDBParseNCBI( PDBParseModel ):
         @raise PDBParserError: if couldn't find PDB file
         """
         id = str.lower( id )
-        filenames = ['%s.pdb' % id,
+        filenames = [os.path.join( db_path, '%s.pdb' % id),
                      db_path + '/pdb%s.ent' % id,
                      db_path + '/%s/pdb%s.ent.Z' %( id[1:3], id ) ]
 
@@ -219,7 +219,8 @@ class PDBParseNCBI( PDBParseModel ):
 
         return m
 
-    def update( self, model, source, skipRes=None, updateMissing=0, force=0 ):
+    def update( self, model, source, skipRes=None, updateMissing=0, force=0,
+                headPatterns=[]):
         """
         Update empty or missing fields of model from the source.
         

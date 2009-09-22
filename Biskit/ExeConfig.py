@@ -212,7 +212,7 @@ class ExeConfig( object ):
                                the program
         """
         try:
-            self.bin = T.absbinary( self.bin )
+            self.bin = T.absbinary( self.bin ) ## raises IOError if not found
 
             missing = self.update_environment()
             report = '%s is missing environment variables: %r'\

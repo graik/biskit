@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2009 Raik Gruenberg
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -15,91 +15,68 @@
 ## You find a copy of the GNU General Public License in the file
 ## license.txt along with this program; if not, write to the Free
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-##
-##
-## last $Author: graik $
-## last $Date: 2009-07-02 17:36:36 +0200 (Thu, 02 Jul 2009) $
-## $Revision: 810 $
-"""Wrap TMAlign structure alignment program"""
 
-import tempfile
-from Biskit import Executor, TemplateError, BiskitError, PDBModel
-import Biskit.tools as T
-import Biskit.molUtils as MU
-import re
+## last $Author: graik $
+## last $Date: 2009-05-09 14:17:28 +0200 (Sat, 09 May 2009) $
+## $Revision: $
+"""
+Wrapper for structure alignment program TM-Align
+
+Application: http://zhang.bioinformatics.ku.edu/TM-align/
+Reference: Y. Zhang, J. Skolnick, TM-align: A protein structure alignment
+algorithm based on TM-score , Nucleic Acids Research, 2005 33: 2302-2309
+"""
+
+import tempfile, re
 import numpy as N
 
-## Example output of TMAlign (for parsing)
-"""
+from Biskit import Executor, TemplateError
+## import Biskit.settings as S
+import Biskit.tools as T
+import Biskit as B
 
- **************************************************************************
- *                               TM-align                                 *
- * A protein structural alignment algorithm based on TM-score             *
- * Reference: Y. Zhang and J. Skolnick, Nucl. Acids Res. 2005 33, 2302-9  *
- * Comments on the program, please email to: yzhang@ku.edu                *
- **************************************************************************
-
-Chain 1:1MQ1_A.pdb  Size=  91
-Chain 2:1MWN_A.pdb  Size=  91 (TM-score is normalized by   91)
-
-Aligned length=  87, RMSD=  2.52, TM-score=0.68780, ID=0.828
-
- -------- rotation matrix to rotate Chain-1 to Chain-2 ------
- i          t(i)         u(i,1)         u(i,2)         u(i,3)
- 1     64.4096909452   0.5070101014  -0.0228654336   0.8616367733
- 2     -1.0448182313   0.4864477233  -0.8176450973  -0.3079368562
- 3      0.1858238387   0.7115541930   0.5752683434  -0.4034314856
-
-(":" denotes the residue pairs of distance < 5.0 Angstrom)
-SELEKAMVALIDVFHQYSG-REGDKHKLKKSELKELINNELSHFLEEIKEQ-EVVDKVMETLDNDGDGECDFQEFMAFVAMVTTACHEFFEHE--
-::::::::::::::::::: ::: :::::::::::::::::::::: .::: ::::::::::::..:::::::::::::::::: ::: :::.
-SELEKAMVALIDVFHQYSGREGD-KHKLKKSELKELINNELSHFLE-EIKEQEVVDKVMETLDEDGDGECDFQEFMAFVSMVTT-ACH-EFFEHE
-"""
-
-class TMAlign_Error( BiskitError ):
+class TMAlignError( Exception ):
     pass
 
 class TMAlign( Executor ):
     """
-    Wrapper for TM-Align Structure alignment program.
+    A TM-Align wrapper for sequence-independent structure alignments of 
+    proteins.
 
     Usage::
+
+        >>> tm = TMAlign( model, refmodel )
+        >>> result = tm.run()
     
-       x = TMAlign( model1, model2 )   ## model1 and 2 are PDBModel instances
-       result = x.run()
+    TMAlign takes two PDBModel instances as input and returns a dictionary 
+    'result' with the following keys:
     
-    Returns dictionary with the following keys:
-       'matrix'  ... N.array of float, rotation translation matrix
-       'rmsd'    ... float, rmsd calculated by TMAlign
-       'length'  ... int, alignment length
-       'score'   ... float, TMAlign score (normalized by length of target)
-       'id'      ... float, percent identity of structure alignment
-       'aln_model'  ... str, alignment string for model1 '-' indicates gap
-       'aln_target' ... str, alignment string for target '-' indicates gap
-       'aln_match'  ... N.array of boolean, CA within 5A of target in alignment
-       
-    Requires:
-       * installation of TMAlign
-    
-    Configuration:
-       * Biskit/data/defaults/exe_tmalign.dat (modify copy in ~/.biskit/)
+        'rt'    ... rotation /translation matrix to superposition model on refmodel
+                    (numpy.array of float)
+        'score' ... TM-Align score (float)
+        'rmsd'  ... RMSD calculated by TM-Align (float)
+        'len'   ... length (in residues) of the structure alignment (float)
+        'id'    ... sequence identity based on the structure alignment (float)
+        'aln_model'  ... str, alignment string for model '-' indicates gap
+        'aln_ref' ... str, alignment string for reference '-' indicates gap
+        'aln_match'  ... N.array of boolean, CA within 5A of target in alignment
+
+    @note: Command configuration: biskit/Biskit/data/defaults/exe_tmalign.dat
     """
     
-    re_score = re.compile( '.*length=\s*(?P<length>\d+)' +
-                           '.*RMSD=\s*(?P<rmsd>\d+\.\d+)' +
-                           '.*TM-score=\s*(?P<score>\d+\.\d+)' +
-                           '.*ID=\s*(?P<id>\d\.\d+)'
-                           )
+    re_rt1 = re.compile(' 1\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)')
+    re_rt2 = re.compile( ' 2\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)')
+    re_rt3 = re.compile( ' 3\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)')
     
-    re_matrix = re.compile( '\s+([-]?\d+\.\d+)' )
+    re_info = re.compile( 'Aligned length=\s*([0-9]+), RMSD=\s*([0-9\.]+), TM-score=\s*([0-9\.]+), ID=\s*([0-9\.]+)')
 
-    def __init__( self, model, target, **kw ):
+    def __init__( self, model, refmodel, **kw ):
         """
-        @param model: model to be aligned
+        @param model: structure to be aligned to reference
         @type  model: PDBModel
-        @param target: target model of the alignment
-        @type  target: PDBModel
-
+        @param refmodel: reference structure
+        @type  refmodel: PDBModel
+        
         @param kw: additional key=value parameters for Executor:
         @type  kw: key=value pairs
         ::
@@ -110,71 +87,50 @@ class TMAlign( Executor ):
           nice     - int, nice level (default: 0)
           log      - Biskit.LogFile, program log (None->STOUT) (default: None)
         """
-        self.model = model
-        self.target = target
-        
-        assert isinstance( self.model, PDBModel), 'expecting PDBModel' 
-        assert isinstance( self.target, PDBModel), 'expecting PDBModel'
+        self.f_pdbin = tempfile.mktemp( '_tmalign_in.pdb' )
+        self.f_pdbref= tempfile.mktemp( '_tmalign_ref.pdb' )
 
-        ## temporary pdb-file
-        self.f_model  = tempfile.mktemp( '_tmalign_model.pdb')
-        self.f_target = tempfile.mktemp( '_tmalign_target.pdb')
-##        self.f_super  = tempfile.mktemp( '_tmalign_super.pdb' )
+        Executor.__init__( self, 'tmalign', 
+                           args= '%s %s' % (self.f_pdbin, self.f_pdbref),
+                           **kw )
+
+        self.refmodel = refmodel
+        self.model = model
         
-        Executor.__init__( self, 'tmalign',
-                           args='%(f_model)s %(f_target)s' % self.__dict__,
-                           catch_err=1, **kw )
-        
-        self.result = {}
+        assert isinstance( self.model, B.PDBModel), 'expecting PDBModel' 
+        assert isinstance( self.refmodel, B.PDBModel), 'expecting PDBModel'
+
+
 
     def prepare( self ):
         """
         Overrides Executor method.
         """
-        self.model.writePdb( self.f_model )
-        self.target.writePdb(self.f_target)
-    
+        self.model.writePdb( self.f_pdbin )
+        self.refmodel.writePdb( self.f_pdbref )
+
     def cleanup( self ):
         """
         Tidy up the mess you created.
-        """
+        Does nothing. No temporary files are created.
+        """        
         Executor.cleanup( self )
-
         if not self.debug:
-            T.tryRemove( self.f_model )
-            T.tryRemove( self.f_target )
- 
-    def isfailed( self ):
-        if not self.output:
-            return True
-        if self.output[:10] == "\n ********":
-            return False
-        return True
-    
-    def __parse_score( self, lines ):
-        l = lines.pop()
-        r = self.re_score.match( l ).groupdict()
-        r['length'] = int( r['length'])
-        r['score']  = float( r['score'] )
-        r['id']     = float( r['id'] )
-        r['rmsd']   = float( r['rmsd'] )
-        
-        return r
-    
-    def __parse_matrix( self, lines ):
-        lines.pop()
-        lines.pop()
-        
-        r = []
-        for i in range( 3 ):
-            l = lines.pop()
-            xyzt = self.re_matrix.findall( l )
-            xyzt = [ float( x ) for x in xyzt ]
-            r.append( xyzt )
-        
-        return {'matrix' : N.array( r ) }
+            T.tryRemove( self.f_pdbin )
+            T.tryRemove( self.f_pdbref)
 
-    def __parse_aln( self, lines ):
+    def __translate_rt( self, rt ):
+        """
+        TM-Align reports translation vector in first row -> push it to last row
+        """
+        rt = rt[:, (1,2,3,0)]
+        return rt
+
+    def __parse_aln( self, output ):
+
+        lines = output[output.find('(":"'):].split( '\n' )
+        lines.reverse()
+        
         lines.pop()
         
         l1 = lines.pop()
@@ -183,51 +139,161 @@ class TMAlign( Executor ):
 
         match = N.array( [ x == ':' for x in l2 ] ) ## all matching positions
         
-        return {'aln_model':l1, 'aln_target':l3, 'aln_match': match }
-            
- 
-    def parse_output( self, lines ):
+        return {'aln_ref':l1, 'aln_model':l3, 'aln_match': match }
+
+    def __parse_matrix( self, output ):
+        try:
+            rt1 = self.re_rt1.findall( output )[0]
+            rt2 = self.re_rt2.findall( output )[0]
+            rt3 = self.re_rt3.findall( output )[0]            
+        except IndexError, why:
+            raise TMAlignError(
+                'Could not find rotation matrix in TMAlign output')
+        r = self.__translate_rt( N.array( (rt1, rt2, rt3), float ) )
+        return r
+
+
+    def __parse_scores( self, output ):
+        try:
+            info = self.re_info.findall( output )[0]
+            info = [ float( i ) for i in info ]
+        except IndexError, why:
+            raise TMAlignError(
+                'Could not find score values in TMAlign output')
         
-        while lines:
-            l = lines[-1]
+        return dict( zip( ['len', 'rmsd', 'score', 'id'], info ) )
+        
 
-            if l.startswith( 'Aligned' ):
-                self.result.update( self.__parse_score( lines ) )
+    def parse( self, output ):
+        """
+        Parse TM-Align output
+        @param output: STDOUT result of TM-Align run
+        @type  output: [str]
 
-            elif l.startswith( ' -------- rotation' ):
-                self.result.update( self.__parse_matrix( lines ) )
+        @return: rotation/translation matrix
+        @rtype: N.array
 
-            elif l.startswith( '(":"' ):
-                self.result.update( self.__parse_aln( lines ) )
+        @raise TMAlignError: if no result
+        """
+        if  output.count('\n') < 7:
+            raise TMAlignError, 'no TM-Align result'
 
-            else:
-                lines.pop()
-            
+        r = {}
+        
+        r['rt'] = self.__parse_matrix( output )
+        r.update( self.__parse_scores( output ) )
+        r.update( self.__parse_aln( output ) )
+        
+        return r
+
+    def isFailed( self ):
+        """
+        Overrides Executor method
+        """
+        return self.error != '' or \
+	       'lately' in self.output
+
+    def fail( self ):
+        """
+        Overrides Executor method. Called when execution fails.
+        """
+        s = 'TMAlign failed. Please check the program output in the '+\
+            'field `output` of this TMAlign instance (e.g. `print x.output`)!'
+        self.log.add( s )
+        raise TMAlignError, s
 
     def finish( self ):
         """
-        Called if program finished successfully (override postprocess otherwise)
+        Overrides Executor method
         """
+        Executor.finish( self )
+
         if not self.exe.pipes:
             self.output = ''.join( open(self.f_out).readlines() )
-        
         assert self.output, 'no output'
+
+        self.result = self.parse( self.output )
+
+
+    def applyTransformation( self, model=None ):
+        """
+        Apply transformation from structure alignment to given model.
+        @param model: PDBModel, external model (default: input model)
+        @return: transformed PDBModel
+        @rtype: PDBModel
+        """
+        model = model or self.model
+        assert self.result, 'call TMAlign.run() first!'
         
-        lines = self.output.split( '\n' )
-        lines.reverse()
+        r = model.transform( self.result['rt'] )
+        r.info['tm_score'] = self.result['score']
+        r.info['tm_id'] = self.result['id']
+        r.info['tm_len'] = self.result['len']
+        r.info['tm_rmsd']= self.result['rmsd']
+
+        return r
+
         
-        self.parse_output( lines )
+
+#############
+##  TESTING        
+#############
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Test class"""
+    
+    TAGS = [ BT.EXE ]
+
+    def test_tmalign( self ):
+        """TMAlign test"""
+        from Biskit import PDBModel
+
+        if self.local: print 'Loading PDB...'
         
+        self.m1 = PDBModel( T.testRoot( 'tmalign/1huy_citrine.model' ) )
+        self.m2 = PDBModel( T.testRoot('tmalign/1zgp_dsred_dimer.model' ) )
+
+
+        if self.local: print 'Starting TMAlign'
+        self.x = TMAlign( self.m1, self.m2, debug=self.DEBUG,
+                         verbose=self.local )
+
+        if self.local:
+            print 'Running'
+
+        self.r = self.x.run()
+
+        if self.local:
+            print "Result: "
+            for key, value in self.r.items():
+                print '\t', key, ':\t', value
+            
+        self.assertEqual( self.r['rmsd'], 1.76 )
+
+    def test_tmalignTransform( self ):
+        """TMAlign.applyTransformation test"""
+        m = T.load( T.testRoot( 'tmalign/1huy_citrine.model' ) )
+        ref = T.load( T.testRoot( 'tmalign/1zgp_dsred_dimer.model' ) )
+        ref = ref.takeChains( [0] )
+
+        tm = TMAlign( m, ref )
+        tm.run()
+        
+        self.maligned = tm.applyTransformation()
+        
+        diff = self.maligned.centerOfMass() - ref.centerOfMass()
+
+        if self.VERBOSITY > 2 or self.local:
+            print 'center of mass deviation: \n%r' % diff
+            self.maligned.concat( ref ).plot()
+        
+        self.assert_( N.all( N.absolute(diff) < 1 ),
+                      'superposition failed: \n%r' % diff)
+
+    
 
 if __name__ == '__main__':
-    ## needs proper test case including failure result
-    
-    m1 = PDBModel( T.testRoot() + '/Mod/project/templates/modeller/1MQ1_A.pdb' )
-    m2 = PDBModel( T.testRoot() + '/Mod/project/templates/modeller/1MWN_A.pdb' )
-    
-    x = TMAlign( m1 , m2 )
-    r = x.run()
-    
 
+    BT.localTest()
 
-    

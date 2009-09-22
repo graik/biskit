@@ -87,17 +87,16 @@ class HmmerSearch( Executor ):
     def __init__( self, target, hmmdb=settings.hmm_db, noSearch=None, **kw ):
         """
         @param target: fasta sequence, fasta file, or PDBModel 
-        @type  target: PDBModel instabce or fasta file
+        @type  target: PDBModel or str (fasta file) or [ str ] (fasta lines)
         @param hmmdb: Pfam hmm database
         @type  hmmdb: str
         @param noSearch: don't perform a seach
         @type  noSearch: 1 OR None
         """
-        self.fName = tempfile.mktemp('.fasta')
         self.hmmdb = hmmdb
 
-        Executor.__init__( self, 'hmmpfam', catch_out=1,
-                           args=' %s %s'%(hmmdb, self.fName), **kw )
+        Executor.__init__( self, 'hmmpfam', f_in= tempfile.mktemp('.fasta'),
+                           catch_out=1, **kw )
 
         self.target = target
         
@@ -153,20 +152,35 @@ class HmmerSearch( Executor ):
         to disc as a fasta file.
         If it is already fasta file the path to the file will be passed on.
         """
-        ## if target is a PDBModel or simple sequence string
-        if isinstance(self.target, PDBModel):
-            fastaSeq, self.fastaID = MT.fasta( self.target )
-            ## write fasta sequence file
-            seq = open( self.fName, 'w' )
-            seq.write( fastaSeq )
-            seq.close()
+        try:
+            ## if target is a PDBModel or simple sequence string
+            if isinstance(self.target, PDBModel):
+                fastaSeq, self.fastaID = MT.fasta( self.target )
+                ## write fasta sequence file
+                seq = open( self.f_in, 'w' )
+                seq.write( fastaSeq )
+                seq.close()
+            
+            elif self.__verify_fasta(self.target):
+
+                if type(self.target) is list:
+                    seq = open( self.f_in, 'w' )
+                    seq.writelines( self.target )
+                    seq.close()
+                else:
+                    ## else assume it is a fasta sequence file   
+                    self.f_in = self.target
+            
+            else:
+                raise HmmerError, 'cannot interpret target %r' % self.target
+
+        except OSError, why:
+            msg = 'Cannot write temporary fasta file %s' % self.f_in
+            msg += '\nError: %r' % why
+            raise HmmerError, msg
         
-        elif self.__verify_fasta(self.target):
-            ## else assume it is a fasta sequence file   
-            self.fName = self.target
-        
-        else:
-            raise HmmerError, 'cannot interpret target %r' % self.target
+        ## fix bug 2816430
+        self.args = ' %s %s' % (self.hmmdb, self.f_in)
         
 
     def parse_result( self ):
@@ -1051,9 +1065,18 @@ class Test(BT.BiskitTest):
         profile = HmmerProfile( 'FH2', verbose=self.local, log=self.log)
         self.profileDic = profile.run()
 
+    def test_HmmerFasta( self ):
+        """Hmmer test (search from fasta)"""
+        h = Hmmer(hmmdb=settings.hmm_db)
+        h.checkHmmdbIndex()
 
-    def test_Hmmer( self):
-        """Hmmer test """
+        self.searchMatches, self.searchHits = h.searchHmmdb(
+            T.testRoot()+'/Mod/project/target.fasta' )
+        
+        self.assertTrue( len( self.searchHits ) > 3 )
+
+    def test_HmmerModel( self):
+        """Hmmer test (search from model)"""
         
         ## initiate and check database status
         self.hmmer = Hmmer( hmmdb=settings.hmm_db, verbose=self.local,
@@ -1088,7 +1111,8 @@ class Test(BT.BiskitTest):
             self.cons = self.hmmer.matchScore( fastaSeq, hmmSeq,
                                           hmmDic_cast, method[0] )
 
-            ## If there are more than one profile in the model, merge to one. 
+            ## If there are more than one profile in the model, merge to one.
+            ## Note: this can be problematic as scores depend on family size
             if self.result:
                 self.result = self.hmmer.mergeProfiles( self.result, self.cons )
             else:
