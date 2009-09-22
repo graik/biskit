@@ -1920,13 +1920,13 @@ class PDBModel:
     def mergeChains( self, c1, id='', segid='', rmOxt=True,
                      renumberAtoms=False, renumberResidues=True):
         """
-        Merge two adjacent chains. This merely removes the internal marker
+        Merge two adjacent chains. This merely removes all internal markers
         for a chain boundary. Atom content or coordinates are not modified.
 
         PDBModel tracks chain boundaries in an internal _chainIndex. However,
         there are cases when this chainIndex needs to be re-built and new 
         chain boundaries are then infered from jumps in chain- or segment 
-        labelling or residue numbering. mergeChains thus automatically
+        labelling or residue numbering. mergeChains automatically
         re-assigns PDB chain- and segment IDs as well as residue numbering
         to prepare for this situation.
         
@@ -1934,17 +1934,17 @@ class PDBModel:
         @type  c1   : int
         @param id   : chain ID of the new chain (default: ID of first chain)
         @type  id   : str
-        @param segid: segment ID of the new chain (default: SEGID of first chain)
+        @param segid: ew chain's segid (default: SEGID of first chain)
         @type  segid: str
-        @param renumberAtoms: rewrite PDB serial numbering of the adjacent chain 
-                              to be consequtive to the last atom of the first
-                              chain (default: True)
+        @param renumberAtoms: rewrite PDB serial numbering of the adjacent
+                              chain to be consequtive to the last atom of the
+                              first chain (default: True)
         @type  renumberAtoms: bool
         @param renumberResidues: shift PDB residue numbering so that the first
                                  residue of the adjacent chain follows the
-                                 previous residue. Other than for atom numbering,
-                                 later jumps in residue numbering are preserved.
-                                 (default: True)
+                                 previous residue. Other than for atom
+                                 numbering, later jumps in residue numbering
+                                 are preserved. (default: True)
         @type  renumberResidues: bool
         """
         c1 = self.__convert_negative_indices( [c1], self.lenChains() )[0]
@@ -2120,39 +2120,39 @@ class PDBModel:
         return r.concat( *models[1:] )
 
 
-    def removeChainBreaks( self, chains, breaks=False ):
-        """
-        Remove chain boundaries *before* given chain indices.
-        Example:
-           removeChainBreaks( [1,3] ) --> removes the first and third chain
-             break but keeps the second, e.g. this joins first and second chain
-             but also second and third chain.
-        Coordinates are not modified. removeChainBreaks( [0] ) doesn't make
-        sense.
-        @param chains: [ int ], chain breaks
-        """
-        if 0 in chains:
-            raise PDBError, 'cannot remove chain break 0'
+##     def removeChainBreaks( self, chains, breaks=False ):
+##         """
+##         Remove chain boundaries *before* given chain indices.
+##         Example:
+##            removeChainBreaks( [1,3] ) --> removes the first and third chain
+##              break but keeps the second, e.g. this joins first and second chain
+##              but also second and third chain.
+##         Coordinates are not modified. removeChainBreaks( [0] ) doesn't make
+##         sense.
+##         @param chains: [ int ], chain breaks
+##         """
+##         if 0 in chains:
+##             raise PDBError, 'cannot remove chain break 0'
         
-        cindex = self.chainIndex( breaks=breaks )
+##         cindex = self.chainIndex( breaks=breaks )
 
-        ## simple removal of terminal OXT and TER label, make it more robust!
-        remove = []
-        for i in chains:
-            lastatom = cindex[i] - 1
-            if self[ lastatom ]['name'] in ['OXT', 'OT2']:
-                remove += [ lastatom ]
-            self['after_ter'][lastatom+1] = 0 
+##         ## simple removal of terminal OXT and TER label, make it more robust!
+##         remove = []
+##         for i in chains:
+##             lastatom = cindex[i] - 1
+##             if self[ lastatom ]['name'] in ['OXT', 'OT2']:
+##                 remove += [ lastatom ]
+##             self['after_ter'][lastatom+1] = 0 
             
-        self.remove( remove )
+##         self.remove( remove )
 
-        ## update chain index
-        cindex = self.chainIndex( breaks=breaks )
+##         ## update chain index
+##         cindex = self.chainIndex( breaks=breaks )
 
-        mask = N.ones( len( cindex ) )
-        N.put( mask, chains, 0 )
+##         mask = N.ones( len( cindex ) )
+##         N.put( mask, chains, 0 )
 
-        self._chainIndex = N.compress( mask, cindex )
+##         self._chainIndex = N.compress( mask, cindex )
     
 
     def take( self, i, rindex=None, cindex=None,
