@@ -41,6 +41,14 @@ class ComplexModelRegistry:
     Keep unique copies of the rec and lig models from many Complexes.
     Make sure that 2 Complexes with the same rec_model (same by file
     name and unchanged) always point to the same PDBModel instance.
+    
+    ComplexModelRegistry caches unique instances of receptor and ligand
+    PDBModels in dictionaries that are indexed by the source file name of 
+    the PDBModel. A new Complex arriving in the Registry is checked against
+    the dictionary -- if there is already an receptor or ligand PDBModel entry 
+    with the same source file and if the PDBModel has not changed from its 
+    source, the receptor and ligand of the Complex are redirected to the
+    cached instance.
     """
 
     def __init__( self ):
