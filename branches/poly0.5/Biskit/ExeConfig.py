@@ -289,7 +289,7 @@ class Test(BT.BiskitTest):
     """ExeConfig test"""
     
     def test_ExeConfig( self ):
-        """ExeConfig test (validate xclock)"""
+        """ExeConfig test (validate using unix ls command)"""
 
         x = ExeConfig( 'ls', strict=1 )
         x.validate()
