@@ -40,7 +40,7 @@ def isType( o, t ):
     """
     Test for correct type or correct class::
       isType( o, type_or_class ) -> 1|0
-      
+
     @param o: object to test
     @type  o: any
     @param t: type OR class
@@ -88,7 +88,7 @@ class SparseArray:
         """
         Create a sparse array from a normal Numeric array or create
         an empty sparse array with a certain shape.
-        
+
         @param array_or_shape: craeate sparse array from::
                                  ( int, ),   shape of array
                                   OR int,     length of array
@@ -114,7 +114,7 @@ class SparseArray:
         else:
             if atype is int: self.shape = ( a, )
             else:
-                if atype is N.arraytype or atype is list:
+                if atype is N.ndarray or atype is list:
                     self.shape = N.shape( a )
                 else:
                     raise SparseArrayError, '%s argument not allowed.' %\
@@ -127,7 +127,7 @@ class SparseArray:
             self.__default = SparseArray( self.shape[1:], typecode, default )
             self.__typecode = 'SA'
 
-        if atype is N.arraytype or atype is list :
+        if atype is N.ndarray or atype is list :
             self.__setAll( a )
 
 
@@ -135,7 +135,7 @@ class SparseArray:
         """
         Replace content of this sparseArray with values from Numeric array
         or list of numbers -- only for 1-dimensional arrays.
-        
+
         @param a: array OR list
         @type  a: array OR [ number ]
         """
@@ -156,14 +156,14 @@ class SparseArray:
         """
         Replace content of this array with values from (multidimensional)
         Numeric array of numbers or list of lists (of lists..) of numbers.
-        
+
         @param a: array OR  list of lists
         @type  a: array OR [ [ number ] ]
         """
         if self.is1D:
             return self.__setAll_1D( a )
 
-        if type(a) in [ N.arraytype, list ]:
+        if type(a) in [ N., list ]:
             if len(a) != self.shape[0]:
                 raise SparseArrayError, 'dimensions not aligned'
 
@@ -180,7 +180,7 @@ class SparseArray:
     def typecode( self ):
         """
         Get type code of object.
-        
+
         @return: typecode of lowest dimension
         @rtype: str
         """
@@ -192,14 +192,14 @@ class SparseArray:
     def default( self ):
         """
         Get default value, defined in L{__init__}.
-        
+
         @return: default value for array elements (of lowest dimension)
         @rtype: number        """
         if self.is1D:
             return self.__default
         ## multidimensional
         return self.__default.default()
-    
+
 
     def nondefault( self ):
         """
@@ -207,7 +207,7 @@ class SparseArray:
         version of this array. If L.default()==0 this would be equivalent to
         nonzero( ravel( L.toarray() ) ) (except that the Numeric array is
         never constructed).
-        
+
         @return: list of indices with none default values
         @rtype: [ int ]
         """
@@ -229,7 +229,7 @@ class SparseArray:
         would have in a raveled array. If L.default()==0 this would be
         equivalent to take( L.toarray(), nonzero( ravel( L.toarray() ) ) )
         (except that the Numeric array is never constructed).
-        
+
         @return: list of none default values
         @rtype: [ number ]
         """
@@ -275,13 +275,13 @@ class SparseArray:
     def put( self, i, v ):
         """
         Replace one or several values, L.put( i, v )
-        
+
         @param i: indices
         @type  i: int OR [ int ]
         @param v: values
         @type  v: any OR [ any ]
         """
-        if type( i ) in [ list, N.arraytype ]:
+        if type( i ) in [ list, N.ndarray]:
             self.__setMany( i, v )
         else:
             self.__setitem__( i, v )
@@ -290,13 +290,13 @@ class SparseArray:
     def __setMany( self, indices, values ):
         """
         Add / replace values of the array.
-        
+
         @param indices: indices, [ int ] OR Numeric.array('i')
         @type  indices: [int]
         @param values: values, [ any ] OR Numeric.array
         @type  values: [any] OR array
         """
-        if type( values ) not in [ list, N.arraytype ]:
+        if type( values ) not in [ list, N.ndarray]:
             values = [ values ] * len( indices )
 
         map( self.__setitem__, indices, values )
@@ -308,10 +308,10 @@ class SparseArray:
 
         @param i: index
         @type  i: int
-        
+
         @return: target position of given index in index list
         @rtype: int
-        
+
         @raise IndexError: if out of bounds
         """
         if i > self.shape[0] or i < 0:
@@ -339,7 +339,7 @@ class SparseArray:
     def __setitem__( self, i, v ):
         """
         Set position specifyed by the index i to value v.
-        
+
         @param i: index 
         @type  i: int OR (int,int)
         @param v: value
@@ -379,12 +379,12 @@ class SparseArray:
     def __setitem_1D( self, i, v ):
         """
         Set position specifyed by the index i to value v in a 1D array.
-        
+
         @param i: array index
         @type  i: int
         @param v: value
         @type  v: any
-        
+
         @raise IndexError: if i < 0 or i > len( this )
         """
         if i in self.indices:
@@ -512,7 +512,7 @@ class SparseArray:
 
         @param v: value
         @type  v: any      
-        
+
         @return: result of comparison
         @rtype: 0|1
         """
@@ -526,7 +526,7 @@ class SparseArray:
 
         @param v: value
         @type  v: any      
-        
+
         @return: number of occurances
         @rtype: int
         """
@@ -539,7 +539,7 @@ class SparseArray:
         """
         position of first occurrence of value::
           index( value ) -> int
-        
+
         @param v: value to look for
         @type  v: any
 
@@ -567,7 +567,7 @@ class SparseArray:
     def empty( self ):
         """
         Check if object is empty.
-        
+
         @return: true if lenght is 0
         @rtype: 1|0
         """
@@ -577,7 +577,7 @@ class SparseArray:
     def __delitem__( self, i ):
         """
         Delete value at index i: supports del this[i]
-        
+
         @note: del this[int:int] is not supported
 
         @param i: index
@@ -597,7 +597,7 @@ class SparseArray:
 
         if pos < len( self.indices ) - 1:
             self.indices = self.indices[:pos] +\
-                           [ p-1 for p in self.indices[pos:] ]
+                [ p-1 for p in self.indices[pos:] ]
 
         self.shape = (self.shape[0] - 1,) + self.shape[1:]
 
@@ -610,12 +610,12 @@ class SparseArray:
         """
         Insert value before index::
           this.insert(index, value) 
-        
+
         @param v: value to insert
         @type  v: any
         @param i: index
         @type  i: int
-        
+
         @raise IndexError: if i < 0 or i > len( this )
         """
         pos = self.__pos( i )
@@ -629,7 +629,7 @@ class SparseArray:
 
         if pos < len( self.indices ):
             self.indices = self.indices[:pos+inc] +\
-                           [ p+1 for p in self.indices[pos+inc:] ]
+                [ p+1 for p in self.indices[pos+inc:] ]
 
         self.shape = (self.shape[0]+1, ) + self.shape[1:]
 
@@ -654,7 +654,7 @@ class SparseArray:
         """
         Enlarge this array along an axis by one value::
           L.append( value, [ axis=0 ])
-        
+
         @param v: v MUST be a sparse array if the given
                   axis is not the last axis of this array
         @type  v: number OR SparseArray
@@ -666,7 +666,7 @@ class SparseArray:
         if axis == 0:
 
             t_default, t_v = getType( self.__default ), getType( v )
-            if t_default == SparseArray and t_v == N.arraytype:
+            if t_default == SparseArray and t_v == N.ndarray:
                 v = SparseArray( v, self.typecode(), self.default()  )
 
             if getType(v) != t_default:
@@ -698,14 +698,14 @@ class SparseArray:
             d.shape = d.shape[:x] + (d.shape[x]+1,) + d.shape[x+1:]
 
             self.shape = self.shape[:axis] + ( self.shape[axis]+1, ) +\
-                         self.shape[axis+1:]
+                self.shape[axis+1:]
 
 
     def extend( self, lst ):
         """
         Extend list by appending elements from the iterable::
           L.extend(iterable)
-          
+
         @param lst: list OR SparseArray with extend values
         @type  lst: [any] OR SparseArray
         """
@@ -731,12 +731,12 @@ class SparseArray:
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test"""
 
     def test_SparseArray(self):
-	"""SparseArray test"""
+        """SparseArray test"""
 
         a = N.zeros( (6,), N.Float32 )
 
@@ -753,11 +753,11 @@ class Test(BT.BiskitTest):
         self.sb = SparseArray( b )
 
         self.sb.append( self.sa )
-        
+
         if self.local:
             print self.sa.toarray()
-            
-	self.assert_( N.all( self.sb.toarray() == self.EXPECTED) )
+
+        self.assert_( N.all( self.sb.toarray() == self.EXPECTED) )
 
 
     EXPECTED = N.array([[ 0.,  3.,  4.,  0.,  0.,  0.],
@@ -771,7 +771,7 @@ class Test(BT.BiskitTest):
 if __name__ == '__main__':
 
     BT.localTest()
-    
+
 
 
 
