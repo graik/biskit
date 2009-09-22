@@ -69,7 +69,7 @@ class Fusion( object ):
         @return: N.array of int, atom indices within residue <rindex> in same 
                  order as atom <names>
         """
-        a_indices, ri = m.res2atomIndices( [rindex] )
+        a_indices = m.res2atomIndices( [rindex] )
         
         ## map atom names to atom indices
         name2i = dict( zip( [ m['name'][i] for i in a_indices ],
@@ -129,29 +129,30 @@ class Fusion( object ):
         m1 = m1.clone()
         m2 = m2.clone()
         
+        ## fit adapter to C-terminal of model 1
+        adapter = self.adapter_model
+        adapter = self.fitOverlap( m1, adapter, r1=-1, r2=0, 
+                                   names=['N', 'CA', 'C', 'O'] )
+        
         ## remove both terminal Os because we wouldn't know which to choose
         self.removeAtoms( m1, rindex=-1, names=['O', 'OT1', 'OT2', 'OXT'] )
         self.removeAtoms( m2, rindex=0,  names=['H', 'HT1', 'HT2', 'HT3'] )
         
-        ## fit adapter to C-terminal of model 1
-        adapter = self.adapter_model
-        adapter = self.fitOverlap( m1, adapter, r1=-1, r2=0, 
-                                   names=['N', 'CA', 'C'] )
-        
         ## add correct peptide O from adapter back to C-term
         sel_o = self.selectAtoms( adapter, rindex=0, names=['O'] )
-        m1 = m1.concat( adapter.take( sel_o ) )
+        m1 = m1.concat( adapter.take( sel_o ), newChain=False, newRes=False )
         
         adapter.writePdb( '~/adapter.pdb' )
         
         ## fit N terminal model2 to C terminal of adapter
-        m2 = self.fitOverlap( adapter, m2, r1=-1, r2=0, names=['N', 'CA', 'C', 'O'] )
+        m2 = self.fitOverlap( adapter, m2, r1=-1, r2=0,
+                              names=['N', 'CA', 'C', 'O'] )
         
         ## concatenate models
         assert( isinstance( m1, PDBModel ) )
-        r = m1.concat( m2 )
-        r['chain_id'] = [ r['chain_id'][0] ] * len( r )
-        r.renumberResidues()
+        r = m1.concat( m2, newChain=False )
+##        r['chain_id'] = [ r['chain_id'][0] ] * len( r )
+##        r.renumberResidues()
         
         return r
     
@@ -170,7 +171,7 @@ class Test( BT.BiskitTest ):
     def cleanUp(self):
         pass
         
-    def __test_FuseN2C(self):
+    def test_FuseN2C(self):
         """
         Fuse.fuseN2C test
         """
@@ -178,9 +179,9 @@ class Test( BT.BiskitTest ):
         self.m2 = PDBModel( T.testRoot( 'polysys/fusion_2.pdb' ) )
         
         self.f = Fusion( adapter='helix' )
-        r = self.f.fuseN2C( self.m1, self.m2 )
+        self.r = self.f.fuseN2C( self.m1, self.m2 )
         
-        r.writePdb('~/fuse.pdb' )        
+        self.r.writePdb('~/fuse.pdb' )        
 
     def test_FuseLarge( self ):
         """
@@ -199,3 +200,5 @@ if __name__ == '__main__':
     
 ##     r.writePdb('~/fuse.pdb' )        
     BT.localTest()
+
+    self = Fusion( adapter='helix' )
