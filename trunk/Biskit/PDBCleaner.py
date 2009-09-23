@@ -41,9 +41,31 @@ class CleanerError( Exception ):
 
 class PDBCleaner:
     """
-    Remove HETAtoms from PDB, replace non-standard AA by closest standard AA.
-    Remove non-standard atoms from standard AA residues (and more).
+    PDBCleaner performs the following tasks:
+    
+      * remove HETAtoms from PDB
+      * replace non-standard AA by its closest standard AA
+      * remove non-standard atoms from standard AA residues
+      * delete atoms that follow missing atoms (in a chain)
+      * remove multiple occupancy atoms (except the one with highest occupancy)
+
+    Usage::
+
+      >>> c = PDBCleaner( model )
+      >>> c.process()
+
+    This will modify the model in-place and report changes to STDOUT.
+    Alternatively, you can specify a log file instance for the output.
+    PDBCleaner.process accepts several options to modify the processing.
+
+    Note: Dictionaries with standard residues and atom content are defined
+          in Biskit.molUtils.
     """
+    
+    #: these atoms always occur at the tip of of a chain or within a ring
+    #: and, if missing, will not trigger the removal of other atoms
+    TOLERATE_MISSING = ['O', 'CG2', 'CD1', 'CD2', 'OG1', 'OE1', 'NH1',
+                        'OD1', 'OE1' ]
 
     def __init__( self, fpdb, log=None, verbose=True ):
         """
@@ -91,13 +113,13 @@ class PDBCleaner:
                             to_be_removed += [ i ]
                             if self.verbose:
                                 self.logWrite(
-                                    'removing %s (%s %s)' % (str_id,a['alternate'],
-                                                         a['occupancy']))
+                                    'removing %s (%s %s)' %
+                                    (str_id,a['alternate'], a['occupancy']))
                         else:
                             if self.verbose:
                                 self.logWrite(
-                                    ('keeping non-A duplicate %s because of 1.0 '+
-                                     'occupancy') % str_id )
+                                 ('keeping non-A duplicate %s because of 1.0 '+
+                                  'occupancy') % str_id )
 
                 except:
                     self.logWrite("Error removing duplicate: "+t.lastError() )
@@ -145,7 +167,7 @@ class PDBCleaner:
 
                     if self.verbose:
                         self.logWrite('renamed %s %i to %s' % \
-                                      (resname, i, MU.nonStandardAA[ resname ]))
+                                     (resname, i, MU.nonStandardAA[ resname ]))
                 else:
                     resnames[i] = 'ALA'
 
@@ -210,7 +232,7 @@ class PDBCleaner:
                     if self.verbose:
                         self.logWrite('%s: renaming %s to %s in %s %i' %\
                                       ( self.model.pdbCode, n, a['name'],
-                                        a['residue_name'], a['residue_number']))
+                                       a['residue_name'], a['residue_number']))
 
             anames   = [ a['name'] for a in res ]
             keep = 1
@@ -218,7 +240,7 @@ class PDBCleaner:
             ## kick out all standard atoms that follow a missing one
             rm = []
             for n in standard:
-                if not n in anames:
+                if (not n in anames) and not (n in self.TOLERATE_MISSING):
                     keep = 0
 
                 if not keep:
@@ -235,7 +257,7 @@ class PDBCleaner:
                     if self.verbose:
                         self.logWrite('%s: removing atom %s in %s %i '%\
                                       ( self.model.pdbCode, a['name'],
-                                        a['residue_name'], a['residue_number']))
+                                       a['residue_name'], a['residue_number']))
                 else:
                     mask += [0]
 
