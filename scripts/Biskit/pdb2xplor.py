@@ -35,7 +35,7 @@ from Biskit import Executor
 from Biskit import settings
 from Biskit import Pymoler
 
-from Numeric import *
+from numpy.oldnumeric import *
 from string import *
 import sys        # sys.exc_type, os.abspath
 import re, os, os.path
