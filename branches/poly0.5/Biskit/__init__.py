@@ -53,8 +53,9 @@ try:
     from EnsembleTraj import EnsembleTraj
     from LocalPath import LocalPath, LocalPathError
 
+    from model import Model
+    from pdbModel import PDBModel, PDBProfiles, PDBError
     from PCRModel import PCRModel
-    from PDBModel import PDBModel, PDBProfiles, PDBError
 
     from ProfileCollection import ProfileCollection, ProfileError
     from ProfileMirror import ProfileMirror
@@ -87,7 +88,6 @@ try:
 ## experimental modules
     from residue import Residue
 
-    from Model import Model
     from Polymer import Polymer
     from Polymer import Feature
     
