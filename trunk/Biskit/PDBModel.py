@@ -171,8 +171,8 @@ class PDBModel:
         @raise PDBError: if file exists but can't be read
         """
         self.source = source
-        if type( source ) is str and len(source) != 4 or \
-               os.path.isfile( source ):
+        if type( source ) is str and ( len(source) != 4 or \
+                                       os.path.isfile( source ) ):
             self.source = LocalPath( source )
 
         self.__validSource = 0
