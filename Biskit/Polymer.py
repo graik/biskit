@@ -28,7 +28,7 @@ import Biskit as B
 import Biskit.tools as T
 import Biskit.molUtils as MU
 
-from Model import Model
+from model import Model
 
 class Feature(object):
     """
