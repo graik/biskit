@@ -312,7 +312,7 @@ class Docker:
         """
         flog = finp + '.log'
 
-        cmd = "%s -ncpu %i -nice %i -noexec < %s > %s"
+        cmd = "%s -ncpu %i -nice %i -noexec -e %s > %s"
         cmd = cmd % (self.bin, ncpu, nice, finp, flog )
 
 	if host != os.uname()[1]:
@@ -585,12 +585,12 @@ class TestCore(BT.BiskitTest):
         recDic = t.load( t.testRoot() + '/multidock/rec/1A2P_model.dic' )
 
         self.d = Docker( recDic, ligDic, out=self.out_folder,
-                         verbose=self.local )
+                         verbose=self.local  )
 
         # dock rec 1 vs. lig 2 on localhost
         fmac1, fout = self.d.createHexInp( 1, 2 )
         if run:
-            self.d.runHex( fmac1, log=1, ncpu=2 )
+            self.d.runHex( fmac1, log=1, ncpu=2, host='localhost' )
 
             self.d.waitForLastHex()
 
