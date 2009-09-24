@@ -113,7 +113,7 @@ class Model( object ):
         self.__version__ = self.version()
     
     def version( self ):
-        return "Model $Revision$"
+        return "$Revision$"
 
     def __len__( self ):
         return self.lenAtoms()
@@ -147,7 +147,7 @@ class Model( object ):
     
     def __setitem__( self, k, v ):
         """
-        Set atom profile or profile item (or meta info)::
+        Set whole atom or residue profile, single profile item, or meta info::
           m['prof1'] = range(10)    <==> m.atoms.set( 'prof1', range(10) )
             OR                      <==> m.residues.set( 'prof1', range(10) )
           
@@ -233,6 +233,7 @@ class Model( object ):
 
         r.residues = self.residues.concat( m.residues, )
         r.atoms    = self.atoms.concat( m.atoms )
+        r.chains   = self.chains.concat( m.chains )
 
         r._resIndex   = N.concatenate(
             (self._resIndex, m._resIndex + self.lenAtoms())) 
@@ -292,44 +293,55 @@ class Model( object ):
         """
         return index2map( self._chainIndex, self.lenAtoms() )
     
-    
-    def take( self, i ):
+
+    def take( self, i, rindex=None, cindex=None,
+              *initArgs, **initKw ):
         """
         Extract a Model with a subset of atoms::
-          take( atomIndices ) -> Polymer / sub-class.
+          take( atomIndices ) -> Model or sub-class of Model
 
         @param i: atomIndices, positions to take in the order to take
         @type  i: list/array of int
+        @param rindex: alternative residue index for new model
+        @type  rindex: numpy.array of int
+        @param cindex: alternative chain index for new model
+        @type  cindex: numpy.array of int
+        Additional arguments and keyword arguments are passed to the 
+        constructor of the new object (mostly for internal use).
 
         @return: Model / sub-class
         @rtype: Model
         """
-        r = self.__class__()
+        r = self.__class__( *initArgs, **initKw )
 
-        r.atoms    = self.atoms.take( i )
-        
+        ## the easy part: extract coordinates and atoms
+        r.xyz = N.take( self.getXyz(), i )
+        r.xyzChanged = self.xyzChanged or not N.all(r.xyz == self.xyz)
+
+        r.atoms = self.atoms.take( i, r )
+
         ## more tricky: rescue residue borders and extract residue profiles
-        new_resmap  = N.take( self.resMap(), i )
-        ## Note: this erases ordering information and fails for repeated residues
-        ## -- see PDBModel version for fix
-        r._resIndex = map2index( new_resmap )
+        new_resmap   = N.take( self.resMap(), i )
+        if rindex is not None:
+            r._resIndex = rindex
+        else:
+            ## this can fail if residues are repeated in the selection
+            r._resIndex = map2index( new_resmap )
 
-        i_res      = N.take( new_resmap, r._resIndex )
-        r.residues = self.residues.take( i_res )
+        i_res     = N.take( new_resmap, r._resIndex )
+        r.residues = self.residues.take( i_res, r )
 
-        ## now the same with chains
-        new_chainmap  = N.take( self.chainMap(), i )
-        ## Note: this erases ordering information and fails for repeated residues
-        ## -- see PDBModel version for fix
-        r._chainIndex = map2index( new_chainmap )
-        
+        ## now the same with chain borders (and later profiles)
+        new_chainmap   = N.take( self.chainMap(), i )
+        if cindex is not None:
+            r._chainIndex = cindex
+        else:
+            r._chainIndex = map2index( new_chainmap )
+
         i_chains = N.take( new_chainmap, r._chainIndex )
         r.chains = self.chains.take( i_chains )
-
+            
         ## copy non-sequential infos
         r.info = copy.deepcopy( self.info )
 
         return r
-
-
-
