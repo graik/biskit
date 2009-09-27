@@ -38,7 +38,7 @@ import numpy.oldnumeric as N
 try:
     import biggles
 except:
-    bigges = 0
+    biggles = 0
 
 
 class Ramachandran:
