@@ -222,7 +222,7 @@ class TrajFlexMaster(TrackingJobMaster):
                 self.log.add('Intra-trajectory calculation requested.')
             f_frames_2 = f_frames_1
 
-        if self.verbose: self.log.add_nobreak('setting up task list...')
+        if self.verbose: self.log.write('setting up task list...')
 
         i_windows = f_frames_1.keys()
         j_windows = f_frames_2.keys()
@@ -260,7 +260,7 @@ class TrajFlexMaster(TrackingJobMaster):
         if traj is None:
             return None
 
-        if self.verbose: self.log.add_nobreak('dumping frame chunks...')
+        if self.verbose: self.log.write('dumping frame chunks...')
 
         n_frames = self.__windowSize( 20, len( self.hosts ), len( traj ) )
 
@@ -278,7 +278,7 @@ class TrajFlexMaster(TrackingJobMaster):
             r[w] = f
 
             if self.verbose and i % (len(i_windows)/50 + 1) == 0:
-                self.log.add_nobreak('#')
+                self.log.write('#')
 
         if self.verbose: self.log.add('done')
 
@@ -320,7 +320,7 @@ class TrajFlexMaster(TrackingJobMaster):
         @return: array( (n_frames, n_frames), 'f'), matrix of pairwise rms
         @rtype: array
         """
-        if self.verbose:   self.log.add_nobreak('assembling result matrix...')
+        if self.verbose:   self.log.write('assembling result matrix...')
 
         intra_traj = self.traj_2 is None
 
@@ -330,7 +330,7 @@ class TrajFlexMaster(TrackingJobMaster):
 
         a  = N.zeros( (n1,n2), N.Float32 )
 
-        if self.verbose: self.log.add_nobreak('#')
+        if self.verbose: self.log.write('#')
 
         for key, value in self.result.items():
             i_start, i_stop = key[0]
@@ -341,7 +341,7 @@ class TrajFlexMaster(TrackingJobMaster):
 
             a[i_start:i_stop, j_start:j_stop] = window
 
-        if self.verbose: self.log.add_nobreak('#')
+        if self.verbose: self.log.write('#')
 
         if intra_traj:
             for i in range( N.shape(a)[0] ):
@@ -351,7 +351,7 @@ class TrajFlexMaster(TrackingJobMaster):
                     else:
                         a[i,j] = a[j,i]
 
-        if self.verbose: self.log.add_nobreak('#')
+        if self.verbose: self.log.write('#')
 
         if intra_traj and not mirror:
             for i in range( N.shape(a)[0] ):
