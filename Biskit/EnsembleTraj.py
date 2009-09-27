@@ -40,7 +40,7 @@ import Biskit.tools as T
 try:
     import biggles
 except:
-    bigges = 0
+    biggles = 0
 
 
 def traj2ensemble( traj, members=10 ):
