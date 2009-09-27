@@ -357,11 +357,11 @@ class AmberEntropyMaster(TrackingJobMaster):
             s = label.pop()
 
             while n > n_min:
-                self.log.add_nobreak( '%s: ' % s )
+                self.log.write( '%s: ' % s )
                 if not i in x:
                     x.append( i )
                     n -= 1
-                    self.log.add_nobreak('%i, ' % i )
+                    self.log.write('%i, ' % i )
                 i += 1
 
             self.log.add('')
@@ -452,7 +452,7 @@ class AmberEntropyMaster(TrackingJobMaster):
             if os.path.exists( f ):
                 self.log.add('using existing ' + f )
             else:
-                self.log.add_nobreak('saving ' + f + '...')
+                self.log.write('saving ' + f + '...')
                 m = traj.takeMember( n )
                 T.dump( m, f )
                 self.log.add('done')
@@ -504,7 +504,7 @@ class AmberEntropyMaster(TrackingJobMaster):
         Save protocol to file.
         """
         f_prot = T.stripSuffix( T.absfile(self.fout) ) + '_protocols.dat'
-        self.log.add_nobreak( 'Saving parameters to %s...' % f_prot )
+        self.log.write( 'Saving parameters to %s...' % f_prot )
         T.dump( self.protocols, f_prot )
 
 
