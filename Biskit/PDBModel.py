@@ -2818,15 +2818,24 @@ class PDBModel:
         return N.array( r )
 
 
-    def removeRes( self, resname ):
+    def removeRes( self, what ):
         """
         Remove all atoms with a certain residue name.
 
-        @param resname: name of residue to be removed
-        @type  resname: str OR list of str
+        @param what: indices or name(s) of residue to be removed
+        @type  what: str OR [ str ] OR int OR [ int ]
         """
-        resname = T.toList( resname )
-        self.remove( self.maskFrom( 'residue_name', resname) )
+        if type( what ) is str:
+            what = T.toList( what )
+            return self.remove( self.maskFrom( 'residue_name', what) )
+
+        if type( what ) is int:
+            what = [ what ]
+
+        if isinstance(what, list) or isinstance( what, N.ndarray):
+            return self.remove( self.res2atomIndices( what ) )
+
+        return False
 
 
     def rms( self, other, mask=None, mask_fit=None, fit=1, n_it=1 ):
