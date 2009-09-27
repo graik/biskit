@@ -853,6 +853,7 @@ class ProfileCollection:
                     result.set( key, [ prof[i] for i in indices ], asarray=0 )
 
                 result.setInfo( key, **copy.deepcopy(self.getInfo(key)) )
+                result.setInfo( key, changed=1 )
 
         except Exception, why:
             raise ProfileError( "Can't take sub-profile %r: %r" % (key,why) )
