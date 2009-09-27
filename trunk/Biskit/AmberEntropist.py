@@ -210,7 +210,7 @@ class AmberEntropist( AmberCrdEntropist ):
 
         ## create Amber Crd file for ptraj
         if not os.path.exists( self.f_crd ):
-            self.log.add_nobreak('Writing amber crd file...')
+            self.log.write('Writing amber crd file...')
             self.traj.writeCrd( self.f_crd )
             self.log.add('done')
             ## release memory
@@ -225,7 +225,7 @@ class AmberEntropist( AmberCrdEntropist ):
         """
         a = AmberParmBuilder( self.traj.ref, verbose=self.verbose,
                               debug=self.debug )
-        self.log.add_nobreak('Building amber topology...')
+        self.log.write('Building amber topology...')
 
         a.parmMirror( self.f_parm, self.parmcrd )
         self.log.add('Topology built')
@@ -590,7 +590,7 @@ class AmberEntropist( AmberCrdEntropist ):
         flock = fname + '__locked'
 
         while os.path.exists( flock ):
-            self.log.add_nobreak('~')
+            self.log.write('~')
             time.sleep( random.random() * 10 )
         self.log.add('')
 
@@ -612,7 +612,7 @@ class AmberEntropist( AmberCrdEntropist ):
         Load single trajectory.
         """
         if self.verbose:
-            self.log.add_nobreak( 'Loading %s...' % fname)
+            self.log.write( 'Loading %s...' % fname)
 
         traj = self.load_locked( fname )
 
