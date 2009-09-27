@@ -28,6 +28,7 @@ import Biskit.tools as T
 import numpy as N
 import weakref 
 import string
+import glob
 
 def nextKey( lst, key ):
     """
@@ -50,6 +51,8 @@ class ResidueFactory( object ):
     """
     Produce residue instance of a certain class given a residue name
     """
+
+    RESFOLDER = 'residues'
 
     @staticmethod
     def get( name ):
@@ -96,6 +99,7 @@ def returnNone():
     """Helper function simulating an empty weakref"""
     return None
     
+
 class Residue(object):
     """
     Instance of an actual residue in a structure. Class variables define 
@@ -196,7 +200,7 @@ class Residue(object):
         return self._from_atom
 
     from_atom = property( _getFromAtom, 
-                doc="Index of first residue atom within model (read-only, cached)")
+            doc="Index of first residue atom within model (read-only, cached)")
     
     def _getToAtom( self ):
         """
