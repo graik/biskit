@@ -2,11 +2,12 @@ from coiledcoil import CoiledCoil
 from choosecoil import CCStudy
 import methods
 import os
-from socket_coil import SocketCoil
+from socket_coil import SocketCoil,NoResultsError
 from Biskit import PDBModel
 from coiledutils import getHeptad
 from Biskit.Mod import Modeller
 from alignment import PirAlignment
+import Biskit as B
 
 
 """
@@ -95,7 +96,8 @@ def createCandidatesFile (filename = "", dir = ""):
     no_coils = 0
     for pdb in pdbs:
         try:
-            print "preparing"+ dir+"/"+pdb
+        #for m in range(1):
+	    print "preparing"+ dir+"/"+pdb
             
             model = PDBModel(dir+"/"+pdb)
             sc = SocketCoil(model)
@@ -104,7 +106,7 @@ def createCandidatesFile (filename = "", dir = ""):
             
             if (sc.result == {}):
                 no_coils += 1
-            assert (sc.result != {})
+            #assert (sc.result != {})
             
             #~ for cc in sc.result.keys():
                 #~ print sc.result[cc]
@@ -119,13 +121,17 @@ def createCandidatesFile (filename = "", dir = ""):
                             line += sc.result[cc].ranges[h][0] + " " +sc.result[cc].ranges[h][1] + " "
                             line += sc.result[cc].chains[h] + " " +getHeptad(sc.result[cc].chains[h],sc.result[cc].registers[h])+" "
                             line += sc.result[cc].homo + " "
-                            line += sc.result[cc].sc.result[cc].registers[h]
+                            line += sc.result[cc].registers[h]
                             file.writelines(line+"\n")
             
             del sc 
-        except:
-            print "failed"
-            failed.append(pdb)
+        except B.DSSP.Dssp_Error:
+            print "failed DSSP "
+	except NoResultsError:
+	    print "No results"
+	#else:
+	    #print "failed "
+            #failed.append(pdb)
         done = done+1
         if done%10 ==0 :
             print "Parsed:",done,"Total:",total,"Failed:",len(failed),"( no coils:",no_coils,")"

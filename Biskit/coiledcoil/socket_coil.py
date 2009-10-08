@@ -11,6 +11,8 @@ Wrapper for SOCKET coiled coil analyzer [Walshaw & Woolfson, 2001]
 class Socket_Error( BiskitError ):
     pass
 
+class NoResultsError( Exception):
+    pass
 
 class SocketCoil (Executor):
     def __init__(self,model = None,**kw):
@@ -82,6 +84,8 @@ class SocketCoil (Executor):
         ## self.model.residues.set( 'ccsocket', profile, mask=self.resMask )
         self.result = self.parse_result()
         #~ print self.result
+	if self.result == {}:
+		raise NoResultsError('Nothing more to say')
         
         
 ##############
