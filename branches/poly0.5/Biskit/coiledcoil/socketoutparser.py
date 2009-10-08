@@ -50,7 +50,10 @@ def parse (path):
     
     file = open(path,"r")
     
-    lines = file.readlines()
+    lines = file.readlines() or []
+
+    if lines == []:
+	print "No input file for parsing."
     
     file.close()
     
