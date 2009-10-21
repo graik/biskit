@@ -1978,7 +1978,10 @@ class PDBModel:
 
         ## starting and ending position of (old) second chain
         i_start= oldI[ c1 ]
-        i_next = oldI[ c1+2 ] if len( oldI ) > c1+2 else len( self )
+        if len( oldI ) > c1+2:
+            i_next = oldI[ c1+2 ]
+        else:
+            i_next = len( self )
         i_scar = oldI[ c1+1 ]     ## (old) starting position of second chain
         n_atoms= i_next - i_start
         
@@ -2039,7 +2042,10 @@ class PDBModel:
 
         ## starting and ending position of new fused and (old) second residue
         i_start= oldI[ r1 ]
-        i_next = oldI[ r1+2 ] if len( oldI ) > r1+2 else len( self )
+        if len( oldI ) > r1+2:
+            i_next = oldI[ r1+2 ]
+        else:
+            i_next = len( self )
         i_scar = oldI[ r1+1 ]     ## (old) starting position of second residue
         n_atoms= i_next - i_start
         
