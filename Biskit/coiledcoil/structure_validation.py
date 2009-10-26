@@ -4,6 +4,9 @@ import os
 from getcoil import createCandidatesFile,dataFileCreation,getBestHit,doHomologyModelling
 from math import sqrt
 from Biskit.tmalign import TMAlign
+from coiledalign import CoiledAlign
+from coiledutils import findInAlignment
+from choosecoil import CCStudy
 
 
 def getCoilStructs ( basepath ,candidates_file):
@@ -207,11 +210,16 @@ def validate(data_path,candidates_file):
     
     for s1 in structs:
         for s2 in structs:
-            mdrmsd = massiveDimerRMSD(structs[s1].compress(structs[s1].maskCA()),structs[s2].compress(structs[s2].maskCA()))
-            tmaligner = TMAlign( structs[s1], structs[s2] )
-            res = tmaligner.run()
-            rmsd_total[(s1,s2)]= {'shiftRMSD':mdrmsd,'tmalRMSD':res['rmsd'],'tmalTSCO':res['score']}
-    
+            if s1!=s2:
+                try:
+                    #~ structs[s1].writePdb('/home/victor/poly0.5/Biskit/testdata/coiledcoil/'+s1+'.pdb')
+                    #~ structs[s2].writePdb('/home/victor/poly0.5/Biskit/testdata/coiledcoil/'+s2+'.pdb')
+                    mdrmsd = massiveDimerRMSD(structs[s1].compress(structs[s1].maskCA()),structs[s2].compress(structs[s2].maskCA()))
+                    tmaligner = TMAlign( structs[s1], structs[s2] )
+                    res = tmaligner.run()
+                    rmsd_total[(s1,s2)]= {'shiftRMSD':mdrmsd,'tmalRMSD':res['rmsd'],'tmalTSCO':res['score']}
+                except:
+                    print s1,s2,"failed"
 
     rmsd = {}
     for pdb in structs:
@@ -223,11 +231,14 @@ def validate(data_path,candidates_file):
         if deleted:
             ## Predict structure
             #~ print data_val_path, sequences[pdb]
-            study, best = getBestHit ( datafile =data_val_path, method = "Parry",sequences=sequences[pdb])
+            study, best2 = getBestHit ( datafile =data_val_path, method = "Parry",sequences=sequences[pdb])
+            best ,study2 = getBestHit2 ( datafile = data_val_path)
+            
             #~ print study, best
             if best[1] != None:
                 #~ print pdb, best[1][1], sequences[pdb]
-                templa_path,result_path = doHomologyModelling ( id = best[1][1] ,candidates_file = candidates_file, sequences = sequences[pdb], study = study)
+                #~ templa_path,result_path = doHomologyModelling ( id = best[1][1] ,candidates_file = candidates_file, sequences = sequences[pdb], study = study)
+                templa_path,result_path = doHomologyModelling ( id = best[2] ,candidates_file = candidates_file, sequences = sequences[pdb], study = study)
                 ## Get the result
                 ## (find the file)
                 files = os.listdir(result_path)
@@ -242,7 +253,7 @@ def validate(data_path,candidates_file):
                 myrmsd = structs[pdb].compress(structs[pdb].maskCA()).rms(resultpdb.compress(resultpdb.maskCA()))
                 tmaligner = TMAlign( structs[pdb], resultpdb )
                 res = tmaligner.run()
-                rmsd[pdb] = {'RMSD':myrmsd,'tmalRMSD':res['rmsd'],'tmalTSCO':res['score'],'selected':best[1][1]}
+                rmsd[pdb] = {'RMSD':myrmsd,'tmalRMSD':res['rmsd'],'tmalTSCO':res['score'],'selected':best[2]}
                 print "RMSD",rmsd[pdb]
                 ## Clean everything
                 os.system("rm -rf "+templa_path)
@@ -259,11 +270,179 @@ def validate(data_path,candidates_file):
     for r in rmsd_total:
         print "%s -  shiftRMSD:%.3f tmalRMSD:%.3f tmalTSCO:%.3f"%(r, rmsd_total[r]['shiftRMSD'],rmsd_total[r]['tmalRMSD'],rmsd_total[r]['tmalTSCO']) 
     
+    print "RRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRRR"
+    rmsdtot = {}
+    for r in rmsd_total:
+        print r
+        item = (rmsd_total[r]['tmalRMSD'],r[1])
+        try:
+            rmsdtot[r[0]].append(item)
+        except:
+            rmsdtot[r[0]] = [item]
+    rmsdshift = {}
+    for r in rmsd_total:
+        item = (rmsd_total[r]['shiftRMSD'],r[1])
+        try:
+            rmsdshift[r[0]].append(item)
+        except:
+            rmsdshift[r[0]] = [item]
+    rmsdtsco = {}
+    for r in rmsd_total:
+        item = (rmsd_total[r]['tmalTSCO'],r[1])
+        try:
+            rmsdtsco[r[0]].append(item)
+        except:
+            rmsdtsco[r[0]] = [item]
+    
+    ## Print this to a file
+    rmsdfile = open("tscormsd_scores","w")
+    for r in rmsdtot:
+        rmsdfile.write(r+" ")
+        for t in rmsdtot[r]:
+            rmsdfile.write("%.3f"%(t[0])+" ")
+        rmsdfile.write("\n")
+    rmsdfile.close()
+
+    rmsdfile = open("shiftrmsd_scores","w")
+    for r in rmsdshift:
+        rmsdfile.write(r+" ")
+        for t in rmsdshift[r]:
+            rmsdfile.write("%.3f"%(t[0])+" ")
+        rmsdfile.write("\n")
+    rmsdfile.close()
+
+    rmsdfile = open("tscore_scores","w")
+    rmsdfile.write(str(rmsdtsco.keys())+"\n")
+    for r in rmsdtsco:
+        rmsdfile.write(r+" ")
+        for t in rmsdtsco[r]:
+            rmsdfile.write("%.3f"%(t[0])+" ")
+        rmsdfile.write("\n")
+    rmsdfile.close()
+    
+    
+    rmsdtot_selected = {}
+    for r in rmsdtot:
+        rmsdtot_selected[r] = min(rmsdtot[r])
+    rmsdshift_selected = {}
+    for r in rmsdshift:
+        rmsdshift_selected[r] = min(rmsdshift[r])
+    rmsdtsco_selected = {}
+    for r in rmsdtsco:
+        rmsdtsco_selected[r] = max(rmsdtsco[r])
+    
+    
     print "RMSDS--------"
     for r in rmsd:
         print "%s (%s)-  RMSD:%.3f tmalRMSD:%.3f tmalTSCO:%.3f  %.3f"%(r, rmsd[r]['selected'],rmsd[r]['RMSD'],rmsd[r]['tmalRMSD'],rmsd[r]['tmalTSCO'],abs(rmsd[r]['RMSD']-rmsd[r]['tmalRMSD'])) 
     
+    ## porcentaje
+    total = 0
+    ok = 0
+    for r in rmsd:
+        print r,rmsd[r]['selected'] , rmsdtsco_selected[r]
         
+        if rmsd[r]['selected'][0:3] == rmsdtsco_selected[r][1][0:3]:
+            ok = ok+1
+        total = total + 1
+    print ok,total
+    
+    total = 0
+    ok = 0    
+    for r in rmsd:
+        #~ print r,rmsd[r]['selected'] , rmsdtsco_selected[r]
+        
+        if rmsd[r]['selected'][0:3] == rmsdtot_selected[r][1][0:3]:
+            ok = ok+1
+        total = total + 1
+    print ok,total
+    
+    total = 0
+    ok = 0    
+    for r in rmsd:
+        #~ print r,rmsd[r]['selected'] , rmsdtsco_selected[r]
+        
+        if rmsd[r]['selected'][0:3] == rmsdshift_selected[r][1][0:3]:
+            ok = ok+1
+        total = total + 1
+        
+    print ok,total
+    
+    
+def getBestHit2(datafile ): 
+    
+    aligners = {}
+    sequences = {}
+    file = open(datafile)
+    lineas = file.readlines()
+    file.close()
+    lineas = [ l.strip() for l in lineas ]
+
+    
+    for l in lineas:
+        contents = l.split()
+        for c in contents:
+            if "register" in c:
+                register = c.split(":")[1]
+                #~ print "register is", register
+            if "seq" in c:
+                sequence = c.split(":")[1]
+                #~ print "sequence is", sequence
+        sequences[contents[0]] = (sequence , register)
+    
+    
+    for s in sequences.keys():
+        #~ print s
+        if s != "TARGET":
+            aligner = CoiledAlign()
+            if len(sequences[s][0])>len(sequences["TARGET"][0]):
+                a = sequences[s]
+                b = sequences["TARGET"]
+            else:
+                b = sequences[s]
+                a = sequences["TARGET"]
+           
+            aligner.alignRegisters(a[0],b[0],a[1],b[1])
+            aligners[s] = aligner
+    
+    a_regs= []
+    a_charges = []
+    a_res = []
+    
+    ## Get abs maximums for normalization
+    max_res = 0
+    max_reg = 0
+    max_charges = 0
+    for a in aligners.keys():
+        for r in aligners[a].reg_alignments["heptads"]:
+            if abs(r[0]) > max_reg:
+                max_reg = abs(r[0])
+        for r in aligners[a].reg_alignments["res_like"]:
+            if abs(r[0]) > max_res:
+                max_res = abs(r[0])
+        for r in aligners[a].reg_alignments["charges"]:
+            if abs(r[0]) > max_charges:
+                max_charges = abs(r[0])
+
+    ## Normalize
+    #~ for a in aligners.keys():
+        #~ for r in aligners[a].reg_alignments["heptads"]:
+            #~ a_regs += [(r[0]/max_reg,r[1],s)]
+        #~ for r in aligners[a].reg_alignments["res_like"]:
+            #~ a_res += [(r[0]/max_res,r[1],s)]
+        #~ for r in aligners[a].reg_alignments["charges"]:
+            #~ a_charges += [(r[0]/max_charges,r[1],s)]
+    
+    acc = []
+    for a in aligners.keys():
+        for t in aligners[a].reg_alignments['charges']:
+            #~ print t[0],t[1],max_charges,aligners[a].reg_alignments['charges'],aligners[a].reg_alignments['heptads'],aligners[a].reg_alignments['res_like']
+            acc += [(t[0]/max_charges + findInAlignment(aligners[a].reg_alignments['heptads'],t[1])/max_reg+ findInAlignment(aligners[a].reg_alignments['res_like'],t[1])/max_res,t[1],a)]
+    
+    #~ print max(acc)
+    study = CCStudy()
+    study.alignments = aligner
+    return  max(acc),study
 
 def extractPdbs(data_path):
     file = open(data_path)
@@ -278,7 +457,7 @@ def extractPdbs(data_path):
     for p in pdbs_s:
         print "cp ./pdbs/"+p+" ./pdbs_nano/"+p 
 
-basepath = '/home/victor/poly0.5/Biskit/testdata/coiledcoil/pdbs_nano'
+basepath = '/home/victor/poly0.5/Biskit/testdata/coiledcoil/pdbs'
 
 #~ extractPdbs(basepath+"/datos_new")
 #~ createCandidatesFile(basepath+"/candidates",basepath)
@@ -292,3 +471,5 @@ basepath = '/home/victor/poly0.5/Biskit/testdata/coiledcoil/pdbs_nano'
 #~ file_stats("/home/victor/poly0.5/Biskit/testdata/coiledcoil/candidates_filtered")
 validate(basepath+"/datos",basepath+"/candidates")
 #~ delFromDataFile(basepath+"/datos",basepath+"/datos_new","2FHA")
+
+#~ getBestHit2(basepath+'/datos_new')

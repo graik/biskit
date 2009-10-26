@@ -73,7 +73,7 @@ class CoiledCoil:
 
         self.scores = self.parseScores( self.db )
         
-        self.find_style = "mean"
+        self.find_style = find_style
         
         
         
@@ -163,7 +163,8 @@ class CoiledCoil:
             best = sorted(new_scores,reverse=True)[0][1]
             self.indexes = indexes[best]
         else:
-            #~ print "*"
+            #~ print "* Using mean"
+            
             best = sorted(score,reverse=True)[0][1]
         
         c = self.correlate(chain,[best])[1]

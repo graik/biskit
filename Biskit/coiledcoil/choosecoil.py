@@ -1,6 +1,6 @@
 from coiledcoil import CoiledCoil
 from coiledalign import CoiledAlign
-from coiledutils import sameRegister, getRegister
+from coiledutils import sameRegister, getRegister, findInAlignment
 import methods
 from Biskit import BiskitError
 
@@ -18,7 +18,10 @@ class CCStudy:
         @type cc: CoiledCoil
         
         """
-        self.parseData(data)
+        try:
+            self.parseData(data)
+        except:
+            print "Empty data file"
         self.mycc = cc or CoiledCoil() 
         self.mycc.find_style = "mean"
         
@@ -253,7 +256,7 @@ class CCStudy:
             keys = self.alignments[k].chain_alignments.keys()
             maxacc = (0,0)
             for t in self.alignments[k].chain_alignments[keys[0]]:
-                acc = ((t[0] + self._findInAlignment(self.alignments[k].chain_alignments[keys[1]],t[1])+ self._findInAlignment(self.alignments[k].chain_alignments[keys[2]],t[1]),t[1]))
+                acc = ((t[0] + self.findInAlignment(self.alignments[k].chain_alignments[keys[1]],t[1])+ findInAlignment(self.alignments[k].chain_alignments[keys[2]],t[1]),t[1]))
                 maxacc = max(maxacc,acc)
             maxims.append((maxacc,k))
             
@@ -271,7 +274,7 @@ class CCStudy:
                 ## Better if one iterates over the number of keys -1
                 ## In this way one can add easily more parameters for
                 ## study
-                acc = ((t[0] + self._findInAlignment(self.alignments[k].reg_alignments[keys[1]],t[1])+ self._findInAlignment(self.alignments[k].reg_alignments[keys[2]],t[1]),t[1]))
+                acc = ((t[0] + findInAlignment(self.alignments[k].reg_alignments[keys[1]],t[1])+ findInAlignment(self.alignments[k].reg_alignments[keys[2]],t[1]),t[1]))
                 maxacc = max(maxacc,acc)
             maxims.append((maxacc,k))
             
@@ -308,7 +311,7 @@ class CCStudy:
             #~ print k,"r",self.alignments[k].reg_alignments['res_like']
             
             for t in self.alignments[k].reg_alignments['charges']:
-                acc = ((t[0] + self._findInAlignment(self.alignments[k].reg_alignments['heptads'],t[1])+ self._findInAlignment(self.alignments[k].reg_alignments['res_like'],t[1]),t[1]))
+                acc = ((t[0] + findInAlignment(self.alignments[k].reg_alignments['heptads'],t[1])+ findInAlignment(self.alignments[k].reg_alignments['res_like'],t[1]),t[1]))
                 
                 try:
                     global_scores[k].append(acc)
@@ -348,25 +351,7 @@ class CCStudy:
         
         return best_chain, best_reg
     
-    def _findInAlignment(self,where=[],what = 0):
-        """
-        Finds the score value associated to one position.
-        
-        @param where: Array where we want to find what. Is an array of the
-                type returned by coiled coil alignment functions, so each element
-                is a score, position tuple.
-        @type where: list of tuples
-        @param what: Index we want to find the score.
-        @type what: integer
-        
-        @return: Score in 'what' position.
-        @type: float
-        """
-        
-        for i in range(len(where)):
-            if where[i][1] == what:
-                return where[i][0]
-        return 0
+    
         
        
 
