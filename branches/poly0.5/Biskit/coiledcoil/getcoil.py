@@ -90,27 +90,24 @@ def createCandidatesFile (filename = "", dir = ""):
     
     file.writelines(dir+"\n")
     
-    failed = []
     total = len(pdbs)
     done = 0
     no_coils = 0
+    no_secondary = 0
+    too_short = 0
+    unknown  = 0
+    ok_parsed = 0
     for pdb in pdbs:
         try:
-        #for m in range(1):
-	    print "preparing"+ dir+"/"+pdb
+        
+            print "preparing"+ dir+"/"+pdb
             
             model = PDBModel(dir+"/"+pdb)
             sc = SocketCoil(model)
-            sc.debug = True
+            sc.debug = False
             sc.run()
             
-            if (sc.result == {}):
-                no_coils += 1
-            #assert (sc.result != {})
-            
-            #~ for cc in sc.result.keys():
-                #~ print sc.result[cc]
-                
+                       
             for cc in sc.result.keys():
                 line = ""
                 if len(sc.result[cc].ranges) >0:
@@ -123,20 +120,29 @@ def createCandidatesFile (filename = "", dir = ""):
                             line += sc.result[cc].homo + " "
                             line += sc.result[cc].registers[h]
                             file.writelines(line+"\n")
-            
+                        else:
+                            too_short += 1
+            file.flush()
             del sc 
         except B.DSSP.Dssp_Error:
+            no_secondary += 1
             print "failed DSSP "
-	except NoResultsError:
-	    print "No results"
-	#else:
-	    #print "failed "
-            #failed.append(pdb)
+        except NoResultsError:
+            no_coils += 1
+            print "No results"
+        except:
+            print "Unknown exception"
+            unknown += 1
+        else:
+            print "ok"
+            ok_parsed += 1
+        
         done = done+1
+        
         if done%10 ==0 :
-            print "Parsed:",done,"Total:",total,"Failed:",len(failed),"( no coils:",no_coils,")"
+            print "\n\nTotal:",total,"Parsed:",done,(done*100/total),"% (",no_secondary+no_coils+unknown+ok_parsed,") Ok:",ok_parsed ,"Failed:",no_secondary+no_coils+unknown,"( no coils:",no_coils,"no secondary:",no_secondary,"unknown:",unknown,"too short:",too_short,")\n"
     
-    print "Parsed:",done,"Total:",total,"Failed:",len(failed),"( no coils:",no_coils,")"
+    print "\n\nParsed:",done,"Total:",total,"(",no_secondary+no_coils+unknown+ok_parsed,") Failed:",no_secondary+no_coils+unknown,"( no coils:",no_coils,"no secondary:",no_secondary,"unknown:",unknown,"too short:",too_short,")\n"
        
     file.close()
 
@@ -257,7 +263,10 @@ def dataFileCreation( data_file = "",candidates_file = ""  ,target_seq = "",targ
                         new_line += " "+methods.getRegisterByMethod(sequence,k)
                 elif method != 'Any':
                     new_line +=  " "+methods.getRegisterByMethod(sequence,method) 
-            
+                try:
+                    new_line += " socket_register:"+contents[9]
+                except:
+                    pass #maybe contents[9] doesn't exist
             file.writelines(new_line+"\n")
         total_done = total_done +1
     new_line = "TARGET seq:"+target_seq+" "

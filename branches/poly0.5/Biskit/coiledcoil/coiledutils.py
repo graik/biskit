@@ -240,6 +240,26 @@ def genRegularRegisters(to_this=100):
         local_reg +=register
     return registers
 
+
+def findInAlignment(where=[],what = 0):
+    """
+    Finds the score value associated to one position.
+    
+    @param where: Array where we want to find what. Is an array of the
+            type returned by coiled coil alignment functions, so each element
+            is a score, position tuple.
+    @type where: list of tuples
+    @param what: Index we want to find the score.
+    @type what: integer
+    
+    @return: Score in 'what' position.
+    @type: float
+    """
+    print where
+    for i in range(len(where)):
+        if where[i][1] == what:
+            return where[i][0]
+    return 0.0
 ##############
 ## Test
 ##############

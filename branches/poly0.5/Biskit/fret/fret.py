@@ -214,10 +214,10 @@ class Test(BT.BiskitTest):
     def test_R0(self):
         """R0 calculation test (mCerulean- mCitrine)"""
         
-        self.fret = FRET( 3.5, 959732990869504)
+        self.fret = FRET(  3.5,959732990869504)
         # k2 is 2/3
         self.assertEqual(self.fret.k2,2./3.)
-        
+        print self.fret.calcR0()
         self.assertAlmostEqual(self.fret.calcR0(),62.9320757163)
         
         # k2 must be overwritten

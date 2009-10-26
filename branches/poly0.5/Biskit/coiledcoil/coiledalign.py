@@ -174,6 +174,7 @@ class CoiledAlign:
         @type: dictionary
         
         """
+        
         ch_a=a;ch_b=b;bra=reg_a;brb=reg_b
         
         start_a = reg_a.find("a")

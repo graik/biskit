@@ -5,7 +5,8 @@ from getcoil import dataFileCreation
 from choosecoil import CCStudy
 from Biskit.molUtils import allAA,single2longAA
 import os
-
+import paircoil as PC
+from coiledcoil import CoiledCoil
 
 """ 
 Collection of functions for validation and table generation.
@@ -129,6 +130,39 @@ def splitInFiles(path,oligo = '2',basepath=".",files = ["homodimeric_parallel_ca
 
 
 
+def gen_table2(path , exclusion_list=[]):
+   
+    file = open(path)
+    lineas = file.readlines()
+    file.close()
+    lineas = [ l.strip() for l in lineas ]
+    
+    table ={}
+    for aa in allAA():
+        table[aa] = {'a':0,'b':0,'c':0,'d':0,'e':0,'f':0,'g':0}
+    
+    
+    all_heptads = []
+    regularRegisters = genRegularRegisters(100)
+    for l in lineas[1:]:
+        contents = l.split()
+        
+        if not contents[0]+":"+contents[3] in exclusion_list:
+            register = contents[9]
+            
+            if not register in regularRegisters:
+                heptads = getAllHeptads(contents[7],register)
+                for h in heptads:
+                    all_heptads.append(h)
+                
+       
+    reg = "abcdefg"
+    for h in all_heptads:
+        for i in range(7):
+            table[h[i]][reg[i]] +=1
+    
+    return table
+
 def gen_table(path , exclusion_list=[]):
     """
     Generates a probability table using candidates in one file.
@@ -182,7 +216,6 @@ def gen_table(path , exclusion_list=[]):
             table[h[i]][reg[i]] +=1
     
     return table
-
 
 
 
@@ -372,32 +405,32 @@ def validation(path,tries, targettype ,tablename,methods):
     """
     file_stats(path)
     t,v = generateValidationGroups(path,0.5)
-    print len(t), len(v)
-    ## 30% used for validation
-    print path+"_val"
+    print "Training group:",len(t),"items Validation group:",len(v),"items"    ## 50% used for validation
+    
     writeValidationCandidates(path,path+"_val",t)
     file_stats(path+"_val")
+    dataFileCreation(path+'_dat',path+"_val",target_seq = "LLLLLLLLLLLL",target_type =targettype, method = "All", use_big = 0)
+    
     writeValidationCandidates(path,path+"_train",v)
     file_stats(path+"_train")
-    ## 70% used for picking 'training' groups
+    ## 50% used for picking 'training' groups
     results = []
     
     ftimes = 0
     
     for i in range(0,tries):
         print "ITN:",i
-        ## from which 50% is used to generate the table 
+        ## from which 40% is used to generate the table 
         try:        
             t,v = generateValidationGroups(path+'_train',0.6)
             writeValidationCandidates(path+'_train',path+"_can",v)
             file_stats(path+"_can")
             writeTable(normalizeTable(gen_table(path+'_can',v)),path+"_table_"+str(i))
             os.system('cp '+path+"_table_"+str(i)+' '+T.dataRoot()+'/coiledcoil/'+tablename)
-            dataFileCreation(path+'_dat',path+"_val",target_seq = "LLLLLLLLLLLL",target_type =targettype, method = "All", use_big = 0)
             study = CCStudy(data = path+'_dat')
             s,a = study.doStudy(True)
             results.append(s)
-        
+            print s
         except:
             ftimes = ftimes+1
     
@@ -408,6 +441,129 @@ def validation(path,tries, targettype ,tablename,methods):
         for m in methods:
             print m,"%.4f"%(r[m][0]),"(%d/%d)"%(r[m][1],r[m][2]),
         i=i+1
+        
+        
+def validation2(path,tries, targettype ,tablename, a_weird_and_not_very_useful_list):
+    """
+    Does the validation process for the candidates file 'path'.
+    It makes 'tries' tables from randomly picked groups.
+    
+    It opens the candidates file 'path' and does the study "tries" times,
+    generating each time a new table.
+    """
+    file_stats(path)
+    t,v = generateValidationGroups(path,0.5)
+    print "Training group:",len(t),"items Validation group:",len(v),"items"    ## 50% used for validation
+    
+    writeValidationCandidates(path,path+"_val",t)
+    file_stats(path+"_val")
+    
+    writeValidationCandidates(path,path+"_train",v)
+    file_stats(path+"_train")
+    ## 50% used for picking 'training' groups
+    results = []
+    
+    ftimes = 0
+    regularRegisters = genRegularRegisters(200)
+    paircoil_regs = {}
+    
+    for i in range(0,tries):
+        print "ITN:",i
+        ## from which 70% is used to generate the table 
+        try:        
+            t,v = generateValidationGroups(path+'_train',0.3)
+            writeValidationCandidates(path+'_train',path+"_can",v)
+            file_stats(path+"_can")
+            writeTable(normalizeTable(gen_table(path+'_can',v)),path+"_table_"+str(i))
+            os.system('cp '+path+"_table_"+str(i)+' '+T.dataRoot()+'/coiledcoil/'+tablename)
+            
+            file = open(path+"_val")
+            lineas = file.readlines()
+            file.close()
+            lineas = [ l.strip() for l in lineas ]
+            sequences = {}
+            
+            cc = CoiledCoil(T.dataRoot()+'/coiledcoil/'+tablename)
+            j = 0
+            for l in lineas[1:]:
+                #~ print j
+                contents = l.split()
+                sequence = contents[6]
+                if contents[9] in regularRegisters:
+                    if contents[6] in sequences.keys() and contents[9] != sequences[contents[6]][0]:
+                        #~ print "Repeated sequence, different register"
+                        sequence = contents[0] +"_"+ contents[4]
+                    #~ elif contents[6] in sequences.keys() :
+                        #~ print "Repeated sequence"
+                    sequences[sequence] = []
+                    sequences[sequence].append(contents[9])
+                    
+                    
+                    sequences[sequence].append(getRegister(cc.findHeptads(contents[6])['best'],contents[6]))
+                    
+                    if not sequence in paircoil_regs.keys():
+                        if len(contents[6]) >= 21:
+                            pc = PC.Paircoil(contents[6])
+                            pc.run()
+                            sequences[sequence].append(pc.result.register)
+                            paircoil_regs[sequence] = sequences[sequence][2]
+                        #~ else:
+                            #~ print "Small sequence!!"
+                    else:
+                        sequences[sequence].append(paircoil_regs[sequence])
+                #~ else:
+                    #~ print "Not regular", contents[9],len(contents[9])
+                j +=1
+        except:
+            ftimes = ftimes+1
+        
+        table = 0
+        total_table = 0
+        paircoil = 0
+        total_paircoil = 0
+        
+        for s in sequences.keys():
+            if sequences[s][0] == sequences[s][1]:
+                table = table + 1
+            total_table += 1
+            if len(sequences[s]) == 3:
+                #~ print sequences[s]
+                #~ print len(sequences[s])
+                if sequences[s][0] == sequences[s][2]:
+                    paircoil += 1
+                total_paircoil += 1
+        results.append({tablename:(float(table),total_table,float(table)/total_table),"Paircoil":(float(paircoil),total_paircoil,float(paircoil)/total_paircoil)})
+    
+    print "RESULTADOS"
+    print "Paircoil:",results[0]["Paircoil"][2],results[0]["Paircoil"][1]
+    i=0
+    for t in results:
+        print i,"\t", t[tablename][2],"\t",t[tablename][1]
+        i = i+1
+        
+def regularHeptadsPercent(path):
+    file = open(path)
+    lineas = file.readlines()
+    file.close()
+    lineas = [ l.strip() for l in lineas ]
+        
+    sequences = []
+    
+    for l in lineas[1:]:
+        contents = l.split()
+        sequences.append((contents[6],contents[9]))
+        
+    
+    regular = 0
+    total = 0
+    regularRegisters = genRegularRegisters(200)
+    
+    for i in range(len(sequences)):
+        if sequences[i][1] in regularRegisters:
+            regular = regular + 1
+        total = total+1
+    
+    print total, regular
 
 
 import Biskit.test as BT
@@ -424,11 +580,22 @@ class Test(BT.BiskitTest):
     def test_and_try(self): 
         """ Database cleaning """
         print        
-        file_stats(T.dataRoot()+'/coiledcoil/coils.db')   
-        errorFilter(T.dataRoot()+'/coiledcoil/coils.db')
-        incompleteHeptadFilter( T.dataRoot()+'/coiledcoil/coils.db',T.dataRoot()+'/coiledcoil/coils_comphep.db')
+        #~ file_stats(T.dataRoot()+'/coiledcoil/coils.db')   
+        #~ errorFilter(T.dataRoot()+'/coiledcoil/coils.db')
+        #~ incompleteHeptadFilter( T.dataRoot()+'/coiledcoil/coils.db',T.dataRoot()+'/coiledcoil/coils_comphep.db')
         
+        #~ file_stats(T.dataRoot()+'/coiledcoil/coils_comphep.db') 
+        
+        
+        #~ --------------------
+        file_stats(T.dataRoot()+'/coiledcoil/database.db')   
+        errorFilter(T.dataRoot()+'/coiledcoil/database.db') 
+        regularHeptadsPercent(T.dataRoot()+'/coiledcoil/database.db')
+        incompleteHeptadFilter( T.dataRoot()+'/coiledcoil/database.db',T.dataRoot()+'/coiledcoil/coils_comphep.db')
+        print "REGULAR REGISTERS"
+        regularHeptadsPercent(T.dataRoot()+'/coiledcoil/coils_comphep.db')
         file_stats(T.dataRoot()+'/coiledcoil/coils_comphep.db') 
+        
         
         lengthFilter(T.dataRoot()+'/coiledcoil/coils_comphep.db',T.dataRoot()+'/coiledcoil/coils_14.db',14)
         lengthFilter(T.dataRoot()+'/coiledcoil/coils_comphep.db',T.dataRoot()+'/coiledcoil/coils_20.db',20)
@@ -445,39 +612,68 @@ class Test(BT.BiskitTest):
         
         tries = 100
         
+        #~ try:
+            #~ validation(T.testRoot()+'/coiledcoil/hompar14',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
+        validation2(T.testRoot()+'/coiledcoil/hompar14',tries,("homo","parallel",2),'homodimeric_parallel',[])
+        #~ except:
+            #~ print "FAILED HOMPAR14"
         try:
-            validation(T.testRoot()+'/coiledcoil/hompar14',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
-        except:
-            print "FAILED HOMPAR14"
-        try:
-            validation(T.testRoot()+'/coiledcoil/homantipar14',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HomoAntipar'])
+            #~ validation(T.testRoot()+'/coiledcoil/homantipar14',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HomoAntipar'])
+            validation2(T.testRoot()+'/coiledcoil/homantipar14',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HomoAntipar'])
         except:
             print "FAILED HOMAPAR14"
         try:
-            validation(T.testRoot()+'/coiledcoil/hetpar14',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SPar','AllTypes','HeteroPar'])
+            #~ validation(T.testRoot()+'/coiledcoil/hetpar14',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SPar','AllTypes','HeteroPar'])
+            validation2(T.testRoot()+'/coiledcoil/hetpar14',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SPar','AllTypes','HeteroPar'])
         except:
             print "FAILED HETPAR14"
         try:
-            validation(T.testRoot()+'/coiledcoil/hetantipar14',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
+            #~ validation(T.testRoot()+'/coiledcoil/hetantipar14',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
+            validation2(T.testRoot()+'/coiledcoil/hetantipar14',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',[])
         except:
             print "FAILED HETAPAR14"
         
         
         try:    
-            validation(T.testRoot()+'/coiledcoil/hompar28',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
+            #~ validation(T.testRoot()+'/coiledcoil/hompar28',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
+            validation2(T.testRoot()+'/coiledcoil/hompar20',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
         except:
-            print "FAILED HOMPAR28"
+            print "FAILED HOMPAR20"
+        try:    
+            #~ validation(T.testRoot()+'/coiledcoil/homantipar28',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HomoAntipar'])
+            validation2(T.testRoot()+'/coiledcoil/homantipar20',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HomoAntipar'])
+        except:
+            print "FAILED HOMAPAR20"
+        try:    
+            #~ validation(T.testRoot()+'/coiledcoil/hetpar28',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SPar','AllTypes','HeteroPar'])
+            validation2(T.testRoot()+'/coiledcoil/hetpar20',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SPar','AllTypes','HeteroPar'])
+        except:
+            print "FAILED HETPAR20"
+        try:    
+            #~ validation(T.testRoot()+'/coiledcoil/hetantipar28',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
+            validation2(T.testRoot()+'/coiledcoil/hetantipar20',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
+        except:
+            print "FAILED HETAPAR20"
+        
         
         try:    
-            validation(T.testRoot()+'/coiledcoil/homantipar28',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HomoAntipar'])
+            #~ validation(T.testRoot()+'/coiledcoil/hompar28',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
+            validation2(T.testRoot()+'/coiledcoil/hompar28',tries,("homo","parallel",2),'homodimeric_parallel',['Pair','Parry','SPar','AllTypes','HomoPar'])
+        except:
+            print "FAILED HOMPAR28"
+        try:    
+            #~ validation(T.testRoot()+'/coiledcoil/homantipar28',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HomoAntipar'])
+            validation2(T.testRoot()+'/coiledcoil/homantipar28',tries,("homo","antiparallel",2),'homodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HomoAntipar'])
         except:
             print "FAILED HOMAPAR28"
         try:    
-            validation(T.testRoot()+'/coiledcoil/hetpar28',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SPar','AllTypes','HeteroPar'])
+            #~ validation(T.testRoot()+'/coiledcoil/hetpar28',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SPar','AllTypes','HeteroPar'])
+            validation2(T.testRoot()+'/coiledcoil/hetpar28',tries,("hetero","parallel",2),'heterodimeric_parallel',['Pair','Parry','SPar','AllTypes','HeteroPar'])
         except:
             print "FAILED HETPAR28"
         try:    
-            validation(T.testRoot()+'/coiledcoil/hetantipar28',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
+            #~ validation(T.testRoot()+'/coiledcoil/hetantipar28',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
+            validation2(T.testRoot()+'/coiledcoil/hetantipar28',tries,("hetero","antiparallel",2),'heterodimeric_antiparallel',['Pair','Parry','SAPar','AllTypes','HeteroAntipar'])
         except:
             print "FAILED HETAPAR28"
         

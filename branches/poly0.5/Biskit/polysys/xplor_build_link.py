@@ -41,7 +41,7 @@ seq2 = single2longAA(seq)
 psfGen.seqToPSF(seq2, segName='LINK', seqType='protein' )
 protocol.genExtendedStructure()
 #~ protocol.fixupCovalentGeom(maxIters=100,useVDW=1)
-#pdbTool.PDBTool("01_extended_link.pdb").write()
+pdbTool.PDBTool("01_extended_link.pdb").write()
 
 from protocol import fixupCovalentGeom
 fixupCovalentGeom('all')
@@ -49,4 +49,12 @@ fixupCovalentGeom('all')
 from ivm import IVM
 integrator = IVM()
 from protocol import torsionTopology
-torsionTopology(integrator,oTensors=listOfVarTensors)
+torsionTopology(integrator)
+
+import xplorSimulation
+
+sim = xplorSimulation.XplorSimulation()
+from monteCarlo import *
+
+#~ mc = MC(sim)
+randomizeTorsions()
