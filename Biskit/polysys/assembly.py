@@ -22,7 +22,13 @@ class Assembly :
             self.blocks.remove(f)
         else:
             self.blocks.remove(Block(f))
-        
+    
+    def getBlock(self,name):
+        for b in self.blocks:
+            if b.name == name:
+                return b
+        return None
+    
     def addConstraint(self,c):
         self.constraints.append(c)
     
@@ -214,11 +220,15 @@ class BasicEngine( Engine):
             chains[i] = chr(letters[i])
         # Link
         i = 0
+        print crow
         for crow in o_ctree:
             print "\t - Creating chain "+ chains[i]+ "...",
             a = crow[0].a.run()
             for c in crow:
+                print c
+                print c.b
                 a = xplortools.joinProteins(a,c.b.run())
+                #~ print "joining a with b", c 
             a['chain_id'] = a.lenAtoms() * [chains[i]]
             a.writePdb(chains[i]+".pdb")
             i = i+1

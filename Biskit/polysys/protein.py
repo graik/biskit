@@ -22,14 +22,39 @@ class UndefProtein (BlockEntity):
 
     def setSequence(self,sequence):
         self.sequence = sequence
-
-    def run (self):
+    
+    def randomizeTorsionAngles(self):
+        if self.structure!=None:
+            self.structure= xplortools.randomizeTorsionAngles(self.structure)
+    
+    def run (self,maxlen = 30):
         BlockEntity.run(self)
         
-        p_a = xtender.Xtender(self.sequence).run()
+        index = 0
+        long = len(self.sequence)
+        total = None
+        
+        while long > maxlen :
+            print self.sequence[maxlen*index:maxlen*(index+1)],len(self.sequence[maxlen*index:maxlen*(index+1)])
+            link = xtender.Xtender(self.sequence[maxlen*index:maxlen*(index+1)]).run()
+            if total == None:
+                total = link
+            else:
+                total = xplortools.joinProteins(total,link)
+            index += 1
+            long = long - maxlen
+       
+        print self.sequence[maxlen*index:len(self.sequence)],len(self.sequence[maxlen*index:len(self.sequence)])
+        link = xtender.Xtender(self.sequence[maxlen*index:len(self.sequence)]).run()
+        
+        if index == 0:
+            total = link
+        else:
+            total = xplortools.joinProteins(total,link)
+        
         
         ## TODO: delete terminals etc 
-        self.structure = xplortools.cleanPdb(p_a)
+        self.structure = xplortools.cleanPdb(total)
         return self.structure
 
 
@@ -118,7 +143,7 @@ class Protein (PDBModel, BlockEntity):
                 
                 if end<len:
                     #create distal undef seq
-                    e2 = UndefProtein(self.name+"_chain_end_"+self.__prot_chains[chain_number],self.__prot_chains_sequences[chain_number][end:len(self.__prot_chains_sequences[chain_number])])
+                    e2 = UndefProtein(self.name+"_chain_end_"+self.__prot_chains[chain_number],self.__prot_chains_sequences[chain_number][end-1:len(self.__prot_chains_sequences[chain_number])])
                     bend = Block(self.name+"_undef_chain_end_"+self.__prot_chains[chain_number],entity = e2)
                     bend.addInterval(Interval(end,len(self.__prot_chains_sequences[chain_number])))
                     a.blocks.append(bend)
@@ -198,7 +223,7 @@ class Protein (PDBModel, BlockEntity):
         return BlockEntity.__str__(self)+PDBModel.__str__(self)
 
     def run(self):
-        return None
+        return self
 
     def getStructData(self,atoms):
         return self.take(atoms)
@@ -218,23 +243,40 @@ class Test(BT.BiskitTest):
     def cleanUp( self ):
         pass
 
-    def test_Creation(self):
-        """Creation test cases"""
-        p = Protein ("MyProt",T.testRoot() + "/polysys/2Q57.pdb")
-        a = Assembly ("myAssembly")
-        a.addBlock(Block("myTestProt",entity = p))
-        a.run()
-        if self.local:
-            print a
-        self.assertEqual(len(a.blocks),4)
-        h = p.getStructData([5,6])
+    #~ def test_Creation(self):
+        #~ """Creation test cases"""
+        #~ p = Protein ("MyProt",T.testRoot() + "/polysys/2Q57.pdb")
+        #~ a = Assembly ("myAssembly")
+        #~ a.addBlock(Block("myTestProt",entity = p))
+        #~ a.run()
+        #~ if self.local:
+            #~ print a
+        #~ self.assertEqual(len(a.blocks),4)
+        #~ h = p.getStructData([5,6])
 
-        if self.local:
-            h.writePdb("lel.pdb")
+        #~ if self.local:
+            #~ h.writePdb("lel.pdb")
 
     def test_UndefCreation(self):
         """Undef. protein creation test"""
-
-
+        #~ seq = "MMETPTDNIVSPFHNFGSSTQYSGTLSRTPNQIIELEKPSTSPFHNFGSSTQY"
+        #~ print
+        #~ print seq, len(seq)
+        #~ u = UndefProtein("undef",seq)
+        #~ link = u.run()
+        #~ print u.structure.sequence(),len(u.structure.sequence())
+        #~ link.writePdb("test_link.pdb")
+        #~ link = PDBModel("test_link.pdb")
+        #~ link2 = xplortools.randomizeTorsionAngles(link)
+        #~ link2.writePdb("myrandomization.pdb")
+        
+        #~ loop = UndefProtein("loop","RRRP")
+        #~ link = loop.run()
+        #~ link.writePdb("test_link.pdb")
+        
+        #~ end = UndefProtein("end","IKNFSKDVGNGRHETSTFLGLINPNKVVEVGNVHDNDTVIIRRGFTLNSGECSRQSTVDSI")
+        #~ end.run().writePdb("start2.pdb")
+        xplortools.joinProteins(PDBModel("out_min.bk.pdb"),PDBModel("start2.pdb")).writePdb("start.pdb")
+        
 if __name__ == '__main__':
     BT.localTest()

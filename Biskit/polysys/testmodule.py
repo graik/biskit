@@ -76,7 +76,7 @@ pol3 = Assembly("BasicEngineTest")
 
 p1 = Protein("GFP1_en",'1HUY.pdb')
 p2 = Protein("GFP2_en",'2AWT.pdb')
-p3 = Protein("LeuZip_en",'1JUN.pdb')
+#~ p3 = Protein("LeuZip_en",'1JUN.pdb')
 
 
 #~ undef1 = UndefProtein("first","ASFEASSDS")
@@ -90,9 +90,9 @@ p3 = Protein("LeuZip_en",'1JUN.pdb')
 
 pol3.addBlock(Block("GFP1_b",entity=p1))
 pol3.addBlock(Block("GFP2_b",entity=p2))
-pol3.addBlock(Block("LeuZip_b",entity=p3))
+#~ pol3.addBlock(Block("LeuZip_b",entity=p3))
 
-pol3.addConstraint(Constraint("linked",p1,p3))
+pol3.addConstraint(Constraint("linked",pol3.getBlock("GFP1_en_undef_chain_end_A").entity,p2))
 #~ pol3.addConstraint(Constraint("linked",p3,p1))
 
 pol3.addEngine(BasicEngine())
