@@ -175,8 +175,8 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
     final.writePdb("initial.pdb")
     
     
-    #~ os.system('vmd -dispdev text -e vmdscript')
-    #~ os.system('namd2 namdscript')
+    os.system('vmd -dispdev text -e vmdscript')
+    os.system('namd2 namdscript')
     
     
     #~ final = PDBModel('in_min.pdb')
@@ -191,8 +191,8 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
         #~ os.system('namd2 namdscript')
         #~ os.system('cp out_min.coor in_min.pdb')
     
-    #~ os.system('cp out_min.coor final.pdb')
-
+    os.system('cp out_min.coor final.pdb')
+    return cleanPdb(PDBModel('final.pdb'))
 
 def joinProteins(a = None, b = None):
     """
@@ -222,14 +222,11 @@ def joinProteins(a = None, b = None):
     
     a.writePdb("initial.pdb")
     os.system('vmd -dispdev text -e vmdscript')
-    a = PDBModel("in_min.pdb")
+    os.system('namd2 namdscript')
+    os.system('cp out_min.coor out_min.pdb')
+    a = PDBModel("out_min.pdb")
     a_end = a.xyz[N.where( a.maskFrom( 'name', ['OT1'] ))[0][0]] 
-    a_start = a.xyz[N.where( a.maskFrom( 'name', ['HT2'] ))[0][0]] 
     a = cleanPdb(a)
-    
-    
-    
-    
     
     
     a_last_C = a.xyz[N.where(a.maskFrom( 'name', ['C'] ))[0][-1]]
@@ -266,53 +263,23 @@ def joinProteins(a = None, b = None):
     final['serial_number'] = range( len(final) )
     final.atoms['segment_id'] = ["p1"]*len(final)
     final.report()
-    final =  cleanPdb(final)
-    
-    
-    tata = a.lenResidues()
-    tatb = b.lenResidues()
-    
-    free_residues = range(int(tata*0.8), int(tata+(tatb*0.2)))
-        
-  
     final.writePdb("initial.pdb")
-    
-    
-    #~ os.system('vmd -dispdev text -e vmdscript')
-    
-    #~ final = PDBModel('in_min.pdb')
-    #~ for i in range(len(final)):
-        #~ if final.atoms['residue_number'][i] in free_residues:
-            #~ final.atoms['temperature_factor'][i] = 0.0
-        #~ else:
-            #~ final.atoms['temperature_factor'][i] = 1.0
-        
-    #~ final.writePdb("in_min.pdb")
-    
-    forces = final.clone()
-    for i in range(len(final)):
-        forces.atoms['occupancy'][i] = 100.0
-        if not forces.atoms['residue_number'][i] in free_residues:
-            if forces.atoms['residue_number'][i]<tata:
-                forces.xyz[i] = N.array([1000.,1000.,1000.])
-            else:
-                forces.xyz[i] = N.array([-1000.,-1000.,-1000.])
-        else:
-            forces.xyz[i] = N.array([0.,0.,0.])
-    forces.writePdb('in_min_forces.pdb')
-    
+    os.system('vmd -dispdev text -e vmdscript')
     os.system('namd2 namdscript')
-    
-    
-    
-    
-    
-    #~ for i in range(0,1):
-        #~ os.system('namd2 namdscript')
-        #~ os.system('cp out_min.coor in_min.pdb')
-    
     os.system('cp out_min.coor final.pdb')
+    
     return cleanPdb(PDBModel('final.pdb'))
+    
+    
+def randomizeTorsionAngles (model):
+        model.writePdb("to_randomize.pdb")
+        os.system("xplor -py anglerandomization.xp.py")
+        os.system("cp randomized.pdb initial.pdb")
+        os.system('vmd -dispdev text -e vmdscript')
+        os.system('namd2 namdscript')
+        os.system('cp out_min.coor out_min.pdb')
+        
+        return PDBModel("out_min.pdb")
 
 if __name__ == '__main__':    
     #~ linkProteins(a = PDBModel('2AWT') , b= PDBModel('2CQJ'),distance = 70)

@@ -32,7 +32,7 @@ class BlockEntity:
         pass
     
     def run(self):
-        pass
+        return self.structure
         
     def getStructData(self,atoms):
         pass
