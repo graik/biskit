@@ -208,7 +208,7 @@ class FRETPair (object) :
                     
                     return
         
-        self.ehandler.fatal( "This pair isn't defined in database.")
+        self.ehandler.fatal( "This pair isn't defined in database." +self._acceptor.name+" " +self._donor.name)
                 
         
 

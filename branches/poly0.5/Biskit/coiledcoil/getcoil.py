@@ -331,7 +331,7 @@ def getBestHit ( datafile ="",method = "",sequences=[]):
     s,a = study.doStudy(True)
     print s
     best= study.chooseBestMean()
-    #~ print best
+    print best
     return study,best
     
 def doHomologyModelling ( id = "" ,candidates_file = "",  sequences = [],heptads_p = [],study = None):
@@ -414,6 +414,7 @@ def doHomologyModelling ( id = "" ,candidates_file = "",  sequences = [],heptads
     
     
     ## There must be the same number of coiled coils and sequences
+    print len(coils),len(sequences)
     assert(len(coils) == len(sequences)),"You must provide as sequences as there are in the template coiled coil."
     
     ## Get pairs coil sequence / target sequence

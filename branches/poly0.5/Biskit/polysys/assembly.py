@@ -1,7 +1,7 @@
 #~ from polyfret import *
 #~ import ResiduePicker
 
-import xplortools
+from xplortools import joinProteins
 from constraint import *
 
 class Assembly :
@@ -225,9 +225,9 @@ class BasicEngine( Engine):
             print "\t - Creating chain "+ chains[i]+ "...",
             a = crow[0].a.run()
             for c in crow:
-                print c
-                print c.b
-                a = xplortools.joinProteins(a,c.b.run())
+                #~ print c
+                #~ print c.b
+                a = joinProteins(a,c.b.run())
                 #~ print "joining a with b", c 
             a['chain_id'] = a.lenAtoms() * [chains[i]]
             a.writePdb(chains[i]+".pdb")
