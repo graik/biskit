@@ -6,7 +6,6 @@ from Biskit.molUtils import single2longAA
 from Biskit.PDBModel import PDBModel 
 import os
 from xtender import Xtender 
-
 import Biskit.tools as T
 import Biskit.molUtils as MU
 from Biskit import PDBCleaner
@@ -23,7 +22,35 @@ def cleanPdb(m1):
     m1 = PDBCleaner( m1 ).process()
     
     return m1
+
+def createLink(sequence,maxlen):
+    index = 0
+    long = len(sequence)
+    total = None
     
+    while long > maxlen :
+        print sequence[maxlen*index:maxlen*(index+1)],len(sequence[maxlen*index:maxlen*(index+1)])
+        link = Xtender(sequence[maxlen*index:maxlen*(index+1)]).run()
+        if total == None:
+            total = link
+        else:
+            total = joinProteins(total,link)
+        index += 1
+        long = long - maxlen
+   
+    print sequence[maxlen*index:len(sequence)],len(sequence[maxlen*index:len(sequence)])
+    link = Xtender(sequence[maxlen*index:len(sequence)]).run()
+    
+    if index == 0:
+        total = link
+    else:
+        total = joinProteins(total,link)
+    
+        
+        ## TODO: delete terminals etc 
+    return cleanPdb(total)
+
+
 def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],distance = 0):
     """
     Links two proteins with a flexible peptide of repeating pattern linkseq.
@@ -70,16 +97,23 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
     ## - Get contour from distance
     
     wlc = WormLikeChainModel()
-    p = 4.; x = distance 
+    #http://www.scfbio-iitd.res.in/software/proteomics/perlen.jsp
+    p = 40.; x = distance 
         
     wlc.p = p;wlc.x=x;
-    wlc.T = 298.;wlc.F = 10e-12
+    wlc.T = 298.
+    k = 0.138 #pN * A
+    Ec = (4.0*40.) / (k * 298. )
+    wlc.F = Ec
 
-    linkdist = wlc.getContourLengthFromX()
+    linkdist = max(wlc.getContourLengthFromX2())
+    
     
     print linkdist
     
-    linkdist = 700 ## in A 
+    #~ return
+    
+    #~ linkdist = 700 ## in A 
     
     ## - Get number of residues (3.5A for N to N)
     nres = int( linkdist / 3.5 )
@@ -91,13 +125,14 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
     for i in range(nres):
         linkseq += link_seq[i%len(link_seq)]
         
-    #~ open("01_sequence.txt","w").write(a.sequence()+linkseq+b.sequence())
-    #~ open("01_link_sequence.txt","w").write(linkseq)
-    #~ os.system("xplor -py xplor_build_link.py")
-    #~ link = PDBModel("01_extended_link.pdb")
     
-    link = Xtender(linkseq).run()
-
+    #~ link = Xtender(linkseq).run()
+    link = UndefProtein("uprot",linkseq).run().writePdb("initial.pdb")
+    os.system('vmd -dispdev text -e vmdscript')
+    os.system('namd2 namdscript')
+    os.system('cp out_min.coor out_min.pdb')
+    link = PDBModel("out_min.pdb")
+    
     ## Orientation
     link.xyz -= link.centerOfMass()
     link_end = link.xyz[N.where( link.maskFrom( 'name', ['OT1'] ))[0][0]] 
@@ -177,20 +212,9 @@ def linkProteins(a = None, b = None,link_seq = "GSGSGSGSA",direction = [0,0,1],d
     
     os.system('vmd -dispdev text -e vmdscript')
     os.system('namd2 namdscript')
+  
     
-    
-    #~ final = PDBModel('in_min.pdb')
-    #~ for i in range(len(final)):
-        #~ if final.atoms['residue_number'][i] in fixed:
-            #~ final.atoms['temperature_factor'][i] = 1.0
-        #~ else:
-            #~ final.atoms['temperature_factor'][i] = 0.0
-    #~ final.writePdb("in_min.pdb") 
-    
-    #~ for i in range(0,3):
-        #~ os.system('namd2 namdscript')
-        #~ os.system('cp out_min.coor in_min.pdb')
-    
+   
     os.system('cp out_min.coor final.pdb')
     return cleanPdb(PDBModel('final.pdb'))
 
@@ -264,24 +288,33 @@ def joinProteins(a = None, b = None):
     final.atoms['segment_id'] = ["p1"]*len(final)
     final.report()
     final.writePdb("initial.pdb")
-    os.system('vmd -dispdev text -e vmdscript')
-    os.system('namd2 namdscript')
-    os.system('cp out_min.coor final.pdb')
+    #~ os.system('vmd -dispdev text -e vmdscript')
+    #~ os.system('namd2 namdscript > out_namd')
+    #~ os.system('cp out_min.coor final.pdb')
     
-    return cleanPdb(PDBModel('final.pdb'))
+    #~ return cleanPdb(PDBModel('final.pdb'))
+    return cleanPdb(PDBModel('initial.pdb'))
     
     
 def randomizeTorsionAngles (model):
+        open("sequence_random","w").write(model.sequence())
         model.writePdb("to_randomize.pdb")
         os.system("xplor -py anglerandomization.xp.py")
         os.system("cp randomized.pdb initial.pdb")
-        os.system('vmd -dispdev text -e vmdscript')
-        os.system('namd2 namdscript')
-        os.system('cp out_min.coor out_min.pdb')
+        os.system("rm randomized.pdb")
+        #~ os.system('vmd -dispdev text -e vmdscript')
+        #~ os.system('namd2 namdscript')
+        #~ os.system('cp out_min.coor out_min.pdb')
         
-        return PDBModel("out_min.pdb")
+        
+        return PDBModel("initial.pdb")
+        #~ return PDBModel("out_min.pdb")
+        
 
 if __name__ == '__main__':    
+    seq = "MMETPTDNIVSPFHNFGSSTQYSGTLSRTPNQIIELEKPSTSPFHNFGSSTQY"
+    createLink(seq,22).writePdb("yeha.pdb")
+    exit()
     #~ linkProteins(a = PDBModel('2AWT') , b= PDBModel('2CQJ'),distance = 70)
     #~ joinProteins(a = PDBModel('2AWT.pdb') , b= PDBModel('2CQJ.pdb'))
     #~ link = PDBModel()
@@ -305,10 +338,10 @@ if __name__ == '__main__':
     
     leu_A = p.takeChains([0])
     leu_B = p.takeChains([1])
-    #~ linkProteins(a = PDBModel('1HUY.pdb') , b= leu_A, distance = 700)
-    #~ os.system("cp initial.pdb A.pdb")
-    #~ linkProteins(a = PDBModel('1HUY.pdb') , b= leu_B, distance = 700)
-    #~ os.system("cp initial.pdb B.pdb")
+    linkProteins(a = PDBModel('1HUY.pdb') , b= leu_A, distance = 200)
+    os.system("cp initial.pdb A.pdb")
+    linkProteins(a = PDBModel('1HUY.pdb') , b= leu_B, distance = 200)
+    os.system("cp initial.pdb B.pdb")
     a = PDBModel('A.pdb')
     b = PDBModel('B.pdb')
     a_2 = a.takeChains([2])

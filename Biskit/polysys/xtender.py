@@ -44,7 +44,10 @@ import psfGen, protocol, pdbTool
 import protocol
 
 simWorld.setRandomSeed(5521)
-
+#~ protocol.topology['protein'] = '/home/victor/xplor-nih-2.23/toppar/topallh6x.pro' 
+#~ protocol.topology['protein'] = '/home/victor/xplor-nih-2.23/toppar/charmm22/topallh22x.pro' 
+#~ protocol.parameters['protein'] = '/home/victor/xplor-nih-2.23/toppar/paramallh3x.pro'
+#~ protocol.parameters['protein'] = '/home/victor/xplor-nih-2.23/toppar/charmm22/parallh22x.lip'
 protocol.initTopology(('protein'))
 protocol.initParams(('protein'))
 
@@ -52,6 +55,8 @@ seq = "%(seq_long)s"
 psfGen.seqToPSF(seq,seqType='prot',startResid=1, segName='')
 
 protocol.genExtendedStructure(maxFixupIters=50)
+
+protocol.fixupCovalentGeom('all')
 
 xplor.command( "minimize powell nstep=%(min_cycles)i nprint 10 end")
 

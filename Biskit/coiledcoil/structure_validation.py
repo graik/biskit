@@ -457,19 +457,21 @@ def extractPdbs(data_path):
     for p in pdbs_s:
         print "cp ./pdbs/"+p+" ./pdbs_nano/"+p 
 
-basepath = '/home/victor/poly0.5/Biskit/testdata/coiledcoil/pdbs'
 
-#~ extractPdbs(basepath+"/datos_new")
-#~ createCandidatesFile(basepath+"/candidates",basepath)
-#~ structs, sequences, correspondences= getCoilStructs(basepath)
-#~ print structs
-#~ print sequences
-#~ dataFileCreation( data_file = basepath+"/datos",candidates_file = basepath+"/candidates", target_seq = 'LLLLLLLLLLL', method = "Any",target_type = ("hetero","antiparallel",2))
-   
-#~ lengthFilter("/home/victor/poly0.5/Biskit/testdata/coiledcoil/candidates","/home/victor/poly0.5/Biskit/testdata/coiledcoil/candidates_filtered",7)
-#~ file_stats("/home/victor/poly0.5/Biskit/testdata/coiledcoil/pdbs_small/candidates")
-#~ file_stats("/home/victor/poly0.5/Biskit/testdata/coiledcoil/candidates_filtered")
-validate(basepath+"/datos",basepath+"/candidates")
-#~ delFromDataFile(basepath+"/datos",basepath+"/datos_new","2FHA")
+if __name__ == '__main__':
+    basepath = '/home/victor/poly0.5/Biskit/testdata/coiledcoil/pdbs'
 
-#~ getBestHit2(basepath+'/datos_new')
+    #~ extractPdbs(basepath+"/datos_new")
+    #~ createCandidatesFile(basepath+"/candidates",basepath)
+    #~ structs, sequences, correspondences= getCoilStructs(basepath)
+    #~ print structs
+    #~ print sequences
+    #~ dataFileCreation( data_file = basepath+"/datos",candidates_file = basepath+"/candidates", target_seq = 'LLLLLLLLLLL', method = "Any",target_type = ("hetero","antiparallel",2))
+       
+    #~ lengthFilter("/home/victor/poly0.5/Biskit/testdata/coiledcoil/candidates","/home/victor/poly0.5/Biskit/testdata/coiledcoil/candidates_filtered",7)
+    #~ file_stats("/home/victor/poly0.5/Biskit/testdata/coiledcoil/pdbs_small/candidates")
+    #~ file_stats("/home/victor/poly0.5/Biskit/testdata/coiledcoil/candidates_filtered")
+    validate(basepath+"/datos",basepath+"/candidates")
+    #~ delFromDataFile(basepath+"/datos",basepath+"/datos_new","2FHA")
+
+    #~ getBestHit2(basepath+'/datos_new')

@@ -21,7 +21,7 @@ class PolyChromophore ( BlockEntity , Chromophore):
         return self.structure.take(atoms)
         
 
-class PolyFRETEntity(BlockEntity , FRETEntity):
+class PolyFRETEntity(Protein , FRETEntity):
     """"
     Wrapper for FRETEntity. Please see FRETEntity for further information.
     """
@@ -36,21 +36,28 @@ class PolyFRETEntity(BlockEntity , FRETEntity):
         Creation (see Chromophore and BlockEntity for further info.).
         """
         
-        FRETEntity.__init__(self,name,chromo_autodef = False, database = "../fret/"+FRETEntity.DEFAULT_DB)
-    
-        p = Protein(path+self.source+".pdb")
+        FRETEntity.__init__(self,name,chromo_autodef = True, database = FRETEntity.DEFAULT_DB)
         
-        self.structure = p
+        source = self.source
+        name = self.name
+        self.path = path
+        Protein.__init__(self,path+self.source+".pdb")
+        self.source = source
+        self.name = name
+        #~ self.structure = p
         
-        BlockEntity.__init__(self,name,self.structure)
+        #~ BlockEntity.__init__(self,name,self.structure)
         
-        self.chromo = PolyChromophore (self.name,source = self.source,database="../fret/"+Chromophore.DEFAULT_DB ,prot= p)
         
+        self.chromo = PolyChromophore (self.name,source = self.source,database=Chromophore.DEFAULT_DB ,prot= self)
+        
+        self.structure = PDBModel(self.path+self.source+".pdb")
     
     def onInsertion(self,myassembly=None):
         """
         See BlockEntity::onInsertion
         """
+        Protein.onInsertion(self,myassembly)
         
         c = Block(self.chromo.name+"_Chromophore",father=myassembly.blocks[-1],entity=self.chromo)
         c.addInterval(self.chromo.atomrange[0],self.chromo.atomrange[1])
@@ -58,7 +65,12 @@ class PolyFRETEntity(BlockEntity , FRETEntity):
     
     def getStructData(self,atoms):
         return self.structure
+    
+    def run(self):
+        return self.structure
         
+    def __str__(self):
+        return "[PolyFRETEntity "+self.name+"]"
     
 
 ##############

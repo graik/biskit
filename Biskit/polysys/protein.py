@@ -26,37 +26,16 @@ class UndefProtein (BlockEntity):
     def randomizeTorsionAngles(self):
         if self.structure!=None:
             self.structure= xplortools.randomizeTorsionAngles(self.structure)
-    
-    def run (self,maxlen = 30):
-        BlockEntity.run(self)
-        
-        index = 0
-        long = len(self.sequence)
-        total = None
-        
-        while long > maxlen :
-            print self.sequence[maxlen*index:maxlen*(index+1)],len(self.sequence[maxlen*index:maxlen*(index+1)])
-            link = xtender.Xtender(self.sequence[maxlen*index:maxlen*(index+1)]).run()
-            if total == None:
-                total = link
-            else:
-                total = xplortools.joinProteins(total,link)
-            index += 1
-            long = long - maxlen
-       
-        print self.sequence[maxlen*index:len(self.sequence)],len(self.sequence[maxlen*index:len(self.sequence)])
-        link = xtender.Xtender(self.sequence[maxlen*index:len(self.sequence)]).run()
-        
-        if index == 0:
-            total = link
-        else:
-            total = xplortools.joinProteins(total,link)
-        
-        
-        ## TODO: delete terminals etc 
-        self.structure = xplortools.cleanPdb(total)
+         
         return self.structure
-
+        
+    def run (self):
+        
+        #~ if self.structure == None:
+        self.structure = xplortools.cleanPdb(xplortools.createLink(self.sequence,22))
+        
+            
+        return self.structure
 
 
 class Protein (PDBModel, BlockEntity):
@@ -259,16 +238,18 @@ class Test(BT.BiskitTest):
 
     def test_UndefCreation(self):
         """Undef. protein creation test"""
-        #~ seq = "MMETPTDNIVSPFHNFGSSTQYSGTLSRTPNQIIELEKPSTSPFHNFGSSTQY"
+        seq = "MMETPTDNIVDNIVDNIV"
         #~ print
         #~ print seq, len(seq)
-        #~ u = UndefProtein("undef",seq)
-        #~ link = u.run()
+        u = UndefProtein("undef",seq)
+        link = u.run()
         #~ print u.structure.sequence(),len(u.structure.sequence())
-        #~ link.writePdb("test_link.pdb")
-        #~ link = PDBModel("test_link.pdb")
-        #~ link2 = xplortools.randomizeTorsionAngles(link)
-        #~ link2.writePdb("myrandomization.pdb")
+        link.writePdb("test_link.pdb")
+        
+        for i in range(10): 
+            u.structure = PDBModel("test_link.pdb")
+            link2 = u.randomizeTorsionAngles()
+            u.structure.writePdb("myrandomization"+str(i)+".pdb")
         
         #~ loop = UndefProtein("loop","RRRP")
         #~ link = loop.run()
@@ -276,7 +257,7 @@ class Test(BT.BiskitTest):
         
         #~ end = UndefProtein("end","IKNFSKDVGNGRHETSTFLGLINPNKVVEVGNVHDNDTVIIRRGFTLNSGECSRQSTVDSI")
         #~ end.run().writePdb("start2.pdb")
-        xplortools.joinProteins(PDBModel("out_min.bk.pdb"),PDBModel("start2.pdb")).writePdb("start.pdb")
+        #~ xplortools.joinProteins(PDBModel("out_min.bk.pdb"),PDBModel("start2.pdb")).writePdb("start.pdb")
         
 if __name__ == '__main__':
     BT.localTest()

@@ -216,7 +216,7 @@ class Block(object):
 
     def onInsertion(self,assembly= None):
         if self.father == None: # so is only executed for the "top" block
-            if self.entity:
+            if self.entity != None:
                 self.entity.onInsertion(myassembly = assembly)
             
 ##############

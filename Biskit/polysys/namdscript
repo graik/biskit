@@ -13,6 +13,7 @@ outputname              $output
 
 paraTypeCharmm	    on
 parameters          /usr/local/lib/vmd/plugins/noarch/tcl/readcharmmpar1.0/par_all27_prot_lipid_na.inp
+#parameters          /home/victor/xplor-nih-2.23/toppar/paramallh3x.pro
 
 binaryoutput            no
 binaryrestart           no

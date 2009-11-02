@@ -37,7 +37,7 @@ class FRETEntity:
     Note that a FRET can be used for proteic or not proteic FRET entities definition.
     """
 
-    DEFAULT_DB = T.dataRoot()+'./fret/fret_prots_db/single_parameters.db' # default value for database file
+    DEFAULT_DB = T.dataRoot()+'/fret/fret_prots_db/single_parameters.db' # default value for database file
 
     def __init__ (self,name="FRETEntity",database="", structure = None,chromo_autodef = False):
 

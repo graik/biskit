@@ -9,6 +9,7 @@ set file_out_psf in_min.psf
 
 package require psfgen
 topology /usr/local/lib/vmd/plugins/noarch/tcl/membrane1.0/top_all27_prot_lipid.inp 
+#topology /home/victor/xplor-nih-2.23/toppar/protein.top #topallh6x.pro
 pdbalias residue HIS HSE
 pdbalias atom ILE CD1 CD
 segment U {pdb $file_in}

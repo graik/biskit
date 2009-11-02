@@ -90,4 +90,4 @@ if __name__ == '__main__':
 
 	#~ print results
 
-	plot3DFRETEfficiencySphere(results,cycle,MapName,True,("set view map\n",))
+	plot3DFRETEfficiencySphere(results,cycle,MapName,True,("",))##("set view map\n",))
