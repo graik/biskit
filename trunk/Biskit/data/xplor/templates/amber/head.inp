@@ -7,12 +7,12 @@
 
 topology		! read topology file
     reset
-    @@%(project_root)s/xplor/toppar_amber/topamber.inp
-    @@%(project_root)s/xplor/toppar_amber/patches.pro
+    @@%(data_root)s/xplor/toppar_amber/topamber.inp
+    @@%(data_root)s/xplor/toppar_amber/patches.pro
 end                       
 
 parameter               ! Read parameter file
     reset
-    @@%(project_root)s/xplor/toppar_amber/paramber.gb.inp
+    @@%(data_root)s/xplor/toppar_amber/paramber.gb.inp
 end
 
