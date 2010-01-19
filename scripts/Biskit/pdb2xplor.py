@@ -78,7 +78,7 @@ class Xplor (XplorInput):
 
         ## pre-defined stuff
         self.ss_cutoff = 4           # threshold of S-S distance for S-S bond
-        self.project_root = projectRoot() # folder containing xplor/templates
+        self.data_root = dataRoot() # folder containing xplor/templates
         self.pdbcode = cleaner.pdbname[:4]
         self.outname = absfile( self.path + self.pdbcode )
 
@@ -358,7 +358,7 @@ one header_template
 
 the most relevant variables are:
 
-for header:   project_root .. root folder of cvs project
+for header:   data_root    .. Biskit/data folder (xplor top and param files)
 for segment:  segment_id   .. segid of currently processed segment
               segment_pdb  .. file name of segment pdb (generated)
               amber_patch  .. terminal patches for amber ff (generated)
