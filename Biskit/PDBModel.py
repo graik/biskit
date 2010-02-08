@@ -2851,14 +2851,13 @@ class PDBModel:
         @param what: indices or name(s) of residue to be removed
         @type  what: str OR [ str ] OR int OR [ int ]
         """
-        if type( what ) is str:
+        if not isinstance( what, list ) or isinstance( what, N.ndarray):
             what = T.toList( what )
+        
+        if type( what[0] ) is str:
             return self.remove( self.maskFrom( 'residue_name', what) )
 
-        if type( what ) is int:
-            what = [ what ]
-
-        if isinstance(what, list) or isinstance( what, N.ndarray):
+        if type( what[0] ) is int:
             return self.remove( self.res2atomIndices( what ) )
 
         return False
