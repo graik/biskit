@@ -90,7 +90,8 @@ class MatrixPlot(FramedPlot):
     of each cell will be illutrated using the selected color range.
     """
 
-    def __init__(self, matrix, mesh=0, palette="plasma", legend=0, step=1):
+    def __init__(self, matrix, mesh=0, palette="plasma", legend=0, step=1,
+                 vmin=None, vmax=None):
         """
         @param matrix: the 2-D array to plot
         @type  matrix: array
@@ -104,6 +105,9 @@ class MatrixPlot(FramedPlot):
         @param step: reduce matrix -- take only each step position in x and y
         @type  step: int
 
+        @param vmin: override minimal value, all values below will revert
+                     to default color
+
         @return: biggles plot object, view with biggles.FramedPlot.show() or
                  save with biggles.FramedPlot.write_eps(file_name).
         @rtype: biggles.FramedPlot
@@ -113,12 +117,17 @@ class MatrixPlot(FramedPlot):
 
         FramedPlot.__init__(self)
 
-        self.palette = ColorSpectrum( palette )
-
         if step != 1:
             matrix = self.__thinarray( matrix, step )
 
-        self.matrix = self.palette.color_array( matrix )
+        if vmin is None:
+            vmin = N.amin( matrix )
+
+        if vmax is None:
+            vmax = N.amax( matrix )
+        self.palette = ColorSpectrum( palette, vmin=vmin, vmax=vmax )
+
+        self.matrix = self.palette.color_array( matrix, resetLimits=0 )
         s = N.shape( self.matrix )
 
         for i in range(s[0]):
