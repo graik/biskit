@@ -701,7 +701,7 @@ def linfit( x, y ):
     @param y: y-data
     @type  y: [ float ]
     
-    @return: float, float - m, n, r^2 (slope, intersection, corr. coefficient)
+    @return: m, n, r^2 (slope, intersection, corr. coefficient)
     @rtype: float, float, float
     
     @raise BiskitError: if x and y have different number of elements
