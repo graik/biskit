@@ -7,7 +7,7 @@
 ## last $Date$
 ## $Revision$
 
-import RandomArray as ra
+import numpy.random as ra
 import numpy.oldnumeric as N
 
 class PatchGeneratorFromOrbit:
