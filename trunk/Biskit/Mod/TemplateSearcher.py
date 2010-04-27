@@ -42,7 +42,10 @@ import string
 import gzip
 import subprocess
 import  cStringIO
+import commands
 from Bio import File
+from Bio import Fasta
+
 
 class PickyURLopener(urllib.FancyURLopener):
     """Override default urllib error handling -- always raise an exception."""
@@ -161,6 +164,46 @@ class TemplateSearcher( SequenceSearcher ):
 
         return result
 
+    def fastaRecordFromId( self, db, id, chain='' ):
+        """
+        Use::
+           fastaRecordFromId( db, id ) -> Bio.Fasta.Record
+
+        @param db: database
+        @type  db: str
+        @param id: sequence database ID
+        @type  id: str
+
+        @return: fasta record
+        @rtype: Bio.Fasta.Record
+
+        @raise BlastError: if can't fetch fasta record from database
+        """
+        cmd = settings.fastacmd_bin + " -d %s -s  'pdb|%s|%s'" \
+              % (db, id, chain)
+
+        err, o = commands.getstatusoutput( cmd )
+        if err:
+            EHandler.warning('%s returned error: %r' % (cmd, err) )
+            raise BlastError( err )
+
+        frecord = Fasta.Record()
+        frecord.title = id
+
+        try:
+            for line in o.split('\n'):
+                if line[0] == '>':
+                    frecord.annotation = line[1:]
+                else:
+                    frecord.sequence += line.strip()
+
+        except IndexError:
+            raise InternalError, \
+                  "Couldn't fetch fasta record %s from database %s" % (id,db)
+
+        return frecord
+        
+
 
     def fastaFromIds( self, db, id_lst ):
         """
@@ -179,7 +222,7 @@ class TemplateSearcher( SequenceSearcher ):
         result = {}
         for i in id_lst:
             try:
-                r = self.fastaRecordFromId( db, i['pdb'] )
+                r = self.fastaRecordFromId( db, i['pdb'], i['chain'] )
                 r.chain = i['chain']
                 result[ i['pdb'] ] = r
             except BlastError, why:
