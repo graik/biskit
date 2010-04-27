@@ -179,7 +179,10 @@ class TemplateSearcher( SequenceSearcher ):
 
         @raise BlastError: if can't fetch fasta record from database
         """
-        cmd = settings.fastacmd_bin + " -d %s -s  'pdb|%s|%s'" \
+        if chain == '':
+            return SequenceSearcher.fastaRecordFromId( self, db, id )
+        
+        cmd = settings.fastacmd_bin + " -d %s -s 'pdb|%s|%s'" \
               % (db, id, chain)
 
         err, o = commands.getstatusoutput( cmd )
