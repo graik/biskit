@@ -137,25 +137,6 @@ def wSD(x, w):
     return N.sqrt( wVar(x, w) )
 
 
-def cross(v, w):
-    """
-    Cross product between two coordinates.
-
-    @param v: coordinate vector
-    @type  v: list or array
-    @param w: coordinate vector
-    @type  w: list or array
-    
-    @return: array('f') or float
-    @rtype: array('f') or float  
-    """
-    x = v[1]*w[2] - v[2]*w[1]
-    y = v[2]*w[0] - v[0]*w[2]
-    z = v[0]*w[1] - v[1]*w[0]
- 
-    return N.array( (x, y, z ) )
-
-
 def aboveDiagonal( pw_m ):
     """
     Collect all the values above the diagonal in a square
