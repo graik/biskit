@@ -195,13 +195,18 @@ class Intervor( Executor ):
 
         m.addChainId()
         rec_ids, lig_ids = self.__chainIds( m )
+
+        ## last intervor version rejects non-1.0 Occupancies
+        m['occupancy'] = N.ones( len(m) ) 
         
         ## intervor reports serial number in facets --> make equal to index
-        m['serial_number'] = range( len( m ) )
+        ## m['serial_number'] = range( len( m ) )  ## use option -p
 
         ## override commandline args that will be used by run()
         self.args = "-f %s -o %i -C %s -C %s -v 2 -D ." %\
             (self.f_pdb, self.mode, rec_ids, lig_ids) 
+        self.args = "-f %s -C %s -C %s -D -p." %\
+            (self.f_pdb, rec_ids, lig_ids) 
         
         m.writePdb( self.f_pdb )
 
