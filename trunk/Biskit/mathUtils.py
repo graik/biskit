@@ -31,7 +31,7 @@ general purpose math methods
 import numpy.oldnumeric as N
 import random
 import numpy.oldnumeric.random_array as RandomArray
-import math
+import math, cmath
 
 class MathUtilError( Exception ):
     pass
@@ -778,6 +778,131 @@ def projectOnSphere( xyz, radius=None, center=None ):
     return polarToCartesian( rtp ) + center
 
 
+def rotateAxis(theta, vector):
+    """
+    Calculate a left multiplying rotation matrix that rotates
+    theta rad around vector.
+    
+    Taken from: http://osdir.com/ml/python.bio.devel/2008-09/msg00084.html
+
+    Example:
+
+    >>> m=rotateAxis(pi, N.array([1,0,0]))
+
+    @type theta: float
+    @param theta: the rotation angle
+
+
+    @type vector: L{Vector}
+    @param vector: the rotation axis
+
+    @return: The rotation matrix, a 3x3 Numeric array.
+    """
+    vector = vector / N.linalg.norm(vector)
+    x,y,z=vector
+    c=N.cos(theta)
+    s=N.sin(theta)
+    t=1-c
+    rot=N.zeros((3,3), "d")
+    # 1st row
+    rot[0,0]=t*x*x+c
+    rot[0,1]=t*x*y-s*z
+    rot[0,2]=t*x*z+s*y
+    # 2nd row
+    rot[1,0]=t*x*y+s*z
+    rot[1,1]=t*y*y+c
+    rot[1,2]=t*y*z-s*x
+    # 3rd row
+    rot[2,0]=t*x*z-s*y
+    rot[2,1]=t*y*z+s*x
+    rot[2,2]=t*z*z+c
+    return rot
+
+
+def cbrt(x):
+    """
+    cubic root.
+    Author: Victor Gil.
+    """
+    if x >= 0: 
+        return math.pow(x, 1.0/3.0) 
+    else:
+        return -math.pow(N.abs(x), 1.0/3.0) 
+ 
+    
+def cartesian2D(r, w, deg=0): # radian if deg=0; degree if deg=1 
+    """ 
+    Convert from polar (r,w) to rectangular (x,y) x = r cos(w) y = r sin(w)
+    Author: Victor Gil
+    """ 
+    from math import cos, sin, pi 
+    if deg: 
+        w = pi * w / 180.0 
+        return r * cos(w), r * sin(w) 
+        
+def polar2D(x, y, deg=0): # radian if deg=0; degree if deg=1 
+    """
+    Convert from rectangular (x,y) to polar (r,w) r = sqrt(x^2 + y^2) 
+    w = arctan(y/x) = [-\pi,\pi] = [-180,180] 
+    
+    Author: Victor Gil
+    """ 
+    from math import hypot, atan2, pi 
+    if deg: 
+        return hypot(x, y), 180.0 * atan2(y, x) / pi 
+    else: 
+        return hypot(x, y), atan2(y, x) 
+
+
+def quadratic(a, b, c=None): 
+    """ 
+    x^2 + ax + b = 0 (or ax^2 + bx + c = 0) By substituting x = y-t and t = a/2,
+    the equation reduces to y^2 + (b-t^2) = 0 which has easy solution 
+    y = +/- sqrt(t^2-b)
+    
+    Author: Victor Gil
+    """ 
+    if c: # (ax^2 + bx + c = 0) 
+        a, b = b / float(a), c / float(a)
+    t = a / 2.0 
+    r = t**2 - b 
+    if r >= 0: # real roots 
+        y1 = math.sqrt(r) 
+    else: # complex roots 
+        y1 = cmath.sqrt(r) 
+    y2 = -y1 
+    return y1 - t, y2 - t 
+    
+def cubic(a, b, c, d=None):
+    """
+    x^3 + ax^2 + bx + c = 0  (or ax^3 + bx^2 + cx + d = 0)
+    With substitution x = y-t and t = a/3, the cubic equation reduces to    
+        y^3 + py + q = 0,
+    where p = b-3t^2 and q = c-bt+2t^3.  Then, one real root y1 = u+v can
+    be determined by solving 
+        w^2 + qw - (p/3)^3 = 0
+    where w = u^3, v^3.  From Vieta's theorem,
+        y1 + y2 + y3 = 0
+        y1 y2 + y1 y3 + y2 y3 = p
+        y1 y2 y3 = -q,
+    the other two (real or complex) roots can be obtained by solving
+        y^2 + (y1)y + (p+y1^2) = 0
+        
+    Author: Victor Gil
+    """
+    cos = math.cos
+    if d:			# (ax^3 + bx^2 + cx + d = 0)
+        a, b, c = b / float(a), c / float(a), d / float(a)
+    t = a / 3.0
+    p, q = b - 3 * t**2, c - b * t + 2 * t**3
+    u, v = quadratic(q, -(p/3.0)**3)
+    if type(u) == type(0j):	# complex cubic root
+        r, w = polar2D(u.real, u.imag)
+        y1 = 2 * cbrt(r) * cos(w / 3.0)
+    else:			# real root
+        y1 = cbrt(u) + cbrt(v)
+    y2, y3 = quadratic(y1, p + y1**2)
+    return y1 - t, y2 - t, y3 - t
 
 #############
 ##  TESTING        
