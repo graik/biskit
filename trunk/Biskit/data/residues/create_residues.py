@@ -2,6 +2,50 @@ import Biskit as B
 import Biskit.tools as T
 import numpy as N
 
+residue_names = {'ala':'alanine',
+                 'arg':'arginine',
+                 'asn':'asparagine',
+                 'asp':'aspartate',
+                 'cys':'cysteine',
+                 'gln':'glutamine',
+                 'glu':'glutamate',
+                 'gly':'glycine',
+                 'his':'histidine',
+                 'ile':'isoleucine',
+                 'leu':'leucine',
+                 'lys':'lysine',
+                 'met':'methionine',
+                 'phe':'phenylalanine',
+                 'pro':'proline',
+                 'ser':'serine',
+                 'thr':'threonine',
+                 'trp':'tryptophane',
+                 'tyr':'tyrosine',
+                 'val':'valine',
+
+                 'da':'desoxyadenine',
+                 'dc':'desoxycytosine',
+                 'dg':'desoxyguanine',
+                 'dt':'desoxythymidine',
+
+                 'a':'adenine',
+                 'c':'cytosine',
+                 'g':'guanine',
+                 'u':'uracile',
+
+                 'adp':'adenosine diphosphate',
+                 'amp':'adenosine monophosphate',
+                 'atp':'adenosine triphosphate',
+                 'cdp':'cytosine diphosphate',
+                 'cmp':'cyclic adenosine monophosphate (cAMP)',
+                 'ctp':'cytosine triphosphate',
+                 'gdp':'guanosine diphosphate',
+                 'gmp':'guanosine monophosphate',
+                 'gtp':'guanosine triphosphate',
+                 'sam':'S-adenosine monophosphate',
+                 'ttp':'thymidine triphosphate',
+                 }
+
 def extract_unique_residues( m ):
     """
     @param m: PDBModel
@@ -22,6 +66,10 @@ def normalize_residue( r ):
     r['chain_id'] = ['A'] * len( r )
     r['segment_id'] = [''] * len( r )
     r['residue_number'] = [ 1 ] * len( r )
+    r['serial_number'] = range( len(r) )
+    r['temperature_factor'] = [ 1.0 ] * len(r)
+    r['insertion_code'] = [''] * len(r)
+    
     r = r.centered()
     return r
 
