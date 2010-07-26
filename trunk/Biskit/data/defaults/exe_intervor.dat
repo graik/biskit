@@ -3,7 +3,7 @@
 comment=voronoi interface calculation by F. Cazal et al.
 
 ## binary
-bin=intervor.exe
+bin=intervor
 
 ## working directory
 cwd=
