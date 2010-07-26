@@ -1,0 +1,98 @@
+MULTIDOCK TEST 
+==============
+This text file describes how to perform a docking run where more than
+one receptor model is docked to more than ome ligand model, here referenced
+to as multidocking (see Grunberg, Leckner, Nilges (2004) Structure 
+Dec;12(12):2095-6). The starting point for a multidocking is the
+free receptor and ligand structures and optionally the bound complex
+for reference. This example is the most simple multidocking possible - 
+a single receptor model is docked against two ligand models.
+
+Preparation:
+-----------
+First you will need to run the regular docking test (test_docking.zsh). 
+This will then have created the following directories with various
+files in them in your test root directory:
+
+  ~biskit/test/lig
+  ~biskit/test/rec
+  ~biskit/test/com
+  ~biskit/test/dock
+
+
+Run the test:
+------------
+
+mkdir lig_pcr_00
+  Creating a directory in which the outpur of the pcr-MD simulation
+  will be written. To run a pcr-MD simulation you need a modified
+  version of xplor avaliable upon request.
+
+runPcr.py -t lig -r lig_pcr_00 -h localhost -nstep 10
+  Run a (too) short simulation on localhost without any principal 
+  component restraints (the pcr flag is set to 0). This will result
+  in 500 shapshots (separated by 20 fs, 10 x 2 fs time steps). The pcr force
+  is here set to zero - i.e. this is a standard parallell MD simulation . 
+  
+  The script returns information about the simulation that is usefull
+  if you need to stop or restart the simulation:
+    host: localhost
+    pid:  14500
+    nice: 0
+    binary:        /shared_bin/xplor/ifcxplor
+    result folder: /mnt/data/shared_bin/biskit/test/lig_pcr_00/pcr_00
+    topology:      /mnt/data/shared_bin/biskit/test/lig
+    force:         0
+
+cd lig_pcr_00
+mkdir model
+
+pdb2model.py -i lig_pcr_00/*.pdb -a -wat -o model/
+  Parallellized script that converts all the pdb snapshots into 
+  PDBModels. The script reads the pdb files from the lig_pcr_00
+  folder, strips of any water molecules abd writes PDBModels into
+  the model folder. Got an error? Make sure that pvm is running.
+
+pdb2traj.py -i model/*.model -r ../lig/1A19.pdb -wat -f
+  Collects the PDBModels and fits them all to the provided reference
+  structure, deletes the waters and writes a trajectory output file: traj.dat
+  
+thinTraj.py -i traj.dat
+  To speed up the subsequent calculations in this example we delete
+  only keep every 5th frame of the trajectory.
+
+cd ..
+mkdir multidock
+mkdir multidock/lig
+cd multidock/lig
+
+selectModels.py -i ../../lig_pcr_00/traj.dat -n 2
+  Cluster the trajectory snapshots in two groups using fuzzy clustering. 
+  The structure closest to the center of each cluster will be written 
+  to disc as a PDBModel.
+
+PCR2hex.py  -psf ../../lig/*psf -pdb *model
+  Convert models to pdb files that can be used by HEX and bundle the
+  models into a model dictionary.
+
+dope.py -s ../../lig/1A19.pdb  -so ../../lig/1A19_dry.model -i *.model  -dic 1A19_model.dic
+  Add structure related information to all models (acessible surface area, 
+  surface curvature, residue conservation etc.)
+  
+cd ..
+ln -s ../dock/rec .
+ln -s ../dock/com .
+  This example is the lightest version of a multidocking possible as we
+  are here docking two ligands against one receptor. We will use the 
+  receptor and complex from the docking test for the multidocking.
+
+multidock.py -rdic rec/1A2P_model.dic -ldic lig/1A19_models.dic -com com/1BGS_hex.pdb -hex
+  This starts the multidocking across the accessible hosts. The HEX macro files
+  and the stdout from HEX will be written to disc in the output folder during
+  docking. When the docking is done the macro files and the logfiles are 
+
+cd hex*
+contacter.py -i complexes.cl -a -ref ../../com/ref.complex
+
+a_rmsd_vs_dock_performance.py -cl complexes_cont.cl -ref ../../com/ref.complex -key fnac_10
+

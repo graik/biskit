@@ -1,0 +1,517 @@
+REMARK heat ensemble for 0.1 ps at 25 K and write out ensemble trajectory
+!! Copyright (C) 2002-2005 Michael Nilges
+!!
+!! This program is free software; you can redistribute it and/or
+!! modify it under the terms of the GNU General Public License as
+!! published by the Free Software Foundation; either version 2 of the
+!! License, or any later version.
+!!
+!! This program is distributed in the hope that it will be useful,
+!! but WITHOUT ANY WARRANTY; without even the implied warranty of
+!! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+!! General Public License for more details.
+!!
+!! You find a copy of the GNU General Public License in the file
+!! license.txt along with this program; if not, write to the Free
+!! Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+!!
+!! $Revision$
+!! last $Author$
+!! last $Date$
+!! adapted to be used with runPCR.py (Raik Gruenberg)
+
+!! contains place holder %(nstep)s for number of steps
+!! contains place holder %(xbin)s for xplor binary
+!! contains place holder %(parm)s for toppar folder with param19*
+
+evaluate ($inicount = @@tempcount )
+if ($inicount ge 50) then stop end if
+
+! sort out file names and segment id's
+! set the file names automatically to the current directory
+system echo '"'`pwd`'"' > pwd
+system echo '"'`cd ..; pwd`'"' > pwdRoot
+
+evaluate ($projectroot = @@pwdRoot )
+evaluate ($structureid = @@segid )
+evaluate ($projectroot = $projectroot + "/")
+
+! get first character from structureid
+for $letter in ("0" "1" "2" "3" "4" "5" "6" "7" "8" "9") loop test
+   evaluate ($tttt = $letter + ($structureid - $letter))
+   if ($tttt eq $structureid) then exit loop test end if
+end loop test
+
+! set some calculation parameters
+! initial weight on PCR term - will automatically adapt
+! demand increase of first eigenvalue of at least by
+! the same value is applied to increase force constant
+evaluate ($pcrweight = 0.1)
+evaluate ($initialpcrpermode = @@initialpcr )
+evaluate ($increasetarget = 1.1)
+
+! select atoms for the PCR restraint term
+system echo "(name ca or name cb or name cg)" > atomselection
+
+
+
+evaluate ($initialtemp = 100)
+evaluate ($tempstep = 50)
+evaluate ($finaltemp = 300)
+evaluate ($nstep = %(nstep)s)
+system echo $nstep > nstep
+
+! read in psf file and start pdb file for a monomer
+evaluate ($structurefile = $projectroot + $structureid + "/" + $structureid + ".psf")
+structure @@$structurefile end
+evaluate ($startpdbfile  = $projectroot + $structureid + "/" + $structureid + ".pdb")
+coor @@$startpdbfile
+
+! modify water segids so that copy generation works
+evaluate ($xwatsegid = $letter + "XWW")
+evaluate ($watsegid  = $letter + "WWW")
+
+vector do (segid = $watsegid)  (segid 1WWW)
+vector do (segid = $watsegid)  (segid W000)
+vector do (segid = $xwatsegid) (segid 1XWW)
+
+parameter
+  	reset
+        @@%(parm)s/param19.pro
+ 	@@%(parm)s/param19.sol
+	@@nbonds_19h2o.inp
+end
+
+
+vector ident (store9)  @@atomselection 
+coor select @@atomselection  end
+evaluate ($Nresidues = $select)
+evaluate ($Nmodes = 3*$Nresidues)
+
+if ($inicount eq 0) then
+   minimize powell nstep=100 nprint 5 end
+
+   shake
+      nconstraints=150000
+      reference=parameter 
+      bonds (not resname tip3) (hydrogen)
+      molecule (resname tip3)
+      tolerance 1.0e-5
+   end
+
+   minimize powell nstep=100 nprint 5 end
+end if
+
+! get all segids
+evaluate ($ssss = "    ")
+evaluate ($index = 0)
+for $id in id (tag) loop segi
+   vector show element (segid) (id $id)
+   if ($result ne $ssss) then 
+      evaluate ($ssss = $result)
+      evaluate ($index = $index + 1)
+      evaluate ($s_$index = $result)
+   end if
+end loop segi
+
+
+evaluate ($segid_count = 0)
+while ($segid_count lt $index) loop dup1
+   evaluate ($segid_count = $segid_count + 1)
+   evaluate ($dupli_count = 0)
+   evaluate ($new_segid = encode($dupli_count) + ($s_$segid_count - $letter))
+   evaluate ($first_segid = $new_segid)
+   vector do (segid = $new_segid) (segid $s_$segid_count)
+   while ($dupli_count lt 9) loop dup2
+      evaluate ($dupli_count = $dupli_count + 1)
+      evaluate ($new_segid = encode($dupli_count) + ($s_$segid_count - $letter))
+      duplicate selection = (segid $first_segid) segid = $new_segid end
+   end loop dup2
+end loop dup1
+
+! no interaction between segments
+@lesA-J.inp
+
+
+! constraints for bonds
+shake
+   nconstraints=150000
+   reference=parameter bonds (all) (hydrogen)
+   tolerance 1.0e-5
+end
+
+
+!in the beginning use all directions
+
+evaluate ($Npcr = $Nmodes - 6)
+
+evaluate ($variation = 0.0)
+evaluate ($targetvariation = 0)
+evaluate ($oldenergy = 0)
+evaluate ($tempcount = $inicount)
+
+if ($tempcount ne 0) then
+    evaluate ($previoustemp = $tempcount - 1) 
+    eval ($evecfile = $structureid + "_" + encode($tempcount) + "_" + "evec.dat")
+    eval ($preveval = $structureid + "_" + encode($previoustemp) + "_" + "eval.dat")
+    eval ($evalfile = $structureid + "_" + encode($tempcount) + "_" + "eval.dat")
+    eval ($averfile = $structureid + "_" + encode($tempcount) + "_" + "aver.dat")
+    eval ($gmodfile = $structureid + "_" + encode($tempcount) + "_" + "gmod.dat")
+    eval ($trajfile = $structureid + "_" + encode($tempcount) + "_" + "traj.crd")
+    evaluate ($Qrestart = TRUE)
+
+    ! unfortunately we cannot make a loop since we would not be able to select all segids starting
+    ! with a specified number...
+    evaluate ($count = 0)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 0*)
+    vector do (segid = $letter + (segid - "0")) (store1)
+    coor @@$pdbOUTfile  end
+    vector do (segid = "0" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 1*)
+    vector do (segid = $letter + (segid - "1")) (store1)
+    coor @@$pdbOUTfile  end
+    vector do (segid = "1" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 2*)
+    vector do (segid = $letter + (segid - "2")) (store1)
+    coor @@$pdbOUTfile end
+    vector do (segid = "2" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 3*)
+    vector do (segid = $letter + (segid - "3")) (store1)
+    coor @@$pdbOUTfile  end
+    vector do (segid = "3" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 4*)
+    vector do (segid = $letter + (segid - "4")) (store1)
+    coor @@$pdbOUTfile  end
+    vector do (segid = "4" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 5*)
+    vector do (segid = $letter + (segid - "5")) (store1)
+    coor @@$pdbOUTfile  end
+    vector do (segid = "5" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 6*)
+    vector do (segid = $letter + (segid - "6")) (store1)
+    coor @@$pdbOUTfile  end
+    vector do (segid = "6" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 7*)
+    vector do (segid = $letter + (segid - "7")) (store1)
+    coor @@$pdbOUTfile  end
+    vector do (segid = "7" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 8*)
+    vector do (segid = $letter + (segid - "8")) (store1)
+    coor @@$pdbOUTfile  end
+    vector do (segid = "8" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 9*)
+    vector do (segid = $letter + (segid - "9")) (store1)
+    coor @@$pdbOUTfile  end
+    vector do (segid = "9" + (segid - $letter)) (store1)
+
+else
+   evaluate ($Qrestart = FALSE)
+end if
+
+
+
+while ($tempcount lt 50) loop heat
+   evaluate ($previoustemp = $tempcount)
+   evaluate ($tempcount = $tempcount + 1)
+   evaluate ($targettemp = min($finaltemp, $initialtemp + $tempcount * $tempstep))
+
+   ! we write out the first eigenvalue and read it in to get the new target
+   if ($tempcount gt 1) then 
+      system head -1 $evalfile > variation
+      eval ($variation = @@variation )
+      eval ($targetvariation = 2 * $variation)
+      eval ($oldenergy = @@oldenergy )
+   end if
+   if ($tempcount eq 2) then
+      evaluate ($Npcr = min($Npcr,250))
+      eval ($prevvaria = 0 )
+   elseif ($tempcount gt 2) then
+      evaluate ($npcr = max(5,(int(min(250, $npcr)/(2**($tempcount-2))))))
+      system head -1 $preveval > prevvaria
+      eval ($prevvaria = @@prevvaria )   
+   end if
+
+   eval ($unifile = $structureid + "_" + "uniform" + "_" + "eval.dat")
+   evaluate ($Nnontrivial = $Nmodes - 6)
+   evaluate ($count = 0)
+   set message off echo off end
+   set display $unifile end
+   while ($count lt $Npcr) loop disp
+      evaluate ($count = $count + 1)
+      display $targetvariation   1
+   end loop disp
+   while ($count lt $Nnontrivial) loop disp
+      evaluate ($count = $count + 1)
+      display 0.0   1
+   end loop disp
+   while ($count lt $Nmodes) loop disp
+      evaluate ($count = $count + 1)
+      display 0.0   0
+   end loop disp
+   close $unifile end
+   set message on echo on end
+
+! PCR restraint
+! we always want to put the same energy per mode in the beginning
+! if the variation stays constant or goes down, we increase the weight by 10 percent
+
+   if ($tempcount ge 2) then
+      evaluate ($oldtarget = $increasetarget*2*$prevvaria)
+      if ($targetvariation le $oldtarget) then
+         eval ($oldenergy = $increasetarget * $oldenergy)
+      end if
+      @@pcr.inp
+      energy end
+      evaluate ($pcrweight = 1.0*$oldenergy/$pcr*$pcrweight*$Npcr)
+      @@pcr.inp
+      system gzip $evecfile
+      energy end
+      evaluate ($pcrpermode = $pcr / $Npcr)
+      system echo $pcrpermode > oldenergy
+   else 
+      evaluate ($pcr = 1)
+      evaluate ($pcrpermode = $initialpcrpermode)
+      system echo $pcrpermode > oldenergy
+   end if
+   evaluate ($oldtarget = $increasetarget*$targetvariation)
+ 
+   set display energies.disp end
+   display $tempcount $variation $pcrweight $pcrpermode
+
+
+   evaluate ($trajfile = $structureid + "_" + encode($tempcount) + "_"+ "ens.crd")
+
+   ! set fbeta according to solvent-accessible surface
+   @ExpSASAatA-J.inp
+    if ($Qrestart eq TRUE) then
+      dynamics verlet
+        restart=restartfile
+	nstep=0 timestep=0.002 {ps}
+      end
+    end if
+    if ($tempcount lt 10) then
+      vector do (vx = maxwell($targettemp)) (all)
+      vector do (vy = maxwell($targettemp)) (all)
+      vector do (vz = maxwell($targettemp)) (all)
+    end if
+    dynamics verlet
+	nstep=$nstep timestep=0.002 {ps}
+	iasvel = current
+	tcoupling = false  tbath = $targettemp
+	rbuf = 0 origin = (0 0 0)  ilbfrq = 500000000
+	nprint=5 iprfrq=50
+	ntrfrq = 500000000
+        trajectory = $trajfile ascii = true
+        nsavc = 10
+        save=restartfile isvfrq=$nstep
+    end
+    close $trajfile end
+
+
+    evaluate ($count = 0)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 0*)
+    vector do (segid = $letter + (segid - "0")) (store1)
+    write coor output = $pdbOUTfile selection= (store1 ) end
+    vector do (segid = "0" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 1*)
+    vector do (segid = $letter + (segid - "1")) (store1)
+    write coor output = $pdbOUTfile selection= (store1 ) end
+    vector do (segid = "1" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 2*)
+    vector do (segid = $letter + (segid - "2")) (store1)
+    write coor output = $pdbOUTfile selection= (store1 ) end
+    vector do (segid = "2" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 3*)
+    vector do (segid = $letter + (segid - "3")) (store1)
+    write coor output = $pdbOUTfile selection= (store1 ) end
+    vector do (segid = "3" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 4*)
+    vector do (segid = $letter + (segid - "4")) (store1)
+    write coor output = $pdbOUTfile selection= (store1 ) end
+    vector do (segid = "4" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 5*)
+    vector do (segid = $letter + (segid - "5")) (store1)
+    write coor output = $pdbOUTfile selection= (store1 ) end
+    vector do (segid = "5" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 6*)
+    vector do (segid = $letter + (segid - "6")) (store1)
+    write coor output = $pdbOUTfile selection= (store1 ) end
+    vector do (segid = "6" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 7*)
+    vector do (segid = $letter + (segid - "7")) (store1)
+    write coor output = $pdbOUTfile selection= (store1 ) end
+    vector do (segid = "7" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 8*)
+    vector do (segid = $letter + (segid - "8")) (store1)
+    write coor output = $pdbOUTfile selection= (store1 ) end
+    vector do (segid = "8" + (segid - $letter)) (store1)
+
+    evaluate ($count = $count + 1)
+    evaluate ($pdbOUTfile = $structureid + "_" + encode($tempcount) + "_" + encode ($count) + ".pdb")
+    vector ident (store1) (segid 9*)
+    vector do (segid = $letter + (segid - "9")) (store1)
+    write coor output = $pdbOUTfile selection= (store1 ) end
+    vector do (segid = "9" + (segid - $letter)) (store1)
+
+    vector ident (store9)  @@atomselection 
+
+    set echo off message off end
+
+    evaluate ($status = "START")
+    evaluate ($count = 0)
+    while ($status # "COMPLETE") loop traj
+      if ($status = "START") then
+	read trajectory
+	  ascii = true 
+	   input = $trajfile
+	   begin = 10 skip = 10 stop = $nstep
+	end
+      else
+	read trajectory next end
+      end if
+
+      evaluate ($count = $count + 1)
+      evaluate ($pdbOUTfile = "temp" + encode($count) + ".pdb")
+      vector ident (store1) (segid 0*)
+      vector do (segid = $letter + (segid - "0")) (store1)
+      write coor output = $pdbOUTfile selection= (store1 and store9) end
+      vector do (segid = "0" + (segid - $letter)) (store1)
+
+      evaluate ($count = $count + 1)
+      evaluate ($pdbOUTfile = "temp" + encode($count) + ".pdb")
+      vector ident (store1) (segid 1*)
+      vector do (segid = $letter + (segid - "1")) (store1)
+      write coor output = $pdbOUTfile selection= (store1 and store9) end
+      vector do (segid = "1" + (segid - $letter)) (store1)
+
+      evaluate ($count = $count + 1)
+      evaluate ($pdbOUTfile = "temp" + encode($count) + ".pdb")
+      vector ident (store1) (segid 2*)
+      vector do (segid = $letter + (segid - "2")) (store1)
+      write coor output = $pdbOUTfile selection= (store1 and store9) end
+      vector do (segid = "2" + (segid - $letter)) (store1)
+
+      evaluate ($count = $count + 1)
+      evaluate ($pdbOUTfile = "temp" + encode($count) + ".pdb")
+      vector ident (store1) (segid 3*)
+      vector do (segid = $letter + (segid - "3")) (store1)
+      write coor output = $pdbOUTfile selection= (store1 and store9) end
+      vector do (segid = "3" + (segid - $letter)) (store1)
+
+      evaluate ($count = $count + 1)
+      evaluate ($pdbOUTfile = "temp" + encode($count) + ".pdb")
+      vector ident (store1) (segid 4*)
+      vector do (segid = $letter + (segid - "4")) (store1)
+      write coor output = $pdbOUTfile selection= (store1 and store9) end
+      vector do (segid = "4" + (segid - $letter)) (store1)
+
+      evaluate ($count = $count + 1)
+      evaluate ($pdbOUTfile = "temp" + encode($count) + ".pdb")
+      vector ident (store1) (segid 5*)
+      vector do (segid = $letter + (segid - "5")) (store1)
+      write coor output = $pdbOUTfile selection= (store1 and store9) end
+      vector do (segid = "5" + (segid - $letter)) (store1)
+
+      evaluate ($count = $count + 1)
+      evaluate ($pdbOUTfile = "temp" + encode($count) + ".pdb")
+      vector ident (store1) (segid 6*)
+      vector do (segid = $letter + (segid - "6")) (store1)
+      write coor output = $pdbOUTfile selection= (store1 and store9) end
+      vector do (segid = "6" + (segid - $letter)) (store1)
+
+      evaluate ($count = $count + 1)
+      evaluate ($pdbOUTfile = "temp" + encode($count) + ".pdb")
+      vector ident (store1) (segid 7*)
+      vector do (segid = $letter + (segid - "7")) (store1)
+      write coor output = $pdbOUTfile selection= (store1 and store9) end
+      vector do (segid = "7" + (segid - $letter)) (store1)
+
+      evaluate ($count = $count + 1)
+      evaluate ($pdbOUTfile = "temp" + encode($count) + ".pdb")
+      vector ident (store1) (segid 8*)
+      vector do (segid = $letter + (segid - "8")) (store1)
+      write coor output = $pdbOUTfile selection= (store1 and store9) end
+      vector do (segid = "8" + (segid - $letter)) (store1)
+
+      evaluate ($count = $count + 1)
+      evaluate ($pdbOUTfile = "temp" + encode($count) + ".pdb")
+      vector ident (store1) (segid 9*)
+      vector do (segid = $letter + (segid - "9")) (store1)
+      write coor output = $pdbOUTfile selection= (store1 and store9) end
+      vector do (segid = "9" + (segid - $letter)) (store1)
+
+    end loop traj
+    set echo on message on end
+
+    eval ($preveval = $evalfile )
+    eval ($evecfile = $structureid + "_" + encode($tempcount) + "_" + "evec.dat")
+    eval ($evalfile = $structureid + "_" + encode($tempcount) + "_" + "eval.dat")
+    eval ($averfile = $structureid + "_" + encode($tempcount) + "_" + "aver.dat")
+    eval ($gmodfile = $structureid + "_" + encode($tempcount) + "_" + "gmod.dat")
+    eval ($trajfile = $structureid + "_" + encode($tempcount) + "_" + "traj.crd")
+
+    system %(xbin)s < modes.inp > modes.out
+    system rm temp*.pdb
+    system mv evec.temp $evecfile
+    system mv eval.temp $evalfile
+    system mv aver.temp $averfile
+    system mv gmod.temp $gmodfile
+    system mv traj.temp $trajfile
+
+    system echo $tempcount > tempcount
+end loop heat
+
+stop

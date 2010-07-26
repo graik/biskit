@@ -1,0 +1,80 @@
+REMARK Roger Abseher, Mar 1999
+REMARK determines solvent accessible surface area (SASA) for individual segids
+REMARK SASA is used as criterion for Langevin vs. Newtonian dynamics
+REMARK requires heavy atom SASA reference data to be stored in store2
+set echo off message off end
+! initialize fractional solvent accesibility
+vector do (store1 = 0) (all)
+
+! determine sasa (result is stored in rmsd (default)):
+surface 
+	sele= (not hydro and not resn tip3 and segid 0*) 
+   	rh2o=1.6 
+   	mode access
+end
+vector do (store1 = rmsd ) (not hydro and not resn tip3 and segid 0*)
+surface 
+	sele= (not hydro and not resn tip3 and segid 1*) 
+   	rh2o=1.6 
+   	mode access
+end
+vector do (store1 = rmsd ) (not hydro and not resn tip3 and segid 1*)
+surface 
+	sele= (not hydro and not resn tip3 and segid 2*) 
+   	rh2o=1.6 
+   	mode access
+end
+vector do (store1 = rmsd ) (not hydro and not resn tip3 and segid 2*)
+surface 
+	sele= (not hydro and not resn tip3 and segid 3*) 
+   	rh2o=1.6 
+   	mode access
+end
+vector do (store1 = rmsd ) (not hydro and not resn tip3 and segid 3*)
+surface 
+	sele= (not hydro and not resn tip3 and segid 4*) 
+   	rh2o=1.6 
+   	mode access
+end
+vector do (store1 = rmsd ) (not hydro and not resn tip3 and segid 4*)
+surface 
+	sele= (not hydro and not resn tip3 and segid 5*) 
+   	rh2o=1.6 
+   	mode access
+end
+vector do (store1 = rmsd ) (not hydro and not resn tip3 and segid 5*)
+surface 
+	sele= (not hydro and not resn tip3 and segid 6*) 
+   	rh2o=1.6 
+   	mode access
+end
+vector do (store1 = rmsd ) (not hydro and not resn tip3 and segid 6*)
+surface 
+	sele= (not hydro and not resn tip3 and segid 7*) 
+   	rh2o=1.6 
+   	mode access
+end
+vector do (store1 = rmsd ) (not hydro and not resn tip3 and segid 7*)
+surface 
+	sele= (not hydro and not resn tip3 and segid 8*) 
+   	rh2o=1.6 
+   	mode access
+end
+vector do (store1 = rmsd ) (not hydro and not resn tip3 and segid 8*)
+surface 
+	sele= (not hydro and not resn tip3 and segid 9*) 
+   	rh2o=1.6 
+   	mode access
+end
+vector do (store1 = rmsd ) (not hydro and not resn tip3 and segid 9*)
+ 
+! assign friction coefficients according to surface
+vector do (fbeta = 0) (all)
+vector show max (store1) (all)
+vector do (store1 = store1 + $result/10) (all)
+vector do (fbeta = 5*store1/$result) (not hydro and not resn tip3)
+vector do (fbeta = 20) (not hydro and resn tip3)
+
+set echo on message on end
+
+

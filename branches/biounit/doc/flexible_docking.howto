@@ -1,0 +1,360 @@
+.. ===================================================================
+.. Biskit, a toolkit for the manipulation of macromolecular structures
+.. Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
+..
+.. This program is free software; you can redistribute it and/or
+.. modify it under the terms of the GNU General Public License as
+.. published by the Free Software Foundation; either version 2 of the
+.. License, or any later version.
+..
+.. This program is distributed in the hope that it will be useful,
+.. but WITHOUT ANY WARRANTY; without even the implied warranty of
+.. MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+.. General Public License for more details.
+..
+.. You find a copy of the GNU General Public License in the file
+.. license.txt along with this program; if not, write to the Free
+.. Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+..
+..
+.. last $Author$
+.. last $Date$
+.. $Revision$
+.. ===================================================================
+.. See also: http://biskit.pasteur.fr/use/workflows/flexible-docking
+
+
+This text file describes a flexible docking run starting from a 
+free receptor and a free ligand pdb-file we generate a ensemble 
+of receptor and ligand conformers. We then dock the receptor and 
+ligand conformers against each other, later referred to as cross-docking.
+The next step is to collect the docking result into a complex list 
+and then cluster the solutions based on intermolecular atom contacts.
+During the docking it is possible to use the known structure of the 
+bound complex for benchmarking purposes. 
+
+The structure ensembles are generated using principal component
+restraind molecular dynamics (PCR-MD). To run this you need a modified
+version of XPLOR that is available upon request.
+
+Two other files that might be worth having a closer look at are the 
+test scripts for regular docking: `test_docking`_ and the corresponding 
+file for flexible docking: `test_multidock`_. The latter describing the 
+most simple flexible docking possible, namely that of two ligand conformers
+against a single receptor conformer (see Grunberg, Leckner, Nilges (2004) 
+Structure Dec;12(12):2095-6 for some larger cross-dockings)
+
+
+--------------------------------------------------------------------
+
+========
+Contents	
+========
+
+- `Setup a directory structure for the docking`_
+- `Starting structures`_
+- `Preparing the structures`_
+- `Generate a ligand ensemble`_
+- `Generate a receptor ensemble`_
+- `Collect the ligand simulation snapshots`_
+- `Collect the receptor simulation snapshots`_
+- `Cluster the trajectories`_
+- `Prepare the complex structures for docking`_
+- `Add additional info to the models`_
+- `Run the flexible docking`_
+- `Calculate complex list data`_
+- `Check complex list data completeness`_
+- `Analyze docking result`_
+
+--------------------------------------------------------------------
+
+Setup a directory structure for the docking
+===========================================
+Not to end up with a folder cluttered with tons of files a folder structure
+like the one below this is recommended for a docking project::
+
+ ~/project_folder/rec
+ ~/project_folder/rec_pcr_00
+ ~/project_folder/lig
+ ~/project_folder/lig_pcr_00
+ ~/project_folder/com
+ ~/project_folder/multidock
+ ~/project_folder/multidock/rec
+ ~/project_folder/multidock/lig
+ ~/project_folder/multidock/com
+ ~/project_folder/multidock/hex
+
+--------------------------------------------------------------------
+
+Starting structures
+===================
+You will need a receptor and a ligand structure and optionally a 
+complex structure. So, the first task is to retrieve receptor 
+and ligand coordinate files of the free (unbound) form 
+(currently only pdb format supported).
+
+Again, just like in the normal docking example, lets say our 
+starting structures are called::
+ 
+ 1lig_original.pdb
+ 1rec_original.pdb
+ 1com_original.pdb (optional)
+
+Place the files in the corresponding *rec*, *lig* or *com* folder.
+
+--------------------------------------------------------------------
+
+Preparing the structures
+========================
+Prepare your structures just like in the regular `docking howto`_.
+
+Now run the *pdb2xplor.py* script for all structures:
+
+>>> cd rec
+>>> pdb2xplor.py -i 1rec_original.pdb -exe
+
+>>> cd ../lig  
+>>> pdb2xplor.py -i 1lig_original.pdb -c 1 -exe
+
+>>> cd ../com
+>>> pdb2xplor.py -i 1com_original.pdb 
+
+
+You have now three cleaned and minimized structures with corresponding psf-files::
+
+ rec/1REC.pdb  and  1REC.psf
+ lig/1LIG.pdb  and  1LIG.psf
+ com/1COM.pdb  and  1COM.psf
+
+--------------------------------------------------------------------
+
+Generate a ligand ensemble
+==========================
+This example starts a simulation on localhost without any principal 
+component restraints. The simulation will run 10 MD simulations in 
+parallell (for greater ensemble diversity) and will result in 500 
+shapshots (separated by 1 ps, 500 x 2 fs time steps).
+
+**NOTE:** 
+This is a time consuming step! Depending on the size of your system and 
+the hardware you are using the simulation will take anything from days to 
+months. 
+
+The pcr force is here set to zero - i.e. this is a standard parallell 
+MD simulation. If you would like an even greater diversity run the script
+with a *-f* argument greater than zero (hint: aim at something close to 
+0.2 times the number of amino acids).
+
+Extracted from the *runPCR.py* help screen::
+
+ Syntax: runPCR -t |psfFolder| -h |host|
+                [-f |Force| -r |resultFolder| -n |nice| -i |inpFolder| ]
+
+ Options:
+        -f      force constant for PCR restraint
+        -r      base folder for result (sub-folders will be created)
+        -t      folder with topology (psf, pdb)
+        -n      nice value
+        -h      host computer (accessible via ssh)
+        -i      folder with all input files, must contain restart_h2o.inp'
+        -parm   folder with param19.* files
+
+ Default options:
+        - f     0
+        - i     ~/biskit/external/xplor/inpPcr
+        - h     localhost
+        - parm  ~/biskit/external/xplor/toppar
+        - n     0
+        - r     .
+        - nstep         500
+
+
+Now start the simulation. If you want to run it on another host than 
+the localhost you need `pasword free ssh access`_ to that machine.
+
+>>> runPcr.py -t lig -r lig_pcr_00 -h localhost
+
+The script returns information about the simulation that is usefull
+if you need to stop or restart the simulation::
+
+    host: localhost
+    pid:  14500
+    nice: 0
+    binary:        /shared_bin/xplor/ifcxplor
+    result folder: /mnt/data/shared_bin/biskit/test/lig_pcr_00/pcr_00
+    topology:      /mnt/data/shared_bin/biskit/test/lig
+    force:         0
+
+--------------------------------------------------------------------
+
+Generate a receptor ensemble
+============================
+Do the same thing for the receptor as you did for the ligand 
+under `Generate a ligand ensemble`_.
+
+>>> runPcr.py -t rec -r rec_pcr_00 -h localhost
+
+--------------------------------------------------------------------
+
+Collect the ligand simulation snapshots
+=======================================
+The following step is quite time consuming and has therefore been 
+parallellized through PVM. The first step is thus to start the 
+pvm deamon (if not already running).
+
+>>> pvm  
+
+Create a *model* folder in the *lig_pcr_00* folder
+
+>>> cd ~/project_folder/lig_pcr_00
+>>> mkdir model
+
+*pdb2model.py* is a parallellized script that converts all the pdb 
+snapshots into PDBModels. The script reads the pdb files from the 
+*lig_pcr_00* folder, strips of any water molecules and writes PDBModels 
+into the model folder. 
+
+>>> pdb2model.py -i lig_pcr_00/*.pdb -a -wat -o model/
+
+*pdb2traj.py* collects the PDBModels created by *pdb2model.py* and fits 
+them all to a given reference structure, deletes the waters and 
+writes a trajectory output file: *traj.dat*
+
+>>> pdb2traj.py -i model/*.model -r ../lig/1LIG.pdb -wat -f
+  
+If you don't need all the trajectory frames can remove some of them from the
+trajectort. This will speed up the subsequent calculations in the example 
+below we keep every 5th frame of the trajectory.
+  
+>>> thinTraj.py -i traj.dat -step 5
+
+--------------------------------------------------------------------
+
+Collect the receptor simulation snapshots
+=========================================
+Do the same thing for the receptor as you did for the ligand 
+under `Collect the ligand simulation snapshots`_. 
+
+>>> cd ~/project_folder/rec_pcr_00
+>>> mkdir model
+>>> pdb2model.py -i rec_pcr_00/*.pdb -a -wat -o model/
+>>> pdb2traj.py -i model/*.model -r ../lig/1REC.pdb -wat -f
+
+--------------------------------------------------------------------
+
+Cluster the trajectories
+========================
+We don't want to use all 500 snapshots for the docking, rather we
+want to select representative structures from the ensemble. In this
+example we select 10 ligand conformers and we do this by means of 
+fuzzy clustering, where each picked structure is a cluster center.
+
+*selectModels.py* will cluster the trajectory snapshots in ten clusters. 
+The structure closest to the center of each cluster will be written 
+to disc as a PDBModel and a model dictionary.
+
+The *-ref* option tells the script to add the reference structure of the
+trajectory being clustered to the model dictionary, thus we will end
+up with a model dictionary containing 11 structures (10 cluster centers
+and the minimized structure from `Preparing the structures`_.
+
+>>> cd ~/project_folder/multidock/lig
+>>> selectModels.py -i ../../lig_pcr_00/traj.dat -psf ../../lig/1LIG.psf -n 10 -ref
+
+and the same for the receptor:
+
+>>> cd ~/project_folder/multidock/rec
+>>> selectModels.py -i ../../rec_pcr_00/traj.dat -psf ../../rec/1REC.psf -n 10 -ref
+
+--------------------------------------------------------------------
+
+Prepare the complex structures for docking
+==========================================
+This step has already been explained thoroughly in the `docking howto`_.
+
+Use *PCR2hex.py* to convert the complex pdb files that can be used by 
+HEX. 
+
+>>> cd ~/project_folder/multidock/com
+>>> PCR2hex.py  -psf ../../com/1COM.psf -pdb ../../com/1COM.pdb
+
+--------------------------------------------------------------------
+
+Add additional info to the models
+=================================
+
+Now well add structure related information to all models that will be
+used in the docking (acessible surface area, surface curvature, 
+residue conservation etc.)
+
+>>> cd ~/project_folder/multidock/lig
+>>> dope.py -s ../../lig/1LIG.pdb  -so ../../lig/1LIG.model -i *.model  -dic 1LIG_model.dic
+
+>>> cd ~/project_folder/multidock/rec
+>>> dope.py -s ../../rec/1REC.pdb  -so ../../rec/1REC.model -i *.model  -dic 1REC_model.dic
+
+>>> cd ~/project_folder/multidock/com
+>>> dope.py -s ../../com/1COM.pdb  -so ../../com/1COM.model -i *.model  -dic 1COM_model.dic
+
+--------------------------------------------------------------------
+
+Run the flexible docking
+========================
+In this example we are docking 11 receptor structures against 11 ligand structures 
+(i.e. 121 single docking runs) and we are using the known complex for benchmarking.
+The `HEX`_ macro files and the stdout from `HEX`_ will be written to disc in the output 
+folder during docking. When the docking is done the macro files and the logfiles 
+are compressed.
+
+This starts the multidocking across the accessible hosts (defined in *~/.biskit/hosts.dat*).
+The output will be a complex list with 11x11x512 docking solutions.
+
+>>> multidock.py -rdic rec/1A2P_model.dic -ldic lig/1A19_models.dic -com com/1BGS_hex.pdb
+
+
+--------------------------------------------------------------------
+
+Calculate complex list data
+===========================
+This step has already been explained thoroughly in the `docking howto`_.
+
+>>> contacter.py -i complexes.cl -a -ref ../../com/ref.complex
+
+--------------------------------------------------------------------
+
+Check complex list data completeness
+====================================
+
+A simple script that will tell you if all the data has been calculated 
+for all the complexes. If not you can use contacter.py script to 
+recalculate the missing data (see the contacter.py help info). 
+
+>>> inspectComplexList.py complexes_cont.cl
+
+--------------------------------------------------------------------
+
+Analyze docking result
+======================
+This is just an example of a simple analysis script that prints
+various information about the quality of the docking results.
+
+>>> a_rmsd_vs_dock_performance.py -cl complexes_cont.cl -ref ../../com/ref.complex -key fnac_10
+
+and another scripts that visualizes the result as contour plots
+
+>>> a_multidock_contour.py -cl complexes_cont.cl
+
+
+
+.. ============================================================================
+.. ========== following this line are reStructuredText links ==================
+
+.. _`HEX`: http://www.csd.abdn.ac.uk/hex/
+
+.. _`test_docking`: http://cvs.sourceforge.net/viewcvs.py/biskit/biskit/test/test_docking.txt
+
+.. _`test_multidock`: http://cvs.sourceforge.net/viewcvs.py/biskit/biskit/test/test_multidock.txt
+
+.. _`docking howto`: use/docking
+
+.. _`pasword free ssh access`: install/detailed-instructions/detailed-installation-instructions-for-biskit#note-4
