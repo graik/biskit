@@ -231,6 +231,59 @@ REMEDY: run the script fixAtomIndices.py
 
         return {}
         
+    def __parseBiomt( self, pdbFile, firstLine):
+        """
+        """
+        line = firstLine
+        biomtDict = {}
+        moleculeI = 0
+
+        while line[0] == 'REMARK' and line[1].startswith(' 350'):
+            # 5 = len(' 350 ')
+            biomtLine = line[1][5:].lstrip()
+            if biomtLine.startswith('BIOMOLECULE:'): # start a new molecule
+                if moleculeI > 0:   # isn't the first molecule
+                    # lets update the dictionary with what we've got
+                    biomtDict[moleculeNum] = (targetChains,rtList)
+
+                #12 = len('BIOMOLECULE:')
+                moleculeNum = int(biomtLine[12:].strip())
+                targetChains = []
+                rotation = []
+                translation = []
+                rtList = []
+
+                moleculeI += 1
+                matrixI = 0
+
+            if biomtLine.startswith('APPLY THE FOLLOWING TO CHAINS:'):  
+            # parse targeted chains, we assume this comes after BIOMOLECULE line
+                # 30 = len('APPLY THE FOLLOWING TO CHAINS:')
+                targetChains.extend(c.strip() for c in biomtLine[30:].split(','))
+
+            if biomtLine.startswith('BIOMT'):  
+            # parse rotate-translate matri{x/ces}, we assume this comes after BIOMOLECULE line
+                matrixI += 1
+                # 6 = len('BIOMT#')
+                rawCoords = biomtLine[6:].split()
+                rotation.append([float(x) for x in rawCoords[1:4]])
+                translation.append(float(rawCoords[4]))
+                if matrixI % 3 == 0:
+                     rtList.append((rotation,translation))
+                     rotation = []
+                     translation = []
+
+            try:
+                line = pdbFile.readLine()
+            except ValueError, what:
+                 self.log.add('Warning: Error parsing line %i of %s' %
+                              (i, T.stripFilename( fname )) )
+                 self.log.add('\tError: '+str(what) )
+                 continue
+        # process last molecule group
+        biomtDict[moleculeNum] = (targetChains,rtList)
+        # return (transformation dictionary , last line which isn't ours)
+        return {'BIOMT': biomtDict}, line
 
     def __collectAll( self, fname, skipRes=None, headPatterns=[] ):
         """
@@ -273,26 +326,39 @@ REMEDY: run the script fixAtomIndices.py
 
         f = IO.PDBFile( fname )
 
+        skipLine = False
+
         try:
             line, i = ('',''), 0
 
             while line[0] <> 'END' and line[0] <> 'ENDMDL':
 
                 i += 1
-                try:
-                    line = f.readLine()
-                except ValueError, what:
-                    self.log.add('Warning: Error parsing line %i of %s' %
-                                 (i, T.stripFilename( fname )) )
-                    self.log.add('\tError: '+str(what) )
-                    continue
+                if not skipLine:
+                    try:
+                        line = f.readLine()
+                    except ValueError, what:
+                        self.log.add('Warning: Error parsing line %i of %s' %
+                                     (i, T.stripFilename( fname )) )
+                        self.log.add('\tError: '+str(what) )
+                        continue
+                else:
+                    skipLine = False
 
                 ## header handling
                 if in_header and line[0] == 'HEADER':
                     info.update( self.__parseHeader( line ) )
 
                 if in_header and line[0] == 'REMARK':
-                    info.update( self.__parseRemark( line, patterns ) )
+                    if line[1].startswith(' 350'):
+                        biomtDict, line = self.__parseBiomt( f, line )
+                        info.update( biomtDict )
+                        # we've hogged a line beyond REMARK 350 records in 
+                        # __parseBiomt(), now we need to process it here
+                        skipLine = True
+                        continue
+                    else:
+                        info.update( self.__parseRemark( line, patterns ) )
                     
 
                 ## preserve position of TER records
@@ -383,11 +449,17 @@ class Test(BT.BiskitTest):
             print 'Loading pdb file ..'
 
         self.p = PDBParseFile()
-        self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P_rec_original.pdb')
+        self.m = self.p.parse2new( T.testRoot()+'/rec/2V4E.pdb')
+        print (self.m.info)
+##      self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P_rec_original.pdb')
 ##      self.m2= self.p.parse2new( T.testRoot()+'/com/1BGS.pdb' )
 
         self.assertAlmostEqual( N.sum( self.m.centerOfMass() ), 
-                                100.93785705968378, 4 )
+                                -74.1017, 4 )
+##        self.assertAlmostEqual( N.sum( self.m.centerOfMass() ), 
+##                                100.93785705968378, 4 )
+##        self.assertAlmostEqual( N.sum( self.m.centerOfMass() ), 
+##                                100.93785705968378, 4 )
 ##         self.assertAlmostEqual( N.sum( self.m.centerOfMass() ),
 ##            113.682601929 )
 
