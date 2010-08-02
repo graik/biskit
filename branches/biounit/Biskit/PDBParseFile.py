@@ -236,13 +236,14 @@ REMEDY: run the script fixAtomIndices.py
         """
         line = firstLine
         biomtDict = {}
-        moleculeI = 0
+        moleculeNum = -1
 
         while line[0] == 'REMARK' and line[1].startswith(' 350'):
             # 5 = len(' 350 ')
             biomtLine = line[1][5:].lstrip()
             if biomtLine.startswith('BIOMOLECULE:'): # start a new molecule
-                if moleculeI > 0:   # isn't the first molecule
+
+                if moleculeNum != -1:   
                     # lets update the dictionary with what we've got
                     biomtDict[moleculeNum] = (targetChains,rtList)
 
@@ -253,8 +254,7 @@ REMEDY: run the script fixAtomIndices.py
                 translation = []
                 rtList = []
 
-                moleculeI += 1
-                matrixI = 0
+                matrixLine = 0
 
             if biomtLine.startswith('APPLY THE FOLLOWING TO CHAINS:'):  
             # parse targeted chains, we assume this comes after BIOMOLECULE line
@@ -263,12 +263,12 @@ REMEDY: run the script fixAtomIndices.py
 
             if biomtLine.startswith('BIOMT'):  
             # parse rotate-translate matri{x/ces}, we assume this comes after BIOMOLECULE line
-                matrixI += 1
+                matrixLine += 1
                 # 6 = len('BIOMT#')
                 rawCoords = biomtLine[6:].split()
                 rotation.append([float(x) for x in rawCoords[1:4]])
                 translation.append(float(rawCoords[4]))
-                if matrixI % 3 == 0:
+                if matrixLine % 3 == 0:
                      rtList.append((rotation,translation))
                      rotation = []
                      translation = []
@@ -282,7 +282,7 @@ REMEDY: run the script fixAtomIndices.py
                  continue
         # process last molecule group
         biomtDict[moleculeNum] = (targetChains,rtList)
-        # return (transformation dictionary , last line which isn't ours)
+        # return (indexed transformation dictionary , last line which isn't ours)
         return {'BIOMT': biomtDict}, line
 
     def __collectAll( self, fname, skipRes=None, headPatterns=[] ):
@@ -451,6 +451,9 @@ class Test(BT.BiskitTest):
         self.p = PDBParseFile()
         self.m = self.p.parse2new( T.testRoot()+'/rec/2V4E.pdb')
         print (self.m.info)
+        self.m.report( prnt=self.local,
+                                plot=(self.local or self.VERBOSITY > 2) )
+        self.m.makeMultimer(1)
 ##      self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P_rec_original.pdb')
 ##      self.m2= self.p.parse2new( T.testRoot()+'/com/1BGS.pdb' )
 
