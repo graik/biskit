@@ -269,7 +269,9 @@ REMEDY: run the script fixAtomIndices.py
                 rotation.append([float(x) for x in rawCoords[1:4]])
                 translation.append(float(rawCoords[4]))
                 if matrixLine % 3 == 0:
-                    rotation.append( translation )
+                    rotation = N.array( rotation )
+                    translation = N.transpose( [ translation ] )
+                    rotation = N.concatenate( (rotation, translation), axis=1 )
                     rtList.append(N.array(rotation))
                     ## rtList.append((rotation,translation))
                     rotation = []
