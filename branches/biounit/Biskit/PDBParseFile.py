@@ -269,9 +269,11 @@ REMEDY: run the script fixAtomIndices.py
                 rotation.append([float(x) for x in rawCoords[1:4]])
                 translation.append(float(rawCoords[4]))
                 if matrixLine % 3 == 0:
-                     rtList.append((rotation,translation))
-                     rotation = []
-                     translation = []
+                    rotation.append( translation )
+                    rtList.append(N.array(rotation))
+                    ## rtList.append((rotation,translation))
+                    rotation = []
+                    translation = []
 
             try:
                 line = pdbFile.readLine()
@@ -449,7 +451,7 @@ class Test(BT.BiskitTest):
             print 'Loading pdb file ..'
 
         self.p = PDBParseFile()
-        self.m = self.p.parse2new( T.testRoot()+'/rec/2V4E.pdb')
+        self.m = self.p.parse2new( T.testRoot()+'biounit/2V4E.pdb')
         print (self.m.info)
         self.m.report( prnt=self.local,
                                 plot=(self.local or self.VERBOSITY > 2) )

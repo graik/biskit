@@ -20,6 +20,8 @@
 @see L{Biskit.PDBParseFile}
 @see L{Biskit.PDBParseModel}
 """
+import numpy as N
+
 import Biskit
 import Biskit.tools as T
 from PDBParseFile   import PDBParseFile
@@ -39,7 +41,14 @@ class BioUnit:
         """
         self.biomt = model.info['BIOMT']
         self.model = model
+        self.postprocess()
 
+    def postprocess(self):
+        """
+        postprocess BIOMT data
+        """
+        pass
+        
     def makeMultimer (self, biomoleculeNum):
         """
         @param biomoleculeNum: ID of the biomolecule (from BIOMT record)
@@ -92,9 +101,9 @@ if __name__ == '__main__':
     BT.localTest()
 
     ## test concat performance
-    import Biskit.tools as T
+    ## import Biskit.tools as T
 
-    chains = [ m.takeChains( [i] ) for i in range( 16 ) ]
+    ## chains = [ m.takeChains( [i] ) for i in range( 16 ) ]
 
-    T.profile( 'm = chains[0].concat( *chains[1:] )' )
+    ## T.profile( 'm = chains[0].concat( *chains[1:] )' )
     
