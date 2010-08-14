@@ -1249,7 +1249,33 @@ def gzopen( fname, mode='r' ):
         return gzip.open( fname, mode )
 
     return open( fname, mode )
-        
+
+
+def profile( s ):
+    """
+    Profile the given code fragment and report time-consuming method calls.
+    @param s: python code fragment, example: 'm = PDBModel("3tgi")'
+    @type  s: str
+    """    
+    try:
+        import cProfile as profile
+        fout = tempDir() + '/profiling.out'
+
+        profile.run( s, fout )
+
+        ## Analyzing
+        import pstats
+        p = pstats.Stats(fout)
+
+        ## long steps and methods calling them
+        p.sort_stats('cumulative').print_stats(20)
+        p.print_callers(0.0)
+
+        tryRemove( fout )
+
+    except ImportError, why:
+        raise ToolsError, 'Python profiling modules are not installed.'
+
 
 #############
 ##  TESTING        
