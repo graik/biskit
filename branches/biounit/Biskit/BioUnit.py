@@ -41,6 +41,11 @@ class BioUnit:
         self.model = model
 
     def makeMultimer (self, biomoleculeNum):
+        """
+        @param biomoleculeNum: ID of the biomolecule (from BIOMT record)
+        @type  biomoleculeNum: int
+        @return PDBModel, with the bio-molecule as specified in BIOMT
+        """
         try:
             (chainIds, transformMatrices) = self.biomt[biomoleculeNum]
         except:
@@ -79,9 +84,17 @@ class Test(BT.BiskitTest):
         if self.local:
             print 'unit has', len(self.b.moleculeList()), 'molecules'
 
-        self.mul = self.b.makeMultimer(self.m, 1)
+        self.mul = self.b.makeMultimer(1)
         self.mul.report()
 
 if __name__ == '__main__':
 
     BT.localTest()
+
+    ## test concat performance
+    import Biskit.tools as T
+
+    chains = [ m.takeChains( [i] ) for i in range( 16 ) ]
+
+    T.profile( 'm = chains[0].concat( *chains[1:] )' )
+    
