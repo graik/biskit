@@ -20,25 +20,36 @@
 @see L{Biskit.PDBParseFile}
 @see L{Biskit.PDBParseModel}
 """
-
+import Biskit
+import Biskit.tools as T
 from PDBParseFile   import PDBParseFile
+
+class BioUnitError( Biskit.BiskitError ):
+    pass
 
 class BioUnit:
     """
     A class for assembling multimers according to BIOMT data
     """
+    
     def __init__( self, model ):
+        """
+        @param model: PDBModel with BIOMT record
+        @type  model: Biskit.PDBModel
+        """
         self.biomt = model.info['BIOMT']
+        self.model = model
 
-    def makeMultimer (self, model, biomoleculeNum):
+    def makeMultimer (self, biomoleculeNum):
         try:
             (chainIds, transformMatrices) = self.biomt[biomoleculeNum]
         except:
-            print 'This unit does not have biomolecule #', (biomoleculeNum)
-            return model
+            raise BioUnitError, \
+                  'This unit does not have biomolecule #%i' % biomoleculeNum
+            ## return model
 
-        mask = model.maskFrom( 'chain_id', chainIds )
-        chains = model.compress( mask )
+        mask = self.model.maskFrom( 'chain_id', chainIds )
+        chains = self.model.compress( mask )
         monomers = [ chains.transform ( rt ) for rt in transformMatrices ]
         result = monomers[0].concat( *monomers[1:] )
         return result
@@ -57,16 +68,16 @@ class Test(BT.BiskitTest):
     def test_BioUnit( self ):
         """BioUnit test"""
 
-        ## loading output file from X-plor
         if self.local:
             print 'Loading pdb file ..'
 
         self.p = PDBParseFile()
-        self.m = self.p.parse2new( '../../2V4E.pdb')
+        self.m = self.p.parse2new( T.testRoot('biounit/2V4E.pdb') )
         self.m.report()
 
         self.b = BioUnit(self.m)
-        print 'unit has', len(self.b.moleculeList()), 'molecules'
+        if self.local:
+            print 'unit has', len(self.b.moleculeList()), 'molecules'
 
         self.mul = self.b.makeMultimer(self.m, 1)
         self.mul.report()
