@@ -22,11 +22,10 @@
 """
 import numpy as N
 
-import Biskit
+import Biskit as B
 import Biskit.tools as T
-from PDBParseFile   import PDBParseFile
 
-class BioUnitError( Biskit.BiskitError ):
+class BioUnitError( B.BiskitError ):
     pass
 
 class BioUnit:
@@ -34,42 +33,57 @@ class BioUnit:
     A class for assembling multimers according to BIOMT data
     """
     
-    def __init__( self, model ):
+    def __init__( self, model, biomt_dict ):
         """
-        @param model: PDBModel with BIOMT record
+        @param model: parent PDBModel
         @type  model: Biskit.PDBModel
         """
-        self.biomt = model.info['BIOMT']
         self.model = model
-        self.postprocess()
+        self.postprocess(biomt_dict)
 
-    def postprocess(self):
+    def postprocess(self, biomt_dict):
         """
         postprocess BIOMT data
         """
-        pass
+        self.biomol = {}
+        for biomol_num in biomt_dict.keys():
+            (chain_ids, rt_matrices) = biomt_dict[biomol_num]
+            biomol_key = 'biomol'+str(biomol_num)
+            self.biomol[biomol_key] = rt_matrices
+            atom_mask = self.model.maskFrom( 'chain_id', chain_ids )
+            self.model.residues[biomol_key] = self.model.atom2resMask( atom_mask )
+
         
-    def makeMultimer (self, biomoleculeNum):
+    def makeMultimer (self, biomol_id):
         """
-        @param biomoleculeNum: ID of the biomolecule (from BIOMT record)
-        @type  biomoleculeNum: int
+        @param biomol_id: ID of the biomolecule
+        @type  biomol_id: string
         @return PDBModel, with the bio-molecule as specified in BIOMT
         """
         try:
-            (chainIds, transformMatrices) = self.biomt[biomoleculeNum]
+            rt_matrices = self.biomol[biomol_id]
         except:
             raise BioUnitError, \
-                  'This unit does not have biomolecule #%i' % biomoleculeNum
-            ## return model
+                  'This unit does not have biomolecule ' % biomol_id
 
-        mask = self.model.maskFrom( 'chain_id', chainIds )
-        chains = self.model.compress( mask )
-        monomers = [ chains.transform ( rt ) for rt in transformMatrices ]
+        try:
+            atom_mask = self.model.res2atomMask ( self.model[biomol_id] )
+            chains = self.model.compress( atom_mask )
+        except:
+            raise BioUnitError, \
+                  'Parent model does not have biomolecule ' % biomol_id
+
+        #mask = self.model.maskFrom( 'chain_id', chainIds )
+        #chains = self.model.compress( mask )
+        monomers = [ chains.transform ( rt ) for rt in rt_matrices ]
         result = monomers[0].concat( *monomers[1:] )
         return result
 
-    def moleculeList (self):
-        return self.biomt.keys()
+    def moleculeIndex (self):
+        """
+        @return string list, the ids for multimer atom masks
+        """
+        return self.biomol.keys()
 
 #############
 ##  TESTING        
@@ -85,16 +99,20 @@ class Test(BT.BiskitTest):
         if self.local:
             print 'Loading pdb file ..'
 
-        self.p = PDBParseFile()
+        self.p = B.PDBParseFile.PDBParseFile()
+        
         self.m = self.p.parse2new( T.testRoot('biounit/2V4E.pdb') )
         self.m.report()
-
-        self.b = BioUnit(self.m)
+        
         if self.local:
-            print 'unit has', len(self.b.moleculeList()), 'molecules'
+            print 'unit has', len(self.m.biounit.moleculeIndex()), 'multimers'
 
-        self.mul = self.b.makeMultimer(1)
+        self.mul = self.m.biounit.makeMultimer('biomol1')
         self.mul.report()
+        
+        ##2V4E has 2 disjoint multimers
+        
+        ##self.sanitycheck = self.mul.biounit.makeMultimer('biomol2')
 
 if __name__ == '__main__':
 

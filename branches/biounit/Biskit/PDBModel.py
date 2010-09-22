@@ -2225,6 +2225,13 @@ class PDBModel:
         r.pdbCode = self.pdbCode
         r.fileName = self.fileName
         r.source = self.source
+        
+        ## copy the biounit
+        try:
+            r.biounit = copy.copy( self.biounit )
+            r.biounit.model = r
+        except AttributeError:
+            pass
 
         return r
 

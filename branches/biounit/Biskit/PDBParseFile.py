@@ -35,6 +35,7 @@ import re
 import Biskit as B
 import Biskit.mathUtils as M
 import Biskit.tools as T
+import Biskit.BioUnit as BU
 from Biskit.PDBParser import PDBParser, PDBParserError
 
 
@@ -149,7 +150,13 @@ class PDBParseFile( PDBParser ):
 
                 model.pdbCode = model.pdbCode or info.get('pdb_code', None) or \
                                 self.idFromName( model.fileName)
-
+                
+                ## make biounit from the dictionary we have parsed                
+                if 'BIOMT' in info:
+                    biomt = info['BIOMT']
+                    model.biounit = BU.BioUnit(model, biomt)
+                    del info['BIOMT']
+                
                 model.info.update( info )
                                
         except:
