@@ -54,13 +54,14 @@ class BioUnit:
             self.model.residues[biomol_key] = self.model.atom2resMask( atom_mask )
 
         
-    def makeMultimer (self, biomol_id):
+    def makeMultimer (self, biomol_id=None):
         """
         @param biomol_id: ID of the biomolecule
         @type  biomol_id: string
         @return PDBModel, with the bio-molecule as specified in BIOMT
         """
         try:
+            biomol_id = biomol_id or self.biomol.keys()[0]
             rt_matrices = self.biomol[biomol_id]
         except:
             raise BioUnitError, \
@@ -84,6 +85,19 @@ class BioUnit:
         @return string list, the ids for multimer atom masks
         """
         return self.biomol.keys()
+
+    def keys():
+        """instead of moleculeIndex() ??"""
+        return self.biomol.keys()
+
+    def __len__(self):
+        """Return number of biomolecules as length"""
+        return len(self.biomol)
+
+    def __getitem__(self, key):
+        """biounit[key] ==> biounit.biomol[key]"""
+        return self.biomol[ key ]
+
 
 #############
 ##  TESTING        
