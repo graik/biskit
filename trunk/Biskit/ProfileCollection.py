@@ -328,20 +328,18 @@ class ProfileCollection:
     def __setstate__(self, state ):
         """
         called for unpickling the object.
-        Compability fix: Convert Numeric arrays to numpy arrays 
-                         -- requires old Numeric
+        Compability fix: Convert lists to numpy arrays 
         """
         self.__dict__ = state
-
-        try:
-            import Numeric
-        except:
-            return
-
+        
         for k, v in self.profiles.items():
 
-            if getattr( v, 'astype', 0) and not isinstance( v, N.ndarray):
-                self.profiles[k] = N.array( v )
+            ## ProfileCollection < 966 stored objects and str in lists rather 
+            ## than arrays
+            ## re-assign lists so that they are converted to arrays
+            if type(v) is list:
+                self.profiles[k] = self.toarray( v )
+                self.infos[k]['isarray'] = False
     
 
     def __getitem__( self, k ):
