@@ -366,7 +366,7 @@ class Residue(object):
         names = m.atoms['name'][self.from_atom : self.to_atom]
 
         ## number of occurrences of each atom name
-        counts = [ names.count( n ) for n in names ]
+        counts = [ N.sum(names == n) for n in names ]
         if max( counts ) <= 1:
             return  ## nothing to do
         

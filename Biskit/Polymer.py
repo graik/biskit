@@ -313,10 +313,10 @@ class Polymer( Model ):
         if newchain and len( sequence ) > 0:
             self.__newChain()
 
-        rrnames = self.residues['name']    # residue names for residue profile 
-        anames  = self.atoms['name']         # atom names for atom profile
-        rnames  = self.atoms['residue_name'] # residue names for atom profile
-        elements= self.atoms['element']      # element codes for atom profile
+        rrnames = self.residues['name'].tolist()    # residue names for residue profile 
+        anames  = self.atoms['name'].tolist()         # atom names for atom profile
+        rnames  = self.atoms['residue_name'].tolist() # residue names for atom profile
+        elements= self.atoms['element'].tolist()      # element codes for atom profile
 
         resIndex= self._resIndex
         i_res = 0                      # pointer to current residue position
