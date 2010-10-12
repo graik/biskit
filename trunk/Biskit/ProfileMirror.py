@@ -300,7 +300,7 @@ if __name__ == '__main__':
     ## mirror looks at every second position
     mirror = ProfileMirror( p, range(0, len(string.letters), 2 ) )
 
-    assert mirror['name'] == list( string.letters[::2] )
+    assert mirror['name'] == N.array( string.letters[::2] )
     assert N.all( mirror['id'] == range( 0, p.profLength(), 2 ) )
 
     ## create a new profile
