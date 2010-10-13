@@ -148,7 +148,10 @@ class Residue(object):
         @param model: PDBModel, parent model of this residue
         @param index: int, position of this residue in model's residue index
         """
-        self.model = weakref.ref( model ) if model else returnNone
+        if model:
+            self.model = weakref.ref( model )
+        else:
+            self.model = returnNone
         self.i = index or 0
         self.terminal = terminal
 
