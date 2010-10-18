@@ -50,9 +50,10 @@ class BioUnit:
         self.model.residues['biomol'] = [0] * self.model.lenResidues()
         for biomol_num in biomt_dict.keys():
             (chain_ids, rt_matrices) = biomt_dict[biomol_num]
-            self.biomol[biomol_num] = rt_matrices
+            self.biomol[biomol_num-1] = rt_matrices
             atom_mask = self.model.maskFrom( 'chain_id', chain_ids )
             self.model.residues['biomol'] += self.model.atom2resMask( atom_mask ) * biomol_num
+        self.model.residues['biomol'] -= 1
         
     def makeMultimer (self, biomol_id=None):
         """
@@ -104,6 +105,16 @@ class BioUnit:
         r.biomol = dict([ (bm , self.biomol[bm]) for bm in remaining_biomols ])
         return r
 
+    def append(self, bu):
+        """
+        Glue two BioUnits together -> new BioUnit
+        @param bu: BioUnit to append
+        @type  bu: Biskit.BioUnit
+        """
+        r = self.__class__(self.model)
+        k = max(self.keys())+1
+        r.biomol = dict ([(key,self[key]) for key in self.keys()] + [(key+k,bu[key]) for key in bu.keys()])
+        return r
 
 #############
 ##  TESTING        
@@ -118,21 +129,15 @@ class Test(BT.BiskitTest):
 
         if self.local:
             print 'Loading pdb file ..'
-
+        N.set_printoptions(threshold=N.nan)
         self.p = B.PDBParseFile.PDBParseFile()
         
         self.m = self.p.parse2new( T.testRoot('biounit/2V4E.pdb') )
         self.m.report()
-        
         if self.local:
-            print 'unit has', len(self.m.biounit.keys()), 'multimers'
+           print 'unit has', len(self.m.biounit.keys()), 'multimers'
 
-        self.mul = self.m.biounit.makeMultimer(1)
-        self.mul.report()
-        
-        ##2V4E has 2 disjoint multimers
-        
-        ##self.sanitycheck = self.mul.biounit.makeMultimer(2)
+        self.m.biounit.makeMultimer(0).report()
 
 if __name__ == '__main__':
 

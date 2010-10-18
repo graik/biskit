@@ -2125,7 +2125,7 @@ class PDBModel:
 
         r.residues = self.residues.concat( m.residues, )
         r.atoms = self.atoms.concat( m.atoms, )
-
+        
         r.residues.model = r
         r.atoms.model = r
 
@@ -2143,6 +2143,14 @@ class PDBModel:
             r.mergeResidues( m.lenResidues() -1 )
 
         r.info = copy.deepcopy( self.info )
+        
+        try:
+            k = max(self.biounit.keys())+1
+            r.residues['biomol'][self.lenResidues():] += k
+            r.biounit = self.biounit.append(m.biounit)
+            r.biounit.model = r
+        except AttributeError:
+            pass
 
         return r.concat( *models[1:] )
 
@@ -2228,7 +2236,7 @@ class PDBModel:
         
         ## copy the biounit
         try:
-            r.biounit = copy.copy( self.biounit )
+            r.biounit = self.biounit.take(i)
             r.biounit.model = r
         except AttributeError:
             pass
