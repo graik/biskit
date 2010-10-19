@@ -3539,7 +3539,20 @@ class PDBModel:
                if ref.__chainFraction( c, self ) > fractLimit  ]
 
         return c0, c_r
-
+        
+    def biounit (self, assembly = 0)
+        try:
+            r = self.biounit.makeMultimer(assembly)
+        except AttributeError:
+            r = self
+        return r
+        
+    def lenBiounits (self)
+        try:
+            r = len(self.biounit.keys())
+        except AttributeError:
+            r = 0
+        return r
 
 
 #############

@@ -267,6 +267,9 @@ REMEDY: run the script fixAtomIndices.py
             # parse targeted chains, we assume this comes after BIOMOLECULE line
                 # 30 = len('APPLY THE FOLLOWING TO CHAINS:')
                 targetChains.extend(c.strip() for c in biomtLine[30:].split(','))
+            if biomtLine.startswith('AND CHAINS:'):  
+                # 11 = len('AND CHAINS:')
+                targetChains.extend(c.strip() for c in biomtLine[11:].split(','))
 
             if biomtLine.startswith('BIOMT'):  
             # parse rotate-translate matri{x/ces}, we assume this comes after BIOMOLECULE line
