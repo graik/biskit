@@ -3540,7 +3540,7 @@ class PDBModel:
 
         return c0, c_r
         
-    def biounit(self, assembly = 0):
+    def biomodel(self, assembly = 0):
         """
         Return the 'biologically relevant assembly' of this model
         according to the information in the PDB's BIOMT record. This

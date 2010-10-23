@@ -467,7 +467,7 @@ class Test(BT.BiskitTest):
         print (self.m.info)
         self.m.report( prnt=self.local,
                                 plot=(self.local or self.VERBOSITY > 2) )
-        self.m.biounit(1)
+        self.m.biomodel(1)
 ##      self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P_rec_original.pdb')
 ##      self.m2= self.p.parse2new( T.testRoot()+'/com/1BGS.pdb' )
 
