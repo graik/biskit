@@ -328,18 +328,20 @@ class ProfileCollection:
     def __setstate__(self, state ):
         """
         called for unpickling the object.
-        Compability fix: Convert lists to numpy arrays 
+        Compability fix: Convert Numeric arrays to numpy arrays 
+                         -- requires old Numeric
         """
         self.__dict__ = state
-        
+
+        try:
+            import Numeric
+        except:
+            return
+
         for k, v in self.profiles.items():
 
-            ## ProfileCollection < 966 stored objects and str in lists rather 
-            ## than arrays
-            ## re-assign lists so that they are converted to arrays
-            if type(v) is list:
-                self.profiles[k] = self.toarray( v )
-                self.infos[k]['isarray'] = False
+            if getattr( v, 'astype', 0) and not isinstance( v, N.ndarray):
+                self.profiles[k] = N.array( v )
     
 
     def __getitem__( self, k ):
@@ -550,37 +552,61 @@ class ProfileCollection:
         return prof
 
 
-    def toarray( self, prof ):
+    def array_or_list( self, prof, asarray ):
         """
-        Convert to array
+        Convert to array or list depending on asarray option
 
         @param prof: profile
-        @type  prof: list OR array OR str
+        @type  prof: list OR array
+        @param asarray: 1.. autodetect type, 0.. force list, 2.. force array
+        @type  asarray: 2|1|0
         
         @return: profile
-        @rtype: array
+        @rtype: list OR array
         
         @raise ProfileError:
         """
         try:
-            l = len( prof )
-            
-            if type( prof ) is str:
-                prof = list( prof )
 
-            if not isinstance( prof, N.ndarray ):
-                prof = N.array( prof )
-                
-            if N.shape( prof ) is ():
-                prof = N.array( prof.tolist(), dtype=object )
+            ## autodetect type
+            if asarray == 1:
 
-            assert N.size( prof ) == l,'length of array differs from input list'
+                if isinstance( prof, N.ndarray ):
+                    return self.__picklesave_array( prof )
+
+                if type( prof ) is str:  # tolerate strings as profiles
+                    return list( prof )
+    
+                p = self.__picklesave_array( N.array( prof ) )
+                if p.dtype.char not in ['O','c','S']: ## no char or object arrays!
+                    return p
+
+                return list( prof )
+
+            ## force list
+            if asarray == 0:
+
+                if isinstance( prof, N.ndarray ):
+                    return prof.tolist()
+
+                return list( prof )
+
+            ## force array
+            if asarray == 2:
+                if isinstance( prof, N.ndarray ):
+                    return self.__picklesave_array( prof )
                 
-            return self.__picklesave_array( prof )
+                return self.__picklesave_array( N.array( prof ) )
 
         except TypeError, why:
+            ## Numeric bug: N.array(['','','']) raises TypeError
+            if asarray == 1 or asarray == 0:
+                return list( prof )
+
             raise ProfileError, "Cannot create array from given list. %r"\
                   % T.lastError()
+
+        raise ProfileError, "%r not allowed as value for asarray" % asarray
 
 
     def expand( self, prof, mask, default ):
@@ -660,10 +686,10 @@ class ProfileCollection:
                 "Mask doesn't match profile ( N.sum(mask)!=len(prof) ). " +
                 "%i != %i" % (N.sum(mask), len( prof ) ) )
 
-        prof = self.toarray( prof )
+        prof = self.array_or_list( prof, asarray )
 
         ## use default == 0 for arrays
-        if not default:
+        if not default and isinstance( prof, N.ndarray ):
             default = 0
 
         ## expand profile to have a value also for masked positions
@@ -678,6 +704,7 @@ class ProfileCollection:
 
         info['version'] = '%s %s' % (T.dateString(), self.version() )
         if comment: info['comment'] = comment
+        info['isarray'] = isinstance( prof, N.ndarray )
         info['default'] = default
 
         ## optional infos
@@ -823,7 +850,7 @@ class ProfileCollection:
                 if isinstance( prof, N.ndarray ):
                     result.set( key, N.take( prof, indices ) )
                 else:
-                    result.set( key, [ prof[i] for i in indices ] )
+                    result.set( key, [ prof[i] for i in indices ], asarray=0 )
 
                 result.setInfo( key, **copy.deepcopy(self.getInfo(key)) )
                 result.setInfo( key, changed=1 )

@@ -148,10 +148,7 @@ class Residue(object):
         @param model: PDBModel, parent model of this residue
         @param index: int, position of this residue in model's residue index
         """
-        if model:
-            self.model = weakref.ref( model )
-        else:
-            self.model = returnNone
+        self.model = weakref.ref( model ) if model else returnNone
         self.i = index or 0
         self.terminal = terminal
 
@@ -369,7 +366,7 @@ class Residue(object):
         names = m.atoms['name'][self.from_atom : self.to_atom]
 
         ## number of occurrences of each atom name
-        counts = [ N.sum(names == n) for n in names ]
+        counts = [ names.count( n ) for n in names ]
         if max( counts ) <= 1:
             return  ## nothing to do
         

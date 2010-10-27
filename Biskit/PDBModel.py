@@ -1251,10 +1251,10 @@ class PDBModel:
 
           >>> mask = m.maskFrom( 'name', 'CA' )
           >>> mask = m.maskFrom( 'name', lambda a: a == 'CA' )
-          >>> mask = [ a == 'CA' for a in m.atoms['name'] ]
+          >>> mask = N.array( [ a == 'CA' for a in m.atoms['name'] ] )
 
-        Or simply use::
-          >>> mask = m.atoms['name'] == 'CA'
+        People having numpy installed can also simply use::
+          >>> mask = numpy.array(m.atoms['name']) == 'CA'
 
         @param key: the name of the profile to use
         @type  key: str
@@ -2015,7 +2015,7 @@ class PDBModel:
         ## remove OXT and OT2 if requested
         if rmOxt:
             ## overkill: we actually would only need to look into last residue
-            anames = self.atoms['name'][i_start:i_scar]
+            anames = N.array( self.atoms['name'][i_start:i_scar] )
             i_oxt = N.flatnonzero( N.logical_or( anames=='OXT', anames=='OT2' ))
             if len( i_oxt ) > 0:
                 self.remove( i_oxt )
@@ -2125,7 +2125,7 @@ class PDBModel:
 
         r.residues = self.residues.concat( m.residues, )
         r.atoms = self.atoms.concat( m.atoms, )
-
+        
         r.residues.model = r
         r.atoms.model = r
 
@@ -2143,6 +2143,14 @@ class PDBModel:
             r.mergeResidues( m.lenResidues() -1 )
 
         r.info = copy.deepcopy( self.info )
+        
+        try:
+            k = max(self.biounit.keys())+1
+            r.residues['biomol'][self.lenResidues():] += k
+            r.biounit = self.biounit.append(m.biounit)
+            r.biounit.model = r
+        except AttributeError:
+            pass
 
         return r.concat( *models[1:] )
 
@@ -2225,6 +2233,13 @@ class PDBModel:
         r.pdbCode = self.pdbCode
         r.fileName = self.fileName
         r.source = self.source
+        
+        ## copy the biounit
+        try:
+            r.biounit = self.biounit.take(i)
+            r.biounit.model = r
+        except AttributeError:
+            pass
 
         return r
 
@@ -3297,7 +3312,7 @@ class PDBModel:
         else:
             j = self.resIndex()[stop+1]
 
-        return self.atoms['name'][i:j].tolist()
+        return self.atoms['name'][i:j]
 
 
     def __testDict_and( self, dic, condition ):
@@ -3524,7 +3539,37 @@ class PDBModel:
                if ref.__chainFraction( c, self ) > fractLimit  ]
 
         return c0, c_r
+        
+    def biomodel(self, assembly = 0):
+        """
+        Return the 'biologically relevant assembly' of this model
+        according to the information in the PDB's BIOMT record. This
+        removes redundant chains and performs symetry operations to
+        complete multimeric structures.  Some PDBs define several
+        alternative biological units: usually (0) the author-defined
+        one and (1) software-defined -- see L{lenBiounits}.
 
+        @param assembly: assembly index (default: 0 .. author-determined unit)
+        @type  assembly: int
+
+        @return: PDBModel; biologically relevant assembly
+        """
+        try:
+            r = self.biounit.makeMultimer(assembly)
+        except AttributeError:
+            r = self
+        return r
+        
+    def lenBiounits (self):
+        """
+        @return: int; number of alternative biological assemblies defined in
+                 PDB header
+        """
+        try:
+            r = len(self.biounit.keys())
+        except AttributeError:
+            r = 0
+        return r
 
 
 #############
@@ -3631,16 +3676,16 @@ class Test(BT.BiskitTest):
         """PDBModel renameAmberRes tests"""
         self.m3 = B.PDBModel( T.testRoot()+'/amber/1HPT_0dry.pdb')
 
-        n_cyx = N.sum(self.m3.atoms['residue_name'] == 'CYX')
-        n_hid = N.sum(self.m3.atoms['residue_name'] == 'HID')
-        n_hip = N.sum(self.m3.atoms['residue_name'] == 'HIP')
-        n_hie = N.sum(self.m3.atoms['residue_name'] == 'HIE')
+        n_cyx = self.m3.atoms['residue_name'].count('CYX')
+        n_hid = self.m3.atoms['residue_name'].count('HID')
+        n_hip = self.m3.atoms['residue_name'].count('HIP')
+        n_hie = self.m3.atoms['residue_name'].count('HIE')
         n_hix = n_hid + n_hie + n_hip
 
         self.m3.renameAmberRes()
 
-        self.assertEqual(n_cyx, N.sum(self.m3.atoms['residue_name']=='CYS'))
-        self.assertEqual(n_hix, N.sum(self.m3.atoms['residue_name']=='HIS'))
+        self.assertEqual(n_cyx, self.m3.atoms['residue_name'].count('CYS'))
+        self.assertEqual(n_hix, self.m3.atoms['residue_name'].count('HIS'))
 
     def test_xplor2amber(self):
         """PDBModel xplor2amber test"""
@@ -3670,14 +3715,14 @@ class Test(BT.BiskitTest):
         ## _m2 uses _m1 as source
         self._m2 = B.PDBModel( self._m )
         l1 = self._m2.atoms['name']
-        self.assert_( N.all(l1 == anames) )
+        self.assertEqual( l1, anames )
 
         ## remove unchanged profiles and coordinates
         self._m2.slim()
 
         ## fetch them again from source (of source)
         l2 = self._m2.atoms['name']
-        self.assert_( N.all(l2 == anames) )
+        self.assertEqual( l2, anames )
 
         ## disconnect _m from PDB file source
         self._m.saveAs( self.fout2 )
@@ -3686,7 +3731,7 @@ class Test(BT.BiskitTest):
         self._m.slim()
 
         ## this should now trigger the reloading of fout2
-        self.assert_( N.all(self._m2.atoms['name'] == anames) )
+        self.assertEqual( self._m2.atoms['name'], anames )
         self.assert_( N.all( self._m2.getXyz()[0] == xyz0) )
 
         ## after disconnection, slim() should not have any effect
@@ -3717,8 +3762,8 @@ class Test(BT.BiskitTest):
         r.mergeChains( 0 )
         self.r = r
         self.assert_( r.lenChains() == m.lenChains() )
-        self.assert_( N.all( r['chain_id'] == chain_ids ) )
-        self.assert_( N.all( r['residue_number'] == res_numbers) )
+        self.assert_( N.all( N.array(r['chain_id']) == chain_ids ) )
+        self.assert_( N.all( N.array(r['residue_number']) == res_numbers ) )
         
     def test_mergeResidues( self ):
         """PDBModel.mergeResidues test"""
