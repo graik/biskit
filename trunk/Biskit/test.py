@@ -439,7 +439,7 @@ def getOuterNamespace():
 
     return r
 
-def getCallerNamespace( callpattern='localTest' ):
+def getCallingNamespace( callpattern='localTest' ):
     """
     Fetch the namespace of the module/script from which the localTest method
     is running. This is more general than the getOuterNamespace method and 
@@ -457,6 +457,9 @@ def getCallerNamespace( callpattern='localTest' ):
         i = 0
         while frames[i][3] != callpattern:
             i += 1
+            if i >= len( frames ):
+                raise BiskitTestError, \
+                      'cannot find %s in current stack trace' % callpattern
         
         f = frames[i + 1][0]
         r = f.f_globals
@@ -511,8 +514,7 @@ def localTest( testclass=None, verbosity=BiskitTest.VERBOSITY,
     @raise BiskitTestError: if there is no BiskitTest-derived class defined
     """
     ## get calling namespace
-    #outer = getOuterNamespace()
-    outer = getCallerNamespace()
+    outer = getCallingNamespace( callpattern='localTest' )
     if testclass:
         testclasses = [testclass]
     else:
