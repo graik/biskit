@@ -1,0 +1,43 @@
+   evaluate ($maxenergy = 99999999999)
+   evaluate ($sumenerL = 0)
+   evaluate ($i = 0)
+   while ($i lt $ncopy) loop inter
+      constraints 
+         interaction (segid $segiL_$i) (segid I% or segid $segiL_$i) weights * 1.0  end
+         interaction (segid $segiL_$i) (segid R%) weights * 1.0 vdw 0.1 elec 0.1 end
+      end
+
+      energy end
+      if ($vdw lt $maxenergy) then
+         evaluate ($maxenergy = $vdw)
+         evaluate ($maxL = $segiL_$i)
+      end if
+      evaluate ($enerL_$i = max(0.0,1/exp($vdw/($kboltz*$WeightTemp))))
+      evaluate ($sumenerL = $sumenerL + $enerL_$i)
+      evaluate ($i = $i + 1)
+   end loop inter
+
+   evaluate ($maxenergy = 99999999999)
+   evaluate ($sumenerR = 0)
+   evaluate ($i = 0)
+   while ($i lt $ncopy) loop inter
+      constraints 
+         interaction (segid $segiR_$i) (segid I% or segid $segiR_$i) weights * 1.0  end
+         interaction (segid $segiR_$i) (segid L%) weights * 1.0 vdw 0.1 elec 0.1 end
+      end
+
+      energy end
+      if ($vdw lt $maxenergy) then
+         evaluate ($maxenergy = $vdw)
+         evaluate ($maxR = $segiR_$i)
+      end if
+      evaluate ($enerR_$i = max(0.0,1/exp($vdw/($kboltz*$WeightTemp))))
+      evaluate ($sumenerR = $sumenerR + $enerR_$i)
+      evaluate ($i = $i + 1)
+   end loop inter
+   evaluate ($i = 0)
+   while ($i lt $ncopy) loop inter
+      evaluate ($enerL_$i = $enerL_$i /($sumenerL))
+      evaluate ($enerR_$i = $enerR_$i /($sumenerR))
+      evaluate ($i = $i + 1)
+   end loop inter   

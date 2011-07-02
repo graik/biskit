@@ -1,0 +1,28 @@
+[BINARY]
+
+comment=prosa2003 http://www.proceryon.com/solutions/prosa.html
+
+## binary
+bin=prosa2003
+
+## working directory
+cwd=
+
+## wrap process in shell
+shell=0
+
+## use non-default shell
+shellexe=
+
+## communicate with process via STDIN and STDOUT
+pipes=0
+
+## Use new environment containing only variables given below
+replaceEnv=1
+
+##
+## run time environment settings
+## Empty entries mark variables that have to be specified from outside
+##
+[ENVIRONMENT]
+PROSA_BASE =

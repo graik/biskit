@@ -1,0 +1,20 @@
+# use with pdb2xplor
+! Generate structure file for a protein
+!
+! $Revision$
+! last $Date$
+! last $Author$
+
+topology                        ! Read topology file
+   reset
+   @@%(data_root)s/xplor/templates/param19/toph19.pro
+   @@%(data_root)s/xplor/templates/param19/toph19.sol
+   @@%(data_root)s/xplor/templates/param19/unpatch_caps.pro
+end
+
+parameter                       ! Read parameter file
+   reset
+   @@%(data_root)s/xplor/templates/param19/param19.pro
+   @@%(data_root)s/xplor/templates/param19/param19.sol
+end
+
