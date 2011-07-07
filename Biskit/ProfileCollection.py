@@ -912,13 +912,20 @@ class ProfileCollection:
         @return: concatenated profile(s)  
         @rtype: ProfileCollection / subclass
         """
-
+        ## end recursion (no more arguments)
         if len( profiles ) == 0:
             return self
 
         next = profiles[0]
 
         r = self.__class__()
+        
+        ## special case: concat something to empty profile collection
+        if len( self ) == 0:
+            return next.clone().concat( *profiles[1:] )
+        if len( next ) == 0:
+            return self.clone().concat( *profiles[1:] )
+        
 
         for k, p in self.profiles.items():
 
@@ -1016,12 +1023,12 @@ class ProfileCollection:
     def isChanged( self, keys=None ):
         """
         @param keys: only check these profiles (default: None -> means all)
-        @type  keys: [ str ]
+        @type  keys: [ str ] OR str
         @return: True, if any of the profiles is tagged as 'changed'
         @rtype: bool
         """
-
         keys = keys or self.keys()
+        keys = T.toList( keys )  ## in case single str is given as argument 
 
         for k in keys:
             if self.getInfo( k )['changed']:
@@ -1182,8 +1189,8 @@ class Test(BT.BiskitTest):
                       [0, 2, 4, 6, 8, 0, 2, 4, 6, 8, 0, 2, 4, 6, 8]))
     
 
-    def test_iterations(self):
-        """ProfileCollection test"""
+    def test_concat(self):
+        """ProfileCollection.concat test"""
         import string
         import random
 
@@ -1199,7 +1206,15 @@ class Test(BT.BiskitTest):
         self.p3 = self.p3.concat( self.p3, self.p3, self.p3 )
         self.p3 = self.p3.concat( self.p3, self.p3, self.p3 )
         self.p3 = self.p3.concat( self.p3, self.p3, self.p3 )
-
+        
+        empty = ProfileCollection()
+        double = self.p3.concat( self.p3 )
+        self.p5 = empty.concat( self.p3 )
+        self.assertEqual( self.p3['letters'], self.p5['letters'] )
+        
+        self.p5 = self.p3.concat( empty, empty, self.p3 )
+        self.assertEqual( double['letters'], self.p5['letters'] )
+        
 
     def test_crossvies(self):
         """ProfileCollection.crossviews test"""
@@ -1216,7 +1231,7 @@ class Test(BT.BiskitTest):
         
         del self.p4
         
-        self.assert_( views[0].alive is False )
+        self.assert_( views[0].alive is False ) 
 
 
 def clock( s ):
