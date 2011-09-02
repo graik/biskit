@@ -942,19 +942,45 @@ class ProfileCollection:
         return r.concat( *profiles[1:] )
 
 
-    def update( self, other, stickyChanged=1 ):
+    def update( self, other, stickyChanged=1, mask=None ):
         """
         Merge other ProfileCollection into this one, replacing existing
         profiles and info values. This is the obvious translation of
         dict.update(). The changed flag of each profile is set to 1 if:
            1. an existing profile is overridden with different values
            2. the profile is marked 'changed' in the other collection
+
+        The two ProfileCollections should have the same dimension in terms of
+        atoms, that is p1.profLength() == p2.profLength(). If this is not the
+        case, it is possible to 'mask' atoms in p1 that are 
+        are missing in p2. That means the target ProfileCollection can
+        have more atoms then the other collection but not vice-versa.
+        
+        Example::
+            p1.profLength() == 10
+            p2.profLength() == 5
+            p1.update( p2, mask=[0,1,0,1,0,1,0,1,0,1] )
+        ...would assign the atom values of the shorter collection p2 to every
+        second atom of the longer collection p1.
+        If p2 has more items (atoms) per profile than p1, this would not work.
+        In this case p2 first needs to be compressed to the same shape
+        as p1::
+            p1.profLength() == 5
+            p2.profLength() == 10
+            p2 = p2.compress( [0,1,0,1,0,1,0,1,0,1] )
+            p1.update( p2 )
           
         @param other: profile
         @type  other: ProfileCollection
         @param stickyChanged: mark all profiles 'changed' that are marked
                               'changed' in the other collection (default: 1)
         @type  stickyChanged: 0|1
+        @param mask: 1 x N_atoms array of 0|1, if the other collection has less
+                     atoms than this one, mark those positions with 0 that are
+                     only existing in this collection 
+                     (N.sum(mask)==self.profLength())
+        @type  mask: [int]
+        @param mask: N.array of 0 or 1, 
         """
         for key, prof in other.items():
 
@@ -967,7 +993,7 @@ class ProfileCollection:
             else:
                 del info['changed']
 
-            self.set( key, prof, **info )
+            self.set( key, prof, mask=mask, **info )
 
 
     def updateMissing( self, source, copyMissing=1, allowEmpty=0,
