@@ -295,16 +295,17 @@ class PDBModel:
         @rtype: any        
         """
         if type( k ) is str:
-            if v is not None and len( v ) == self.lenAtoms():
-                return self.atoms.set( k, v )
-            if v is not None and len( v ) == self.lenResidues():
-                return self.residues.set( k, v )
             if k in self.atoms:
                 return self.atoms.set( k, v )
             if k in self.residues:
                 return self.residues.set( k, v )
             if k in self.info:
                 self.info[ k ] = v
+                return
+            if v is not None and len( v ) == self.lenAtoms():
+                return self.atoms.set( k, v )
+            if v is not None and len( v ) == self.lenResidues():
+                return self.residues.set( k, v )
             raise ProfileError, \
                   'Value cannot clearly be assigned to either atom or '+\
                   'residue profiles'
@@ -592,11 +593,12 @@ class PDBModel:
         @return: xyz-coordinates, N.array( 3 x N_atoms, N.Float32 )
         @rtype: array 
         """
-        if self.xyz is None:
+        if self.xyz is None and self.validSource() is not None:
             self.update( force=1 )
 
         if self.xyz is None:
-            return N.array( [], N.Float32 )
+            ## empty array that can be concatenated to other xyz arrays
+            return N.zeros( (0,3), N.float32 )
 
         if mask is None:
             return self.xyz
@@ -2133,7 +2135,7 @@ class PDBModel:
         r._resIndex  = N.concatenate((self.resIndex(), append_I ))
 
         append_I = m.chainIndex() +self.lenAtoms()
-        r._chainIndex =N.concatenate((self.chainIndex(), append_I))
+        r._chainIndex =N.concatenate((self.chainIndex( singleRes=1 ), append_I))
 
         ## remove traces of residue or chain breaks
         if not newChain:
@@ -2577,6 +2579,9 @@ class PDBModel:
         @rtype:  list of int
         """
         result = []
+        
+        if self.lenAtoms() == 0:
+            return N.array( result, N.Int )
 
         lastResNumber = -100
         lastResName   = ''
@@ -2675,6 +2680,9 @@ class PDBModel:
 
         result = []
 
+        if self.lenAtoms() == 0:
+            return N.array( result, N.Int )
+        
         lastResidue = -100
         lastChainID = None
         lastSegID = None
@@ -3578,6 +3586,9 @@ class PDBModel:
 
 import Biskit.test as BT
 
+class _TestData(object):
+    MODEL = None
+
 class Test(BT.BiskitTest):
     """Test class """
 
@@ -3589,13 +3600,12 @@ class Test(BT.BiskitTest):
         import tempfile
 
         ## loading output file from X-plor
-        t = time.clock()
-        self.MODEL = self.MODEL or B.PDBModel( T.testRoot()+'/com/1BGS.pdb')
+        self.MODEL = _TestData.MODEL or B.PDBModel( T.testRoot()+'/com/1BGS.pdb')
+        _TestData.MODEL = self.MODEL
         self.m = self.MODEL
         self.fout_pdb = tempfile.mktemp( '_test1.pdb' )
         self.fout1 = tempfile.mktemp( '_test1.model' )
         self.fout2 = tempfile.mktemp( '_test2.model' )
-        if self.local: print "prepare: ", time.clock() - t
 
     def cleanUp( self ):
         T.tryRemove( self.fout1 )
@@ -3781,7 +3791,52 @@ class Test(BT.BiskitTest):
         self.assertEqual( m.lenResidues(), len_r - 1 )
         self.assertEqual( m.lenAtoms(), len_a )
         self.assertEqual( len( r_gly ), 2 * 5 )
+        
+    def test_getset(self):
+        """PDBModel.__get/set__ test"""
+        self.assertEqual( self.m[10]['occupancy'], 1.0 )
+        self.assertEqual( self.m['chain_id', 'changed'], 0 )
+        self.assertEqual( len(self.m['chain_id'] ), len( self.m ) )
+        self.assert_( type( self.m['date']) is str )
+        self.m['resname'] = self.m.atom2resProfile('residue_name')
+        self.assertEqual( len( self.m['resname'] ), self.m.lenResidues() )
+        
+        self.m.info['tested'] = False
+        self.m['tested'] = True
+        self.assert_( self.m.info['tested'] )
 
+        self.m['serial_number', 'default'] = 1
+        self.assert_( self.m.atoms['serial_number','default'] == 1 )
+        
+        self.m['resname', 'changed'] = 0
+        self.assertFalse( self.m.residues.isChanged( 'resname' ) )
+        
+        self.m['index'] = range( len( self.m) )
+        self.assert_( self.m['index'][-1] == len( self.m ) - 1 )
+        
+    def test_slice(self):
+        """PDBModel.__slice__ test"""
+        self.assert_( len( self.m[0:100:20]  ) == 5 )
+
+    def test_various(self):
+        """PDBModel various tests"""
+        m = PDBModel()
+        self.assertEqual( type( m.getXyz() ), N.ndarray )
+    
+    def test_compareChains(self):
+        """PDBModel.compareChains test"""
+        m = self.m.clone()
+        m2 = PDBModel()
+        ## extract first 100 atoms of each chain
+        for i in range(m.lenChains()):
+            m2 = m2.concat( m.takeChains([i]).take( range(100) ) )
+            
+        m3 = m2.takeChains( [2,3,0,1] )  ## re-order chains
+            
+        i, iref = m2.compareChains( m3 )
+        
+        
+        
 class TestExe( BT.Test ):
     """PDBModel tests that rely on external applications"""
     
