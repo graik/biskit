@@ -485,6 +485,8 @@ class Executor:
 
         if self.exe.pipes and self.f_out:
             open( self.f_out, 'w').writelines( self.output )
+        if not self.exe.pipes and self.catch_err:
+            self.error = open( self.f_err, 'r' ).readlines()
 
         if self.verbose: self.log.add(".. finished.")
 
