@@ -64,7 +64,7 @@ def squared_distance_matrix(x, y):
 
 
 def distance_matrix(x, y):
-	return N.sqrt(squared_distance_matrix(x, y))
+    return N.sqrt(squared_distance_matrix(x, y))
 
 
 class FuzzyCluster:
@@ -119,7 +119,7 @@ class FuzzyCluster:
         msm = self.calc_membership_matrix(d2)
         centers = self.calc_cluster_center(msm)
 
-       	return d2, msm, centers
+        return d2, msm, centers
 
 
     def error(self, msm, d2):
@@ -140,13 +140,13 @@ class FuzzyCluster:
     def create_membership_matrix(self):
         """
         Create a random membership matrix.
-        
+
         @return: random array of shape length of data to
                  cluster times number of clusters
         @rtype: array('f')
         """
         seed(self.seedx, self.seedy)
-        
+
         r = random((self.npoints, self.n_cluster))
         return N.transpose(r / N.sum(r))
 
@@ -155,7 +155,7 @@ class FuzzyCluster:
         """
         Start the cluestering. Run until the error is below the error
         treshold or the max number of iterations have been run.
-        
+
         @param errorthreshold: treshold value for error 
         @type  errorthreshold: float
         @param n_iterations: treshold value for number of iterations
@@ -240,29 +240,28 @@ import Biskit.test as BT
 
 class Test(BT.BiskitTest):
     """FuzzyCluster test"""    
-    
+
     def test_FuzzyCluster( self):
         """FuzzyCluster test"""
-	import gnuplot as G
+        import gnuplot as G
 
-	x1 = random((500,2))
-	x2 = random((500,2)) + 1
-	x3 = random((500,2)) + 2
+        x1 = random((500,2))
+        x2 = random((500,2)) + 1
+        x3 = random((500,2)) + 2
 
-	self.x = N.concatenate((x1, x2, x3))
+        self.x = N.concatenate((x1, x2, x3))
 
-	self.fuzzy = FuzzyCluster(self.x, n_cluster=5, weight=1.5)
+        self.fuzzy = FuzzyCluster(self.x, n_cluster=5, weight=1.5)
 
-	self.centers = self.fuzzy.go(1.e-30, n_iterations=50, nstep=10,
-				     verbose=self.local)
+        self.centers = self.fuzzy.go(1.e-30, n_iterations=50, nstep=10,
+                                     verbose=self.local)
 
-	if self.local:
-	    print "cluster centers are displayed in green"
-	    G.scatter( self.x, self.centers )
-	    
+        if self.local:
+            print "cluster centers are displayed in green"
+            G.scatter( self.x, self.centers )
+
         self.assertEqual( N.shape(self.centers), (5, 2) )
-          
+
 if __name__ == '__main__':
 
     BT.localTest()
-
