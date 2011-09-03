@@ -34,7 +34,7 @@ class Density:
     """
     Analyze a density distribution of values.
     Can be created from a list of samples or from a discrete distribution::
-    
+
       Density( values = [ float ] )
         or
       Density( p = array(2xN,'f') )
@@ -66,7 +66,7 @@ class Density:
     def store(self, val):
         """
         Analyze distribution data.
-        
+
         @param val: array (2 x len(data) ) with start of bin and witdh
                     of bin (default: None)
         @type  val: array        
@@ -99,10 +99,10 @@ class Density:
     def confidenceInterval(self, level):
         """
         confidenceInterval(self, level)
-        
+
         @param level: confidence level (e.g. 0.68 for stdev interval)
         @type  level: float
-        
+
         @return: start and end of the confidence interval
                  containing |level|*100 % of the probability
         @rtype: float, float
@@ -125,10 +125,10 @@ class Density:
         """
         findConfidenceInterval(self, x)
         Find the smallest possible density interval that still includes x.
-        
+
         @param x: value
         @type  x: float
-        
+
         @return: convidence level, interval start and end
         @rtype: float, (float,float)
         """
@@ -176,8 +176,8 @@ class Density:
         l = N.array(l)
         l = N.take(l, N.argsort(l))
 
-	globals().update( locals() )
-	
+        globals().update( locals() )
+
         break_points = N.nonzero(N.greater(l[1:] - l[:-1], 1))
 
         start = 0
@@ -200,7 +200,7 @@ def p_lognormal(x, alpha, beta):
     the usual mean and standard dev of the lognormal distribution itself but
     are the mean and stdev of the distribution after log-transformation.
     The two parameters can hence be calculated from n sample values v::
-    
+
       alpha = 1/n N.sum( ln(vi) )
       beta = N.sqrt( 1/(n-1) N.sum( ln(vi) - alpha )^2  )
 
@@ -210,7 +210,7 @@ def p_lognormal(x, alpha, beta):
     @type  alpha: float
     @param beta: stdev of the log-transformed random variable
     @type  beta: float
-    
+
     @return: probability of x
     @rtype: float
     """
@@ -223,14 +223,14 @@ def logConfidence( x, R, clip=1e-32 ):
     Estimate the probability of x NOT beeing a random observation from a
     lognormal distribution that is described by a set of random values.
     The exact solution to this problem is in L{Biskit.Statistics.lognormal}.
-    
+
     @param x: observed value
     @type  x: float
     @param R: sample of random values; 0 -> don't clip (default: 1e-32)
     @type  R: [float]
     @param clip: clip zeros at this value
     @type  clip: float
-    
+
     @return:  confidence that x is not random, mean of random distrib.
     @rtype: (float, float)
     """
@@ -260,29 +260,29 @@ def logConfidence( x, R, clip=1e-32 ):
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """
     Test class
     """
 
     def test_Density(self):
-	"""Statistics.Density test"""
+        """Statistics.Density test"""
         import random
 
         ## a lognormal density distribution the log of which has mean 1.0
         ## and stdev 0.5
         self.X = [ (x, p_lognormal(x, 1.0, 0.5))
-		   for x in N.arange(0.00001, 50, 0.001)]
+                   for x in N.arange(0.00001, 50, 0.001)]
 
-	alpha = 2.
-	beta = 0.6
+        alpha = 2.
+        beta = 0.6
 
-	self.R = [ random.lognormvariate( alpha, beta )
-		   for i in range( 10000 )]
+        self.R = [ random.lognormvariate( alpha, beta )
+                   for i in range( 10000 )]
 
-	p = logConfidence( 6.0, self.R )[0]#, area(6.0, alpha, beta)
-            
+        p = logConfidence( 6.0, self.R )[0]#, area(6.0, alpha, beta)
+
 
 if __name__ == '__main__':
 

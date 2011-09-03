@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -50,7 +50,7 @@ class StructMaster(TrackingJobMaster):
         slave_script = T.projectRoot() + '/Biskit/StructureSlave.py'
 
         TrackingJobMaster.__init__(self, dat, chunk, hosts, niceness,
-                           slave_script, **kw)
+                                   slave_script, **kw)
 
         self.options = {}
         self.options['out'] = outFolder
@@ -58,7 +58,7 @@ class StructMaster(TrackingJobMaster):
         self.options['skipRes'] = None
         if skipWat:
             self.options['skipRes'] = ['WAT','TIP3','H2O','WWW','Na+','Cl-']
-        
+
         if kw.has_key('show_output'):
             self.options['report'] = not kw['show_output']
 
@@ -90,44 +90,44 @@ class StructMaster(TrackingJobMaster):
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test"""
 
     TAGS = [ BT.PVM ]
 
     def prepare(self):
-	import tempfile
+        import tempfile
         self.out_folder = tempfile.mkdtemp( '_test_StructureMaster' )
 
     def test_StructureMaster(self):
-	"""StructureMaster test"""
-	import os
+        """StructureMaster test"""
+        import os
 
         pdbs = {T.testRoot() + '/lig/1A19.pdb':'',
                 T.testRoot() + '/rec/1A2P.pdb':'',
                 T.testRoot() + '/com/1BGS.pdb':''}
 
         self.master = StructMaster( pdbs,
-                               2,
-                               hosts=hosts.cpus_all,
-                               outFolder= self.out_folder,
-                               show_output=self.local,
-                               verbose=self.local,
-                               add_hosts=1 )
+                                    2,
+                                    hosts=hosts.cpus_all,
+                                    outFolder= self.out_folder,
+                                    show_output=self.local,
+                                    verbose=self.local,
+                                    add_hosts=1 )
 
         ## run and wait for result
         self.r = self.master.calculateResult()
 
         if self.local:
             print 'The converted pdb files has been written to %s' \
-		  % self.out_folder
+                  % self.out_folder
 
-	self.assert_( os.path.exists( self.out_folder + '/1A19.model') )
+        self.assert_( os.path.exists( self.out_folder + '/1A19.model') )
 
     def cleanUp(self):
         T.tryRemove( self.out_folder, tree=1 )
-        
+
 if __name__ == '__main__':
 
     BT.localTest()

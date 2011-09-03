@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -85,21 +85,21 @@ class FixedList( list ):
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test case"""
 
     def test_FixedList(self):
-	"""Dock.FixedList test"""
+        """Dock.FixedList test"""
         self.lst = range(10)
 
         self.f = FixedList( self.lst )
 
         if self.local: print 'f.fixed() is %i for a FixedList'% self.f.fixed()
-        
+
         self.assertRaises( FixedListError, self.f.append, 6 )
 
-        
+
 if __name__ == '__main__':
 
     BT.localTest()

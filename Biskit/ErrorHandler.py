@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -24,7 +24,7 @@
 """
 Default Error Handler for Biskit classes.
 """
-    
+
 import Biskit.tools as T
 from Biskit.LogFile import ErrLog
 from Biskit.Errors import HandledError, NormalError, FatalError
@@ -45,10 +45,10 @@ class ErrorHandler( object ):
     def fatal( self, message ):
         """
         Handle a fatal error (likely a bug), stop program execution.
-        
+
         @param message: message to be given to user
         @type  message: str
-        
+
         @raise FatalError: 
         """
         s = '\nFatal Error: '+str(message)
@@ -63,10 +63,10 @@ class ErrorHandler( object ):
         """
         Handle a normal error (like non-existing file) that is not
         necessarily a bug.
-        
+
         @param message: message to be given to user
         @type  message: str
-        
+
         @raise NormalError: 
         """
         s = '\nError: '+str(message)
@@ -80,7 +80,7 @@ class ErrorHandler( object ):
     def warning( self, message, error=1, trace=0 ):
         """
         Issue a warning. No exception is raised.
-        
+
         @param message: message to be given to user
         @type  message: str
         @param error: report Exception with line (default: 1)
@@ -109,31 +109,30 @@ import Biskit.test as BT
 
 class Test(BT.BiskitTest):
     """ErrorHandler test"""
-    
+
     def prepare(self):
         import tempfile
-	self.f_out = tempfile.mktemp( '_test_ErrorHandler' )
+        self.f_out = tempfile.mktemp( '_test_ErrorHandler' )
 
     def cleanUp(self):
         T.tryRemove( self.f_out )
-            
+
     def test_ErrorHandler( self ):
         """ErrorHandler test"""
         from Biskit.LogFile import LogFile
-        
+
         self.err_log = LogFile( self.f_out )
-        
+
         self.e = ErrorHandler( log=self.err_log )
         self.e.warning( 'A warning' )
 
         if self.local:
             print 'An error log file was written to %s'%self.f_out
 
-	lines = open(self.err_log.fname).readlines()
-	self.assertEquals(lines[-1],'Warning (ignored): A warning\n')
-        
+        lines = open(self.err_log.fname).readlines()
+        self.assertEquals(lines[-1],'Warning (ignored): A warning\n')
+
 if __name__ == '__main__':
 
     BT.localTest(debug=0)
-    
 

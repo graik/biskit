@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -59,13 +59,13 @@ class Xplor (XplorInput):
         """
         XplorInput.__init__(self, absfile(path) + '/'
                             + cleaner.pdbname + "_generate.inp" )
-        
+
         self.cleaner = cleaner
         self.log = cleaner.log
 
         self.path = absfile( path )
         self.path += '/'
-            
+
         self.header_template = absfile( fheader )
         self.segment_template = absfile( fsegment )
         self.tail_template = absfile( ftail )
@@ -86,7 +86,7 @@ class Xplor (XplorInput):
         self.__dict__.update( extras )
 
         self.log.add("\nPreparing XPlor generate.inp file:\n" + 30 * '-' +'\n')
-        
+
         ## read all segments from cleaner
         self.chains = []
         chain = cleaner.next()
@@ -101,7 +101,7 @@ class Xplor (XplorInput):
         self.log.add("Writing pdb file for each segment.")
         self.writeChains()
 
-        
+
     def _getSS(self, res=['CYS','CYX']):
         """
         Get all S-S bonds as list of tuples (each having two residues)
@@ -120,15 +120,15 @@ class Xplor (XplorInput):
                     if residue.name in res: #'CYS':
                         vectorCoord = Vector(residue['SG'].position.array)
                         residueList = residueList +\
-                                [{'res':residue.number, 'id':chain.segment_id,
-                                  'xyz':vectorCoord, 'index':resIndex},]
+                                    [{'res':residue.number, 'id':chain.segment_id,
+                                      'xyz':vectorCoord, 'index':resIndex},]
                 except:
                     self.log.add(
                         "_getSS(): Error while looking for S-S bonds: ")
                     self.log.add("residue: " + str(residue) )
                     self.log.add("Error: " + lastError() + '\n' )
                     errWriteln("Error in _getSS. See log for details")
-                    
+
                 resIndex = resIndex + 1
 
         ## Calculate distances between all entries in that list
@@ -141,7 +141,7 @@ class Xplor (XplorInput):
                 coord2=residueList[counter2]['xyz']
                 if (coord1 - coord2).length() < self.ss_cutoff:
                     contactList = contactList +\
-                             [(residueList[counter1], residueList[counter2]),]
+                                [(residueList[counter1], residueList[counter2]),]
                 counter2 =counter2 +1
             counter1 = counter1 + 1
 
@@ -166,13 +166,13 @@ class Xplor (XplorInput):
                     chain.residues[res1].name = 'CYX'
                     self.log.add(
                         "\nRenamed residue %i of segment %s from CYS to CYX."
-                                 % (res1, chainID1))
-                    
+                        % (res1, chainID1))
+
                 if chain.segment_id == chainID2:
                     chain.residues[res2].name = 'CYX'
                     self.log.add(
                         "\nRenamed residue %i of segment %s from CYS to CYX."
-                                 % (res2, chainID2))
+                        % (res2, chainID2))
 
 
     def _patchAllSS(self):
@@ -231,7 +231,7 @@ class Xplor (XplorInput):
         patch = self._getTerPatch(nTerPatch, "nil", nTerResNum, chain)
         patch = patch + self._getTerPatch(nTerPatch2, '"+"', nTerResNum, chain)
         patch = patch + """patch NTR2 refe="-"=( segid "%4s" and resid "%s" ) refe="+"=( segid "%4s" and resid "%s") end\n\n""" %\
-                (chain.segment_id, nTerResNum, chain.segment_id, n2TerResNum)
+              (chain.segment_id, nTerResNum, chain.segment_id, n2TerResNum)
 
         patch = patch + self._getTerPatch(cTerPatch, "nil", cTerResNum, chain)
         patch = patch + self._getTerPatch("CTER", '"-"', cTerResNum, chain)
@@ -254,7 +254,7 @@ class Xplor (XplorInput):
             self.log.add("  Segment template: " + self.segment_template)
             self.log.add("  Tail template   : " + self.tail_template)
             self.log.add("\nThese options (place holders) are available:")
-            
+
             for k in self.__dict__.keys():
                 self.log.add("\t%25s\t%s" % (k, str(self.__dict__[k])[:65] ))
 
@@ -291,8 +291,8 @@ def _defaultOptions():
         't':dataRoot() + '/xplor/templates/param19',
         'c':'0',
         'thickness':'9',
-	'pw_dist':'3.5',
-	'water_diam':'2.4'}
+        'pw_dist':'3.5',
+        'water_diam':'2.4'}
 
 def _use(options):
     print """
@@ -399,7 +399,7 @@ def main(options):
 
     chainMask = options.get('cmask', None)
     if chainMask: chainMask = toIntList(chainMask)
-    
+
     try:
         if options.has_key('h'):
             fheader = options['h']
@@ -452,17 +452,17 @@ def main(options):
             if toInt( new_name[0] )== None or len(new_name)<4 :
                 raise StandardError, \
                       'You gave an incorrect new filename. Exiting'
-            
+
             ## create link
             else:
                 new_file = '%s/%s.%s'%(os.path.dirname(absfile(fname)),
-                                        new_name,
-                                        fname.split('.')[-1])
+                                       new_name,
+                                       fname.split('.')[-1])
                 os.link(fname, new_file)
                 print 'Link from %s to %s created sucessfully'\
                       %(absfile(fname), new_file)
                 fname = new_file
-                
+
     ## switch on Amber specialities ?
     amber = options.has_key('a')
 
@@ -470,10 +470,10 @@ def main(options):
     capBreaks = options.has_key('cap')
 
     cleaner = ChainCleaner(
-                 ChainSeparator(fname, outPath,
-                                int(options['c']),
-                                capBreaks=capBreaks,
-                                chainMask=chainMask) )
+        ChainSeparator(fname, outPath,
+                       int(options['c']),
+                       capBreaks=capBreaks,
+                       chainMask=chainMask) )
 
     # initialize with output path and base file name for generate.inp file
     xplorer = Xplor(outPath, cleaner, fheader, fsegment, ftail, amber, extras=options )
@@ -482,7 +482,7 @@ def main(options):
 
     ## run X-Plor
     if options.has_key('exe'):
-        
+
         out, error, returncode = Executor( 'xplor' , strict=0,
                                            f_in=xplorer.cleaner.pdbname + "_generate.inp",
                                            f_out=xplorer.cleaner.pdbname + '_generate.log').run()
@@ -498,7 +498,7 @@ def main(options):
         pm.add('select none')
 
         colors = [ hex2rgb(c, str) for c in hexColors( len(xplorer.chains) )]
-        
+
         i=0
         for c in xplorer.chains:
             print colors[i], c.segment_id
@@ -510,15 +510,14 @@ def main(options):
         pm.show()
 
 
-    
+
 if __name__ == '__main__':
 
     options = cmdDict( _defaultOptions() )
-    
+
     if len(sys.argv) < 2:
         _use(options)
     if sys.argv[1] == '-?' or sys.argv[1] == '--help':
         _help()
     else:
         main(options)
-

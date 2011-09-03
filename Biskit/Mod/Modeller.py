@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -114,12 +114,12 @@ class Modeller( Executor ):
         @type  starting_model: int
         @param ending_model  : last model to report [10]
         @type  ending_model  : int
-	@param zFilter: override z-score cutoff of Mod.TemplateFilter
-	                0..skip this filter
-	@type  zfilter: float
-	@param idfilter: override sequence identity cutoff of TemplateFilter
-	                 0..skip this filter
-	@type  idFilter: float
+        @param zFilter: override z-score cutoff of Mod.TemplateFilter
+        0..skip this filter
+        @type  zfilter: float
+        @param idfilter: override sequence identity cutoff of TemplateFilter
+        0..skip this filter
+        @type  idFilter: float
         @param disc_report : keep logs, write ordered pdbs to model_xx.pdb [1]
         @type  disc_report : bool
         """
@@ -204,8 +204,8 @@ class Modeller( Executor ):
 
     def filter_templates( self, target_id='target' ):
         """
-	Kick out some templates before the modeller run.
-	"""
+        Kick out some templates before the modeller run.
+        """
 
         tf = TemplateFilter( self.aln_info, target_id=target_id,
                              verbose=self.verbose, log=self.log )

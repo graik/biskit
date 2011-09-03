@@ -48,7 +48,7 @@ def erf(x):
 
     @param x: value
     @type  x: float
-    
+
     @return: value
     @rtype: float
     """
@@ -59,9 +59,9 @@ def erf(x):
     t = 1. / (1. + 0.5 * z)
 
     r = t * N.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + \
-        t * (0.09678418 + t * (-0.18628806 + t * (0.27886807 + t * \
-        (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * \
-        0.17087277)))))))))
+                                                               t * (0.09678418 + t * (-0.18628806 + t * (0.27886807 + t * \
+                                                                                                         (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * \
+                                                                                                                                               0.17087277)))))))))
 
     if x >= 0.:
         return 1. - r
@@ -73,14 +73,14 @@ def logArea(x, alpha, beta):
     """
     Area of the smallest interval of a lognormal distribution that still
     includes x.
-    
+
     @param x: border value
     @type  x: float
     @param alpha: mean of log-transformed distribution
     @type  alpha: float
     @param beta: standarddev of log-transformed distribution
     @type  beta: float
-    
+
     @return: probability that x is NOT drawn from the given distribution
     @rtype: float
     """
@@ -99,7 +99,7 @@ def logMean( alpha, beta ):
     @type  alpha: float
     @param beta: standarddev of log-transformed distribution
     @type  beta: float
-    
+
     @return: mean of the original lognormal distribution
     @rtype: float
     """
@@ -112,7 +112,7 @@ def logSigma( alpha, beta ):
     @type  alpha: float
     @param beta: standarddev of log-transformed distribution
     @type  beta: float
-    
+
     @return: 'standard deviation' of the original lognormal distribution
     @rtype: float
     """
@@ -125,7 +125,7 @@ def logMedian( alpha, beta=None ):
     @type  alpha: float
     @param beta: not needed
     @type  beta: float
-    
+
     @return: median of the original lognormal distribution
     @rtype: float
     """
@@ -136,14 +136,14 @@ def logConfidence( x, R, clip=0 ):
     """
     Estimate the probability of x NOT beeing a random observation from a
     lognormal distribution that is described by a set of random values.
-    
+
     @param x: observed value
     @type  x: float
     @param R: sample of random values
     @type  R: [float]
     @param clip: clip zeros at this value  0->don't clip (default: 0)
     @type  clip: float
-    
+
     @return: confidence that x is not random, median of random distr.
     @rtype: (float, float)
     """
@@ -172,14 +172,14 @@ def logConfidence( x, R, clip=0 ):
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """
     Test class
     """
 
     def test_lognormal(self):
-	"""Statistics.lognormal test"""
+        """Statistics.lognormal test"""
         import random
         import Biskit.gnuplot as gnuplot
         import Biskit.hist as H
@@ -201,13 +201,12 @@ class Test(BT.BiskitTest):
 
         if self.local:
             gnuplot.plot( H.density( N.array(cr) - ca, 100 ) )
-            
+
             globals().update( locals() )
-                              
+
         self.assertAlmostEqual( ca,  0.86877651432955771, 7)
 
 
 if __name__ == '__main__':
 
     BT.localTest()
-

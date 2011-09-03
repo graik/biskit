@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -49,7 +49,7 @@ class PDBParser(object):
         """
         @param log: Log for warnings [default log to STDERR]
         @type  log: Biskit.LogFile.LogFile
-        
+
         Override if needed. Call parent method in overriding class!
         """
         self.log = log or ErrLog()
@@ -59,13 +59,13 @@ class PDBParser(object):
     def supports( source ):
         """
         Override!
-        
+
         The method is static and can thus be called directly with the parser
         class rather than with an instance::
 
         >>> if PDBParser.supports('myfile.pdb'):
         >>>     ...
-        
+
         @return: True if the given source is supported by this parser
                  implementation
         @rtype: bool
@@ -88,7 +88,7 @@ class PDBParser(object):
         @rtype: str
         """
         raise NotImplementedError, 'description() is not implemented.'
-        
+
 
     def update( self, model, source, skipRes=None, updateMissing=0, force=0,
                 headPatterns=[] ):
@@ -98,13 +98,13 @@ class PDBParser(object):
 
         Override!
 
-	Note for implementations:
-	  * Profiles that are taken from the source should be labeled
-	    'changed'=0 (regardless of their status in the source).
-	  * The same holds for coordinates (xyzChanged=0).
-	  * However, profiles or coordinates or fields existing in the model
+        Note for implementations:
+        * Profiles that are taken from the source should be labeled
+        'changed'=0 (regardless of their status in the source).
+        * The same holds for coordinates (xyzChanged=0).
+        * However, profiles or coordinates or fields existing in the model
           must remain untouched.
-	
+
         @param model: existing model
         @type  model: PDBModel
         @param source: source PDB file or pickled PDBModel or PDBModel object
@@ -132,8 +132,8 @@ class PDBParser(object):
         @rtype: bool
         """
         return (model.xyz is None \
-		or None in model.atoms.profiles.values() \
-		or None in model.residues.profiles.values() )
+                or None in model.atoms.profiles.values() \
+                or None in model.residues.profiles.values() )
 
 
     def parse2new( self, source, disconnect=False, skipRes=None ):

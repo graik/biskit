@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -72,11 +72,11 @@ Options:
     -zfilter |float|
                ignore templates that are more than z standard deviations below
                the average sequence identity to the target (0..switch off)
-	       (default: see Biskit.Mod.TemplateFilter.py)
+               (default: see Biskit.Mod.TemplateFilter.py)
     -idfilter |float|
                ignore templates that have less than idfilter fraction sequence
                identity to target sequence (the best template is always kept)
-	       (0..switch filtering off)
+               (0..switch filtering off)
 
     -mod_template |file|
                Provide a different input script template (see Modeller.py).
@@ -89,14 +89,14 @@ Options:
     -debug |1| to not delete any temporary files
     -nice |int| to adjust a non-0 nice level
 
-    
+
 
 input: ./templates/modeller/*.pdb
        ./t_coffee/final.pir_aln
 
 output: ./modeller/modeller.log
                   /*.B9999000??   <- models
-		  /model_??.pdb   <- processed PDBs ordered by modeller score
+        /model_??.pdb   <- processed PDBs ordered by modeller score
 
 Default options:
 """
@@ -109,9 +109,9 @@ def defaultOptions():
     return {'o':'.',
             'log': None,
             'node':None,
-	    'v':1,
-	    'zfilter':TF.Z_CUTOFF,
-	    'idfilter':TF.ID_CUTOFF,
+            'v':1,
+            'zfilter':TF.Z_CUTOFF,
+            'idfilter':TF.ID_CUTOFF,
             }
 
 def convertOptions( o ):
@@ -122,16 +122,16 @@ def convertOptions( o ):
     """
     o['verbose'] = int( o.get('v',1) )
     del o['v']
-    
+
     o['outFolder'] = tools.absfile( o.get('o','.') )
     del o['o']
-    
+
     o['zfilter'] = float( o.get('zfilter',0) )
     o['idfilter']= float( o.get('idfilter',0))
 
     o['log'] = o.get('log', None)
     if o['log']:
-	o['log'] = LogFile( o['o'] + '/' + options['log'], 'a' )
+        o['log'] = LogFile( o['o'] + '/' + options['log'], 'a' )
 
     o['debug'] = int( o.get('debug', 0) )
     o['nice']  = int( o.get('nice', 0) )
@@ -156,7 +156,7 @@ def __printMatrix( matrix ):
             print ' '*5,
         for j in range(i, nr):
             print '%5.2f'%matrix[i,j],
-            
+
 ### MAIN ###
 
 options   = tools.cmdDict( defaultOptions() )
@@ -186,9 +186,9 @@ try:
               "Type model.py -? or model.py -help for a full list of options!"
 
     m8 = M( **options )
-   
+
     if not 'dry' in options:
-	r = m8.run()  ## comment out for testing
+        r = m8.run()  ## comment out for testing
 
 except:
     EHandler.error( 'Error while modelling.')
@@ -220,11 +220,11 @@ if options.has_key('s'):
 
     ## get all templates
     templates =  glob.glob( '%s*'%( m8.outFolder + TS. F_MODELLER ))
-    
+
     p=Pymoler()
     ## add models
     for i in range( len(traj) ):
-	print 'Pymol.add model', i
+        print 'Pymol.add model', i
         p.addPdb( traj[i], 'model_%i'%i ) 
         names  += [ 'model_%i'%i ]
 
@@ -242,17 +242,17 @@ if options.has_key('s'):
 
     for i in range( len(names) ):
         p.add('color %s, %s'%(colors[i], names[i]) )
-                
+
     p.add('hide all')
     p.add('show line')
 
     ## don't show sidechains and carboxyl oxygen - too messy
     p.add('select bb, not name c+ca+n')
     p.add('hide line, bb')
-    
+
     p.add('select none')
     p.add('zoom all')
 
     print 'writing pymol script and models...'
-    
+
     p.show()

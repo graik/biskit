@@ -3,7 +3,7 @@
 ## Class msms
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -51,7 +51,7 @@ class Pdb2xyzrn( Executor ):
     """
     MSMS - pdb2xyzrn
     ================
-    
+
     Run the awk script C{ pdb_to_xyzrn } to extract names and radii.
     This is nessesary to run msms. The radii and atoms depend on where
     in the sequence an atom resides. The radii used is determined
@@ -69,7 +69,7 @@ class Pdb2xyzrn( Executor ):
         """
         @param model: reference
         @type  model: PDBModel
-        
+
         @param kw: additional key=value parameters for Executor:
         @type  kw: key=value pairs
         ::
@@ -88,15 +88,15 @@ class Pdb2xyzrn( Executor ):
         ##   called "atmtypenumbers".
         if not os.path.exists( T.dataRoot() + '/msms/'):
             raise Pdb2xyzrnError, 'Cannot find msms directory. This should reside in ~biskit/Biskit/data/msms'
-	
+
         fmsms =  T.dataRoot() + '/msms/'
 
-	## use biskit-version of pdb_to_xyzrn by default
-	exe = ExeConfigCache.get('pdb2xyzrn', strict=1)
-	try:
-	    exe.validate()
-	except ExeConfigError:
-	    exe.bin = fmsms + '/gpdb_to_xyzrn'
+        ## use biskit-version of pdb_to_xyzrn by default
+        exe = ExeConfigCache.get('pdb2xyzrn', strict=1)
+        try:
+            exe.validate()
+        except ExeConfigError:
+            exe.bin = fmsms + '/gpdb_to_xyzrn'
 
         Executor.__init__( self, 'pdb2xyzrn', f_in=self.f_pdb,
                            cwd=fmsms, **kw )
@@ -121,7 +121,7 @@ class Pdb2xyzrn( Executor ):
     def parse_xyzrn( self, output ):
         """
         Extract xyz and r from output.
-        
+
         @param output: STDOUT from pdb_to_xyzrn
         @type  output: [str]
 
@@ -139,7 +139,7 @@ class Pdb2xyzrn( Executor ):
             if len(l)!=0:
                 l = string.split( l )
                 xyzr += [ float(l[0]), float(l[1]), \
-                         float(l[2]), float(l[3]) ]
+                          float(l[2]), float(l[3]) ]
                 n += [ l[5] ]
 
         xyzr = N.reshape( xyzr, ( len(xyzr)/4, 4 ) )
@@ -184,7 +184,7 @@ class Pdb2xyzrn( Executor ):
 
 ##     @bug: MSLIB fails when calling Mslib.MSMS()
 ##           The error seems to go back to Scientificpython:
-          
+
 ##           ERROR::
 ##             File "/usr/tmp/python-8778q1e", line 160, in calc
 ##             surf = Mslib.MSMS( coords = xyz, radii = self.r )
@@ -208,7 +208,7 @@ class Pdb2xyzrn( Executor ):
 ##         """
 ##         Run msms analytical surface calculation, i.e.::
 ##           msms -if xyzr.coord -af atoms.area -surface ases
-          
+
 ##         @param descr: descriptive name
 ##         @type  descr: str
 ##         @param probeRadius: probe radius
@@ -288,7 +288,7 @@ class MSMS( Executor ):
     """
     MSMS
     ====
-    
+
     Calculate SAS (Solvent Accessible surface) and
     SES (Solvent Excluded Surface) using the msms applicaton.
 
@@ -426,14 +426,14 @@ class MSMS( Executor ):
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test case"""
 
     TAGS = [ BT.OLD, BT.EXE ]  ## msms is superseeded by SurfaceRacer
-    
+
     def test_msms(self):
-	"""msms test"""
+        """msms test"""
         from Biskit import PDBModel
 
         if self.local: print 'Loading PDB...'
@@ -445,7 +445,7 @@ class Test(BT.BiskitTest):
 
         if self.local: print 'Running'
         out, sesList, sasList, atmList = self.ms.run()
-        
+
         if self.local:
             print out
             print '\nResult from MSMS (first 5 lines): '
@@ -454,14 +454,14 @@ class Test(BT.BiskitTest):
                 print '%.2f \t%.2f \t%s'%(sesList[i], sasList[i], atmList[i])
 
             print 'MSMS done'
-        
+
             globals().update( locals() )
 
-            
+
         self.assertAlmostEqual( out['sas'] + out['ses'],
-				5085.1580000000004 + 4208.7389999999996, 8 )
-    
-        
+                                5085.1580000000004 + 4208.7389999999996, 8 )
+
+
 if __name__ == '__main__':
 
     BT.localTest()
@@ -472,7 +472,7 @@ if __name__ == '__main__':
 ## if __name__ == '__main__':
 
 ##     from Biskit import PDBModel
-    
+
 ##     print "Loading PDB..."
 
 ##     m = PDBModel( T.testRoot() + '/lig/1A19.pdb' )
@@ -517,4 +517,3 @@ if __name__ == '__main__':
 ## ##     a = MSLIB( m )
 ## ##     out, sesList, sasList, atmList = a.calc( m.xyz  )
 ## ##     print out
-

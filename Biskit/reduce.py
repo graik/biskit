@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg
+## Copyright (C) 2004-2011 Raik Gruenberg
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -25,11 +25,10 @@ Wrapper for structure protonation program reduce
 Application: 
 """
 
-import tempfile, re
+import tempfile
 import numpy as N
 
-from Biskit import Executor, TemplateError, PDBModel
-## import Biskit.settings as S
+from Biskit import Executor, PDBModel
 import Biskit.tools as T
 
 class ReduceError( Exception ):
@@ -84,11 +83,9 @@ class Reduce( Executor ):
         f_out= tempfile.mktemp( '_reduce_out.pdb')
         self.f_db = T.dataRoot() + '/reduce/reduce_wwPDB_het_dict.txt' 
 
-        kw['catch_err'] = True
-        
         Executor.__init__( self, 'reduce', 
                            args= '-BUILD -DB %s %s'%(self.f_db,self.f_pdbin),
-                           f_out=f_out,
+                           f_out=f_out, catch_err=True,
                            **kw )
 
         self.model = model

@@ -2,7 +2,7 @@
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -78,7 +78,7 @@ class BisList:
     That means there are two ways of implementing BisList.
       1. via multiple inheritence from BisList (first!) and list
          -> only L{getValue}, L{extend}, L{append} and L{take} need to be
-	 overriden.
+         overriden.
       2. inheritence from BisList only
          -> the __xxx__ methods have to be implemented, too.
 
@@ -103,14 +103,14 @@ class BisList:
         """
         Get the value of a dictionary entry of a list item.
         B{Override!}
-        
+
         @param i: position in collection
         @type  i: int
         @param key: attribute key
         @type  key: any
         @param default: return value if key is not found [None]
         @type  default: any
-        
+
         @return: any
         @rtype: any
         """
@@ -144,10 +144,10 @@ class BisList:
     def __add__( self, other ):
         """
         c.__add__( other ) <==> c + other
-       
+
         @param other: other instance
         @type  other: instance
-        
+
         @return: new instance with one collection appended to the other
         @rtype: any
         """
@@ -162,7 +162,7 @@ class BisList:
 
         @param other: other instance
         @type  other: instance
-        
+
         @return: this instance with other appended
         @rtype: any
         """
@@ -185,7 +185,7 @@ class BisList:
         """
         Append a single item to the end of this list.
         B{Override!}
-        
+
         @param v: any (left to the implementing class)
         @type  v: any
         """
@@ -203,13 +203,13 @@ class BisList:
     def argsort( self, sortKey, cmpfunc=cmp ):
         """
         Sort by values of a certain item attribute.
-        
+
         @param sortKey: attribute key
         @type  sortKey: any
         @param cmpfunc: used for comparing values; cmpfunc(v1,v2)
                         -> -1,0,1 [built-in cmp]
         @type  cmpfunc: function
-        
+
         @return: indices after sorting (the collection itself is not sorted)
         @rtype: [ int ]
         """
@@ -227,7 +227,7 @@ class BisList:
         @type  indices: [ int ]
         @param deepcopy: deepcopy items (default: 0)
         @type  deepcopy: 0|1
-        
+
         @return: new instance (or sub-class) with specified items
         @rtype: instance
         """
@@ -237,7 +237,7 @@ class BisList:
     def compress( self, mask, deepcopy=0 ):
         """
         Extract certain items.
-        
+
         @param mask: mask of positions; len( mask ) == len( self )
         @type  mask: [ 1|0 ]
         @param deepcopy: deepcopy items (default: 0)
@@ -258,7 +258,7 @@ class BisList:
         @type  sortKey: any
         @param cmpfunc: comparison function
         @type  cmpfunc: function
-        
+
         @return: new instance (or sub-class) sorted by item
         @rtype: instance        
         """
@@ -271,7 +271,7 @@ class BisList:
         items. If unique==0, the result is guaranteed to have the same
         length as the collection (or the list of given
         indices). Missing values are replaced by default (None).
-        
+
         @param key: key for item attribute
         @type  key: any
         @param default: default value if key is not found (default: None)
@@ -280,7 +280,7 @@ class BisList:
         @type  indices: list of int OR None
         @param unique: report each value only once (set union), (default 0)
         @type  unique: 1|0
-        
+
         @return: list of values
         @rtype: list
         """
@@ -301,14 +301,14 @@ class BisList:
     def filterRange( self, key, vLow, vHigh ):
         """
         Get indices of items where vLow <= item[ key ] <= vHigh.
-        
+
         @param key: item attribute
         @type  key: any
         @param vLow: lower bound
         @type  vLow: any
         @param vHigh: upper bound
         @type  vHigh: any
-                          
+
         @return: array of int
         @rtype: array
         """
@@ -323,12 +323,12 @@ class BisList:
     def filterEqual( self, key, lst ):
         """
         Get indices of items for which item[ key ] in lst.
-        
+
         @param key: item attribute
         @type  key: any
         @param lst: [ any ], list of allowed values
         @type  lst: list
-        
+
         @return: array of int
         @rtype: array
         """
@@ -339,10 +339,10 @@ class BisList:
     def filterFunct( self, f ):
         """
         Get indices of items for which f( item ) == 1.
-        
+
         @param f: f must take a single item as argument and return 1 or 0
         @type  f: function
-        
+
         @return: array of int
         @rtype: array
         """
@@ -353,7 +353,7 @@ class BisList:
     def filter( self, key, cond ):
         """
         Extract items matching condition.
-        
+
         @param key: item attribute  (not used if cond is function )
         @type  key: any
         @param cond: conditon::
@@ -361,10 +361,10 @@ class BisList:
                      - list          -> item[ key ] in cond
                      - function      -> cond( c ) == 1
         @type  cond: any
-                 
+
         @return: new instance (or sub-class)
         @rtype: instance
-        
+
         @raise ConditionError: if cond is neither list nor tuple nor function: 
         """
         indices = None
@@ -394,7 +394,7 @@ class BisList:
         """
         @param key: item attribute
         @type  key: any
-        
+
         @return: index of item with highest item[key] value
         @rtype: int
         """
@@ -406,7 +406,7 @@ class BisList:
         """
         @param key: item attribute
         @type  key: any
-        
+
         @return: item with highest item[key] value
         @rtype: float
         """
@@ -417,7 +417,7 @@ class BisList:
         """
         @param key: item attribute
         @type  key: any
-        
+
         @return: index of item with lowest item[infokey] value
         @rtype: int
         """
@@ -429,7 +429,7 @@ class BisList:
         """
         @param key: item attribute
         @type  key: any
-        
+
         @return: item with lowest item[key] value
         @rtype: float
         """
@@ -442,10 +442,10 @@ class BisList:
         @type  key: any
         @param value: item value
         @type  value: any        
-        
+
         @return: position of item for which item[key] == value
         @rtype: int
-        
+
         @raise AmbiguousMatch: ItemNotFound,
                if there are more or less than 1 matches
         """
@@ -469,7 +469,7 @@ class BisList:
 
         @return: item for which item[key] == value
         @rtype: any
-        
+
         @raise AmbiguousMatch: ItemNotFound,
                if there are more or less than 1 matches
         """
@@ -484,7 +484,7 @@ class BisList:
 
         C{ EXAMPLE: lst.toDict('soln')                 }
         C{ -> {soln1:Item, soln3:Item, solnN:Item}     }
-        
+
         @param key: item attribute
         @type  key: any
 
@@ -514,7 +514,7 @@ class BisList:
         @type  l1: list
         @param l2: second list
         @type  l2: list
-        
+
         @return: modified lists
         @rtype: (l1, l2)
         """
@@ -538,20 +538,20 @@ class BisList:
 
         C{ EXAMPLE: plot( xkey, [ykey1, ykey2..],[arg1=x, arg2=y]) }
         C{         -> biggles.FramedPlot }
-        
+
         @param xkey: key for x-values
         @type  xkey: any
         @param ykey: key for y-values
         @type  ykey: any
         @param arg: arguments handed over to biggles.Points()
         @type  arg: any
-        
+
         @return: Biggles.FramedPlot, display with show() !
         @rtype:  Biggles.FramedPlot
         """
         if not biggles:
             raise ImportError, 'biggles module could not be imported.'
-        
+
         if len(ykey) == 0:
             xkey, ykey = 'index', [ xkey ]
 
@@ -585,10 +585,10 @@ class BisList:
     def plotArray( self, xkey, *ykey, **arg ):
         """
         Plot pairs of item values.
-        
+
         C{ EXAMPLE: plot( xkey, [ykey1, ykey2..],[arg1=x, arg2=y]) }
         C{         -> biggles.FramedPlot                           }
-        
+
         @param xkey: key for x-values
         @type  xkey: any
         @param ykey: key for y-values
@@ -601,7 +601,7 @@ class BisList:
         """
         if not biggles:
             raise ImportError, 'biggles module could not be imported.'
-        
+
         if len(ykey) == 0:
             xkey, ykey = 'index', [ xkey ]
 
@@ -627,7 +627,7 @@ class BisList:
             plot[i,0].add( biggles.Points( x, y, color=colors[i], **arg ) )
 
             plot[i,0].add( biggles.PlotLabel( 0.2, 0.95, ykey[i],
-                                         color=colors[i] ) )
+                                              color=colors[i] ) )
 
         return plot
 

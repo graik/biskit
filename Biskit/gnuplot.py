@@ -63,31 +63,31 @@ def _plotData(data):
     plotlist = []
     filelist = []
     for set in data:
-	filename = tempfile.mktemp()
-	file = open(filename, 'w')
-	is_sequence = _isSequence(set[0])
-	for point in set:
-	    if is_sequence:
-		for coordinate in point:
-		    file.write(`coordinate` + ' ')
-	    else:
-		file.write(`point`)
-	    file.write('\n')
-	file.close()
-	if is_sequence:
-	    plotlist.append((filename, len(set[0])))
-	else:
-	    plotlist.append((filename, 1))
-	filelist.append(filename)
+        filename = tempfile.mktemp()
+        file = open(filename, 'w')
+        is_sequence = _isSequence(set[0])
+        for point in set:
+            if is_sequence:
+                for coordinate in point:
+                    file.write(`coordinate` + ' ')
+            else:
+                file.write(`point`)
+            file.write('\n')
+        file.close()
+        if is_sequence:
+            plotlist.append((filename, len(set[0])))
+        else:
+            plotlist.append((filename, 1))
+        filelist.append(filename)
     command = 'plot '
     for item in plotlist:
-	filename, n = item
-	if n == 1:
-	    command = command + '"' + filename + '"  notitle w l, '
-	else:
-	    for i in range(n-1):
-		command = command + '"' + filename + \
-			  '"  using 1:' + `i+2` + ' notitle w l, '
+        filename, n = item
+        if n == 1:
+            command = command + '"' + filename + '"  notitle w l, '
+        else:
+            for i in range(n-1):
+                command = command + '"' + filename + \
+                        '"  using 1:' + `i+2` + ' notitle w l, '
     command = command[:-2] + '\n'
     return command, filelist
 
@@ -102,31 +102,31 @@ def _plotWithLabels(data):
     else:
         data = data.items()
     for set, key in data:
-	filename = tempfile.mktemp()
-	file = open(filename, 'w')
-	is_sequence = _isSequence(set[0])
-	for point in set:
-	    if is_sequence:
-		for coordinate in point:
-		    file.write(`coordinate` + ' ')
-	    else:
-		file.write(`point`)
-	    file.write('\n')
-	file.close()
-	if is_sequence:
-	    plotlist.append((key, filename, len(set[0])))
-	else:
-	    plotlist.append((key, filename, 1))
-	filelist.append(filename)
+        filename = tempfile.mktemp()
+        file = open(filename, 'w')
+        is_sequence = _isSequence(set[0])
+        for point in set:
+            if is_sequence:
+                for coordinate in point:
+                    file.write(`coordinate` + ' ')
+            else:
+                file.write(`point`)
+            file.write('\n')
+        file.close()
+        if is_sequence:
+            plotlist.append((key, filename, len(set[0])))
+        else:
+            plotlist.append((key, filename, 1))
+        filelist.append(filename)
     command = 'plot '
     for item in plotlist:
-	key, filename, n = item
-	if n == 1:
-	    command = command + '"' + filename + '"  title "%s" w l, ' %key
-	else:
-	    for i in range(n-1):
-		command = command + '"' + filename + \
-			  '"  using 1:' + `i+2` + ' title "%s" w l, ' %key
+        key, filename, n = item
+        if n == 1:
+            command = command + '"' + filename + '"  title "%s" w l, ' %key
+        else:
+            for i in range(n-1):
+                command = command + '"' + filename + \
+                        '"  using 1:' + `i+2` + ' title "%s" w l, ' %key
     command = command[:-2] + '\n'
     return command, filelist
 
@@ -141,31 +141,31 @@ def _barGraphPlotData(data):
     plotlist = []
     filelist = []
     for set in data:
-	filename = tempfile.mktemp()
-	file = open(filename, 'w')
-	is_sequence = _isSequence(set[0])
-	for point in set:
-	    if is_sequence:
-		for coordinate in point:
-		    file.write(`coordinate` + ' ')
-	    else:
-		file.write(`point`)
-	    file.write('\n')
-	file.close()
-	if is_sequence:
-	    plotlist.append((filename, len(set[0])))
-	else:
-	    plotlist.append((filename, 1))
-	filelist.append(filename)
+        filename = tempfile.mktemp()
+        file = open(filename, 'w')
+        is_sequence = _isSequence(set[0])
+        for point in set:
+            if is_sequence:
+                for coordinate in point:
+                    file.write(`coordinate` + ' ')
+            else:
+                file.write(`point`)
+            file.write('\n')
+        file.close()
+        if is_sequence:
+            plotlist.append((filename, len(set[0])))
+        else:
+            plotlist.append((filename, 1))
+        filelist.append(filename)
     command = 'plot '
     for item in plotlist:
-	filename, n = item
-	if n == 1:
-	    command = command + '"' + filename + '" notitle with boxes , '
-	else:
-	    for i in range(n-1):
-		command = command + '"' + filename + \
-			  '"  using 1:' + `i+2` + 'notitle with boxes , '
+        filename, n = item
+        if n == 1:
+            command = command + '"' + filename + '" notitle with boxes , '
+        else:
+            for i in range(n-1):
+                command = command + '"' + filename + \
+                        '"  using 1:' + `i+2` + 'notitle with boxes , '
     command = command[:-2] + '\n'
     #print command
     return command, filelist
@@ -173,38 +173,38 @@ def _barGraphPlotData(data):
 ###########################################################################
 # Scatterplots
 ###########################################################################
- 
+
 def _scatterData(data, marker = 'points'):
     plotlist = []
     filelist = []
     for set in data:
-	filename = tempfile.mktemp()
-	file = open(filename, 'w')
-	is_sequence = _isSequence(set[0])
-	for point in set:
-	    if is_sequence:
-		for coordinate in point:
-		    file.write(`coordinate` + ' ')
-	    else:
-		file.write(`point`)
-	    file.write('\n')
-	file.close()
-	if is_sequence:
-	    plotlist.append((filename, len(set[0])))
-	else:
-	    plotlist.append((filename, 1))
-	filelist.append(filename)
+        filename = tempfile.mktemp()
+        file = open(filename, 'w')
+        is_sequence = _isSequence(set[0])
+        for point in set:
+            if is_sequence:
+                for coordinate in point:
+                    file.write(`coordinate` + ' ')
+            else:
+                file.write(`point`)
+            file.write('\n')
+        file.close()
+        if is_sequence:
+            plotlist.append((filename, len(set[0])))
+        else:
+            plotlist.append((filename, 1))
+        filelist.append(filename)
     command = 'plot '
     for item in plotlist:
-	filename, n = item
-	if n == 1:
-	    command = command + '"' + filename + '"  notitle  with %s, ' \
-                      %marker 
-	else:
-	    for i in range(n-1):
-		command = command + '"' + filename + \
-			  '"  using 1:' + `i+2` + ' notitle  with %s, ' \
-                          %marker
+        filename, n = item
+        if n == 1:
+            command = command + '"' + filename + '"  notitle  with %s, ' \
+                    %marker 
+        else:
+            for i in range(n-1):
+                command = command + '"' + filename + \
+                        '"  using 1:' + `i+2` + ' notitle  with %s, ' \
+                        %marker
     command = command[:-2] + '\n'
     return command, filelist
 
@@ -215,31 +215,31 @@ def _scatterData3D(data):
     plotlist = []
     filelist = []
     for set in data:
-	filename = tempfile.mktemp()
-	file = open(filename, 'w')
-	is_sequence = _isSequence(set[0])
-	for point in set:
-	    if is_sequence:
-		for coordinate in point:
-		    file.write(`coordinate` + ' ')
-	    else:
-		file.write(`point`)
-	    file.write('\n')
-	file.close()
-	if is_sequence:
-	    plotlist.append((filename, len(set[0])))
-	else:
-	    plotlist.append((filename, 1))
-	filelist.append(filename)
+        filename = tempfile.mktemp()
+        file = open(filename, 'w')
+        is_sequence = _isSequence(set[0])
+        for point in set:
+            if is_sequence:
+                for coordinate in point:
+                    file.write(`coordinate` + ' ')
+            else:
+                file.write(`point`)
+            file.write('\n')
+        file.close()
+        if is_sequence:
+            plotlist.append((filename, len(set[0])))
+        else:
+            plotlist.append((filename, 1))
+        filelist.append(filename)
     command = 'splot '
     for item in plotlist:
-	filename, n = item
-	if n == 1:
-	    command = command + '"' + filename + '"  notitle  with points, '
-	else:
-	    for i in range(n-1):
-		command = command + '"' + filename + \
-			  '"  using 1:' + `i+2` + ' notitle  with points, '
+        filename, n = item
+        if n == 1:
+            command = command + '"' + filename + '"  notitle  with points, '
+        else:
+            for i in range(n-1):
+                command = command + '"' + filename + \
+                        '"  using 1:' + `i+2` + ' notitle  with points, '
     command = command[:-2] + '\n'
     return command, filelist
 
@@ -256,22 +256,22 @@ def _parallelAxesPlotData(data, origin):
     lower = data[0][0]
     upper = lower
     for point in data:
-	for i in range(naxes):
-	    value = point[i]
-	    file.write('%d %g\n' % (i+origin, value))
-	    lower = min(lower, value)
-	    upper = max(upper, value)
-	file.write('\n')
+        for i in range(naxes):
+            value = point[i]
+            file.write('%d %g\n' % (i+origin, value))
+            lower = min(lower, value)
+            upper = max(upper, value)
+        file.write('\n')
     margin = 0.05*(upper-lower)
     for i in range(0, naxes):
-	file.write('\n')
-	file.write('%d %g\n' % (i+origin, lower-margin))
-	file.write('%d %g\n' % (i+origin, upper+margin))
+        file.write('\n')
+        file.write('%d %g\n' % (i+origin, lower-margin))
+        file.write('%d %g\n' % (i+origin, upper+margin))
     file.close()
     command = 'plot ' + '[%d:%d] [%g:%g]' % (origin, origin+naxes-1,
-					     lower-margin, upper+margin) + \
-		 '"' + filename + '" index 0 notitle w l, "' + \
-		 filename + '" index 1 notitle w l lt -1\n'
+                                             lower-margin, upper+margin) + \
+            '"' + filename + '" index 0 notitle w l, "' + \
+            filename + '" index 1 notitle w l lt -1\n'
     return command, filelist
 
 #
@@ -279,30 +279,30 @@ def _parallelAxesPlotData(data, origin):
 #
 def _execute(command, filelist, keywords):
     if keywords.has_key('file'):
-	filename = tempfile.mktemp()
-	file = open(filename, 'w')
-	file.write('set terminal postscript\n')
-	file.write('set output "' + keywords['file'] + '"\n')
-	file.write(command)
-	file.close()
-	filelist.append(filename)
-	os.system('gnuplot ' + filename)
+        filename = tempfile.mktemp()
+        file = open(filename, 'w')
+        file.write('set terminal postscript\n')
+        file.write('set output "' + keywords['file'] + '"\n')
+        file.write(command)
+        file.close()
+        filelist.append(filename)
+        os.system('gnuplot ' + filename)
     else:
-	if old_version:
-	    gnuplot = os.popen('gnuplot 1> /dev/null 2>&1', 'w')
-	    gnuplot.write('set terminal x11\n')
-	    gnuplot.write(command)
-	    gnuplot.flush()
-	    _gnuplot_pipes.append(gnuplot)
-	    os.system('sleep 2s')
-	else:
-	    gnuplot = os.popen('gnuplot -persist 1> /dev/null 2>&1', 'w')
-	    gnuplot.write('set terminal x11\n')
-	    gnuplot.write(command)
-	    gnuplot.write('quit\n')
-	    gnuplot.close()
+        if old_version:
+            gnuplot = os.popen('gnuplot 1> /dev/null 2>&1', 'w')
+            gnuplot.write('set terminal x11\n')
+            gnuplot.write(command)
+            gnuplot.flush()
+            _gnuplot_pipes.append(gnuplot)
+            os.system('sleep 2s')
+        else:
+            gnuplot = os.popen('gnuplot -persist 1> /dev/null 2>&1', 'w')
+            gnuplot.write('set terminal x11\n')
+            gnuplot.write(command)
+            gnuplot.write('quit\n')
+            gnuplot.close()
     for file in filelist:
-	os.unlink(file)
+        os.unlink(file)
 
 
 
@@ -344,9 +344,9 @@ def scatter(*data, **keywords):
 #
 def parallelAxesPlot(data, **keywords):
     try:
-	origin = keywords['origin']
+        origin = keywords['origin']
     except KeyError:
-	origin = 0
+        origin = 0
     command, filelist = _parallelAxesPlotData(data, origin)
     _execute(command, filelist, keywords)
 
@@ -355,50 +355,49 @@ def parallelAxesPlot(data, **keywords):
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test case"""
 
     def prepare(self):
-	self.fout = tempfile.mktemp('ps','testgnuplot_')
+        self.fout = tempfile.mktemp('ps','testgnuplot_')
 
     def cleanUp(self):
-	import Biskit.tools as T
-	T.tryRemove( self.fout )
+        import Biskit.tools as T
+        T.tryRemove( self.fout )
 
     def test_plot2ps(self):
-	"""gnuplot.plot to file test"""
-	plot([1, 5, 3, 4], file = self.fout)
-	if self.local:
-	    print 'plot written to ', self.fout
+        """gnuplot.plot to file test"""
+        plot([1, 5, 3, 4], file = self.fout)
+        if self.local:
+            print 'plot written to ', self.fout
 
     def test_scatter(self):
-	"""gnuplot.scatter test (interactive only)"""
-	from numpy.oldnumeric.random_array import poisson
-	if self.local:
-	    self.p = scatter( poisson(50,(1000,2))  )
+        """gnuplot.scatter test (interactive only)"""
+        from numpy.oldnumeric.random_array import poisson
+        if self.local:
+            self.p = scatter( poisson(50,(1000,2))  )
 
     def test_plot( self ):
         """gnuplot.plot test"""
-	# List of (x, y) pairs
-	# plot([(0.,1),(1.,5),(2.,3),(3.,4)])
-	# plot( zip( range(10), range(10) ) )
+        # List of (x, y) pairs
+        # plot([(0.,1),(1.,5),(2.,3),(3.,4)])
+        # plot( zip( range(10), range(10) ) )
 
-	# Two plots; each given by a 2d array
-	import numpy.oldnumeric as N
-	x = N.arange(10)
-	y1 = x**2
-	y2 = (10-x)**2
-	plot( N.transpose(N.array([x, y1])), N.transpose(N.array([x, y2])))
+        # Two plots; each given by a 2d array
+        import numpy.oldnumeric as N
+        x = N.arange(10)
+        y1 = x**2
+        y2 = (10-x)**2
+        plot( N.transpose(N.array([x, y1])), N.transpose(N.array([x, y2])))
 
     def test_parallelAxesPlot(self):
-	"""gnuplot.parallelAxesPlot test (interactive only)"""
-	if self.local:
-	    data = [[0., 1., 0.], [1., -1., 0.], [0.5, 0., 1.]]
-	    parallelAxesPlot(data)
+        """gnuplot.parallelAxesPlot test (interactive only)"""
+        if self.local:
+            data = [[0., 1., 0.], [1., -1., 0.], [0.5, 0., 1.]]
+            parallelAxesPlot(data)
 
 
 if __name__ == '__main__':
 
     BT.localTest()
-

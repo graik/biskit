@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -90,7 +90,7 @@ class Setting:
             self.vtype = vtype
         except ValueError, e:
             raise InvalidValue, '%s: cannot convert "%s" to %r.' %\
-              (self.name,self.value,vtype)
+                  (self.name,self.value,vtype)
 
     def __repr__( self, tab='' ):
         error = ''
@@ -101,7 +101,7 @@ class Setting:
 
         return '%s%s = %s%s(%s)%s%s' %\
                (error, self.name, tab, self.vtype.__name__, str(self.value),\
-               tab, comment)
+                tab, comment)
 
     def __str__( self ):
         return self.__repr__( tab='\t' )
@@ -116,7 +116,7 @@ class Setting:
             return cmp( self.name, other.name )
 
         return cmp( self, other )
-    
+
 
     def formatted( self ):
         """
@@ -178,7 +178,7 @@ class SettingsParser(object):
             raise
         except Exception, e:
             raise InvalidPath, 'error during path validation: %r' % str(e)
-        
+
 
     def __validBinary( self, v ):
         """
@@ -203,7 +203,7 @@ class SettingsParser(object):
     def __type( self, option, default=str ):
         """
         Extract type from option name.
-        
+
         @param option: name of parameter
         @type  option: str
         @param default: default type [str]
@@ -220,17 +220,17 @@ class SettingsParser(object):
         if option.count('-') > 0:
 
             try:
-                
+
                 splt = option.split('-')
 
                 s = splt[0]
                 o = ''.join( splt[1:] )
-                
+
                 t = eval( s )
 
                 if not type(t) is type:
                     raise TypeError, '%s is not a valid type' % s
-                
+
             except Exception, e:
                 raise TypeError, 'Cannot extract type from %s: %r'\
                       % option, e
@@ -248,14 +248,14 @@ class SettingsParser(object):
 
         @param section: which section are we working on
         @type  section: str
-        
+
         @return: new setting
         @rtype: Setting
 
         @raise SettingsError: InvalidType or Value
         """
         r = Setting( section=section )
-            
+
         try:
 
             x = value.split('#')             ## split off comments
@@ -318,7 +318,7 @@ class SettingsParser(object):
 
             if c.read( self.f_ini ) != [ self.f_ini ]:
                 raise IOError, 'Settings file %s not found.' % self.f_ini
-                
+
             for section in c.sections():
 
                 self.result.update(
@@ -347,19 +347,19 @@ class SettingsParser(object):
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test"""
 
     def test_SettingsParser(self):
-	"""SettingsManager test"""
+        """SettingsManager test"""
         p = SettingsParser( T.dataRoot() + '/defaults/settings.cfg')
 
         p.parse()
 
         t = p.result.get('testparam', Setting())
 
-	self.assertEqual( (t.name, t.value), ('testparam', 42) )
+        self.assertEqual( (t.name, t.value), ('testparam', 42) )
 
         return t.name, t.value
 

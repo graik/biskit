@@ -1,7 +1,7 @@
 ## ChainWriter:
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -45,7 +45,7 @@ class ChainWriter:
         """
         Take chains from ChainCleaner and write pdb files.
         File names are created from segid of each chain + '_seg.pdb'
-        
+
         @param path: output path for PDB files
         @type  path: string
         """
@@ -55,12 +55,12 @@ class ChainWriter:
     def _startPDB(self, chain, fname):
         """
         Create pdb file and write header.
-        
+
         @param chain: Scientific.IO.PDB.PeptideChain object
         @type  chain: chain object
         @param fname: file name
         @type  fname: string
-        
+
         @return: handle of open file
         @rtype: PDBFile
         """
@@ -76,7 +76,7 @@ class ChainWriter:
     def removeTER(self, fname):
         """
         Remove TER record from PDB.
-        
+
         @param fname: name of existing file.
         @type  fname: string
         """
@@ -94,7 +94,7 @@ class ChainWriter:
     def writeChain(self, chain):
         """
         Write single chain as PDB. File name will be segid + '_seg.pdb'.
-        
+
         @param chain: Scientific.IO.PDB.PeptideChain object
         @type  chain: chain object
         """
@@ -132,12 +132,12 @@ class Test(BT.BiskitTest):
 
         from ChainCleaner import ChainCleaner
         from ChainSeparator import ChainSeparator
-    
+
         self.cleaner = ChainCleaner( ChainSeparator( self.fname,
-						     self.outPath ) )
+                                                     self.outPath ) )
 
         self.writer = ChainWriter( self.outPath )
-        
+
         all_msg = []
         for i in range(3):
             msg = self.writer.writeChain( self.cleaner.next() )
@@ -145,16 +145,15 @@ class Test(BT.BiskitTest):
                 print 'Writing separated, cleaned chain to disk...%i'%msg
             all_msg += [ msg ]
 
-	self.assertEquals( all_msg, [1, 0, 0] )
-        
+        self.assertEquals( all_msg, [1, 0, 0] )
+
     def cleanUp(self):
         T.tryRemove( self.outPath + '/1A2P_waters.pdb' )
         T.tryRemove( self.outPath + '/1A2A_seg.PDB' )
-                     
-    
+
+
 
 if __name__ == '__main__':
 
     BT.localTest()
-
 

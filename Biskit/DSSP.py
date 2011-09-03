@@ -2,7 +2,7 @@
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -84,16 +84,16 @@ class Dssp( Executor ):
         """
         self.model = model
 #        self.model = model.clone( deepcopy=1 )
-        
+
         ## temporary pdb-file
         self.f_pdb = tempfile.mktemp( '_dssp.pdb')
         self.f_out = tempfile.mktemp( '_dssp.out')
-        
+
         Executor.__init__( self, 'dsspcmbi',
                            args='-na %s'%self.f_pdb,
                            catch_err=1, **kw )
 
-        
+
     def prepare( self ):
         """
         Overrides Executor method.
@@ -137,7 +137,7 @@ class Dssp( Executor ):
         if len(lines) < 9:
             raise Dssp_Error,\
                   'Dssp result file %s contains no secondary structure data'%self.f_out
-                
+
         ## Collect secondary structure data. Note that:
         ##
         ## 1. If Dssp detects a chain break or a residue with an
@@ -190,12 +190,12 @@ class Dssp( Executor ):
             """
             atoms = [ a['name'] for a in res ]
             count = atoms.count('CA') + atoms.count('N') + \
-                    atoms.count('C') + atoms.count('O')
+                  atoms.count('C') + atoms.count('O')
             if count == 4:
                 return 1
 
         secStruc = []
-        
+
         resDic = self.model.resList()
         i = 0
         j = 0
@@ -203,7 +203,7 @@ class Dssp( Executor ):
 
             complete = __completeBB( resDic[j] )
 ##            res_name = MU.singleAA( [resDic[j][0]['residue_name']] )[0]
-            
+
             ## assign irregular if not complete residue, DSSP
             ## skipps these residues
             if not complete:
@@ -230,7 +230,7 @@ class Dssp( Executor ):
 
         ## check that the entire sequence has a secondary structure assigned
         assert len(secStruc) == self.model.lenResidues()
-                
+
         return ''.join(secStruc)        
 
 
@@ -242,7 +242,7 @@ class Dssp( Executor ):
         self.result = self.parse_result( )
 
 
-        
+
 #############
 ##  TESTING        
 #############
@@ -252,10 +252,10 @@ class Test(BT.BiskitTest):
     """DSSP test"""
 
     TAGS = [BT.EXE]
-    
+
     def prepare(self):
         self.f = T.testRoot()+"/com/1BGS.pdb"
-	
+
 
     def test_DSSP( self ):
         """DSSP test"""

@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -71,21 +71,21 @@ import time
 class Flusher( Thread ):
 
     def __init__( self, *f ):
-	Thread.__init__( self )
-	self.setDaemon( True )
-	
-	self.files = f
-	self.stop = False
+        Thread.__init__( self )
+        self.setDaemon( True )
+
+        self.files = f
+        self.stop = False
 
     def setStop( self ):
-	self.stop = True
+        self.stop = True
 
     def run( self ):
 
-	while not self.stop:
-	    for f in self.files:
-		f.flush()
-	    time.sleep( 2 )
+        while not self.stop:
+            for f in self.files:
+                f.flush()
+            time.sleep( 2 )
 
 
 class Test(BT.BiskitTest):
@@ -96,7 +96,7 @@ class Test(BT.BiskitTest):
 if __name__ == '__main__':
 
     import tempfile, os, sys
-    
+
     f_out = open( tempfile.mktemp( '.out', 'slave_', os.getcwd() ), 'w' )
 
     sys.stdout = f_out
@@ -108,9 +108,8 @@ if __name__ == '__main__':
 
     if len(sys.argv) == 2:
 
-	niceness = int(sys.argv[1])
-	os.nice(niceness)
+        niceness = int(sys.argv[1])
+        os.nice(niceness)
 
     slave = Slave()
     slave.start()
-

@@ -3,7 +3,7 @@
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -102,7 +102,7 @@ class Docker:
         t.ensure( ligDic, dict, )
 
         self.verbose = verbose
-        
+
         self.recDic = recDic
         self.ligDic = ligDic
 
@@ -159,7 +159,7 @@ class Docker:
     def prepareOutFolder( self, fout ):
         """
         Setup an output folder
-        
+
         @param fout: outfile name
         @type  fout: str
 
@@ -196,7 +196,7 @@ class Docker:
         @type  m: PDBModel
         @param ids: chain id, len(ids) == m.lenChains
         @type  ids: [str]
-        
+
         @return: m is changed directly
         @rtype: PDBModel
         """
@@ -220,7 +220,7 @@ class Docker:
         @type  idList: [str]
         @param subDir: 'rec' or 'lig'
         @type  subDir: str
-        
+
         @return: model dictionary, { modelNumber : file_name_created, .. }
         @rtype: dict
         """
@@ -249,15 +249,15 @@ class Docker:
     def createHexInp( self, nRec, nLig ):
         """
         Create a HEX macro file for docking a rec lig pair.
-        
+
         @param nRec: model number rec in model dictionaries
         @type  nRec: int
         @param nLig: model number lig in model dictionaries
         @type  nLig: int
-        
+
         @return: macro file name, future out file name
         @rtype: (str, str)
-        
+
         @raise DockerError: if macro dock option is different from previous
                             call
         """
@@ -278,11 +278,11 @@ class Docker:
         else:
             silent=1
             if self.verbose: silent=0
-            
+
             fmac, fout, macro = hexTools.createHexInp(recPdb,rec, ligPdb,lig,
-                                   self.comPdb, outFile=fout_base,
-                                   macDock=self.macroDock, sol=self.soln,
-                                   silent=silent)
+                                                      self.comPdb, outFile=fout_base,
+                                                      macDock=self.macroDock, sol=self.soln,
+                                                      silent=silent)
 
         if self.macroDock == None:
             self.macroDock = macro
@@ -315,8 +315,8 @@ class Docker:
         cmd = "%s -ncpu %i -nice %i -noexec -e %s > %s"
         cmd = cmd % (self.bin, ncpu, nice, finp, flog )
 
-	if host != os.uname()[1]:
-	    cmd = "ssh %s %s" % (host, cmd)
+        if host != os.uname()[1]:
+            cmd = "ssh %s %s" % (host, cmd)
 
         runner = RunThread( cmd, self, finp=finp, host=host,
                             log=log, verbose=self.verbose )
@@ -455,17 +455,17 @@ class RunThread( Thread ):
             if not os.path.exists( self.fout ):
 
                 if self.verbose:
-		    print "Executing on ", self.host, ' with ', \
-			  t.stripFilename(self.finp)
-		    print "Command: ", self.cmd
+                    print "Executing on ", self.host, ' with ', \
+                          t.stripFilename(self.finp)
+                    print "Command: ", self.cmd
 
                 cmd_lst = self.cmd.split()
 
                 self.status = os.spawnvp(os.P_WAIT, cmd_lst[0], cmd_lst )
 
-		if self.status != 0:
-		    raise DockerError,\
-			  'Hex returned exit status %i' % self.status
+                if self.status != 0:
+                    raise DockerError,\
+                          'Hex returned exit status %i' % self.status
 
                 waited = 0
                 while waited < 25 and not os.path.exists( self.fout ):
@@ -516,7 +516,7 @@ class RunThread( Thread ):
         Replace current model numbers in HEX out file by given nRec and nLig.
         Only to be used with one-against-one dockings because all
         ReceptorModel and LigandModel entries are replaced by nRec, nLig.
-        
+
         @param nRec: receptor number
         @type  nRec: int
         @param nLig: ligand number
@@ -545,7 +545,7 @@ class RunThread( Thread ):
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class TestCore(BT.BiskitTest):
     """Base class for short and long Test case"""
 
@@ -569,19 +569,19 @@ class TestCore(BT.BiskitTest):
         ## they will not exist, so we will have to create them.
         rec_dir = t.testRoot() + '/multidock/rec'
         com_dir = t.testRoot() + '/multidock/com'
-        
+
         if not os.path.exists( rec_dir ):
             ## remove old invalid links
             if os.path.lexists( rec_dir ):
                 os.unlink( rec_dir )
             os.symlink( t.testRoot() + '/dock/rec', rec_dir )
-            
+
         if not os.path.exists( com_dir ):
             ## remove old invalid links
             if os.path.lexists( com_dir ):
                 os.unlink( com_dir )
             os.symlink( t.testRoot() + '/dock/com', com_dir )
-            
+
         recDic = t.load( t.testRoot() + '/multidock/rec/1A2P_model.dic' )
 
         self.d = Docker( recDic, ligDic, out=self.out_folder,
@@ -603,7 +603,7 @@ class TestCore(BT.BiskitTest):
 
 class TestLong(TestCore):
     """Test case running a complete hex docking (ca. 30 min/CPU)"""
-    
+
     TAGS = [ BT.EXE, BT.LONG ]
 
     def test_DockerLong(self):
@@ -621,4 +621,3 @@ class TestShort(TestCore):
 if __name__ == '__main__':
 
     BT.localTest()
-

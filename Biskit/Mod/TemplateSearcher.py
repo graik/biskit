@@ -2,7 +2,7 @@
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -52,9 +52,9 @@ class PickyURLopener(urllib.FancyURLopener):
 
     def http_error_default(self, url, fp, errcode, errmsg, headers):
         """
-	Default error handling.
-	@raise IOError: if something went wrong
-	"""
+        Default error handling.
+        @raise IOError: if something went wrong
+        """
         raise IOError, 'Cannot open %r. Error %r (%s)' % (url,errcode,errmsg)
 
 urllib._urlopener = PickyURLopener()
@@ -181,9 +181,9 @@ class TemplateSearcher( SequenceSearcher ):
         """
         if chain == '':
             return SequenceSearcher.fastaRecordFromId( self, db, id )
-        
+
         cmd = settings.fastacmd_bin + " -d %s -s 'pdb|%s|%s'" \
-              % (db, id, chain)
+            % (db, id, chain)
 
         err, o = commands.getstatusoutput( cmd )
         if err:
@@ -205,7 +205,7 @@ class TemplateSearcher( SequenceSearcher ):
                   "Couldn't fetch fasta record %s from database %s" % (id,db)
 
         return frecord
-        
+
 
 
     def fastaFromIds( self, db, id_lst ):
@@ -299,17 +299,17 @@ class TemplateSearcher( SequenceSearcher ):
 
     def parsePdbFromHandle(self, handle, first_model_only=True ):
         """
-	Parse PDB from file/socket or string handle into memory.
+        Parse PDB from file/socket or string handle into memory.
 
-	@param handle: fresh open file/socket handle to PDB ressource or string
-	@type  handle: open file-like object or str
-	@param first_model_only: only take first of many NMR models [True]
-	@type  first_model_only: bool
+        @param handle: fresh open file/socket handle to PDB ressource or string
+        @type  handle: open file-like object or str
+        @param first_model_only: only take first of many NMR models [True]
+        @type  first_model_only: bool
 
         @return: pdb file as list of strings, dictionary with resolution
         @rtype: [str], {'resolution':float }
-	@raise BlastError: if passed in string is too short
-	"""
+        @raise BlastError: if passed in string is too short
+        """
         lines = []
         res_match = None
         infos = {}
@@ -319,9 +319,9 @@ class TemplateSearcher( SequenceSearcher ):
                 raise BlastError( "Couldn't extract PDB Info." )
             handle =  cStringIO.StringIO( handle )
 
-## 	if handle.peekline()[:6] != 'TITLE':
-## 	    raise BlastError, 'Ressource does not seem to be a PDB:\n%r' %\
-## 		  handle.peekline()
+## if handle.peekline()[:6] != 'TITLE':
+##     raise BlastError, 'Ressource does not seem to be a PDB:\n%r' %\
+##   handle.peekline()
 
         for l in handle:
             lines += [ l ]
@@ -573,4 +573,3 @@ class Test(BT.BiskitTest):
 if __name__ == '__main__':
 
     BT.localTest()
-

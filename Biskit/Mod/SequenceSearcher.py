@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -186,17 +186,17 @@ class SequenceSearcher:
 
     def __copyFileHandle(self, result_handle, fname ):
         """
-	Copy the blast result to a file. The input file handle will be
-	empty afterwards! Use the returned string handle instead.
+        Copy the blast result to a file. The input file handle will be
+        empty afterwards! Use the returned string handle instead.
 
-	@param result_handle: file handle returned by NCBI* blast runners
-	@type  result_handle: file
-	@param fname : absolute path to output file
-	@type  fname : str
+        @param result_handle: file handle returned by NCBI* blast runners
+        @type  result_handle: file
+        @param fname : absolute path to output file
+        @type  fname : str
 
-	@return: a fresh 'file' (string) handle with the output
-	@rtype : cStringIO.StringI
-	"""
+        @return: a fresh 'file' (string) handle with the output
+        @rtype : cStringIO.StringI
+        """
         str_results = result_handle.read()
         try:
             save_file = open( fname, 'w' )
@@ -666,7 +666,7 @@ class SequenceSearcher:
         """
         iter = 1
         while (self.clustersCurrent > self.clusterLimit \
-              or self.clustersCurrent == None) \
+               or self.clustersCurrent == None) \
               and (simCut > 0 and lenCut > 0):
 
             self.clusterFasta( fastaIn, simCut, lenCut, ncpu )
@@ -828,8 +828,8 @@ class TestBase(BT.BiskitTest):
 
     def prepareOutput(self, ident):
         """Set up an output folder for a blast run and point
-	self.outfolder and log files to the right location
-	"""
+        self.outfolder and log files to the right location
+        """
         import tempfile
         import shutil
         from Biskit.LogFile import LogFile

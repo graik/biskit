@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -65,7 +65,7 @@ class QualMaster(TrackingJobMaster):
         @return: dictionary with init parameters
         @rtype: {param:value}
         """
-	return {'verbose':self.verbose}
+        return {'verbose':self.verbose}
 
 
     def done(self):
@@ -76,22 +76,22 @@ class QualMaster(TrackingJobMaster):
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test"""
 
     TAGS = [ BT.PVM ]
 
     def test_QualMaster(self):
-	"""QualMaster test"""
+        """QualMaster test"""
         import os.path
-        
+
         ## a minimal list of trajectories
         traj_list = [ T.testRoot() + '/lig_pcr_00/traj.dat' ]
 
         self.master = QualMaster( traj_list,
-				  show_output=self.local,
-				  verbose=self.local )
+                                  show_output=self.local,
+                                  verbose=self.local )
 
         ## run and wait for result
         self.r = self.master.calculateResult()
@@ -101,14 +101,14 @@ class Test(BT.BiskitTest):
 
         if self.local:
             print 'A RMSD plot is writen to: %s'% self.f_plot
-            
+
     def cleanUp(self):
-	try:
-	    T.tryRemove( self.f_plot )
-	except:
-	    pass
-    
-        
+        try:
+            T.tryRemove( self.f_plot )
+        except:
+            pass
+
+
 if __name__ == '__main__':
 
     BT.localTest()

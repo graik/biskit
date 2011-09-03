@@ -2,7 +2,7 @@
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -86,15 +86,15 @@ class ContactMaster(TrackingJobMaster):
         @type  force: [str]
         @param verbose: print progress infos (default: 1)
         @type  verbose: 0|1
-        
+
         @raise BiskitError: if attempting to extract version from list
                             that is not of type ComplexEvolvingList.
         """
         self.outFile = outFile
 
         self.verbose = verbose
-	self.log = log
-        
+        self.log = log
+
         ## set name for error log file
         self.ferror = os.path.dirname(
             t.absfile(self.outFile)) + '/contacting_errors.log'
@@ -147,7 +147,7 @@ class ContactMaster(TrackingJobMaster):
         self.c_ref_ratom_10 = None
 
         if not self.force or 'fnarc_10' in self.force or \
-               'c_ratom_10' in self.force:
+           'c_ratom_10' in self.force:
 
             self.__create_reduced_models( complexLst, refCom=refComplex )
             if refComplex:
@@ -166,8 +166,8 @@ class ContactMaster(TrackingJobMaster):
         self.finished = 0
 
         TrackingJobMaster.__init__( self, complexDic, chunks,
-               hosts, niceness, slave_path, show_output=show_output,
-               add_hosts=add_hosts, verbose=verbose )
+                                    hosts, niceness, slave_path, show_output=show_output,
+                                    add_hosts=add_hosts, verbose=verbose )
 
         if verbose: print "JobMaster initialized."
 
@@ -208,7 +208,7 @@ class ContactMaster(TrackingJobMaster):
         """
         Get a ComplexList by extracting a specified version (generation) of
         a ComplexEvolvingList.
-        
+
         @param cel: ComplexEvolvingList
         @type  cel: ComplexEvolvingList
         @param com_version: version of ComplexEvolvingList to get
@@ -390,7 +390,7 @@ class ContactMaster(TrackingJobMaster):
     def __toBeUpdated( self, com ):
         """
         Check if complex is to be updated.
-        
+
         @param com: Complex
         @type  com: Complex
 
@@ -411,10 +411,10 @@ class ContactMaster(TrackingJobMaster):
     def __complexDic( self, cl ):
         """
         Collect info about complexes in ComplexList that needs to be updated.
-        
+
         @param cl: ComplexList
         @type  cl: ComplexList
-        
+
         @return: dictionary mapping solution number to Complex,
                  remaining complexes as a ComplexList
         @rtype: {int:Complex}, ComplexList
@@ -540,8 +540,8 @@ class ContactMaster(TrackingJobMaster):
              'reduced_recs' : self.reduced_recs,
              'reduced_ligs' : self.reduced_ligs,
              'c_ref_ratom_10'  : self.c_ref_ratom_10,
-	     'log':self.log.fname,
-	     'verbose':self.verbose
+             'log':self.log.fname,
+             'verbose':self.verbose
              }
 
         return r
@@ -615,7 +615,7 @@ class ContactMaster(TrackingJobMaster):
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test case
 
@@ -626,17 +626,17 @@ class Test(BT.BiskitTest):
 
     def prepare(self):
         self.cl_out = tempfile.mktemp('_test.cl')
-	self.master = None
-	
+        self.master = None
+
 
     def cleanUp(self):
-	if self.master is not None:
-	    t.tryRemove( self.master.outFile )
-	    t.tryRemove( self.master.ferror )
+        if self.master is not None:
+            t.tryRemove( self.master.outFile )
+            t.tryRemove( self.master.ferror )
 
 
     def test_ContactMaster(self):
-	"""Dock.ContactMaster test"""
+        """Dock.ContactMaster test"""
         niceness = {'default': 0}
         self.hosts = cpus_all[:4]
 
@@ -646,31 +646,30 @@ class Test(BT.BiskitTest):
         refcom = t.load( t.testRoot() + "/com/ref.complex")
 
         self.master = ContactMaster( lst, chunks = 3, hosts = self.hosts,
-				     niceness = niceness,
-				     show_output = self.local,
-				     verbose = self.local,
-				     refComplex = refcom,
-				     outFile = self.cl_out )
-        
-	self.assert_( len(self.hosts) > 0,
-		      'master needs at least one pvm node for calculations' )
+                                     niceness = niceness,
+                                     show_output = self.local,
+                                     verbose = self.local,
+                                     refComplex = refcom,
+                                     outFile = self.cl_out )
 
-	if len(self.hosts) > 0:
+        self.assert_( len(self.hosts) > 0,
+                      'master needs at least one pvm node for calculations' )
+
+        if len(self.hosts) > 0:
         ## wait for calculation to finish, then load contacted list
-	    self.cl_cont = self.master.calculateResult()
+            self.cl_cont = self.master.calculateResult()
 
-	    if self.local:
-		print 'Any error are written to: %s'%master.ferror
-		## plot atom and residue contacts vs. rmsd
-		self.p = self.cl_cont.plot( 'rms', 'fnac_10','fnarc_10' )
-		self.p.show()
-            
-	    self.assertAlmostEqual(N.sum(self.cl_cont.valuesOf('fnac_10')),
-				   0.50811038550663579, 5 )
+            if self.local:
+                print 'Any error are written to: %s'%master.ferror
+                ## plot atom and residue contacts vs. rmsd
+                self.p = self.cl_cont.plot( 'rms', 'fnac_10','fnarc_10' )
+                self.p.show()
+
+            self.assertAlmostEqual(N.sum(self.cl_cont.valuesOf('fnac_10')),
+                                   0.50811038550663579, 5 )
 
 
 if __name__ == '__main__':
 
     BT.localTest()
-
 

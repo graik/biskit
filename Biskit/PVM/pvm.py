@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -52,7 +52,7 @@ def pack_and_send(tid, msg_tag, object, encoding = None):
 def delHosts(hosts):
     """
     Remove hosts from PVM.
-    
+
     @param hosts: list of hostnames
     @type  hosts: [str]
     """
@@ -80,7 +80,7 @@ def expandLocal( host ):
 def addHosts( number=None, hosts=H.nodes_all, expand=1 ):
     """
     Add hosts to PVM.
-    
+
     @param number: number of requested nodes
                    if number == 0, nothing happens
                    if number == None, all hosts are added (default)
@@ -113,7 +113,7 @@ def countHosts():
 
 ## Error codes returned by pvmlib
 pvmerrors = {
-    0  : 'PvmOk	     Success',
+    0  : 'PvmOk           Success',
     -2 : 'PvmBadParam     Bad parameter',
     -3 : 'PvmMismatch     Parameter mismatch',
     -4 : 'PvmOverflow     Value too large',
@@ -147,4 +147,3 @@ pvmerrors = {
     -35: 'PvmParentNotSet Spawning parent set PvmNoSpawnParent',
     -36: "PvmIPLoopback   Master Host's IP is Loopback"
 }
-    

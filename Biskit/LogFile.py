@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -49,7 +49,7 @@ class LogFile:
     def f( self ):
         """
         Open file only when needed for first time.
-        
+
         @return: open file handle
         @rtype: object
         """
@@ -60,18 +60,18 @@ class LogFile:
 
 
     def write(self, s):
-	"""Synonym for add_nobreak.
+        """Synonym for add_nobreak.
         @param s: line
         @type  s: str
-	"""
-	self.add_nobreak( s )
+        """
+        self.add_nobreak( s )
 
     def writeln(self, s):
-	"""Synonym for add.
+        """Synonym for add.
         @param s: line
         @type  s: str
-	"""
-	self.add(s)
+        """
+        self.add(s)
 
     def add(self, s):
         """
@@ -80,12 +80,12 @@ class LogFile:
         @param s: line
         @type  s: str        
         """
-	if not type(s) is list:
-	    s = [ s ]
+        if not type(s) is list:
+            s = [ s ]
 
-	for i in s:
-	    self.f().write(i)
-	    self.f().write('\n')
+        for i in s:
+            self.f().write(i)
+            self.f().write('\n')
 
         self.f().flush()
 
@@ -144,18 +144,18 @@ class StdLog( LogFile ):
 import Biskit.test as BT
 
 class Test(BT.BiskitTest):
-    
+
     def prepare(self):
-	import tempfile
+        import tempfile
         self.f_out = tempfile.mktemp( '_test_LogFile' )
 
     def cleanUp(self):
         if T.tryRemove( self.f_out ) and self.local:
-	    print 'log file removed.'
-        
+            print 'log file removed.'
+
     def test_LogFile( self ):
         """LogFile test """
-        
+
         self.l = LogFile( self.f_out, mode='w')
 
         self.l.writeln('1')
@@ -165,22 +165,21 @@ class Test(BT.BiskitTest):
         if self.local:
             print 'log file written to %s'%self.f_out
 
-	lines = open(self.f_out).readlines()
-	self.assertEqual( lines, ['1\n','23\n'] )
-            
+        lines = open(self.f_out).readlines()
+        self.assertEqual( lines, ['1\n','23\n'] )
+
     def test_StdLog(self):
-	 """StdLog test (only in interactive mode)"""
-	 if self.local:
-	     self.l = StdLog()
-	     self.l.write(' test message ... ')
+        """StdLog test (only in interactive mode)"""
+        if self.local:
+            self.l = StdLog()
+            self.l.write(' test message ... ')
 
     def test_ErrLog(self):
-	 """ErrLog test"""
-	 self.l = ErrLog()
-	 self.l.write(' test message ... ')
+        """ErrLog test"""
+        self.l = ErrLog()
+        self.l.write(' test message ... ')
 
-        
+
 if __name__ == '__main__':
 
     BT.localTest()
-

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -33,7 +33,7 @@ def _use( options ):
 trajFluct.py: Calculate global and side chain fluctuation per atom
               for a trajectory.
 
-Syntax:	   trajFluct -i trajectory_file [-o result_trajectory]
+Syntax:  trajFluct -i trajectory_file [-o result_trajectory]
 
                      
 Options:   -i     pickled trajectory

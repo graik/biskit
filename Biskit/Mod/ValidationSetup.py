@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -105,12 +105,12 @@ class ValidationSetup:
         @param chain_index: file with clustering results
                             (default: None-> L{TemplateSearcher.F_CHAIN_INDEX})
         @type  chain_index: 
-        
+
         @return: pdb codes of templates
         @rtype: [str]
         """
         chain_index = chain_index or self.outFolder + \
-                      TemplateSearcher.F_NR + TemplateSearcher.F_CHAIN_INDEX
+                    TemplateSearcher.F_NR + TemplateSearcher.F_CHAIN_INDEX
 
         r1 = re.compile( r'([A-Z0-9]{4}).pdb' )
         index = open( "%s"%chain_index, 'r' )
@@ -160,7 +160,7 @@ class ValidationSetup:
         @param output_folder: top output folder
                              (default: None -> L{F_RESULT_FOLDER})
         @type  output_folder: str
-        
+
         @return: dictionary mapping pdb code to CA-trace files
         @rtype: {str:str}
         """
@@ -198,7 +198,7 @@ class ValidationSetup:
         """
         Create a dictionary which keys are templates pdb code and the value
         the different file names of pdb files for MODELLER
-        
+
         @param cluster_list: pdb codes of templates
         @type  cluster_list: [str]
         @param pdb_folder: folder with Modeller pdb files
@@ -207,7 +207,7 @@ class ValidationSetup:
         @param output_folder: top output folder
                              (default: None -> L{F_RESULT_FOLDER})
         @type  output_folder: str
-        
+
         @return: dictionary mapping pdb code to pdb files used by  Modeller
         @rtype: {str:str}
         """
@@ -255,7 +255,7 @@ class ValidationSetup:
                 os.mkdir( folder)
             else:
                 print 'Directory %s exists, skipping'%( cluster + \
-                                   TemplateSearcher.F_RESULT_FOLDER)
+                                                        TemplateSearcher.F_RESULT_FOLDER)
 
             pdb_path = pdb_dictionary["%s"%cluster]
             PDBModels_list = []
@@ -266,8 +266,8 @@ class ValidationSetup:
                 pdb_name.append(os.path.split(pdb)[1][:-4])
 
             input_file = self.outFolder + self.F_RESULT_FOLDER + \
-                         '/%s'%cluster + TemplateSearcher.F_RESULT_FOLDER \
-                         + self.F_TEMPLATES_FASTA
+                       '/%s'%cluster + TemplateSearcher.F_RESULT_FOLDER \
+                       + self.F_TEMPLATES_FASTA
 
             templatesfasta = open("%s"%input_file,'w')
 
@@ -353,7 +353,7 @@ class ValidationSetup:
         @type  output_folder: str   
         """
         output_folder = output_folder or self.outFolder + \
-                        self.F_RESULT_FOLDER + '/%s/'%cluster
+                      self.F_RESULT_FOLDER + '/%s/'%cluster
         target = open("%s"%(output_folder + self.F_TEMPLATE_SEQUENCE),'w')
         target.write(">target\n")
 
@@ -385,11 +385,11 @@ class ValidationSetup:
         @type  output_folder: str         
         """
         sequences_folder = sequences_folder or self.outFolder + \
-                           SequenceSearcher.F_RESULT_FOLDER
+                         SequenceSearcher.F_RESULT_FOLDER
 
         output_folder = output_folder or self.outFolder + \
-                        self.F_RESULT_FOLDER + '/%s'%cluster + \
-                        SequenceSearcher.F_RESULT_FOLDER
+                      self.F_RESULT_FOLDER + '/%s'%cluster + \
+                      SequenceSearcher.F_RESULT_FOLDER
 
         if not os.path.exists( output_folder ):
             ## os.link doesn't seem to work with folders
@@ -418,7 +418,7 @@ class ValidationSetup:
         """
         input_folder = input_folder or self.outFolder + self.F_PDB_FOLDER
         output_file = output_file or self.outFolder + self.F_RESULT_FOLDER +\
-                      '/%s/'%cluster + self.F_KNOWN_STRUCTURE
+                    '/%s/'%cluster + self.F_KNOWN_STRUCTURE
 
         files = os.listdir('%s'%input_folder)
         for pdb in files:
@@ -437,7 +437,7 @@ class ValidationSetup:
         @type  validation_folder: str         
         """
         validation_folder = validation_folder + self.F_RESULT_FOLDER or \
-                            self.outFolder + self.F_RESULT_FOLDER
+                          self.outFolder + self.F_RESULT_FOLDER
 
         cluster_list = self.cluster_result()
         for cluster in cluster_list:
@@ -465,7 +465,7 @@ class Test(BT.BiskitTest):
     """
 
     def prepare(self):
-	import tempfile
+        import tempfile
         import shutil
 
         ## collect the input files needed
@@ -481,18 +481,18 @@ class Test(BT.BiskitTest):
 
 
     def test_ValidationSetup(self):
-	"""Mod.ValidationSetup test"""
+        """Mod.ValidationSetup test"""
         v = ValidationSetup( outFolder = self.outfolder )    
 
         v.go( validation_folder =self.outfolder )  
 
         if self.local and self.DEBUG:
             print 'The validation project can be found in %s/validation'%\
-		  self.outfolder
+                  self.outfolder
 
 
     def cleanUp(self):
-	T.tryRemove( self.outfolder, tree=1)
+        T.tryRemove( self.outfolder, tree=1)
 
 if __name__ == '__main__':
 

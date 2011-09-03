@@ -42,19 +42,19 @@ def _use():
     t    - str, target folder/file
     url  - str, target url for top right link
     o    - str, output folder
-    
+
 Default options:
 """
     for key, value in o.items():
         print "\t-",key, "\t",value
-        
+
     sys.exit(0)
 
-        
+
 GRAY = """
 /* Body color */ 
 body               { background: #ffffff; color: #000000; } 
- 
+
 /* Tables */ 
 table.summary, table.details, table.index
                    { background: #dddddd; color: #000000; } 
@@ -68,7 +68,7 @@ tr.group           { background: #c0e0f8; color: #000000;
 /* Documentation page titles */
 h2.module          { margin-top: 0.2em; }
 h2.class           { margin-top: 0.2em; }
- 
+
 /* Headings */
 h1.heading         { font-size: +140%; font-style: italic;
                      font-weight: bold; }
@@ -76,7 +76,7 @@ h2.heading         { font-size: +125%; font-style: italic;
                      font-weight: bold; }
 h3.heading         { font-size: +110%; font-style: italic;
                      font-weight: normal; }
-                    
+
 /* Base tree */
 pre.base-tree      { font-size: 80%; margin: 0; }
 
@@ -167,23 +167,23 @@ if __name__ == '__main__':
         f = open( fname, 'w' )
         f.writelines( GRAY )
         f.close()
-        
+
         o = cmdDict( o )
         o['gray'] = fname
- 	o['dot'] = absbinary('dot')
+        o['dot'] = absbinary('dot')
 
         ## command for version 2.x of epydoc
         if int(o['ver'])==2:
             command = '%(bin)s --css white --private-css %(gray)s -u %(url)s -o %(o)s -n Biskit -t "doc_modules.html" -v %(t)s'%o
-            
+
         ## command for version 3.x of epyd
         ##
         ## 3.aplha2 argument --show-sourcecode now need to be given explicitly
         if int(o['ver'])==3:
             command =  '%(bin)s -o %(o)s --css=white --url=%(url)s --name=Biskit --top=indices.html --show-sourcecode --graph=classtree --dotpath=%(dot)s --parse-only --verbose %(t)s'%o
 
-      #  classtree, callgraph, umlclasstree
-        
+    #  classtree, callgraph, umlclasstree
+
         os.system( command )
         os.unlink(fname)
 
@@ -281,5 +281,4 @@ if __name__ == '__main__':
 ##                         the HTML output.
 ##     --pstat=FILE        A pstat output file, to be used in generating call
 ##                         graphs.
-
 

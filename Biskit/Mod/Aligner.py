@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -87,10 +87,10 @@ class Aligner:
         @type  outFolder: str
         @param log: log file instance, if None, STDOUT is used (default: None)
         @type  log: LogFile
-	@param verbose: be verbose
-	@type  verbose: 1 | 0
-	@param sap: perform structural alignment
-	@type  sap: 1 | 0
+        @param verbose: be verbose
+        @type  verbose: 1 | 0
+        @param sap: perform structural alignment
+        @type  sap: 1 | 0
         """
         self.log = log
         self.outFolder = T.absfile( outFolder )
@@ -101,9 +101,9 @@ class Aligner:
         ## recognize file types for adding t_coffee type code
         self.ex_inp_types = { 'P' : re.compile('.+\.[Pp][Dd][Bb]$|'+
                                                '.+\.[Aa][Ll][Pp][Hh][Aa]$'),
-                                               'L' : re.compile('.+\.[Ll][Ii][Bb]$'),
-                                               'S' : re.compile('.*\.[Ff][Aa][Ss][Tt][Aa]$')
-                                           }
+                              'L' : re.compile('.+\.[Ll][Ii][Bb]$'),
+                              'S' : re.compile('.*\.[Ff][Aa][Ss][Tt][Aa]$')
+                              }
 
         self.commands = []  ## list of t_coffee commands to run
 
@@ -325,8 +325,8 @@ class Aligner:
                                        output=['clustalw','phylip',
                                                'score_html', 'pir_aln'],
 ##                                     run_name=T.stripFileName(f_final_aln),
-                                       outfile=f_final_aln,
-                                       quiet=f_coffee_log+'_4')
+outfile=f_final_aln,
+quiet=f_coffee_log+'_4')
             ]
 
         ## Normal alignment run with structural alignment

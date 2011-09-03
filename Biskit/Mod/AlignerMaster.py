@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -89,7 +89,7 @@ class AlignerMaster(TrackingJobMaster):
     def setupJobs(self):
         """
         Prepare the job dictionnary for 'AlignerSlave'
-        
+
         @return: input informations for aligner for each project
         @rtype: {{str}}
         """
@@ -99,11 +99,11 @@ class AlignerMaster(TrackingJobMaster):
             aligner_input = {}
             aligner_input['outFolder'] = T.absfile(f)
             aligner_input['fastaTemplates'] = \
-                                  self.__dir_or_none( f, self.fastaTemplates )
+                         self.__dir_or_none( f, self.fastaTemplates )
             aligner_input['fastaSequences'] = \
-                                  self.__dir_or_none( f, self.fastaSequences )
+                         self.__dir_or_none( f, self.fastaSequences )
             aligner_input['fastaTarget'] = \
-                                  self.__dir_or_none( f, self.fastaTarget )
+                         self.__dir_or_none( f, self.fastaTarget )
 
             pdb_list = []
             if self.pdbFolder is None:
@@ -160,24 +160,24 @@ class FullProjectTest(BT.BiskitTest):
     ## rename to test_fullProject to perform this test
     def t_fullProject( self ):
         """
-	Mod.AlignerMaster full project test
+        Mod.AlignerMaster full project test
         """
         ## a full test case that demands a valid testRoot project
-	projRoot =  T.testRoot()+'/Mod/project'
-	self.projects = glob.glob( projRoot + '/validation/*' )
+        projRoot =  T.testRoot()+'/Mod/project'
+        self.projects = glob.glob( projRoot + '/validation/*' )
 
-	self.master = AlignerMaster(folders = self.projects,
-			       ferror = projRoot+'/AlignErrors.out',
-			       hosts = hosts.cpus_all[ : 10 ],
-			       show_output = self.local)
+        self.master = AlignerMaster(folders = self.projects,
+                                    ferror = projRoot+'/AlignErrors.out',
+                                    hosts = hosts.cpus_all[ : 10 ],
+                                    show_output = self.local)
 
-	self.r = self.master.calculateResult()
+        self.r = self.master.calculateResult()
 
 
 class TestBase( BT.BiskitTest ):
 
     def prepare(self):
-	import tempfile
+        import tempfile
         import shutil
 
         ## collect the input files needed
@@ -200,25 +200,25 @@ class TestBase( BT.BiskitTest ):
 
     def t_AlignerMaster(self, run=True):
 
-	nodes = hosts.cpus_all[ : 5 ]
-	
+        nodes = hosts.cpus_all[ : 5 ]
+
         self.master = AlignerMaster( folders=[self.outfolder],
-				     ferror=self.outfolder+'/AlignErrors.out',
-				     hosts=nodes,
-				     show_output=self.local,
-				     verbose=self.local )
+                                     ferror=self.outfolder+'/AlignErrors.out',
+                                     hosts=nodes,
+                                     show_output=self.local,
+                                     verbose=self.local )
 
         if run:
-	    assert len(nodes) > 0, 'master needs at least 1 pvm node.'
+            assert len(nodes) > 0, 'master needs at least 1 pvm node.'
 
             self.r = self.master.calculateResult()
             if self.local and self.DEBUG:
-		self.log.add('The alignment result is in %s/t_coffee'%\
-			     self.outfolder)
-            
+                self.log.add('The alignment result is in %s/t_coffee'%\
+                             self.outfolder)
+
     def cleanUp(self):
         T.tryRemove( self.outfolder, tree=1 )
-        
+
 
 class TestDry( TestBase ):
     """Dry run test case that does not actually run t-coffee"""
@@ -226,8 +226,8 @@ class TestDry( TestBase ):
     TAGS = [ BT.PVM ]
 
     def test_AlignerMaster(self):
-	"""Mod.AlignerMaster limited dry run test"""
-	return self.t_AlignerMaster(run=False)
+        """Mod.AlignerMaster limited dry run test"""
+        return self.t_AlignerMaster(run=False)
 
 class TestReal( TestBase ):
     """Full AlignerMaster test case"""
@@ -235,12 +235,11 @@ class TestReal( TestBase ):
     TAGS = [BT.PVM, BT.EXE, BT.LONG]
 
     def test_AlignerMaster(self):
-	"""Mod.AlignerMaster full test"""
-	return self.t_AlignerMaster(run=True)
-    
+        """Mod.AlignerMaster full test"""
+        return self.t_AlignerMaster(run=True)
+
 
 if __name__ == '__main__':
 
     BT.localTest()
-
 

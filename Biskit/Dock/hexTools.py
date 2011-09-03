@@ -2,7 +2,7 @@
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -38,12 +38,12 @@ from Biskit import PDBDope, molUtils
 def createHexPdb_single( model, fout=None ):
     """
     Write PDB of one structure for hex.
-    
+
     @param model: model
     @type  model: PDBModel
     @param fout: out file name (default: pdbCode + _hex.pdb)
     @type  fout: str
-    
+
     @return: file name of result PDB
     @rtype: str
     """
@@ -59,12 +59,12 @@ def createHexPdb_single( model, fout=None ):
 def createHexPdb( modelDic, fout=None ):
     """
     Write pdb for hex with models separated by MODEL%i/ENDMODEL
-    
+
     @param modelDic: dictionary mapping an integer to each model
     @type  modelDic: dict {int:PCRModel}
     @param fout: output name, default is pdbCode + _hex.pdb
     @type  fout: str
-    
+
     @return: file name of result PDB
     @rtype: str
     """
@@ -105,7 +105,7 @@ def centerSurfDist( model, surf_mask, mask=None ):
     """
     Calculate the longest and shortest distance from
     the center of the molecule to the surface.
-    
+
     @param mask: atoms not to be considerd (default: None)
     @type  mask: [1|0]
     @param surf_mask: atom surface mask, needed for minimum surface distance
@@ -115,7 +115,7 @@ def centerSurfDist( model, surf_mask, mask=None ):
     @rtype: float, float
     """
     if mask is None:
-            mask = model.maskHeavy()
+        mask = model.maskHeavy()
 
     ## calculate center of mass
     center = model.centerOfMass()
@@ -149,7 +149,7 @@ def createHexInp( recPdb, recModel, ligPdb, ligModel, comPdb=None,
     @type  comPdb: str
     @param outFile: base of file name for mac and out
     @type  outFile: str
-    
+
     @param macDock: None -> hex decides (from the size of the molecule),
                     1 -> force macroDock, 0-> force off (default: None)
     @type  macDock: None|1|0
@@ -157,7 +157,7 @@ def createHexInp( recPdb, recModel, ligPdb, ligModel, comPdb=None,
     @type  silent: 0|1
     @param sol: number of solutions that HEx should save (default: 512)
     @type  sol: int
-    
+
     @return: HEX macro file name, HEX out generated bu the macro,
              macro docking status
     @rtype: str, str, boolean
@@ -296,8 +296,8 @@ activate_docking
 # ------------ also save all solutions ----------
 docking_sort_mode 0            # Sort solutions by energy (1 by cluster)
 save_docking %(output_all)s""" \
-    %({'range':round(molRange), 'output_all':outName_all,
-       'nr_sol':int(sol), 'output_clust':outName_clust} )
+         %({'range':round(molRange), 'output_all':outName_all,
+            'nr_sol':int(sol), 'output_clust':outName_clust} )
 
     macOpen.writelines( head )
 
@@ -318,12 +318,12 @@ save_docking %(output_all)s""" \
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test case"""
 
     def test_hexTools(self):
-	"""Dock.hexTools test"""
+        """Dock.hexTools test"""
         from Biskit import PDBModel
         self.m = PDBModel( t.testRoot() + '/com/1BGS.pdb' )
         dist = centerSurfDist( self.m , self.m.maskCA() )
@@ -334,5 +334,4 @@ class Test(BT.BiskitTest):
 if __name__ == '__main__':
 
     BT.localTest()
-
 
