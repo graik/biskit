@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -43,7 +43,7 @@ class Fold_X( Executor ):
     Run fold_X with given PDBModel
     ==============================
       Returns a dictionary with energy terms.
-       
+
       Example usage
       -------------
          >>> x = Fold_X( model, verbose=1 )
@@ -56,36 +56,36 @@ class Fold_X( Executor ):
       (version 2.5.2). The first is the entropy cost of making a complex.
       This is zero if not 'AnalyseComplex' is run. The final value are
       the number of residues.
-      
+
       We'll try to keep the energy labels of Fold-X version 1 if possible.
       ::
-        ene    - total energy	
-	bb_hb  - Backbone Hbond	
-	sc_hb  - Sidechain Hbond	   
-	vw     - Van der Waals	
-	el     - Electrostatics	
-	sol_p  - Solvation Polar	   
-	sol_h  - Solvation Hydrophobic	
-	vwcl   - Van de Waals clashes	
-	sc     - entropy side chain	
-	mc     - entropy main chain	
-	sloop  - sloop_entropy	
-	mloop  - mloop_entropy	
-	cis    - cis_bond	
-	tcl    - torsional clash	   
-	bbcl   - backbone clash	
-	dip    - helix dipole	
-	wtbr   - water bridge	
-	disu   - disulfide	
-	el_kon - electrostatic kon	
+        ene    - total energy
+        bb_hb  - Backbone Hbond
+        sc_hb  - Sidechain Hbond
+        vw     - Van der Waals
+        el     - Electrostatics
+        sol_p  - Solvation Polar  
+        sol_h  - Solvation Hydrophobic
+        vwcl   - Van de Waals clashes
+        sc     - entropy side chain
+        mc     - entropy main chain
+        sloop  - sloop_entropy
+        mloop  - mloop_entropy
+        cis    - cis_bond
+        tcl    - torsional clash   
+        bbcl   - backbone clash
+        dip    - helix dipole
+        wtbr   - water bridge
+        disu   - disulfide
+        el_kon - electrostatic kon
         p_cov  - partial covalent bonds
              ( - complex entropy )
              ( - number of residues )        
-    
+
       Reference
       ---------
         U{http://foldx.embl.de} for more info
-   
+
     @note: September 11 - 2006: 
       Tested with Fold-X 2.5.2
     """
@@ -111,7 +111,7 @@ class Fold_X( Executor ):
         self.temp_result  = tempfile.mktemp('_foldx_.result')
         self.temp_runlog  = tempfile.mktemp('_foldx_.log')
         self.temp_errlog  = tempfile.mktemp('_foldx_.err')
-        
+
         Executor.__init__( self, 'fold_X', args='-manual %s %s %s'\
                            %(self.temp_pdb, self.temp_option,
                              self.temp_command), **kw )
@@ -158,22 +158,22 @@ class Fold_X( Executor ):
                            target.index( a2['name'] ))
             except ValueError, why:
                 s = "Unknown atom for %s %i: %s or %s" % \
-                    (res, a1['residue_number'], a1['name'], a2['name'] )
+                  (res, a1['residue_number'], a1['name'], a2['name'] )
                 raise Fold_XError( s )
 
         ## make a copy
- #       model = model.take( range(model.lenAtoms()) )
- 
+    #       model = model.take( range(model.lenAtoms()) )
+
         ## mask for all heavy atoms, H and H3
         heavy_mask = model.maskHeavy()
- #       HN_mask = model.mask( lambda a: a['name'] == 'H' )
- #       H3_mask = model.mask( lambda a: a['name'] == 'H3' )
+    #       HN_mask = model.mask( lambda a: a['name'] == 'H' )
+    #       H3_mask = model.mask( lambda a: a['name'] == 'H3' )
 
-         ## rename H and H3 -> HN
- #       atm_dic = model.getAtoms()
- #       for i in N.nonzero( HN_mask + H3_mask ):
- #           atm_dic[i]['name'] = 'HN'
- 
+            ## rename H and H3 -> HN
+    #       atm_dic = model.getAtoms()
+    #       for i in N.nonzero( HN_mask + H3_mask ):
+    #           atm_dic[i]['name'] = 'HN'
+
         ## remove all none backbone hydrogens
         keep_mask = heavy_mask #+ HN_mask + H3_mask
         model = model.compress( keep_mask )
@@ -190,7 +190,7 @@ class Fold_X( Executor ):
     def prepare( self ):
         """
         Write a Fold-X compatible pdb file to disc.
-        
+
         @note: Overrides Executor method.
         """
         self.__prepareModel( self.model, self.temp_pdb )
@@ -199,7 +199,7 @@ class Fold_X( Executor ):
         f_com.writelines(['<TITLE>FOLDX_commandfile;\n',
                           '<Stability>%s;\n'%self.temp_result])
         f_com.close()
-        
+
         f_opt = open( self.temp_option, 'w')
         f_opt.writelines(['<TITLE> FOLDX_optionfile;\n',
                           '<logfile_name> %s;'%self.temp_runlog,
@@ -228,7 +228,7 @@ class Fold_X( Executor ):
             ## 'errorfile.txt' in the local directory. Remove.
             T.tryRemove( 'errorfile.txt' )
 
-            
+
     def parse_foldx( self):
         """
         Extract energies from output.
@@ -257,7 +257,7 @@ class Fold_X( Executor ):
                      'sc',   'mc',    'sloop',  'mloop',
                      'cis',  'tcl',   'bbcl',   'dip',
                      'wtbr', 'disu',  'el_kon', 'p_cov' ]
-            
+
             ## add energies to dictionary
             for i in range( len( keys ) ):
                 energy[ keys[i] ] = float( E[i] )
@@ -267,7 +267,7 @@ class Fold_X( Executor ):
 
         return energy
 
-        
+
     def isFailed( self ):
         """
         @note: Overrides Executor method
@@ -291,18 +291,18 @@ class Test(BT.BiskitTest):
     """Fold_X test"""
 
     TAGS = [ BT.EXE ]
-    
+
     def test_Fold_X( self):
         """Fold_X test"""
         from Biskit import PDBModel
-        
+
         ## Loading PDB...
         self.m = PDBModel( T.testRoot() + '/rec/1A2P.pdb' )
         self.m = self.m.compress( self.m.maskProtein() )
 
         ## Starting fold_X
         self.x = Fold_X( self.m, debug=self.DEBUG,
-			 verbose=(self.VERBOSITY>2) )
+                         verbose=(self.VERBOSITY>2) )
 
         ## Running
         self.r = self.x.run()
@@ -321,6 +321,5 @@ class Test(BT.BiskitTest):
 if __name__ == '__main__':
 
     BT.localTest()
-
 
 

@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -53,7 +53,7 @@ class ModelList( DictList ):
         @type  lst: [ dict ]
         @param item_type: type, class of allowed items [ dict ]
         @type  item_type: [ dict ]
-        
+
         @raise DictListError: if list contains non-item_type item.
         """
         DictList.__init__( self, lst, item_type )
@@ -62,7 +62,7 @@ class ModelList( DictList ):
     def version( self ):
         """
         Version of class.
-        
+
         @return: class version number
         @rtype: str
         """
@@ -72,7 +72,7 @@ class ModelList( DictList ):
     def getItemValue( self, item, key, default=None ):
         """
         Get a value from a given item (dictionary). Overrides DictList method.
-        
+
         @param item: possible entry of this list
         @type  item: dict
         @param key: dictionary key
@@ -89,10 +89,10 @@ class ModelList( DictList ):
     def file2model( self, file_or_model ):
         """
         Load PDBModel from file if necessary.
-        
+
         @param file_or_model: file name or existing model
         @type  file_or_model: str OR PDBModel
-        
+
         @return: existing model or model loaded from file
         @rtype: PDBModel
         """
@@ -105,7 +105,7 @@ class ModelList( DictList ):
     def _processNewItem( self, v, i ):
         """
         Called before an item is added to the list. Override but call.
-        
+
         @param i: index
         @type  i: int
         @param v: value
@@ -130,10 +130,10 @@ class Test(BT.BiskitTest):
     def test_ModelList( self ):
         """ModelList test"""
         import random
-        
+
         self.f_lst = [ T.testRoot() + '/rec/1A2P.pdb',
-		       T.testRoot() + '/lig/1A19.pdb',
-		       T.testRoot() + '/com/1BGS.pdb' ]
+                       T.testRoot() + '/lig/1A19.pdb',
+                       T.testRoot() + '/com/1BGS.pdb' ]
 
         ## Loading PDBs...
         self.l = ModelList( self.f_lst )
@@ -149,11 +149,11 @@ class Test(BT.BiskitTest):
             print self.l.valuesOf('score')
             self.p.show()
 
-	self.assertEqual( self.seq, self.EXPECTED )
+        self.assertEqual( self.seq, self.EXPECTED )
 
     #: expected result
     EXPECTED = ['VINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIR', 'KKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDCLTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILS', 'AQVINTFDGVADYLQTYHKLPDNYITKSEAQALGWVASKGNLADVAPGKSIGGDIFSNREGKLPGKSGRTWREADINYTSGFRNSDRILYSSDWLIYKTTDHYQTFTKIRKKAVINGEQIRSISDLHQTLKKELALPEYYGENLDALWDALTGWVEYPLVLEWRQFEQSKQLTENGAESVLQVFREAKAEGADITIILS']
-    
+
 if __name__ == '__main__':
 
     BT.localTest()

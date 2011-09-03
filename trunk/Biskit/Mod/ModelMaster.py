@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -95,7 +95,7 @@ class ModelMaster(TrackingJobMaster):
     def setupJobs(self):
         """
         Prepare the job dictionnary for 'ModelSlave'
-        
+
         @return: input informations for modeller for each project
         @rtype: {{str}}
         """
@@ -105,10 +105,10 @@ class ModelMaster(TrackingJobMaster):
             modeller_input = {}
             modeller_input['outFolder'] = T.absfile(f)
             modeller_input['fastaTarget'] = \
-                                self.__dir_or_none( f, self.fastaTarget )
+                          self.__dir_or_none( f, self.fastaTarget )
             modeller_input['f_pir'] = self.__dir_or_none( f, self.f_pir )
             modeller_input['template_folder'] = \
-                                self.__dir_or_none( f, self.template_folder )
+                          self.__dir_or_none( f, self.template_folder )
             modeller_input['starting_model'] = self.starting_model
             modeller_input['ending_model'] = self.ending_model
 
@@ -151,9 +151,9 @@ class Test(BT.BiskitTest):
     """
 
     TAGS = [BT.PVM, BT.LONG, BT.EXE]
-    
+
     def prepare(self):
-	import tempfile
+        import tempfile
         import shutil
 
         ## collect the input files needed
@@ -168,32 +168,31 @@ class Test(BT.BiskitTest):
                      self.outfolder + '/t_coffee' )    
 
         shutil.copy( T.testRoot() + '/Mod/project/target.fasta',
-                         self.outfolder  )
+                     self.outfolder  )
 
-    
+
     def test_ModelMaster( self):
-	"""Mod.ModelMaster test"""
+        """Mod.ModelMaster test"""
 
-	nodes = hosts.cpus_all[ : 10 ]
+        nodes = hosts.cpus_all[ : 10 ]
 
         self.master = ModelMaster(folders = [self.outfolder],
-                             hosts=nodes,
-                             show_output = self.local,
-                             verbose = self.local )
+                                  hosts=nodes,
+                                  show_output = self.local,
+                                  verbose = self.local )
 
-	assert len(nodes) > 0, 'master needs at least 1 pvm node.'
+        assert len(nodes) > 0, 'master needs at least 1 pvm node.'
 
-	self.r = self.master.calculateResult()
+        self.r = self.master.calculateResult()
 
-	if self.debug and self.local:
-	    print 'The models result can be found in %s/modeller'%\
-		  self.outfolder
-            
+        if self.debug and self.local:
+            print 'The models result can be found in %s/modeller'%\
+                  self.outfolder
+
     def cleanUp(self):
         T.tryRemove( self.outfolder, tree=1 )
-    
+
 
 if __name__ == '__main__':
 
     BT.localTest()
-

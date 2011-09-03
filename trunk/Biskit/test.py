@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -72,7 +72,7 @@ Usage
 
             if self.local:   ## only if the module is executed directly
                 print self.result 
-                
+
             self.assertEqual( self.result, 42, 'unexpected result' )
 
 
@@ -88,7 +88,7 @@ Note:
         - If TAG is not given, the test will have the default NORMAL tag.
         - Names of test functions **must** start with C{test_}.
         - The doc string of test_* will be reported as id of this test.
-	- this module also acts as the script to collect and run the tests
+        - this module also acts as the script to collect and run the tests
 '''
 
 import unittest as U
@@ -130,7 +130,7 @@ class BiskitTest( U.TestCase):
 
     Usage:
     ======
-    
+
       Biskit test cases should be created by sub-classing BiskitTest
       and by adding one or more test_* methods (each method starting
       with 'test_' is treated as a separate test). The doc string of a
@@ -246,7 +246,7 @@ class FlushingTextTestRunner( U.TextTestRunner ):
 
     def _makeResult(self):
         return Flushing_TextTestResult(self.stream, self.descriptions,
-                                     self.verbosity)
+                                       self.verbosity)
 
 
 class BiskitTestLoader( object ):
@@ -296,7 +296,7 @@ class BiskitTestLoader( object ):
         @raise ImportError: if a python file cannot be imported
         """
         module_folder = module.replace('.', os.path.sep)
-        
+
         files = glob.glob( os.path.join( path, module_folder,'*.py' ) )
 
         files = map( T.stripFilename, files )
@@ -329,7 +329,7 @@ class BiskitTestLoader( object ):
                 if type(i) is type and \
                    issubclass( i, Biskit.test.BiskitTest ) and \
                    i.__name__ != 'BiskitTest':
-                    
+
                     suite = U.defaultTestLoader.loadTestsFromTestCase( i )
                     self.suite.addTests( suite )
                     tested = 1
@@ -353,12 +353,12 @@ class BiskitTestLoader( object ):
 
 
     def __moduleNames(self, modules ):
-        
+
         modules = [ m.__name__ for m in modules ]   ## extract name
         modules = [ m.replace('.',' .   ') for m in modules ]
 
         return modules
-        
+
 
     def report( self ):
         """
@@ -450,22 +450,22 @@ def getCallingNamespace( callpattern='localTest' ):
     @rtype: dict  
     """
     import inspect
-    
+
     try:
         frames = inspect.getouterframes( inspect.currentframe() )
-        
+
         i = 0
         while frames[i][3] != callpattern:
             i += 1
             if i >= len( frames ):
                 raise BiskitTestError, \
                       'cannot find %s in current stack trace' % callpattern
-        
+
         f = frames[i + 1][0]
         r = f.f_globals
     finally:
         del frames, f, i
-    
+
     return r
 
 
@@ -480,8 +480,8 @@ def extractTestCases( namespace ):
     for i in namespace.values():
 
         if type(i) is type \
-               and issubclass( i, Biskit.test.BiskitTest )\
-               and i.__name__ != 'BiskitTest':
+           and issubclass( i, Biskit.test.BiskitTest )\
+           and i.__name__ != 'BiskitTest':
 
             r += [i]
 
@@ -500,7 +500,7 @@ def localTest( testclass=None, verbosity=BiskitTest.VERBOSITY,
     interactive interpreter. The BiskitTest instance itself is also
     put into the calling namespace as variable 'self', so that test code
     fragments referring to it can be executed interactively.
-    
+
     @param testclass: BiskitTest-derived class [default: first one found]
     @type  testclass: class
     @param verbosity: verbosity level of TextTestRunner
@@ -570,7 +570,7 @@ Run unittest tests for biskit.
     log  - path to logfile (overriden); empty -log means STDOUT        [STDOUT]
     nox  - suppress test plots                                          [False]
     dry  - do not actually run the test but just collect tests          [False]
-               
+
 Examples:
 
     * Run all but long or obsolete tests from Biskit and Biskit.Dock:
@@ -579,12 +579,12 @@ Examples:
     * Run only PVM-dependent tests of the Biskit.Mod sub-package:
     test.py -i pvm  -p Biskit.Mod
 
-        
+
 Default options:
 """
     for key, value in defaults.items():
         print "\t-",key, "\t",value
-        
+
     sys.exit(0)
 
 
@@ -629,12 +629,12 @@ if __name__ == '__main__':
 
     if len( sys.argv ) == 1 and 'test.py' in sys.argv[0]:
         _use( defaults )
-        
+
     _convertOptions( o )
 
     BiskitTest.VERBOSITY = o['v']
     BiskitTest.DEBUG = o['debug']
-    
+
     l = BiskitTestLoader( allowed=o['i'], forbidden=o['e'],
                           verbosity=o['v'], log=o['log'], debug=o['debug'])
 

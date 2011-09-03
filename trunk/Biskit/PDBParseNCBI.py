@@ -2,7 +2,7 @@
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -41,7 +41,7 @@ from PDBParseModel import PDBParseModel
 class PDBParseNCBI( PDBParseModel ):
 
     ex_resolution = re.compile(\
-            'REMARK   2 RESOLUTION\. *([0-9\.]+|NOT APPLICABLE)' )
+        'REMARK   2 RESOLUTION\. *([0-9\.]+|NOT APPLICABLE)' )
 
     ## resolution assigned to NMR structures
     NMR_RESOLUTION = 3.5
@@ -54,7 +54,7 @@ class PDBParseNCBI( PDBParseModel ):
 
         >>> if ParsePDBModel.supports( model ):
         >>>     ...
-        
+
         @return: True if the given source is supported by this parser
         @rtype: bool
         """
@@ -132,9 +132,9 @@ class PDBParseNCBI( PDBParseModel ):
             from Bio import File
         except:
             raise PDBParserError('Could not find Biopython - ' + \
-                               'remote fetching of PDBs is not supported.')
+                                 'remote fetching of PDBs is not supported.')
 
-        
+
         handle = urllib.urlopen( rcsb_url% (id,id) )
 
         uhandle = File.UndoHandle(handle)
@@ -147,17 +147,17 @@ class PDBParseNCBI( PDBParseModel ):
 
     def parsePdbFromHandle(self, handle, first_model_only=True ):
         """
-	Parse PDB from file/socket or string handle into memory.
+        Parse PDB from file/socket or string handle into memory.
 
-	@param handle: fresh open file/socket handle to PDB ressource or string
-	@type  handle: open file-like object or str
-	@param first_model_only: only take first of many NMR models [True]
-	@type  first_model_only: bool
+        @param handle: fresh open file/socket handle to PDB ressource or string
+        @type  handle: open file-like object or str
+        @param first_model_only: only take first of many NMR models [True]
+        @type  first_model_only: bool
 
         @return: pdb file as list of strings, dictionary with resolution
         @rtype: [str], {'resolution':float }
-	@raise PDBParserError: if passed in string is too short
-	"""
+        @raise PDBParserError: if passed in string is too short
+        """
         lines = []
         res_match = None
         infos = {}
@@ -167,9 +167,9 @@ class PDBParseNCBI( PDBParseModel ):
                 raise PDBParserError( "Couldn't extract PDB Info." )
             handle =  cStringIO.StringIO( handle )
 
-## 	if handle.peekline()[:6] != 'TITLE':
-## 	    raise PDBParserError, 'Ressource does not seem to be a PDB:\n%r' %\
-## 		  handle.peekline()
+## if handle.peekline()[:6] != 'TITLE':
+##     raise PDBParserError, 'Ressource does not seem to be a PDB:\n%r' %\
+##     handle.peekline()
 
         for l in handle:
             lines += [ l ]
@@ -191,7 +191,7 @@ class PDBParseNCBI( PDBParseModel ):
 
 
     def fetchPDB( self, id ):
-        
+
         try:
             h = self.getLocalPDBHandle( id )
         except:
@@ -214,7 +214,7 @@ class PDBParseNCBI( PDBParseModel ):
         m.disconnect()
         m.pdbCode = id
         m.info.update( infos )
-        
+
         T.tryRemove( fname )
 
         return m
@@ -223,7 +223,7 @@ class PDBParseNCBI( PDBParseModel ):
                 headPatterns=[]):
         """
         Update empty or missing fields of model from the source.
-        
+
         Profiles that are taken from the source are labeled 'changed'=0.
         The same holds for coordinates (xyzChanged=0).
         However, existing profiles or coordinates or fields remain untouched.
@@ -245,11 +245,11 @@ class PDBParseNCBI( PDBParseModel ):
                 super( PDBParseNCBI, self ).update(
                     model, s, skipRes=skipRes, updateMissing=updateMissing,
                     force=force )
-                              
+
         except Exception, why:
             raise PDBParserError, "Cannot fetch PDB from %s, "\
-                   % str(source) + "Reason:\n" + str(why)
-        
+                  % str(source) + "Reason:\n" + str(why)
+
         ## override source set by PDBParseModel
         model.source = source
 
@@ -258,7 +258,7 @@ class PDBParseNCBI( PDBParseModel ):
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test"""
 
@@ -273,7 +273,7 @@ class Test(BT.BiskitTest):
         self.m = self.p.parse2new( '1A2P')
 
         self.assert_( len(self.m) == 3042 )
-                                
+
 
 if __name__ == '__main__':
 

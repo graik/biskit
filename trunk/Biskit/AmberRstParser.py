@@ -2,7 +2,7 @@
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -25,7 +25,7 @@
 """
 Parse Amber restart files.
 """
-    
+
 import re
 import numpy.oldnumeric as N
 import os.path
@@ -52,7 +52,7 @@ class AmberRstParser:
         self.n = 0       #: number of atoms
         self.lines_per_frame = 0
         self.xyz = None  #: will hold coordinate array
-	self.box = None  #: will hold box array if any
+        self.box = None  #: will hold box array if any
 
         ## pre-compile pattern for line2numbers
         xnumber = "-*\d+\.\d+"              # optionally negtive number
@@ -61,10 +61,10 @@ class AmberRstParser:
 
 
     def __del__(self):
-	try:
-	    self.crd.close()
-	except:
-	    pass
+        try:
+            self.crd.close()
+        except:
+            pass
 
 
     def __nextLine( self ):
@@ -94,10 +94,10 @@ class AmberRstParser:
 
     def getXyz( self ):
         """Get coordinate array.
-        
+
         @return: coordinates, N.array( N x 3, 'f')
         @rtype: array
-        
+
         @raise ParseError: if can't interprete second line
         """
         if not self.xyz:
@@ -108,14 +108,14 @@ class AmberRstParser:
             try:
                 self.n, self.time = self.crd.readline().split()
                 self.n = int( self.n )
-		self.time = float( self.time )
+                self.time = float( self.time )
             except:
                 raise ParseError("Can't interprete second line of "+self.frst)
 
             ## pre-compute lines expected per frame
             self.lines_per_frame = self.n / 2
             if self.n % 2 != 0:
-		self.lines_per_frame += 1
+                self.lines_per_frame += 1
 
             self.xyz = self.__frame()
 
@@ -125,12 +125,12 @@ class AmberRstParser:
     def getModel( self, ref, rnAmber=0 ):
         """
         Get model.
-        
+
         @param ref: reference with same number and order of atoms
         @type  ref: PDBModel
         @param rnAmber: rename Amber to standard residues (HIE, HID, HIP, CYX)
         @type  rnAmber: 1|0
-        
+
         @return: PDBModel
         @rtype: PDBModel
         """
@@ -139,8 +139,8 @@ class AmberRstParser:
 
         result = ref.clone()
         result.setXyz( self.xyz )
-	if rnAmber:
-	    result.renameAmberRes()
+        if rnAmber:
+            result.renameAmberRes()
 
         return result
 
@@ -148,7 +148,7 @@ class AmberRstParser:
     def getFirstCrdLine( self ):
         """
         Return the first line of Amber crd.
-        
+
         @return: first line of Amber crd formatted coordinate block
         @rtype: str
         """
@@ -166,7 +166,7 @@ class AmberRstParser:
         """
         Write/Append Amber-formatted block of coordinates to a file.
         If a file handle is given, the file will not be closed.
-        
+
         @param fcrd: file to write to
         @type  fcrd: str or file object
         @param append: append to existing file (default: 1)
@@ -186,7 +186,7 @@ class AmberRstParser:
             if append:
                 mode = 'a'
             f = open( T.absfile( fcrd ), mode )
-            
+
             newf = (mode=='w' or not os.path.exists( T.absfile(fcrd) ))
             if newf:
                 f.write("\n")
@@ -218,31 +218,30 @@ class Test(BT.BiskitTest):
     """Test AmberRstParser"""
 
     def prepare(self):
-	self.f    = T.testRoot()+'/amber/sim.rst'
-	self.fref = T.testRoot()+'/amber/1HPT_0.pdb'
-	
-	self.p = AmberRstParser( self.f )
+        self.f    = T.testRoot()+'/amber/sim.rst'
+        self.fref = T.testRoot()+'/amber/1HPT_0.pdb'
+
+        self.p = AmberRstParser( self.f )
 
     def test_getXyz( self ):
-	"""AmberRstParser.getXyz test"""
-	self.xyz = self.p.getXyz()
-	self.assertEqual( N.shape(self.xyz), (11200,3) )
+        """AmberRstParser.getXyz test"""
+        self.xyz = self.p.getXyz()
+        self.assertEqual( N.shape(self.xyz), (11200,3) )
 
 class TestLong(Test):
     """long AmberRstParser test"""
     TAGS = [BT.LONG]
 
     def test_getModel(self):
-	"""AmberRstParser.getModel test"""
-	self.ref = PDBModel( self.fref )
-	self.model = self.p.getModel( self.ref )
-	self.assertEqual( len(self.model), 11200 )
+        """AmberRstParser.getModel test"""
+        self.ref = PDBModel( self.fref )
+        self.model = self.p.getModel( self.ref )
+        self.assertEqual( len(self.model), 11200 )
 
 
 if __name__ == '__main__':
 
     ## run Test and push self.* fields into global namespace
     BT.localTest( )
-
 
 

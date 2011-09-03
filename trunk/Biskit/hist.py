@@ -2,7 +2,7 @@
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Wolfgang Rieping
+## Copyright (C) 2004-2011 Wolfgang Rieping
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -33,7 +33,7 @@ def histogram(data, nbins, range = None):
     """
     Create a histogram.
     Comes from Konrad Hinsen: Scientific Python
-    
+
     @param data: data list or array
     @type  data: [any]
     @param nbins: number of bins
@@ -46,17 +46,17 @@ def histogram(data, nbins, range = None):
     """
     data = Numeric.array(data, Numeric.Float)
     if range is None:
-	min = Numeric.minimum.reduce(data)
-	max = Numeric.maximum.reduce(data)
+        min = Numeric.minimum.reduce(data)
+        max = Numeric.maximum.reduce(data)
     else:
-	min, max = range
-	data = Numeric.repeat(data,
-		   Numeric.logical_and(Numeric.less_equal(data, max),
-                                       Numeric.greater_equal(data, min)))
+        min, max = range
+        data = Numeric.repeat(data,
+                              Numeric.logical_and(Numeric.less_equal(data, max),
+                                                  Numeric.greater_equal(data, min)))
     bin_width = (max-min)/nbins
     data = Numeric.floor((data - min)/bin_width).astype(Numeric.Int)
     histo = Numeric.add.reduce(Numeric.equal(
-	Numeric.arange(nbins)[:,Numeric.NewAxis], data), -1)
+        Numeric.arange(nbins)[:,Numeric.NewAxis], data), -1)
     histo[-1] = histo[-1] + Numeric.add.reduce(Numeric.equal(nbins, data))
     bins = min + bin_width*(Numeric.arange(nbins)+0.5)
     return Numeric.transpose(Numeric.array([bins, histo]))
@@ -66,7 +66,7 @@ def density(x, nBins, range = None, steps = 1, hist = 0):
     """
     returns the normalized histogram of x::
       density( data, nBins [,range=None, steps=1, hist=0|1] ) -> array
-      
+
     @param x: data list or array
     @type  x: [any]
     @param nBins: number of bins
@@ -77,7 +77,7 @@ def density(x, nBins, range = None, steps = 1, hist = 0):
     @type  steps: 1|0
     @param hist: 0: normalize histogram (default 0)
     @type  hist: 1|0
-    
+
     @return: array (2 x len(data) ) with start of bin and witdh of bin. 
     @rtype: array
     """
@@ -107,7 +107,7 @@ def density(x, nBins, range = None, steps = 1, hist = 0):
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test case"""
 
@@ -119,13 +119,13 @@ class Test(BT.BiskitTest):
         self.assert_( Numeric.all( self.data == self.EXPECT) )
 
     EXPECT= Numeric.array([[  4. ,   0. ],
-			   [  4. ,   2. ],
-			   [  6.4,   2. ],
-			   [  6.4,   2. ],
-			   [  8.8,   2. ],
-			   [  8.8,   3. ],
-			   [ 11.2,   3. ],
-			   [ 11.2,   0. ]])
+                           [  4. ,   2. ],
+                           [  6.4,   2. ],
+                           [  6.4,   2. ],
+                           [  8.8,   2. ],
+                           [  8.8,   3. ],
+                           [ 11.2,   3. ],
+                           [ 11.2,   0. ]])
 
 
 if __name__ == '__main__':

@@ -68,23 +68,23 @@ class ROCalyzer( object ):
 
     def __init__( self, positives ):
         """
-	@param positives: mask identifying all true positives
-	@type  positives: [ 1|0 ]
-	"""
+        @param positives: mask identifying all true positives
+        @type  positives: [ 1|0 ]
+        """
         self.positives = positives
 
 
     def random_roccurves(self, score, n=100 ):
         """
-	Generate roc curves for randomized target masks.
-	@param score: sequence of score values for target sequence
-	@type  score: [ int ] or [ float ]
-	@param n: number of curves to generate (100)
-	@type  n: int
-	@return: a set of sensitivity/specifity curves for the given score
-	         applied to random 'positive' items.
+        Generate roc curves for randomized target masks.
+        @param score: sequence of score values for target sequence
+        @type  score: [ int ] or [ float ]
+        @param n: number of curves to generate (100)
+        @type  n: int
+        @return: a set of sensitivity/specifity curves for the given score
+        applied to random 'positive' items.
         @rtype: [ (sens, spec), ]
-	"""
+        """
         N.random.seed()
         r = []
         for i in range(n):
@@ -98,17 +98,17 @@ class ROCalyzer( object ):
 
     def roccurve( self, score, ref=None ):
         """
-	Calculate the ROC curve of the given score.
+        Calculate the ROC curve of the given score.
         @todo: doesn't handle target containing only true positives or
         only true negatives
 
-	@param score: sequence of score values for target sequence
-	@type  score: [ int ] or [ float ]
-	@param ref  : alternative mask of positives (overrides self.positives)
-	@type  ref  : [ 1|0 ]
-	@return: curve describing 1-specificity (1st column) versus sensitivity
-	@rtype: [ (specifity, false_positive_rate) ]
-	"""
+        @param score: sequence of score values for target sequence
+        @type  score: [ int ] or [ float ]
+        @param ref  : alternative mask of positives (overrides self.positives)
+        @type  ref  : [ 1|0 ]
+        @return: curve describing 1-specificity (1st column) versus sensitivity
+        @rtype: [ (specifity, false_positive_rate) ]
+        """
         if ref is None:
             ref = self.positives
 
@@ -136,19 +136,19 @@ class ROCalyzer( object ):
 
     def area( self, curve, start=0.0, stop=1.0 ):
         """
-	Numerically add up the area under the given curve.
-	The curve is a 2-D array or list of tupples as returned by roccurve().
-	The x-axis is the first column of this array (curve[:,0]).
+        Numerically add up the area under the given curve.
+        The curve is a 2-D array or list of tupples as returned by roccurve().
+        The x-axis is the first column of this array (curve[:,0]).
 
-	@param curve: a list of x,y coordinates
-	@type  curve: [ (y,x), ] or N.array
-	@param start: lower boundary (in x) (default: 0.0)
-	@type  start: float
-	@param stop: upper boundary (in x) (default: 1.0)
-	@type  stop: float
-	@return: the area underneath the curve between start and stop.
-	@rtype: float
- 	"""
+        @param curve: a list of x,y coordinates
+        @type  curve: [ (y,x), ] or N.array
+        @param start: lower boundary (in x) (default: 0.0)
+        @type  start: float
+        @param stop: upper boundary (in x) (default: 1.0)
+        @type  stop: float
+        @return: the area underneath the curve between start and stop.
+        @rtype: float
+        """
         c = N.array( curve )
         assert len( N.shape( c ) ) == 2
 
@@ -178,33 +178,33 @@ class ROCalyzer( object ):
 
     def rocarea( self, score ):
         """
-	Calculate how much the score outperforms a perfect random score.
-	The measure used is the area underneath the ROC curve. A perfect
-	random score should, on average, form a diagonal roc curve with an
-	area of 0.5. Anything above that *may* indicate better-than random
-	performance. See also isnoise() for quantifying this.
-	@param score: the score predicted for each item
-	@type  score: [ float ]
-	@return: a.area( a.roccurve( score) ) - 0.5
-	@rtype: float
-	"""
+        Calculate how much the score outperforms a perfect random score.
+        The measure used is the area underneath the ROC curve. A perfect
+        random score should, on average, form a diagonal roc curve with an
+        area of 0.5. Anything above that *may* indicate better-than random
+        performance. See also isnoise() for quantifying this.
+        @param score: the score predicted for each item
+        @type  score: [ float ]
+        @return: a.area( a.roccurve( score) ) - 0.5
+        @rtype: float
+        """
         return self.area( self.roccurve( score ) ) - 0.5
 
 
     def isnoise( self, score, n_samples=1000 ):
         """
-	Test how a given score performs at predicting items in the
-	positive list compared to its 'performance' at  predicting random
-	elements. The result corresponds to a two-tailed P value.
+        Test how a given score performs at predicting items in the
+        positive list compared to its 'performance' at  predicting random
+        elements. The result corresponds to a two-tailed P value.
         See L{utest} for the analytical solution. 
-	@param score: the score predicted for each item
-	@type  score: [ float ]
-	@param n_samples: number of random samples
-	@type  n_samples: int
+        @param score: the score predicted for each item
+        @type  score: [ float ]
+        @param n_samples: number of random samples
+        @type  n_samples: int
 
-	@return: probability P that the prediction success of score is just
-	         a random effect (1.0 means it's just perfectly random).
-	"""
+        @return: probability P that the prediction success of score is just
+        a random effect (1.0 means it's just perfectly random).
+        """
         from Biskit import EHandler
 
         ## list of random deviations from diagonal area 0.5
@@ -235,8 +235,8 @@ class ROCalyzer( object ):
         characteristics (ROC) and relative operating levels (ROL)
         curves: Statistical significance and interpretation
 
-	@param score: the score predicted for each item
-	@type  score: [ float ]
+        @param score: the score predicted for each item
+        @type  score: [ float ]
 
         @return: 1-tailed P-value
         @rtype: float
@@ -317,7 +317,7 @@ class Test(BT.BiskitTest):
 
         self.score = self.cl.valuesOf('hex_eshape')
         ## convert hex energies into positive score
-##  	self.score = N.array(self.cl.valuesOf('hex_etotal')) * -1
+        ##  self.score = N.array(self.cl.valuesOf('hex_etotal')) * -1
 
         ## define complexes with less the 6 A rmsd from reference as positives
         self.hits = N.less( self.cl.valuesOf('rms'), 6 )
@@ -387,5 +387,4 @@ class Test(BT.BiskitTest):
 if __name__ == '__main__':
 
     BT.localTest()
-
 

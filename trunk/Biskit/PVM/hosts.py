@@ -78,7 +78,7 @@ try:
     f = __CFG_DEFAULT
 
     if os.path.exists( __CFG_USER ):
-	f = __CFG_USER
+        f = __CFG_USER
 
     execfile( f )
 

@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg
+## Copyright (C) 2004-2011 Raik Gruenberg
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -44,29 +44,29 @@ class TMAlign( Executor ):
 
     Usage
     =====
-    
+
     >>> tm = TMAlign( model, refmodel )
     >>> result = tm.run()
-    
+
     TMAlign takes two PDBModel instances as input and returns a dictionary 
     'result' with the following keys:
-    
+
     'rt'    ... rotation /translation matrix to superposition model on refmodel
                 (numpy.array of float)
     'score' ... TM-Align score (float)
     'rmsd'  ... RMSD calculated by TM-Align (float)
     'len'   ... length (in residues) of the structure alignment (float)
     'id'    ... sequence identity based on the structure alignment (float)
-    
+
     @note: the alignment itself is currently not parsed in. Adapt parse_tmalign
            if you want to recover this information, too.
     @note: Command configuration: biskit/Biskit/data/defaults/exe_tmalign.dat
     """
-    
+
     re_rt1 = re.compile(' 1\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)')
     re_rt2 = re.compile( ' 2\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)')
     re_rt3 = re.compile( ' 3\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)')
-    
+
     re_info = re.compile( 'Aligned length=\s*([0-9]+), RMSD=\s*([0-9\.]+), TM-score=\s*([0-9\.]+), ID=\s*([0-9\.]+)')
 
     def __init__( self, model, refmodel, **kw ):
@@ -75,7 +75,7 @@ class TMAlign( Executor ):
         @type  model: PDBModel
         @param refmodel: reference structure
         @type  refmodel: PDBModel
-        
+
         @param kw: additional key=value parameters for Executor:
         @type  kw: key=value pairs
         ::
@@ -136,7 +136,7 @@ class TMAlign( Executor ):
             raise TMAlignError, 'no TM-Align result'
 
         r = {}
-        
+
         try:
             rt1 = self.re_rt1.findall( output )[0]
             rt2 = self.re_rt2.findall( output )[0]
@@ -144,17 +144,17 @@ class TMAlign( Executor ):
         except IndexError, why:
             raise TMAlignError(
                 'Could not find rotation matrix in TMAlign output')
-        
+
         try:
             info = self.re_info.findall( output )[0]
             info = [ float( i ) for i in info ]
         except IndexError, why:
             raise TMAlignError(
                 'Could not find score values in TMAlign output')
-        
+
         r.update( dict( zip( ['len', 'rmsd', 'score', 'id'], info ) ) )        
         r['rt'] = self.__translate_rt( N.array( (rt1, rt2, rt3), float ) )
-        
+
         return r
 
     def isFailed( self ):
@@ -162,14 +162,14 @@ class TMAlign( Executor ):
         Overrides Executor method
         """
         return self.error != '' or \
-	       'lately' in self.output
+               'lately' in self.output
 
     def fail( self ):
         """
         Overrides Executor method. Called when execution fails.
         """
         s = 'TMAlign failed. Please check the program output in the '+\
-            'field `output` of this TMAlign instance (e.g. `print x.output`)!'
+          'field `output` of this TMAlign instance (e.g. `print x.output`)!'
         self.log.add( s )
 
         raise TMAlignError, s
@@ -191,7 +191,7 @@ class TMAlign( Executor ):
         """
         model = model or self.model
         assert self.result, 'call TMAlign.run() first!'
-        
+
         r = model.transform( self.result['rt'] )
         r.info['tm_score'] = self.result['score']
         r.info['tm_id'] = self.result['id']
@@ -200,7 +200,7 @@ class TMAlign( Executor ):
 
         return r
 
-        
+
 
 #############
 ##  TESTING        
@@ -209,7 +209,7 @@ import Biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test class"""
-    
+
     TAGS = [ BT.EXE ]
 
     def test_tmalign( self ):
@@ -217,14 +217,14 @@ class Test(BT.BiskitTest):
         from Biskit import PDBModel
 
         if self.local: print 'Loading PDB...'
-        
+
         self.m1 = PDBModel( T.testRoot( 'tmalign/1huy_citrine.model' ) )
         self.m2 = PDBModel( T.testRoot('tmalign/1zgp_dsred_dimer.model' ) )
 
 
         if self.local: print 'Starting TMAlign'
         self.x = TMAlign( self.m1, self.m2, debug=self.DEBUG,
-                         verbose=self.local )
+                          verbose=self.local )
 
         if self.local:
             print 'Running'
@@ -235,7 +235,7 @@ class Test(BT.BiskitTest):
             print "Result: "
             for key, value in self.r.items():
                 print '\t', key, ':\t', value
-            
+
         self.assertEqual( self.r['rmsd'], 1.76 )
 
     def test_tmalignTransform( self ):
@@ -246,21 +246,20 @@ class Test(BT.BiskitTest):
 
         tm = TMAlign( m, ref )
         tm.run()
-        
+
         self.maligned = tm.applyTransformation()
-        
+
         diff = self.maligned.centerOfMass() - ref.centerOfMass()
 
         if self.VERBOSITY > 2 or self.local:
             print 'center of mass deviation: \n%r' % diff
             self.maligned.concat( ref ).plot()
-        
+
         self.assert_( N.all( N.absolute(diff) < 1 ),
                       'superposition failed: \n%r' % diff)
 
-    
+
 
 if __name__ == '__main__':
 
     BT.localTest()
-

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -34,10 +34,10 @@ def _use( options ):
 pdb2traj.py: Collect many coordinate frames ( pdb or pickled PDBModel ) of one
              molecule. Write Trajectory object. Waters are removed.
 
-Syntax:	   pdb2traj -i pdb1 pdb2 ..  [ -e -r |ref_structure| -o |out_file| -f
+Syntax:    pdb2traj -i pdb1 pdb2 ..  [ -e -r |ref_structure| -o |out_file| -f
                     -wat -c ]
 OR         pdb2traj -d folder/with/pdbs/or/models [ -r ... ]
-                     
+
 Options:   -i     input pdb files or pickled PDBModel objects
            -d     folder containing input pdb or pickled PDBModel files
            -e     create EnsembleTraj, input files must be ordered first
@@ -49,7 +49,7 @@ Options:   -i     input pdb files or pickled PDBModel objects
            -f     fit to reference (dry reference if given)
            -c     analyze atom content of all files seperately before casting
                   them to reference. Default: only analyze first file in -i.
-           
+
 Note about reference structure: The atom order and content of the files given
 with -i is adapted to the order/content of the reference PDB but NOT
 vice-versa. Snapshots can hence have additional atoms (which are removed) but
@@ -59,7 +59,7 @@ Default options:
 """
     for key, value in options.items():
         print "\t-",key, "\t",value
-        
+
     sys.exit(0)
 
 ### MAIN ###

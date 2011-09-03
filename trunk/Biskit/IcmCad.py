@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -85,7 +85,7 @@ copy a_ \"mol2\" delete
         @type  ref_model: PDBModel
         @param models: structures to be compared with reference
         @type  models: [PDBModel]
-        
+
         @param kw: additional key=value parameters for Executor:
         @type  kw: key=value pairs
         ::
@@ -113,7 +113,7 @@ copy a_ \"mol2\" delete
         Prepare a model that ICM likes.
          - consecutive numbering of residues
          - no chain identifier
-        
+
         @param model: model 
         @type  model: PDBModel
         @param f_out: name of pdb file to write
@@ -153,7 +153,7 @@ copy a_ \"mol2\" delete
     def parse_icm( self, output ):
         """
         Extract CAD value from icm output.
-        
+
         @param output: STDOUT result of ICM run
         @type  output: [str]
 
@@ -180,7 +180,7 @@ copy a_ \"mol2\" delete
         Overrides Executor method
         """
         return self.error != '' or \
-	       not '3> 1.8*Cad' in self.output
+               not '3> 1.8*Cad' in self.output
 
 
     def fail( self ):
@@ -188,7 +188,7 @@ copy a_ \"mol2\" delete
         Overrides Executor method. Called when execution fails.
         """
         s = 'IcmBrowser failed. Please check the program output in the '+\
-            'field `output` of this IcmCad instance (e.g. `print x.output`)!'
+          'field `output` of this IcmCad instance (e.g. `print x.output`)!'
         self.log.add( s )
 
         raise IcmCadError, s
@@ -205,10 +205,10 @@ copy a_ \"mol2\" delete
         """
         Has to be overridden to support head / segment / tail structure.
         Replace formatstr place holders in inp by fields of this class.
-        
+
         @return: ICM input script
         @rtype: [str]
-        
+
         @raise  TemplateError: if template not found
         """
         try:
@@ -240,7 +240,7 @@ import Biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test class"""
-    
+
     TAGS = [ BT.EXE ]
 
     def test_IcmCad( self ):
@@ -271,13 +271,12 @@ class Test(BT.BiskitTest):
 
         if self.local:
             print "Result: ", self.r
-        
+
         self.assertEqual( self.r, [8.8603529999999999, 9.0315890000000003,
                                    8.5055429999999994] )
 
-    
+
 
 if __name__ == '__main__':
 
     BT.localTest()
-

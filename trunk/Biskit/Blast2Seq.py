@@ -1,7 +1,7 @@
 #!/usr/bin/python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -48,13 +48,13 @@ class Blast2Seq( Executor ):
     def __init__(self, seq1, seq2, **kw ):
         """
         @param seq1: sequence string
-	@type  seq1: str
-	@param seq2: sequence string
-	@type  seq2: str
+        @type  seq1: str
+        @param seq2: sequence string
+        @type  seq2: str
         """
         self.seq1 = seq1
         self.seq2 = seq2
-        
+
         self.inp1 = tempfile.mktemp('_seq1.fasta')
         self.inp2 = tempfile.mktemp('_seq2.fasta')
 
@@ -63,14 +63,14 @@ class Blast2Seq( Executor ):
         self.ex_expect = re.compile('.+ Expect = ([\d\-e\.]+)')
 
         blastcmd = '-i %s -j %s  -M BLOSUM62 -p blastp -F F'\
-                   %(self.inp1, self.inp2)
+                 %(self.inp1, self.inp2)
 
         Executor.__init__( self, 'bl2seq', blastcmd, catch_out=1, **kw )
 
 
     def prepare( self ):
         """
-        create temporary fasta files for bl2seq	
+        create temporary fasta files for bl2seq
         """
         f1 = open(self.inp1, 'w')
         f2 = open(self.inp2, 'w')
@@ -85,7 +85,7 @@ class Blast2Seq( Executor ):
         remove temporary files
         """
         Executor.cleanup( self )
-        
+
         if not self.debug:
             T.tryRemove( self.inp1 )
             T.tryRemove( self.inp2 )
@@ -96,25 +96,25 @@ class Blast2Seq( Executor ):
         Extract sequence identity and overlap length from one single
         bl2seq hit
 
-	@return: blast results, e.g. {'aln_id':1.0, 'aln_len':120}
-	@rtype: dict
-	"""
+        @return: blast results, e.g. {'aln_id':1.0, 'aln_len':120}
+        @rtype: dict
+        """
         ## check that the outfut file is there and seems valid
         if not os.path.exists( self.f_out ):
             raise Blast2SeqError,\
                   'Hmmersearch result file %s does not exist.'%self.f_out
-        
+
         if T.fileLength( self.f_out ) < 10:
             raise Blast2SeqError,\
                   'Hmmersearch result file %s seems incomplete.'%self.f_out
-        
+
         out = open( self.f_out, 'r' )
         hitStr = out.read()
         out.close()
-        
-	# get rid of line breaks
+
+        # get rid of line breaks
         hitStr = hitStr.replace( '\n', '#' )
-	
+
         try:
             _id = self.ex_identity.match(hitStr)  # Blast Identity
             if (_id == None):
@@ -135,7 +135,7 @@ class Blast2Seq( Executor ):
         Executor.finish( self )
         self.result = self.filterBlastHit( )
 
-        
+
 #############
 ##  TESTING        
 #############
@@ -150,21 +150,20 @@ class Test(BT.BiskitTest):
     def test_all( self ):
         """Blast2Seq test """
         self.blaster = Blast2Seq("AAAFDASEFFGIGHHSFKKEL",
-				 "AAAFDASEFFGIGHHSAKK") 
+                                 "AAAFDASEFFGIGHHSAKK") 
 
         self.r = self.blaster.run()
-        
+
         if self.local:
             print self.r
-        
+
         self.assertEqual( self.r,{'aln_len': 19, 'aln_id': 0.94736842105263153,
-				  'res_id': 18} )
+                                  'res_id': 18} )
 
 
 if __name__ == '__main__':
 
     BT.localTest()
-
 
 
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -43,9 +43,8 @@ a_compare_rms_vs_fnc.py: Plot interface rmsd (heavy and/or backbone) vs.
                          rms_if_bb_vs_cont.eps
                          rms_if_bb_vs_rms_if.eps
                          rms_hex_vs_rms_if.eps
-                           
-                           
-Syntax:		-i  complexes_cont.cl
+
+Syntax:         -i  complexes_cont.cl
                 -o  str, output directory
                 -v  [str], list of keys to plot
                 -if     1||0 create plot of key vs. interface rmsd
@@ -58,7 +57,7 @@ Abbreviations: fnac  - Fraction of Native Atom Contacts
     default = defOptions()
     for k in default:
         print "\t",k,"\t",default[k]
-        
+
     sys.exit(0)
 
 
@@ -84,7 +83,7 @@ def nameFromPath( path ):
                 name += re.findall( '^dock_[0-9,a-z,_]{4}.+', p )[0]
             except:
                 name += re.findall( '^dock_[0-9,a-z,_]{4}', p )[0]
-            
+
     return name
 
 
@@ -99,7 +98,7 @@ def subPlot( data, data_keys, x_key, y_key  ):
     for v in y_dat:
         if not v in y_val:
             y_val += [v]
-            
+
     y_val = sort( y_val )
 
     x_max = []
@@ -115,13 +114,13 @@ def subPlot( data, data_keys, x_key, y_key  ):
 
     ## collect plots
     sp = []
-    
+
     sp += [ biggles.Curve( x_max, y_val, color='grey') ]
     sp += [ biggles.Curve( x_min, y_val, color='grey') ]
 
     sp += [ biggles.Points( x_dat, y_dat, type='dot', size=1 ) ]
     sp += [ biggles.PlotLabel( .8, .9, y_key, size=3 ) ]
-    
+
     return sp
 
 
@@ -134,26 +133,26 @@ def test():
     return options
 
 
-    
+
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         _use()
-    
+
 #    options = test()
     options = T.cmdDict( defOptions() )
 
     ##### COMPLEX LIST ####
     options['if'] = int( options['if'] )
     options['if_bb'] = int( options['if_bb'] )
-    
+
     ## Load complex dictionary
     c_lst = T.load( options['i'] )
     pkeys = T.toList( options['v'] )
     keys =  [ 'soln', 'rms', 'rms_if', 'rms_if_bb' ] + pkeys
-              
+
     ## get complex data
     data = [ transpose(c_lst.valuesOf('soln')) ]
-    
+
     for key in keys[1:]:
         data +=  [ transpose(c_lst.valuesOf(key)) ]
 
@@ -193,7 +192,7 @@ if __name__ == '__main__':
         ap.write_eps( options['o']+'/rms_if_vs_cont.eps',
                       width="18cm", height="29cm" )
 
-        
+
     if options['if_bb']:
         ## Array plot - rmsd vs. fnc
         ap2 = biggles.FramedArray( 2, 2, title=nameFromPath( options['i'] ) )
@@ -202,7 +201,7 @@ if __name__ == '__main__':
         ## labels
         ap2.ylabel = 'fraction of native contacts'
         ap2.xlabel = 'interface bb rmsd'
- 
+
         x_key = 'rms_if_bb'
 
         for plot in subPlot( data, keys, x_key, pkeys[0] ):

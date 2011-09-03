@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -24,7 +24,7 @@
 """
 Plot RMSD, Energy of ensemble trajectory.
 """
-    
+
 from os.path import dirname
 
 import tools as T
@@ -42,7 +42,7 @@ class QualSlave(JobSlave):
         """
         Copy the parameters that Master is passing in as dict into
         fields of this class.
-        
+
         @param params: defined in Master
         @type  params: dict
         """
@@ -64,8 +64,8 @@ class QualSlave(JobSlave):
             fout = dirname( f )+'/'+'%s'+ T.stripFilename(f)+'.eps'
             fshort = dirname( f )[-15:]
 
-	    if self.verbose:
-		print fshort
+            if self.verbose:
+                print fshort
 
             t = self.loadTraj( f )
 
@@ -74,8 +74,8 @@ class QualSlave(JobSlave):
             p = self.plotRmsdRef(t, fshort )
             p.write_eps( fout % 'rms_', width="18cm", height="29cm" )
 
-	    if self.verbose:
-		print "Done"
+            if self.verbose:
+                print "Done"
 
         return dict
 
@@ -83,7 +83,7 @@ class QualSlave(JobSlave):
     def loadTraj( self, ftraj ):
         """
         Load trajectories from disc.
-        
+
         @param ftraj: path to trajectory
         @type  ftraj: str
 
@@ -99,27 +99,27 @@ class QualSlave(JobSlave):
         Calculate the rmsd to the reference, the CA rmsd to the average
         member and the CA rmsd to last member frame. Add the results
         into a profile.
-        
+
         @param t: ensemble trajectory object
         @type  t:  EnsembleTraj
         """
         mCA = t.ref.maskCA()
 
         t.fit( ref=t.ref, prof='rms_all_ref', comment='all heavy',
-	       verbose=self.verbose )
+               verbose=self.verbose )
 
         t.fitMembers( mask=mCA, prof='rms_CA_av', comment='CA to member avg',
-		      verbose=self.verbose )
+                      verbose=self.verbose )
 
         t.fitMembers( refIndex=-1, mask=mCA, prof='rms_CA_last',
                       comment='all CA to last member frame',
-		      verbose=self.verbose)
+                      verbose=self.verbose)
 
 
     def plotRmsdRef( self, t, title ):
         """
         Plot the rmsd profiles calculated in L{ calcRmsd }.
-        
+
         @param t: ensemble trajectory object
         @type  t:  EnsembleTraj
         @param title: plot title
@@ -143,26 +143,26 @@ import time
 class Flusher( Thread ):
 
     def __init__( self, *f ):
-	Thread.__init__( self )
-	self.setDaemon( True )
-	
-	self.files = f
-	self.stop = False
+        Thread.__init__( self )
+        self.setDaemon( True )
+
+        self.files = f
+        self.stop = False
 
     def setStop( self ):
-	self.stop = True
+        self.stop = True
 
     def run( self ):
 
-	while not self.stop:
-	    for f in self.files:
-		f.flush()
-	    time.sleep( 2 )
+        while not self.stop:
+            for f in self.files:
+                f.flush()
+            time.sleep( 2 )
 
 
 def redirect_output():
     import tempfile, os, sys
-    
+
     f_out = open( tempfile.mktemp( '.out', 'slave_', T.absfile('~')),'w')
 
     sys.stdout = f_out
@@ -176,38 +176,38 @@ def redirect_output():
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test QualSlave without the master."""
 
     TAGS = [ BT.PVM ]
 
     def test_QualSlave(self):
-	"""QualSlave test"""
-	import os
+        """QualSlave test"""
+        import os
 
-	jobs = {0: T.testRoot() + '/lig_pcr_00/traj.dat'}
+        jobs = {0: T.testRoot() + '/lig_pcr_00/traj.dat'}
 
-	self.feps = '%s/rms_traj.eps' % os.path.dirname( jobs[0] )
+        self.feps = '%s/rms_traj.eps' % os.path.dirname( jobs[0] )
 
-	slave = QualSlave()
-	slave.initialize( {'verbose':0} )
-	r = slave.go( jobs )
+        slave = QualSlave()
+        slave.initialize( {'verbose':0} )
+        r = slave.go( jobs )
 
-	if self.VERBOSITY > 2:
-	    self.log.write('eps written to ' + self.feps )
+        if self.VERBOSITY > 2:
+            self.log.write('eps written to ' + self.feps )
 
-	self.assert_( os.path.exists( self.feps ) )
+        self.assert_( os.path.exists( self.feps ) )
 
     def cleanUp(self):
-	T.tryRemove( self.feps )
+        T.tryRemove( self.feps )
 
 if __name__ == '__main__':
 
 ##     BT.localTest()  ## for interactive debugging only
-    
+
     redirect_output()
-    
+
     import os, sys
 
     if len(sys.argv) == 2:

@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -335,34 +335,34 @@ class PDBModel:
     def __repr__( self ):
         code = self.pdbCode or ''
         return  '[%s %s %5i atoms, %4i residues, %2i chains]' % \
-            ( self.__class__.__name__, code, self.lenAtoms(lookup=False), 
-              self.lenResidues(), self.lenChains() )
-    
+                ( self.__class__.__name__, code, self.lenAtoms(lookup=False), 
+                  self.lenResidues(), self.lenChains() )
+
     def __str__( self ):
         return self.__repr__()
-    
+
     def report( self, prnt=True, plot=False ):
         """
         Print (or return) a brief description of this model.
-        
+
         @prnt: directly print report to STDOUT (default True)
         @prnt: bool
         @return: if prnt==True: None, else: formatted description of this model
         @rtype: None or str
         """
         r = self.__repr__()
-        
+
         for c in range( self.lenChains() ):
             r += '\n\t* chain %i: %s' % ( c,
-                        T.clipStr( self.takeChains( [c] ).sequence(), 60 ) )
+                                          T.clipStr( self.takeChains( [c] ).sequence(), 60 ) )
 
         r += '\n source: ' + repr( self.source )
         r += '\n %2i atom profiles:    %s' % ( len( self.atoms ), 
-                            T.clipStr( repr(self.atoms.keys()), 57 )) 
+                                               T.clipStr( repr(self.atoms.keys()), 57 )) 
         r += '\n %2i residue profiles: %s' % ( len( self.residues ),
-                            T.clipStr( repr(self.residues.keys()), 57 ))
+                                               T.clipStr( repr(self.residues.keys()), 57 ))
         r += '\n %2i info records:     %s' % ( len( self.info ), 
-                            T.clipStr( repr( self.info.keys() ), 57 ))
+                                               T.clipStr( repr( self.info.keys() ), 57 ))
 
         if plot:
             self.plot()
@@ -371,7 +371,7 @@ class PDBModel:
             print r
         else:
             return r
-        
+
     def plot( self, hetatm=False ):
         """
         Get a quick & dirty overview over the content of a PDBModel. plot
@@ -389,13 +389,13 @@ class PDBModel:
             mask = self.maskHetatm()
             mask = mask + m.maskSolvent()
             m = self.compress( N.logical_not( mask ) )
-        
+
         chains = [ self.takeChains( [i] ) for i in range( m.lenChains())]
         xy = [ zip( m.xyz[:,0], m.xyz[:,1] ) for m in chains ]
 
         gnuplot.plot( *xy )
- 
- 
+
+
     def __vintageCompatibility( self ):
         """
         backward compatibility to vintage PDBModels < 2.0.0
@@ -634,10 +634,10 @@ class PDBModel:
         @param name: name to access profile
         @type  name: str        
         @param default: default result if no profile is found, if None,
-	                try to update from source and raise error [None]
+        try to update from source and raise error [None]
         @type  default: any
-	@param update: update from source before returning empty profile [True]
-	@type  update: bool
+        @param update: update from source before returning empty profile [True]
+        @type  update: bool
         @param updateMissing: update from source before reporting missing
                               profile [False]
         @type  updateMissing: 0||1
@@ -1416,33 +1416,33 @@ class PDBModel:
 
 
     def maskDNA( self ):
-            """
-            Short cut for mask of all atoms in DNA (based on residue name).
+        """
+        Short cut for mask of all atoms in DNA (based on residue name).
 
-            @return: N.array( 1 x N_atoms ) of 0||1
-            @rtype: array
-            """
-            return self.maskFrom( 'residue_name', ['DA','DC','DG','DT'] )
+        @return: N.array( 1 x N_atoms ) of 0||1
+        @rtype: array
+        """
+        return self.maskFrom( 'residue_name', ['DA','DC','DG','DT'] )
 
     def maskRNA( self ):
-            """
-            Short cut for mask of all atoms in RNA (based on residue name).
+        """
+        Short cut for mask of all atoms in RNA (based on residue name).
 
-            @return: N.array( 1 x N_atoms ) of 0||1
-            @rtype: array
-            """
-            return self.maskFrom( 'residue_name', ['A','C','G','U'] )
+        @return: N.array( 1 x N_atoms ) of 0||1
+        @rtype: array
+        """
+        return self.maskFrom( 'residue_name', ['A','C','G','U'] )
 
     def maskNA( self ):
-            """
-            Short cut for mask of all atoms in DNA or RNA
-            (based on residue name).
+        """
+        Short cut for mask of all atoms in DNA or RNA
+        (based on residue name).
 
-            @return: N.array( 1 x N_atoms ) of 0||1
-            @rtype: array
-            """
-            return self.maskFrom( 'residue_name',
-                                  ['A','C','G','U','T','DA','DC','DG','DT'] )
+        @return: N.array( 1 x N_atoms ) of 0||1
+        @rtype: array
+        """
+        return self.maskFrom( 'residue_name',
+                              ['A','C','G','U','T','DA','DC','DG','DT'] )
 
     def indicesFrom( self, key, cond ):
         """
@@ -1639,7 +1639,7 @@ class PDBModel:
         i = self.__convert_negative_indices( i, len( index ) )
         if max( i ) >= len( index ) or min( i ) < 0:
             raise PDBError, "invalid indices"
-        
+
         ## last atom of each residue / chain
         stop = N.concatenate( (index[1:], [len_i]) ) - 1
 
@@ -1720,26 +1720,26 @@ class PDBModel:
         """
         if min( indices ) >= 0:
             return indices
-        
+
         indices = copy.copy( N.array( indices ) )
 
         negatives = N.flatnonzero( indices < 0 )
-        
+
         a = N.zeros( len( indices ) )
         N.put( a, negatives, length )
-        
+
         indices += a
-        
+
         #for i in negatives:
             #indices[ i ] = length + indices[i] ## substract from end
-        
+
         return indices
 
 
     def res2atomIndices( self, indices ):
         """
         Convert residue indices to atom indices.
-        
+
         @param indices: list/array of residue indices
         @type  indices: list/array of int
 
@@ -1808,7 +1808,7 @@ class PDBModel:
     def chain2atomIndices( self, indices, breaks=0 ):
         """
         Convert chain indices into atom indices.
-        
+
         @param indices: list/array of chain indices
         @type  indices: list/array of int
 
@@ -1927,7 +1927,7 @@ class PDBModel:
         Group the profile values of each residue's atoms into a separate list.
         @param p: name of existing atom profile OR ...
                   [ any ], list of lenAtoms() length
-        
+
         @return: a list (one entry per residue) of lists (one entry per resatom)
         @rtype: [ [ any ] ]
         """
@@ -1936,10 +1936,10 @@ class PDBModel:
 
         rI = self.resIndex()       # starting atom of each residue
         rE = self.resEndIndex()    # ending atom of each residue
-        
+
         r = [ p[ rI[res] : rE[res]+1 ] for res in range( self.lenResidues() ) ]
         return r
-    
+
     def mergeChains( self, c1, id='', segid='', rmOxt=True,
                      renumberAtoms=False, renumberResidues=True):
         """
@@ -1952,7 +1952,7 @@ class PDBModel:
         labelling or residue numbering. mergeChains automatically
         re-assigns PDB chain- and segment IDs as well as residue numbering
         to prepare for this situation.
-        
+
         @param c1   : first of the two chains to be merged
         @type  c1   : int
         @param id   : chain ID of the new chain (default: ID of first chain)
@@ -1971,10 +1971,10 @@ class PDBModel:
         @type  renumberResidues: bool
         """
         c1 = self.__convert_negative_indices( [c1], self.lenChains() )[0]
-        
+
         oldI = self.chainIndex()
         assert len(oldI) > c1 + 1, 'no adjacent chain to be merged'
-        
+
         ## remove chain boundary from chainIndex
         self._chainIndex = N.concatenate( (oldI[:c1+1], oldI[c1+2:] ) ) 
 
@@ -1986,18 +1986,18 @@ class PDBModel:
             i_next = len( self )
         i_scar = oldI[ c1+1 ]     ## (old) starting position of second chain
         n_atoms= i_next - i_start
-        
+
         ## remove trace of PDB TER statement (if any)
         self['after_ter'][ i_scar ] = 0
 
         ## harmonize chain ID
         id = id or self['chain_id'][i_scar-1]
         self['chain_id'][ i_start : i_next ] = [ id ] * n_atoms
-        
+
         ## harmonize segID
         segid = segid or self['segment_id'][i_scar-1]
         self['segment_id'][ i_start : i_next ] = [ segid ] * n_atoms
-        
+
         ## harmonize PDB residue numbering (by *shifting* current numbers)
         if renumberResidues:
             first = self['residue_number'][ i_scar-1 ] + 1
@@ -2005,15 +2005,15 @@ class PDBModel:
 
             profile = self['residue_number'][i_scar:i_next] + delta
             self['residue_number'][i_scar:i_next] = profile
-        
+
         ## harmonize PDB atom numbering (by *rewriting* current numbers)
         ## usually though, atoms already have consequtive numbering through the PDB
         if renumberAtoms:
             n = i_next - i_scar
             first = self['serial_number'][ i_scar-1 ] + 1 
-            
+
             self['serial_number'][i_scar:i_next] = N.arange(first, first + n)
-            
+
         ## remove OXT and OT2 if requested
         if rmOxt:
             ## overkill: we actually would only need to look into last residue
@@ -2021,7 +2021,7 @@ class PDBModel:
             i_oxt = N.flatnonzero( N.logical_or( anames=='OXT', anames=='OT2' ))
             if len( i_oxt ) > 0:
                 self.remove( i_oxt )
-        
+
 
     def mergeResidues( self, r1, name='', residue_number=None, 
                        chain_id='', segment_id='',
@@ -2035,10 +2035,10 @@ class PDBModel:
         @type  name: str
         """
         r1 = self.__convert_negative_indices( [r1], self.lenResidues() )[0]
-        
+
         oldI = self.resIndex()
         assert len(oldI) > r1 + 1, 'no adjacent residue to be merged'
-        
+
         ## remove residue boundary from residue Index
         self._resIndex = N.concatenate( (oldI[:r1+1], oldI[r1+2:] ) ) 
 
@@ -2050,7 +2050,7 @@ class PDBModel:
             i_next = len( self )
         i_scar = oldI[ r1+1 ]     ## (old) starting position of second residue
         n_atoms= i_next - i_start
-        
+
         ## move PDB TER statement (if any) to end of fused residue
         if i_next < len( self ):
             self['after_ter'][ i_next ] = self['after_ter'][ i_scar ]
@@ -2059,26 +2059,26 @@ class PDBModel:
         ## harmonize residue name
         name = name or self['residue_name'][i_scar-1]
         self['residue_name'][ i_start : i_next ] = [ name ] * n_atoms
-        
+
         ## harmonize chain ID
         id = chain_id or self['chain_id'][i_scar-1]
         self['chain_id'][ i_start : i_next ] = [ id ] * n_atoms
-        
+
         ## harmonize segID
         segid = segment_id or self['segment_id'][i_scar-1]
         self['segment_id'][ i_start : i_next ] = [ segid ] * n_atoms
-        
+
         ## harmonize PDB residue numbering
         residue_number = residue_number or self['residue_number'][i_scar-1]
         self['residue_number'][i_start:i_next] = [residue_number] * n_atoms
-        
+
         ## harmonize PDB atom numbering (by *rewriting* current numbers)
         if renumberAtoms:
             n = i_next - i_scar
             first = self['serial_number'][ i_scar-1 ] + 1 
-            
+
             self['serial_number'][i_scar:i_next] = N.arange(first, first + n)
-        
+
         ## shift chain boundary (if any) to end of fused residue
         ## unless it's the end of the model or there is already a boundary there
         if i_scar in self.chainIndex():
@@ -2088,12 +2088,12 @@ class PDBModel:
             else:
                 self._chainIndex = N.concatenate( self._chainIndex[:i],
                                                   self._chainIndex[i+1:] )
-        
+
         ## mark duplicate atoms in the 'alternate' field of the new residue
         r = B.Residue( self, r1 )
         r.labelDuplicateAtoms()
-    
-    
+
+
     def concat( self, *models, **kw ):
         """
         Concatenate atoms, coordinates and profiles. source and fileName
@@ -2127,7 +2127,7 @@ class PDBModel:
 
         r.residues = self.residues.concat( m.residues, )
         r.atoms = self.atoms.concat( m.atoms, )
-        
+
         r.residues.model = r
         r.atoms.model = r
 
@@ -2140,12 +2140,12 @@ class PDBModel:
         ## remove traces of residue or chain breaks
         if not newChain:
             r.mergeChains( m.lenChains() - 1 )
-        
+
         if not newRes:
             r.mergeResidues( m.lenResidues() -1 )
 
         r.info = copy.deepcopy( self.info )
-        
+
         try:
             k = max(self.biounit.keys())+1
             r.residues['biomol'][self.lenResidues():] += k
@@ -2170,7 +2170,7 @@ class PDBModel:
 ##         """
 ##         if 0 in chains:
 ##             raise PDBError, 'cannot remove chain break 0'
-        
+
 ##         cindex = self.chainIndex( breaks=breaks )
 
 ##         ## simple removal of terminal OXT and TER label, make it more robust!
@@ -2180,7 +2180,7 @@ class PDBModel:
 ##             if self[ lastatom ]['name'] in ['OXT', 'OT2']:
 ##                 remove += [ lastatom ]
 ##             self['after_ter'][lastatom+1] = 0 
-            
+
 ##         self.remove( remove )
 
 ##         ## update chain index
@@ -2190,7 +2190,7 @@ class PDBModel:
 ##         N.put( mask, chains, 0 )
 
 ##         self._chainIndex = N.compress( mask, cindex )
-    
+
 
     def take( self, i, rindex=None, cindex=None,
               *initArgs, **initKw ):
@@ -2235,7 +2235,7 @@ class PDBModel:
         r.pdbCode = self.pdbCode
         r.fileName = self.fileName
         r.source = self.source
-        
+
         ## copy the biounit
         try:
             r.biounit = self.biounit.take(i)
@@ -2579,7 +2579,7 @@ class PDBModel:
         @rtype:  list of int
         """
         result = []
-        
+
         if self.lenAtoms() == 0:
             return N.array( result, N.Int )
 
@@ -2682,7 +2682,7 @@ class PDBModel:
 
         if self.lenAtoms() == 0:
             return N.array( result, N.Int )
-        
+
         lastResidue = -100
         lastChainID = None
         lastSegID = None
@@ -2876,7 +2876,7 @@ class PDBModel:
         """
         if not isinstance( what, list ) or isinstance( what, N.ndarray):
             what = T.toList( what )
-        
+
         if type( what[0] ) is str:
             return self.remove( self.maskFrom( 'residue_name', what) )
 
@@ -3071,13 +3071,13 @@ class PDBModel:
         result = self.transform( r, t )
 
         return result
-    
+
     def structureFit( self, refModel, mask=None ):
         """
         Structure-align this model onto a reference model using the external
         TM-Align program (which needs to be installed).
         structureFit( refModel [, mask] ) -> PDBModel (or subclass)
-        
+
         The result model has additional TM-Align statistics in its info record:
         r = m.structureFit( ref )
         r.info['tm_score'] -> TM-Align score
@@ -3096,12 +3096,12 @@ class PDBModel:
             m_this = self.compress( mask )
         else:
             m_this = self
-        
+
         tm = B.TMAlign( m_this, refModel )
         r = tm.run()
 
         return tm.applyTransformation( self )
-    
+
 
     def centered( self, mask=None ):
         """
@@ -3547,7 +3547,7 @@ class PDBModel:
                if ref.__chainFraction( c, self ) > fractLimit  ]
 
         return c0, c_r
-        
+
     def biomodel(self, assembly = 0):
         """
         Return the 'biologically relevant assembly' of this model
@@ -3567,7 +3567,7 @@ class PDBModel:
         except AttributeError:
             r = self
         return r
-        
+
     def lenBiounits (self):
         """
         @return: int; number of alternative biological assemblies defined in
@@ -3711,9 +3711,9 @@ class Test(BT.BiskitTest):
     def test_report(self):
         """PDBModel report&plot test"""
         self.report_output = self.m.report( prnt=self.local,
-                                plot=(self.local or self.VERBOSITY > 2) )
- 
-        
+                                            plot=(self.local or self.VERBOSITY > 2) )
+
+
     def test_sourceHandling(self):
         """PDBModel source / disconnection tests"""
         self._m = self.m.clone()
@@ -3755,26 +3755,26 @@ class Test(BT.BiskitTest):
         res_numbers = m['residue_number']
         atm_numbers = m['serial_number']
         chain_ids   = m['chain_id']
-        
+
         m1 = m.takeResidues( range(3) )
         m2 = m.takeResidues( range(3, m.lenResidues() ) )
 
         m2.renumberResidues()
         m2['chain_id'] = len(m2) * ['X']
-        
+
         self.m1 = m1
         self.m2 = m2
 
         self.r = m1.concat( m2 )
         r = self.r
         self.assert_( r.lenChains() == m.lenChains() + 1 )
-        
+
         r.mergeChains( 0 )
         self.r = r
         self.assert_( r.lenChains() == m.lenChains() )
         self.assert_( N.all( N.array(r['chain_id']) == chain_ids ) )
         self.assert_( N.all( N.array(r['residue_number']) == res_numbers ) )
-        
+
     def test_mergeResidues( self ):
         """PDBModel.mergeResidues test"""
         m = self.m.clone()
@@ -3784,14 +3784,14 @@ class Test(BT.BiskitTest):
         len_a = m.lenAtoms()
 
         r_gly = B.Residue( m, gg_position )
-        
+
         m.mergeResidues( gg_position )
         r_gly.reset()
-        
+
         self.assertEqual( m.lenResidues(), len_r - 1 )
         self.assertEqual( m.lenAtoms(), len_a )
         self.assertEqual( len( r_gly ), 2 * 5 )
-        
+
     def test_getset(self):
         """PDBModel.__get/set__ test"""
         self.assertEqual( self.m[10]['occupancy'], 1.0 )
@@ -3800,20 +3800,20 @@ class Test(BT.BiskitTest):
         self.assert_( type( self.m['date']) is str )
         self.m['resname'] = self.m.atom2resProfile('residue_name')
         self.assertEqual( len( self.m['resname'] ), self.m.lenResidues() )
-        
+
         self.m.info['tested'] = False
         self.m['tested'] = True
         self.assert_( self.m.info['tested'] )
 
         self.m['serial_number', 'default'] = 1
         self.assert_( self.m.atoms['serial_number','default'] == 1 )
-        
+
         self.m['resname', 'changed'] = 0
         self.assertFalse( self.m.residues.isChanged( 'resname' ) )
-        
+
         self.m['index'] = range( len( self.m) )
         self.assert_( self.m['index'][-1] == len( self.m ) - 1 )
-        
+
     def test_slice(self):
         """PDBModel.__slice__ test"""
         self.assert_( len( self.m[0:100:20]  ) == 5 )
@@ -3822,7 +3822,7 @@ class Test(BT.BiskitTest):
         """PDBModel various tests"""
         m = PDBModel()
         self.assertEqual( type( m.getXyz() ), N.ndarray )
-    
+
     def test_compareChains(self):
         """PDBModel.compareChains test"""
         m = self.m.clone()
@@ -3830,24 +3830,24 @@ class Test(BT.BiskitTest):
         ## extract first 100 atoms of each chain
         for i in range(m.lenChains()):
             m2 = m2.concat( m.takeChains([i]).take( range(100) ) )
-            
+
         m3 = m2.takeChains( [2,3,0,1] )  ## re-order chains
-            
+
         i, iref = m2.compareChains( m3 )
-        
-        
-        
+
+
+
 class TestExe( BT.Test ):
     """PDBModel tests that rely on external applications"""
-    
+
     TAGS = [BT.EXE]
-    
+
     def test_structureFit( self ):
         """PDBModel.structureFit test"""
         m = T.load( T.testRoot( 'tmalign/1huy_citrine.model' ) )
         ref = T.load( T.testRoot( 'tmalign/1zgp_dsred_dimer.model' ) )
         ref = ref.takeChains( [0] )
-        
+
         r = m.structureFit( ref )
         diff = r.centerOfMass() - ref.centerOfMass()
 

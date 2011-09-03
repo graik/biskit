@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -74,7 +74,7 @@ class TrackingJobMaster( JobMaster ):
       some of them might still be running when cleanup() or done() are
       executed. The slave script must tolerate errors that, e.g., happen
       if cleanup() is called while it is running.
-      
+
     @todo: try finding some solution to the problem where the master
            sends out an exit signal to all slaves but doesn't wait for
            a response (see note)
@@ -120,9 +120,9 @@ class TrackingJobMaster( JobMaster ):
 
         self.disabled_hosts = []
         self.slow_hosts = {}
-        
+
         self.verbose = verbose
-        
+
         ## end of calculation is signalled on lockMsg
         self.lock = RLock()
         self.lockMsg = Condition( self.lock )
@@ -195,7 +195,7 @@ class TrackingJobMaster( JobMaster ):
 
         self.progress[host]['done'] += 1
         self.progress[host]['time'] = time.time() \
-                                      - self.progress[host]['timeStart']
+            - self.progress[host]['timeStart']
 
 
     def reportProgress( self ):
@@ -269,10 +269,10 @@ class TrackingJobMaster( JobMaster ):
         Return result dict, if it is available.
         Override to return something else - which will also be the return value
         of calculateResult().
-        
+
         @param arg: keyword-value pairs, for subclass implementations
         @type  arg: {key:value}
-        
+
         @return: {any:any}
         @rtype: {any:any}
         """
@@ -283,10 +283,10 @@ class TrackingJobMaster( JobMaster ):
         """
         Convenience function that is starting the parallel calculation and
         blocks execution until it is finished.
-        
+
         @param arg: keyword-value pairs, for subclass implementations
         @type  arg: {key:value}
-        
+
         @return: array( (n_frames, n_frames), 'f'), matrix of pairwise rms
         @rtype: array
         """
@@ -304,7 +304,7 @@ class TrackingJobMaster( JobMaster ):
         Get data necessary for a restart of the running calculation.
         Locks, file handles and private data are *NOT* saved.
         Override if necessary but call this method in child method.
-        
+
         @return: {..}, dict with 'pickleable' fields of master
         @rtype: dict
         """
@@ -347,11 +347,11 @@ class TrackingJobMaster( JobMaster ):
         """
         Prepare this master for restart, called by restart().
         Override if necessary but call in child.
-        
+
         @param rst_data: {..}, parameters for master.__dict__ + some
                          special fields
         @type  rst_data: dict
-        
+
         @return: {..}, parameters for master.__dict__ without special fields
         @rtype: dict
         """
@@ -385,10 +385,10 @@ def restart( rst_data, **params ):
 if __name__ == '__main__':
 
     import pypvm
-    
+
     try:
-	
-	pypvm.hostinfo()
+
+        pypvm.hostinfo()
 
     except:
-	print T.lastError()
+        print T.lastError()

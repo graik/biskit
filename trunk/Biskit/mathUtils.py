@@ -2,7 +2,7 @@
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -53,12 +53,12 @@ def accumulate( a ):
 def variance(x, avg = None):
     """
     Variance, S{sigma}^2
-    
+
     @param x: data
     @type  x: array('f') or float
     @param avg: use this average, otherwise calculated from x
     @type  avg: float OR None
-    
+
     @return: float
     @rtype: float    
     """
@@ -79,7 +79,7 @@ def SD(x, avg = None):
     @type  x: array('f') or float
     @param avg: use this average, otherwise calculated from x
     @type  avg: float OR None
-    
+
     @return: float
     @rtype: float        
     """
@@ -89,12 +89,12 @@ def SD(x, avg = None):
 def wMean(x, w=None):
     """
     Weighted mean: Mean of data (x) weighted by (w).
-    
+
     @param x: X-D array with numbers
     @type  x: array
     @param w: 1-D array of same length as x with weight factors
     @type  w: array
-    
+
     @return: array('f') or float
     @rtype: array('f') or float
     """
@@ -114,7 +114,7 @@ def wVar(x, w):
     @type  x: array
     @param w: 1-D array of same length as x with weight factors
     @type  w: array
-    
+
     @return: array('f') or float
     @rtype: array('f') or float    
     """
@@ -130,7 +130,7 @@ def wSD(x, w):
     @type  x: array
     @param w: 1-D array of same length as x with weight factors
     @type  w: array
-    
+
     @return: array('f') or float
     @rtype: array('f') or float     
     """
@@ -141,10 +141,10 @@ def aboveDiagonal( pw_m ):
     """
     Collect all the values above the diagonal in a square
     matrix.
-    
+
     @param pw_m: symmetric square matrix
     @type  pw_m: 2-D array
-    
+
     @return: raveled list of 'unique' values without diagonal
     @rtype: list
     """
@@ -161,12 +161,12 @@ def aboveDiagonal( pw_m ):
 def arrayEqual( a, b ):
     """
     Compare 2 arrays or lists of numbers for equality.
-    
+
     @param a: first array (multi-dimensional is supported)
     @type  a: array / list
     @param b: second array (multi-dimensional is supported)
     @type  b: array / list
-    
+
     @return: 1 if array/list a equals array/list b
     @rtype: 1|0
     """
@@ -188,19 +188,19 @@ def arrayEqual( a, b ):
 def pairwiseDistances(u, v):
     """
     Pairwise distances between two arrays.
-    
+
     @param u: first array 
     @type  u: array
     @param v: second array 
     @type  v: array
-    
+
     @return: Numeric.array( len(u) x len(v) ) of double
     @rtype: array
     """
     diag1 = N.diagonal( N.dot( u, N.transpose(u) ) )
     diag2 = N.diagonal( N.dot( v, N.transpose(v) ) )
     dist = -N.dot( v,N.transpose(u) )\
-           -N.transpose( N.dot( u, N.transpose(v) ) )
+         -N.transpose( N.dot( u, N.transpose(v) ) )
     dist = N.transpose( N.asarray( map( lambda column,a:column+a, \
                                         N.transpose(dist), diag1) ) )
     return N.transpose( N.sqrt( N.asarray(
@@ -210,12 +210,12 @@ def pairwiseDistances(u, v):
 def randomMask( nOnes, length ):
     """
     Create random array of given lenght and number of ones.
-    
+
     @param nOnes: number of ones
     @type  nOnes: int
     @param length: lenght of array
     @type  length: int
-    
+
     @return: array with ones and zeros
     @rtype: array( 1|0 )
     """
@@ -238,17 +238,17 @@ def randomMask( nOnes, length ):
 def random2DArray( matrix, ranNr=1, mask=None):
     """
     Create randomized 2D array containing ones and zeros.
-    
+
     @param matrix: matrix to randomize
     @type  matrix: 2D array
     @param mask: mask OR None (default: None)
     @type  mask: list(1|0)
     @param ranNr: number of matricies to add up (default: 1)
     @type  ranNr: integer
-    
+
     @return: 2D array or |ranNr| added contact matricies
     @rtype:2D array
-    
+
     @raise MathUtilError: if mask does not fit matrix
     """
     ## get shape of matrix
@@ -263,7 +263,7 @@ def random2DArray( matrix, ranNr=1, mask=None):
             raise MathUtilError(
                 'MatUtils.random2DArray - mask of incorrect length' +
                 '\tMatrix length: %i Mask length: %i'\
-                  %(len( N.ravel(matrix) ), len(mask)))
+                %(len( N.ravel(matrix) ), len(mask)))
 
     if not mask:
         array = N.ravel(matrix)
@@ -302,7 +302,7 @@ def slidingAverage( y, window=2 ):
 def runningAverage( x, interval=2, preserve_boundaries=0 ):
     """
     Running average (smoothing) over a given data window.
-    
+
     @param x: data
     @type  x: list of int/float
     @param interval: window size C{ (-(interval-1)/2 to +(interval-1)/2) }
@@ -311,7 +311,7 @@ def runningAverage( x, interval=2, preserve_boundaries=0 ):
     @param preserve_boundaries: shrink window at edges to keep original
                                 start and end value (default: 0)
     @type  preserve_boundaries: 0|1
-    
+
     @return: list of floats
     @rtype: [ float ]
     """
@@ -374,7 +374,7 @@ def area(curve, start=0.0, stop=1.0 ):
     c = N.zeros( N.shape(curve), curve.dtype )
     c[:,0] = curve[:,1]
     c[:,1] = curve[:,0]
-    
+
     assert len( N.shape( c ) ) == 2
 
     ## apply boundaries  ## here we have a problem with flat curves
@@ -403,10 +403,10 @@ def packBinaryMatrix( cm ):
     """
     Compress sparse array of 0 and ones to list of one-positions
     (space saving function, upack with L{unpackBinaryMatrix}).
-    
+
     @param cm: X by Y array of int
     @type  cm: 2D array 
-    
+
     @return: {'shape':(X,Y), 'nonzero':[int] }
     @rtype: dict
     """
@@ -423,12 +423,12 @@ def packBinaryMatrix( cm ):
 def unpackBinaryMatrix( pcm, raveled=0 ):
     """
     Uncompress array of 0 and 1 that was compressed with L{packBinaryMatrix}.
-    
+
     @param pcm: {'shape':(X,Y,..), 'nonzero':[int]}
     @type  pcm: dict
     @param raveled: return raveled (default: 0)
     @type  raveled: 1|0
-    
+
     @return: N.array(X by Y by ..) of int
     @rtype: 2D array
     """
@@ -451,12 +451,12 @@ def matrixToList( cm ):
     """
     Convert matrix into standard python list remembering the dimensions.
     Unpack with L{listToMatrix}.
-    
+
     @note: Not used right now.
 
     @param cm: array of int
     @type  cm: 2D array
-    
+
     @return: {'shape':(int,..), 'lst':[..] }
     @rtype: dict
     """
@@ -473,12 +473,12 @@ def matrixToList( cm ):
 def listToMatrix( lcm ):
     """
     Convert result of L{matrixToList} back into Numeric array
-    
+
     @note: Not used right now.
 
     @param lcm: {'shape':(int,..), 'lst':[..] }
     @type  lcm: dict    
-    
+
     @return: Numeric.array
     @rtype: 
     """
@@ -504,7 +504,7 @@ def eulerRotation(alpha, beta, gamma):
     @type  beta: float
     @param gamma: euler angle S{gamma}
     @type  gamma: float
-    
+
     @return: 3 x 3 array of float
     @rtype: array
     """
@@ -534,7 +534,7 @@ def randomRotation():
     Get random rotation matrix.
 
     @author: Michael Habeck
-    
+
     @return: 3 x 3 array of float
     @rtype: array
     """
@@ -589,7 +589,7 @@ def union( a, b ):
     """
     Union of two lists (without duplicates)
     C{ union( [any], [any] ) -> [any] }
-    
+
     @param a: first list
     @type  a: [any]
     @param b: second list
@@ -626,7 +626,7 @@ def removeFromList( l, v, all=1 ):
     """
     Remove all or first occurrence(s) of v from l.
     C{ removeFromList( l, v, [all=1] ) }
-    
+
     @param l: list
     @type  l: [ any ]
     @param v: remove these values
@@ -652,14 +652,14 @@ def randomRange( start, stop, n ):
     """
     Creates a set of n unique integers randomly distributed between
     start and stop. 
-    
+
     @param start: minimal index
     @type  start: int
     @param stop: 1+maximal index
     @type  stop: int
     @param n: number of indices
     @type  n: int
-    
+
     @return: set of unique integers evenly distributed between start and stop
     @rtype: [int]
     """
@@ -676,15 +676,15 @@ def linfit( x, y ):
     """
     Calculate linear least-square fit to the points given by x and y.
     see U{http://mathworld.wolfram.com/LeastSquaresFitting.html}
-    
+
     @param x: x-data
     @type  x: [ float ]
     @param y: y-data
     @type  y: [ float ]
-    
+
     @return: m, n, r^2 (slope, intersection, corr. coefficient)
     @rtype: float, float, float
-    
+
     @raise BiskitError: if x and y have different number of elements
     """
     x, y = N.array( x, N.Float64), N.array( y, N.Float64)
@@ -712,10 +712,10 @@ def cartesianToPolar( xyz ):
     """
     Convert cartesian coordinate array to polar coordinate array: 
     C{ x,y,z -> r, S{theta}, S{phi} }
-    
+
     @param xyz: array of cartesian coordinates (x, y, z)
     @type  xyz: array
-    
+
     @return: array of polar coordinates (r, theta, phi)
     @rtype: array
     """
@@ -735,10 +735,10 @@ def polarToCartesian( rtp ):
     """
     Convert polar coordinate array to cartesian coordinate array: 
     C{ r, S{theta}, S{phi} -> x,y,z }
-     
+
     @param rtp: array of cartesian coordinates (r, theta, phi)
     @type  rtp: array
-    
+
     @return: array of cartesian coordinates (x, y, z)
     @rtype: array
     """
@@ -753,7 +753,7 @@ def projectOnSphere( xyz, radius=None, center=None ):
     """
     Project the coordinates xyz on a sphere with a given radius around
     a given center.
-    
+
     @param xyz: cartesian coordinates
     @type  xyz: array N x 3 of float
     @param radius: radius of target sphere, if not provided the maximal
@@ -782,7 +782,7 @@ def rotateAxis(theta, vector):
     """
     Calculate a left multiplying rotation matrix that rotates
     theta rad around vector.
-    
+
     Taken from: http://osdir.com/ml/python.bio.devel/2008-09/msg00084.html
 
     Example:
@@ -828,8 +828,8 @@ def cbrt(x):
         return math.pow(x, 1.0/3.0) 
     else:
         return -math.pow(N.abs(x), 1.0/3.0) 
- 
-    
+
+
 def cartesian2D(r, w, deg=0): # radian if deg=0; degree if deg=1 
     """ 
     Convert from polar (r,w) to rectangular (x,y) x = r cos(w) y = r sin(w)
@@ -839,12 +839,12 @@ def cartesian2D(r, w, deg=0): # radian if deg=0; degree if deg=1
     if deg: 
         w = pi * w / 180.0 
         return r * cos(w), r * sin(w) 
-        
+
 def polar2D(x, y, deg=0): # radian if deg=0; degree if deg=1 
     """
     Convert from rectangular (x,y) to polar (r,w) r = sqrt(x^2 + y^2) 
     w = arctan(y/x) = [-\pi,\pi] = [-180,180] 
-    
+
     Author: Victor Gil
     """ 
     from math import hypot, atan2, pi 
@@ -859,7 +859,7 @@ def quadratic(a, b, c=None):
     x^2 + ax + b = 0 (or ax^2 + bx + c = 0) By substituting x = y-t and t = a/2,
     the equation reduces to y^2 + (b-t^2) = 0 which has easy solution 
     y = +/- sqrt(t^2-b)
-    
+
     Author: Victor Gil
     """ 
     if c: # (ax^2 + bx + c = 0) 
@@ -872,7 +872,7 @@ def quadratic(a, b, c=None):
         y1 = cmath.sqrt(r) 
     y2 = -y1 
     return y1 - t, y2 - t 
-    
+
 def cubic(a, b, c, d=None):
     """
     x^3 + ax^2 + bx + c = 0  (or ax^3 + bx^2 + cx + d = 0)
@@ -887,19 +887,19 @@ def cubic(a, b, c, d=None):
         y1 y2 y3 = -q,
     the other two (real or complex) roots can be obtained by solving
         y^2 + (y1)y + (p+y1^2) = 0
-        
+
     Author: Victor Gil
     """
     cos = math.cos
-    if d:			# (ax^3 + bx^2 + cx + d = 0)
+    if d:       # (ax^3 + bx^2 + cx + d = 0)
         a, b, c = b / float(a), c / float(a), d / float(a)
     t = a / 3.0
     p, q = b - 3 * t**2, c - b * t + 2 * t**3
     u, v = quadratic(q, -(p/3.0)**3)
-    if type(u) == type(0j):	# complex cubic root
+    if type(u) == type(0j):   # complex cubic root
         r, w = polar2D(u.real, u.imag)
         y1 = 2 * cbrt(r) * cos(w / 3.0)
-    else:			# real root
+    else:     # real root
         y1 = cbrt(u) + cbrt(v)
     y2, y3 = quadratic(y1, p + y1**2)
     return y1 - t, y2 - t, y3 - t
@@ -908,7 +908,7 @@ def cubic(a, b, c, d=None):
 ##  TESTING        
 #############
 import Biskit.test as BT
-        
+
 class Test(BT.BiskitTest):
     """Test case"""
 
@@ -930,8 +930,7 @@ class Test(BT.BiskitTest):
         self.assertAlmostEqual( self.area, 0.5, 7 )
 
     EXPECT = N.sum( N.array([ 2.12132034,  0.70710678,  7.07106781]) )
-    
+
 if __name__ == '__main__':
 
     BT.localTest()
-

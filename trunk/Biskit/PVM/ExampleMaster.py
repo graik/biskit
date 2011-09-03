@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -36,7 +36,7 @@ class Master(TrackingJobMaster):
     ## Slave script that goes with this master
     slave_script =  projectRoot() + '/Biskit/PVM/ExampleSlave.py'
 
-    
+
     def __init__(self, verbose=1, *args, **kw):
         """
         Parameters nedded by master and/or slave.
@@ -45,7 +45,7 @@ class Master(TrackingJobMaster):
 
         TrackingJobMaster.__init__(self, verbose=verbose, *args, **kw)
 
-                         
+
     def getInitParameters(self, slave_tid):
         """
         Hand over parameters to slave once.
@@ -87,7 +87,7 @@ class Test(BT.BiskitTest):
     TAGS = [BT.PVM]
 
     def test_ExampleMaster(self):
-	"""PVM.ExampleMaster test"""
+        """PVM.ExampleMaster test"""
 
         hosts = cpus_all[:8]
 
@@ -103,15 +103,15 @@ class Test(BT.BiskitTest):
         ## slave_script - name of slave.py
         ## in the end get results from master.result
         ## -> dictionary of some_id : result_object pairs
-        
+
         master = Master( data=data, chunk_size=10,
                          hosts=hosts, niceness=niceness,
                          slave_script=Master.slave_script,
                          show_output=self.local, redistribute=1,
                          verbose=self.local )
 
-	assert len(hosts) > 0, 'master needs at least 1 PVM node.'
-	
+        assert len(hosts) > 0, 'master needs at least 1 PVM node.'
+
         ## blocking call
         r = master.calculateResult()
 
@@ -119,7 +119,7 @@ class Test(BT.BiskitTest):
         ##     master.start()
         ##     time.sleep( 10 )
         ##     rst = master.getRst()
-        
+
 
 if __name__ == '__main__':
 

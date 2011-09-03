@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -40,7 +40,7 @@ contacter: Take ComplexList, calculate contactMatrix and other stuff
            for all complexes on several nodes. Pickle ComplexList to a file.
            The result values are put into the info dict of each complex.
 
-Syntax:	   contacter [-i |complex_lst| -o |file_complex_lst|
+Syntax:    contacter [-i |complex_lst| -o |file_complex_lst|
                       -c |chunk_value| -ref |ref_complex| -v |complex_version|
                       -a -h |n_hosts| -u
                       -f |name| -s | -n |min_nice| -all -e |host1 host2..|]
@@ -74,7 +74,7 @@ Default options:
     o = defaultOptions()
     for key, value in o.items():
         print "\t-",key, "\t",value
-        
+
     sys.exit(0)
 
 
@@ -92,12 +92,12 @@ def reduceComplexList( cl ):
     """
     if len( cl ) == len(cl.recModels()) * len(cl.ligModels()) * 512:
         return cl
-    
+
     if len( cl ) < 512:
         print '\nNOTE: THE COMPLEX LIST IS SHORTER THAN 512 COMPLEXES'
         print '   COMPLEX LIST CONTAINS %i ONLY COMPLEXES\n'%len(cl)
         return cl
-    
+
     t.flushPrint('\nRemoving HEX solutions greater than 512.\n')
     r = cl.filter('soln', (0,512) )
     t.flushPrint('%i solutions removed.\n' % (len( cl ) - len( r ) ) )
@@ -111,7 +111,7 @@ def checkListStatus( cl, update=0, force_keys=[], version=-1 ):
     If the list is to be only updated then check that the list/sublist has
     entries that can be updated. If an unupdatable list is sent to
     the contactMaster the calculation will halt.
-    
+
     update     - 1||0, are we in update mode? if not return whole list
     force_keys - 1||0, calculation is restricted to certain keys
     """
@@ -125,7 +125,7 @@ def checkListStatus( cl, update=0, force_keys=[], version=-1 ):
     else:
         todo = [ c[version] for c in cl
                  if None in c.values(keys=force_keys, default=None) ]
-        
+
     ## add missing force keys with value None
     if force_keys:
         for c in todo:
@@ -163,7 +163,7 @@ t.flushPrint( "done\n" )
 force = []
 if options.has_key('f'):
     raw_force = t.toList( options['f'] )
-    
+
     ## check that the key is valid
     validKeys = ['fnac_4.5', 'fnac_10', 'fnrc_4.5',
                  'fnarc_9', 'fnarc_10', 'c_ratom_9', 'c_ratom_10',
@@ -236,7 +236,7 @@ try:
             else:
                 print '\nWorking on sub list %i of %i (complexes %i to %i)'\
                       %( n, n_chunks+1, target_size*(n-1), target_size*(n) )
-                
+
                 sLst = checkListStatus(subLst, update, force, version )
 
                 ## subList contains fields that needs to be updated
@@ -259,7 +259,7 @@ try:
                     ## wait until master is finished
                     while not master.isFinished():
                         time.sleep( 5 )
-                        
+
                 ## subList contains no info to be updated   
                 else:
                     t.dump( subLst, subFile )
@@ -290,11 +290,11 @@ try:
                                    show_output = show_x,
                                    add_hosts = add_hosts)
             master.start()
-            
+
         else:
             t.flushPrint( "\n #### Nothing to update! #### " )
-            
+
 except IOError, why:
     t.errWriteln("IOError while working on %s:" % t.absfile(options['i']) \
-               + str(why) )
+                 + str(why) )
     t.errWriteln( t.lastErrorTrace() )

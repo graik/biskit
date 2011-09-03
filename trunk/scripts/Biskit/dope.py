@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -36,7 +36,7 @@ import Biskit.LocalPath
 def _use( options ):
     print """
 
-Syntax:	   dope.py -s sourceModel -i otherModels [-p [fx surf dens cons]]
+Syntax:    dope.py -s sourceModel -i otherModels [-p [fx surf dens cons]]
                   [-so sourceOut -o othersPrefix -dic old_model_dic ]
                   [-nosort -nowat]
 
@@ -75,13 +75,13 @@ Options:
    -dic    file name of pickled model dict to be updated
    -nosort do not sort atoms within residues
    -wat    keep waters
-                     
+
 Default options:   
-           
+
 """
     for key, value in options.items():
         print "\t-",key, "\t",value
-    
+
     sys.exit(0)
 
 
@@ -94,15 +94,15 @@ def prepareSource( inFile, outFile, wat=1, sort=1,
     """
     Strip waters, add profiles and save as doped source model.
     """
-    
+
     source = PDBModel( inFile )
-    
+
     if wat:
         source.remove( lambda a: a['residue_name'] in ['HOH','WAT','TIP3'] )
-    
+
     if sort:
         source = source.sort()
-    
+
     doper = PDBDope( source )
 
     if surf:
@@ -118,14 +118,14 @@ def prepareSource( inFile, outFile, wat=1, sort=1,
 
     if dssp:
         doper.addSecondaryStructure()
-    
+
     try:
         if cons:
             doper.addConservation( )
     except:
         errWriteln('\n ERROR: Conservation profile could not be added to '\
                    + str(sourceOut) + '\n' )
-       
+
     source.saveAs( outFile )
 
     return source
@@ -151,13 +151,13 @@ def changeModel( inFile, prefix, sourceModel ):
     #model.atomsChanged = 0
     for k in model.atoms:
         model.atoms[k,'changed'] = N.all( model[k] == sourceModel[k] )
-        
+
     model.xyzChanged = ( 0 != N.sum( N.ravel( model.xyz - sourceModel.xyz)) )
 
     model.update( updateMissing=1 )
 
     if model.xyzChanged:
-        
+
         doper = PDBDope( model )
 
         if 'MS' in sourceModel.atoms.keys():
@@ -170,7 +170,7 @@ def changeModel( inFile, prefix, sourceModel ):
             doper.addFoldX()
 
     outFile = os.path.dirname( inFile ) + '/' + prefix +\
-              T.stripFilename( inFile ) + '.model' 
+            T.stripFilename( inFile ) + '.model' 
 
     T.dump( model, outFile )
 

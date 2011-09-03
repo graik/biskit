@@ -40,34 +40,34 @@ class Logfile:
 
     def __init__(self, filename = None):
 
-	if filename is None:
+        if filename is None:
 
-	    import os
+            import os
 
-	    filename = '/tmp/pvm_thread.log.' + str(os.getpid())
+            filename = '/tmp/pvm_thread.log.' + str(os.getpid())
 
-	self.filename = filename
-	self.lines = []
+        self.filename = filename
+        self.lines = []
 
 
     def post(self, message):
 
-	import time
+        import time
 
-	self.lines.append('\n' + str(time.time()) + ':')
-	self.lines.append(message)
+        self.lines.append('\n' + str(time.time()) + ':')
+        self.lines.append(message)
 
-	file = open(self.filename, 'w')
-	file.write('\n'.join(self.lines))
-	file.close()
+        file = open(self.filename, 'w')
+        file.write('\n'.join(self.lines))
+        file.close()
 
 
     def write(self):
-	print '\n'.join(self.lines)
+        print '\n'.join(self.lines)
 
 
     def rm(self):
-	import os
+        import os
         if os.path.exists(self.filename):
             os.unlink(self.filename)
 
@@ -79,7 +79,7 @@ class PVMThread(Thread):
     a simple class binding incoming pvm-messages to methods.
     """
 
-    
+
     def __init__(self, log = None):
         from threading import Event
 
@@ -100,8 +100,8 @@ class PVMThread(Thread):
         self.setMessageLoopDelay(0.1)
         self.__loopEvent = Event()
 
-	if log: self.__log = Logfile()
-	else: self.__log = None
+        if log: self.__log = Logfile()
+        else: self.__log = None
 
         ## add ping-mechanism
 
@@ -202,7 +202,7 @@ class PVMThread(Thread):
     def send_primitive(self, tid, msg_tag, value):
         result = pvm.pack_and_send(tid, msg_tag, value)
 
-	self.post_message_sent(msg_tag, tid, value)
+        self.post_message_sent(msg_tag, tid, value)
 
 
     def send(self, task, msg_tag, value = None):
@@ -225,7 +225,7 @@ class PVMThread(Thread):
 
             try:
                 tid = hash[t]
-	    except:
+            except:
                 tid = t
 
             self.send_primitive(tid, msg_tag, (time_stamp, value))
@@ -264,7 +264,7 @@ class PVMThread(Thread):
 
                     parameters = pvm.unpack()
 
-##		    self.post_message_received(message, tid, parameters)
+##    self.post_message_received(message, tid, parameters)
 
                     value = (message, parameters[0], parameters[1])
 
@@ -289,7 +289,7 @@ class PVMThread(Thread):
                     message = values[i][0]
                     parameters = values[i][2]
 
-##		self.post_execute_method(message, tid, parameters)
+##    self.post_execute_method(message, tid, parameters)
 
                     if parameters is None:
                         bindings[(tid, message)]()
@@ -313,10 +313,10 @@ class PVMThread(Thread):
 
         result = P.trecv(self.getPingTimeout(), MSG_PING, tid)
 
-	try:
-	    pvm.unpack()
-	except:
-	    pass
+        try:
+            pvm.unpack()
+        except:
+            pass
 
         if result <= 0:
             return 0
@@ -331,38 +331,38 @@ class PVMThread(Thread):
     ## additional functionality for better debuging
 
     def log(self):
-	if self.__log:
-	    self.__log.write()
+        if self.__log:
+            self.__log.write()
 
 
     def post(self, message):
-	if self.__log:
-	    self.__log.post(message)
+        if self.__log:
+            self.__log.post(message)
 
 
     def post_message_received(self, msg_tag, tid, params):
-	log_msg = 'PVMThread: received and unpacked: ' + \
-		  'msg_tag = %d, tid = %d\n' %(msg_tag, tid)
-	log_msg += '[params = %s]' %str(params)
-	self.post(log_msg)
+        log_msg = 'PVMThread: received and unpacked: ' + \
+                'msg_tag = %d, tid = %d\n' %(msg_tag, tid)
+        log_msg += '[params = %s]' %str(params)
+        self.post(log_msg)
 
 
     def post_message_sent(self, msg_tag, tid, params):
-	log_msg = 'PVMThread: message sent: ' + \
-		  'msg_tag = %d, tid = %d\n' %(msg_tag, tid)
-	log_msg += '[params = %s]' %str(params)
-	self.post(log_msg)
+        log_msg = 'PVMThread: message sent: ' + \
+                'msg_tag = %d, tid = %d\n' %(msg_tag, tid)
+        log_msg += '[params = %s]' %str(params)
+        self.post(log_msg)
 
 
     def post_execute_method(self, msg_tag, tid, params):
-	log_msg = 'PVMThread: execute method bound to: ' + \
-		  'msg_tag = %d, tid = %d\n' %(msg_tag, tid)
-	log_msg += '[params =  %s]' %str(params)
-	self.post(log_msg)
+        log_msg = 'PVMThread: execute method bound to: ' + \
+                'msg_tag = %d, tid = %d\n' %(msg_tag, tid)
+        log_msg += '[params =  %s]' %str(params)
+        self.post(log_msg)
 
     def rm_log(self):
-	if self.__log:
-	    self.__log.rm()
+        if self.__log:
+            self.__log.rm()
 
 
 class PVMMasterSlave(PVMThread):

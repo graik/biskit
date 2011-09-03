@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -35,7 +35,7 @@ class XplorInput:
     """
     Create Xplor input file. addFromTemplate() might be usefull for
     non-xplor-stuff, too.
-    
+
     @note: The file is only flushed to disc when the object is destructed,
     or the flush() method is called!
     """
@@ -105,7 +105,7 @@ class XplorInput:
         """
         Returns block with parameters (as String).
         Use e.g. for minimize or paramter statement.
-        
+
         @param title: first line of block
         @type  title: str
         @param paramDic: dictionary of type
@@ -117,7 +117,7 @@ class XplorInput:
                                e.g. C{ [param1, param2] } to have param1 and
                                param2 come first
         @type  priorityParams: [str]
-        
+
         @return: Will result in param1=value1, param2=value2. If e.g. value1
                  is an empty string or None just param is written in that line
         @rtype: str
@@ -211,20 +211,20 @@ class XplorInput:
         @type  oldName: str
         @param newName: new atom name
         @type  newName: str
-        
+
         @return: Line: C{ vector do (name=|newName|) (name |oldName|
                           and resname |resname|) }
         @rtype: str
         """
         self.add(
             ("""vector do (name="%(newName)s") (name "%(oldName)s" """+
-            """and resname "%(newName)s" )""") % vars() )
+             """and resname "%(newName)s" )""") % vars() )
 
 
     def renameAtoms( self, atomDicLst ):
         """
         Rename several atoms.
-        
+
         @param atomDicLst: list of dictionaries wher each dictionary
                            describs one renaming task e.g. ::
                              [{'res':'ALA', 'old':'HT1', 'new':'H1'},{...}]
@@ -245,7 +245,7 @@ class XplorInput:
         @param select: optional additional selection for residue,
                        e.g. 'and resid 10'
         @type  select: str
-        
+
         @return: Line: C{ 'vector do (resname=|newName|)
                            (resname |oldName| |select|)' }
         @rtype: str
@@ -259,7 +259,7 @@ class XplorInput:
     def hbuild(self, selection):
         """
         Append hbuild block. Example for how to use the block() method.
-        
+
         @param selection: String with atom selection
         @type  selection: str
         """
@@ -272,7 +272,7 @@ class XplorInput:
     def patchSS(self, res1, res2):
         """
         Patch statement for disulfide bond between residue number 1 and 2.
-        
+
         @param res1: dictionary with number and segid for the first residue
                      e.g. C{ {'res':19,'id':'SEGID'} }
         @type  res1: dict
@@ -282,7 +282,7 @@ class XplorInput:
         select_1 = """( segid "%4s" and resid %s )""" % (res1['id'],res1['res'])
         select_2 = """( segid "%4s" and resid %s )""" % (res2['id'],res2['res'])
         result = self.blockFromDic("patch disu",
-                            {'reference=1': select_1, 'reference=2': select_2} )
+                                   {'reference=1': select_1, 'reference=2': select_2} )
         self.add(result)
 
 
@@ -290,7 +290,7 @@ class XplorInput:
         """
         Return string holding xplor input for segment consisting of one chain.
         Example for nesting blocks with blockFromDic().
-        
+
         @param seg_id: segment id
         @type  seg_id: str
         @param fpdb: complete filename of pdb
@@ -301,13 +301,13 @@ class XplorInput:
 
         ## create inner block "chain", put coordinates statement at top
         chain_block = self.blockFromDic("chain",\
-            {'link ppgp head - GLY tail + PRO end':'',
-            'link ppgg head - GLY tail + GLY end':'',
-            'link pepp head - * tail + PRO end':'',
-            'link ppg2 head - GLY tail + * end':'',
-            'link ppg1 head - * tail + GLY end':'',
-            'link pept head - * tail + * end':'',
-            coord_statement:''}, 1, [coord_statement])
+                                        {'link ppgp head - GLY tail + PRO end':'',
+                                         'link ppgg head - GLY tail + GLY end':'',
+                                         'link pepp head - * tail + PRO end':'',
+                                         'link ppg2 head - GLY tail + * end':'',
+                                         'link ppg1 head - * tail + GLY end':'',
+                                         'link pept head - * tail + * end':'',
+                                         coord_statement:''}, 1, [coord_statement])
 
         ## create outer block "segment" and nest chain block into it
         result = self.blockFromDic("segment",
@@ -320,7 +320,7 @@ class XplorInput:
         """
         Read template input file with formatstr placeholders, insert values
         from valueDic.
-        
+
         @param fTemplate: filename for template
         @type  fTemplate: str
         @param valueDic: Dictionary, {placeHolder:value}
@@ -343,7 +343,7 @@ class XplorInput:
             s += "\n  template line:\n  " + str(line)
             s += "\n  Please give a value for this option at the command line."
             s += "\n  E.g: pdb2xplor.py -i input.pdb -%s some_value -t..." %\
-                 str( why[0] )
+              str( why[0] )
 
             raise XplorInputError, s
 
@@ -386,7 +386,7 @@ class Test( BT.BiskitTest ):
         self.f_out_inp = tempfile.mktemp('_test_out.inp')
 
     def test_XplorInput( self ):
-	"""XplorInput test"""
+        """XplorInput test"""
 
         ## write to output
         self.t = XplorInput( self.f_out_inp )
@@ -402,28 +402,27 @@ class Test( BT.BiskitTest ):
         self.t.addFromTemplate( self.f_inp, {'value':'TEST','number':10})
         self.t.flush()
 
-	self.__dict__.update( locals() )
-	
+        self.__dict__.update( locals() )
+
         ## check result
         f = open( self.f_out_inp, 'r')
-	self.lines = f.readlines()
+        self.lines = f.readlines()
 
         if self.local:
             for l in self.lines:
                 print l[:-1]
         f.close()
 
-	self.assertEqual( self.lines[-3], 'Test Template with 10 values:\n' )
+        self.assertEqual( self.lines[-3], 'Test Template with 10 values:\n' )
 
     def cleanUp(self):
-	T.tryRemove( self.f_inp )
-	T.tryRemove( self.f_out_inp )
+        T.tryRemove( self.f_inp )
+        T.tryRemove( self.f_out_inp )
 
-      
+
 if __name__ == '__main__':
 
     BT.localTest()
-
 
 
 

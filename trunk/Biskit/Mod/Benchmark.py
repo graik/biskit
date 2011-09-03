@@ -2,7 +2,7 @@
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -75,7 +75,7 @@ class Benchmark:
         @type  outFolder: str
         @param verbose: write intermediary files (default: 1)
         @type  verbose: 1|0
-	"""
+        """
         self.outFolder = T.absfile( outFolder )
 
         self.verbose = verbose
@@ -88,13 +88,13 @@ class Benchmark:
         Create folders needed by this class.
         """
         if not os.path.exists(self.outFolder + self.F_RESULT_FOLDER):
-            os.mkdir(self.outFolder + self.F_RESULT_FOLDER)		
+            os.mkdir(self.outFolder + self.F_RESULT_FOLDER)
 
 
     def output_fittedStructures(self, pdb, reference, index, atom_mask,
                                 output_folder = None):
         """
-	Takes a model and a reference structure, performs both a
+        Takes a model and a reference structure, performs both a
         normal fillting to the reference and an itterative fitting.
         Then returns the two fitted models.
 
@@ -113,7 +113,7 @@ class Benchmark:
         @return: pdb_if, pdb -  model, fitted iteratively (n=10),
                                 model, without iterative fitting
         @rtype: PDBModel, PDBModel
-	"""
+        """
         output_folder = output_folder or self.outFolder + self.F_RESULT_FOLDER
 
         tmp_model = pdb.compress( atom_mask )
@@ -138,9 +138,9 @@ class Benchmark:
 
     def calc_rmsd(self, fitted_model_if, fitted_model_wo_if, reference, model):
         """
-	Takes the two fitted structures (with and without iterative fitting),
-	the known structure (reference), and the associated model inside the
-	pdb_list. Calculates the different RMSD and set the profiles
+        Takes the two fitted structures (with and without iterative fitting),
+        the known structure (reference), and the associated model inside the
+        pdb_list. Calculates the different RMSD and set the profiles
 
         @param fitted_model_if: itteratively fitted model
         @type  fitted_model_if: PDBModel
@@ -150,7 +150,7 @@ class Benchmark:
         @type  reference: PDBModel
         @param model: model
         @type  model: PDBModel
-	"""
+        """
         ## first calculate rmsd for heavy atoms and CA without
         ## removing any residues from the model
         mask_CA = fitted_model_wo_if.maskCA()
@@ -184,7 +184,7 @@ class Benchmark:
 
     def output_rmsd_aa(self, pdb_list, output_file = None):
         """
-	Write a file rmsd_aa.dat that contains
+        Write a file rmsd_aa.dat that contains
         all the global heavy atom rmsd values.
 
         @param pdb_list: list of models
@@ -192,7 +192,7 @@ class Benchmark:
         @param output_file: output file
                             (default: None S{->} outFolder/L{F_RMSD_AA})
         @type  output_file: str
-	"""
+        """
         output_file = output_file or self.outFolder + self.F_RMSD_AA
         rmsd_aa_out = open(output_file, 'w')
 
@@ -210,7 +210,7 @@ class Benchmark:
 
     def output_rmsd_ca(self, pdb_list, output_file = None):
         """
-	Write a file rmsd_ca.dat that contains
+        Write a file rmsd_ca.dat that contains
         all the global c_alpha rmsd values.
 
         @param pdb_list: list of models
@@ -218,7 +218,7 @@ class Benchmark:
         @param output_file: output file
                             (default: None S{->} outFolder/L{F_RMSD_CA})
         @type  output_file: str        
-	"""
+        """
         output_file = output_file or self.outFolder + self.F_RMSD_CA
         rmsd_ca_out = open('%s'%output_file, 'w')
 
@@ -236,7 +236,7 @@ class Benchmark:
 
     def rmsd_res(self, coord1, coord2):
         """
-	Calculate the rsmd on residue level for c-alpha between a
+        Calculate the rsmd on residue level for c-alpha between a
         model and its reference.
 
         @param coord1: first set of coordinates
@@ -246,7 +246,7 @@ class Benchmark:
 
         @return: rmsd_res: rmsd per c-alpha
         @rtype: [float]
-	"""	
+        """
         rmsd_res = []
 
         for i in range( len(coord1) ):
@@ -260,7 +260,7 @@ class Benchmark:
 
     def output_rmsd_res(self, pdb_list, output_folder = None):
         """
-	Write a file that contains the rmsd profile on a residue
+        Write a file that contains the rmsd profile on a residue
         level for c_alpha.
 
         @param pdb_list: list of models
@@ -268,7 +268,7 @@ class Benchmark:
         @param output_folder: output folder (default: None S{->} outFolder/
                               L{F_RESULT_FOLDER}/L{F_RMSD_RES})
         @type  output_folder: str      
-	"""
+        """
         for m, t in zip(pdb_list, range(len(pdb_list))):
             output_file = output_folder or self.outFolder + \
                         self.F_RESULT_FOLDER + self.F_RMSD_RES + '_%02i'%t
@@ -285,15 +285,15 @@ class Benchmark:
 
     def cad(self, reference, model):
         """
-	Calculates the CAD Contact Area Difference between
-	the model and its reference structure and set a profile
-	for the model
+        Calculates the CAD Contact Area Difference between
+        the model and its reference structure and set a profile
+        for the model
 
         @param reference: reference model
         @type  reference: PDBModel
         @param model: model
         @type  model: PDBModel
-	"""
+        """
         reference = reference.compress(reference.maskProtein())
         model = model.compress(model.maskProtein())
 
@@ -308,14 +308,14 @@ class Benchmark:
 
     def write_PDBModels(self, pdb_list, output_file = None):
         """
-	Pickles the list of PDBModels to disc.
+        Pickles the list of PDBModels to disc.
 
         @param pdb_list: list of models
         @type  pdb_list: ModelList
         @param output_file: output file
                        (default: None S{->} outFolder/L{F_PDBModels_OUT})
         @type  output_file: str         
-	"""
+        """
         output_file = output_file or self.outFolder + self.F_PDBModels_OUT
         T.dump(pdb_list, '%s'%(output_file))
 
@@ -355,7 +355,7 @@ class Benchmark:
         mask_final_ref = N.compress(mask_casting, amask)
         mask_final = mask_casting * amask
 
-        reference = reference.compress(mask_final_ref)	
+        reference = reference.compress(mask_final_ref)
 
         for i in range(len(pdb_list)):
 
