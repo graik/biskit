@@ -64,10 +64,16 @@ class Reduce( Executor ):
     @note: Command configuration: biskit/Biskit/data/defaults/exe_reduce.dat
     """
 
-    def __init__( self, model, **kw ):
+    def __init__( self, model, tempdir=None, args='', **kw ):
         """
         @param model: structure to be aligned to reference
         @type  model: PDBModel
+        @param tempdir: create dedicated temporary folder (default: None)
+                        see Executor
+        @param tempdir: str | 0|1
+        @param args: additional command line arguments for reduce (default:'')
+                     example: '-OLDpdb'
+        @type  args: str
 
         @param kw: additional key=value parameters for Executor:
         @type  kw: key=value pairs
@@ -79,13 +85,17 @@ class Reduce( Executor ):
           nice     - int, nice level (default: 0)
           log      - Biskit.LogFile, program log (None->STOUT) (default: None)
         """
-        self.f_pdbin = tempfile.mktemp( '_reduce_in.pdb' )
-        f_out= tempfile.mktemp( '_reduce_out.pdb')
+        tempdir = self.newtempfolder( tempdir )
+        
+        self.f_pdbin = tempfile.mktemp( '_in.pdb', 'reduce_', dir=tempdir )
+        f_out= tempfile.mktemp( '_out.pdb', 'reduce_', dir=tempdir)
         self.f_db = T.dataRoot() + '/reduce/reduce_wwPDB_het_dict.txt' 
 
         Executor.__init__( self, 'reduce', 
-                           args= '-BUILD -DB %s %s'%(self.f_db,self.f_pdbin),
+                           args= '%s -BUILD -DB %s %s' %\
+                           (args, self.f_db, self.f_pdbin),
                            f_out=f_out, catch_err=True,
+                           tempdir=tempdir,
                            **kw )
 
         self.model = model
