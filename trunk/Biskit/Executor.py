@@ -248,7 +248,7 @@ class Executor:
 
     def __init__( self, name, args='', template=None, f_in=None, f_out=None,
                   f_err=None, strict=1, catch_out=1, push_inp=1, catch_err=0,
-                  node=None, nice=0, cwd=None, log=None, debug=0,
+                  node=None, nice=0, cwd=None, tempdir=None, log=None, debug=0,
                   verbose=None, validate=1, **kw ):
 
         """
@@ -293,6 +293,10 @@ class Executor:
         @type  nice: int
         @param cwd: working directory, overwrites ExeConfig.cwd (default: None)
         @type  cwd: str
+        @param tempdir: folder for temporary files, will be created if not
+                        existing (default: None ... use system default)
+                        if set to True: create a new tempdir within default 
+        @type  tempdir: str | True
         @param log: execution log (None->STOUT) (default: None)
         @type  log: Biskit.LogFile
         @param debug: keep all temporary files (default: 0)
@@ -311,14 +315,18 @@ class Executor:
         self.exe = ExeConfigCache.get( name, strict=strict )
         if validate:
             self.exe.validate()
+        
+        ## see prepare()
+        self.keep_tempdir = True   ## set to False if tempdir created new
+        self.tempdir = self.newtempfolder( tempdir ) ## repeat in child classes
 
         self.f_out = t.absfile( f_out )
         if not f_out and catch_out:
-            self.f_out = tempfile.mktemp( '.out', name+'_' )
+            self.f_out = tempfile.mktemp( '.out', name+'_', self.tempdir)
 
         self.f_err = t.absfile( f_err )
         if not f_err and catch_err:
-            self.f_err = tempfile.mktemp( '.err', name+'_' )
+            self.f_err = tempfile.mktemp( '.err', name+'_', self.tempdir)
                 
         self.keep_out = f_out is not None
         self.keep_inp = f_in  is not None  #: do not clean up the input file
@@ -328,7 +336,7 @@ class Executor:
         self.f_in = t.absfile( f_in )
         ## pre-define name of input file that will be generated later 
         if template and not f_in:
-            self.f_in  = tempfile.mktemp('.inp', name+'_')
+            self.f_in  = tempfile.mktemp('.inp', name+'_', self.tempdir)
 
         self.push_inp = push_inp
 
@@ -367,6 +375,23 @@ class Executor:
         @rtype: str
         """       
         return 'Executor $Revision$'
+
+
+    def newtempfolder( self, tempdir=None ):
+        """
+        Create a new unique file name for a temporary folder or return the 
+        system-wide existing tempfolder.
+        @param tempdir: folder for temporary files, will be created if not
+                        existing (default: None ... use system default)
+                        if set to True: create a new tempdir within default 
+        @type  tempdir: str | True
+        """
+        if tempdir is True:
+            return tempfile.mktemp( '', 
+                                    self.__class__.__name__.lower() + '_', 
+                                    t.tempDir() )
+        else:
+            return tempdir or t.tempDir()
 
 
     def communicate( self, cmd, inp, bufsize=-1, executable=None,
@@ -578,9 +603,14 @@ class Executor:
 
     def prepare( self ):
         """
-        called before running external program, override!
+        Called before running external program, override!
+        Call at the beginning of child method to create temporary folder.
         """
-        pass
+        if not os.path.exists( self.tempdir):
+            if self.verbose:
+                self.log.writeln('\ncreating temporary directory '+self.tempdir)
+            os.mkdir( self.tempdir )
+            self.keep_tempdir = False
 
 
     def postProcess( self ):
@@ -593,7 +623,9 @@ class Executor:
     def cleanup( self ):
         """
         Clean up after external program has finished (failed or not).
-        Override, but call in child method!
+        Note: a temporary folder, if it has been created, is only deleted if
+        it empty.
+        Override, but call in (preferably at the end of) child method!
         """
         if not self.keep_out and not self.debug and self.f_out:
             t.tryRemove( self.f_out )
@@ -603,6 +635,13 @@ class Executor:
 
         if self.f_err and not self.debug:
             t.tryRemove( self.f_err )
+        
+        if not self.keep_tempdir and not self.debug:
+            if os.listdir( self.tempdir ):  
+                self.log.add('Warning: Removing non-empty temporary folder %s'%\
+                             self.tempdir )
+            self.log.writeln( 'Removing temporary folder %s' % self.tempdir )
+            t.tryRemove( self.tempdir, tree=True )
 
 
     def fail( self ):
@@ -700,7 +739,7 @@ class Executor:
 
             return self.convertInput( inp )
 
-        except Exception, why:
+        except IOError, why:
             s =  "Error while creating input file from template."
             s += "\n  template file: " + str( self.template )
             s += "\n  why: " + str( why )
@@ -739,7 +778,9 @@ class Test(BT.BiskitTest):
         self.e = Executor( 'emacs', args=args, strict=0,
                            f_in=None,
                            f_out=self.fout,
-                           verbose=self.local, cwd=t.absfile('~') )
+                           verbose=self.local, cwd=t.absfile('~'),
+                           tempdir=True,
+                           debug=self.debug )
         
         self.r = self.e.run()
 
@@ -747,6 +788,20 @@ class Test(BT.BiskitTest):
             print 'Emacs was running for %.2f seconds'%self.e.runTime
 
         self.assert_( self.e.pid != None )
+    
+    def test_tempfiles(self):
+        """Executor test temporary file creation and removal"""
+        self.e = Executor( 'emacs', args='-kill', f_out=self.fout, 
+                           verbose=self.local, tempdir=True,
+                           debug=False )
+        self.e.prepare()
+        self.assert_( os.path.exists( self.e.tempdir ), 
+                      'cannot find temp. folder' )
+        self.e.cleanup()
+        self.assert_( not os.path.exists( self.e.tempdir ),
+                      'tempfolder has not been removed.')
+        
+        
 
 if __name__ == '__main__':
 
