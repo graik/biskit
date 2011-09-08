@@ -79,6 +79,7 @@ try:
     from FuzzyCluster import FuzzyCluster
     from PDBDope import PDBDope
     from tmalign import TMAlign
+    from reduce import Reduce
 
     from ModelList import ModelList
     from Ramachandran import Ramachandran
