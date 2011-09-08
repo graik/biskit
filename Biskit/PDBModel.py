@@ -940,9 +940,9 @@ class PDBModel:
         name is changed to HIE or HID or HIP, respectively. Disulfide bonds
         are not yet identified - CYS -> CYX renaming must be done manually
         (see AmberParmBuilder for an example). 
-        Internally amber uses H atom names ala HD21 while standard pdb files
-        use 1HD2. By default, ambpdb produces 'standard' pdb atom names but
-        it can output the less ambiguous amber names with switch -aatm.
+        Internally amber uses H atom names ala HD21 while (old) standard pdb 
+        files use 1HD2. By default, ambpdb produces 'standard' pdb atom names 
+        but it can output the less ambiguous amber names with switch -aatm.
 
         @param change: change this model's atoms directly (default:1)
         @type  change: 1|0
