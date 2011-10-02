@@ -1,0 +1,31 @@
+! values adapted from Chimera Delphi controller
+
+autoc=true  ! automatic convergence
+
+! grid parameters
+!gsize=65    ! default to automatic grid size
+perfil = 60  ! protein dimension 0.6 of grid
+scale=1.2    ! default grid spacing
+prbrad=1.4   ! probe radius (default 1.4)
+bndcon=4     ! boundary conditions (default 2)
+
+! physical parameters
+indi=4.0     ! interior dielectric constant
+exdi=80.0    ! exterior
+salt=0.15    ! in M
+ionrad=2     ! ion radius (2 for NaCl)
+
+!nonit=0      ! non-linear iterations  
+
+
+in(pdb,file=%(f_pdb)s)
+in(siz,file="radii.siz")
+in(crg,file="%(f_charges)s")
+in(frc,file=%(f_pdb)s)
+
+!maxc=0.0001
+!linit=800
+energy(s,c,g)
+out(phi, file="%(f_pdb)s_out.phi")
+out(frc, file="%(f_pdb)s_out.frc")
+out(modpdb, file="%(f_pdb)s_out.pdb")

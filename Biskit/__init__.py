@@ -85,6 +85,8 @@ try:
     from Ramachandran import Ramachandran
     from CommandLine import CommandLine
     
+    from amberResidues import AmberResidueType, AmberPrepParser
+    
 ## experimental modules
     from residue import Residue
 

@@ -62,7 +62,7 @@ class AmberResidueType( B.PDBModel ):
         
         
     def __str__( self ):
-        return '[%s %3s %3i atoms: %-20s ]' % \
+        return '[%s %3s %3i atoms: %s ]' % \
                (self.__class__.__name__, self.code, len(self), self.name )
     
     def __repr__( self ):
@@ -198,6 +198,14 @@ class AmberPrepParser( object ):
         for resblock in self.residueBlocks():
             r, atoms = self.parseResidue( resblock )
             yield self.createResidue( r, atoms )
+        
+    def residueDict( self ):
+        """
+        @return: dict, residue types indexed by 3-letter residue code,
+                 example: {'ala':[AmberResidueType ALA], 'cys':[...}
+        """
+        r = dict( [(res.code,res) for res in self.residueTypes()] )
+        return r
             
 
 #############
@@ -231,9 +239,14 @@ class Test(BT.BiskitTest):
         
         self.assertEqual( len(results['all_amino03.in']), 33 )
         
+        dic = self.p.residueDict()
+        self.assert_( isinstance( dic.values()[0], AmberResidueType) )
+        
+        self.results = results
         if self.local:
             for res in results['all_nuc02.in']:
                 print res
+                
 
 if __name__ == '__main__':
 
