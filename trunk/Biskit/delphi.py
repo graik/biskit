@@ -38,7 +38,7 @@ class DelphiError( Exception ):
 
 class DelphiCharges( object ):
     """
-    Helper class to write out a Delphi charge file
+    Helper class to write out a (custom) Delphi charge file
     """
     
     def __init__(self, restypes={} ):
@@ -176,12 +176,40 @@ class DelphiCharges( object ):
     
 class Delphi( Executor ):
     """
+    Calculate electrostatic potentials and potential maps with Delphi.
+    [Work in Progress]
+    
+    The current workflow of this wrapper is:
+    1. take input model/structure, remove hydrogens
+    2. add and optimize hydrogens with the reduce program
+    3. adapt residue and atom names to Amber conventions
+    4. match each residue (by atom content) to a residue from a list of 
+       Amber residue topology files
+    5. Create custom delphi charge file with Amber partial charges
+    6. Run Delphi in temporary folder 
+    7. not yet implemented: parse results
+    
     
     Usage
     =====
 
-    >>> 
-    >>> 
+    >>> D = Delphi( inputmodel )
+    >>> result = D.run()
+    
+    Customization
+    =============
+    
+    The default delphi parameter file can be replaced (parameter template).
+    Note though that you should keep the place holders for input and output
+    files. The default parameter file is taken from:
+
+        Biskit/data/delphi/delphi_simple.prm
+    
+    The default handling and matching of partial charges can be modified by:
+    
+        * providing a ready-made Delphi charge file (parameter f_charges)
+        * providing an alternative list of Amber topology files from which 
+          residues are looked up by their atom content (parameter topologies)
 
     @note: Command configuration: biskit/Biskit/data/defaults/exe_delphi.dat
     """
