@@ -4,16 +4,16 @@ autoc=true  ! automatic convergence
 
 ! grid parameters
 !gsize=65    ! default to automatic grid size
-perfil = 60  ! protein dimension 0.6 of grid
-scale=1.2    ! default grid spacing
-prbrad=1.4   ! probe radius (default 1.4)
-bndcon=4     ! boundary conditions (default 2)
+perfil=%(perfil)i    ! protein dimension 0.6 of grid
+scale=%(scale)f      ! default grid spacing
+prbrad=%(prbrad)f    ! probe radius (default 1.4)
+bndcon=%(bndcon)i    ! boundary conditions (default 2)
 
 ! physical parameters
-indi=4.0     ! interior dielectric constant
-exdi=80.0    ! exterior
-salt=0.15    ! in M
-ionrad=2     ! ion radius (2 for NaCl)
+indi=%(indi)f     ! interior dielectric constant
+exdi=%(exdi)f     ! exterior
+salt=%(salt)f     ! in M
+ionrad=%(ionrad)f ! ion radius (2 for NaCl)
 
 !nonit=0      ! non-linear iterations  
 
