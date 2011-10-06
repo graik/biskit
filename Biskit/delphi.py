@@ -27,6 +27,7 @@ Application:
 
 import tempfile, os
 import numpy as N
+import re
 
 from Biskit import Executor, PDBModel, Reduce
 from Biskit import AmberPrepParser
@@ -38,7 +39,7 @@ class DelphiError( Exception ):
 
 class DelphiCharges( object ):
     """
-    Helper class to write out a (custom) Delphi charge file
+    Helper class for Delphi to write out a (custom) Delphi charge file
     """
     
     def __init__(self, restypes={} ):
@@ -215,7 +216,6 @@ class Delphi( Executor ):
     """
 
     F_RADII = 'default.siz'           ## default Delphi atom radius file
-    F_CHARGES = 'prot_amb.crg'        ## default all-purpose charge-file
     F_PARAMS = 'delphi_simple.prm'    ## default delphi parameter file
     
     ## list of Amber topology files in decending priority
@@ -224,6 +224,12 @@ class Delphi( Executor ):
                   'all_aminoct03.in',
                   'all_aminont03.in',
                   'all_nuc02.in' ]
+    
+    RE_E_GRID = r'total grid energy\s+:\s+(?P<egrid>[0-9\-\.]+)\s+kt'
+    RE_E_COUL = r'coulombic energy\s+:\s+(?P<ecoul>[0-9\-\.]+)\s+kt'
+    RE_E_SELF = r'self-reaction field energy\s+:\s+(?P<eself>[0-9\-\.]+)\s+kt'
+    RE_E_RXN  = r'total reaction field energy\s+:\s+(?P<erxn>[0-9\-\.]+)\s+kt'
+    RE_SURFCH = r'total s\.charge\,no epsin carrying\s+:\s+(?P<scharge>[0-9\-\.]+)'
     
     
     def __init__( self, model, template=None, topologies=None,
@@ -328,7 +334,6 @@ class Delphi( Executor ):
         except IOError, why: 
             raise IOError, 'Error creating custom delphi charge file '+f_out+\
                   '( '+str(why)+' )'
-        
 
     
     def prepare( self ):
@@ -378,10 +383,24 @@ class Delphi( Executor ):
 
         raise DelphiError, s
 
-    def parseOutput( self, fname ):
+    def parseOutput( self ):
         """
+        Assumes output file has been parsed into self.output
         """
-        pass
+        r = {}
+        for pattern in [self.RE_E_COUL, self.RE_E_GRID, self.RE_E_RXN, 
+                        self.RE_E_SELF, self.RE_SURFCH]:
+            ex = re.compile( pattern )
+            hit = ex.search( self.output )
+            try:
+                r.update( hit.groupdict() )
+            except:
+                print 'warning, no match for: ' + pattern
+        
+        for k, v in r.items():
+            r[k] = float( v )
+            
+        return r
     
     def finish( self ):
         """
@@ -391,6 +410,7 @@ class Delphi( Executor ):
         try:
             f = open( self.f_out, 'r')
             self.output = f.read()
+            self.result = self.parseOutput()
             f.close()
         except IOError, why:
             raise DelphiError, 'Cannot open delphi output file %s' % self.f_out
