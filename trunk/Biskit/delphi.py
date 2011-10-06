@@ -39,14 +39,26 @@ class DelphiError( Exception ):
 
 class DelphiCharges( object ):
     """
-    Helper class for Delphi to write out a (custom) Delphi charge file
+    Helper class for Delphi to write out a (custom) Delphi charge file. Atomic
+    partial charges are taken from a dictionary of AmberResidue instances. 
+    This dictionary can be created with the AmberResidue class from standard
+    Amber topology files (bundled with Biskit in Biskit/data/amber/residues).
+    
+    Residues in the input PDB are matched against Amber residues with exactly 
+    the same atom content (same set of atom names). That means, the name of 
+    the residue can differ (as is the case for e.g. CALA, CTHR or NALA, etc.).
+    
+    DelphiCharges.customCharges() can be applied iteratively with different 
+    sets of residue descriptions until all residues in the input model have been 
+    matched against a topology entry.
     """
     
     def __init__(self, restypes={} ):
         """
         @param fname: output file name
         @type  fname: str
-        @param restypes: dict of Residue type definitions indexed by code
+        @param restypes: dict of Residue type definitions indexed by 3-letter 
+                         code
         @type  restypes: { str: AmberResidueType }
         """
         self.restypes = restypes
@@ -188,7 +200,7 @@ class Delphi( Executor ):
        Amber residue topology files
     5. Create custom delphi charge file with Amber partial charges
     6. Run Delphi in temporary folder 
-    7. not yet implemented: parse results
+    7. parse result energies into result dictionary
     
     
     Usage
@@ -196,6 +208,19 @@ class Delphi( Executor ):
 
     >>> D = Delphi( inputmodel )
     >>> result = D.run()
+    >>> result
+    scharge :  1.4266   # surface charge
+    egrid :  9105.51    # total grid energy
+    ecoul :  -9849.664  # couloumb energy
+    erxn :  -664.7469   # corrected reaction field energy
+    erxnt :  -21048.13  # total reaction field energy
+    eself :  -20383.39  # self reaction field energy
+    
+    Note
+    ====
+    
+    All energy values are in units of kT. The important terms for the
+    calculation of (free) energy differences are 'egrid', 'erxn' and 'ecoul'. 
     
     Customization
     =============
@@ -205,11 +230,22 @@ class Delphi( Executor ):
     files. The default parameter file is taken from:
 
         Biskit/data/delphi/delphi_simple.prm
+        
+    As always, the place holders (e.g. %(salt)f ) in this file are replaced
+    by the value of a variable of the same name (e.g. salt) within the name
+    space of the Executor instance. In other words:
     
-    The default handling and matching of partial charges can be modified by:
+    >>> D = Delphi( inputmodel, salt=0.2, ionrad=2.5 )
+    
+    ...will override the default values for salt and ionradius for which there
+    are the place hoders %(salt)f and %(ionrad)f in the template file.
+    
+    
+    The default handling and matching of atomic partial charges can be 
+    modified by:
     
         * providing a ready-made Delphi charge file (parameter f_charges)
-        * providing an alternative list of Amber topology files from which 
+        * or providing an alternative list of Amber topology files from which 
           residues are looked up by their atom content (parameter topologies)
 
     @note: Command configuration: biskit/Biskit/data/defaults/exe_delphi.dat
@@ -228,12 +264,15 @@ class Delphi( Executor ):
     RE_E_GRID = r'total grid energy\s+:\s+(?P<egrid>[0-9\-\.]+)\s+kt'
     RE_E_COUL = r'coulombic energy\s+:\s+(?P<ecoul>[0-9\-\.]+)\s+kt'
     RE_E_SELF = r'self-reaction field energy\s+:\s+(?P<eself>[0-9\-\.]+)\s+kt'
-    RE_E_RXN  = r'total reaction field energy\s+:\s+(?P<erxn>[0-9\-\.]+)\s+kt'
+    RE_E_RXN  = r'corrected reaction field energy\s*:\s+(?P<erxn>[0-9\-\.]+)\s+kt'
+    RE_E_RXNT = r'total reaction field energy\s*:\s+(?P<erxnt>[0-9\-\.]+)\s+kt'
     RE_SURFCH = r'total s\.charge\,no epsin carrying\s+:\s+(?P<scharge>[0-9\-\.]+)'
     
     
     def __init__( self, model, template=None, topologies=None,
                   f_charges=None,
+                  indi=4.0, exdi=80.0, salt=0.15, ionrad=2, prbrad=1.4, 
+                  bndcon=4, scale=1.2, perfil=60, 
                   **kw ):
         """
         @param model: structure for which potential should be calculated
@@ -249,6 +288,15 @@ class Delphi( Executor ):
                           [default: create custom]
         @type  f_charges: str
 
+        @param indi: interior dilectric (4.0)
+        @param exdi: exterior dielectric (80.0)
+        @param salt: salt conc. in M (0.15)
+        @param ionrad: ion radius (2)
+        @param prbrad: probe radius (1.4) 
+        @param bndcon: boundary condition (4, delphi default is 2)
+        @param scale:  grid spacing (1.2)
+        @param perfil: grid fill factor in % (for automatic grid, 60) 
+        
         @param kw: additional key=value parameters for Executor:
         @type  kw: key=value pairs
         ::
@@ -271,6 +319,16 @@ class Delphi( Executor ):
         self.topologies = topologies or self.F_RESTYPES
         self.f_charges = f_charges or tempfile.mktemp( '.crg', 'delphi_',
                                                        dir=tempdir )
+        
+        ## DELPHI run parameters
+        self.indi=indi  # interior dilectric(4.0)
+        self.exdi=exdi  # exterior dielectric(80.0)
+        self.salt=salt  # salt conc. in M (0.15)
+        self.ionrad=ionrad # ion radius (2)
+        self.prbrad=prbrad # probe radius (1.4) 
+        self.bndcon=bndcon # boundary condition (4, delphi default is 2)
+        self.scale=scale   # grid spacing (1.2)
+        self.perfil=perfil # grid fill factor in % (for automatic grid, 60) 
         
         Executor.__init__( self, 'delphi', 
                            template=template,
@@ -389,13 +447,13 @@ class Delphi( Executor ):
         """
         r = {}
         for pattern in [self.RE_E_COUL, self.RE_E_GRID, self.RE_E_RXN, 
-                        self.RE_E_SELF, self.RE_SURFCH]:
+                        self.RE_E_SELF, self.RE_E_RXNT, self.RE_SURFCH]:
             ex = re.compile( pattern )
             hit = ex.search( self.output )
             try:
                 r.update( hit.groupdict() )
             except:
-                print 'warning, no match for: ' + pattern
+                self.log.writeln('Warning, no match for: ' + pattern)
         
         for k, v in r.items():
             r[k] = float( v )
@@ -449,7 +507,14 @@ class Test(BT.BiskitTest):
         if self.local:
             print "Result: "
             print self.r
-
+            
+        expect = {'scharge': 1.4266, 'egrid': 9105.510, 'ecoul': -9849.664, 
+                  'eself': -20383.390, 'erxn': -664.7469}
+        
+        for k, v in expect.items():
+            self.assertAlmostEqual( expect[k], self.r[k], 2, 
+                                    'missmatch in energy values: '+k)
+        
             
     def test_delphiCharges( self ):
         """DelphiCharges test"""
