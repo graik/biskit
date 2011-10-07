@@ -20,9 +20,7 @@
 ## last $Date: 2009-05-09 14:17:28 +0200 (Sat, 09 May 2009) $
 ## $Revision: $
 """
-Wrapper for Delphi -- PB electrostatic potential calculation.
-
-Application: 
+Wrapper for Delphi -- Poisson-Boltzman electrostatic potential calculation.
 """
 
 import tempfile, os
@@ -560,7 +558,8 @@ class Delphi( Executor ):
         """
         Overrides Executor method
         """
-        return False
+        return self.output is None or \
+               not 'energy calculations done' in self.output
 
     def fail( self ):
         """
@@ -571,6 +570,18 @@ class Delphi( Executor ):
         self.log.add( s )
 
         raise DelphiError, s
+
+    def postProcess( self ):
+        """
+        Called directly after execution. Read delphi output.
+        """
+        try:
+            f = open( self.f_out, 'r')
+            self.output = f.read()
+            f.close()
+        except IOError:
+            self.output = None
+    
 
     def parseOutput( self ):
         """
@@ -596,13 +607,7 @@ class Delphi( Executor ):
         Overrides Executor method
         """
         Executor.finish( self )
-        try:
-            f = open( self.f_out, 'r')
-            self.output = f.read()
-            self.result = self.parseOutput()
-            f.close()
-        except IOError, why:
-            raise DelphiError, 'Cannot open delphi output file %s' % self.f_out
+        self.result = self.parseOutput()
             
 
 
