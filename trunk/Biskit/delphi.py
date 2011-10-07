@@ -209,18 +209,73 @@ class Delphi( Executor ):
     >>> D = Delphi( inputmodel )
     >>> result = D.run()
     >>> result
-    scharge :  1.4266   # surface charge
-    egrid :  9105.51    # total grid energy
-    ecoul :  -9849.664  # couloumb energy
-    erxn :  -664.7469   # corrected reaction field energy
-    erxnt :  -21048.13  # total reaction field energy
-    eself :  -20383.39  # self reaction field energy
+    {'scharge' :  1.4266   # surface charge
+     'egrid' :  9105.51    # total grid energy
+     'ecoul' :  -9849.664  # couloumb energy
+     'erxn'  :  -664.7469   # corrected reaction field energy
+     'erxnt' :  -21048.13  # total reaction field energy
+     'eself' :  -20383.39 }  # self reaction field energy
     
     Note
     ====
     
     All energy values are in units of kT. The important terms for the
-    calculation of (free) energy differences are 'egrid', 'erxn' and 'ecoul'. 
+    calculation of (free) energy differences are 'egrid', 'erxn' and 'ecoul'.
+    
+    Grid dimensions
+    ===============
+    
+    If no further options are given, the Delphi wrapper will determine grid
+    dimensions that are centered on the molecule and lead to at most 60%
+    "filling" of the grid in any of the x, y or z dimensions. In other words,
+    the longest dimension of the solute along x, y or z axis will still have a
+    20% margin to the grid boundary. This fill-factor can be overriden with
+    the 'perfil' parameter.
+    
+    The density of the grid is, by default, 1.2 points per Angstroem
+    and can be adjusted with the 'scale' parameter. The number of grid points 
+    (gsize) will be calculated accordingly. 
+    
+    For a given combination of scale and perfil, this calculation will give
+    approximately (but not exactly) the same grid dimensions as the one the
+    delphi program would determine by itself. Minor differences may lead to
+    two grid points more or less. This can also lead to some changes in
+    resulting energies.
+    
+    For more control over grid dimensions, you should call the method
+    Delphi.setGrid() *before* Delphi.run(). For example:
+    
+    >>> D = Delphi( inputmodel )
+    >>> D.setGrid( scale=1.2, perfil=80 )
+    
+    ... will fix a grid centered on the molecule, with 1/1.2 A grid spacing and 
+    at least 10% distance margin to the boundary. Another example:
+    
+    >>> D = Delphi( inputmodel )
+    >>> D.setGrid( acenter=(0,0,0), scale=1.0, gsize=100 )
+    
+    ... circumvents any calculation and fixes a 100 x 100 x 100 grid centered 
+    on 0 and with 1/1.0 A grid spacing -- a box of 100 A x 100 A x 100 A. If
+    the scale parameter is not given, it will default to whatever was specified
+    at the Delphi() constructor (and from there default to 1.2). 
+    
+    Delphi.setGrid() returns the three grid parameters as a dictionary for 
+    later re-use. So if you want to use the same grid dimensions for two 
+    different structures you can first calculate the dimensions based on one
+    structure and then apply the same dimensions to another Delphi run:
+    
+    >>> D1 = Delphi( complex )
+    >>> grid1 = D1.setGrid( scale=2.4, perfil=60 )
+    >>> print grid1
+    {'acenter': (0.1, 10., -0.5), 'scale': 2.400, 'gsize': 99 }
+    
+    >>> ligand = complex.takeChains( [1] ) ## extract part of structure
+    >>> D2 = Delphi( ligand )
+    >>> D2.setGrid( **grid1 )
+    
+    Note: The '**' syntax unpacks the dictionary as keyword parameters into the 
+    method.
+    
     
     Customization
     =============
@@ -327,8 +382,13 @@ class Delphi( Executor ):
         self.ionrad=ionrad # ion radius (2)
         self.prbrad=prbrad # probe radius (1.4) 
         self.bndcon=bndcon # boundary condition (4, delphi default is 2)
+        
+        ## DELPHI parameters for custom grid
         self.scale=scale   # grid spacing (1.2)
-        self.perfil=perfil # grid fill factor in % (for automatic grid, 60) 
+        self.perfil=perfil # grid fill factor in % (for automatic grid, 60)
+        self.gsize = None
+        self.acenter = None
+        self.strcenter = '(0.0,0.0,0.0)'
         
         Executor.__init__( self, 'delphi', 
                            template=template,
@@ -341,7 +401,74 @@ class Delphi( Executor ):
         
         self.model = model
         self.delphimodel = None
+    
 
+    def delphiDimensions( self, model ):
+        """
+        Calculate "geometric" center and molecular dimensions as defined by 
+        Delphi (the delphi geometric center is NOT exactly what a geometric
+        center is commonly defined as). 
+        @param model: PDBModel for which center and dimensions should be
+                      calculated
+        @type model:  PDBModel
+        @return: center and dimensions
+        @rtype : N.array([x,y,z] of float), N.array([x,y,z] of float)
+        """
+        m = model.compress( model.maskHeavy() )
+        xyz = m.getXyz()
+        
+        ## largest protein length in x, y, z direction
+        dimensions = N.max( xyz, 0 ) - N.min( xyz, 0 )
+        
+        center = N.min( xyz, 0) + dimensions / 2
+        
+        ## + 1 C diameter
+        dimensions += 2*1.7
+        
+        return center, dimensions
+        
+
+    def setGrid( self, acenter=None, gsize=None, scale=None, perfil=None ):
+        """
+        Specify or calculate Delphi grid. There are two options:
+        (1) specify the actual grid by giving acenter, scale and gsize.
+        (2) calculate new grid dimensions from acenter, scale and perfil.
+        If not given, acenter defaults to the geometric center of the structure
+        model.
+        @param acenter: center coordinates for the grid
+        @type  acenter: [float, float, float]
+        @param gsize: number of grid points in x, y, and z direction
+        @type  gsize: int
+        @param scale: distance between grid points
+        @type scale : float
+        @param perfil: percent fill factor 
+        """
+        center, dimensions = self.delphiDimensions( self.model )
+
+        if acenter is not None:
+            self.acenter = acenter
+        else:
+            if self.acenter is None:
+                self.acenter = center
+        
+        self.strcenter = str( tuple( self.acenter) )
+        self.scale= scale or self.scale
+        
+        if not gsize:
+            self.perfil = perfil or self.perfil
+              
+            ## grid size in number of points at self.scale per Angstrom density
+            gsize = (N.max( dimensions ) * 100. / self.perfil) * self.scale
+            gsize = int( round( gsize ) )
+            
+            ## grid size must be an uneven number
+            if not gsize % 2:
+                gsize += 1
+                
+            self.gsize = gsize
+        
+        return {'acenter':self.acenter, 'scale':self.scale, 'gsize':self.gsize}
+        
         
     def version(self):
         return 'Delphi $Revision: $'
@@ -401,6 +528,10 @@ class Delphi( Executor ):
         Executor.prepare( self )
         
         self.__prepareFolder()
+        
+        ## if setGrid hasn't been called yet, create automatic grid
+        if not self.gsize:
+            self.setGrid()
         
         reducer = Reduce( self.model, verbose=self.verbose,
                           tempdir=self.tempdir, cwd=self.cwd,
@@ -508,11 +639,11 @@ class Test(BT.BiskitTest):
             print "Result: "
             print self.r
             
-        expect = {'scharge': 1.4266, 'egrid': 9105.510, 'ecoul': -9849.664, 
-                  'eself': -20383.390, 'erxn': -664.7469}
+        expect = {'scharge': 1.427, 'egrid': 9075., 'ecoul': -9849.70, 
+                  'eself': -20383.4, 'erxn': -666.7}
         
         for k, v in expect.items():
-            self.assertAlmostEqual( expect[k], self.r[k], 2, 
+            self.assertAlmostEqual( expect[k], self.r[k], 0, 
                                     'missmatch in energy values: '+k)
         
             

@@ -3,8 +3,9 @@
 autoc=true  ! automatic convergence
 
 ! grid parameters
-!gsize=65    ! default to automatic grid size
-perfil=%(perfil)i    ! protein dimension 0.6 of grid
+! perfil=%(perfil)i    ! commented out because we dont use automatic grid
+acenter%(strcenter)s   ! grid center
+gsize=%(gsize)i      ! number of grid points in each dimension
 scale=%(scale)f      ! default grid spacing
 prbrad=%(prbrad)f    ! probe radius (default 1.4)
 bndcon=%(bndcon)i    ! boundary conditions (default 2)
