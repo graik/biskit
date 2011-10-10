@@ -34,19 +34,6 @@ from Biskit.difflib_old import SequenceMatcher
 #from difflib import SequenceMatcher
 
 
-def sequenceList( model ):
-    """
-    Extracts a one letter amino acid sequence list
-    
-    @param model: model
-    @type  model: PDBModel
-    
-    @return: sequence ['A','G','R','T',.....]
-    @rtype: [str]
-    """
-    return [ i for i in model.sequence() ]
-
-
 def getOpCodes( seq_1, seq_2 ):
     """
     Compares two sequences and returns a list with the information
@@ -134,217 +121,60 @@ def getEqualLists( seqDiff ):
 
 
 
-def repeateInMatch( deletedRes ):
-    """
-    Takes a string and returns a list of strings containing internal repeates.
+def expandRepeatsLeft( s, start, end, length=1 ):
+    """recursively identify sequence repeats on left edge of s[start:end]"""
+    core = s[start:end]
 
-    @param deletedRes: string of one letter amino acid sequence
-    @type  deletedRes: str
+    if start-length>=0 and s[ start-length : start ] == core[0 : length]:
+        start -= length
+        start = expandRepeatsLeft( s, start, end )
+
+    return start
+
+def expandRepeatsRight( s, start, end, length=1 ):
+    """recursively identify sequence repeats on right edge of s[start:end]"""
+    core = s[start:end]
+
+    if end+length<=len(s) and s[ end: end+length ] == core[-length:end]:
+        end += length
+        end = expandRepeatsRight( s, start, end, length )
+
+    return end
+
+def expandRepeats( s, start, size ):
+    """
+    Expand a text fragment within a larger string so that it includes any
+    sequence repetitions to its right or left edge. 
     
-    @return: smallest self repete. Example::
-                'GSGS'     returns  'GS'
-                'ABABABAB'    "     'ABAB' and 'AB'
-                'FFF'         "     'F'
-    @rtype: str
+    Example:
+       ABC[BC]CCCDE  -> A[BCCCC]DE
+       
+    The idea here is to avoid alignment missmatches due to duplications. 
+    The above to sequences could be aligned in several ways, for example:
+       A--BC---DE      AB----C-DE
+       ABCBCCCCDE  or  ABCBCCCCDE
+    We don't know for sure which positions should be kept and which positions
+    should be deleted in the longer string. So the most conservative approach
+    is to remove the whole ambiguous fragment.
+    
+    @param s: input string
+    @type  s: str
+    @param start: start position of text fragment
+    @type  start: int
+    @param size: size of text fragment
+    @type  size: int
+    
+    @return: start and size of expanded fragment
+    @rtype: (int, int)
     """
-    segment = []
-    repete = []
-    word = []
-    checkList = []
+    end = start + size
+    left = [  expandRepeatsLeft(s,start,end,l) for l in range(size+1) ]
+    right= [ expandRepeatsRight(s,start,end,l) for l in range(size+1) ]
 
-    # the maximun length of a word is half of the deleted residues
-    length = len( deletedRes )
-    half = range( 1, length/2+1 )
-
-    if len( half ) > 1:
-        half.reverse()
-
-    # get a list of the number of possible repetes
-    #
-    # example: for a string 'ABABABAB' (lengt 8) return [2,4,8] corresponding
-    #          to 'ABAB','ABAB' or 'AB','AB',AB','AB' or 'A','B','A',...
-    for i in half:
-
-        if length/(i*1.0) - int( length/(i*1.0) ) == 0.0:
-            segment.append(length/i)
-
-    # get the corresponding words
-    # example: 'ABABABAB' and seg = 1 -> ['ABAB','ABAB']
-    for seg in segment:
-
-        wordLen = length/seg
-        i=0
-        word = []
-
-        while i < length:
-            word = word + [deletedRes[i:i+wordLen]]
-            i = i + wordLen
-
-        # compare the identity of all words of length i
-        # to all other words of the same length
-        j=1
-        k=2
-        score = 0
-
-        while j <= seg:
-
-            while k <= seg:
-
-                if word[j-1] == word[k-1]:
-                    score += 1
-                k += 1
-
-            k = j +2
-            j += 1
-        # if all words are the same, add to list of strings to return
-        if score == (seg*(seg-1))/2:
-
-            checkList = checkList + [word[0]]
-
-    return checkList    
-
-
-
-def delete( seqAA, seqNr, delList ):
-    """
-    1. Takes a amino acid and a sequence list and deletes positions
-       according to the information given in the delList.
-
-    2. Furthermore, compares the deleted sequence with the following
-       and preceding sequence. If they are identical also these
-       residues are deleted.
-
-    3. If the sequence contains internal repeates (as in the sequence
-       'GSGS') and 2) does not apply the preceding and following
-       sequence is also scanned for this sequence (here 'GS').
-
-    @param seqAA: list with the amino acid sequence in one letter code
-    @type  seqAA: [str]
-    @param seqNr: list with the amino acid postitons
-    @type  seqNr: [int]
-    @param delList: list of residues to be deleted (postiton, length)
-    @type  delList: [tuple]
-
-    @return: sequence and positions, example::
-               seqAA - ['A','G','R','T',.....]
-               seqNr - [ 0,  1,  2,  3 ,.....]  
-               delList - [(0, 2), (180, 4)]
-               ->  seqAA - ['R','T',.....]
-                   seqNr - [ 2,  3 ,.....]
-                   
-    @rtype: [str],[int]
-    """
-
-    offset = 0 # keep track of the number of deteted residues
-
-    # iterate over the lists in delList
-    for list in delList:
-
-        deletedRes = ''     # seq of deleted residues ('GR')
-        followingBlock = '' # seq of following res 
-        precedingBlock = '' # seq of preceding res
-
-        start = list[0]-offset 
-        length = list[1]
-        positions = range( start, start+length )
-
-        # collect deteted residue sequence in a string
-        # an the preceding and following sequence of same length
-        for pos in positions:
-
-            deletedRes = deletedRes + seqAA[ pos ]
-            try:
-                followingBlock = followingBlock  + seqAA[ pos + length ]
-            except:
-                pass
-##                sys.stderr.write("N'del ")
-
-            try:
-                precedingBlock = precedingBlock + seqAA[ pos - length ]
-            except:
-                pass
-##                sys.stderr.write("C'del ")
-
-        # get a list of internal delete sequence repeats
-        intraRepeteList = repeateInMatch(deletedRes)
-
-        to_be_removed = [] 
-        for pos in positions:
-
-            to_be_removed.append( pos )
-            offset += 1
-
-            # if the sequence block of delList matches the following block
-            # delete it as well
-            if deletedRes == followingBlock:
-
-                to_be_removed.append( pos+length )
-                offset += 1
-
-            # ... and the same goes for the previous block
-            if deletedRes == precedingBlock:
-
-                to_be_removed.append( pos-length )
-                offset += 1
-
-        # if the preceding block was not deleted, check for preceding
-        # intra repetes
-        hit = 0  # to be able to stop if hit is found
-        if deletedRes != precedingBlock:
-
-            while hit == 0:
-
-                for repete in intraRepeteList:
-
-                    repeteSeq = ''.join( seqAA[ positions[0]-len(repete) : positions[0] ] )
-                    repetePos = range( positions[0]-len(repete), positions[0] )
-
-                    if repete == repeteSeq:
-
-                        hit += 1
-
-                        for pos in repetePos:
-
-                            to_be_removed.append( pos )
-                            offset += 1
-                hit += 1
-
-        # ... and following intra repetes
-        hit = 0
-        if deletedRes != followingBlock:
-
-            while hit == 0:
-
-                for repete in intraRepeteList:
-
-                    repeteSeq = ''.join( seqAA[ positions[0]+length : positions[0]+length+len(repete) ] )
-                    repetePos =  range( positions[0]-length, positions[0]+length+len(repete) )
-
-                    if repete == repeteSeq:
-
-                        hit += 1
-
-                        for pos in repetePos:
-
-                            to_be_removed.append( pos )
-                        offset += 1
-                hit += 1
-
-        # sort and inverse list of resides to be removed
-        if len(to_be_removed) > 1:
-
-            to_be_removed.sort()
-            to_be_removed.reverse()
-
-        # delete from the end and forward
-        for r in to_be_removed:
-
-            del seqAA[r]
-            del seqNr[r]
-
-
-    return seqAA, seqNr
-
+    left = min(left)
+    right= max(right)
+    
+    return left, right-left
 
 
 def getEqual( seqAA, seqNr, equalList ):
@@ -374,42 +204,57 @@ def getEqual( seqAA, seqNr, equalList ):
         equalSeqAA = equalSeqAA + seqAA[equal[0]:equal[0]+equal[1]] 
         equalSeqNr = equalSeqNr + seqNr[equal[0]:equal[0]+equal[1]] 
 
-
     return equalSeqAA, equalSeqNr
 
 
-def iterate( seqAA_1, seqNr_1, seqAA_2, seqNr_2, del_1, del_2 ):
-    """
-    Delete residues until no more deletions are indicated by the
-    sequence matcher. Return the final sequences
+def del2mask( seq, *delpos ):
+    """convert list of (from, to) delete positions into a mask of 0 or 1"""
+    mask = N.ones( len(seq) )
 
-    @param seqAA_1: list with the amino acid sequence in one letter code
-    @type  seqAA_1: [str]    
-    @param seqNr_1: list with the amino acid postitons
-    @type  seqNr_1: [int]
-    @param seqAA_2: list with the amino acid sequence in one letter code
-    @type  seqAA_2: [str]    
-    @param seqNr_2: list with the amino acid postitons
-    @type  seqNr_2: [int]
-    @param del_1: Lists of tuples containing regions of the sequences that
-                  should be deteted
-    @type  del_1: [tuple]
-    @param del_2: Lists of tuples containing regions of the sequences that
-                  should be deteted
-    @type  del_2: [tuple]
+    for start, size in delpos:
+        mask.put( range( start, start+size), 0 )
+        
+    return mask
+
+def compareSequences( seqAA_1, seqAA_2 ):
+    """
+    """
+    seqAA_1 = list( seqAA_1 )
+    seqAA_2 = list( seqAA_2 )
+    seqNr_1 = range( len( seqAA_1 ) )
+    seqNr_2 = range( len( seqAA_2 ) )
+
+    # get mask
+    mask_1 = N.zeros( len( seqNr_1 ) )
+    mask_2 = N.zeros( len( seqNr_2 ) )
+
+    # compare sequences
+    seqDiff = getOpCodes( seqAA_1, seqAA_2)
+
+    # get delete lists
+    del_1, del_2 =  getSkipLists( seqDiff )
     
-    @return: the final sequence and position lists
-    @rtype: [str], [int], [str], [int]
-    """
-    while del_1 <> [] or del_2 <> []:
-        seqAA_1, seqNr_1  = delete(seqAA_1, seqNr_1, del_1)
-        seqAA_2, seqNr_2  = delete(seqAA_2, seqNr_2, del_2)
+    del_1 = [ expandRepeats( seqAA_1, *pos ) for pos in del_1 ]
+    del_2 = [ expandRepeats( seqAA_2, *pos ) for pos in del_2 ]
+    
+    mask1 = del2mask( seqAA_1, *del_1 )
+    mask2 = del2mask( seqAA_2, *del_2 )
+ 
+    seqAA_1 = N.compress( mask1, seqAA_1 ).tolist()
+    seqNr_1 = N.compress( mask1, seqNr_1 ).tolist()
+    seqAA_2 = N.compress( mask2, seqAA_2 ).tolist()
+    seqNr_2 = N.compress( mask2, seqNr_2 ).tolist()
+    
+    # get equal parts
+    seqDiff = getOpCodes( seqAA_1, seqAA_2 )
+    equal_1, equal_2 = getEqualLists( seqDiff ) 
+    seqAA_1, seqNr_1 = getEqual( seqAA_1, seqNr_1, equal_1)
+    seqAA_2, seqNr_2 = getEqual( seqAA_2, seqNr_2, equal_2 )
 
-        seqDiff = getOpCodes( seqAA_1, seqAA_2 )
-        del_1, del_2 = getSkipLists( seqDiff )
+    N.put( mask_1, seqNr_1 , 1 )
+    N.put( mask_2, seqNr_2 , 1 )
 
-    return  seqAA_1, seqNr_1, seqAA_2, seqNr_2
-
+    return mask_1, mask_2
 
 def compareModels( model_1, model_2 ):
     """
@@ -427,36 +272,10 @@ def compareModels( model_1, model_2 ):
     @rtype: ([1|0...],[1|0...])
     """
     # get sequence AA and Nr strings
-    seqAA_1 = sequenceList( model_1 )
-    seqAA_2 = sequenceList( model_2 )
-    seqNr_1 = range( len( seqAA_1 ) )
-    seqNr_2 = range( len( seqAA_2 ) )
+    seqAA_1 = model_1.sequence()
+    seqAA_2 = model_2.sequence()
 
-    # get mask
-    mask_1 = N.zeros( len( seqNr_1 ) )
-    mask_2 = N.zeros( len( seqNr_2 ) )
-
-    # compare sequences
-    seqDiff = getOpCodes( seqAA_1, seqAA_2)
-
-    # get delete lists
-    del_1, del_2 =  getSkipLists( seqDiff )
-
-    # delete residues until del_1 = del_2 = []
-    seqAA_1, seqNr_1, seqAA_2, seqNr_2 = \
-                 iterate( seqAA_1, seqNr_1, seqAA_2, seqNr_2, del_1, del_2 )
-
-    # get equal parts
-    seqDiff = getOpCodes( seqAA_1, seqAA_2 )
-    equal_1, equal_2 = getEqualLists( seqDiff ) 
-    seqAA_1, seqNr_1 = getEqual( seqAA_1, seqNr_1, equal_1)
-    seqAA_2, seqNr_2 = getEqual( seqAA_2, seqNr_2, equal_2 )
-
-    N.put( mask_1, seqNr_1 , 1 )
-    N.put( mask_2, seqNr_2 , 1 )
-
-    return mask_1, mask_2
-
+    return compareSequences( seqAA_1, seqAA_2 )
 
 
 #############
@@ -488,6 +307,14 @@ class Test(BT.BiskitTest):
 
         self.assert_( N.all(mask1 == self.EXPECT[0] ) )
         self.assert_( N.all(mask2 == self.EXPECT[1] ) )
+        
+    def test_sequenceRepeats(self):
+        """match2seq sequence repeat test"""
+        seq1 = 'ABCDEFG~~~~~~~~~~~~~~~'
+        seq2 = '~~~~~'
+        mask1, mask2 = compareSequences( seq1, seq2 )
+        self.assert_( N.all( mask1 == N.zeros( len(seq1 ) )) )
+        self.assert_( N.all( mask2 == N.zeros( len(seq2 ) )) )
 
 
     EXPECT =  N.array([1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
