@@ -353,8 +353,9 @@ class PDBModel:
         r = self.__repr__()
 
         for c in range( self.lenChains() ):
-            r += '\n\t* chain %i: %s' % ( c,
-                                          T.clipStr( self.takeChains( [c] ).sequence(), 60 ) )
+            m = self.takeChains( [c] )
+            r += '\n\t* chain %-2i(%s): %s' % ( c, m['chain_id'][0],
+                                          T.clipStr( m.sequence(), 60 ) )
 
         r += '\n source: ' + repr( self.source )
         r += '\n %2i atom profiles:    %s' % ( len( self.atoms ), 
@@ -1296,20 +1297,30 @@ class PDBModel:
         return self.__maskCA
 
 
-    def maskBB( self, force=0 ):
+    def maskBB( self, force=0, solvent=0 ):
         """
-        Short cut for mask of all backbone atoms.
+        Short cut for mask of all backbone atoms. Supports standard protein
+        and DNA atom names. Any residues classified as solvent (water, ions)
+        are filtered out.
 
         @param force: force calculation even if cached mask is available
         @type  force: 0||1
+        @param solvent: include solvent residues (default: false)
+        @type  solvent: 1||0
 
         @return: N.array( 1 x N_atoms ) of 0||1
         @rtype: array
         """
-        if self.__maskBB == None or force:
-            self.__maskBB = self.maskFrom( 'name',
-                                           ['CA', 'C', 'N', 'O', 'H','OXT'] )
+        if self.__maskBB == None or force or solvent:
+            mask = self.maskFrom( 'name', ['CA', 'C', 'N', 'O', 'H','OXT',
+                                           "P","O5'","C5'","C4'","C3'","O3'"])
+            if not solvent:
+                mask = N.logical_not(self.maskSolvent()) * mask
 
+                self.__maskBB = mask  ## cache
+            else:
+                return mask  ## don't cache
+            
         return self.__maskBB
 
 
@@ -1377,13 +1388,13 @@ class PDBModel:
     def maskSolvent( self ):
         """
         Short cut for mask of all atoms in residues named
-        TIP3, HOH, WAT, Na+, Cl-
+        TIP3, HOH, WAT, Na+, Cl-, CA, ZN
 
         @return: N.array( 1 x N_atoms ) of 0||1
         @rtype: array
         """
         return self.maskFrom('residue_name', ['TIP3','HOH','WAT','Na+', 'Cl-',
-                                              'CA'])
+                                              'CA', 'ZN'])
 
     def maskHetatm( self ):
         """
@@ -1637,6 +1648,8 @@ class PDBModel:
         """
         ## catch invalid indices
         i = self.__convert_negative_indices( i, len( index ) )
+        if len(i)==0:
+            return i, N.array( [], int )
         if max( i ) >= len( index ) or min( i ) < 0:
             raise PDBError, "invalid indices"
 
@@ -1718,7 +1731,7 @@ class PDBModel:
         @return: modified copy of indices (or unchanged indices itself)
         @rtype: N.array of int
         """
-        if min( indices ) >= 0:
+        if len(indices)==0 or min( indices ) >= 0:
             return indices
 
         indices = copy.copy( N.array( indices ) )
@@ -1961,7 +1974,7 @@ class PDBModel:
         @type  segid: str
         @param renumberAtoms: rewrite PDB serial numbering of the adjacent
                               chain to be consequtive to the last atom of the
-                              first chain (default: True)
+                              first chain (default: False)
         @type  renumberAtoms: bool
         @param renumberResidues: shift PDB residue numbering so that the first
                                  residue of the adjacent chain follows the
@@ -2481,7 +2494,7 @@ class PDBModel:
         return len( self.resIndex() )
 
 
-    def lenChains( self, breaks=0, maxDist=None, singleRes=0 ):
+    def lenChains( self, breaks=0, maxDist=None, singleRes=0, solvent=0 ):
         """
         Number of chains in model.
 
@@ -2492,13 +2505,15 @@ class PDBModel:
         @type  maxDist: float
         @param singleRes: allow chains consisting of single residues (def 0)
         @type  singleRes: 1||0
+        @param solvent: also check solvent residues for "chain breaks" (def 0)
+        @type  solvent: 1||0
 
         @return: total number of chains
         @rtype: int
         """
         try:
             return len( self.chainIndex( breaks=breaks, maxDist=maxDist,
-                                         singleRes=singleRes) )
+                                         singleRes=singleRes, solvent=solvent))
         except IndexError:  ## empty residue map
             return 0
 
@@ -2745,7 +2760,7 @@ class PDBModel:
 
 
     def chainIndex( self, breaks=0, maxDist=None, force=0, cache=0,
-                    singleRes=0 ):
+                    singleRes=0, solvent=0 ):
         """
         Get indices of first atom of each chain.
 
@@ -2764,12 +2779,16 @@ class PDBModel:
                           Otherwise group consecutive residues with identical
                           name into one chain.
         @type  singleRes: 1||0
+        @param solvent: also check solvent residues for "chain breaks" 
+                        (default: false)
+        @type  solvent: 1||0
 
         @return: array (1 x N_chains) of int
         @rtype: list of int
         """
         ## fast track
-        if not (breaks or force or maxDist) and self._chainIndex is not None:
+        if not (breaks or force or maxDist or solvent) \
+           and self._chainIndex is not None:
             return self._chainIndex
 
         r = self._chainIndex
@@ -2778,17 +2797,19 @@ class PDBModel:
             r = self.__inferChainIndex()
 
         if breaks:
-            break_pos = self.chainBreaks( breaks_only=1, maxDist=maxDist )
+            break_pos = self.chainBreaks( breaks_only=1, maxDist=maxDist,
+                                          solvent=solvent, force=force )
             break_pos = break_pos + 1  ## chainBreaks reports last atom of each chain
             r = mathUtils.union( break_pos, r )
             r.sort()
 
         ## filter out chains consisting only of a single residue
         if not singleRes:
-            r = self.__filterSingleResChains( r, ignore_resnumbers=breaks )
-
+##            r = self.__filterSingleResChains( r, ignore_resnumbers=breaks )
+            r = self.__filterSingleResChains( r, ignore_resnumbers=False)
+            
         ## cache the result if it has been computed with default parameters
-        if not(breaks or force or maxDist or singleRes) or cache:
+        if not(breaks or force or maxDist or singleRes or solvent) or cache:
             self._chainIndex = r
 
         return N.array( r, N.Int )
@@ -2812,7 +2833,7 @@ class PDBModel:
                                self.lenAtoms() )
 
 
-    def chainBreaks( self, breaks_only=1, maxDist=None, force=0 ):
+    def chainBreaks( self, breaks_only=1, maxDist=None, force=0, solvent=0 ):
         """
         Identify discontinuities in the molecule's backbone.
 
@@ -2821,50 +2842,57 @@ class PDBModel:
         @param maxDist: maximal distance between consequtive residues
                         [ None ] .. defaults to twice the average distance
         @type  maxDist: float
+        @param solvent: also check solvent residues (def 0)
+        @type  solvent: 1||0
+        @param force: force re-calculation, do not use cached positions (def 0)
+        @type  force: 1||0
 
         @return: atom indices of last atom **before** a probable chain break
         @rtype: list of int
         """
         if self.__chainBreaks is not None and not force and \
-           maxDist is None and breaks_only:
+           maxDist is None and breaks_only and not solvent:
             r = self.__chainBreaks
 
         else:
 
-            i_bb = N.nonzero( self.maskBB() )
-            bb   = self.take( i_bb )
-            bb_ri= bb.resIndex()
-            xyz = [ bb.xyz[ bb_ri[i] : bb_ri[i+1] ] for i in range(len(bb_ri)-1) ]
-            xyz +=[ bb.xyz[ bb_ri[-1]: len(bb) ] ]
+            i_bb = N.nonzero( self.maskBB( solvent=solvent ) )
+            if len(i_bb) < 2:
+                r = []
+ 
+            else:
+                bb   = self.take( i_bb )
+                bb_ri= bb.resIndex()
+                xyz = [ bb.xyz[ bb_ri[i] : bb_ri[i+1] ] for i in range(len(bb_ri)-1) ]
+                xyz +=[ bb.xyz[ bb_ri[-1]: len(bb) ] ]
+    
+                ## get distance between last and first backbone atom of each residue
+                dist = lambda a,b: N.sqrt( N.sum( N.power( a - b ,2 ) ) )
+    
+                d = [ dist( xyz[i][-1], xyz[i+1][0] ) for i in range(len(bb_ri)-1) ]
+    
+                ## get distances above mean
+                cutoff = maxDist or N.median(d)*2
+                r = N.nonzero( N.greater( d, cutoff ) )
 
-            ## get distance between last and first backbone atom of each residue
-            dist = lambda a,b: N.sqrt( N.sum( N.power( a - b ,2 ) ) )
-
-            d = [ dist( xyz[i][-1], xyz[i+1][0] ) for i in range(len(bb_ri)-1) ]
-
-            ## get distances above mean
-            cutoff = maxDist or MLab.mean(d)*2
-            breaks = N.nonzero( N.greater( d, cutoff ) )
-
-            if len(breaks) == 0:
-                return N.array( [] )
-
-            ri = self.resIndex()
-            ri_to_e = {}
-            for i in range( len(ri)-1 ):
-                ri_to_e[ ri[i] ] = ri[ i+1 ]-1
-
-            ## map back to the original atom indices
-            r = [ ri_to_e[ i_bb[ bb_ri[i] ] ] for i in breaks ]
+            if len(r) > 0:
+    
+                ri = self.resIndex()
+                ri_to_e = {}
+                for i in range( len(ri)-1 ):
+                    ri_to_e[ ri[i] ] = ri[ i+1 ]-1
+    
+                ## map back to the original atom indices
+                r = [ ri_to_e[ i_bb[ bb_ri[i] ] ] for i in r ]
 
             if breaks_only:
-                ri = self.chainIndex( breaks=0 )
+                ri = self.chainIndex( breaks=0, solvent=solvent )
                 r = [ x for x in r if not x+1 in ri ]
 
                 if maxDist is None:
                     self.__chainBreaks = r
 
-        return N.array( r )
+        return N.array( r, int )
 
 
     def removeRes( self, what ):
@@ -3510,10 +3538,16 @@ class PDBModel:
         @rtype: float
         """
         m = self.takeChains([chain])
+        
+        if len(m) == 0:
+            return 0
 
         m_cast = m.take( m.compareAtoms( ref )[0] )
 
-        f = 1. * len( m_cast ) / m_cast.lenChains( breaks=1, maxDist=5.)
+        f = 1. * len( m_cast )
+        if f > 0:
+            f = f / m_cast.lenChains( breaks=1, maxDist=5.)
+
         f = f / len( m )
 
         return f
@@ -3673,7 +3707,8 @@ class Test(BT.BiskitTest):
         self.m4 = B.PDBModel( T.testRoot()+'/com/1BGS_original.pdb')
         self.assertEqual( self.m4.lenChains(), 9 )
         self.assertEqual( self.m4.lenChains( breaks=1 ), 9 )
-        self.assertEqual( self.m4.lenChains( breaks=1, singleRes=1 ), 138 )
+        self.assertEqual( self.m4.lenChains( breaks=1, singleRes=1, solvent=1), 
+                          200 )
         self.m4.writePdb( self.fout_pdb, ter=2 )
 
     def test_chainSingleResidues( self ):
