@@ -541,14 +541,13 @@ class PDBCleaner:
         capC = self.convertChainIdsCter( m, capC )
         
         if breaks:
-            ## check!!!! this uses non-broken chain index
             end_broken = m.atom2chainIndices( m.chainBreaks(), breaks=1 )
             
             capC = M.union( capC, end_broken )
             capN = M.union( capN, N.array( end_broken ) + 1 )
             
-##        capN = self.filterProteinChains(m, capN, m.chainIndex(breaks=breaks))
-##        capC = self.filterProteinChains(m, capC, m.chainEndIndex(breaks=breaks))
+        capN = self.filterProteinChains(m, capN, m.chainIndex(breaks=breaks))
+        capC = self.filterProteinChains(m, capC, m.chainEndIndex(breaks=breaks))
 
         for i in capN:
             m = self.capACE( m, i )
@@ -645,13 +644,16 @@ class Test(BT.BiskitTest):
         
         self.c = PDBCleaner( self.m3, log=self.log, verbose=self.local )
         self.m3 = self.c.capTerminals( breaks=True, capC=[0], capN=[0])
+        self.assertEqual( self.m3.takeChains([0]).sequence()[:18], 
+                          'XVINTFDGVADXXKLPDN' )
         
         if self.local:
             self.log.add( '\nTesting automatic chain capping...\n' )
         
         self.c = PDBCleaner( self.m4, log=self.log, verbose=self.local )
-        
         self.m4 = self.c.capTerminals( auto=True )
+        self.assertEqual( self.m4.takeChains([0]).sequence()[:18], 
+                          'XVINTFDGVADXXKLPDN' )
         
 if __name__ == '__main__':
 
