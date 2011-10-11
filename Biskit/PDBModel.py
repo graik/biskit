@@ -123,6 +123,10 @@ class PDBProfiles( ProfileCollection ):
 class PDBError(BiskitError):
     pass
 
+class PDBIndexError( PDBError):
+    """Errors warning of issues with residue or chain index."""
+    pass
+
 class PDBModel:
     """
     Store and manipulate coordinates and atom infos stemming from a PDB file.
@@ -2152,10 +2156,10 @@ class PDBModel:
 
         ## remove traces of residue or chain breaks
         if not newChain:
-            r.mergeChains( m.lenChains() - 1 )
+            r.mergeChains( self.lenChains() - 1 )
 
         if not newRes:
-            r.mergeResidues( m.lenResidues() -1 )
+            r.mergeResidues( self.lenResidues() -1 )
 
         r.info = copy.deepcopy( self.info )
 
@@ -2210,9 +2214,33 @@ class PDBModel:
         """
         Extract a PDBModel with a subset of atoms::
           take( atomIndices ) -> PDBModel / sub-class.
+          
+        All other PDBModel methods that extract portions of the model (e.g.
+        compress, takeChains, takeResidues, keep, clone, remove) are ultimately
+        using take() at their core.
+          
+        Note:
+        take employs fast numpy vector mapping methods to re-calculate
+        the residue and chain index of the result model. The methods generally
+        work but there is one scenario were this mechanism can fail: If take
+        is used to create repetitions of residues or chains directly next to
+        each other, these residues or chains can get accidentally merged. For
+        this reason, calling methods can optionally pre-calculate and provide
+        a correct version of the new residue or chain index (which will then
+        be used as is).
 
         @param i: atomIndices, positions to take in the order to take
         @type  i: list/array of int
+        
+        @param rindex: optional residue index for result model after extraction
+        @type  rindex: N.array of int
+
+        @param cindex: optional chain index for result model after extraction
+        @type  cindex: N.array of int
+        
+        @param *initArgs: optional arguments for constructor of result model
+        @param **initKw : optional keyword arguments for constructure of result
+                          model
 
         @return: PDBModel / sub-class
         @rtype: PDBModel
@@ -2240,6 +2268,7 @@ class PDBModel:
         if cindex is not None:
             r._chainIndex = cindex
         else:
+            ## this can fail if chains are repeated next to each other in i
             new_chainmap   = N.take( self.chainMap(), i )
             r._chainIndex = self.map2index( new_chainmap )
 
@@ -2352,9 +2381,25 @@ class PDBModel:
         return self.take( i, rindex=index )
 
 
-    def takeChains( self, chains, breaks=0 ):
+    def takeChains( self, chains, breaks=0, force=0 ):
         """
         Get copy of this model with only the given chains.
+        
+        Note, there is one very special scenario where chain boundaries can get
+        lost: If breaks=1 (chain positions are based on normal chain boundaries
+        as well as structure-based chain break detection) AND one or more
+        chains are extracted several times next to each other, for example
+        chains=[0, 1, 1, 2], then the repeated chain will be merged. So in
+        the given example, the new model would have chainLength()==3. This case
+        is tested for and a PDBIndexError is raised. Override with force=1 and
+        proceed at your own risk. Which, in this case, simply means you should
+        re-calculate the chain index after takeChains(). Example::
+        
+           >>> repeat = model.takeChains( [0,0,0], breaks=1, force=1 )
+           >>> repeat.chainIndex( force=1, cache=1 )
+           
+        This works because the new model will have back-jumps in residue 
+        numbering.
 
         @param chains: list of chains, e.g. [0,2] for first and third
         @type  chains: list of int
@@ -2362,6 +2407,8 @@ class PDBModel:
         @type  breaks: 0|1
         @param maxDist: (if breaks=1) chain break threshold in Angstrom
         @type  maxDist: float
+        @param force: override check for chain repeats (only for breaks==1)
+        @type  force: bool
 
         @return: PDBModel consisting of the given chains in the given order
         @rtype : PDBModel / subclass
@@ -2369,7 +2416,21 @@ class PDBModel:
         ## i, index = self.chain2atomIndices( chains, breaks=breaks )
         i, index = self.extendIndex( chains, self.chainIndex( breaks=breaks ),
                                      self.lenAtoms() )
-        return self.take( i, cindex=index )
+        if not breaks or len(chains)==0:
+            return self.take( i, cindex=index )
+
+        ## test for repeats:
+        if not force:
+            chains = N.array( chains, int )
+            delta = N.concatenate( (chains[1:], [chains[-1]+1]) ) - chains
+            if not N.all( delta != 0 ):
+                raise PDBIndexError,\
+                   'Chain boundaries cannot be preserved for repeats.' +\
+                   "Use 'force=1' to override, then re-calculate chainIndex()."
+            
+        ## Give up on repeat treatement: 
+        ## more important: the new model's chain index should NOT include breaks
+        return self.take( i )
 
 
     def addChainFromSegid(self, verbose=1):
@@ -2690,7 +2751,6 @@ class PDBModel:
         r = self.resIndex()
         return N.concatenate( (r[1:], [self.lenAtoms()]) ) - 1 
 
-
     def __inferChainIndex( self ):
 
         result = []
@@ -2813,6 +2873,15 @@ class PDBModel:
             self._chainIndex = r
 
         return N.array( r, N.Int )
+
+    def chainEndIndex( self, breaks=0, solvent=0 ):
+        """
+        Get the position of the each residue's last atom.
+        @return: index of the last atom of each residue
+        @rtype: list of int
+        """
+        r = self.chainIndex( breaks=breaks, solvent=solvent )
+        return N.concatenate( (r[1:], [self.lenAtoms()]) ) - 1 
 
 
     def chainMap( self, breaks=0, maxDist=None ):
