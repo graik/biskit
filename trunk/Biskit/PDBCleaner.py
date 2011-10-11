@@ -25,12 +25,15 @@
 ## $Revision$
 
 """
-Clean PDB-files so that they can be used for MD.
+Clean PDB-files so that they can be used for MD. This module is a 
+(still partial) re-implementation of the vintage pdb2xplor script.
 """
 
 import Biskit.molUtils as MU
+import Biskit.mathUtils as M
 import Biskit.tools as t
 from Biskit.PDBModel import PDBModel
+from Biskit.LogFile import StdLog
 
 import numpy.oldnumeric as N
 
@@ -48,16 +51,40 @@ class PDBCleaner:
       * remove non-standard atoms from standard AA residues
       * delete atoms that follow missing atoms (in a chain)
       * remove multiple occupancy atoms (except the one with highest occupancy)
+      * add ACE and NME capping residues to C- and N-terminals or chain breaks
+        (see capTerminals(), this is NOT done automatically in process())
 
-    Usage::
+    Usage:
+    =======
 
       >>> c = PDBCleaner( model )
       >>> c.process()
+      >>> c.capTerminals( auto=True )
 
     This will modify the model in-place and report changes to STDOUT.
     Alternatively, you can specify a log file instance for the output.
     PDBCleaner.process accepts several options to modify the processing.
-
+    
+    Capping
+    =======
+    
+    Capping will add N-methyl groups to free C-terminal carboxy ends
+    or Acetyl groups to free N-terminal Amines and will thus 'simulate' the
+    continuation of the protein chain -- a common practice in order to 
+    prevent fake terminal charges. The automatic discovery of missing residues
+    is guess work at best. The more conservative approach is to use,
+    for example:
+    
+      >>> c.capTerminals( breaks=1, capC=[0], capN=[2] )
+      
+    In this case, only the chain break detection is used for automatic capping
+    -- the last residue before a chain break is capped with NME and the first
+    residue after the chain break is capped with ACE. Chain break detection
+    relies on PDBModel.chainBreaks() (via PDBModel.chainIndex( breaks=1 )).
+    The normal terminals to be capped are now specified explicitely. The first
+    chain (not counting chain breaks) will receive a NME C-terminal cap and the
+    third chain of the PDB will receive a N-terminal ACE cap. 
+    
     Note: Dictionaries with standard residues and atom content are defined
           in Biskit.molUtils.
     """
@@ -67,15 +94,22 @@ class PDBCleaner:
     TOLERATE_MISSING = ['O', 'CG2', 'CD1', 'CD2', 'OG1', 'OE1', 'NH1',
                         'OD1', 'OE1' ]
 
+    ## PDB with ACE capping residue
+    F_ace_cap = t.dataRoot() + '/amber/leap/ace_cap.pdb'
+    ## PDB with NME capping residue
+    F_nme_cap = t.dataRoot() + '/amber/leap/nme_cap.pdb'
+
     def __init__( self, fpdb, log=None, verbose=True ):
         """
-        @param fpdb: pdb file OR PDBModel
-        @type  fpdb: str
-        @param log: LogFile object
-        @type  log: object
+        @param fpdb: pdb file OR PDBModel instance
+        @type  fpdb: str OR Biskit.PDBModel
+        @param log: Biskit.LogFile object (default: STDOUT)
+        @type  log: Biskit.LogFile
+        @param verbose: log warnings and infos (default: True)
+        @type  verbose: bool
         """
         self.model = PDBModel( fpdb )
-        self.log = log
+        self.log = log or StdLog()
         self.verbose = verbose
 
 
@@ -270,7 +304,266 @@ class PDBCleaner:
 
         return N.sum( mask )
 
+    def capACE( self, model, chain, breaks=True ):
+        """
+        Cap N-terminal of given chain.
 
+        Note: In order to allow the capping of chain breaks,
+        the chain index is, by default, based on model.chainIndex(breaks=True), 
+        that means with chain break detection activated! This is not the 
+        default behaviour of PDBModel.chainIndex or takeChains or chainLength. 
+        Please use the wrapping method capTerminals() for more convenient 
+        handling of the index.
+
+        @param model: model
+        @type  model: PDBMode
+        @param chain: index of chain to be capped
+        @type  chain: int
+        @param breaks: consider chain breaks when identifying chain boundaries
+        @type  breaks: bool
+        
+        @return: model with added NME capping
+        @rtype : PDBModel
+        """
+        if self.verbose:
+            self.logWrite('Capping N-terminal of chain %i with ACE' % chain )
+
+        c_start = model.chainIndex( breaks=breaks )
+        c_end = model.chainEndIndex( breaks=breaks)
+        Nterm_is_break = False
+        Cterm_is_break = False
+        
+        if breaks:
+            Nterm_is_break = c_start[chain] not in model.chainIndex()
+            Cterm_is_break = c_end[chain] not in model.chainEndIndex()
+            
+        m_ace = PDBModel( self.F_ace_cap )
+
+        chains_before = model.takeChains( range(chain), breaks=breaks )
+        m_chain       = model.takeChains( [chain], breaks=breaks )
+        chains_after  = model.takeChains( range(chain+1, len(c_start)),
+                                          breaks=breaks )
+
+        m_term  = m_chain.resModels()[0]
+
+        ## we need 3 atoms for superposition, CB might mess things up but
+        ## could help if there is no HN
+        ##        if 'HN' in m_term.atomNames():
+        m_ace.remove( ['CB'] )  ## use backbone 'C' rather than CB for fitting 
+
+        ## rename overhanging residue in cap PDB
+        for a in m_ace:
+            if a['residue_name'] != 'ACE':
+                a['residue_name'] = m_term.atoms['residue_name'][0]
+            else:
+                a['residue_number'] = m_term.atoms['residue_number'][0]-1
+                a['chain_id']       = m_term.atoms['chain_id'][0]
+                a['segment_id']     = m_term.atoms['segment_id'][0]
+
+        ## fit cap onto first residue of chain
+        m_ace = m_ace.magicFit( m_term )
+
+        cap = m_ace.resModels()[0]
+        serial = m_term['serial_number'][0] - len(cap)
+        cap['serial_number'] = range( serial, serial + len(cap) )
+
+        ## concat cap on chain
+        m_chain = cap.concat( m_chain, newChain=False )
+
+        ## re-assemble whole model
+        r = chains_before.concat( m_chain, newChain=not Nterm_is_break)
+        r = r.concat( chains_after, newChain=not Cterm_is_break)
+
+        return r
+
+
+    def capNME( self, model, chain, breaks=True ):
+        """
+        Cap C-terminal of given chain. 
+
+        Note: In order to allow the capping of chain breaks,
+        the chain index is, by default, based on model.chainIndex(breaks=True), 
+        that means with chain break detection activated! This is not the 
+        default behaviour of PDBModel.chainIndex or takeChains or chainLength.
+        Please use the wrapping method capTerminals() for more convenient 
+        handling of the index.
+
+        @param model: model
+        @type  model: PDBMode
+        @param chain: index of chain to be capped
+        @type  chain: int
+        @param breaks: consider chain breaks when identifying chain boundaries
+        @type  breaks: bool
+        
+        @return: model with added NME capping residue
+        @rtype : PDBModel
+        """
+        if self.verbose:
+            self.logWrite('Capping C-terminal of chain %i with NME.' % chain )
+        m_nme   = PDBModel( self.F_nme_cap )
+
+        c_start = model.chainIndex( breaks=breaks )
+        c_end = model.chainEndIndex( breaks=breaks)
+        Nterm_is_break = False
+        Cterm_is_break = False
+        if breaks:
+            Nterm_is_break = c_start[chain] not in model.chainIndex()
+            Cterm_is_break = c_end[chain] not in model.chainEndIndex()
+         
+        chains_before = model.takeChains( range(chain), breaks=breaks )
+        m_chain       = model.takeChains( [chain], breaks=breaks )
+        chains_after  = model.takeChains( range(chain+1, len(c_start)),
+                                          breaks=breaks )
+
+        m_term  = m_chain.resModels()[-1]
+
+        ## rename overhanging residue in cap PDB, renumber cap residue
+        for a in m_nme:
+            if a['residue_name'] != 'NME':
+                a['residue_name'] = m_term.atoms['residue_name'][0]
+            else:
+                a['residue_number'] = m_term.atoms['residue_number'][0]+1
+                a['chain_id']       = m_term.atoms['chain_id'][0]
+                a['segment_id']     = m_term.atoms['segment_id'][0]
+
+        ## chain should not have any terminal O after capping
+        m_chain.remove( ['OXT'] )            
+
+        ## fit cap onto last residue of chain
+        m_nme = m_nme.magicFit( m_term )
+        
+        cap = m_nme.resModels()[-1]
+        serial = m_term['serial_number'][-1]+1
+        cap['serial_number'] = range( serial, serial + len(cap) )
+
+        ## concat cap on chain
+        m_chain = m_chain.concat( cap, newChain=False )
+
+        ## should be obsolete now
+        if getattr( m_chain, '_PDBModel__terAtoms', []) != []:
+            m_chain._PDBModel__terAtoms = [ len( m_chain ) - 1 ]
+        assert m_chain.lenChains() == 1
+
+        ## re-assemble whole model
+        r = chains_before.concat( m_chain, newChain=not Nterm_is_break)
+        r = r.concat( chains_after, newChain=not Cterm_is_break)
+
+        return r
+
+
+    def convertChainIdsNter( self, model, chains ):
+        """
+        Convert normal chain ids to chain ids considering chain breaks.
+        """
+        if len(chains) == 0: 
+            return chains
+        i = N.take( model.chainIndex(), chains ) 
+        ## convert back to chain indices but this time including chain breaks
+        return model.atom2chainIndices( i, breaks=1 )
+        
+    def convertChainIdsCter( self, model, chains ):
+        """
+        Convert normal chain ids to chain ids considering chain breaks.
+        """
+        if len(chains) == 0: 
+            return chains
+        ## fetch last atom of given chains
+        index = N.concatenate( (model.chainIndex(), [len(model)]) )
+        i = N.take( index, N.array( chains ) + 1 ) - 1
+        ## convert back to chain indices but this time including chain breaks
+        return model.atom2chainIndices( i, breaks=1 )
+    
+
+    def unresolvedTerminals( self, model ):
+        """
+        Autodetect (aka "guess") which N- and C-terminals are most likely not
+        the real end of each chain. This guess work is based on residue 
+        numbering:
+        
+        * unresolved N-terminal: a protein residue with a residue number > 1
+
+        * unresolved C-terminal: a protein residue that does not contain either
+                               OXT or OT or OT1 or OT2 atoms
+                               
+        @param model: PDBModel
+        
+        @return: chains with unresolved N-term, with unresolved C-term
+        @rtype : ([int], [int])
+        """
+        c_first = model.chainIndex()
+        c_last  = model.chainEndIndex()
+        
+        capN = [ i for (i,pos) in enumerate(c_first)\
+                 if model['residue_number'][pos] > 1 ]
+        
+        capN = self.filterProteinChains( model, capN, c_first )
+        
+        capC = []
+        for (i,pos) in enumerate(c_last):
+            atoms = model.takeResidues(model.atom2resIndices([pos])).atomNames()
+            
+            if not( 'OXT' in atoms or 'OT' in atoms or 'OT1' in atoms or \
+                    'OT2' in atoms ):
+                capC += [ i ]
+
+        capC = self.filterProteinChains( model, capC, c_last )
+                  
+        return capN, capC
+    
+    #@todo filter for protein positions in breaks=1
+
+    def filterProteinChains( self, model, chains, chainindex ):
+        maskProtein = model.maskProtein()
+        chains = [ i for i in chains if maskProtein[ chainindex[i] ] ]
+        return chains
+
+    def capTerminals( self, auto=False, breaks=False, capN=[], capC=[] ):
+        """
+        Add NME and ACE capping residues to chain breaks or normal N- and 
+        C-terminals.
+        
+        @param breaks: put ACE and NME capping residue on chain breaks 
+                          (default: False)
+        @type  breaks: bool
+        @param capN: indices of chains that should get ACE cap (default: [])
+        @type  capN: [int]
+        @param capC: indices of chains that should get NME cap (default: [])
+        @type  capC: [int]
+        """
+        m = self.model
+        c_len = m.lenChains()
+            
+        if auto:
+            breaks=True
+            capN, capC = self.unresolvedTerminals( m )
+        
+        capN = self.convertChainIdsNter( m, capN )
+        capC = self.convertChainIdsCter( m, capC )
+        
+        if breaks:
+            ## check!!!! this uses non-broken chain index
+            end_broken = m.atom2chainIndices( m.chainBreaks(), breaks=1 )
+            
+            capC = M.union( capC, end_broken )
+            capN = M.union( capN, N.array( end_broken ) + 1 )
+            
+##        capN = self.filterProteinChains(m, capN, m.chainIndex(breaks=breaks))
+##        capC = self.filterProteinChains(m, capC, m.chainEndIndex(breaks=breaks))
+
+        for i in capN:
+            m = self.capACE( m, i )
+            assert m.lenChains() == c_len, '%i != %i' % \
+                   (m.lenChains(), c_len)
+
+        for i in capC:
+            m = self.capNME( m, i )
+            assert m.lenChains() == c_len
+        
+        self.model = m
+        return self.model
+
+    
+    
     def process( self, keep_hetatoms=0, amber=0, keep_xaa=[] ):
         """
         Remove Hetatoms, waters. Replace non-standard names.
@@ -325,28 +618,40 @@ class Test(BT.BiskitTest):
         from Biskit.LogFile import LogFile
         import tempfile
 
-        self.f_out = tempfile.mktemp( '_test_PDBCleaner' )
-        
-        self.l = LogFile( self.f_out, mode='w')
-
 
     def test_PDBCleaner( self ):
         """PDBCleaner test"""
         
         ## Loading PDB...
         self.c = PDBCleaner( t.testRoot() + '/rec/1A2P_rec_original.pdb',
-                             log=self.l )
+                             log=self.log )
         
         self.m = self.c.process()
 
-        if self.local:
-            print 'PDBCleaner log file written to: %s'%self.f_out
-
         self.assertAlmostEqual( N.sum( self.m.masses()), 34029.0115499993, 7 )
+        
+    def test_Capping( self ):
+        """PDBCleaner.capTerminals test"""
+        ## Loading PDB...
+        self.model = PDBModel(t.testRoot() + '/rec/1A2P_rec_original.pdb')
 
-    def cleanUp(self):
-        t.tryRemove( self.f_out )    
-    
+        self.c = PDBCleaner( self.model, log=self.log, verbose=self.local )       
+        self.m2 = self.c.capTerminals( breaks=True )
+        self.assert_( self.m2.atomNames() == self.model.atomNames() )
+        
+        self.m3 = self.model.clone()
+        self.m3.removeRes( [10,11,12,13,14,15] )
+        self.m4 = self.m3.clone()
+        
+        self.c = PDBCleaner( self.m3, log=self.log, verbose=self.local )
+        self.m3 = self.c.capTerminals( breaks=True, capC=[0], capN=[0])
+        
+        if self.local:
+            self.log.add( '\nTesting automatic chain capping...\n' )
+        
+        self.c = PDBCleaner( self.m4, log=self.log, verbose=self.local )
+        
+        self.m4 = self.c.capTerminals( auto=True )
         
 if __name__ == '__main__':
 
