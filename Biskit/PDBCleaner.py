@@ -86,7 +86,10 @@ class PDBCleaner:
     third chain of the PDB will receive a N-terminal ACE cap. 
     
     Note: Dictionaries with standard residues and atom content are defined
-          in Biskit.molUtils.
+          in Biskit.molUtils. This is a duplicate effort with the new strategy
+          to parse Amber prep files for very similar information
+          (AmberResidueType, AmberResidueLibrary) and should change once we 
+          implement a real framework for better residue handling. 
     """
     
     #: these atoms always occur at the tip of of a chain or within a ring
@@ -520,7 +523,7 @@ class PDBCleaner:
     def capTerminals( self, auto=False, breaks=False, capN=[], capC=[] ):
         """
         Add NME and ACE capping residues to chain breaks or normal N- and 
-        C-terminals.
+        C-terminals. Note: these capping residues contain hydrogen atoms.
         
         @param breaks: put ACE and NME capping residue on chain breaks 
                           (default: False)
