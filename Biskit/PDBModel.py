@@ -3682,6 +3682,34 @@ class PDBModel:
             r = 0
         return r
 
+    def atomkey( self, compress=True ):
+        """
+        Create a string key encoding the atom content of this model independent
+        of the order in which atoms appear within residues. Atom names are
+        simply sorted alphabetically within residues and then concatenated.
+        
+        @param compress: compress key with zlib (default: true)
+        @type  compress: bool
+        @return: key formed from sorted atom content of model
+        @rtype: str
+        """
+        import zlib
+        rindex = N.concatenate( (self.resIndex(), [len(self)] ) )
+        r = ''
+        anames = self.atoms['name'] ## cache for faster access
+        
+        for i in range(len(rindex)-1):
+            a = anames[rindex[i]:rindex[i+1]]
+            a.sort()
+            a = ''.join(a)
+            r = r + a
+            
+        if compress:
+            return zlib.compress(r)
+            
+        return r
+  
+
 
 #############
 ##  TESTING        
