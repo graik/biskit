@@ -36,9 +36,38 @@ import Biskit.molUtils as M
 class AmberResidueType( B.PDBModel ):
     """
     Standard description of a certain class of residues.
+    
+    In addition to the normal PDBModel things, this class defines three
+    additional fields:
+        * name   ... the full long residue name (str), e.g. 'Alanine'
+        * code   ... the three-letter name used in PDB files (str), e.g. 'ALA'
+        * letter ... the single-letter residue code (str), e.g. 'A'
+        
+    The order and names of atoms are supposed to serve as a reference to check
+    and normalize actual residues parsed from PDB files.
+    
+    Currently, AmberResidueTypes can only be created from Amber prep library
+    files. @seeAlso \L{Biskit.AmberPrepParser}
+    
+    An alternative method would be to create AmberResidueTypes from some 
+    standard PDB file::
+    
+        >>> m = PDBModel('standard_aa.pdb')
+        >>> standard_res = [ AmberResidueType( res ) for res in m.resModels() ]
     """
     
     def __init__(self, name=None, code=None, letter=None, source=None  ):
+        """
+        @param name: full residue name (converted to lower letters)
+        @type  name: str
+        @param code: three-letter residue code (converted to upper letters)
+        @type  code: str
+        @param letter: single-letter residue code (converted to upper letter)
+        @type  letter: str
+        @param source: pdb file, model or structure of residue from which to 
+                       extract all the other data
+        @type  source: PDBModel or str
+        """
         
         self.name = name      ## 'alanine'
         self.code = code      ## 'ALA'
@@ -78,6 +107,13 @@ class AmberPrepParser( object ):
     
         p = AmberOffParser( 'all_amino03.in' )
         residues = [ r for r in p.residueTypes() ]
+        
+    Returns AmberResidue instances that can be handled like a PDBModel
+    although the xyz array contains relative Z-coordinates not real cartesian
+    ones. Atom profiles of the AmberResidue instance include:
+        * charge ... atomic partial charge (float)
+        * name   ... atom name (str)
+        * amber_type ... Amber atom type (str)
     """
     
     F_DEFAULT = 'all_amino03.in'
