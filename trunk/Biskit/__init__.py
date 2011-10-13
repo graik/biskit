@@ -86,6 +86,9 @@ try:
     from CommandLine import CommandLine
     
     from amberResidues import AmberResidueType, AmberPrepParser
+    from amberResidueLibrary import AmberResidueLibrary,\
+                                    AmberResidueLibraryError
+    from delphi import Delphi, DelphiError
     
 ## experimental modules
     from residue import Residue
