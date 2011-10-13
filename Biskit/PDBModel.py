@@ -3696,6 +3696,9 @@ class PDBModel:
         import zlib
         rindex = N.concatenate( (self.resIndex(), [len(self)] ) )
         r = ''
+        if len(rindex) == 0:
+            return r
+        
         anames = self.atoms['name'] ## cache for faster access
         
         for i in range(len(rindex)-1):
