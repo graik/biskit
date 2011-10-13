@@ -28,7 +28,7 @@ Application:
 import tempfile
 import numpy as N
 
-from Biskit import Executor, PDBModel
+from Biskit import Executor, PDBModel, PDBCleaner
 import Biskit.tools as T
 
 class ReduceError( Exception ):
@@ -55,6 +55,9 @@ class Reduce( Executor ):
     H atoms (e.g. HD12). You can switch to the xplor convention (2HD1) with
     PDBModel.amber2xplor().
     
+    Capping of terminals
+    =====================
+    
     Usage
     =====
 
@@ -64,7 +67,9 @@ class Reduce( Executor ):
     @note: Command configuration: biskit/Biskit/data/defaults/exe_reduce.dat
     """
 
-    def __init__( self, model, tempdir=None, args='', **kw ):
+    def __init__( self, model, tempdir=None, args='', 
+                  autocap=False, capN=[], capC=[],
+                  **kw ):
         """
         @param model: structure to be aligned to reference
         @type  model: PDBModel
@@ -74,6 +79,16 @@ class Reduce( Executor ):
         @param args: additional command line arguments for reduce (default:'')
                      example: '-OLDpdb'
         @type  args: str
+        
+        @param autocap: add capping NME and ACE residues to any (auto-detected)
+                        false N- or C-terminal (default: False)
+        @type  autocap: bool
+        
+        @param capN: cap N-terminal of these chains (indices) with ACE ([])
+        @type  capN: [ int ]
+        
+        @param capC: cap C-terminal of these chains (indices) with NME ([])
+        @type  capN: [ int ]
 
         @param kw: additional key=value parameters for Executor:
         @type  kw: key=value pairs
@@ -90,10 +105,16 @@ class Reduce( Executor ):
         self.f_pdbin = tempfile.mktemp( '_in.pdb', 'reduce_', dir=tempdir )
         f_out= tempfile.mktemp( '_out.pdb', 'reduce_', dir=tempdir)
         self.f_db = T.dataRoot() + '/reduce/reduce_wwPDB_het_dict.txt' 
+        
+        self.autocap = autocap
+        self.capN = capN
+        self.capC = capC
+        
+        lenchains = model.lenChains()
 
         Executor.__init__( self, 'reduce', 
-                           args= '%s -BUILD -DB %s %s' %\
-                           (args, self.f_db, self.f_pdbin),
+                           args= '%s -BUILD -Nterm%i -DB %s %s' %\
+                           (args, lenchains, self.f_db, self.f_pdbin),
                            f_out=f_out, catch_err=True,
                            tempdir=tempdir,
                            **kw )
@@ -103,10 +124,17 @@ class Reduce( Executor ):
     def version(self):
         return 'Reduce $Revision: $'
 
+    def capTerminals( self ):
+        c = PDBCleaner( self.model )
+        c.capTerminals( auto=self.autocap, capN=self.capN, capC=self.capC )
+    
     def prepare( self ):
         """
         Overrides Executor method.
         """
+        if self.autocap or len(self.capN) or len(self.capC):
+            self.capTerminals()
+            
         self.model = self.model.compress( self.model.maskHeavy() )
         self.model.writePdb( self.f_pdbin )
 
@@ -187,26 +215,30 @@ class Test(BT.BiskitTest):
     TAGS = [ BT.EXE ]
 
     def test_reduce( self ):
-        """TMAlign test"""
-        if self.local: print 'Loading PDB...'
+        """Reduce test"""
+        if self.local: self.log.add('Loading PDB...')
 
         self.m1 = PDBModel( T.testRoot( 'lig/1A19_dry.model' ) )
+        self.m2 = T.load( T.testRoot( 'com/ref.complex' ) )
+        self.m2 = self.m2.model()
 
 
-        if self.local: print 'Starting Reduce'
+        if self.local: self.log.add('Starting Reduce')
         self.x = Reduce( self.m1, debug=self.DEBUG,
                          verbose=self.local )
-
         if self.local:
-            print 'Running'
-
+            self.log.add( 'Running')
         self.r = self.x.run()
 
         if self.local:
-            print "Result: "
-            print self.r.report()
+            self.log.add("Result: ")
+            self.log.add(self.r.report())
 
-
+        if self.local:
+            self.log.add('Reduce protein complex')
+        self.x = Reduce( self.m2, debug=self.DEBUG, verbose=self.local)
+        self.r2 = self.x.run()
+        
 
 if __name__ == '__main__':
 
