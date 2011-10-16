@@ -88,6 +88,7 @@ try:
     from amberResidues import AmberResidueType, AmberPrepParser
     from amberResidueLibrary import AmberResidueLibrary,\
                                     AmberResidueLibraryError
+    from atomCharger import AtomCharger
     from delphi import Delphi, DelphiError
     
 ## experimental modules
