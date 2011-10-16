@@ -2602,28 +2602,22 @@ class PDBModel:
         return [ atoms[ ri[res] : ri[res+1] ] for res in range( resLen ) ] 
 
 
-    def resModels( self ):
+    def resModels( self, i=None ):
         """
         Creates a PDBModel per residue in PDBModel.
+        @param i: range of residue positions (default: all residues)
+        @type  i: [ int ] or N.array( int )
 
         @return: list of PDBModels, one for each residue
         @rtype: list of PDBModels
         """
         ri = self.resIndex()
-        resLen = len( ri )
-        xyz = self.getXyz()
+        re = self.resEndIndex()
+        if i is None:
+            i = N.arange( len(ri) )
+##        xyz = self.getXyz()
 
-        result = []
-        for res in  range( resLen ):
-
-            a = ri[res]
-            if res == resLen - 1:
-                e = self.lenAtoms()
-            else:
-                e = ri[res + 1]
-
-            result += [ self.take( range(a,e) ) ]
-
+        result = [ self.take(N.arange(ri[x],re[x]+1)) for x in i ]
         return result
 
 
