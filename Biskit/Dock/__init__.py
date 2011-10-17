@@ -31,6 +31,7 @@ try:
     from Docker import Docker
     from FixedList import FixedList
     from HexParser import HexParser
+    from delphiBindingEnergy import DelphiBindingEnergy
 ##     from Intervor import Intervor
 ##     from PatchGenerator import PatchGenerator
 ##     from PatchGeneratorFromOrbit import PatchGeneratorFromOrbit
