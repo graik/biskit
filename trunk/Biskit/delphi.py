@@ -27,7 +27,7 @@ import tempfile, os
 import numpy as N
 import re
 
-from Biskit import Executor, PDBModel, Reduce
+from Biskit import Executor, PDBModel, Reduce, AtomCharger, AmberResidueLibrary
 from Biskit import AmberPrepParser
 import Biskit.tools as T
 import Biskit.mathUtils as U
@@ -35,33 +35,51 @@ import Biskit.mathUtils as U
 class DelphiError( Exception ):
     pass
 
-class DelphiCharges( object ):
+class PDB2DelphiCharges( object ):
     """
-    Helper class for Delphi to write out a (custom) Delphi charge file. Atomic
-    partial charges are taken from a dictionary of AmberResidue instances. 
-    This dictionary can be created with the AmberResidue class from standard
-    Amber topology files (bundled with Biskit in Biskit/data/amber/residues).
+    Generate a Delphi Charge file from the atomic partial charges assigned
+    to a Input structure. Charge records are built as generically as possible.
+    That means without residue number or chain ID, in order to minimize the
+    number of records. 
     
-    Residues in the input PDB are matched against Amber residues with exactly 
-    the same atom content (same set of atom names). That means, the name of 
-    the residue can differ (as is the case for e.g. CALA, CTHR or NALA, etc.).
+    Cases where the same name is used for residues with different atom
+    content, e.g. C-terminal ALA and normal ALA, require special treatment:
+    The most common residue is described by a generic record (ALA, no residue
+    number) and any additional versions with different atom content are
+    described with explicit residue number and chain ID.
     
-    DelphiCharges.customCharges() can be applied iteratively with different 
-    sets of residue descriptions until all residues in the input model have been 
-    matched against a topology entry.
     """
     
-    def __init__(self, restypes={} ):
+    def __init__( self, model ):
         """
-        @param fname: output file name
-        @type  fname: str
-        @param restypes: dict of Residue type definitions indexed by 3-letter 
-                         code
-        @type  restypes: { str: AmberResidueType }
         """
-        self.restypes = restypes
-    
-    def res2delphi(self, restype, resnumber=None, comment='' ):
+        self.model = model
+        self.resmap = None
+        
+    def prepare( self ):
+        if not 'partial_charge' in self.model.atoms:
+            ac = AtomCharger()
+            ac.charge( self.model )
+        
+        self.resmap = self.mapResidues()
+        
+    def mapResidues( self ):
+        """
+        """
+        resmap = {}
+        resmodels = self.model.resModels()
+        
+        for res in resmodels:
+            resname = res['residue_name'][0]
+            akey = res.atomkey(compress=False)
+            ## initialize dict of dict if not existing
+            resmap[ resname ] = resmap.get(resname,{})
+            resmap[ resname ][akey] = resmap[ resname ].get(akey, [])
+            resmap[ resname ][ akey ]+= [ res ]
+
+        return resmap
+
+    def res2delphi(self, restype, resnumber=None, chain=None, comment='' ):
         """
         Generate the Delphi charge record for a single residue (residue type).
         @type restype: AmberResidueType
@@ -71,14 +89,15 @@ class DelphiCharges( object ):
         @rtype: str
         """
         resnumber = resnumber or ''
+        chain = chain or ''
 
         r = ''
         for atom in restype.atoms.iterDicts():
  
             atom['resnumber'] = str(resnumber)
-            atom['rescode'] = restype.code
-            r += '%(name)-5s %(rescode)3s %(resnumber)-5s %(charge)6.3f'%\
-                 atom
+            atom['chain'] = chain
+            r += '%(name)-5s %(residue_name)3s %(resnumber)-3s %(chain)1s %(partial_charge)6.3f'\
+                  % atom
 
             if comment:
                 r += '  ! %s' % comment
@@ -86,120 +105,72 @@ class DelphiCharges( object ):
             r += '\n'
         return r
     
+    def manyres2delphi(self, akeydict ):
+        """
+        Generate one or several charge records for one or more residues with
+        the same name (e.g. normal ALA and C-terminal ALA).
+        
+        @param akeydict: dict of residues indexed by atom keys
+        @type  akeydict: { str : PDBModel }
+        @return: Delphi Charge record for one or more residues with the same
+                 name
+        """
+        if len( akeydict ) == 1:
+            return self.res2delphi( akeydict.values()[0][0] )
+        
+        ## determine which of several residues is used most
+        keyres = [ (len(reslist), reslist) for reslist in akeydict.values() ]
+        keyres.sort()
+        keyres.reverse()
+
+        ## one record w/o number and chain id for all residues with these atoms
+        r = ''
+        key, res = keyres[0]
+        r += self.res2delphi( res[0] )
+        
+        ## now add less used residues with number and chainID
+        for key, residues in keyres[1:]:
+            for res in residues:
+                r += self.res2delphi( res, resnumber=res['residue_number'][0],
+                                      chain=res['chain_id'][0] )
+            
+        return r
+    
+    
     def tofile( self, fname ):
+        if not self.resmap:
+            self.prepare()
+        
         fname = T.absfile( fname )
         f = open( fname, 'w' )
         f.write('! charge file generated by Biskit.delphi.DelphiCharges\n')
         f.write('atom__resnumbc_charge_\n')
+
         try:
-            for res in self.restypes:
-                f.write( self.res2delphi( res ) )
+            for resname, akeys in self.resmap.items():
+                f.write( self.manyres2delphi( akeys ) )
         finally:
             f.close()
-        
-    
-    def checkmodel( self, m ):
-        """
-        Verify that all residues and atoms in model m are covered by charges.
-        @type m: PDBModel
-        @return: residues not described or with missing atoms, atom names
-        @rtype: ([int], [str])
-        """
-        assert( isinstance(m,PDBModel) )
-        missing = {}
-
-        for i, resm in enumerate( m.resModels() ):
-            
-            resname = resm['residue_name'][0]
-            missing_atm = []
-            missing_res = not resname in self.restypes
-            
-            if not missing_res:
-                resatoms = resm.atomNames()
-                standard = self.restypes[resname].atomNames()
-                missing_atm = U.difference( resatoms, standard )
-            
-            if missing_res or missing_atm:
-                missing[i] = missing_atm
-        
-        return missing
-    
-    def atomkey( self, residue ):
-        """
-        Create a string key encoding the atom content of residue.
-        @param residue: model or AmberResidue
-        @type  residue: PDBModel or AmberResidue
-        @return: key formed from alphabetically sorted atom content of residue
-        @rtype: str
-        """
-        r = residue.atomNames()
-        r.sort()
-        r = ''.join( r )
-        return r
-        
-    
-    def resindex( self, *resdics):
-        """
-        Build an index of residue types indexed by ordered atom content.
-        @param *resdics: additional restype dictionaries indexed by res. name
-        @type  *resdics: {str_resname: AmberResidue}
-        @return: dict with alphabetically ordered atom content as key
-        @rtype : { str_atoms : AmberResidue }
-        """
-        r = {}
-        ## default residues treated last to give them priority
-        resdics = resdics + ( self.restypes, )  
-
-        for rdic in resdics:
-            for resname, restype in rdic.items():
-                r[ self.atomkey(restype) ] = restype
-
-        return r
-    
-    def customCharges( self, model, comment='' ):
-        """
-        @param model: structure for which Delphi charge file should be created
-        @type  model: PDBModel
-        @return: Delphi charge table, list of non-matching residues
-        @rtype: str
-        """
-        index = self.resindex()
-        missing = []
-        r = ''
-        
-        for res in model.resModels():
-            rtype = index.get( self.atomkey( res ), None)
-            resnumber = res['residue_number'][0]
-
-            if rtype is not None:
-                
-                rtype.code = res['residue_name'][0]
-                    
-                r += self.res2delphi( rtype, resnumber=resnumber, 
-                                      comment=comment )
-                comment = ''  ## erase comment
-            else:
-                missing += [ res ]
-    
-        return r, missing
-        
    
     
 class Delphi( Executor ):
     """
     Calculate electrostatic potentials and potential maps with Delphi.
-    [Work in Progress]
     
-    The current workflow of this wrapper is:
+    The current default workflow of this wrapper is:
     1. take input model/structure, remove hydrogens
-    2. add and optimize hydrogens with the reduce program
-    3. adapt residue and atom names to Amber conventions
-    4. match each residue (by atom content) to a residue from a list of 
-       Amber residue topology files
-    5. Create custom delphi charge file with Amber partial charges
-    6. Run Delphi in temporary folder 
-    7. parse result energies into result dictionary
-    
+    2. cap chain breaks and probable false N- and C-termini with NME and ACE
+       residues to cancel artificial charges (see L{Biskit.PDBCleaner})
+    3. add and optimize hydrogens with the reduce program
+       (see L{Biskit.Reduce} )
+    4. adapt residue and atom names to Amber conventions
+    5. match each residue (by atom content) to a residue from a list of 
+       Amber residue topology files and assign partial charge to each atom
+       (see L{Biskit.AtomCharger})
+    6. Create custom delphi charge file with Amber partial charges
+    7. Determine center and dimensions of the grid used in Delphi calculation
+    8. Run Delphi in temporary folder 
+    9. parse result energies into result dictionary
     
     Usage
     =====
@@ -297,9 +268,12 @@ class Delphi( Executor ):
     The default handling and matching of atomic partial charges can be 
     modified by:
     
-        * providing a ready-made Delphi charge file (parameter f_charges)
+        * providing a ready-made Delphi charge file (parameter: f_charges)
         * or providing an alternative list of Amber topology files from which 
-          residues are looked up by their atom content (parameter topologies)
+          residues are looked up by their atom content (parameter: topologies)
+        * or circumvent charge matching (parameter: addcharge=False) and 
+          provide a input PDBModel with an atom profile 'partial_charge' that 
+          is used instead
 
     @note: Command configuration: biskit/Biskit/data/defaults/exe_delphi.dat
     """
@@ -324,6 +298,9 @@ class Delphi( Executor ):
     
     def __init__( self, model, template=None, topologies=None,
                   f_charges=None,
+                  addcharge=True,
+                  protonate=True,
+                  autocap=True,
                   indi=4.0, exdi=80.0, salt=0.15, ionrad=2, prbrad=1.4, 
                   bndcon=4, scale=1.2, perfil=60, 
                   **kw ):
@@ -340,6 +317,17 @@ class Delphi( Executor ):
         @param f_charges: alternative delphi charge file 
                           [default: create custom]
         @type  f_charges: str
+        @param addcharge: build atomic partial charges with AtomCharger
+                          [default: True]
+        @type  addcharge: bool
+        
+        @param protonate: (re-)build hydrogen atoms with reduce program (True)
+                          see L{Biskit.Reduce}
+        @type  protonate: bool
+        @param autocap: add capping NME and ACE residues to any (auto-detected)
+                        false N- or C-terminal and chain breaks (default: True)
+                        see L{Biskit.Reduce} and L{Biskit.PDBCleaner}
+        @type  autocap: bool
 
         @param indi: interior dilectric (4.0)
         @param exdi: exterior dielectric (80.0)
@@ -373,6 +361,10 @@ class Delphi( Executor ):
         self.f_charges = f_charges or tempfile.mktemp( '.crg', 'delphi_',
                                                        dir=tempdir )
         
+        self.protonate = protonate
+        self.autocap = autocap
+        self.addcharge = addcharge
+        
         ## DELPHI run parameters
         self.indi=indi  # interior dilectric(4.0)
         self.exdi=exdi  # exterior dielectric(80.0)
@@ -388,18 +380,23 @@ class Delphi( Executor ):
         self.acenter = None
         self.strcenter = '(0.0,0.0,0.0)'
         
+        kw['tempdir'] = tempdir
+        kw['cwd']     = tempdir
+        
         Executor.__init__( self, 'delphi', 
                            template=template,
                            f_in=f_in,
                            args=f_in,
                            catch_err=True,
-                           tempdir=tempdir,
-                           cwd=tempdir,
                            **kw )
         
         self.model = model
         self.delphimodel = None
     
+
+    def version(self):
+        return 'Delphi $Revision: $'
+
 
     def delphiDimensions( self, model ):
         """
@@ -465,12 +462,11 @@ class Delphi( Executor ):
                 
             self.gsize = gsize
         
+        return self.getGrid()
+    
+    def getGrid( self ):
         return {'acenter':self.acenter, 'scale':self.scale, 'gsize':self.gsize}
         
-        
-    def version(self):
-        return 'Delphi $Revision: $'
-
 
     def __prepareFolder( self ):
         """
@@ -492,28 +488,39 @@ class Delphi( Executor ):
 
     def __prepareCharges(self, f_out ):
 
-        unhandled = self.delphimodel
-        
         try:
-            f = open( f_out, 'w' )
-            f.write('! custom charge file generated by Biskit.delphi.Delphi\n')
-            f.write('atom__resnumbc_charge_\n')
+            if self.addcharge:
+                if self.verbose:
+                    self.log.add(
+                        '\nAssigning atomic charges with AtomCharger...\n')
+    
+                if self.topologies is None:
+                    reslib = None
+                else:
+                    reslib = AmberResidueLibrary(self.topologies,log=self.log,
+                                                 verbose=self.verbose)
+                ac = AtomCharger( reslibrary=reslib, 
+                                  log=self.log, verbose=self.verbose )
+                ac.charge( self.delphimodel )
             
-            for topo in self.topologies:
-                if unhandled:
-                    dc = DelphiCharges( AmberPrepParser(topo).residueDict() )
+            if self.verbose:
+                self.log.add('\nCreating Delphi charge file %s\n'%f_out)
 
-                    r, missing = dc.customCharges( unhandled, 
-                                                   comment= 'from %s:'% topo)
-                    f.write( r )
-                    
-                    if missing: ## create new model with only unhandled residues
-                        unhandled = missing[0].concat( *missing[1:] )
-                    else:
-                        unhandled = None
+            dc = PDB2DelphiCharges( self.delphimodel )
+            dc.prepare()
+            dc.tofile( f_out )
             
-            f.close()
-          
+            if self.verbose:
+                qmissing = N.sum( self.delphimodel['partial_charge']==0 )
+                self.log.add('\nAtoms without charges: %i\n' % N.sum(qmissing))
+                if N.sum(qmissing) > 0:
+                    self.log.add('Warning: there are atoms without charge:\n')
+                    m = self.delphimodel.compress( qmissing )
+                    for a in m:
+                        self.log.add(
+                            '%(serial)4i %(name)-4s %(residue_name)3s %(residue_number)3i %(chain_id)s\n'\
+                            % a)
+
         except IOError, why: 
             raise IOError, 'Error creating custom delphi charge file '+f_out+\
                   '( '+str(why)+' )'
@@ -531,19 +538,24 @@ class Delphi( Executor ):
         if not self.gsize:
             self.setGrid()
         
-        reducer = Reduce( self.model, verbose=self.verbose,
-                          tempdir=self.tempdir, cwd=self.cwd,
-                          log=self.log, debug=self.debug )
-        if self.verbose: 
-            self.log.add('adding hydrogen atoms to input structure')
-
-        self.delphimodel = reducer.run()
+        if self.protonate:
+            reducer = Reduce( self.model, verbose=self.verbose,
+                              autocap=self.autocap,
+                              tempdir=self.tempdir, cwd=self.cwd,
+                              log=self.log, debug=self.debug )
+            if self.verbose: 
+                self.log.add('adding hydrogen atoms to input structure\n')
+    
+            self.delphimodel = reducer.run()
+        else:
+            self.delphimodel = self.model.clone()
+            
         self.delphimodel.xplor2amber()
-        self.delphimodel.writePdb( self.f_pdb )
         
         if not os.path.exists( self.f_charges ):
             self.__prepareCharges( self.f_charges )
         
+        self.delphimodel.writePdb( self.f_pdb )
 
     def cleanup( self ):
         """
@@ -566,7 +578,7 @@ class Delphi( Executor ):
         Overrides Executor method. Called when execution fails.
         """
         s = 'Delphi failed. Please check the program output in the '+\
-          'field `output` of this Delphi instance (e.g. `print x.output`)!'
+          'field `output` of this Delphi instance (e.g. `print x.output`)!\n'
         self.log.add( s )
 
         raise DelphiError, s
@@ -615,6 +627,7 @@ class Delphi( Executor ):
 ##  TESTING        
 #############
 import Biskit.test as BT
+import tempfile
 
 class Test(BT.BiskitTest):
     """Test class"""
@@ -622,14 +635,21 @@ class Test(BT.BiskitTest):
     TAGS = [ BT.EXE ]
     MODEL= None
 
+    def prepare( self ):
+        self.fcrg = tempfile.mktemp( 'delphicharges_', '.crg' )
+
+        
+    def cleanUp( self ):
+        if not self.debug:
+            T.tryRemove( self.fcrg )
+
+    
     def test_delphi( self ):
         """Delphi test"""
         if self.local: print 'Loading PDB...'
 
-        self.m1 = self.MODEL or \
-            PDBModel( T.testRoot( 'lig/1A19_dry.model' ) )
+        self.m1 = self.MODEL or PDBModel( T.testRoot( 'lig/1A19_dry.model' ) )
         Test.MODEL = self.m1
-
 
         if self.local: print 'Starting Delphi'
         self.x = Delphi( self.m1, debug=self.DEBUG,
@@ -650,14 +670,12 @@ class Test(BT.BiskitTest):
         for k, v in expect.items():
             self.assertAlmostEqual( expect[k], self.r[k], 0, 
                                     'missmatch in energy values: '+k)
-        
-            
-    def test_delphiCharges( self ):
-        """DelphiCharges test"""
-        resnormal = AmberPrepParser( 'all_amino03.in' ).residueDict()
-        resnterm  = AmberPrepParser( 'all_aminont03.in').residueDict()
-        rescterm  = AmberPrepParser( 'all_aminoct03.in').residueDict()
-        
+
+
+    def test_delphiCharges2( self ):
+        """
+        PDB2DelphiCharges test
+        """
         if self.local:
             T.errWrite( 'loading PDB...' )
 
@@ -669,27 +687,26 @@ class Test(BT.BiskitTest):
         if self.local:
             T.errWrite( 'Adding hydrogens to model (reduce)...' )
 
-        self.rmodel = Reduce( self.m1 ).run()
+        self.rmodel = Reduce( self.m1, verbose=self.local ).run()
         self.rmodel.xplor2amber()
         if self.local:
             T.errWriteln( 'Done.' )
-        
-        self.dc = DelphiCharges( resnormal )
-        if self.local:
-            print
-            print self.dc.res2delphi( self.dc.restypes['CYS'] )
 
-        missing = self.dc.checkmodel( self.rmodel )
+        ac = AtomCharger()
+        ac.charge(self.rmodel)
+        self.rmodel.addChainFromSegid()
+        
+        self.dc = PDB2DelphiCharges( self.rmodel )
+        self.dc.prepare()
+        
+        self.assertEqual( len(self.dc.resmap['LYS']), 2 )  # normal and N'
+        self.assertEqual( len(self.dc.resmap['SER']), 2 )  # normal and C'
+        
         if self.local:
-            print 'atom types identified as missing: ', missing
+            T.errWriteln( 'writing delphi charge file to %s' % self.fcrg )
+        self.dc.tofile( self.fcrg )
         
-        self.assert_( 0 in missing.keys(), 'residue missmatch (0)' )
-        self.assert_( 88 in missing.keys(), 'residue missmatch (88)' )
-        self.assert_( U.difference(['H1', 'H2', 'H3'], missing[0]) == [],
-                      'atom missmatch (0)' )
-        self.assert_( 'OXT' in missing[88], 'atom missmatch (88)' )
-        
-        self.customCharges = self.dc.customCharges( self.rmodel )
+        self.assert_( os.path.exists( self.fcrg ) )
         
         
 
