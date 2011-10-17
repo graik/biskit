@@ -58,6 +58,8 @@ class Reduce( Executor ):
     Capping of terminals
     =====================
     
+    See L{Biskit.PDBCleaner} for a discussion of protein chain capping.
+    
     Usage
     =====
 
