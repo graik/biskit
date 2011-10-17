@@ -66,12 +66,12 @@ class AtomCharger( object ):
     assigned to the atom profile m['charges'] (one value for each atom). That
     means the charge (float value) of the third atom can be accessed as:
     
-    >>> m['charge'][2]
+    >>> m['partial_charge'][2]
     
     And the numpy array of all charges can be summed into the total charge of 
     the molecule:
     
-    >>> q = numpy.sum( m['charge'] )
+    >>> q = numpy.sum( m['partial_charge'] )
     
     See also the testing code for a more elaborate example of using
     AtomCharger.
@@ -114,20 +114,20 @@ class AtomCharger( object ):
                                  '%s %i' % (res['residue_name'][0],
                                             res['residue_number'][0]) )
                 refres = res
-                refres['charge'] = N.zeros( len(refres) )
+                refres['partial_charge'] = N.zeros( len(refres) )
             
             refres = refres.clone()
             refres['residue_name'] = len(refres) * [ res['residue_name'][0] ]
             iref, i = refres.compareAtoms( res )
             
-            qres = N.take( refres['charge'], iref )
+            qres = N.take( refres['partial_charge'], iref )
             
 ##            assert len(qres) == len(res), 'missmatch of atom number'
             
             q = N.concatenate( (q, qres ) )
         
         assert len(q) == len(model), 'AtomCharger: missing charge records'
-        model['charge'] = q
+        model['partial_charge'] = q
 
 #############
 ##  TESTING        
@@ -170,10 +170,10 @@ class Test(BT.BiskitTest):
         ac.charge( self.m1 )
         ac.charge( self.m2 )
 
-        self.assertAlmostEqual( N.sum(self.m1['charge']), -6, 2 )
-        self.assertAlmostEqual( N.sum(self.m2['charge']), -4, 2 )
-        self.assert_( N.all(self.m1['charge'] != 0), 'unmatched atoms 1' )
-        self.assert_( N.all(self.m2['charge'] != 0), 'unmatched atoms 2' )
+        self.assertAlmostEqual( N.sum(self.m1['partial_charge']), -6, 2 )
+        self.assertAlmostEqual( N.sum(self.m2['partial_charge']), -4, 2 )
+        self.assert_( N.all(self.m1['partial_charge'] != 0), 'unmatched atoms 1' )
+        self.assert_( N.all(self.m2['partial_charge'] != 0), 'unmatched atoms 2' )
         
 
 if __name__ == '__main__':
