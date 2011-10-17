@@ -492,7 +492,7 @@ class Delphi( Executor ):
             if self.addcharge:
                 if self.verbose:
                     self.log.add(
-                        '\nAssigning atomic charges with AtomCharger...\n')
+                        '\nAssigning atomic charges with AtomCharger...')
     
                 if self.topologies is None:
                     reslib = None
@@ -504,7 +504,7 @@ class Delphi( Executor ):
                 ac.charge( self.delphimodel )
             
             if self.verbose:
-                self.log.add('\nCreating Delphi charge file %s\n'%f_out)
+                self.log.add('Creating Delphi charge file %s'%f_out)
 
             dc = PDB2DelphiCharges( self.delphimodel )
             dc.prepare()
@@ -512,13 +512,13 @@ class Delphi( Executor ):
             
             if self.verbose:
                 qmissing = N.sum( self.delphimodel['partial_charge']==0 )
-                self.log.add('\nAtoms without charges: %i\n' % N.sum(qmissing))
+                self.log.add('\nAtoms without charges: %i' % N.sum(qmissing))
                 if N.sum(qmissing) > 0:
-                    self.log.add('Warning: there are atoms without charge:\n')
+                    self.log.add('Warning: there are atoms without charge:')
                     m = self.delphimodel.compress( qmissing )
                     for a in m:
                         self.log.add(
-                            '%(serial)4i %(name)-4s %(residue_name)3s %(residue_number)3i %(chain_id)s\n'\
+                            '%(serial)4i %(name)-4s %(residue_name)3s %(residue_number)3i %(chain_id)s'\
                             % a)
 
         except IOError, why: 
