@@ -185,7 +185,7 @@ class AmberPrepParser( object ):
         r['code'] = io.readline().split()[0]
         
         atoms = {'serial_number': [], 'name':[], 'amber_type':[],
-                 'xyz':[], 'charge':[] }
+                 'xyz':[], 'partial_charge':[] }
         for l in self.atomLines( s ):
             items = l.split()
             atoms['serial_number'].append( int( items[0] ) )
@@ -193,14 +193,14 @@ class AmberPrepParser( object ):
             atoms['amber_type'].append( items[2] )
             atoms['xyz'].append( items[7:10] )
             try:
-                atoms['charge'].append( items[10] )
+                atoms['partial_charge'].append( items[10] )
             except:
                 pass  ## charge column is not always present
             
-        if atoms['charge'] == []:
-            atoms['charge'] = self.parseCharges( s )
+        if atoms['partial_charge'] == []:
+            atoms['partial_charge'] = self.parseCharges( s )
         
-        atoms['charge'] = N.array( atoms['charge'], N.float )
+        atoms['partial_charge'] = N.array( atoms['partial_charge'], N.float )
         atoms['xyz']    = N.array( atoms['xyz'], N.float )
         return r, atoms
 

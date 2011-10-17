@@ -129,7 +129,7 @@ class AmberResidueLibrary( object ):
         self.topoindex[ fbase ] = resdic
         
         for resname, restype in resdic.items():
-            akey = self.atomkey(restype)
+            akey = restype.atomkey(compress=False)
             
             if akey in self.aindex and not override:
                 raise AmberResidueLibraryError, \
@@ -149,10 +149,7 @@ class AmberResidueLibrary( object ):
         @return: key formed from alphabetically sorted atom content of residue
         @rtype: str
         """
-        r = residue.atomNames()
-        r.sort()
-        r = ''.join( r )
-        return r
+        return residue.atomkey(compress=False)
   
     
     def byAtoms(self, akey, default=None ):
@@ -165,7 +162,7 @@ class AmberResidueLibrary( object ):
         @rtype: AmberResidueType
         """
         if isinstance( akey, PDBModel ):
-            akey = self.atomkey( akey )
+            akey = akey.atomkey(compress=False)
         return self.aindex.get(akey, default)
     
     
@@ -193,7 +190,7 @@ class AmberResidueLibrary( object ):
             return self.aindex[key]
         
         if isinstance(key, PDBModel):
-            return self.aindex[ self.atomkey( key ) ]
+            return self.aindex[ key.atomkey(compress=False) ]
  
         if type(key) is tuple:
             return self.byName( *key )
