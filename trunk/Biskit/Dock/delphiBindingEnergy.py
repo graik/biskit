@@ -17,7 +17,7 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ## last $Author: graik $
-## last $Date: 2009-05-09 14:17:28 +0200 (Sat, 09 May 2009) $
+## last $Date: $
 ## $Revision: $
 """
 Delphi-based protocol for electrostatic component of free energy of binding.
@@ -89,8 +89,8 @@ class DelphiBindingEnergy( object ):
     we create a grid that covers every linear dimension to at least 60% 
     (perfil=60) and has a density of only 1.2 points per Angstroem (scale=1.2). 
     Recommended are higher densities of 2 or more points per Angstroem.
-    Higher densities come at much larger computational cost but different
-    values should be tested. 
+    Higher densities come at much larger computational cost. It is recommended
+    to test different values and average results.
     
     Note: Any parameters that are not recognized by 
     DelphiBindingEnergy() will be passed on to the Biskit.Delphi instance
@@ -387,6 +387,9 @@ class Test(BT.BiskitTest):
 
         self.assertAlmostEqual( self.r['dG_kt'], 21.6, 1 )
 
+        if self.local:
+            self.log.add(
+                '\nFinal result: dG = %3.2f kcal/mol'%self.r['dG_kcal'])
 
 if __name__ == '__main__':
 
