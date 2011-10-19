@@ -32,6 +32,11 @@ import Biskit.tools as T
 import Biskit as B
 import Biskit.molUtils as M
  
+class AmberPrepError( Exception ):
+    pass
+
+class AmberPrepChargeMissmatch( AmberPrepError ):
+    pass
 
 class AmberResidueType( B.PDBModel ):
     """
@@ -174,7 +179,14 @@ class AmberPrepParser( object ):
     def parseCharges( self, s ):
         s = s[ s.find('CHARGE') : ]
         s = s[ s.find('\n') : ]
-        s = s[ : s.find('IMPROPER') ]
+        
+        endpos1 = s.find('LOOP')
+        endpos2 = s.find('IMPROPER')
+        endpos = endpos2
+        if endpos1 != -1 and endpos1 < endpos2:
+            endpos = endpos1
+        
+        s = s[ : endpos ]
         s = s.strip()
         r = N.array( s.split() )
         return r
@@ -202,13 +214,30 @@ class AmberPrepParser( object ):
             atoms['amber_type'].append( items[2] )
             atoms['xyz'].append( items[7:10] )
             try:
+                ## BIG FAT WARNING: charge column sometimes deviates from 
+                ## charge record further down -- only use as fall-back
+                ## Example mess up: HIP in all_amino03
                 atoms['partial_charge'].append( items[10] )
             except:
                 pass  ## charge column is not always present
             
+        try:
+            ## the charge record seems more reliable but is not always there
+            q = self.parseCharges( s )
+            if len(q) != len( atoms['xyz'] ):
+                if r['name'] == 'HISTIDINE PLUS':
+                    pass
+                raise AmberPrepChargeMissmatch, 'broken charge record in '+\
+                      r['code']
+            atoms['partial_charge'] = q
+        except IndexError:
+            pass
+        except AmberPrepChargeMissmatch, why:
+            pass
+
         if atoms['partial_charge'] == []:
-            atoms['partial_charge'] = self.parseCharges( s )
-        
+            raise AmberPrepError, 'failed to parse charges for '+r['code']
+
         atoms['partial_charge'] = N.array( atoms['partial_charge'], N.float )
         atoms['xyz']    = N.array( atoms['xyz'], N.float )
         return r, atoms
