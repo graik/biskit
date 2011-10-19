@@ -27,44 +27,43 @@ import numpy as N
 from Biskit import PDBModel, StdLog
 from Biskit import AmberResidueLibrary
 from Biskit import Reduce
+import Biskit.mathUtils as MA
 
 
 class AtomCharger( object ):
     """
     Assign atomic partial charges to each atom of a structure. Charges are
-    taken from a dictionary of L{Biskit.AmberResidueType} instances. This
-    dictionary can be created with the AmberResidue class from standard Amber
-    topology files (bundled with Biskit in Biskit/data/amber/residues). The
-    content of several Amber topology files is bundled up into a
-    L{Biskit.AmberResidueLibrary} instance and passed on to AtomCharger.
+    taken from a collection of L{Biskit.AmberResidueType} instances.    
+    L{Biskit.AmberResidueLibrary} bundles the content of several amber
+    topology files and identifies matching residue types by atom content and
+    (if that fails) by name. The original topology files are bundled with 
+    Biskit in Biskit/data/amber/residues. 
     
-    Residues in the input PDB are matched against Amber residues with exactly 
-    the same atom content (same set of atom names). That means, the name of 
-    the residue can differ (as is the case for e.g. CALA, CTHR or NALA, etc.).
+    Residues in the input PDB are first matched against Amber residues with
+    exactly the same atom content (same set of atom names). That means, the
+    name of the residue can differ (as is the case for e.g. CALA, CTHR or
+    NALA, etc.).
 
-    Residues for which there was no atom match in the AmberResidueLibrary, get 
-    charge 0 assigned to every atom. A warning is reported to the log instance
-    if verbose==True.
+    Residues for which there was no exact atom match in the
+    AmberResidueLibrary, will be matched against a residue type of the same
+    name. Missing atoms will be ignored which will lead to an incomplete
+    charge. However, if there is any unknown atoms (atoms that cannot be
+    matched to any atom in the reference residue type) charge 0 is assigned to
+    every atom of the *whole* residue. 
     
-    Note, the default Amber residue topologies are all-atom including
-    hydrogens. Most likely, you will need to add hydrogens to your PDBModel
-    before passing it to AtomCharger. Use L{Biskit.Reduce} for this purpose.
-    Example:
+    Any missmatches are reported as a warning to the log instance if
+    verbose==True.
     
-    >>> m = PDBModel( '3tgi' )
-    >>> r = Reduce( m, autocap=True )
-    >>> m = r.run()
+    Use:
+    ====
     
-    >>> ac = AtomCharger()
+    >>> m = PDBModel( 'my.pdb' )
+    >>> ac = AtomCharger( verbose=True )
     >>> ac.charge( m )
     
-    ...This will first autodetect and "cap" any protein chain breaks or
-    missing N- and C-terminals with ACE and NME residues, then run the reduce
-    program to optimize hydrogen bonding networks and add hydrogen atoms, and
-    only then call AtomCharger to match each residue to the Amber residue
-    description with exactly the same atom content. Partial charges are then
-    assigned to the atom profile m['charges'] (one value for each atom). That
-    means the charge (float value) of the third atom can be accessed as:
+    Partial charges are then assigned to the atom profile m['partial_charge']
+    (one value for each atom). That means the charge (float value) of the
+    third atom can be accessed as:
     
     >>> m['partial_charge'][2]
     
@@ -73,8 +72,50 @@ class AtomCharger( object ):
     
     >>> q = numpy.sum( m['partial_charge'] )
     
+    We chose 'partial_charge' because the standard PDB data model already 
+    contains a record 'charge', which is set to a string and may contain ugly
+    things like '+2' or '-1' but cannot hold float values.
+    
+    Note:
+    =====
+    
+    The default Amber residue topologies are all-atom including hydrogens.
+    Most likely, you will need to add hydrogens to your PDBModel before
+    passing it to AtomCharger. Use L{Biskit.Reduce} for this purpose. Example:
+    
+    >>> m = PDBModel( '3tgi' )
+    >>> r = Reduce( m )
+    >>> m = r.run()
+    
+    >>> ac = AtomCharger()
+    >>> ac.charge( m )
+    
+    ...This will run the reduce program to optimize hydrogen bonding networks
+    and add hydrogen atoms, and only then call AtomCharger to match each
+    residue to the Amber residue description with exactly the same atom
+    content.
+    
+    Customization:
+    ==============
+    
+    If you want to transfer charges from a different set of topologies, 
+    create your own L{AmberResidueLibrary} instance and pass it to the 
+    constructor. For example:
+    
+    >>> topofiles = ['uni_amino03', 'uni_aminoct03', 'uni_aminont03']
+    >>> reslib = AmberResidueLibrary( topofiles, verbose=True )
+    >>> ac = AtomCharger( reslib )
+
+    This will match residues against the united atom topology files that are
+    also found in Biskit/data/amber/residues. You can specify full file
+    names to point to your own prep files.
+    
     See also the testing code for a more elaborate example of using
     AtomCharger.
+    
+    @see L{AmberResidueType}
+    @see L{AmberResidueLibrary}
+    @see L{Reduce}
     """
     
     def __init__(self, reslibrary=None, log=None, verbose=False ):
@@ -93,7 +134,40 @@ class AtomCharger( object ):
                                                         verbose=verbose)
         self.verbose = verbose
         self.log = log or StdLog()
-    
+
+
+    def lookupResidue(self, model):
+        """
+        Identify best-matching ResidueType. First try by atom content then by
+        name.
+        @param model: single residue PDBModel
+        @type  model: PDBModel
+        @return: residue type with name adjusted to the model's residue name
+        @rtype : AmberResidueType OR None
+        """
+        resname = model['residue_name'][0].upper()
+
+        refres = self.reslib.byAtoms( model )
+
+        if refres is None:
+##            if self.verbose:
+##                self.log.add('Warning: no exact atom match for residue '+\
+##                             '%3s %3i'% (resname, model['residue_number'][0])+\
+##                             '\nNow trying by residue name...')
+            try:
+                refres = self.reslib.byName( resname )
+            except KeyError, what:
+                return None
+
+        refres = refres.clone()
+        refres['residue_name'] = len(refres) * [resname]
+        
+        return refres
+        
+    def __resinfo( self, res, i ):
+        r = '#%-3i (%3s %3i %1s)' % (i, res['residue_name'][0], 
+                               res['residue_number'][0], res['chain_id'][0])
+        return r
 
     def charge(self, model):
         """
@@ -102,26 +176,43 @@ class AtomCharger( object ):
         @type  model: PDBModel
         """
         q = N.array( [], float )
-        failed = []
         
-        for res in model.resModels():
-            refres = self.reslib.byAtoms( res )
+        for j,res in enumerate(model.resModels()):
+            refres = self.lookupResidue( res )
 
             if refres is None:
-                failed += [ res ]
                 if self.verbose:
-                    self.log.add('Warning: could not find residue type for '+\
-                                 '%s %i' % (res['residue_name'][0],
-                                            res['residue_number'][0]) )
+                    self.log.add('Warning: no residue type for '+\
+                                  self.__resinfo(res,j) +\
+                                 '\nWhole residue will be set to charge 0.')
                 refres = res
                 refres['partial_charge'] = N.zeros( len(refres) )
             
-            refres = refres.clone()
-            refres['residue_name'] = len(refres) * [ res['residue_name'][0] ]
             iref, i = refres.compareAtoms( res )
             
             qres = N.take( refres['partial_charge'], iref )
             
+            if len(iref) < len(refres):
+                if self.verbose:
+                    self.log.add('Warning: %i atoms missing from residue %s:'%\
+                             (len(refres)-len(iref), self.__resinfo(res,j)) )
+                    
+                    missing = MA.difference( range(len(refres)), iref )
+                    self.log.add('\t'+str(N.take( refres['name'], missing )) )
+                    self.log.add(
+                        '\tIgnored. Residue will have incomplete charge.')
+                         
+            if len(i) < len( res ):
+                if self.verbose:
+                    self.log.add('Warning: %i unknown  atoms in residue %s:' %\
+                             (len(res)-len(i), self.__resinfo(res,j)) )
+    
+                    missing = MA.difference( range(len(res)), i )
+                    self.log.add('\t'+str(N.take( res['name'], missing )) )
+                    self.log.add('\tGiving up. Whole residue will be set to charge 0.')
+
+                qres = N.zeros( len(res) )
+                
 ##            assert len(qres) == len(res), 'missmatch of atom number'
             
             q = N.concatenate( (q, qres ) )
@@ -162,7 +253,7 @@ class Test(BT.BiskitTest):
         if self.local:
             self.log.add('\nSetup Residue Library\n')
         
-        ac = AtomCharger()
+        ac = AtomCharger(log=self.log, verbose=self.local)
         
         if self.local:
             self.log.add('match residues to Amber topology')
@@ -172,8 +263,17 @@ class Test(BT.BiskitTest):
 
         self.assertAlmostEqual( N.sum(self.m1['partial_charge']), -6, 2 )
         self.assertAlmostEqual( N.sum(self.m2['partial_charge']), -4, 2 )
-        self.assert_( N.all(self.m1['partial_charge'] != 0), 'unmatched atoms 1' )
-        self.assert_( N.all(self.m2['partial_charge'] != 0), 'unmatched atoms 2' )
+        self.assert_(N.all(self.m1['partial_charge'] != 0),'unmatched atoms 1')
+        self.assert_(N.all(self.m2['partial_charge'] != 0),'unmatched atoms 2')
+
+        if self.local:
+            self.log.add('\nNow test handling of atom miss-matches:\n')
+        
+        self.m3 = PDBModel(self.m1.clone())
+        self.m3.remove( [0,3,100,101,102,200] )
+        ac.charge( self.m3 )
+        
+        self.assertAlmostEqual( N.sum(self.m3['partial_charge']),-8.21, 2)
         
 
 if __name__ == '__main__':

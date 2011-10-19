@@ -166,34 +166,60 @@ class AmberResidueLibrary( object ):
         return self.aindex.get(akey, default)
     
     
-    def byName(self, topo, rescode ):
+    def byName(self, rescode, topo=None ):
         """
-        Identify matching reference residue by library and residue name.
-        @param topo: (file) name of topology
-        @type  topo: str
+        Identify matching reference residue by residue name. Note: residue
+        names are not guaranteed to be unique if several topology files have
+        been read in (the default set of Amber topologies uses unique names
+        though). The optional topo parameter can be used to specify in 
+        which topology the residue is looked up.
+        
+        Note: residue 3 letter names are all UPPERCASE.
+        
         @param rescode: three-letter name of residue to look up
         @type  rescode: str
+        @param topo: optional (file) name of topology (@see L{topokeys()} )
+        @type  topo: str
 
-        @return: matching reference residue OR None
+        @return: matching reference residue
         @rtype: AmberResidueType
         
         @raise: KeyError if the topology or residue name are not found
         """
-        fbase = T.stripFilename( topo )
-        return self.topoindex[ fbase ][ rescode ]
+        if topo:
+            fbase = T.stripFilename( topo )
+            return self.topoindex[ fbase ][ rescode ]
+
+        for topo, residues in self.topoindex.items():
+            if rescode in residues:
+                return residues[rescode]
+
+        raise KeyError, 'No residue type found for name '+str(rescode)
+        
     
     def __len__( self ):
         return len(self.aindex)
     
     def __getitem__( self, key ):
+        """
+        reslib[ PDBModel ] -> ResidueType for matching residue
+        reslib[ str(atomkey) ] -> ResidueType with same atom key
+        """
         if type(key) is str:
             return self.aindex[key]
         
         if isinstance(key, PDBModel):
             return self.aindex[ key.atomkey(compress=False) ]
  
-        if type(key) is tuple:
-            return self.byName( *key )
+        
+    def topokeys( self ):
+        return self.topoindex.keys()
+    
+    def keys( self ):
+        return self.aindex.keys()
+    
+    def values( self ):
+        return self.aindex.values()
     
 #############
 ##  TESTING        
@@ -206,9 +232,12 @@ class Test(BT.BiskitTest):
     def test_amberResidueLibrary( self ):
         """AmberResidueLibrary test"""
         self.lib = AmberResidueLibrary(verbose=self.local)
-        ala = self.lib['all_amino03', 'ALA' ]
+        ala = self.lib.byName('ALA', 'all_amino03')
         r   = self.lib[ ala ]
         self.assertEqual( r, ala )
+        r   = self.lib.byName( 'ALA' )
+        self.assertEqual( r, ala )
+        
         self.assertEqual( len( self.lib ), 114 )
         
 if __name__ == '__main__':
