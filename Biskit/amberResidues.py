@@ -96,7 +96,16 @@ class AmberResidueType( B.PDBModel ):
     
     def __repr__( self ):
         return str( self )
-        
+    
+    def take( self, i, rindex=None, cindex=None,
+          *initArgs, **initKw ):
+        """Overriding PDBModel.take to rescue and copy additional fields"""
+        r = B.PDBModel.take(self, i, rindex, cindex, *initArgs, **initKw )
+        r.name = self.name
+        r.code = self.code
+        r.letter = self.letter
+        return r
+
        
 class AmberPrepParser( object ):
     """
