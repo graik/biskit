@@ -72,18 +72,12 @@ def go( fin, fout, fpsf=None, skipRes=None, amber=0, pdb=None ):
 
     m.saveAs( absfile(fout) )
 
-def testexc():
-    d = 'hallo'
-    raise Exception, 'test fehler'
-
 ##### MAIN ########
 
 if __name__ == '__main__':
 
     options = cmdDict( {} )
 
-    testexc()
-    
     if len( options ) < 2:
         _use( options )
 
