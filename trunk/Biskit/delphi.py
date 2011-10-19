@@ -159,8 +159,9 @@ class Delphi( Executor ):
     
     The current default workflow of this wrapper is:
     1. take input model/structure, remove hydrogens
-    2. cap chain breaks and probable false N- and C-termini with NME and ACE
-       residues to cancel artificial charges (see L{Biskit.PDBCleaner})
+    2. optionally: cap chain breaks and probable false N- and C-termini with 
+       NME and ACE residues to cancel artificial charges 
+       (see L{Biskit.PDBCleaner})
     3. add and optimize hydrogens with the reduce program
        (see L{Biskit.Reduce} )
     4. adapt residue and atom names to Amber conventions
@@ -201,7 +202,7 @@ class Delphi( Executor ):
     20% margin to the grid boundary. This fill-factor can be overriden with
     the 'perfil' parameter.
     
-    The density of the grid is, by default, 1.2 points per Angstroem
+    The density of the grid is, by default, 2.3 points per Angstroem
     and can be adjusted with the 'scale' parameter. The number of grid points 
     (gsize) will be calculated accordingly. 
     
@@ -226,7 +227,7 @@ class Delphi( Executor ):
     ... circumvents any calculation and fixes a 100 x 100 x 100 grid centered 
     on 0 and with 1/1.0 A grid spacing -- a box of 100 A x 100 A x 100 A. If
     the scale parameter is not given, it will default to whatever was specified
-    at the Delphi() constructor (and from there default to 1.2). 
+    at the Delphi() constructor (and from there default to 2.3). 
     
     Delphi.setGrid() returns the three grid parameters as a dictionary for 
     later re-use. So if you want to use the same grid dimensions for two 
@@ -300,9 +301,9 @@ class Delphi( Executor ):
                   f_charges=None,
                   addcharge=True,
                   protonate=True,
-                  autocap=True,
+                  autocap=False,
                   indi=4.0, exdi=80.0, salt=0.15, ionrad=2, prbrad=1.4, 
-                  bndcon=4, scale=1.2, perfil=60, 
+                  bndcon=4, scale=2.3, perfil=60, 
                   **kw ):
         """
         @param model: structure for which potential should be calculated
@@ -325,7 +326,7 @@ class Delphi( Executor ):
                           see L{Biskit.Reduce}
         @type  protonate: bool
         @param autocap: add capping NME and ACE residues to any (auto-detected)
-                        false N- or C-terminal and chain breaks (default: True)
+                        false N- or C-terminal and chain breaks (default: False)
                         see L{Biskit.Reduce} and L{Biskit.PDBCleaner}
         @type  autocap: bool
 
@@ -335,7 +336,7 @@ class Delphi( Executor ):
         @param ionrad: ion radius (2)
         @param prbrad: probe radius (1.4) 
         @param bndcon: boundary condition (4, delphi default is 2)
-        @param scale:  grid spacing (1.2)
+        @param scale:  grid spacing (2.3)
         @param perfil: grid fill factor in % (for automatic grid, 60) 
         
         @param kw: additional key=value parameters for Executor:
@@ -374,7 +375,7 @@ class Delphi( Executor ):
         self.bndcon=bndcon # boundary condition (4, delphi default is 2)
         
         ## DELPHI parameters for custom grid
-        self.scale=scale   # grid spacing (1.2)
+        self.scale=scale   # grid spacing (2.3)
         self.perfil=perfil # grid fill factor in % (for automatic grid, 60)
         self.gsize = None
         self.acenter = None
@@ -511,14 +512,14 @@ class Delphi( Executor ):
             dc.tofile( f_out )
             
             if self.verbose:
-                qmissing = N.sum( self.delphimodel['partial_charge']==0 )
+                qmissing = self.delphimodel['partial_charge']==0
                 self.log.add('\nAtoms without charges: %i' % N.sum(qmissing))
                 if N.sum(qmissing) > 0:
                     self.log.add('Warning: there are atoms without charge:')
                     m = self.delphimodel.compress( qmissing )
                     for a in m:
                         self.log.add(
-                            '%(serial)4i %(name)-4s %(residue_name)3s %(residue_number)3i %(chain_id)s'\
+                            '%(serial_number)4i %(name)-4s %(residue_name)3s %(residue_number)3i %(chain_id)s'\
                             % a)
 
         except IOError, why: 
@@ -652,7 +653,7 @@ class Test(BT.BiskitTest):
         Test.MODEL = self.m1
 
         if self.local: print 'Starting Delphi'
-        self.x = Delphi( self.m1, debug=self.DEBUG,
+        self.x = Delphi( self.m1, scale=1.2, debug=self.DEBUG,
                          verbose=self.local )
 
         if self.local:
