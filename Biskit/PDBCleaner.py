@@ -542,9 +542,9 @@ class PDBCleaner:
         
         Note: this operation *replaces* the internal model.
         
-        @param breaks: put ACE and NME capping residue on chain breaks 
-                          (default: False)
-        @type  breaks: bool
+        @param auto: put ACE and NME capping residue on chain breaks
+                     and on suspected false N- and C-termini (default: False)
+        @type  auto: bool
         @param capN: indices of chains that should get ACE cap (default: [])
         @type  capN: [int]
         @param capC: indices of chains that should get NME cap (default: [])
@@ -555,13 +555,13 @@ class PDBCleaner:
         i_breaks = m.chainBreaks()
             
         if auto:
+            if not breaks:
+                capN = self.convertChainIdsNter( m, capN )
+                capC = self.convertChainIdsCter( m, capC )
+
             breaks=True
             capN, capC = self.unresolvedTerminals( m )
         
-        capN = self.convertChainIdsNter( m, capN )
-        capC = self.convertChainIdsCter( m, capC )
-        
-        if breaks:
             end_broken = m.atom2chainIndices( m.chainBreaks(), breaks=1 )
             
             capC = M.union( capC, end_broken )
@@ -571,13 +571,13 @@ class PDBCleaner:
         capC = self.filterProteinChains(m, capC, m.chainEndIndex(breaks=breaks))
 
         for i in capN:
-            m = self.capACE( m, i )
+            m = self.capACE( m, i, breaks=breaks )
             assert m.lenChains() == c_len, '%i != %i' % \
                    (m.lenChains(), c_len)
             assert len(m.chainBreaks(force=True)) == len(i_breaks)
 
         for i in capC:
-            m = self.capNME( m, i )
+            m = self.capNME( m, i, breaks=breaks )
             assert m.lenChains() == c_len
             assert len(m.chainBreaks(force=True)) == len(i_breaks)
         
