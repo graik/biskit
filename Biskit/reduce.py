@@ -17,7 +17,7 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ## last $Author: graik $
-## last $Date: 2009-05-09 14:17:28 +0200 (Sat, 09 May 2009) $
+## last $Date: $
 ## $Revision: $
 """
 Wrapper for structure protonation program reduce
@@ -128,7 +128,8 @@ class Reduce( Executor ):
 
     def capTerminals( self ):
         c = PDBCleaner( self.model )
-        c.capTerminals( auto=self.autocap, capN=self.capN, capC=self.capC )
+        self.model = c.capTerminals( auto=self.autocap, 
+                                     capN=self.capN, capC=self.capC )
     
     def prepare( self ):
         """
@@ -234,11 +235,12 @@ class Test(BT.BiskitTest):
 
         if self.local:
             self.log.add("Result: ")
-            self.log.add(self.r.report())
+            self.log.add(self.r.report(prnt=False))
 
         if self.local:
             self.log.add('Reduce protein complex')
-        self.x = Reduce( self.m2, debug=self.DEBUG, verbose=self.local)
+        self.x = Reduce( self.m2, debug=self.DEBUG, verbose=self.local,
+                         autocap=True )
         self.r2 = self.x.run()
         
 
