@@ -42,6 +42,9 @@ import copy
 class CleanerError( Exception ):
     pass
 
+class CappingError( CleanerError ):
+    pass
+
 class PDBCleaner:
     """
     PDBCleaner performs the following tasks:
@@ -377,6 +380,11 @@ class PDBCleaner:
         r = chains_before.concat( m_chain, newChain=not Nterm_is_break)
         r = r.concat( chains_after, newChain=not Cterm_is_break)
 
+        if len(c_start) != r.lenChains( breaks=breaks ):
+            raise CappingError, 'Capping ACE would mask a chain break. '+\
+                  'This typically indicates a tight gap with high risk of '+\
+                  'clashes and other issues.'
+
         return r
 
 
@@ -451,6 +459,11 @@ class PDBCleaner:
         r = chains_before.concat( m_chain, newChain=not Nterm_is_break)
         r = r.concat( chains_after, newChain=not Cterm_is_break)
 
+        if len(c_start) != r.lenChains( breaks=breaks ):
+            raise CappingError, 'Capping NME would mask a chain break. '+\
+                  'This typically indicates a tight gap with high risk of '+\
+                  'clashes and other issues.'
+        
         return r
 
 
@@ -499,6 +512,8 @@ class PDBCleaner:
         capN = [ i for (i,pos) in enumerate(c_first)\
                  if model['residue_number'][pos] > 1 ]
         
+        capN = [i for i in capN if model['residue_name'][c_first[i]] != 'ACE']
+        
         capN = self.filterProteinChains( model, capN, c_first )
         
         capC = []
@@ -525,6 +540,8 @@ class PDBCleaner:
         Add NME and ACE capping residues to chain breaks or normal N- and 
         C-terminals. Note: these capping residues contain hydrogen atoms.
         
+        Note: this operation *replaces* the internal model.
+        
         @param breaks: put ACE and NME capping residue on chain breaks 
                           (default: False)
         @type  breaks: bool
@@ -535,6 +552,7 @@ class PDBCleaner:
         """
         m = self.model
         c_len = m.lenChains()
+        i_breaks = m.chainBreaks()
             
         if auto:
             breaks=True
@@ -556,10 +574,12 @@ class PDBCleaner:
             m = self.capACE( m, i )
             assert m.lenChains() == c_len, '%i != %i' % \
                    (m.lenChains(), c_len)
+            assert len(m.chainBreaks(force=True)) == len(i_breaks)
 
         for i in capC:
             m = self.capNME( m, i )
             assert m.lenChains() == c_len
+            assert len(m.chainBreaks(force=True)) == len(i_breaks)
         
         self.model = m
         return self.model
@@ -657,6 +677,19 @@ class Test(BT.BiskitTest):
         self.m4 = self.c.capTerminals( auto=True )
         self.assertEqual( self.m4.takeChains([0]).sequence()[:18], 
                           'XVINTFDGVADXXKLPDN' )
+        
+        
+    def test_capping_extra( self ):
+        """PDBCleaner.capTerminals extra challenge"""
+        self.m2 = PDBModel( t.testRoot() + '/pdbclean/foldx_citche.pdb' )
+        self.c = PDBCleaner( self.m2, verbose=self.local, log=self.log)
+        self.assertRaises(CappingError, self.c.capTerminals, [],{'auto':True})
+        if self.local:
+            self.log.add('OK: CappingError has been raised indicating clash.' )
+        
+        self.assertEqual( len(self.m2.takeChains([1]).chainBreaks()), 1 )
+        
+        
         
 if __name__ == '__main__':
 
