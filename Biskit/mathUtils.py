@@ -904,6 +904,40 @@ def cubic(a, b, c, d=None):
     y2, y3 = quadratic(y1, p + y1**2)
     return y1 - t, y2 - t, y3 - t
 
+def outliers( a, z=5, it=5 ):
+    """
+    Iterative detection of outliers in a set of numeric values.
+    
+    @param a: array or list of values
+    @type  a: [ float ]
+    @param z: z-score threshold for iterative refinement of median and SD
+    @type  z: float
+    @param it: maximum number of iterations
+    @type  it: int
+    
+    @return: outlier mask, median and standard deviation of last iteration
+    @rtype: N.array( int ), float, float
+    """
+    mask = N.ones( len(a) )
+    out  = N.zeros( len(a) )
+    
+    for i in range( it ):
+        b  = N.compress( N.logical_not(out), a )
+        me = N.median( b )
+        sd = N.std( b )
+        
+        bz = N.absolute((N.array( a ) - me) / sd)  # pseudo z-score of each value
+        o  = bz > z
+##        print 'iteration %i: <%5.2f> +- %5.2f -- %i outliers' % (i,me,sd,N.sum(o))
+
+        if N.sum(o) == N.sum(out):
+            return o, me, sd
+            
+        out = o
+    
+    return out, me, sd
+        
+    
 #############
 ##  TESTING        
 #############

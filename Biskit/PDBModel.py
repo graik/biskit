@@ -2896,16 +2896,26 @@ class PDBModel:
                                self.lenAtoms() )
 
 
-    def chainBreaks( self, breaks_only=1, maxDist=None, force=0, solvent=0 ):
+    def chainBreaks( self, breaks_only=1, maxDist=None, force=0, solvent=0,
+                     z=6. ):
         """
-        Identify discontinuities in the molecule's backbone.
+        Identify discontinuities in the molecule's backbone. By default,
+        breaks are identified from the distribution of distances between the
+        last backbone atom of a residue and the first backbone atom of the
+        next residue. The median distance and standard deviation are
+        determined iteratively and outliers (i.e. breaks) are identified
+        as any pairs of residues with a distance that is more than z standard
+        deviations (default 10) above the median. This heuristics can be
+        overriden by specifiying a hard distance cutoff (maxDist).
 
         @param breaks_only: don't report ends of regular chains (def 1)
         @type  breaks_only: 1|0
         @param maxDist: maximal distance between consequtive residues
-                        [ None ] .. defaults to twice the average distance
+                        [ None ] .. defaults median + z * standard dev.
         @type  maxDist: float
-        @param solvent: also check solvent residues (def 0)
+        @param z      : z-score for outlier distances between residues (def 10)
+        @type  z      : float
+        @param solvent: also check selected solvent residues (buggy!) (def 0)
         @type  solvent: 1||0
         @param force: force re-calculation, do not use cached positions (def 0)
         @type  force: 1||0
@@ -2914,7 +2924,7 @@ class PDBModel:
         @rtype: list of int
         """
         if self.__chainBreaks is not None and not force and \
-           maxDist is None and breaks_only and not solvent:
+           maxDist is None and breaks_only and not solvent and z==6.:
             r = self.__chainBreaks
 
         else:
@@ -2926,17 +2936,23 @@ class PDBModel:
             else:
                 bb   = self.take( i_bb )
                 bb_ri= bb.resIndex()
-                xyz = [ bb.xyz[ bb_ri[i] : bb_ri[i+1] ] for i in range(len(bb_ri)-1) ]
-                xyz +=[ bb.xyz[ bb_ri[-1]: len(bb) ] ]
-    
-                ## get distance between last and first backbone atom of each residue
-                dist = lambda a,b: N.sqrt( N.sum( N.power( a - b ,2 ) ) )
-    
-                d = [ dist( xyz[i][-1], xyz[i+1][0] ) for i in range(len(bb_ri)-1) ]
-    
+                bb_re= bb.resEndIndex()
+##                xyz = [ bb.xyz[ bb_ri[i] : bb_ri[i+1] ] for i in range(len(bb_ri)-1) ]
+##                xyz +=[ bb.xyz[ bb_ri[-1]: len(bb) ] ]
+##                centroid = N.array([ N.average( x ) for x in xyz ])
+
+                last = N.take( bb.xyz, bb_re )[:-1]
+                first= N.take( bb.xyz, bb_ri )[1:]
+                
+##                dist = N.sqrt( N.sum( N.power(centroid[:-1]-centroid[1:],2), 
+##                                      axis=1 ) )
+                dist = N.sqrt( N.sum( N.power(last-first,2), axis=1 ) )
+                
+                outliers, median, sd = mathUtils.outliers( dist, z=z, it=5 )
+                
                 ## get distances above mean
-                cutoff = maxDist or N.median(d)*2
-                r = N.nonzero( N.greater( d, cutoff ) )
+                cutoff = maxDist or median + z * sd
+                r = N.nonzero( N.greater( dist, cutoff ) )
 
             if len(r) > 0:
     
@@ -2947,12 +2963,16 @@ class PDBModel:
     
                 ## map back to the original atom indices
                 r = [ ri_to_e[ i_bb[ bb_ri[i] ] ] for i in r ]
+                # can probably be replaced by this (not extensively tested):
+##                re = self.resEndIndex()
+##                r = [ re[i] for i in r ]
+
 
             if breaks_only:
                 ri = self.chainIndex( breaks=0, solvent=solvent )
                 r = [ x for x in r if not x+1 in ri ]
 
-                if maxDist is None:
+                if maxDist is None and not solvent and z==6.:
                     self.__chainBreaks = r
 
         return N.array( r, int )
@@ -3802,8 +3822,20 @@ class Test(BT.BiskitTest):
         self.assertEqual( self.m4.lenChains(), 9 )
         self.assertEqual( self.m4.lenChains( breaks=1 ), 9 )
         self.assertEqual( self.m4.lenChains( breaks=1, singleRes=1, solvent=1), 
-                          200 )
+                          9 )
         self.m4.writePdb( self.fout_pdb, ter=2 )
+        
+    def test_chainBreaks2(self):
+        """PDBModel more complicated chain break detection"""
+        self.m5 = B.PDBModel( T.testRoot()+'/pdbclean/foldx_citche.pdb')
+        breaks = self.m5.chainBreaks()
+        self.assertEqual( len(breaks), 2 )
+        
+        ## limitation of the method: same model but now with capping residues
+        ## filling the gap
+        self.m6 = B.PDBModel( T.testRoot()+'/pdbclean/citche_capped.pdb')
+        breaks = self.m6.chainBreaks()
+        self.assertEqual( len(breaks), 1 )
 
     def test_chainSingleResidues( self ):
         """PDBModel single residue chain test"""
