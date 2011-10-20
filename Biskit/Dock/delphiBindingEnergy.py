@@ -77,8 +77,21 @@ class DelphiBindingEnergy( object ):
           'coul': coulomb contribution in kT , 
           'solv': solvation contribution in kT, 
           'ions': salt or ionic contribution in kT }
-
           
+    The modified complex used for the calculation (with hydrogens added and
+    many other small changes) can be recovered from the DelphiBindingEnergy
+    instance:
+    
+    >>> modified_com = dg.delphicom
+    
+    The run() method assigns the result dictionary to the info record
+    of both the original and the modified complex. That means:
+    
+    >>> r1 = com.info['dG_delphi']
+    >>> r2 = modified_com.info['dG_delphi']
+    >>> r1 == r2
+    True
+    
     Customization:
     ==============
     
@@ -132,9 +145,9 @@ class DelphiBindingEnergy( object ):
     """
     
     def __init__(self, com, 
-                 protonate=True,
+                 protonate=True, addcharge=True,
                  indi=4.0, exdi=80.0, salt=0.15, ionrad=2, prbrad=1.4, 
-                 bndcon=4, scale=1.2, perfil=60, 
+                 bndcon=4, scale=2.3, perfil=60, 
                  template=None, topologies=None,
                  f_charges=None,
                  verbose=True, debug=False, log=None, tempdir=None, cwd=None,
@@ -145,13 +158,15 @@ class DelphiBindingEnergy( object ):
         @param protonate: (re-)build hydrogen atoms with reduce program (True)
                           see L{Biskit.Reduce}
         @type  protonate: bool
+        @param addcharge: Assign partial charges from Amber topologies (True)
+        @type  addcharge: bool
         @param indi: interior dilectric (4.0)
         @param exdi: exterior dielectric (80.0)
         @param salt: salt conc. in M (0.15)
         @param ionrad: ion radius (2)
         @param prbrad: probe radius (1.4) 
         @param bndcon: boundary condition (4, delphi default is 2)
-        @param scale:  grid spacing (1.2)
+        @param scale:  grid spacing (2.3)
         @param perfil: grid fill factor in % (for automatic grid, 60) 
         
         @param template: delphi command file template [None=use default]
@@ -178,7 +193,8 @@ class DelphiBindingEnergy( object ):
         self.com = com
         self.delphicom = None
         
-        self.protonate = True
+        self.protonate = protonate
+        self.addcharge = addcharge
         ## DELPHI run parameters
         self.indi=indi  # interior dilectric(4.0)
         self.exdi=exdi  # exterior dielectric(80.0)
@@ -227,15 +243,16 @@ class DelphiBindingEnergy( object ):
                 tempdir += '/0_reduce'
                 
             r = Reduce( m, tempdir=tempdir, log=self.log,
-                        autocap=True,
+                        autocap=False,
                         debug=self.debug, verbose=self.verbose )
             m = r.run()
             
-        if self.verbose:
-            self.log.add( '\nAssigning charges from Amber topologies...')
-                
-        ac = AtomCharger( log=self.log, verbose=self.verbose )
-        ac.charge( m )
+        if self.addcharge:
+            if self.verbose:
+                self.log.add( '\nAssigning charges from Amber topologies...')
+                    
+            ac = AtomCharger( log=self.log, verbose=self.verbose )
+            ac.charge( m )
             
         mrec = m.takeChains( range( mrec.lenChains() ) )
         mlig = m.takeChains( range( mrec.lenChains(), m.lenChains() ) )
@@ -365,6 +382,9 @@ class DelphiBindingEnergy( object ):
         self.prepare()
         self.ezero, self.esalt = self.processSixsome()
         self.result = self.bindingEnergy( self.ezero, self.esalt )
+        
+        self.delphicom.info['dG_delphi'] = self.result
+        self.com.info['dG_delphi'] = self.result
         
         return self.result
 
