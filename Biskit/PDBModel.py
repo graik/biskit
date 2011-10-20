@@ -2957,15 +2957,15 @@ class PDBModel:
             if len(r) > 0:
     
                 ri = self.resIndex()
-                ri_to_e = {}
-                for i in range( len(ri)-1 ):
-                    ri_to_e[ ri[i] ] = ri[ i+1 ]-1
-    
-                ## map back to the original atom indices
-                r = [ ri_to_e[ i_bb[ bb_ri[i] ] ] for i in r ]
+##                ri_to_e = {}
+##                for i in range( len(ri)-1 ):
+##                    ri_to_e[ ri[i] ] = ri[ i+1 ]-1
+##    
+##                ## map back to the original atom indices
+##                r = [ ri_to_e[ i_bb[ bb_ri[i] ] ] for i in r ]
                 # can probably be replaced by this (not extensively tested):
-##                re = self.resEndIndex()
-##                r = [ re[i] for i in r ]
+                re = self.resEndIndex()
+                r = [ re[i] for i in r ]
 
 
             if breaks_only:
