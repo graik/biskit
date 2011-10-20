@@ -96,7 +96,7 @@ class PDB2DelphiCharges( object ):
  
             atom['resnumber'] = str(resnumber)
             atom['chain'] = chain
-            r += '%(name)-5s %(residue_name)3s %(resnumber)-3s %(chain)1s %(partial_charge)6.3f'\
+            r += '%(name)-5s %(residue_name)3s %(resnumber)-3s%(chain)1s  %(partial_charge)6.3f'\
                   % atom
 
             if comment:
@@ -651,6 +651,7 @@ class Test(BT.BiskitTest):
 
         self.m1 = self.MODEL or PDBModel( T.testRoot( 'lig/1A19_dry.model' ) )
         Test.MODEL = self.m1
+        self.m1.addChainFromSegid()
 
         if self.local: print 'Starting Delphi'
         self.x = Delphi( self.m1, scale=1.2, debug=self.DEBUG,
