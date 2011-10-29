@@ -104,6 +104,8 @@ class AmberEntropist( AmberCrdEntropist ):
         @type  atoms: [str]
         @param heavy: remove hydrogens (default: 0)
         @type  heavy: 1|0
+        @param protein: remove all non-protein atoms (default: 0)
+        @type  protein: 1|0
         @param ex: exclude member trajectories
         @type  ex: [int] OR ([int],[int])
         @param ex_n: exclude last n members  OR...                
@@ -168,6 +170,7 @@ class AmberEntropist( AmberCrdEntropist ):
         self.sstart = ss     ## self.start is assigned by AmberCrdEntropist
         self.sstop  = se     ## self.stop  is assigned by AmberCrdEntropist
         self.heavy  = heavy
+        self.protein = protein
         self.atoms  = atoms
         self.memsave= memsave
 
@@ -650,9 +653,10 @@ class AmberEntropist( AmberCrdEntropist ):
             traj.removeAtoms( N.nonzero( N.logical_not( aMask ) )  )
 
         ## get rid of non-standard atoms, water, ions, etc.
-        l = traj.lenAtoms()
-        traj = traj.compressAtoms( traj.ref.maskProtein() )
-        self.log.add('%i non-protein atoms deleted.' % (l - traj.lenAtoms()) )
+        if self.protein:
+            l = traj.lenAtoms()
+            traj = traj.compressAtoms( traj.ref.maskProtein() )
+            self.log.add('%i non-protein atoms deleted.'% (l- traj.lenAtoms()))
 
         ## delete hydrogens, if requested
         if self.heavy:
