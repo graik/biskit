@@ -42,7 +42,7 @@ Syntax:  a_trajEntropy.py -i |traj1.dat+traj2.dat| [ -o |result.dic|
                       -ex_n |exclude_n_members|
                       -ex1 |ex_from_traj1| -ex2 |ex_from_traj2|
                       -ex3 |exclude_member_tripple|
-                      -atoms |CA CB ..| -heavy
+                      -atoms |CA CB ..| -heavy -protein
                       -nice |level|
                       -parm |parm_file| -crd |crd_file| -f_out |ptraj_out|
                       -f_template |ptraj_template|
@@ -56,6 +56,7 @@ Options:
         se         skip frames after |se| of each member trajectory
         atoms      considered atoms (default: all)
         heavy      remove hydrogens (default: don't)
+        protein    remove non-protein atoms (default: don't)
         ref        pickled PDBModel, Complex, or Trajectory
         cast       equalize atom content of traj and ref         [no]
         chains     list of integer chain indices e.g -chains 0 1 [all]
@@ -116,7 +117,8 @@ for k in ['s','e','ss', 'se', 'step','fit_s', 'fit_e', 'nice','thin', 'ex_n',
     if k in options:
         options[k] = int( options[k] )
 
-for k in ['debug', 'verbose', 'cast', 'split', 'shuffle', 'shift', 'heavy']:
+for k in ['debug', 'verbose', 'cast', 'split', 'shuffle', 'shift', 'heavy',
+          'protein']:
     if k in options:
         options[k] = 1
     else:
