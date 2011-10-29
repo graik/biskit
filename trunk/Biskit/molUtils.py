@@ -48,7 +48,12 @@ aaDicStandard =\
 
 #: same for nucleic acids (incomplete)
 nsDicStandard = {'a':'a', 'g':'g', 'c':'c', 't':'t', 'u':'u',
-                 'da':'a','dg':'g','dc':'c','dt':'t'}
+                 'a3':'a', 'g3':'g', 'c3':'c', 't3':'t', 'u3':'u',
+                 'a5':'a', 'g5':'g', 'c5':'c', 't5':'t', 'u5':'u',
+                 'da':'a','dg':'g','dc':'c','dt':'t',
+                 'da3':'a','dg3':'g','dc3':'c','dt3':'t',
+                 'da5':'a','dg5':'g','dc5':'c','dt5':'t'
+                 }
 
 #: extend aaDicStandard with non-standard residues
 aaDic = copy.copy( aaDicStandard )
