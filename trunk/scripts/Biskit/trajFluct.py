@@ -69,10 +69,10 @@ ref = traj.getRef()
 ## disconnect ref from its source
 ref.disconnect()
 
-ref.setAtomProfile( 'fluct_global', f_global,
+ref.atoms.set( 'fluct_global', f_global,
                 comment='fluctuation around average position in A' )
 
-ref.setAtomProfile( 'fluct_local', f_local,
+ref.atoms.set( 'fluct_local', f_local,
                 comment='fluctuation after fitting to each residue backbone')
 
 try:
@@ -80,9 +80,9 @@ try:
     doper = PDBDope( ref )
 
     flushPrint('adding accessible surface profiles...')
-    doper.addASA()
+    doper.addSurfaceRacer()
 
-except ProfileError, why:
-    errWriteln("Couldn't add ASA, ProfileError: ", why)
+except Exception, why:
+    errWriteln("Couldn't add surface area profiles, ProfileError: ", why)
 
 dump( traj, options['o'] )
