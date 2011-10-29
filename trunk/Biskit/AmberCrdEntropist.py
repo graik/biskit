@@ -168,29 +168,29 @@ class AmberCrdEntropist( Executor ):
             lines = open( f_out, 'r' ).readlines()
             lines.reverse()
             l = lines.pop()
-
+    
+            while not r['nframes']:
+                r['nframes'] = r['nframes'] or self.__tryMatch( re_nsets, l )
+                l = lines.pop()
+                
             while not re_thermo.search(l):
                 l = lines.pop()
-
+    
             while not re_table.search(l):
                 r['T']    = r['T']     or self.__tryMatch( re_T, l )
                 r['mass'] = r['mass']  or self.__tryMatch( re_mass, l )
                 r['vibes']= r['vibes'] or self.__tryMatch( re_vibes,l )
                 l = lines.pop()
-
+    
             l = lines.pop()
             v = []
-            while l != '\n':
+            while lines:
                 v += [ self.__tryMatch( re_value, l ) ]
                 l = lines.pop()
-
+    
             r['S_total'], r['S_trans'], r['S_rot'], r['S_vibes'] = tuple(v[:4])
             r['contributions'] = v[4:]
-
-            while len( lines ) > 0:
-                r['nframes'] = r['nframes'] or self.__tryMatch( re_nsets, l )
-                l = lines.pop()
-
+    
         except IndexError:
             raise EntropistError, 'unexpected end of ptraj output file.'
 

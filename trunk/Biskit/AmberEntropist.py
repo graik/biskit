@@ -53,7 +53,8 @@ class AmberEntropist( AmberCrdEntropist ):
     def __init__( self, traj=None, parm=None, crd=None, ref=None, cast=0,
                   chains=None, border=None, split=0, shift=0, shuffle=0,
                   thin=None,
-                  s=0, e=None, ss=0, se=None, step=1, atoms=None, heavy=0, 
+                  s=0, e=None, ss=0, se=None, step=1, atoms=None, heavy=0,
+                  solvent=0,
                   ex=[], ex_n=0, ex3=None, ex1=None,
                   fit_s=None, fit_e=None, memsave=1,
                   **kw ):
@@ -104,8 +105,8 @@ class AmberEntropist( AmberCrdEntropist ):
         @type  atoms: [str]
         @param heavy: remove hydrogens (default: 0)
         @type  heavy: 1|0
-        @param protein: remove all non-protein atoms (default: 0)
-        @type  protein: 1|0
+        @param solvent: retain solvent and ions (default: 0)
+        @type  solvent: 1|0
         @param ex: exclude member trajectories
         @type  ex: [int] OR ([int],[int])
         @param ex_n: exclude last n members  OR...                
@@ -170,7 +171,7 @@ class AmberEntropist( AmberCrdEntropist ):
         self.sstart = ss     ## self.start is assigned by AmberCrdEntropist
         self.sstop  = se     ## self.stop  is assigned by AmberCrdEntropist
         self.heavy  = heavy
-        self.protein = protein
+        self.solvent = solvent
         self.atoms  = atoms
         self.memsave= memsave
 
@@ -653,10 +654,10 @@ class AmberEntropist( AmberCrdEntropist ):
             traj.removeAtoms( N.nonzero( N.logical_not( aMask ) )  )
 
         ## get rid of non-standard atoms, water, ions, etc.
-        if self.protein:
+        if not self.solvent:
             l = traj.lenAtoms()
-            traj = traj.compressAtoms( traj.ref.maskProtein() )
-            self.log.add('%i non-protein atoms deleted.'% (l- traj.lenAtoms()))
+            traj = traj.compressAtoms( N.logical_not(traj.ref.maskSolvent()) )
+            self.log.add('%i solvent/ion atoms deleted.'% (l- traj.lenAtoms()))
 
         ## delete hydrogens, if requested
         if self.heavy:
@@ -768,3 +769,31 @@ class AmberEntropist( AmberCrdEntropist ):
         if self.result['nframes'] != self.nframes:
             raise EntropistError, 'incorrect number of frames: %i instead %i'%\
                   ( self.result['nframes'], self.nframes )
+        
+#############
+##  TESTING        
+#############
+import Biskit.test as BT
+
+class Test(BT.BiskitTest):
+    """Test class"""
+
+    TAGS = [ BT.EXE ]
+    
+    def test_amberEntropist( self ):
+        """AmberEntropist test"""
+        import Biskit.tools as T
+        self.a = AmberEntropist( T.testRoot() + '/amber/entropy/com_fake.etraj',
+                                 verbose=self.local, debug=self.debug,
+                                 log=self.log)
+        self.r = self.a.run()
+        self.assertEqual( int(self.r['S_total']), 398 )
+        self.assertAlmostEqual( self.r['mass'], 3254, 0 )
+        self.assertAlmostEqual( self.r['S_vibes'], 298, 0 )
+        self.assertEqual( int(self.r['S_rot']), 50 )
+        self.assertEqual( int(self.r['nframes']), 44 )
+
+if __name__ == '__main__':
+
+    BT.localTest(debug=False)
+    
