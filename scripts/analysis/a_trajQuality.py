@@ -40,7 +40,7 @@ Options:
 
 Default options:
 """
-    for key, value in o.items():
+    for key, value in options.items():
         print "\t-",key, "\t",value
 
     sys.exit(0)
