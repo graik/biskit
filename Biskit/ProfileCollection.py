@@ -31,6 +31,8 @@ import numpy as N
 import tools as T
 import mathUtils as M
 from Biskit import EHandler
+from Biskit.hist import density
+
 
 import copy
 from UserDict import DictMixin
@@ -1149,7 +1151,116 @@ class ProfileCollection:
 
         return plot
 
+    
+    def plotArray( self, *name, **arg ):
+        """
+        Plot several profiles as a panel of separate plots.
+        @param *name: one or more profile names or tuples of profile names
+        @type  *name: str or (str, str,...)
+        @param xkey: profile to be used as x-axis (default: None)
+        @type  xkey: str
+        @param arg: key=value pairs for Biggles.Curve() function
+        @type  arg: 
 
+        @return: plot, view using plot.show() 
+        @rtype: biggles.FramedPlot
+
+        @raise TypeError: if profile contains non-number items
+        @raise ImportError: If biggles module could not be imported
+        """
+        if not biggles:
+            raise ImportError, 'module biggles could not be imported'
+
+        plot = biggles.FramedArray( len(name),1 )
+
+        if not 'size' in arg:
+            arg['size'] = 1
+        
+        xkey = arg.get('xkey', None)
+        if xkey:
+            plot.xlabel = xkey
+        
+        for i, keys in enumerate(name):
+            
+            if not type(keys) is tuple:
+                keys = ( keys, )
+                
+            for j, key in enumerate(keys):
+
+                x = self.get( xkey, range(self.profLength()) )
+                y = self[key]
+                
+                colors = [0] + T.colorSpectrum( len(keys) , '00FF00', 'FF00FF')
+
+                plot[i,0].add( biggles.Curve( x, y, color=colors[j], **arg ) )
+    
+                plot[i,0].add( biggles.PlotLabel( 0.7, 0.95-j*0.1, key,
+                                                  color=colors[j] ) )
+
+        return plot
+    
+    def plotHistogram( self, *name, **arg ):
+        """
+        @param bins: number of bins (10)
+        @type  bins: int
+        @param ynormalize: normalize histograms to area 1.0 (False)
+        @type  ynormalize: bool
+        @param xnormalize: adapt bin range to min and max of all profiles (True)
+        @type  xnormalize: bool
+        @param xrange: min and max of bin range (None)
+        @type  xrange: (float, float)
+        @param steps: draw histogram steps (True)
+        @type  steps: bool
+        """
+        if not biggles:
+            raise ImportError, 'module biggles could not be imported'
+
+        plot = biggles.FramedArray( len(name),1 )
+
+        if not 'size' in arg:
+            arg['size'] = 1
+        
+        bins = arg.get('bins', 10)
+        hist = arg.get('ynormalize', False)
+        steps= arg.get('steps', 1)
+        histrange= arg.get('xrange', None)
+        autorange= arg.get('xnormalize', histrange is None)
+        
+        xkey = arg.get('xkey', None)
+        if xkey:
+            plot.xlabel = xkey
+
+        if autorange:
+            v = []
+            for keys in name:
+                if not type(keys) is tuple:
+                    keys = ( keys, )
+                for key in keys:
+                    v += list(self[key])
+            histrange = ( min( v ), max( v ) )
+            
+        for i, keys in enumerate(name):
+            
+            if not type(keys) is tuple:
+                keys = ( keys, )
+                
+            for j, key in enumerate(keys):
+
+                h = density( self[key], nBins=bins, steps=steps, hist=hist,
+                             range=histrange )
+                x = h[:,0]
+                y = h[:,1]
+                
+                colors = [0] + T.colorSpectrum( len(keys) , '00FF00', 'FF00FF')
+
+                plot[i,0].add( biggles.Curve( x, y, color=colors[j], **arg ) )
+    
+                plot[i,0].add( biggles.PlotLabel( 0.7, 0.95-j*0.1, key,
+                                                  color=colors[j] ) )
+
+        return plot
+
+        
     def __shortString( self, s, maxLen ):
         if len( s ) <= maxLen:
             return s
@@ -1258,6 +1369,21 @@ class Test(BT.BiskitTest):
         del self.p4
         
         self.assert_( views[0].alive is False ) 
+        
+    def test_plots(self):
+        """ProfileCollection.plot* test (only in interactive mode)"""
+        import random
+        self.p5 = ProfileCollection()
+        self.p5['range'] = range( 500 )
+        self.p5['gamma'] = [ N.random.gamma(2.0) for i in range(500) ]
+        self.p5['normal'] = [ N.random.normal(2.0) for i in range(500) ]
+        self.p5['poisson'] = [ N.random.poisson(5.) for i in range(500) ]
+
+        if self.local:
+            
+            plot = self.p5.plotHistogram( 'gamma', ('normal','poisson'), 
+                                          bins=10, hist=1, xnormalize=True )
+            plot.show()
 
 
 def clock( s ):
