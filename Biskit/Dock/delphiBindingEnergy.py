@@ -386,6 +386,16 @@ class DelphiBindingEnergy( object ):
         self.delphicom.info['dG_delphi'] = self.result
         self.com.info['dG_delphi'] = self.result
         
+        for com in [self.delphicom, com]:
+            key = 'delphi_%4.2fsalt' % self.salt
+            com.rec_model.info[key] = self.esalt['rec']
+            com.lig_model.info[key] = self.esalt['lig']
+            com.info[key] = self.esalt['com']
+            key = 'delphi_0salt'
+            com.rec_model.info[key] = self.ezero['rec']
+            com.lig_model.info[key] = self.ezero['lig']
+            com.info[key] = self.ezero['com']
+        
         return self.result
 
 #############
