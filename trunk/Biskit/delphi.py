@@ -299,6 +299,7 @@ class Delphi( Executor ):
     
     def __init__( self, model, template=None, topologies=None,
                   f_charges=None,
+                  f_map=None,
                   addcharge=True,
                   protonate=True,
                   autocap=False,
@@ -318,6 +319,8 @@ class Delphi( Executor ):
         @param f_charges: alternative delphi charge file 
                           [default: create custom]
         @type  f_charges: str
+        @param f_map   : output file name for potential map [None= discard]
+        @type  f_map   : str
         @param addcharge: build atomic partial charges with AtomCharger
                           [default: True]
         @type  addcharge: bool
@@ -355,8 +358,12 @@ class Delphi( Executor ):
         f_in = tempfile.mktemp( '.inp', 'delphi_', dir=tempdir )
         
         self.f_pdb = tempfile.mktemp( '.pdb', 'delphi_', dir=tempdir)
-        self.f_grid = tempfile.mktemp( '_grid.phi', 'delphi_', dir=tempdir )
-        self.f_map = None
+
+        self.keep_map = f_map != None
+        self.f_map = f_map or \
+            tempfile.mktemp( '_mapout.phi', 'delphi_', dir=tempdir )
+
+##        self.f_map = None
         self.f_radii = None
         self.topologies = topologies or self.F_RESTYPES
         self.f_charges = f_charges or tempfile.mktemp( '.crg', 'delphi_',
@@ -564,6 +571,8 @@ class Delphi( Executor ):
         """        
         if not self.debug:
             T.tryRemove( self.f_pdb )
+            if not self.keep_map:
+                T.tryRemove( self.f_map )
 
         Executor.cleanup( self )
 
