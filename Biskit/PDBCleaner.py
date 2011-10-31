@@ -98,7 +98,8 @@ class PDBCleaner:
     #: these atoms always occur at the tip of of a chain or within a ring
     #: and, if missing, will not trigger the removal of other atoms
     TOLERATE_MISSING = ['O', 'CG2', 'CD1', 'CD2', 'OG1', 'OE1', 'NH1',
-                        'OD1', 'OE1' ]
+                        'OD1', 'OE1',
+                        'H5T',"O5'", ]
 
     ## PDB with ACE capping residue
     F_ace_cap = t.dataRoot() + '/amber/leap/ace_cap.pdb'
@@ -262,12 +263,14 @@ class PDBCleaner:
         for res in self.model.resList():
 
             resname  = self.__standard_res( res[0]['residue_name'] ).upper()
+            if resname == 'DC5':
+                pass
             standard = copy.copy( MU.atomDic[ resname ] )
 
             ## replace known synonyms by standard atom name
             for a in res:
                 n = a['name']
-                if not n in standard and MU.atomSynonyms.get(n,0) in standard:
+                if not n in standard and MU.atomSyfnonyms.get(n,0) in standard:
                     a['name'] = MU.atomSynonyms[n]
                     if self.verbose:
                         self.logWrite('%s: renaming %s to %s in %s %i' %\
@@ -650,7 +653,18 @@ class Test(BT.BiskitTest):
         
         self.m = self.c.process()
 
-        self.assertAlmostEqual( N.sum( self.m.masses()), 34029.0115499993, 7 )
+        self.assertAlmostEqual( self.m.mass(), 34029.0115499993, 7 )
+        
+    def test_DNACleaning( self ):
+        """PDBCleaner DNA test"""
+        ## Loading PDB...
+        self.c = PDBCleaner( t.testRoot() + 'amber/entropy/0_com.pdb',
+                             log=self.log )
+        
+        self.dna = self.c.process(amber=True)
+
+        self.assertAlmostEqual( self.dna.mass(), 26953.26, 1 )
+        
         
     def test_Capping( self ):
         """PDBCleaner.capTerminals test"""

@@ -119,6 +119,7 @@ try:
         options['leap_pdb']= options.get('leap_pdb',fbase+'_forleap.pdb')
 
     a = AmberParmBuilder( options['i'], **options )
+    del options['debug']
 
     if not 'mirror' in options:
         a.parmSolvated( f_out, **options )
