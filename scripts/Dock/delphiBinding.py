@@ -33,7 +33,7 @@ delphiBinding.py - calculate the electrostatic component of binding free Energy
                    with the Delphi PB solver. The input complex object can be
                    created with pdb2complex.py. This script is a wrapper for
                    the Biskit.Dock.DelphiBindingEnergy class and requires
-                   two external programs (1) reduce (2) delphi. 
+                   two external programs: (1) reduce and (2) delphi. 
 
 Syntax:  delphiBinding.py  -c |input complex|
                             OR
@@ -64,24 +64,25 @@ Options:   -c     complex pdb file or pickled Biskit.Dock.Complex object
            -ionrad     ion radius (2.0 A)
            -prbrad     probe radius (1.4 A)
            -bndcon     box boundary condition (see Delphi manual, default 4)
-           -scale      grid density in points per Angstroem (default 1.2)
+           -scale      grid density in points per Angstroem (default 2.3)
            -perfil     the molecules' largest linear dimension relative to the
                        grid in percent (default 60)
 
-Example Use (recommended options):
+Example Use:
 
-    delphiBinding.py -c input.complex -v -autocap -scale 2.3
+    delphiBinding.py -c input.complex -v -scale 1.2
 
 Or starting from PDB:
 
-    delphiBinding.py -i complex.pdb -r 0 1 -l 2 -autocap -v -scale 2.3
+    delphiBinding.py -i complex.pdb -r 0 1 -l 2 -autocap -v -scale 2.1
                        
-Note: -scale and -perfil together determine the size of the grid. The default 
-      grid density is a bit lower than recommended. The recommended value
-      is -scale 2.3. A -perfil of 60% means that, along its largest dimension,
-      the solute molecule will still only cover 60% of the grid (box). This 
-      factor can probably be increased (resulting in a smaller grid) for larger
-      complexes.
+Note: 
+     
+      -scale and -perfil together determine the size of the grid. The
+      recommended value is -scale 2.3. A -perfil of 60% means that, along its
+      largest dimension, the solute molecule will still only fill 60% of the
+      grid (box). This factor can probably be increased (resulting in a
+      smaller grid) for larger complexes.
       
       See Biskit/Dock/DelphiBindingEnergy.py and Biskit/Delphi.py for a more
       detailed discussion of parameters and issues.
