@@ -38,7 +38,7 @@ def _use( options ):
 
 Syntax:    dope.py -s sourceModel -i otherModels [-p [fx surf dens cons]]
                   [-so sourceOut -o othersPrefix -dic old_model_dic ]
-                  [-nosort -nowat]
+                  [-nosort -wat]
 
 Add conservation, accessibility profiles and foldX energies to a reference
 model and models linking to this reference.
@@ -69,6 +69,7 @@ Options:
              dens ... atomic densities
              cons ... sequence conservation from HMM
              dssp ... secondary structure from DSSP
+             delphi.. info record (no profile): DelPhi electrostatic potential
    -so     filename of updated (source) model pickle
    -i      PDBModels that should be linked to updated source
    -o      pickle updated -i models with this file name prefix
@@ -90,7 +91,7 @@ class ConvertError(Exception):
 
 
 def prepareSource( inFile, outFile, wat=1, sort=1,
-                   foldx=1, surf=1, dens=1, cons=1, dssp=1 ):
+                   foldx=1, surf=1, dens=1, cons=1, dssp=1, delphi=0 ):
     """
     Strip waters, add profiles and save as doped source model.
     """
@@ -118,6 +119,9 @@ def prepareSource( inFile, outFile, wat=1, sort=1,
 
     if dssp:
         doper.addSecondaryStructure()
+        
+    if delphi:
+        doper.addDelphi()
 
     try:
         if cons:
@@ -168,6 +172,9 @@ def changeModel( inFile, prefix, sourceModel ):
 
         if 'foldX' in sourceModel.info.keys():
             doper.addFoldX()
+            
+        if 'delphi' in sourceModel.info.keys():
+            doper.addDelphi()
 
     outFile = os.path.dirname( inFile ) + '/' + prefix +\
             T.stripFilename( inFile ) + '.model' 
@@ -219,13 +226,14 @@ print 'Preparing source ' + str(os.path.basename(sourceIn))\
 
 if sourceOut:
     source = prepareSource( sourceIn, sourceOut,
-                            wat  =('nowat'  not in options),
+                            wat  =('wat'  not in options),
                             sort =('nosort' not in options),
                             foldx=('fx'   in options['p']),
                             surf =('surf' in options['p']),
                             dens =('dens' in options['p']),
                             cons =('cons' in options['p']),
-                            dssp =('dssp' in options['p']) )
+                            dssp =('dssp' in options['p']),
+                            delphi=('delphi' in options['p']))
 else:
     try:
         source = T.load( sourceIn )
