@@ -92,6 +92,22 @@ class DelphiBindingEnergy( object ):
     >>> r1 == r2
     True
     
+    The result of the original DelPhi calculations (with and without salt for
+    receptor, ligand and complex) are assigned to the info dictionaries of the
+    complex' receptor and ligand model as well as to the complex itself:
+    
+    com.info['delphi_0.15salt'] ...delphi run with 0.15M salt on complex
+    com.info['delphi_0salt']    ...delphi run without salt on complex
+
+    com.lig().info['delphi_0.15salt'] ...delphi run with 0.15M salt on ligand
+    com.lig().info['delphi_0salt']    ...delphi run without salt on ligand
+    com.rec().info['delphi_0.15salt'] ...delphi run with 0.15M salt on receptor
+    com.rec().info['delphi_0salt']    ...delphi run without salt on receptor
+    
+    From there the individual values for solvation, ionic and couloumb
+    contributions can be recovered. See L{Biskit.Delphi} for a description of
+    this result dictionary.
+     
     Customization:
     ==============
     
@@ -386,14 +402,15 @@ class DelphiBindingEnergy( object ):
         self.delphicom.info['dG_delphi'] = self.result
         self.com.info['dG_delphi'] = self.result
         
-        for com in [self.delphicom, com]:
+        for com in [self.delphicom, self.com]:
             key = 'delphi_%4.2fsalt' % self.salt
             com.rec_model.info[key] = self.esalt['rec']
             com.lig_model.info[key] = self.esalt['lig']
-            com.info[key] = self.esalt['com']
+            com.lig_model.lig_transformed = None
             key = 'delphi_0salt'
             com.rec_model.info[key] = self.ezero['rec']
             com.lig_model.info[key] = self.ezero['lig']
+            com.lig_model.lig_transformed = None  # reset Complex.lig() cache
             com.info[key] = self.ezero['com']
         
         return self.result
@@ -406,7 +423,7 @@ import Biskit.test as BT
 class Test(BT.BiskitTest):
     """Test class"""
 
-    TAGS = [ BT.EXE ]
+    TAGS = [ BT.EXE, BT.LONG ]
     
     def test_bindingE( self ):
         """bindingEnergyDelphi test (Barnase:Barstar)"""
@@ -423,4 +440,4 @@ class Test(BT.BiskitTest):
 
 if __name__ == '__main__':
 
-    BT.localTest(debug=True)
+    BT.localTest(debug=False)
