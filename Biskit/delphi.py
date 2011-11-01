@@ -642,16 +642,18 @@ import tempfile
 class Test(BT.BiskitTest):
     """Test class"""
 
-    TAGS = [ BT.EXE ]
+    TAGS = [ BT.EXE, BT.LONG ]
     MODEL= None
 
     def prepare( self ):
         self.fcrg = tempfile.mktemp( 'delphicharges_', '.crg' )
+        self.fmap = tempfile.mktemp( 'delphimap_', '.phi' )
 
         
     def cleanUp( self ):
         if not self.debug:
             T.tryRemove( self.fcrg )
+            T.tryRemove( self.fmap )
 
     
     def test_delphi( self ):
@@ -664,7 +666,7 @@ class Test(BT.BiskitTest):
 
         if self.local: print 'Starting Delphi'
         self.x = Delphi( self.m1, scale=1.2, debug=self.DEBUG,
-                         verbose=self.local )
+                         verbose=self.local, f_map=self.fmap )
 
         if self.local:
             print 'Running'
@@ -681,6 +683,9 @@ class Test(BT.BiskitTest):
         for k, v in expect.items():
             self.assertAlmostEqual( expect[k], self.r[k], 0, 
                                     'missmatch in energy values: '+k)
+        
+        self.assert_(os.path.exists( self.fmap ), 'Potential map not found' )
+        self.assert_(os.path.getsize( self.fmap) > 1000, 'empty potential map')
 
 
     def test_delphiCharges2( self ):
@@ -723,5 +728,5 @@ class Test(BT.BiskitTest):
 
 if __name__ == '__main__':
 
-    BT.localTest(debug=True)
+    BT.localTest(debug=False)
     
