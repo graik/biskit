@@ -60,7 +60,7 @@ if len (sys.argv) < 3:
 
 ## create a reference complex
 print "Loading..."
-ref_com =  PDBModel( T.absfile( options['c'] ) )
+ref_com =  PDBModel( options['c'] )
 print "Removing water..."
 ref_com.remove( lambda a: a['residue_name'] in ['TIP3','HOH','WAT'] )
 
