@@ -27,8 +27,11 @@ import tempfile, os
 import numpy as N
 import re
 
-from Biskit import Executor, PDBModel, Reduce, AtomCharger, AmberResidueLibrary
-from Biskit import AmberPrepParser
+from Biskit import Executor, PDBModel
+from Biskit.reduce import Reduce
+from Biskit.atomCharger import AtomCharger
+from Biskit.amberResidueLibrary import AmberResidueLibrary
+from Biskit.amberResidues import AmberPrepParser
 import Biskit.tools as T
 import Biskit.mathUtils as U
 
