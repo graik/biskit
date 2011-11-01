@@ -40,7 +40,7 @@ class DelphiBindingEnergy( object ):
     Determine the electrostatic component of the free energy of binding using
     several rounds of Delphi calculations. DelphiBindingEnergy accepts a 
     binary complex (L{Biskit.Dock.Complex}) as input, performs several house
-    keeping tasks (automatic capping of free terminals, h-bond optimization and
+    keeping tasks (optional capping of free terminals, h-bond optimization and
     protonation with the reduce program, assignment of Amber partial atomic 
     charges) and then calls Delphi six times:
 
@@ -114,12 +114,11 @@ class DelphiBindingEnergy( object ):
     The most important Delphi parameters (dielectric, salt concentration, 
     grid scales, ion and probe radius) can be adjusted by passing parameters
     to the constructor (see documentation of __init__). The default parameters
-    should be reasonable, apart perhaps from the grid settings -- By default,
+    should be reasonable. By default,
     we create a grid that covers every linear dimension to at least 60% 
-    (perfil=60) and has a density of only 1.2 points per Angstroem (scale=1.2). 
-    Recommended are higher densities of 2 or more points per Angstroem.
-    Higher densities come at much larger computational cost. It is recommended
-    to test different values and average results.
+    (perfil=60) and has a density of 2.3 points per Angstroem (scale=2.3). 
+    Such high densities come at much larger computational cost. It is
+    recommended to test different values and average results.
     
     Note: Any parameters that are not recognized by 
     DelphiBindingEnergy() will be passed on to the Biskit.Delphi instance
@@ -141,8 +140,10 @@ class DelphiBindingEnergy( object ):
     generally be a good idea but the automatic discovery of premature C-termini
     or N-termini is guess work at best. See L{Biskit.PDBCleaner} for a more
     detailed discussion. You can override the default behaviour by setting
-    autocap=False (no capping at all) and then provide a complex structure
-    that is already pre-treated by L{Biskit.Reduce}. For example:
+    autocap=False (no capping at all, this is now the default) and you can 
+    then provide a complex structure that is already pre-treated by 
+    L{Biskit.Reduce}.
+    For example:
     
     >>> m = PDBModel('mycomplex.pdb')
     >>> m = Reduce( m, capN=[0], capC=[2] )
