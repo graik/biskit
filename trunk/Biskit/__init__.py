@@ -77,12 +77,11 @@ try:
     from SurfaceRacer import SurfaceRacer, SurfaceRacer_Error
     from DSSP import Dssp, Dssp_Error
     from FuzzyCluster import FuzzyCluster
-    from PDBDope import PDBDope
+
     from tmalign import TMAlign
     from reduce import Reduce
 
     from ModelList import ModelList
-    from Ramachandran import Ramachandran
     from CommandLine import CommandLine
     
     from amberResidues import AmberResidueType, AmberPrepParser
@@ -90,7 +89,10 @@ try:
                                     AmberResidueLibraryError
     from atomCharger import AtomCharger
     from delphi import Delphi, DelphiError
-    
+
+    from PDBDope import PDBDope
+    from Ramachandran import Ramachandran
+
 ## experimental modules
     from residue import Residue
 

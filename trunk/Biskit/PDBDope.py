@@ -34,6 +34,7 @@ from Biskit.Hmmer import Hmmer
 from Biskit.DSSP import Dssp
 from Biskit.Fold_X import Fold_X
 from Biskit.SurfaceRacer import SurfaceRacer
+from Biskit.delphi import Delphi, DelphiError
 
 
 class PDBDope:
@@ -333,6 +334,62 @@ class PDBDope:
         x.run()
 
         return x
+    
+    def addDelphi( self, **kw ):
+        """
+        Calculate electrostatic potentials and potential maps with Delphi.
+        See L{Biskit.Delphi} for details. The same options apply. By default,
+        the DelPhi wrapper uses the program reduce to assign hydrogens and then
+        maps Amber partial atomic charges into the structure. The result of the
+        calculation is stored in the info dict of the model. Example:
+        
+        >>> dope = PDBDope( model )
+        >>> dope.addDelphi()
+        >>> print model.info['delphi']
+        
+            {'scharge' :  1.4266   # surface charge
+            'egrid' :  9105.51    # total grid energy
+            'ecoul' :  -9849.664  # couloumb energy
+            'erxn'  :  -664.7469   # corrected reaction field energy
+            'erxnt' :  -21048.13  # total reaction field energy
+            'eself' :  -20383.39 }  # self reaction field energy
+            
+        The same dictionary is also returned by this method.
+        
+        @param f_map   : output file name for potential map [None= discard]
+        @type  f_map   : str
+        @param addcharge: build atomic partial charges with AtomCharger
+                          [default: True]
+        @type  addcharge: bool
+        
+        @param protonate: (re-)build hydrogen atoms with reduce program (True)
+                          see L{Biskit.Reduce}
+        @type  protonate: bool
+        @param autocap: add capping NME and ACE residues to any (auto-detected)
+                        false N- or C-terminal and chain breaks (default: False)
+                        see L{Biskit.Reduce} and L{Biskit.PDBCleaner}
+        @type  autocap: bool
+
+        @param indi: interior dilectric (4.0)
+        @param exdi: exterior dielectric (80.0)
+        @param salt: salt conc. in M (0.15)
+        @param ionrad: ion radius (2)
+        @param prbrad: probe radius (1.4) 
+        @param bndcon: boundary condition (4, delphi default is 2)
+        @param scale:  grid spacing (2.3)
+        @param perfil: grid fill factor in % (for automatic grid, 60) 
+
+        @raise ExeConfigError: if external application (delphi, reduce) is 
+                               missing
+        
+        @return: dict with delphi results
+        @rtype: {str: float}
+        """
+        d = Delphi( self.m, **kw )
+        r = d.run()
+        
+        self.m.info['delphi'] = r
+        return r
 
 #############
 ##  TESTING        
@@ -438,8 +495,6 @@ class LongTest( BT.BiskitTest ):
 
     def test_conservation(self):
         """PDBDope.addConservation (Hmmer) test"""
-        self.local = 0
-
         if self.local: print "Adding conservation data...",
         self.d.addConservation()
         if self.local: print 'Done.'
@@ -454,6 +509,17 @@ class LongTest( BT.BiskitTest ):
             pm.colorAtoms( 'm', N.clip(self.M.profile('cons_ent'), 0.0, 100.0) )
             pm.show()
 
+    def test_delphi(self):
+        """PDBDope.addDelphi test"""
+        if self.local:
+            self.log.add( 'Calculating Delphi electrostatic potential' )
+            self.log.add( '' )
+
+        self.d.addDelphi( scale=1.2 )
+        
+        self.assertAlmostEqual( self.M['delphi']['scharge'], 0.95, 1 )
+        
+        
 
 class OldTest( BT.BiskitTest ):
 
@@ -477,21 +543,3 @@ if __name__ == '__main__':
 
     BT.localTest()  ## pushes test PDBDope instance as 'd' into namespace
 
-##     from Biskit import PDBModel
-##     f = T.testRoot() + '/com/1BGS.pdb'
-
-##     M = PDBModel( f )
-##     M = M.compress( M.maskProtein() )
-
-
-##     d = PDBDope( M )
-
-##     d.addSecondaryStructure()
-
-##     d.addFoldX()
-
-##     d.addDensity()
-
-##     d.addSurfaceRacer( probe=1.4 )
-
-##     d.addSurfaceMask()
