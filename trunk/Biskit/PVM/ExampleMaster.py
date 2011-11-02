@@ -89,7 +89,7 @@ class Test(BT.BiskitTest):
     def test_ExampleMaster(self):
         """PVM.ExampleMaster test"""
 
-        hosts = cpus_all[:8]
+        hosts = cpus_all[:3]
 
         niceness = {'default': 20}
 
