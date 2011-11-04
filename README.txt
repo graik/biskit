@@ -21,7 +21,8 @@ and Hmmer; interfaces to further software can be added
 easily. Moreover, Biskit simplifies the parallelisation of
 calculations via PVM (Parallel Virtual Machine).
 
-In this document:  * Release 2.3.1
+In this document:  * Release 2.4
+                   * Release 2.3.1
                    * Release 2.3
                    * Release 2.2
 		   * Release 2.1.0-beta
@@ -31,12 +32,84 @@ In this document:  * Release 2.3.1
 		   * License
 		   * Open issues
 
-Release 2.4 (upcoming)
-----------------------
+Release 2.4
+-----------
 
-* TM-Align structure alignment wrapper and integration into PDBModel
-  - new class(Executor): TMAlign
+This Biskit release was long overdue. Even though I didn't have much
+time to work on Biskit for most of the last two years, a lot of
+changes and improvements have accumulated, especially over the last
+months. The SVN trunk is now quite different from the last
+release. This release is (or should be) still backward-compatible to
+binary pickled data from all previous releases. I haven't insisted any
+longer on compatibility with the old Python 2.4. If anyone still needs
+support for that, patches can be generated quite easily -- please send
+me (Raik) a mail. The "classic" Python versions 2.5 upwards should
+work. A conversion to Python 3.0 is planned but will require some more
+effort.
+
+The most important new features:
+
+* TM-Align: structure alignment wrapper and integration into PDBModel
+  - new class: TMAlign
   - new method in PDBModel: structureFit()
+
+* Reduce: a wrapper for the reduce program to optimize hydrogen
+  bonding networks, assign protonation states to His and add hydrogens
+  to a structure.
+
+* AtomCharger: maps partial atomic charges from Amber prep/topology
+  files into the residues of a given structure.
+
+* Delphi: wrapper (and more) for automatted calculations of
+  electrostatic potentials with the DelPhi Poisson-Boltzmann solver
+
+* DelphiBindingEnergy: workflow for the calculation of electrostatic
+  free energies of binding (with Delphi) for a given complex
+
+* Support for DNA and RNA residues in entropy and other calculations
+
+* BioModel: extract and apply the biological relevant unit from PDB
+  file (by Alexander Gryzlov)
+
+
+Smaller improvements:
+
+* new plotting methods for ProfileCollection (e.g. histograms)
+
+* DNA/RNA support in PDBModel.maskBB() (backbone)
+
+* also report PDB chain IDs in PDBModel.report()
+
+* improved support for empty PDBModels, e.g. concatenation to and from
+
+* re-written and simplified the recognition of sequence repeats in
+  that is used by PDBModel.compareAtoms()
+
+* Executor: allow bundling of temporary files into temporary directory
+
+* changed identification of chain breaks
+
+* additional test cases
+
+* updated Amber related tools (AmberParmBuilder, entropy-related classes)
+  to Amber version 11
+
+... and many fixes for old bugs without, hopefully, introducing too
+many new ones.
+
+
+Unfortunately, there are also some things that will NOT work right now:
+
+* the new version of HMMer and mofifications to Pfam have killed the
+  Biskit wrapper which probably would need to be re-written almost
+  from scratch -- the PDBDope.addConservation doesn't currently work
+
+* the Fold-X wrapper is very outdated and has not been updated to the
+  latest versions
+
+As always, feel free to send your comments or questions!
+Good luck!
+Raik
 
 
 Release 2.3.1
