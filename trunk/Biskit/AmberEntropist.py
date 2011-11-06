@@ -210,17 +210,17 @@ class AmberEntropist( AmberCrdEntropist ):
         if not os.path.exists( self.f_parm ):
             self.buildParm()
         else:
-            self.log.add('using existing %s' % self.f_parm)
+            if self.verbose: self.log.add('using existing %s' % self.f_parm)
 
         ## create Amber Crd file for ptraj
         if not os.path.exists( self.f_crd ):
-            self.log.write('Writing amber crd file...')
+            if self.verbose: self.log.write('Writing amber crd file...')
             self.traj.writeCrd( self.f_crd )
-            self.log.add('done')
+            if self.verbose: self.log.add('done')
             ## release memory
             if self.memsave: self.traj = None
         else:
-            self.log.add('using existing %s' % self.f_crd)
+            if self.verbose: self.log.add('using existing %s' % self.f_crd)
 
 
     def buildParm( self ):
@@ -229,10 +229,11 @@ class AmberEntropist( AmberCrdEntropist ):
         """
         a = AmberParmBuilder( self.traj.ref, verbose=self.verbose,
                               debug=self.debug )
-        self.log.write('Building amber topology...')
+        if self.verbose: self.log.write('Building amber topology...')
 
         a.parmMirror( self.f_parm, self.parmcrd )
-        self.log.add('Topology built')
+        
+        if self.verbose: self.log.add('Topology built')
 
 
     def fit( self, traj, refModel=None, mask=None, conv=1e-6 ):
@@ -265,17 +266,20 @@ class AmberEntropist( AmberCrdEntropist ):
             m_new_avg = traj[self.fit_s : self.fit_e].avgModel()
 
             oldD, d    = d, m_avg.rms( m_new_avg, mask=mask )
-            self.log.add( "rms difference: %f" % d )
+
+            if self.verbose:
+                self.log.add( "rms difference: %f" % d )
 
             dd = oldD - d
             m_avg = m_new_avg
 
         ## transform trajectory en block onto reference
         if refModel:
-            self.log.add('fitting trajectory en-block onto reference...')
+            if self.verbose:
+                self.log.add('fitting trajectory en-block onto reference...')
 
             if refModel.atomNames() != traj.ref.atomNames():
-                self.log.add('casting ref for fitting...')
+                if self.verbose: self.log.add('casting ref for fitting...')
                 ref_i, i = refModel.compareAtoms( m_avg )
 
                 refModel = refModel.take( ref_i )
@@ -447,7 +451,9 @@ class AmberEntropist( AmberCrdEntropist ):
             return traj
 
         members = range( traj.n_members )
-        self.log.add("excluding members: " + str(exclude))
+
+        if self.verbose:
+            self.log.add("excluding members: " + str(exclude))
 
         return traj.takeMembers( MU.difference( members, exclude ) )
 
@@ -574,9 +580,10 @@ class AmberEntropist( AmberCrdEntropist ):
         ## joint fit
         if not self.split:
             self.fit( t, ref )
-
-        self.log.add( 'Analysing trajectory with %i atoms and %i frames.' \
-                      % (t.lenAtoms(), t.lenFrames()))
+            
+        if self.verbose:
+            self.log.add( 'Analysing trajectory with %i atoms and %i frames.' \
+                          % (t.lenAtoms(), t.lenFrames()))
 
         return t
 
@@ -594,9 +601,9 @@ class AmberEntropist( AmberCrdEntropist ):
         flock = fname + '__locked'
 
         while os.path.exists( flock ):
-            self.log.write('~')
+            if self.verbose: self.log.write('~')
             time.sleep( random.random() * 10 )
-        self.log.add('')
+        if self.verbose: self.log.add('')
 
         try:
             f = open( flock, 'w' )
@@ -629,7 +636,7 @@ class AmberEntropist( AmberCrdEntropist ):
             self.stop  = (self.sstop  or 0) * traj.n_members
         if (self.sstart or self.sstop) and not isinstance(traj, EnsembleTraj):
             self.start, self.stop = self.sstart, self.sstop
-            self.log.add('Warning: I am using -ss -se instead of -s -e')
+            if self.verbose: self.log.add('Warning: I am using -ss -se instead of -s -e')
         ## remove unwanted frames
         if self.start or self.stop:
             start, stop = self.start, self.stop or len(traj)
@@ -645,7 +652,9 @@ class AmberEntropist( AmberCrdEntropist ):
             self.thin_i = self.thin_i or \
                           MU.randomRange(0, len( traj ), targetLength )
             traj = traj.takeFrames( self.thin_i )
-            self.log.add( "Thinned to %i frames." % len( traj ) )
+
+            if self.verbose:
+                self.log.add( "Thinned to %i frames." % len( traj ) )
 
         ## keep only allowed atoms (default: all)
         if self.atoms:
@@ -657,13 +666,17 @@ class AmberEntropist( AmberCrdEntropist ):
         if not self.solvent:
             l = traj.lenAtoms()
             traj = traj.compressAtoms( N.logical_not(traj.ref.maskSolvent()) )
-            self.log.add('%i solvent/ion atoms deleted.'% (l- traj.lenAtoms()))
+
+            if self.verbose:
+                self.log.add('%i solvent/ion atoms deleted.'% (l- traj.lenAtoms()))
 
         ## delete hydrogens, if requested
         if self.heavy:
             l = traj.lenAtoms()
             traj = traj.compressAtoms( traj.ref.maskHeavy() )
-            self.log.add('%i hydrogens deleted.' % (l - traj.lenAtoms()) )
+            
+            if self.verbose:
+                self.log.add('%i hydrogens deleted.' % (l - traj.lenAtoms()) )
 
         return traj
 
@@ -679,7 +692,8 @@ class AmberEntropist( AmberCrdEntropist ):
             raise EntropistError, 'shift requires EnsembleTraj'
 
         r = range( shift, traj.n_members ) + range( shift )
-        self.log.add('reorder member trajectories: %s...' % str( r ) )
+        if self.verbose:
+            self.log.add('reorder member trajectories: %s...' % str( r ) )
 
         return traj.takeMembers( r )
 
@@ -700,15 +714,18 @@ class AmberEntropist( AmberCrdEntropist ):
         l    = traj.lenAtoms()
         lref = len( refModel )
 
-        self.log.add('comparing traj with %i atoms to reference of %i atoms.'%\
-                     (l, lref))
+        if self.verbose:
+            self.log.add('comparing traj with %i atoms to reference of %i atoms.'%\
+                         (l, lref))
         i, iRef = traj.ref.compareAtoms( refModel )
 
         refModel.keep( iRef )
-        self.log.add("%i atoms deleted from reference."%(lref-len(refModel)))
+        if self.verbose:
+            self.log.add("%i atoms deleted from reference."%(lref-len(refModel)))
 
         traj.keepAtoms( i )
-        self.log.add( "%i atoms deleted from trajectory."% (l-len(i) ) )
+        if self.verbose:
+            self.log.add( "%i atoms deleted from trajectory."% (l-len(i) ) )
 
 
     def tripples( self, lst, n ):
