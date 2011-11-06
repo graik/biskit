@@ -127,6 +127,8 @@ class AmberParmBuilder:
         self.leap_out= leap_out
 
         self.log = log or StdLog()
+        
+        self.output = None   # last output of leap
 
         self.debug = debug
         self.verbose = verbose
@@ -161,6 +163,7 @@ class AmberParmBuilder:
             x.generateInp()
         else:
             x.run()
+            self.output = x.output
         
 ##         ## create leap script
 ##         try:
@@ -638,14 +641,16 @@ class Test( BT.BiskitTest ):
         self.wetparm = tempfile.mktemp('.parm', 'wet_')
         self.wetcrd  = tempfile.mktemp('.crd', 'wet_')
         self.wetpdb  = tempfile.mktemp('.pdb', 'wet_')
+        self.leapout = tempfile.mktemp('.out', 'leap_')
 
     def cleanUp(self):
-        T.tryRemove( self.dryparm )
-        T.tryRemove( self.drycrd )
-        T.tryRemove( self.drypdb )
-        T.tryRemove( self.wetparm )
-        T.tryRemove( self.wetcrd )
-        T.tryRemove( self.wetpdb )
+        if not self.debug:
+            T.tryRemove( self.dryparm )
+            T.tryRemove( self.drycrd )
+            T.tryRemove( self.drypdb )
+            T.tryRemove( self.wetparm )
+            T.tryRemove( self.wetcrd )
+            T.tryRemove( self.wetpdb )
         
 
     def test_AmberParmMirror(self):
@@ -655,6 +660,7 @@ class Test( BT.BiskitTest ):
         self.mdry = ref.compress( mask )
 
         self.a = AmberParmBuilder( self.mdry, verbose=self.local,
+                                   leap_out=self.leapout,
                                    debug=self.DEBUG )
 
         self.a.parmMirror(f_out=self.dryparm,
@@ -676,6 +682,7 @@ class Test( BT.BiskitTest ):
         self.mdry = self.mdry.compress( self.mdry.maskHeavy() )
 
         self.a = AmberParmBuilder( self.mdry,
+                                   leap_out=self.leapout,
                                    verbose=self.local, debug=self.DEBUG)
 
         self.a.parmSolvated( self.wetparm, f_out_crd=self.wetcrd,
@@ -694,4 +701,4 @@ class Test( BT.BiskitTest ):
 
 if __name__ == '__main__':
 
-    BT.localTest()
+    BT.localTest(debug=False)
