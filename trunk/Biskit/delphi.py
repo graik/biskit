@@ -649,8 +649,8 @@ class Test(BT.BiskitTest):
     MODEL= None
 
     def prepare( self ):
-        self.fcrg = tempfile.mktemp( 'delphicharges_', '.crg' )
-        self.fmap = tempfile.mktemp( 'delphimap_', '.phi' )
+        self.fcrg = tempfile.mktemp( '.crg', 'delphicharges_' )
+        self.fmap = tempfile.mktemp( '.phi','delphimap_' )
 
         
     def cleanUp( self ):
