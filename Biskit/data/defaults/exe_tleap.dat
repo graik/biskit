@@ -23,6 +23,7 @@ replaceEnv=0
 ## default Amber force field; should be relative to $AMBERHOME
 ## can also be a file ending of a leaprc file in $AMBERHOME/dat/leap/cmd
 leaprc=ff03.r1
+#leaprc=ff10
 
 ##
 ## run time environment settings
