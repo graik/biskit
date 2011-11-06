@@ -200,20 +200,20 @@ class Test( BT.BiskitTest ):
     def test_AmberLeap_findLeaprc(self):
         """AmberLeap.findLeaprc test"""
         self.x = AmberLeap(self.template)
-        target = P.join(self.x.exe.env['AMBERHOME'], 'dat/leap/cmd/leaprc.ff99')
+        target = P.join(self.x.exe.env['AMBERHOME'], 'dat/leap/cmd/leaprc.ff10')
 
         if self.local:
             self.log.add( '\ntarget leaprc: %s' % target )
         
-        self.assertEqual( self.x.findLeaprc('ff99'), target )
-        self.assertEqual( self.x.findLeaprc('leaprc.ff99'), target )
-        self.assertEqual( self.x.findLeaprc('dat/leap/cmd/leaprc.ff99'), target)
+        self.assertEqual( self.x.findLeaprc('ff10'), target )
+        self.assertEqual( self.x.findLeaprc('leaprc.ff10'), target )
+        self.assertEqual( self.x.findLeaprc('dat/leap/cmd/leaprc.ff10'),target)
         self.assertEqual( self.x.findLeaprc( target ), target )
 
     def test_AmberLeap_run( self ):
         """AmberLeap.run test"""
         self.x = AmberLeap( self.template,
-                            leaprc='ff03',
+                            leaprc='ff03.r1',
                             leap_out=self.flog,
                             fmod='', fprep='', ss_bonds='', box=12.5,
                             in_pdb=self.fpdb,
