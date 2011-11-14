@@ -54,7 +54,7 @@ class AmberEntropist( AmberCrdEntropist ):
                   chains=None, border=None, split=0, shift=0, shuffle=0,
                   thin=None,
                   s=0, e=None, ss=0, se=None, step=1, atoms=None, heavy=0,
-                  solvent=0,
+                  solvent=0, protein=0,
                   ex=[], ex_n=0, ex3=None, ex1=None,
                   fit_s=None, fit_e=None, memsave=1,
                   **kw ):
@@ -105,6 +105,8 @@ class AmberEntropist( AmberCrdEntropist ):
         @type  atoms: [str]
         @param heavy: remove hydrogens (default: 0)
         @type  heavy: 1|0
+        @param protein: remove all non-protein atoms (default: don't)
+        @type  protein: 1|0
         @param solvent: retain solvent and ions (default: 0)
         @type  solvent: 1|0
         @param ex: exclude member trajectories
@@ -172,6 +174,7 @@ class AmberEntropist( AmberCrdEntropist ):
         self.sstop  = se     ## self.stop  is assigned by AmberCrdEntropist
         self.heavy  = heavy
         self.solvent = solvent
+        self.protein = protein
         self.atoms  = atoms
         self.memsave= memsave
 
@@ -189,10 +192,10 @@ class AmberEntropist( AmberCrdEntropist ):
         else:
             self.ex1 = ex1-1
 
-        ## delete non-protein atoms
+        ## filter atoms
         self.ref = self.prepareRef( ref )
 
-        ## delete non-protein atoms, cast to ref, fit to average and ref
+        ## filter atoms, cast to ref, fit to average and ref
         self.traj = self.prepareTraj( traj, self.ref, cast=self.cast )
         self.nframes = len( self.traj )
 
@@ -321,7 +324,8 @@ class AmberEntropist( AmberCrdEntropist ):
         @return: cleaned model
         @rtype: PDBModel      
         """
-        m.keep( N.nonzero( m.maskProtein() ) )
+        if self.protein:            
+            m.keep( N.nonzero( m.maskProtein() ) )
         if self.heavy:
             m.keep( N.nonzero( m.maskHeavy() ) )
         return m

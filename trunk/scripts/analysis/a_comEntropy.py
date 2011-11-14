@@ -82,6 +82,7 @@ Options:
                   (only works with EnsembleTraj; overrides s,e)
         atoms   - [ str ], names of atoms to consider       [all]
         heavy   - delete all hydrogens                      [don't]
+        protein - delete non-protein atoms                  [don't]
         step    - int, frame offset                         [no offset]
         thin    - float, use randomly distributed fraction of frames [all]
                   (similar to step but sometimes better)
@@ -129,7 +130,8 @@ for k in [ 'zfilter', 'thin', 'mem']:
     if k in options:
         options[k] = float( options[k] )
 
-for k in ['debug', 'verbose', 'cast', 'clean', 'w', 'all', 'heavy', 'jack']:
+for k in ['debug', 'verbose', 'cast', 'clean', 'w', 'all', 'heavy', 'jack',
+          'protein']:
     if k in options:
         options[k] = 1
 
