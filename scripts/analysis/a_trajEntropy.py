@@ -57,6 +57,7 @@ Options:
         atoms      considered atoms (default: all)
         heavy      remove hydrogens (default: don't)
         solvent    retain solvent atoms and ions (default: don't)
+        protein    remove non-protein atoms (default: don't)
         ref        pickled PDBModel, Complex, or Trajectory
         cast       equalize atom content of traj and ref         [no]
         chains     list of integer chain indices e.g -chains 0 1 [all]
@@ -118,7 +119,7 @@ for k in ['s','e','ss', 'se', 'step','fit_s', 'fit_e', 'nice','thin', 'ex_n',
         options[k] = int( options[k] )
 
 for k in ['debug', 'verbose', 'cast', 'split', 'shuffle', 'shift', 'heavy',
-          'solvent']:
+          'solvent', 'protein']:
     if k in options:
         options[k] = 1
     else:

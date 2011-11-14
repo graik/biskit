@@ -136,6 +136,7 @@ class AmberEntropyMaster(TrackingJobMaster):
           cast    - 1|0, equalize free and bound atom content [1]
           s,e     - int, start and stop frame                 [0, to end]
           atoms   - [ str ], names of atoms to consider       [all]
+          protein - 1|0, remove non-protein atoms             [0..don't]
           step    - int, frame offset                         [no offset]
           thin    - float, use randomly distributed fraction of frames [all]
                     (similar to step but perhaps better for entropy
