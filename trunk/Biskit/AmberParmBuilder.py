@@ -64,6 +64,26 @@ class AmberParmBuilder:
 
     Requires the amber programs C{tleap} and C{ambpdb}.
     Requires leap template files in C{biskit/Biskit/data/amber/leap/}.
+    
+    Note on forcefields:
+
+       The default forcefield used is specified in exe_tleap and currently
+       is ff10. This translates to loading amber11/dat/leap/cmd/leaprc.ff10
+       at the beginning of the leap run. As of 2011, ff10 is the recommended
+       default forcefield for proteins and nucleic acids.
+       Comment from Jason Swails on the Amber mailing list: 
+       "
+       Try using ff99SB (which is the protein force field part of ff10, which is
+       the version I would actually suggest using).  Despite its label, it is
+       actually a 2006 update of the ff99 force field which performs at least as
+       well (if not better) as ff03."
+       
+       Unfortunately, ions are only "half" paramterized in ff10. Additional 
+       parameters need to be loaded from a frmod file, typically 
+       frcmod.ionsjc_tip3p. There are additional versions of this file optimized
+       for other water models than TIP3. frcmod.ionsjc_tip3p is set as the 
+       default frmod file to include by parmSolvated and parmMirror. Please
+       include it if you provide your own list of frmod files.
 
     @note: The design of AmberParmBuilder is less than elegant. It
            would make more sense to split it into two classes that
@@ -415,7 +435,7 @@ class AmberParmBuilder:
     def parmSolvated( self, f_out, f_out_crd=None, f_out_pdb=None,
                       hetatm=0, norun=0,
                       cap=0, capN=[], capC=[],
-                      fmod=[], fprep=[],
+                      fmod=['frcmod.ionsjc_tip3p'], fprep=[],
                       box=10.0, **kw ):
         """
         @param f_out: target file for parm (topology)
@@ -437,7 +457,10 @@ class AmberParmBuilder:
         @param box: minimal distance of solute from box edge (default: 10.0)
         @type  box: float
         @param fmod: list of files with amber parameter modifications
-                    (to be loaded into leap with loadAmberParams) (default:[])
+                     to be loaded into leap with loadAmberParams
+                    (default:['frcmod.ionsjc_tip3p'] ... mod file needed for 
+                    default Amber ff10 ions -- topology saving will fail if this 
+                    one is missing)
         @type  fmod: [str]
         @param fprep: list of files with amber residue definitions
                     (to be loaded into leap with loadAmberPrep) (default: [])
@@ -549,7 +572,8 @@ class AmberParmBuilder:
         return N.nonzero( N.logical_not( mask ) )
 
 
-    def parmMirror( self, f_out, f_out_crd=None, fmod=[], fprep=[], **kw ):
+    def parmMirror( self, f_out, f_out_crd=None, fmod=['frcmod.ionsjc_tip3p'], 
+                    fprep=[], **kw ):
         """
         Create a parm7 file whose atom content (and order) exactly mirrors
         the given PDBModel. This requires two leap runs. First we get a
@@ -675,7 +699,7 @@ class Test( BT.BiskitTest ):
         self.assert_( eq.all() )
 
 
-    def test_AmberParmSolvated( self ):
+    def __test_AmberParmSolvated( self ):
         """AmberParmBuilder.parmSolvated test"""
         ## remove waters and hydrogens
         self.mdry = self.ref.compress( self.ref.maskProtein() )
@@ -701,4 +725,4 @@ class Test( BT.BiskitTest ):
 
 if __name__ == '__main__':
 
-    BT.localTest(debug=False)
+    BT.localTest(debug=True)
