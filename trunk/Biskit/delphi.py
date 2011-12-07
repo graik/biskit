@@ -471,7 +471,7 @@ class Delphi( Executor ):
             if not gsize % 2:
                 gsize += 1
                 
-            self.gsize = gsize
+        self.gsize = gsize
         
         return self.getGrid()
     
