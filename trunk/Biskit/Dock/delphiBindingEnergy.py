@@ -433,7 +433,7 @@ class Test(BT.BiskitTest):
                                        verbose=self.local )
         self.r = self.dG.run()
 
-        self.assertAlmostEqual( self.r['dG_kt'], 21.6, 1 )
+        self.assertAlmostEqual( self.r['dG_kt'], 21., 0 )
 
         if self.local:
             self.log.add(
