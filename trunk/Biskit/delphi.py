@@ -593,6 +593,12 @@ class Delphi( Executor ):
         s = 'Delphi failed. Please check the program output in the '+\
           'field `output` of this Delphi instance (e.g. `print x.output`)!\n'
         self.log.add( s )
+        if self.output:
+            s = 'The last message from DelPhi reads as follows:\n'
+            s += '\n'.join( self.output.split('\n')[-3:] )
+            self.log.add( s )
+        else:
+            self.log.add( 'There does not seem to be any DelPhi output.')
 
         raise DelphiError, s
 
@@ -684,8 +690,7 @@ class Test(BT.BiskitTest):
                   'eself': -20383.4, 'erxn': -666.7}
         
         for k, v in expect.items():
-            self.assertAlmostEqual( expect[k], self.r[k], 0, 
-                                    'missmatch in energy values: '+k)
+            self.assertAlmostEqual( expect[k], self.r[k], 0 )
         
         self.assert_(os.path.exists( self.fmap ), 'Potential map not found' )
         self.assert_(os.path.getsize( self.fmap) > 1000, 'empty potential map')

@@ -426,7 +426,7 @@ class Test(BT.BiskitTest):
 
     TAGS = [ BT.EXE, BT.LONG ]
     
-    def test_bindingE( self ):
+    def __test_bindingE( self ):
         """bindingEnergyDelphi test (Barnase:Barstar)"""
         self.com = T.load( T.testRoot() + '/com/ref.complex' )
         self.dG = DelphiBindingEnergy( self.com, log=self.log, scale=1.2,
@@ -438,6 +438,22 @@ class Test(BT.BiskitTest):
         if self.local:
             self.log.add(
                 '\nFinal result: dG = %3.2f kcal/mol'%self.r['dG_kcal'])
+            
+    def test_errorcase1( self ):
+        """bindinEnergyDelphi test (error case 01)"""
+        self.m = PDBModel( T.testRoot() + '/delphi/case01.pdb' )
+        rec = self.m.takeChains( [0,1] )
+        lig = self.m.takeChains( [2] )
+        self.com = Complex( rec, lig )
+        
+        self.dG = DelphiBindingEnergy( self.com, log = self.log, scale=0.5,
+                                       verbose=self.local )
+        self.r = self.dG.run()
+
+        if self.local:
+            self.log.add(
+                '\nFinal result: dG = %3.2f kcal/mol'%self.r['dG_kcal'])
+        
 
 if __name__ == '__main__':
 
