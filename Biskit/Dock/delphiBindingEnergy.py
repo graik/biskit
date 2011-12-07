@@ -426,7 +426,7 @@ class Test(BT.BiskitTest):
 
     TAGS = [ BT.EXE, BT.LONG ]
     
-    def __test_bindingE( self ):
+    def test_bindingE( self ):
         """bindingEnergyDelphi test (Barnase:Barstar)"""
         self.com = T.load( T.testRoot() + '/com/ref.complex' )
         self.dG = DelphiBindingEnergy( self.com, log=self.log, scale=1.2,
