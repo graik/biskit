@@ -1,0 +1,18 @@
+# Header for generate.inp with Amber FF
+# use with pdb2xplor.py
+#
+# lines starting with '#' will not be copied into the xplor input file
+
+! Generate structure file for Amber FF
+
+topology		! read topology file
+    reset
+    @@%(data_root)s/xplor/toppar_amber/topamber.inp
+    @@%(data_root)s/xplor/toppar_amber/patches.pro
+end                       
+
+parameter               ! Read parameter file
+    reset
+    @@%(data_root)s/xplor/toppar_amber/paramber.gb.inp
+end
+

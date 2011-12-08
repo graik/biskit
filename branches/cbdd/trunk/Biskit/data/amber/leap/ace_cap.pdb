@@ -1,0 +1,21 @@
+REMARK used by AmberParmBuilder to fit an ACE capping on the N-terminal of a
+REMARK peptide chain
+REMARK
+REMARK $Author$
+REMARK $Revision$
+REMARK $Date$
+REMARK
+ATOM      1  CH3 ACE     1      28.889  16.024  65.993  0.00  0.00           C
+ATOM      2  C   ACE     1      27.531  15.721  66.607  0.00  0.00           C
+ATOM      3  O   ACE     1      27.431  15.128  67.686  0.00  0.00           O
+ATOM      4  N   ALA     2      26.479  16.008  65.743  0.00  0.00           N
+ATOM      5  H   ALA     2      26.645  16.402  64.828  0.00  0.00           H
+ATOM      6  CA  ALA     2      25.063  15.770  66.167  0.00  0.00           C
+ATOM      7  HA  ALA     2      25.001  14.849  66.747  0.00  0.00           H
+ATOM      8  CB  ALA     2      24.559  16.933  67.037  0.00  0.00           C
+ATOM      9  C   ALA     2      24.181  15.647  64.930  0.00  0.00           C
+CONECT    2    1    3    4
+CONECT    1    2
+CONECT    3    2
+CONECT    4    2    5    6
+END

@@ -1,0 +1,13 @@
+REMARK used by AmberParmBuilder to fit an NME capping on the C-terminal of a
+REMARK peptide chain
+REMARK
+REMARK $Author$
+REMARK $Revision$
+REMARK $Date$
+REMARK
+ATOM      3   CA ALA     1      50.057  20.665  20.358
+ATOM      5    C ALA     1      51.346  19.983  20.816
+ATOM      6    O ALA     1      52.424  20.465  21.162
+ATOM      7    N NME     2      51.290  18.540  20.848
+ATOM      8    H NME     2      50.442  18.061  20.579
+ATOM      9  CH3 NME     2      52.425  17.739  21.258

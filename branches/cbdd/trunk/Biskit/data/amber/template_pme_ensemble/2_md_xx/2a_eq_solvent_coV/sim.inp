@@ -1,0 +1,42 @@
+10ps constant volume MD heating up solvent
+ &cntrl
+  ig     = %(rand_seed)i,
+  ntx    = 1,       irest  = 0,
+  lastist= 3000000,
+  lastrst= 3000000,
+  ntpr   = 50,
+  ntwr=5000, ntwx=500, ntwv=500,
+  ntb    = 1,
+  cut    = 9.0,
+  ntr    = 1,
+  nmropt = 1,
+  imin   = 0,
+  nstlim = 10000,
+  dt     = 0.001,   nrespa = 2,
+  ntc    = 2,       tol    = 0.00001,
+  ntf    = 2,
+  temp0  = 300.0,   tempi  = 100.0,
+  ntt    = 1,
+  vrand  = 1000,    nscm   = 1010,
+  ntb    = 1,
+  restraint_wt=50.0,
+  restraintmask=' :1-%(lenres)i',
+ &end
+ &wt
+   type='TEMP0', istep1=0,     istep2=1000,
+                 value1=100.0, value2=100.0,
+ &end
+ &wt
+   type='TEMP0', istep1=1001,   istep2=9000,
+                 value1=100.0,  value2=300.0,
+ &end
+ &wt
+   type='TEMP0', istep1=9001,  istep2=10000,
+                 value1=300.0, value2=300.0,
+ &end
+ &wt
+   type='END',
+ &end
+ &rst
+   iat=0,
+ &end
