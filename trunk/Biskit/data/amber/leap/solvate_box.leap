@@ -1,0 +1,32 @@
+## $Revision$
+## $Date$
+## last $Author$
+##
+## Build Amber topology from cleaned PDB file
+## to be used with AmberParmBuilder.py
+
+logFile %(f_out)s
+
+source %(leaprc)s
+
+%(fmod)s
+%(fprep)s
+
+p = loadPdb %(in_pdb)s
+
+%(ss_bonds)s
+
+solvateBox p TIP3PBOX %(box)f
+#amber 7: solvateBox p WATBOX216 %(box)f
+
+addIons p Na+ 0
+
+addIons p Cl- 0
+
+check p
+
+center p
+
+saveAmberParm p %(out_parm)s %(out_crd)s 
+
+quit

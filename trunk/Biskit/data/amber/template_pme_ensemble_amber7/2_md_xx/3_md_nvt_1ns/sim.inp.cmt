@@ -1,0 +1,48 @@
+constant volume MD
+ &cntrl
+# random seed
+  ig     = %(rand_seed)i,
+
+# increase stack frame size for bigger systems
+  lastist= 4000000,
+  lastrst= 4000000,
+
+# restart from x and v
+  ntx    = 5,       irest  = 1,
+
+# frequency of report to: out, restart file, crd, vel
+  ntpr   = 500,
+  ntwr=5000, ntwx=%(ntwx)i, ntwv=%(ntwv)i,
+# last atom to write coordinates for (don't write solvent)
+  ntwprt = %(lenatoms)i
+
+# periodic, cutoff for "direct search space" in PME
+  ntb    = 1,
+  cut    = 9.0,
+
+# dynamics, 1ns
+  imin   = 0,
+  nstlim = %(n_steps)i,
+       
+# time step, full calc every 2nd step (nrespa=1 necessary with ntp>0)
+  dt     = %(dt)f,   nrespa = 2,
+
+# Shake on
+  ntc    = 2,       tol    = 0.00001,
+# don't calculate H-bond energies
+  ntf    = 2,
+
+# target T, initial T, Behrendsen thermostat
+  temp0  = 300.0,   tempi  = 300.0,
+  ntt    = 1,
+
+# remove translation/rotation
+  nscm   = 1000,
+
+# constant volume periodic, no constant pressure 
+  ntb    = 1,
+  ntp    = 0,
+#  tautp  = 2.0,
+#  plevel = 2,
+
+ &end

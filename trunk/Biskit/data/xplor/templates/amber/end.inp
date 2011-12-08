@@ -1,0 +1,12 @@
+
+! *** Build hydrogens ***
+@@%(data_root)s/xplor/templates/amber/build_hydrogens.inp
+
+! *** rename for HEX ***
+@@%(data_root)s/xplor/templates/amber/rename_for_Hex.inp
+  
+! *** write pdb and psf files ***
+write structure output= %(pdbcode)4s.psf end
+write coor output = %(pdbcode)4s.pdb end
+
+stop

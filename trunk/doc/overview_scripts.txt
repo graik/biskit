@@ -1,0 +1,1356 @@
+.. ===================================================================
+.. Biskit, a toolkit for the manipulation of macromolecular structures
+.. Copyright (C) 2004-2005 Raik Gruenberg & Johan Leckner
+..
+.. This program is free software; you can redistribute it and/or
+.. modify it under the terms of the GNU General Public License as
+.. published by the Free Software Foundation; either version 2 of the
+.. License, or any later version.
+..
+.. This program is distributed in the hope that it will be useful,
+.. but WITHOUT ANY WARRANTY; without even the implied warranty of
+.. MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+.. General Public License for more details.
+..
+.. You find a copy of the GNU General Public License in the file
+.. license.txt along with this program; if not, write to the Free
+.. Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+..
+..
+.. last $Author$
+.. last $Date$
+.. $Revision$
+.. ===================================================================
+
+
+=======
+Content
+=======
+The biskit scripts are sorted into four sub-folders of biskit/scripts.
+Each script has a help screen which is shown if the script is called 
+without parameters or (especially in scripts/Mod) with the -help option. 
+This page simply collects the help screen of each script.
+
+* `scripts/Biskit`_ - *general purpose scripts*
+
+  + `Convenience and management`_ 
+  + `Structure sampling`_ 
+  + `Biskit Setup`_ 
+  + `Structure manipulation`_ 
+
+* `scripts/Dock`_ - *protein-protein docking*
+* `scripts/Mod`_ - *homology modeling*
+* `scripts/analysis`_ - *analysis and visualisation of results*
+    
+--------------
+scripts/Biskit
+--------------
+*General purpose scripts*
+
+
+Convenience and management
+==========================
+back to `Content`_
+
+* redump.py::
+
+   Update old python pickles. Unpickle some python objects and pickle them back
+   to the same filename.  Disable strict class checking if necessary -- this
+   allows to load classes that have meanwhile changed their base
+   class.
+
+   Usage:  redump.py  file1 file2 ..
+
+* relocalize.py::
+
+   Re-create LocalPath in PDBModel or Complex from the original
+   file name (and the current environment variables).
+
+   Usage:  relocalize.py -i |file1 file2 ..|
+
+* killpp.py::
+
+   kill all processes containing a given phrase on all hosts
+   Syntax: killpp.py -n |part_of_name| [-a -f 
+	      -h |host1 host2 host3 ..| -e |host4 host5 ..|]
+	      -n ... search phrase
+	      -a ... kill all without asking
+	      -f ... don't ask anything at all
+	      -h ... only look on these hosts  (default: all)
+	      -e ... exclude one or more hosts from killing
+
+* xload.py::
+
+   xload: show osxview for several machines.
+   Syntax:     xload |machine_file|
+	       machine_file ... text file with one machine name per line
+
+* cvsrm.py::
+
+   remove files from disk and cvs
+   Syntax: cvsrm file1 file2 file3...
+   Changes still need to be committed (cvs ci).
+
+* rm_pvm.py::
+
+   delete all /tmp/pvm* files on all hosts
+
+* bispy::
+
+    script to start the python interpreter with standard Biskit imports
+
+* replace_wildcard_import.py::
+
+   replace_wildcard_import -i |src_file| -m |module_name|
+			  [-as |import_as| -e |exclude_method1 ..| ]
+
+   example: replace_wildcard_import -i tools.py -m Numeric -as N -e Complex
+	    will replace all calls to any Numeric method (except Complex) by N.|method|
+
+* fix_array_constructor.py::
+
+   Fix the import of Numeric.array_constructor in pickled Biskit modules
+   Many Biskit pickles have e.g. array_constructor dumped as
+   PDBModel.array_constructor
+
+* echoTestRoot.py::
+
+   prints the current test root
+
+* restartPVM.py::
+
+    Restart a distributed calculation.
+    Syntax:  restartPVM.py -i |rst_file| [-a]
+    Options:
+	     i  .. restart file containing result of TrackingJobMaster.getRst()
+	     a  .. add hosts to PVM
+
+
+Structure sampling
+==================
+back to `Content`_
+
+* am_restartMD.py::
+
+   Prepare the restart of a broken Amber MD run. Current *crd etc. are
+   moved to oldName_TIMEps.* and the nstlim option in the input file
+   is set to the number of steps remaining to the end of the MD.
+   am_restartMD.py -f |folder| [ -t0 |time_offset| -tot |nstlim_total|
+		   -rst |rst_file|
+		   -inp |inp_file| -e |exclude_files_from_renaming| ]
+
+      tot   - needed for 2nd restart, total number of MD steps (w/o restart)
+      t0    - starting time in ps of this MD
+
+* amber2traj.py::
+
+   Convert single amber crd into Trajectory object
+
+   amber2traj.py -i sim.crd -o traj_0.dat -r ref.pdb [-b -wat -hyd -rnres -code PDBC ]
+
+	-r     ref.pdb - must have identical atom content as sim.crd
+	-b     traj has box info (3 additional coordinates per frame)
+	-wat   delete WAT, Cl-, Na+ residues (after parsing)
+	-hyd   delete all hydrogens (after parsing)
+	-rnres rename amber residues HIE/HID/HIP, CYX to HIS and CYS
+	-code  PDB code of molecule (otherwise first 4 letters of ref file name)
+
+* amberConcat.py::
+
+   Concatenate 2 amber crd/vel files.
+
+   amberConcat.py -i sim1.crd sim2.crd -o sim_merged.crd -n n_atoms [-b
+		  -p |int_precission| -rst |last_sim1.rst last_sim2.rst| ]
+
+     -n     number of atoms (obligatory)
+     -b     traj has box info (3 additional coordinates)
+     -p     when looking for overlapping block, round coord. to p positions
+     -rst   try repairing last frame of sim1, sim2 from given restart file(s)
+
+* amber_ensembleMD.py::
+
+   Prepare ensemble MD with amber - requires template_pme_ensemble folder
+   Syntax:  amber_ensembleMD.py -parm |parm_file| -crd |crd_file| -out |result_folder|
+				-pdb |0_pdb_file|
+			      [ -nb_nodes   |n_nodes_per_host|
+				-template   |template_folder|
+				-nodes_eq   |2 hosts for minimiz.|
+				-nodes_prod |10 hosts for prod.|
+				-n_members  |10|
+				-rseed      |int_random_seed|
+				-dt	    |production_time_step|
+				-n_steps    |production_step_number|
+				-ntwx	    |production_coordinate_writing_interval|
+				-ntwv	    |production_velocities_writing_interval|
+				-place_holder1 |value| -place_holder2 |value| ..]
+
+   The script prepares a new folder |out| with all the input and start files
+   to run multiple copies of an Amber MD. All input/start files/folders are
+   copied from a template folder. Template files and folders ending in 'xx'
+   are recreated |n_members| times. Strings ala '%(place_holder)s' in any
+   template file in any template folder are replaced by the value of
+   self.|place_holder| which can be given at the command line. If
+   self.place_holder contains a list of values, each item is only used once
+   (e.g. nodes_prod or nodes_eq ).
+      
+   Requirements: -$AMBERHOME must be set
+		 -LAM environment must be set up in .cshrc or .zshenv or etc.
+		 -start_eq must be run from first host in nodes_eq.dat !
+
+
+* amber_pdb2parm.py::
+
+   Create amber topology and coordinate files from a PDB.
+
+   Syntax: am_pdb2parm.py -i |PDBfile| [-o |out.parm| ...any of options below ]
+       OR: am_pdb2parm.py -i |PDBfile| -mirror [-o |out.parm| ]
+
+   Result: out.parm, out.crd, out.pdb, (and leap.log in current folder)
+
+   Special option -mirror: create a parm for exact atom content of input PDB
+			 (no S-S bonds formed, atoms missing from residues..)
+			 This parm can be used for ptraj but not for simulations!
+   Options:
+	   ocrd      - str, target file for crd (coordinates) [|f_out_base|.crd]
+	   opdb      - str, target file for pdb 	      [|f_out_base|.pdb]
+	   hetatm    - keep hetero atoms		   	                     [don't]
+	   cap       - put ACE and NME capping residue on chain breaks   [don't]
+	   capN      - int int, indices of chains that should get ACE cap     []
+	   capC      - int int, indices of chains that should get NME cap     []
+	   box       - float, minimal distance of solute from box edge    [10.0]
+	   fmod      - str str, list of files with amber parameter modifications
+		       (to be loaded into leap with loadAmberParams)              []
+	   fprep     - str str, list of files with amber residue definitions
+		       (to be loaded into leap with loadAmberPrep)                []
+
+	   leap_template - str, path to template file for leap input [use default]
+	   leaprc	 - str, path to parameter file for leap [use default]
+	   leap_out	 - str, target file for leap.log [default: discard]
+	   leap_in	 - str, target file for leap.in script [default: discard]
+	   leap_pdb	 - str, target file for cleaned input pdb      [discard]
+	   leap_bin	 - str, path to tleap binary [use default]
+	   norun	 - do not run leap, only prepare files
+	   debug	 - keep all temporary files
+
+	   more -key value pairs for place holders in  leap input template
+   
+   Comments:
+   - The protonation state of histidines is decided from the H-atoms that are found 
+     (HD, HE, or both). After that all H are removed to be added again by leap.
+   - Cleaning tries to convert non-standard residues to the closest standard one.
+   - Cleaning removes non-standard atoms (and atoms following them) from standard residues.
+   - Cleaning keeps the largest / first of multiple occupancies
+   - Ends of chains are assumed if the residue numbering jumps backward, if there
+     is a TER record or chain ID or segid change, or if there is a chain break.
+   - A chain break is assumed if there is an untypical gap in the chain of back-
+     bone atoms (see PDBModel.chainBreaks() ).
+   - The index of the first chain is 0.
+   - Original waters are deleted. 
+   - As usual, options can also be put into a file and loaded with the -x option
+
+* pcr_crd2pdb.py::
+
+   Extract PDB files from Xplor PCR trajectories.
+
+   Syntax: pcr_crd2pdb -i |pcrFolder| -t |psfFolder| -o |outFolder|
+		       [ -n_iter |n_iterations| -skip |stepping| -z ]
+
+	-z	 gzip crd files
+	-skip	 MD-step intervall for PDBs (500 = 1/ps)
+	-n_iter  number of iterations per ensemble member (50 = 50ps)
+
+* reduceTraj.py::
+
+   Reduce all-atom trajectory to trajectory with only one backbone and
+   up to 2 side chain atoms per residue.
+   The new atoms are the centers of mass of several atoms and carry the
+   weight of the pooled atoms in an atom profile called 'mass'.
+
+   reduceTraj.py -i traj.dat [-o traj_reduced.dat -amber -red |red_traj.dat|]
+
+	i     - pickled Trajectory object (all atoms)
+	o     - alternative output file name (default: 'reduced_' + input.dat)
+	red   - pickled reduced traj, just update ref model in given traj.
+	amber - rename amber HIE/HIP/HID, CYX -> HIS, CYS; unwrap atom names
+
+* runPcr.py::
+
+    Start single Xplor PCR job on remote host.
+
+    Syntax: runPCR -t |psfFolder| -h |host|
+		  [-f |Force| -r |resultFolder| -n |nice| -i |inpFolder| ]
+
+    Options:
+	    -f     force constant for PCR restraint
+	    -r     base folder for result (sub-folder will be created)
+	    -t     folder with topology (psf, pdb)
+	    -n     nice value
+	    -h     host computer (accessible via ssh)
+	    -i     folder with all input files, must contain restart_h2o.inp'
+	    -parm  folder with param19.* files
+
+    A MD folder called pcr_<PDBCode> is created. The force constant is
+    written to a file 'oldenergy' in this folder. The topology folder is
+    copied to the new md folder and renamed to the PDB code
+    (which is taken from the first 4 letters of the psf file name).
+    The job is started via ssh on the remote host.
+    A summary of all used parameters is written to runReport.out.
+
+    NOTE: The pdb/psf file has to be 4 characters long and start with
+	  a number (the segId has to conform to the same format).
+
+    By using python -i runPCR.py .. a python shell remains open and
+    the job can be killed with the command r.kill()
+
+* thinTraj.py::
+
+    This script is used only for the test_multidock example and is
+    used to remove frames from the test trajectory to speed up
+    subsequent test steps. With he default setting of step=5 this
+    will result in a 100 frame trajectory.
+
+    thinTraj.py -i traj.dat [-step |int|] 
+
+	  i	- pickled Trajectory object
+	  step  - int, 1..keep all frames, 2..skip first and every second, ..
+
+* traj2ensemble.py::
+
+   Pool several trajectory objects to one ensemble trajectory.
+   Each sub-trajectory is considered as traj of one ensemble member.
+   This script is ignoring any profiles of the given trajectories and
+   re-assigns new frame names ( the Trajectory.concat() method is not
+   used to allow handling of larger trajectories )
+
+   traj2ensemble.py -i |in_traj1 in_traj2 ..| -o |out_traj|
+		   [-s |start_frame(incl.)| -e |end_frame(excl.)| -step |step|
+		    -ref |ref_pdb_or_model| -pdb |PDBCode| -prot ]
+
+       s,e,step - start, end position and stepping for each of the input traject.
+       ref	- PDB or pickled PDBModel with reference coordinates, by default,
+		  the reference frame of the first trajectory is taken
+       pdb	- PDB code to be stored in trajectory
+       prot	- delete all non-protein atoms (not by default)
+
+* trajAddNames.py::
+
+   Add file names of frames to trajectory
+   trajAddNames.py -i |in_traj.| -o |out_traj.| -f |file1 file2 file..|
+
+   Add/replace file names of frames to existing (pickled) Trajectory.
+
+* trajFluct.py::
+
+   trajFluct.py: Calculate global and side chain fluctuation per atom
+		 for a trajectory.
+
+   Syntax:     trajFluct -i trajectory_file [-o result_trajectory]
+		 
+   Options:   -i     pickled trajectory
+	      -o     file name for pickled result Trajectory
+
+* trajpool2ensemble.py::
+
+   Convert one normal Trajectory into EnsembleTraj. The input trajectory must
+   have frame names that allow sorting by time and ensemble member (see
+   EnsembleTraj.py for details).
+
+   traj2ensemble.py -i |in_traj| -n |n_members| -o |out_traj| -pdb |PDBCode| ]
+
+       o	- out file name        (default: replace input file)
+       n	- number of ensemble members to expect (default: 10)
+       pdb	- PDB code to be stored in trajectory
+
+
+Biskit Setup
+============
+back to `Content`_
+
+* setup_biskit.py::
+
+   setup the biskit environment
+
+* setup_hosts.py::
+
+   setup_hosts.py: Setup the host list neded for Biskit distributed calculations.
+
+   Usage: Run this script once and let it create the empty host list in  ~/.biskit/hosts.dat.
+	  Add your avaliable hosts to the list. There are three different sections
+	  to which you can choose to add a host:
+	      - own_hosts:    omputers reserved for own use, highest priority
+	      - shared_hosts: computers shared with others, medium priority
+	      - others_hosts: computers mainly used by others, lowest priority
+	  Add your hosts to the corresponding 'dual' or 'single' cpu option.
+	  Separat the different hosts with a blank space. If you whish to
+	  temporarily exclude a host from being used, add it to the 'exclude' option
+
+	  Optional settings (noce and ram):
+	  The nice settings can be changed for a specific computer (default values
+	  are 0 for 'own' and 'shared' and 17 for 'others'). To add nice value
+	  add the host(s) and the nice value separated by a colon (:) to the
+	  'option' 'nice'. Separate multiple hosts with a blank space.
+	  Example: computer1.local.net:12  computer2:8 computer3.local.net:5
+	  In the same way avaliablbe RAM in GB can be added. The default values
+	  here are 0.5 for a single cpu machine and 1.0 GB for a dual cpu machine.
+   
+   Syntax:  setup_hosts  -i |list, input file| -w |str, out file|
+
+   Options:
+	-i  |filename| read variable names from this file
+	-w  |filename| write variables to this file, if the file already exists
+	      it will be updated,
+	-d  |Yes| accept default values for -i and -w
+
+Structure manipulation
+======================
+back to `Content`_
+
+* 1pdb2model.py::
+
+   Syntax: 1pdb2model.py -i |file1| [-o |outfile| -psf |psf_file| -wat -amber
+			 -pdb |PDBCode| ]
+
+   Result: self-sufficient pickled PDBModel or PCRModel, with itself as source
+    
+   Options:
+       -i      input PDB or pickled PDBModel
+       -psf    psf file name -> will generate PCRModel instead
+       -o      output file name (default: pdbfile.model)
+       -wat    skip water residues (WAT TIP3 WWW H2O) and Cl-, Na+
+       -amber  rename CYX -> CYS, HID/HIE/HIP -> HIS
+       -pdb    pdb code to be stored in model.pdbCode
+
+* averageASA.py::
+
+    averageASA.py - a script that collects the average (of 500 structures)
+		     molecular surface (MS) and solvent accessible surface
+		     (AS) for all 20 amino acids in a GLY-XXX-GLY tripeptide.
+
+    Syntax:  AverageASA.py -i |template.pdb| -r |path|
+			      [ -l |str| -mask |resmask|]
+
+    Options: -i     file, pdb tripeptide template file
+	     -r     path, calculation root folder (many directories with be
+		       created in this folder)
+	     -l     str, label for the three result dictionaries
+	     -mask  residue mask to delete padding residues (i.e GLY)
+       
+    Result:  4 dictionaries AS, AS_sd, MS and MS_sd, written to root folder
+
+* castPdbs.py::
+
+   castPdbs: Convert two similar PDBs in two PDBs with equal atom content.
+   PDBs must not have any HETATOMs. TIP3 residues are removed.
+
+   Syntax: castPdbs.py -i1 |pdb1| -i2 |pdb2| -o1 |outFile1| -o2 |outFile2|
+		       [ -c1 |0 1 ..| -c2 |2 3 ..| ]
+
+   i1, i2   file names of PDBs to be compared
+   o1, o2   file names for result pdbs
+   c1, c2   chain numbers (starting 0) to take from i1 and i2 (default: all)
+
+* dope.py::
+
+    Syntax:    dope.py -s sourceModel -i otherModels
+		      [-so sourceOut -o othersPrefix -dic old_model_dic ]
+
+    Add conservation, accessibility profiles and foldX energies to a reference
+    model and models linking to this reference.
+
+    1) if sourceOut is given: Remove waters from source, put conservation score
+       into profiles, saveAs sourceOut
+    2) update each of |otherModels| from their respective source, make |sourceOut|
+       their new source, remove atoms (shouldn't be changed from |sourceOut|) and
+       pickle them down to same file name plus |othersPrefix| if given.
+    3) update old model dic if given
+
+    Example 1:
+	    dope.py -s ../../rec_wet/1B39.pdb -so ../../rec_wet/dry.model \
+	    -i *.model -dic 1B39_model.dic
+	    -> create source and update model.dic
+
+    Example 2:
+	    dope.py -s ../../rec_wet/dry.model \
+	    -i *.model -dic 1B39_model.dic
+	    -> source already there, update model.dic
+
+* getSS.py::
+
+    Count number of SS bonds in protein.
+    Syntax: getSS.py |input1.pdb| |input_2.pdb| ..
+
+* model2pdb.py::
+
+    Convert a pickled PDBModel into a PDB file.
+
+    Syntax: model2pdb.py -i |infile| -o |outfile| [ -wat -ter 0|1|2 -codeprefix ]
+
+    Options:
+	-i	one or more pickled PDBModel(s)
+	-o	output file name (default: infile.pdb ) (ignored if >1 input file)
+	-wat	skip water residues (WAT TIP3 WWW H2O) and Cl-, Na+
+	-ter 0  don't write any TER statements
+	-ter 1  try restoring original TER statements
+	-ter 2  put TER between all detected chains
+	-codeprefix  add model's pdbCode entry as prefix to out file name
+
+* pdb2model.py::
+
+    Syntax: pdbs2struct.py -i |file1 file2 ..| [-h |host| -c |chunk| -a -w
+			   -o |other_outFolder| -wat -s]
+
+	pvm must be running on the local machine!
+
+    Result: pickled PDBModel object for each pdb file with same file name
+	    but ending in '.model'
+    
+    Options:
+	-h    number of hosts to be used
+	-a    first add hosts to pvm
+	-c    chunk size, number of pdb's passed to each node at once
+	-w    display a xterm window for each node
+	-o    destination folder (default: same where pdb file comes from)
+	-wat  skip water residues (WAT TIP3 WWW H2O)
+	-amber  rename CYX -> CYS, HID/HIE/HIP -> HIS, unwrap atom names
+	      (this creates models with the same atom/res names as pdbs created
+	       with ambpdb -p top.parm -aatm -bres < some.crd > some.pdb )
+	-s    sort atoms alphabetically within residues
+
+* pdb2seq.py::
+
+   Extract AA sequence from PDB.
+
+   Syntax pdb2seq.py |pdb_file|
+
+* pdb2traj.py::
+
+    pdb2traj.py: Collect many coordinate frames ( pdb or pickled PDBModel ) of one
+		 molecule. Write Trajectory object. Waters are removed.
+
+    Syntax:    pdb2traj -i pdb1 pdb2 ..  [ -e -r |ref_structure| -o |out_file| -f -wat -c ]
+	OR:    pdb2traj -d folder/with/pdbs/or/models [ -r ... ]
+		 
+    Options:   -i     input pdb files or pickled PDBModel objects
+	       -d     folder containing input pdb or pickled PDBModel files
+	       -e     create EnsembleTraj, input files must be ordered first
+		      by time then by member; x_30_10.pdb sorts before x_100_09.pdb
+	       -r     reference structure with PDB records (incl. waters),
+		      if not given, the first file from -i is used
+	       -wat   delete TIP3, HOH, Cl-, Na+ from ref and all frames
+	       -o     file name for resulting pickled Trajectory object
+	       -f     fit to reference (dry reference if given)
+	       -c     analyze atom content of all files seperately before casting
+		      them to reference. Default: only analyze first file in -i.
+       
+    Note about reference structure: The atom order and content of the files given
+    with -i is adapted to the order/content of the reference PDB but NOT
+    vice-versa. Snapshots can hence have additional atoms (which are removed) but
+    they must have, at least, all the atoms that are in the reference. 
+
+* pdb2xplor.py::
+
+    The xplor input file will be assembled from 3 template files. The template
+    files should be independent of the particular PDB and should instead contain
+    place holders which pdb2xplor will replace by actual file names, numbers, etc.
+    Place holders look like that:
+	 %(segment_pdb)s  .. means, insert value of variable segment_id as string
+    All the variables of the Xplor class (see Xplor.__init__()) can be adressed
+    this way. The available variables are listed in the log file. Some variables,
+    like segment_pdb, amber_patch, segment_id will only have meaningfull values in
+    a segment template.
+
+    pdb2xplor combines the templates as follows:
+
+    one header_template
+    + (one segment template per segment)
+    + disulfide patches (generated without template)
+    + one tail template
+
+    the most relevant variables are:
+
+    for header:   project_root .. root folder of cvs project
+    for segment:  segment_id   .. segid of currently processed segment
+		  segment_pdb  .. file name of segment pdb (generated)
+		  amber_patch  .. terminal patches for amber ff (generated)
+    for tail:	  pdbcode      .. first 4 letters of input pdb file name
+		  outname      .. suggested file name for output pdb and psf
+				  (with absolute path but w/o '.pdb' or '.psf')
+		  path         .. output path (specified with option -o)
+
+    For hackers:
+    All command line options are also available as variables (e.g. i, o, t).
+    Even more, you can invent any command line option (e.g. -temperature 298)
+    which will then be available as variable. Taken the example you could
+    add a place holder %(temperature)i to your template file which would be
+    translated to 298 (or whatever you specify).
+
+    For hackers++:
+    With option -x you can specify a file containing variable - value pairs ala:
+    temperature    298   # the temperature in K
+    steps 100		 !! minimization steps
+
+    Give one pair per line, only the first 2 words are parsed.
+
+------------
+scripts/Dock
+------------
+*protein-protein docking scripts* -- back to `Content`_
+
+* PCR2hex.py::
+
+   pcr2hex  pool many pdb's into one seperated by MODEL/ENDMDL to be used by hex.
+
+   Syntax:  pcr2hex -psf |in.psf| -pdb |in1.pdb| |in2.pdb| ... [-s |modelFolder| ]
+
+	    -psf     psf file name
+	    -pdb     list of pdb file names
+	    -nos     don't pickle each PDB as pickled w/o waters to this folder
+
+   Result:  -pdb file, pdbCode_hex.pdb (first 4 characters of the first pdb file
+	     are taken as pdbCode)
+	    -model dictionary, pdbCode_models.dic
+	    -modelFolder/in1.model, in2.model, unless -nos has been given
+
+* concat_complexLists.py::
+
+   concat_complexLists.py -i complexes1.cl complexes2.cl -o complexes_out.cl
+			  -mo out_folder_for_changed_models
+			  -rdic correct_rec.dic -ldic correct_lig_models.dic
+
+* contacter.py::
+
+   contacter: Take ComplexList, calculate contactMatrix and other stuff
+	      for all complexes on several nodes. Pickle ComplexList to a file.
+	      The result values are put into the info dict of each complex.
+
+   Syntax:	  contacter [-i |complex_lst| -o |file_complex_lst|
+			 -c |chunk_value| -ref |ref_complex| -v |complex_version|
+			 -a -h |n_hosts| -u
+			 -f |name| -s | -n |min_nice| -all -e |host1 host2..|]
+
+   Options:   -i     pickeled list of Complex objects (file name)
+	      -o     file name for pickled complex dictionary
+	      -c     chunk size (number of complexes passed to each node)
+	      -a     add hosts to pvm
+	      -h     number of nodes to use (default: all available)
+	      -e     exclude hosts
+	      -ref   pickled reference Complex for fraction of native Contacts
+	      -w     show xterm for each node (default: off)
+	      -u     only fill empty info fields, or missing keys from -f 
+	      -f     force calculation on sub-set of measures, current measures:
+			'fnrc_4.5', 'fnac_10', 'fnac_4.5',
+			'fnarc_9', 'fnarc_10', 'c_ratom_9', 'c_ratom_10',
+			'eProsa', 'ePairScore', 'foldX',
+			'cons_ent', 'cons_max', 'cons_abs'
+			'rms_if', 'rms_if_bb', 'xplorEnergy'
+	      -v     work on a previous version of each complex, only valid if
+		     input is ComplexEvolvingList (e.g. status before and after
+		     refinement). 0..use oldest version, -1..use latest version
+	      -n     renice calc to, at least, this nice value
+	      -s     splits complex list into sublists of this size, dumps temporary
+		     contacted lists, collects result (can be resumed)
+	      -all   allow more than 512 solutions per model pair (keep all)
+
+* hex2complex.py::
+
+   hex2complex:    Parse output file from hex docking run, create dictionary of
+        	   Complex(es), and pickle it to a file.
+		   Creates a plot of the cluster distribution (using hex rmsd).
+
+		   rec, lig  - receptor and ligang model dictionary
+		   hex       - output file from hex
+		   o	     - name of resulting complex list
+		   p	     - create biggles plot of rmsd vs. solution
+		   mac       - force rec and lig 'model 1' to be used for all
+
+   Syntax:    hex2complex -rec |models_rec| -lig |models_lig| -hex |hex.out|
+			  -o |output name| -p |create plot|
+
+   Example:    hex2complex -rec 1BZY_models.dic -lig 2AKZ_models.dic
+        		   -hex 1BZY_2AKZ_hex.out -o complexes.cl -p
+
+* hexInput.py::
+
+   hexInput    Create a macro file for hex. 
+   Syntax      hexInput -r |rec pdb| -l |lig pdb|
+			[-c |com pdb| -rm |rec model| -lm |lig model|]
+
+		 r, l	- pdb file in hex format (single or multi model)
+		 rm, lm - model number to use,
+			  if not given perform multi model docking
+		 c	- a reference complex pdb file (for rmsd output)
+		 sol	- number of solutions to save
+	     
+   Result      Hex macro file
+
+* hexResults.py::
+
+   hexResults	Get info about docking results from one or more complexGroup files. 
+   Syntax	hexResult -cg |complexGroup.cg| [ -p |plot name| -o |file name| ]
+	   
+   Result	Plot and report file
+
+* inspectComplexList.py::
+
+   Check info dict of ComplexList for missing values.
+   Syntax: checkComplexes.py |complex_cont.cl|
+
+* multidock.py::
+
+   Seperately dock several receptor models against several ligand models.
+
+   multidock.py -rdic |rec_model.dic| -ldic |lig_model.dic|
+	       [-rpdb |rec_hex.pdb| -lpdb |lig_hex.pdb| -com |refcomplex_hex.pdb|
+		-out |outfolder| -e |excludeHost1 excludeHost2..| mac |1 or 0|
+		-rid |A A ..| -lid |B| -soln |int|]
+
+	    rdic, ldic  .. dict with PCRModels indexed by 1 .. n (rec, lig)
+	    rpdb, lpdb  .. HEX-formatted PDB with same models (rec, lig)
+	    com 	.. HEX-formatted PDB with reference complex
+	    out .. folder for results (created), may contain %s for date
+	    e	.. dont use these hosts
+	    mac .. 1|0 force the use of macro docking, if not given, the size
+		   of the receptor will decide if macro docking is used.
+	    rid,lid .. force these chain IDs into HEX PDB file of rec / lig
+	    soln    .. number of solutions to keep from each docking
+
+* pdb2complex.py::
+
+   pdb2complex.py  - create a reference Complex (without waters)
+
+   Syntax:  pdb2complex.py  -c |complex pdb|
+			    -r |chain index| -l |chain index|
+			    -o |output name|
+		    
+   Options:   -c     complex pdb file or pickled PDBModel object
+	      -r     receptor chain list (e.g. 0 1 ) 
+	      -l     ligand	 ~	 (e.g. 2 )
+	      -o     output file
+	      -lo,lr ligand, receptor model output file
+
+* reduceComplexList.py::
+
+   Reduce macro docked complex list (rec * lib * 5120)
+   to a normal complex list (rec * lig * 512)
+
+      i - complexList to be reduced
+      o - name of reduced list
+
+* selectModels.py::
+
+   selectModels: Select non-redundant frames from a trajectory dump them and put
+		 them into a PDB file for HEX docking.
+
+   Syntax:  selectModels -i |traj.dat| -o |out_folder| [ -psf |psf_file|
+			 -dic |out_model_dic|
+			 -n |number| -ref
+			 -co |TrajCluster.out| -a |atom1 atom2 atom..|
+			 -s |startFrame| -e |endFrame| -step |frameSkip|
+			 -id |chaiID]
+			 -conv |convergence_diff| ]
+		     
+	    i	 - pickled Trajectory object
+	    dic  - alternative name for model.dic
+	    psf  - create PCRModels with psf file info
+	    ref  - add trajectory's reference model to dictionary and pdb if
+		     a reference pdb file is given this will be used insted
+	    id   - set ligand and receptor chainID
+	    a	 - atoms to use for clustering,
+		   default: C and roughly every second side chain heavy atom
+	    conv - float, convergence criterium [1e-11]
+
+   Result:  - n pickled PDBModels '|PDBCode|_|frame|.model' in out_folder
+	    - pickled TrajCluster if requested
+	    - |PDBCode|_model.dic with these n PDBModels indexed from 1 to n
+
+
+-----------
+scripts/Mod
+-----------
+*homology modeling scripts*   --   back to `Content`_
+
+* align.py::
+
+   Syntax: align.py [ -o |outFolder| -log |logFile| -h |host_computer| ]
+
+   Options:
+       -o	output folder for results      (default: .)
+       -log	log file		       (default: STDOUT)
+       -h	host computer for calculation  (default: local computer)
+		-> must be accessible w/o password via ssh, check!
+       -? or help .. this help screen
+
+* align_parallel.py::
+
+   Built multiple alignment for each project given directory (parallelised).
+   If run from within a standardized modeling/validation folder structure,
+   i.e from the project root where the folders templates, sequences, and
+   validation reside all options will be set by the script.
+       
+   Syntax: align_parallel.py -d |list of folders| -h |hosts|
+			    [-pdb |pdbFolder| -ft |fastaTemplates|
+			     -fs |fastaSequences| -fta |fastaTarget|
+			     -fe |ferror|]
+
+   Note:  pvm must be running on the local machine!
+
+   Options:
+       -d    [str], list of project directory (full path)
+       -h    int, number of hosts to be used
+       -a    first add hosts to pvm
+       -pdb  str, pdbFolder for the pdb *.alpha
+       -ft   str, path to 'templates.fasta'
+       -fs   str, path to 'nr.fasta'
+       -fta  str, path to 'target.fasta'
+       -fe   str, path to the error file for the AlignerMaster
+
+* analyse.py::
+
+   Syntax: analyse.py -d |main project folder| [-s |1||0] ]
+		      
+   Result: Performing model analysis for each main project folder given.
+	   Outputs a folder 'analyse' containing:
+       
+	   * analyse/global_results.out
+	     various data about the model, see file header.
+
+	   * analyse/local_results.out:
+	     residue rmsd profile to taget and mean rmsd to tagret
+
+	   * modeller/final.pdb:
+	   the 'best' model with the mean residue rmsd in the B-factor column
+
+
+   Options:
+	   -d	       [str], list of project directory
+	   -s	       show the structure final.pdb im PyMol
+
+* benchmark.py::
+
+   Syntax: benchmark.py -d |list of folders| 
+			[ -modlist |model_list| -ref |reference|]
+							   
+   Result: Performing various benchmark tasks for each folder given.
+	   A folder validation/benchmark containing:
+
+	   * validation/????/benchmark/Fitted_??.pdb:
+	   Benchmark model iteratively superimposed on its known structure.
+
+	   * validation/????/benchmark/rmsd_aa.out:
+	   All-atom rmsd of the benchamark modela. (1) without iterative fitting,
+	   (2) with iterative fitting and (3) the percentage of atoms that has
+	   been removed during the iterative fitting.
+
+	   * validation/????/benchmark/rmsd_ca.out:
+	   same as above, but only for C-alpha atoms
+
+	   * validation/????/benchmark/rmsd_res_??:
+	   gives the C-alpha rmsd for each residue.
+
+	   * validation/????/benchmark/PDBModels.list:
+	   pickled PYTHON list of PDBModels. Each model contains
+	   the benchmark information in the atom and residue profiles:
+	   'rmsd_aa', 'rmsd_ca', 'rmsd_res'. See PDBModel.profile()!
+
+       
+   Options:
+       -d	   [str], list of project validation directories
+       -modlist    str, the path to the 'PDBModels.list' from the
+		     project directory
+       -ref	   str, the path to the 'reference.pdb' from
+		     the project directory (known structure)
+
+* clean_templates.py::
+
+   Syntax: clean_templates.py [-o |output_folder| -i |chainIndex| -log |logFile|
+
+   input: templates/nr/*.pdb
+	  templates/nr/chain_index.txt
+
+   output: templates/t_coffee/*.alpha	 (input for Alignar)
+	   templates/modeller/*.pdb	 (input for Modeller)
+       
+   Options:
+       -o	output folder for results      (default: .)
+       -i	chain index file for templates
+		    (default: '/templates/nr/chain_index.txt')
+       -log	log file		       (default: STDOUT)
+
+* model.py::
+
+   Build model using Modeller.
+
+   Syntax: model.py [ -o |outFolder| -log |logFile| -h |host_computer| ]
+
+   Options:
+       -o	output folder for results      (default: .)
+       -log	log file		       (default: STDOUT)
+       -h	host computer for calculation  (default: local computer)
+		-> must be accessible w/o password via ssh, check!
+       -s	show structures on Pymol superimposed on average
+       -? or help .. this help screen
+
+   input: templates/modeller/*.pdb
+	  t_coffee/final.pir_aln
+
+   output: modeller/modeller.log
+	   /*.B9999000??   <- models
+
+* model_parallel.py::
+
+   Syntax: model_parallel.py -d |list of folders| -h |host|
+			  [-fta |fastaTarget| -pir |f_pir|
+			  -tf |template_folder| -sm |starting_model|
+			  -em |ending_model| -fe |ferror|]
+
+       pvm must be running on the local machine!
+
+   Result: Parallel modelling for each project directory given
+       
+   Options:
+	   -d	 [str], project directories  (default: ./validation/*)
+	   -h	 int, number of hosts to be used  (default: 10)
+	   -fta  str, path to find 'target.fasta'
+	   -pir  str, alignment filename
+	   -tf   str, directories for input atom files
+	   -sm   int, index of the first model
+	   -em   int, index of the last model
+	   -fe   str, filename to output errors from the Slave
+
+* modelling_example.py::
+
+   Biskit.Mod example script that models a structure from a fasta
+   formated sequence file in 4 steps:
+
+   1) Searches for homologe sequences and clusters the found
+      sequences to a representative set using NCBI-Tools.
+   2) Searches for temptale structures for the homology modeling.
+      Similar structures are removed by clustering.
+   3) Build a combined sequence/structure alignment using T-Coffee.
+   4) Build models using Modeller.
+
+   Syntax: modelling_example.py -q |query file| -o |outputFolder|
+			       [-h |host| -log  -view ]
+
+   Options:
+      -q     file; fasta formated sequence file to model
+      -o     folder; directory in which all project files will be
+	       written
+      -h     host name; the quite cpu consuming stasks of aligning
+	       and modeling can be sent to a remote host that also
+	       has access to the output directory
+      -log   write stdOut messages to log file (~project/modelling.log)
+      -view  show the superimposed models in PyMol
+
+
+   HINT: If you want to inspect the alignment used for modeling: 
+	 ~project/t_coffee/final.score_html 
+
+* model_for_docking.py::
+
+   another modelling example
+
+* search_sequences.py::
+
+   Syntax: search_sequences.py [-q |target.fasta| -o |outFolder| -log |logFile|
+		  -db |database| -limit |max_clusters| -e |e-value-cutoff|
+		  -aln |n_alignments| -psi |psi-blast rounds|
+		  -... additional options for blastall (see SequenceSearcher.py) ]
+
+   Result: folder 'sequences' with files:
+	   - blast.out - result from blast search (all alignments)
+	   - cluster_blast.out - blast alignments of cluster sequences
+	   - cluster_result.out - clustering output
+	   - all.fasta - all found sequences in fasta format
+	   - nr.fasta - clustered sequences in fasta format
+       
+   Options:
+       -q	fasta file with query sequence (default: ./target.fasta)
+       -o	output folder for results      (default: .)
+       -log	log file		       (default: STDOUT)
+       -db	sequence data base
+       -limit	Largest number of clusters allowed
+       -e	E-value cutoff for sequence search
+       -aln	number of alignments to be returned
+       -simcut  similarity threshold for blastclust (score < 3 or % identity)
+       -simlen  length threshold for clustering
+       -ncpu	number of CPUs for clustering
+       -psi	int, use PSI Blast with specified number of iterations
+
+* search_templates.py::
+
+   Syntax: search_templates.py [-q |target.fasta| -o |outFolder| -log |logFile|
+		  -db |database| -e |e-value-cutoff|  -limit |max_clusters|
+		  -aln |n_alignments| -psi
+		  -... additional options for blastall (see SequenceSearcher.py) ]
+       
+   Options:
+       -q	fasta file with query sequence (default: ./target.fasta)
+       -o	output folder for results      (default: .)
+       -log	log file		       (default: STDOUT)
+       -db	sequence data base
+       -limit	Largest number of clusters allowed
+       -e	E-value cutoff for sequence search
+       -aln	number of alignments to be returned
+       -simcut  similarity threshold for blastclust (score < 3 or % identity)
+       -simlen  length threshold for clustering
+       -ncpu	number of CPUs for clustering
+       -psi	use PSI Blast instead, experimental!!
+
+* setup_validation.py::
+
+   Setup the cross-validation folder for one or several projects
+       
+   Syntax: setup_validation.py [ -o |project folder(s)| ]
+		      
+   Options:
+       -o	   .. one or several project folders (default: current)
+       -? or -help .. this help screen
+
+
+----------------
+scripts/analysis
+----------------
+*scripts for analysis and visualisation of results*   --   back to `Content`_
+
+* a_baharEntropy.py::
+
+   a_baharEntropy.py -i |com_folder1 com_folder2 com_folder3..|
+
+   com_folder must contain com_wet/dry_com.model,
+			   rec_wet/dry_rec.model,
+			   lig_wet/dry_lig.model
+			   and
+			   analysis_500-5.opt for -cl and -cr option
+   E.g: a_baharEntropy.py -i c11 c12 c13 > result.txt 2> log.txt
+
+* a_baharFluct.py::
+
+   no documentation
+
+* a_cad.py::
+
+   CAD (contact area difference) calculation by icmbrowser.
+   The calculation is performed only for residues that are in contact 
+   in the reference complex.
+     
+       cl  - complexList, has to contain info dictionary data for key
+       ref - reference complex
+
+
+* a_comEntropy.py::
+
+   Run many AmberEntropist calculations on many nodes. The Master has
+   a standard set of 13 protocols to run on rec, lig, and com
+   trajectories, as well as on every single member trajectory - in
+   total 113.  It accepts one variable parameter, e.g. s(tart). Each
+   protocol is then run for all values of the variable parameter.
+   The script puts many temporary trajectories into the folder with the
+   input trajectories -- consider creating a new folder for each trajectory!
+
+   Syntax:  a_comEntropy.py -rec |rec.traj| -lig |lig.traj| -com |com.traj|
+			    -out |out.dat| [ -cr |rec_chains| -zfilter |cutoff|
+			    -s |from| -e |to| -ss |from| -se |to|
+			    -thin |fraction| -step |offset|
+			    -var |option| -vrange |v1 v2..| -jack
+			    -exrec |members| -exlig |members| -excom |members|
+			    -hosts |name1 name2..| -clean  -single ]
+
+   Options:
+       rec    - str, free rec trajectory
+       lig    - str, free lig trajectory
+       com    - str, complex trajectory
+       out    - str, file name for pickled result
+       cr     - [int], chains of receptor in complex trajectory [n_chains rec]
+       var    - str, name of variable option [ s ]
+       vrange - [any], set of values used for variable option
+		OR 'start:stop:step' i.e string convertable to arange() input
+       jack   - set up leave-one-trajectory-out jackknife test [don't]
+		(replaces var with 'ex1' and vrange with range(1,n_members+1))
+
+       zfilter- float, kick out outlyer trajectories using z-score threshold
+		[None->don't]
+       exrec  - [int], exclude certain members of receptor ensemble    [[]]
+       exlig  - [int], exclude certain members of ligand  ensemble     [[]]
+       excom  - [int], exclude certain members of complex ensemble     [[]]
+
+       clean  - remove pickled ref models and member trajectories [0]
+       hosts  - [str], nodes to be used [all known]
+       h      - int, number of nodes to be used from all known [all]
+       single - run only one job on multi-processor nodes [0]
+       mem    - float, run only on machines with more than |mem| GB RAM [0]
+       debug  - don't delete output files [0]
+
+       ... parameters for AmberEntropist -- can also be given as -var
+       cast    - equalize free and bound atom content [1]
+       s,e     - int, start and stop frame		   [0, to end]
+       ss, se  - int, start and stop frame of single member trajectories
+		 (only works with EnsembleTraj; overrides s,e)
+       atoms   - [ str ], names of atoms to consider	   [all]
+       heavy   - delete all hydrogens			   [don't]
+       step    - int, frame offset			   [no offset]
+       thin    - float, use randomly distributed fraction of frames [all]
+		 (similar to step but sometimes better)
+       all     - only calculate with all members, no single member values
+       ex      - [int] exclude same members from rec, lig and com 
+       ex_n    - int, exclude last n members  OR...		    [0]
+       ex3     - int, exclude |ex3|rd tripple of trajectories	    [0]
+		 (0 excludes nothing, 1 excludes [0,1,2] )
+       ex1     - int, exclude ex1-th member remaining after applying ex [None]
+		 (0 excludes nothing, 1 excludes [0] )
+
+       ... parameters for AmberCrdEntropist, Executor, Master
+       f_template - str, alternative ptraj input template  [default]
+       verbose    - print progress messages to log     [log != STDOUT]
+       w	  - show x-windows   [no]
+       a	  - 0|1, add hosts to PVM [1]
+
+
+* a_compare_rms_vs_fnc.py::
+
+   a_compare_rms_vs_fnc.py: Plot interface rmsd (heavy and/or backbone) vs.
+			      fraction native atom/residue contacts at
+			      different cutoffs.
+
+     creates up to 4 plots: rms_if_vs_cont.eps
+			    rms_if_bb_vs_cont.eps
+			    rms_if_bb_vs_rms_if.eps
+			    rms_hex_vs_rms_if.eps
+			  
+			  
+   Syntax:	       -i  complexes_cont.cl
+		   -o  str, output directory
+		   -v  [str], list of keys to plot
+		   -if     1||0 create plot of key vs. interface rmsd
+		   -if_bb  1||0 create plot of key vs. interface backbone rmsd
+
+   Abbreviations: fnac  - Fraction of Native Atom Contacts
+		  fnrc  - Fraction of Native Residue Contacts
+		  fnarc - fnac with Reduced atom models
+
+
+* a_dasa.py::
+
+   Calculate change in access. and molecular surface upon binding.
+   Syntax:   a_dasa.py -r |rec_model| -l |lig_model| -c |com_model|
+
+
+* a_ensemble.py::
+
+   Analyze ensemble MD.
+   Syntax:  a_ensemble.py -i traj.dat [ -z |outlier-z-score| -step |offset|
+			  -o |out.eps| -title |plot_title| ]
+
+
+* a_foldX.py::
+
+   Syntax:  a_foldX   -c |complexes.cl| -o |out_folder| -ref |ref.complex|
+
+* a_model_rms.py::
+
+   load model dictionary and report
+     * average pairwise rmsd
+     * average rmsd to free structure (assumed to be model 1)
+     * average rmsd to bound structure
+    model 1 is not included in the calculations
+
+
+* a_multiDock.py::
+
+   a_multiDock  Visualize multidock results
+   Note: interface rms values are for contact atoms not contact residues.
+
+   Syntax	a_multiDock -cl |complexList.cl|
+
+		cl - complexList, has to contain info dictionary data for key
+		r  - hex receptor pdbs (i.e rec/*_hex.pdb)
+		l  - hex ligand pdbs (i.e lig/*_hex.pdb)
+		ref - reference complex
+		key - info dictionary key to plot (high values are considered good)
+		inv - 1||0 inverse data associated with key (i.e. for rmds plots)
+		maxContour - scale contour circles to fit at most x solutions
+		additional_profile - add to profile plot (rec_model lig_model)
+		
+   Result	5 plots, info txt file, dumped data
+
+
+* a_multidock_contour.py::
+
+   a_multiDock  Visualize multidock results
+   Syntax	a_multiDock -cl |complexList.cl|
+
+		cl	   - complexList, has to contain info dictionary data for key
+		inv	   - 1||0 inverse data associated with key (i.e. for rmds plots)
+		maxContour - scale contour circles to fit at most x solutions
+
+
+* a_random_contacting.py::
+
+   a_random_contacting.py -i 1.cl 2.cl 3.cl .. -ref ref.complex
+			  -nat natively_contacted.cl [ -t ]
+			  [ -nout summary_output_file
+			    -rout random_output_file ]
+   
+   Get confidence of native scores from several scores to random reference.
+
+   Prints table 3 of multidock paper, i.e. fnac, score, rms, ..
+   of free vs. free docking, the docking with highest fnac, and the docking
+   with highest score - FOR EACH complex list. The ref.complex is used to
+   calculate the interface rmsd to the bound.
+   Calculates averages and confidence of highest score, rms..
+   The 'real' table 3 line for the native is appended to a separate file.
+   
+   t   .. print table header
+   nout .. append line with native fnac, scores,.. and confidence to this file
+   rout .. append lines with random fnac, scores,.. to this file [STDOUT]
+   
+
+* a_report_comEntropy.py::
+
+   Analyze the result of a_comEntropy.py
+
+   Syntax:  a_report_comEntropy.py -i |result.dic| [-eps |file| -tall -tsd -t
+						-prefix |str|]
+   Options:
+     -i      dictionary from a_comEntropy.py
+     -eps    output plot with entropies for all values of variable parameter
+     -tall   print table with all entropy values
+     -tsd    print single line with entropy values and standard dev
+	     (var=='ex3')
+     -t      print header row of table
+     -prefix prefix for tables (e.g. a01) 
+
+* a_rmsd_vs_dock_performance.py::
+
+   Collect, calculate and save to disc (both as text files and pickled
+   dictionaries) various data about a complex list. This script is written
+   to collect data from multidocking runs and assums that the first
+   ligand and receptor model is the free xray structure.
+
+   Syntax:   a_rmsd_vs_dock_performance.py -cl |complexList.cl|
+			    -ref |ref.complex| [-key |str| -inv [int|]
+
+	 cl  - complexList, has to contain info dictionary data for key
+	 ref - reference complex
+	 key - info dictionary key to plot (high values are considered good)
+	 inv - 1||0 inverse data associated with key (i.e. for rmds plots)
+
+   Output:   An output directory 'model_vs_rmsd' is created and various text
+	     files and corresponding dictionaries are written to it.
+
+* a_rmsd_vs_performance.py::
+
+   Create figure for multidock paper with the change in docking performance
+   plotted against the change in rms_to_bound (both relative to the free-free
+   docking).
+
+   k .. PDBModel.info key to be plotted (rms_to_bound, rmsCA_to_bound, ..)
+   o .. file name of output eps
+   i .. one or many complexists with 
+
+
+* a_table_fnac_rms_score.py::
+
+   a_table_fnac_rms_score.py [ -i complexes_cont.cl -ref ref.complex -t ]
+   
+   Creates one line of table 3 of multidock paper, i.e. fnac, score, rms, ..
+   of free vs. free docking, the docking with highest fnac, and the docking
+   with highest score.
+   t .. print table header
+
+* a_trajEntropy.py::
+
+   Analyze entropy of a single or one rec and one lig trajectory with ptraj.
+
+   Syntax:  a_trajEntropy.py -i |traj1.dat+traj2.dat| [ -o |result.dic|
+			 -ref |ref_structure| -cast -chains |chain_indices|
+			 -border |chain| -split -shift -shuffle
+			 -s |startFrame| -e |endFrame| -step |frameOffset|
+			 -ss |member_startFrame| -se |member_endFrame|
+			 -ex_n |exclude_n_members|
+			 -ex1 |ex_from_traj1| -ex2 |ex_from_traj2|
+			 -ex3 |exclude_member_tripple|
+			 -atoms |CA CB ..| -heavy
+			 -nice |level|
+			 -parm |parm_file| -crd |crd_file| -f_out |ptraj_out|
+			 -f_template |ptraj_template|
+			 -log |log_file| -debug -verbose ]
+   Options:
+       i	  1 trajectory or 2 trajectories connected by '+'
+       o	  file name for pickled result dictionary
+       s	  skip first |s| frames (of complete trajectory)
+       e	  skip frames after |e| (of complete trajectory)
+       ss	  skip first |ss| frames of each member trajectory
+       se	  skip frames after |se| of each member trajectory
+       atoms	  considered atoms (default: all)
+       heavy	  remove hydrogens (default: don't)
+       ref	  pickled PDBModel, Complex, or Trajectory
+       cast	  equalize atom content of traj and ref 	[no]
+       chains	  list of integer chain indices e.g -chains 0 1 [all]
+       border	  1st chain of 2nd molecule for -split, -shift, -shuffle
+       split	  split complex trajectory and fit rec and lig separately
+		  (requires -border with first lig chain)	[no]
+       shuffle    shuffle the order of rec vs. lig frames
+       thin	  use randomly distributed fraction of frames, e.g. 0.2 [all]
+       step	  frame offset, use every step frame, e.g. 5		[all]
+       ex1	  exclude these members from 1st trajectory, e.g. 3 6
+       ex2	  exclude these members from 2nd trajectory (if given)
+       ex_n	  exclude first n members			[0]
+       ex3	  exclude |ex3|rd tripple of members, e.g. 2 excludes 3,4,5
+		  (0 excludes nothing)  			[0]
+
+       f_template alternative ptraj input template [default template]
+       f_out	  target name for ptraj output file	   [discard]
+       nice	  nice level					 [0]
+       log	  file for program log  		     [STOUT]
+       debug	  keep all temporary files
+       verbose    print extended progress messages to log    [log != STDOUT]
+
+
+* a_trajQuality.py::
+
+   Syntax: a_trajQuality -i |traj_1 traj_2 .. traj_n| [-a -h |n_hosts| -w]
+       pvm must be running on the local machine!
+
+   Result: eps with quality plots in folder of traj files
+       
+   Options:
+       -h    number of hosts to be used
+       -a    first add hosts to pvm
+       -w    display a xterm window for each node
+
+
+* random_complexes.py::
+
+   random_complexes.py -r |rec_model| -l |lig_model| [ -o |out_file| -n |number|
+		       -traj |traj_out_name| -ro |rec_out| -lo |lig_out|
+		       -debug copy_inp_file ]
+
+   Remark:
+   to create valid PCRModels for rec and lig use (in rec_wet/, lig_wet/)
+	   1pdb2model.py -i ????.pdb -psf ????.psf -o xplor.model
+   The waters in the PSF are deleted. They can be in the model but don't have to. 
+
+   Options:
+	r     pickled PCRModel, receptor (psf file has to be valid)
+	l     pickled PCRModel, ligand   (psf file has to be valid)
+	ro    file name for rec copy (centered and no waters)
+	lo    file name for lig copy (centered and no waters)
+	o     file name for result ComplexList
+	n     number of random complexes to generate
+	traj  file name for optional amber crd and pdb (for visualisation)
+	debug keep Xplor input file and don't delete temporary files
+
+* random_grouping.py::
+
+   select set of non-redundant, non-native random complexes
+
+   random_grouping.py -cl |complex_list|
+
+   Options:
+	 ref .. pickled native complex
+	 h   .. number of hosts
+	 co  .. folder name for result complexes
+	 o   .. base name for other result files
+	 a   .. add hosts to PVM before starting
+
