@@ -567,8 +567,8 @@ class TestCore(BT.BiskitTest):
         ## "multidock/com" are symbolic links from "dock/rec" and
         ## "dock/com". If this is a fleshly checked out project
         ## they will not exist, so we will have to create them.
-        rec_dir = t.testRoot() + '/multidock/rec'
-        com_dir = t.testRoot() + '/multidock/com'
+        rec_dir = t.testRoot() + '/dock/rec'
+        com_dir = t.testRoot() + '/dock/com'
 
         if not os.path.exists( rec_dir ):
             ## remove old invalid links
@@ -582,7 +582,7 @@ class TestCore(BT.BiskitTest):
                 os.unlink( com_dir )
             os.symlink( t.testRoot() + '/dock/com', com_dir )
 
-        recDic = t.load( t.testRoot() + '/multidock/rec/1A2P_model.dic' )
+        recDic = t.load( t.testRoot() + '/dock/rec/1A2P_model.dic' )
 
         self.d = Docker( recDic, ligDic, out=self.out_folder,
                          verbose=self.local  )
