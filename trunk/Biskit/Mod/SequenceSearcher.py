@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2011 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2009 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -16,6 +16,7 @@
 ## license.txt along with this program; if not, write to the Free
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
+## Contributions: Marc-Michael Blum (transition to Bio.SeqIO)
 ##
 ## last $Author$
 ## last $Date$
@@ -28,7 +29,8 @@ using the method of choice (Blast , FastA)
 from Bio.Blast import NCBIWWW
 from Bio.Blast import NCBIXML
 from Bio.Blast import NCBIStandalone
-from Bio import Fasta
+from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
 
 import Biskit.tools as T
 import Biskit.Errors as E
@@ -188,12 +190,12 @@ class SequenceSearcher:
         """
         Copy the blast result to a file. The input file handle will be
         empty afterwards! Use the returned string handle instead.
-
+    
         @param result_handle: file handle returned by NCBI* blast runners
         @type  result_handle: file
         @param fname : absolute path to output file
         @type  fname : str
-
+    
         @return: a fresh 'file' (string) handle with the output
         @rtype : cStringIO.StringI
         """
@@ -273,7 +275,7 @@ class SequenceSearcher:
         e = str(e)
 
         try:
-            fasta = Fasta.Iterator( open(seqFile) )
+            fasta = SeqIO.parse( open(seqFile), "fasta" )
             query = fasta.next()
 
             results = NCBIWWW.qblast( program=method, database=db,
@@ -484,7 +486,7 @@ class SequenceSearcher:
         @type  id: str
 
         @return: fasta record
-        @rtype: Bio.Fasta.Record
+        @rtype: Bio.SeqRecord.SeqRecord
 
         @raise BlastError: if can't fetch fasta record from database
         """
@@ -495,17 +497,11 @@ class SequenceSearcher:
             EHandler.warning('%s returned error: %r' % (cmd, err) )
             raise BlastError( err )
 
-        frecord = Fasta.Record()
-        frecord.title = id
-
         try:
-            for line in o.split('\n'):
-                if line[0] == '>':
-                    frecord.annotation = line[1:]
-                else:
-                    frecord.sequence += line.strip()
+            frecord = SeqIO.parse( cStringIO.StringIO(o), 'fasta').next()
+            frecord.id = str(id)
 
-        except IndexError:
+        except StopIteration:
             raise InternalError, \
                   "Couldn't fetch fasta record %s from database %s" % (id,db)
 
@@ -666,7 +662,7 @@ class SequenceSearcher:
         """
         iter = 1
         while (self.clustersCurrent > self.clusterLimit \
-               or self.clustersCurrent == None) \
+              or self.clustersCurrent == None) \
               and (simCut > 0 and lenCut > 0):
 
             self.clusterFasta( fastaIn, simCut, lenCut, ncpu )
@@ -705,7 +701,7 @@ class SequenceSearcher:
         """
         f = open( T.absfile(fastaOut), 'w' )
         for r in frecords:
-            f.write( str( r ) + '\n' )
+            f.write( r.format('fasta') )  ## note better use direct SeqIO
         f.close()
 
 

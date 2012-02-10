@@ -44,7 +44,8 @@ import subprocess
 import  cStringIO
 import commands
 from Bio import File
-from Bio import Fasta
+from Bio import SeqIO
+from Bio.SeqRecord import SeqRecord
 
 
 class PickyURLopener(urllib.FancyURLopener):
@@ -175,7 +176,7 @@ class TemplateSearcher( SequenceSearcher ):
         @type  id: str
 
         @return: fasta record
-        @rtype: Bio.Fasta.Record
+        @rtype: Bio.SeqRecord.SeqRecord
 
         @raise BlastError: if can't fetch fasta record from database
         """
@@ -190,22 +191,15 @@ class TemplateSearcher( SequenceSearcher ):
             EHandler.warning('%s returned error: %r' % (cmd, err) )
             raise BlastError( err )
 
-        frecord = Fasta.Record()
-        frecord.title = id
-
         try:
-            for line in o.split('\n'):
-                if line[0] == '>':
-                    frecord.annotation = line[1:]
-                else:
-                    frecord.sequence += line.strip()
+            frecord = SeqIO.parse( cStringIO.StringIO(o), 'fasta').next()
+            frecord.id = str(id)
 
-        except IndexError:
+        except StopIteration:
             raise InternalError, \
                   "Couldn't fetch fasta record %s from database %s" % (id,db)
 
         return frecord
-
 
 
     def fastaFromIds( self, db, id_lst ):
@@ -572,4 +566,4 @@ class Test(BT.BiskitTest):
 
 if __name__ == '__main__':
 
-    BT.localTest()
+    BT.localTest(debug=True)
