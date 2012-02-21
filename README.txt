@@ -49,7 +49,7 @@ effort.
 
 The most important new features:
 
-* TM-Align: structure alignment wrapper and integration into PDBModel
+* TM-align: structure alignment wrapper and integration into PDBModel
   - new class: TMAlign
   - new method in PDBModel: structureFit()
 
@@ -82,8 +82,9 @@ Smaller improvements:
 
 * improved support for empty PDBModels, e.g. concatenation to and from
 
-* re-written and simplified the recognition of sequence repeats in
-  that is used by PDBModel.compareAtoms()
+* re-written and simplified the recognition of sequence repeats
+  that is used by PDBModel.compareAtoms() (attention, this may cause minor
+  differences in results from this method)
 
 * Executor: allow bundling of temporary files into temporary directory
 
@@ -93,6 +94,12 @@ Smaller improvements:
 
 * updated Amber related tools (AmberParmBuilder, entropy-related classes)
   to Amber version 11
+  
+* Biskit.Mod blast searches adapted to recent BioPython / NCBItools versions
+
+* Biskit.Mod.SequenceSearcher can now fetch fasta records from NCBI website
+  (this allows to run homology modeling without a local database installation
+   but isn't yet passed through as an option to the end-user scripts)
 
 ... and many fixes for old bugs without, hopefully, introducing too
 many new ones.
@@ -106,6 +113,9 @@ Unfortunately, there are also some things that will NOT work right now:
 
 * the Fold-X wrapper is very outdated and has not been updated to the
   latest versions
+  
+* PSI-blast searching may not be working with the latest NCBITools/BioPython
+  version. The Mod module needs to be updated to the new blast+ tool set.
 
 As always, feel free to send your comments or questions!
 Good luck!

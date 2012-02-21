@@ -8,7 +8,7 @@ XS-Python-Version: >= 2.4, << 3.0
 
 Package: python-biskit
 Architecture: all
-Depends: python-numpy, gnuplot, python-scipy, python-scientific, python (>= 2.4), python (<< 2.7), python-scipy, python-biopython
+Depends: python-numpy, gnuplot, python-scipy, python-scientific, python (>= 2.4), python (<< 3.0), python-biopython
 Recommends: plotutils, python-dev, libplot-dev, pvm, pvm-dev, pymol
 Suggests: 
 XB-Python-Version: ${python:Versions}

@@ -10,7 +10,7 @@
 ## building debian source package
 ## (requires stdeb: http://github.com/astraw/stdeb/tree/master)::
 ##
-##   py2dsc --extra-cfg-file packaging/stdeb.cfg dist/biskit-2.3.1.tar.gz
+##   py2dsc --extra-cfg-file packaging/stdeb.cfg dist/biskit-2.4.tar.gz
 ##
 ## or, alternatively::
 ##
@@ -18,7 +18,7 @@
 ##          sdist_dsc --extra-cfg-file packaging/stdeb.cfg
 ##
 ## building debian binary package::
-##   cd deb_dist/biskit-2.3.1/
+##   cd deb_dist/biskit-2.4/
 ##   cp ../../packaging/control debian/  ## fix control; edit if needed
 ##   cp ../../packaging/copyright debian/
 ##   dpkg-buildpackage -rfakeroot -uc -b
@@ -105,9 +105,9 @@ long_description = \
 
 setup(
     name = "biskit",
-    version = "2.3.1",
+    version = "2.4",
     url = 'http://biskit.pasteur.fr',
-    download_url= 'http://downloads.sourceforge.net/biskit/biskit-2.3.1.tar.gz',
+    download_url= 'http://downloads.sourceforge.net/biskit/biskit-2.4.tar.gz',
     author = 'Raik Gruenberg, Johan Leckner, and more',
     author_email = 'raik.gruenberg@crg.es',
     description = 'A Python platform for structural bioinformatics',
@@ -118,19 +118,17 @@ setup(
                       'numpy' ],
 
     ## provide download links for packages not downloadable from PyPi
-    dependency_links = \
-    # biggles -- not available on PyPi
-     ['http://biskit.pasteur.fr/install/mirror/biggles-1.6.5.tar.gz',
+    #dependency_links = \
 
     # numpy, patched against issue #860 (overrides the PyPi download)
     # http://projects.scipy.org/numpy/ticket/860
-      'http://biskit.pasteur.fr/install/mirror/numpy-1.3.0-patched.tar.gz',
+    #  'http://biskit.pasteur.fr/install/mirror/numpy-1.3.0-patched.tar.gz',
 
     # ScientificPython -- registered on PyPi but download doesn't work
-      'http://biskit.pasteur.fr/install/mirror/ScientificPython-2.8.tar.gz',
+    #  'http://biskit.pasteur.fr/install/mirror/ScientificPython-2.8.tar.gz',
 
     # scipy -- registered on pypi but download doesn't work
-      'http://biskit.pasteur.fr/install/mirror/scipy-0.7.0.tar.gz'],
+    #  'http://biskit.pasteur.fr/install/mirror/scipy-0.7.0.tar.gz'],
 
     packages = find_packages(),
     include_package_data = True,

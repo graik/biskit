@@ -83,9 +83,9 @@ long_description = \
 
 setup(
     name = "biskit",
-    version = "2.3.1",
+    version = "2.4",
     url = 'http://biskit.pasteur.fr',
-    download_url= 'http://downloads.sourceforge.net/biskit/biskit-2.3.1.tar.gz',
+    download_url= 'http://downloads.sourceforge.net/biskit/biskit-2.4.tar.gz',
     author = 'Raik Gruenberg, Johan Leckner and others',
     author_email = 'raik.gruenberg@crg.es',
     description = 'A Python platform for structural bioinformatics',
