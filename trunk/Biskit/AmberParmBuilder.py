@@ -475,8 +475,9 @@ class AmberParmBuilder:
         f_out_pdb = t.absfile( f_out_pdb ) or t.stripSuffix( f_out ) +\
                     '_leap.pdb'
 
-        fmod  = [ t.absfile( f ) for f in t.toList( fmod )  ]
-        fprep = [ t.absfile( f ) for f in t.toList( fprep ) ]
+        ## removed: (bugfix 3434136)
+        #fmod  = [ t.absfile( f ) for f in t.toList( fmod )  ]
+        #fprep = [ t.absfile( f ) for f in t.toList( fprep ) ]
 
         try:
             if self.verbose: self.log.add( '\nCleaning PDB file for Amber:' )
@@ -586,6 +587,10 @@ class AmberParmBuilder:
         @type  f_out: str
         @param f_out_crd: target crd file (default: f_out but ending .crd)
         @type  f_out_crd: str
+        @param fmod : list of amber Mod files (loaded with loadAmberParams)
+        @type  fmod : [str]
+        @param fmod : list of amber Prep files (loaded with loadAmberPrep)
+        @type  fmod : [str]
         """
         f_out = t.absfile( f_out )
         f_out_crd = t.absfile( f_out_crd ) or t.stripSuffix( f_out ) + '.crd'
@@ -699,7 +704,7 @@ class Test( BT.BiskitTest ):
         self.assert_( eq.all() )
 
 
-    def __test_AmberParmSolvated( self ):
+    def test_AmberParmSolvated( self ):
         """AmberParmBuilder.parmSolvated test"""
         ## remove waters and hydrogens
         self.mdry = self.ref.compress( self.ref.maskProtein() )
@@ -717,6 +722,7 @@ class Test( BT.BiskitTest ):
 
         m3prot = self.m3.compress( self.m3.maskProtein() )
         refprot= self.ref.compress( self.ref.maskProtein() )
+        refprot.xplor2amber()
         
         self.assertEqual( self.ref.lenChains(), self.m3.lenChains() )
         self.assertEqual( refprot.atomNames(), m3prot.atomNames() )
