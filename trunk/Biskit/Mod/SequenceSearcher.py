@@ -278,6 +278,9 @@ class SequenceSearcher:
             fasta = SeqIO.parse( open(seqFile), "fasta" )
             query = fasta.next()
 
+            if self.verbose:
+                self.log.add('starting blast query...')
+
             results = NCBIWWW.qblast( program=method, database=db,
                                       sequence=query, expect=e,
                                       ncbi_gi='FALSE', **kw )
@@ -497,8 +500,7 @@ class SequenceSearcher:
         result = [ a.accession for a in blast_records.alignments ]
 
         return result
-
-
+    
     def fastaRecordFromId_remote( self, id ):
         """
         experimental: fetch fasta records from remote database
@@ -566,7 +568,7 @@ class SequenceSearcher:
             s = 'from local %s using fastacmd'
             if remote:
                 s = 'remotely from Entrez'
-            self.log.add('Fetching %i fasta records %s...' % (len(id_lst), s))
+            self.log.add('Fetching %i fasta records %s...\n'% (len(id_lst), s))
             
         for i in id_lst:
             try:

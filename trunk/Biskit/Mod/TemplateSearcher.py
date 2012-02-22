@@ -113,6 +113,7 @@ class TemplateSearcher( SequenceSearcher ):
         SequenceSearcher.__init__( self, outFolder=outFolder, verbose=1 )
 
         self.ex_pdb   = re.compile( 'pdb\|([A-Z0-9]{4})\|([A-Z]*)' )
+        self.ex_gb    = re.compile( 'gi\|([0-9]+)\|')
 
         self.ex_resolution = re.compile(\
             'REMARK   2 RESOLUTION\. *([0-9\.]+|NOT APPLICABLE)' )
@@ -155,13 +156,17 @@ class TemplateSearcher( SequenceSearcher ):
         result = []
         for a in blast_records.alignments:
 
-            ids = self.ex_pdb.findall( a.title )
+            ids_pdb = self.ex_pdb.findall( a.title )
+            ids_gb  = self.ex_gb.findall( a.title )
 
-            if not ids:
-                raise BlastError( "Couldn't find ID in " + a.title)
+            if not ids_pdb:
+                raise BlastError( "Couldn't find PDB ID in " + a.title)
+            if not ids_gb:
+                raise BlastError( "Couldn't find genebank ID in " + a.title)
+            assert len( ids_pdb ) == len(ids_gb)
 
-            for id in ids:
-                result += [ { 'pdb':id[0], 'chain':id[1] } ]
+            for pdb, gb in zip( ids_pdb, ids_gb):
+                result += [ { 'pdb':pdb[0], 'chain':pdb[1], 'gb':gb } ]
 
         return result
 
@@ -202,7 +207,7 @@ class TemplateSearcher( SequenceSearcher ):
         return frecord
 
 
-    def fastaFromIds( self, db, id_lst ):
+    def fastaFromIds( self, db, id_lst, remote=False ):
         """
         Use::
            fastaFromIds( id_lst, fastaOut ) -> { str: Bio.Fasta.Record }
@@ -217,9 +222,19 @@ class TemplateSearcher( SequenceSearcher ):
         @rtype: { str: Bio.Fasta.Record }        
         """
         result = {}
+        if self.verbose:
+            s = 'from local %s using fastacmd' % db
+            if remote:
+                s = 'remotely from Entrez'
+            self.log.add('Fetching %i fasta records %s...\n'% (len(id_lst), s))
+
         for i in id_lst:
             try:
-                r = self.fastaRecordFromId( db, i['pdb'], i['chain'] )
+                if remote:
+                    r = self.fastaRecordFromId_remote( i['gb'] )
+                    r.id = i['pdb']  ## clustering expects PDB, not gb ID
+                else:
+                    r = self.fastaRecordFromId( db, i['pdb'], i['chain'] )
                 r.chain = i['chain']
                 result[ i['pdb'] ] = r
             except BlastError, why:
@@ -358,7 +373,8 @@ class TemplateSearcher( SequenceSearcher ):
         result = []
         i = 0
         if not self.silent:
-            T.flushPrint("fetching %i PDBs..." % len( pdbCodes ) )
+            T.flushPrint("fetching %i PDBs (l=local, r=remotely)..." % \
+                         len( pdbCodes ) )
 
         for c in pdbCodes:
 
@@ -542,6 +558,35 @@ class Test(BT.BiskitTest):
 
         db = settings.db_pdbaa
         self.searcher.localBlast( self.f_target, db, 'blastp',
+                                  alignments=200, e=0.0001)
+
+        ## first tries to collect the pdb files from a local db and if
+        ## that fails it tries to collect them remotely
+        self.searcher.retrievePDBs()
+
+        self.searcher.clusterFasta()  ## expects all.fasta
+
+        self.searcher.writeFastaClustered()
+
+        fn = self.searcher.saveClustered()
+
+        if self.local and self.DEBUG:
+            self.log.add(
+                '\nThe set of clustered template files from the search' +\
+                '    can be found in %s/templates' % self.outfolder +\
+                '\nTemplateSearcher log file written to: %s' % self.f_out)
+
+    def test_TemplateSearcherRemote(self):
+        """Mod.TemplateSearcher remote blast test"""
+        silent = 0
+        if self.local: silent=0
+
+        self.searcher = TemplateSearcher( outFolder=self.outfolder,
+                                          verbose=1, log=self.l,
+                                          silent=silent )
+
+        db = settings.db_pdbaa
+        self.searcher.remoteBlast( self.f_target, db, 'blastp',
                                   alignments=200, e=0.0001)
 
         ## first tries to collect the pdb files from a local db and if
