@@ -938,7 +938,7 @@ class PDBModel:
         return ''.join( molUtils.singleAA( l, xtable ) )
 
 
-    def xplor2amber( self, aatm=1 ):
+    def xplor2amber( self, aatm=True, parm10=False ):
         """
         Rename atoms so that tleap from Amber can read the PDB.
         If HIS residues contain atoms named HE2 or/and HD2, the residue
@@ -953,11 +953,25 @@ class PDBModel:
         @type  change: 1|0
         @param aatm: use, for example, HG23 instead of 3HG2 (default:1)
         @type  aatm: 1|0
+        @param parm10: adapt nucleic acid atom names to 2010 Amber forcefield
+        @type  parm10: 1|0
 
         @return: [ {..} ], list of atom dictionaries
         @rtype: list of atom dictionaries
         """
         numbers = map( str, range(10) )
+
+        ## nucleic acid atom names have changed in parm10;
+        if parm10:  ## this evidently is a bit of a hack. Should be revisited.
+            def __parm10rename( a ):
+                if "'1" in a: return a.replace( "'1", "'" )
+                if "'2" in a: return a.replace( "'2", "''" )
+                if a == 'O1P': return 'OP1'
+                if a == 'O2P': return 'OP2'
+                if a == 'H5T': return "HO5'"
+                if a == 'H3T': return "HO3'"
+                return a
+            self.atoms['name'] = map( __parm10rename, self.atoms['name'] )
 
         resI = self.resIndex().tolist()
         resI = N.concatenate( (resI, [len(self)] ) )
@@ -986,7 +1000,7 @@ class PDBModel:
                 if 'HD1' in anames: resnames[first:last]= ['HID'] *(last-first)
                 if 'HE2' in anames and 'HD1' in anames:
                     resnames[first:last] = ['HIP'] *(last-first)
-
+            
 
     def renameAmberRes( self ):
         """
@@ -3573,6 +3587,9 @@ class PDBModel:
         equal_ref = N.nonzero(seqMask_ref)
 
         result, result_ref = [], []
+        
+        rI = self.resIndex()
+        rIref = ref.resIndex()
 
         ## check that all atoms are equal in matching residues
         for i in range(0, len(equal)):
@@ -3582,8 +3599,8 @@ class PDBModel:
             aa_ref = ref.atomNames( equal_ref[i],equal_ref[i] )
 
             ## starting atom of current residue
-            ind = self.resIndex()[ equal[i] ]
-            ind_ref = ref.resIndex()[ equal_ref[i] ]
+            ind = rI[ equal[i] ]
+            ind_ref = rIref[ equal_ref[i] ]
 
             for j in range( len(aa_ref) ):
 
@@ -3608,6 +3625,61 @@ class PDBModel:
 
         return result, result_ref
 
+    def unequalAtoms( self, ref, i=None, iref=None ):
+        """
+        Identify atoms that are not matching between two models. 
+        This method returns somewhat of the opposite of compareAtoms().
+        
+        Not matching means: (1) residue is missing, (2) missing atom within a
+        residue, (3) atom name is different. Differences in coordinates or 
+        other atom profiles are NOT evaluated and will be ignored.
+        
+        (not speed-optimized)
+        
+        @param ref: reference model to compare to
+        @type  ref: PDBModel
+        @param i   : pre-computed positions that are equal in this model
+                     (first value returned by compareAtoms() )
+        @type  i   : N.array( int ) or [ int ]
+        @param iref: pre-computed positions that are equal in ref model
+                     (first value returned by compareAtoms() )
+        @type  i   : N.array( int ) or [ int ]
+        
+        @return: missmatching atoms of self, missmatching atoms of ref
+        @rtype: N.array(int), N.array(int)
+        """
+        if i is None or iref is None:
+            i, iref = self.compareAtoms( ref )
+        mask_self = N.ones( len(self), int )
+        mask_ref  = N.ones( len(ref ), int )
+        
+        N.put( mask_self, i, 0 )
+        N.put( mask_ref, iref, 0 )
+        
+        return N.nonzero( mask_self ), N.nonzero( mask_ref )
+    
+
+    def reportAtoms( self, i=None, n=None ):
+        """
+        @param i: optional list of atom positions to report (default: all)
+        @type i : [ int ]
+        @return: formatted string with atom and residue names similar to PDB
+        @rtype: str
+        """
+        m = self
+        n = n or len(m)
+        
+        if i is not None:
+            m = self.take( i )
+        
+        s = '%(serial_number)4i %(name)5s %(residue_name)3s %(chain_id)1s '+\
+            '%(residue_number)3i'
+
+        atm = [ s % a for a in m ]
+        r = '\n'.join( atm[:n] )
+        if n < len( m ):
+            r += ' ...'
+        return r
 
     def __chainFraction( self, chain, ref ):
         """
