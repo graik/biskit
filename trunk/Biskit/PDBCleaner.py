@@ -543,11 +543,30 @@ class PDBCleaner:
         Add NME and ACE capping residues to chain breaks or normal N- and 
         C-terminals. Note: these capping residues contain hydrogen atoms.
         
+        Chain indices for capN and capC arguments can be interpreted either
+        with or without chain break detection enabled. For example, let's
+        assume we have a two-chain protein with some missing residues (chain
+        break) in the first chain:
+        
+        A:   MGSKVSK---FLNAGSK
+        B:   FGHLAKSDAK
+
+        Then:
+          capTerminals( breaks=False, capN=[1], capC=[1]) will add N-and 
+          C-terminal caps to chain B.
+        However:
+          capTerminals( breaks=True, capN=[1], capC=[1]) will add N- and 
+          C-terminal caps to the second fragment of chain A.
+          
+        
         Note: this operation *replaces* the internal model.
         
         @param auto: put ACE and NME capping residue on chain breaks
                      and on suspected false N- and C-termini (default: False)
         @type  auto: bool
+        @param breaks: switch on chain break detection before interpreting
+                       capN and capC
+        @type  breaks: False
         @param capN: indices of chains that should get ACE cap (default: [])
         @type  capN: [int]
         @param capC: indices of chains that should get NME cap (default: [])
@@ -645,7 +664,7 @@ class Test(BT.BiskitTest):
 
 
     def test_PDBCleaner( self ):
-        """PDBCleaner test"""
+        """PDBCleaner general test"""
         
         ## Loading PDB...
         self.c = PDBCleaner( t.testRoot() + '/rec/1A2P_rec_original.pdb',
@@ -680,7 +699,7 @@ class Test(BT.BiskitTest):
         self.m4 = self.m3.clone()
         
         self.c = PDBCleaner( self.m3, log=self.log, verbose=self.local )
-        self.m3 = self.c.capTerminals( breaks=True, capC=[0], capN=[0])
+        self.m3 = self.c.capTerminals( breaks=True, capC=[0], capN=[0,1])
         self.assertEqual( self.m3.takeChains([0]).sequence()[:18], 
                           'XVINTFDGVADXXKLPDN' )
         
@@ -697,7 +716,7 @@ class Test(BT.BiskitTest):
         """PDBCleaner.capTerminals extra challenge"""
         self.m2 = PDBModel( t.testRoot() + '/pdbclean/foldx_citche.pdb' )
         self.c = PDBCleaner( self.m2, verbose=self.local, log=self.log)
-        self.assertRaises(CappingError, self.c.capTerminals, [],{'auto':True})
+        self.assertRaises(CappingError, self.c.capTerminals, auto=True)
         if self.local:
             self.log.add('OK: CappingError has been raised indicating clash.' )
         
