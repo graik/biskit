@@ -31,7 +31,6 @@ List of Complex objects.
 
 import numpy.oldnumeric as N
 import types
-import biggles
 import random
 
 import Biskit.tools as t
@@ -40,6 +39,11 @@ from Biskit.Errors import BiskitError
 
 from Biskit.Dock.Complex import Complex
 from Biskit.Dock.ComplexModelRegistry import ComplexModelRegistry
+
+try:
+    import biggles
+except:
+    biggles = 0
 
 
 class ComplexListError( BiskitError ):
@@ -646,6 +650,9 @@ class ComplexList( list ):
         @return: biggles plot object
         @rtype: biggles.FramedPlot()
         """
+        if not biggles:
+            raise ImportError, 'biggles module could not be imported.'
+        
         plot = biggles.FramedPlot()
 
         plot.xlabel = xkey
@@ -685,6 +692,9 @@ class ComplexList( list ):
         @return: biggles plot object
         @rtype: biggles.FramedArray        
         """
+        if not biggles:
+            raise ImportError, 'biggles module could not be imported.'
+        
         plot = biggles.FramedArray( len(ykey),1 )
 
         plot.xlabel = xkey

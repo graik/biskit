@@ -36,7 +36,10 @@ import numpy.oldnumeric as N
 import numpy.oldnumeric.random_array as RandomArray
 import copy
 
-import biggles
+try:
+    import biggles
+except:
+    biggles = 0
 
 class AnalyzeError( Exception ):
     pass
@@ -289,6 +292,8 @@ class Analyzer:
         @param list: list to plot
         @type  list: [any]        
         """
+        if not biggles:
+            raise ImportError, 'biggles module could not be imported.'        
 
         self.plot.add( biggles.Curve( range( len(list) ), list, **arg ) )
 
@@ -309,6 +314,9 @@ class Analyzer:
         """
         override for plot creation
         """
+        if not biggles:
+            raise ImportError, 'biggles module could not be imported.'
+        
         self.page = biggles.FramedPlot()
         self.plot = self.page
 

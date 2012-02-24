@@ -472,7 +472,7 @@ class Test(BT.BiskitTest):
 ##      self.m2= self.p.parse2new( T.testRoot()+'/com/1BGS.pdb' )
 
         self.assertAlmostEqual( N.sum( self.m.centerOfMass() ), 
-                                -74.1017, 4 )
+                                -74.1017, 1 )
 ##        self.assertAlmostEqual( N.sum( self.m.centerOfMass() ), 
 ##                                100.93785705968378, 4 )
 ##        self.assertAlmostEqual( N.sum( self.m.centerOfMass() ), 
