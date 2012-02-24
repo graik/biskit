@@ -660,7 +660,7 @@ class Test(BT.BiskitTest):
 
         
     def cleanUp( self ):
-        if not self.debug:
+        if not self.DEBUG:
             T.tryRemove( self.fcrg )
             T.tryRemove( self.fmap )
 
