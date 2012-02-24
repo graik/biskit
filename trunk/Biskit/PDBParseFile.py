@@ -464,7 +464,8 @@ class Test(BT.BiskitTest):
 
         self.p = PDBParseFile()
         self.m = self.p.parse2new( T.testRoot()+'biounit/2V4E.pdb')
-        print (self.m.info)
+        if self.local:
+            print (self.m.info)
         self.m.report( prnt=self.local,
                                 plot=(self.local or self.VERBOSITY > 2) )
         self.m.biomodel(1)
