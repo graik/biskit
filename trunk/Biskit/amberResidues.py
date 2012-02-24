@@ -19,7 +19,7 @@
 ##
 ## last $Author: graik $
 ## last $Date: 2009-05-09 14:17:28 +0200 (Sat, 09 May 2009) $
-## $Revision: 742 $
+## $Revision: $
 """
 Read Amber residue topology from Amber "off" libraries.
 """
