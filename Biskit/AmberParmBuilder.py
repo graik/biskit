@@ -600,7 +600,7 @@ class AmberParmBuilder:
 
         ## First leap round ##
         m_ref = self.m.clone()
-        m_ref.xplor2amber( aatm=aatm )
+        m_ref.xplor2amber( aatm=aatm, parm10=True )
         tmp_in = tempfile.mktemp( 'leap_in0.pdb' )
         m_ref.writePdb( tmp_in, ter=3 )
 
@@ -631,8 +631,11 @@ class AmberParmBuilder:
 
         ## check that ref model doesn't need any change
         if iRef != range( len( m_ref ) ):
+            uLeap, uRef = m_leap.unequalAtoms( m_ref, iLeap, iRef )
+            atms = m_ref.reportAtoms( uRef, n=6 )
             raise AmberError, "Cannot create exact mirror of %s.\n" % tmp_in +\
-                  "Leap has renamed/deleted original atoms in %s."% tmp_pdb
+                  "Leap has renamed/deleted original atoms in %s:\n"% tmp_pdb+\
+                  atms
 
         ## indices of atoms that were added by leap
         delStr = self.__deleteAtoms( m_leap,
@@ -673,13 +676,14 @@ class Test( BT.BiskitTest ):
         self.leapout = tempfile.mktemp('.out', 'leap_')
 
     def cleanUp(self):
-        if not self.debug:
+        if not self.DEBUG:
             T.tryRemove( self.dryparm )
             T.tryRemove( self.drycrd )
             T.tryRemove( self.drypdb )
             T.tryRemove( self.wetparm )
             T.tryRemove( self.wetcrd )
             T.tryRemove( self.wetpdb )
+            T.tryRemove( self.leapout )
         
 
     def test_AmberParmMirror(self):
