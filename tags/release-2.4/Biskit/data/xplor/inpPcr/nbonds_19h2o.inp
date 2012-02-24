@@ -1,0 +1,30 @@
+
+nbonds
+	! no 1-2, no 1-3 interaction, special 1-4 vdW, scaled 1-4 elec
+	nbxmod=5 
+
+	! pairlist and interaction cutoffs
+	cutnb=12.0 ctofnb=11.0 ctonnb=8.0 tolerance=0.5
+
+	! atom-based cutoff
+	atom ! from group; atom is normally more stable
+
+	! elec switching
+	shfo bshf 1.0
+
+	! distance dependent dielectric
+	cdiel 
+
+	! dielectric constant
+	eps=1.0 
+
+	! scale factor for 1-4 elec
+	e14fac=0.4
+
+	! vdW switching
+	vswitch
+
+	! below this interatomic distance a warning is issued
+        wmin=1.5
+end
+

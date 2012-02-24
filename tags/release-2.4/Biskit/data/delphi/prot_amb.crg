@@ -1,0 +1,284 @@
+! united atom amber charges, based on kollman, weiner et al
+! jacs 106, 765 (1984). 
+! see also j. comp chem, vol 7, p 230 (1986) for all atom version
+atom__resnumbc_charge_
+N     ala      -0.520      ALANINE  nonpolar
+CA    ala       0.215
+C     ala       0.526         
+O     ala      -0.500
+H     ala       0.248  
+CB    ala       0.031
+N     arg      -0.520    ARGININE      basic
+C     arg       0.526     
+O     arg      -0.500    
+CA    arg       0.237
+CB    arg       0.049
+CG    arg       0.058
+CD    arg       0.111
+NE    arg      -0.493
+CZ    arg       0.813    
+NH1   arg      -0.635
+NH2   arg      -0.634
+H     arg      0.248
+HE    arg      0.294
+HH11  arg      0.361
+HH12  arg      0.362    
+HH21  arg      0.361    
+HH22  arg      0.362  
+N     asn      -0.520     ASPARAGINE    polar neutral
+CA    asn      0.217
+C     asn      0.526     
+O     asn      -0.500      
+CB    asn      0.003
+ND2   asn      -0.867       
+AD2   asn      -0.867
+CG    asn      0.675      
+OD1   asn      -0.470      
+AD1   asn      -0.470
+H     asn      0.248
+HD21  asn      0.344   
+HD22  asn      0.344
+OD1   asp      -0.706      ASPARTIC ACID       acidic
+OD2   asp      -0.706
+CA    asp      0.246
+CB    asp      -0.208
+CG    asp      0.620
+N     asp      -0.520
+C     asp      0.526
+O     asp      -0.500
+H     asp      0.248
+N     cys      -0.520        CYSTEINE     polar neutral
+C     cys      0.526
+O     cys      -0.500
+CA    cys      0.146
+CB    cys      0.100
+SG    cys      -0.135
+H     cys      0.248
+HG    cys      0.135
+N     cyx      -0.520        CYSTINE       polar neutral
+C     cyx      0.526
+O     cyx      -0.500
+CA    cyx      0.088      
+CB    cyx      0.143
+SG    cyx      0.015
+H     cyx      0.248    
+N     gln      -0.520        GLUTAMINE    polar neutral
+CA    gln      0.210
+C     gln      0.526
+O     gln      -0.500
+CB    gln      0.053
+CG    gln      -0.043 
+NE2   gln      -0.867
+AE2   gln      -0.867
+CD    gln      0.675
+OE1   gln      -0.470
+AE1   gln      -0.470
+H     gln      0.248
+HE21  gln      0.344
+HE22  gln      0.344       
+OE1   glu      -0.706     GLUTAMIC ACID     acidic
+OE2   glu      -0.706
+CD    glu      0.620
+N     glu      -0.520
+C     glu      0.526
+O     glu      -0.500
+CA    glu      0.246
+CB    glu      0.000
+CG    glu      -0.208
+H     glu      0.248
+N     gly      -0.520            GLYCINE   nonpolar
+CA    gly      0.246
+C     gly      0.526
+O     gly      -0.500
+H     gly      0.248
+N     hid      -0.520           HISTIDINE   +0.25 on each N-proton on nd1
+C     hid      0.526
+O     hid      -0.500
+CA    hid      0.219
+CB    hid      0.060
+CG    hid      0.089
+CD2   hid      0.145
+AD2   hid      0.145
+CE1   hid      0.384
+AE1   hid      0.384
+ND1   hid      -0.194
+AD1   hid      -0.194
+NE2   hid      -0.277
+AE2   hid      -0.277
+H     hid      0.248
+HD1   hid      0.320
+N     hie      -0.520    histidine +0.5-proton on ne2
+C     hie      0.526
+O     hie      -0.500
+CA    hie      0.219
+CB    hie      0.060
+CG    hie      0.112
+CD2   hie      0.122
+AD2   hie      0.122
+CE1   hie      0.384
+AE1   hie      0.384
+ND1   hie      -0.277
+AD1   hie      -0.277
+NE2   hie      -0.194
+AE2   hie      -0.194
+H     hie      0.248
+HE2   hie      0.320
+N     his      -0.520  histidine    +0.5
+C     his      0.526
+O     his      -0.500
+CA    his      0.219
+CB    his      0.060
+CG    his      0.112
+CD2   his      0.122
+AD2   his      0.122
+CE1   his      0.384
+AE1   his      0.384
+ND1   his      -0.277
+AD1   his      -0.277
+NE2   his      -0.194
+AE2   his      -0.194
+H     his      0.248
+HD1   his      0.320
+N     hip      -0.520    histidine basic +1.0
+C     hip      0.526
+O     hip      -0.500
+CA    hip      0.195
+CB    hip      0.211
+CG    hip      0.103
+CD2   hip      0.353
+AD2   hip      0.353
+CE1   hip      0.719
+AE1   hip      0.719
+ND1   hip      -0.613
+AD1   hip      -0.613
+NE2   hip      -0.686
+AE2   hip      -0.686
+H     hip      0.248
+HD1   hip      0.478
+HE2   hip      0.486
+N     ile      -0.520   isoleucine    nonpolar
+C     ile      0.526
+O     ile      -0.500
+CA    ile      0.199
+CB    ile      0.030
+CG1   ile      0.017
+CG2   ile      0.001
+CD1   ile      -0.001
+H     ile      0.248
+N     leu      -0.520       LEUCINE   nonpolar
+C     leu      0.526
+O     leu      -0.500
+CA    leu      0.204
+CB    leu      0.016
+CG    leu      0.054
+CD1   leu      -0.014
+CD2   leu      -0.014
+H     leu      0.248    
+N     lys      -0.520          LYSINE     basic
+C     lys      0.526
+O     lys      -0.500
+CA    lys      0.227
+CB    lys      0.039
+CG    lys      0.053
+CD    lys      0.048
+CE    lys      0.218
+NZ    lys      -0.272
+H     lys      0.248
+HZ1   lys      0.3110
+HZ2   lys      0.311  
+HZ3   lys      0.3110
+N     met      -0.520         METHIONINE   nonpolar
+C     met      0.526
+O     met      -0.500
+CA    met      0.137
+CB    met      0.037
+CG    met      0.090
+SD    met      -0.025
+CE    met      0.007
+H     met      0.248    
+N     phe      -0.520             PHENYLALANINE   nonpolar
+C     phe      0.526
+O     phe      -0.500
+CA    phe      0.214
+CB    phe      0.038
+CG    phe      0.011
+CD1   phe      -0.011
+CD2   phe      -0.011
+CE1   phe      0.004
+CE2   phe      0.004
+CZ    phe      -0.003
+H     phe      0.248    
+N     pro      -0.257  PROLINE          nonpolar
+CA    pro      0.112
+C     pro      0.526
+O     pro      -0.500
+CB    pro      -0.001
+CG    pro      0.036
+CD    pro      0.084
+N     ser      -0.520       SERINE   polar neutral
+C     ser      0.526
+O     ser      -0.500
+CA    ser      0.292
+CB    ser      0.194
+OG    ser      -0.550
+H     ser      0.248    
+HG    ser      0.310
+N     thr      -0.520           THREONINE   polar neutral
+C     thr      0.526
+O     thr      -0.500
+OG1   thr      -0.550
+CA    thr      0.268
+CB    thr      0.211
+CG2   thr      0.007
+H     thr      0.248
+HG1   thr      0.310   
+N     trp      -0.520     TRYPTOPHAN   nonpolar
+C     trp      0.526
+O     trp      -0.500
+CA    trp      0.248
+CB    trp      0.020
+CG    trp      0.046
+CD1   trp      0.117
+CD2   trp      -0.275
+NE1   trp      -0.330
+CE2   trp      0.000
+CE3   trp      0.145
+CZ2   trp      0.029
+CZ3   trp      -0.082
+CH2   trp      0.034
+H     trp      0.248   
+HE1   trp      0.294   
+N     tyr      -0.520       TYROSINE    neutral/acidic
+C     tyr      0.526
+O     tyr      -0.500
+OH    tyr      -0.368
+CA    tyr      0.245
+CB    tyr      0.022
+CG    tyr      -0.001
+CD1   tyr      -0.035
+CD2   tyr      -0.035
+CE1   tyr      0.100
+CE2   tyr      0.100
+CZ    tyr      -0.121
+H     tyr      0.248   
+HH    tyr      0.339  
+N     val      -0.520          VALINE   nonpolar
+C     val      0.526
+O     val      -0.500
+CA    val      0.201
+CB    val      0.033
+CG1   val      0.006
+CG2   val      0.006
+H     val      0.248   
+OH2   tip      -0.82        TIP3 WATER OF CHARMM
+H1    tip      0.41
+H2    tip      0.41
+oxt             -1.00
+oct1            -0.75
+oct2            -0.75
+ht1            0.416
+ht2            0.416
+ht3            0.416
+cu               2.0
+zn               2.0
+fe               2.0
