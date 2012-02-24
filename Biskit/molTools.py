@@ -228,7 +228,7 @@ class Test(BT.BiskitTest):
                               
         self.r = N.sum(N.ravel(hb[3:5])) + N.sum(xyz)
 
-        self.assertAlmostEqual( self.r, self.EXPECT, 5 )
+        self.assertAlmostEqual( self.r, self.EXPECT, 3 )
 
     EXPECT = 2025.8997840075292 + 152.687011719
 

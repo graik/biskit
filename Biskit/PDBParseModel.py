@@ -136,7 +136,7 @@ class Test(BT.BiskitTest):
         self.m = self.p.parse2new( B.PDBModel(T.testRoot()+'/rec/1A2P.pdb') )
 
         self.assertAlmostEqual( N.sum( self.m.centerOfMass() ),
-               113.682601929, 7 )
+               113.682601929, 2 )
                                 
 
 if __name__ == '__main__':

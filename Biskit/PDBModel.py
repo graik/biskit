@@ -3887,7 +3887,7 @@ class Test(BT.BiskitTest):
         sort = m2.argsort()
         m2 = m2.sort( sort )
 
-        self.assertAlmostEqual( N.sum( m2.centerOfMass() ),  23.1032009125)
+        self.assertAlmostEqual( N.sum( m2.centerOfMass() ),  23.1032009125,2)
 
 
     def test_chainBreaks(self):
