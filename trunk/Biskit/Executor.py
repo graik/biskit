@@ -636,7 +636,7 @@ class Executor:
         if self.f_err and not self.debug:
             t.tryRemove( self.f_err )
         
-        if not self.keep_tempdir and not self.debug:
+        if not self.keep_tempdir and not self.debug and self.verbose:
             if os.listdir( self.tempdir ):  
                 self.log.add('Warning: Removing non-empty temporary folder %s'%\
                              self.tempdir )
