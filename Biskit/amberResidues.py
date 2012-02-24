@@ -324,6 +324,6 @@ class Test(BT.BiskitTest):
 
 if __name__ == '__main__':
 
-    BT.localTest(debug=True)
+    BT.localTest(debug=False)
 
     
