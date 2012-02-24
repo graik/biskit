@@ -22,7 +22,6 @@
 ## $Revision$
 ## last $Date$
 ## last $Author$
-
 """
 Create Amber topology and coordinate file from PDB.
 """
