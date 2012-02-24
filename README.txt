@@ -17,7 +17,7 @@ trajectories. At the same time, Biskit offers a software platform for
 the rapid integration of external programs and new algorithms into
 complex structural bioinformatics workflows. Calculations are thus
 often delegated to established programs like Xplor, Amber, Hex, Prosa,
-and Hmmer; interfaces to further software can be added
+and DelPhi; interfaces to further software can be added
 easily. Moreover, Biskit simplifies the parallelisation of
 calculations via PVM (Parallel Virtual Machine).
 
@@ -41,7 +41,7 @@ changes and improvements have accumulated, especially over the last
 months. The SVN trunk is now quite different from the last
 release. This release is (or should be) still backward-compatible to
 binary pickled data from all previous releases. I haven't insisted any
-longer on compatibility with the old Python 2.4. If anyone still needs
+on compatibility with the old Python 2.4 any longer. If anyone still needs
 support for that, patches can be generated quite easily -- please send
 me (Raik) a mail. The "classic" Python versions 2.5 upwards should
 work. A conversion to Python 3.0 is planned but will require some more
@@ -80,6 +80,12 @@ Smaller improvements:
 
 * also report PDB chain IDs in PDBModel.report()
 
+* new PDBModel.reportAtoms() to print PDB-style info for selected
+  atoms
+
+* new PDBModel.unequalAtoms() tells which atoms are *not* matching
+  between two structures (opposite of compareAtoms() )
+
 * improved support for empty PDBModels, e.g. concatenation to and from
 
 * re-written and simplified the recognition of sequence repeats
@@ -97,9 +103,14 @@ Smaller improvements:
   
 * Biskit.Mod blast searches adapted to recent BioPython / NCBItools versions
 
-* Biskit.Mod.SequenceSearcher can now fetch fasta records from NCBI website
-  (this allows to run homology modeling without a local database installation
-   but isn't yet passed through as an option to the end-user scripts)
+* Biskit.Mod.SequenceSearcher can now fetch fasta records from NCBI
+  website This allows to run homology modeling without a local
+  database installation but isn't yet passed through as an option to
+  the end-user scripts.
+
+* Removed the warning message for when biggles or PVM are not
+  installed; Errors will instead be raised when these modules are needed.
+
 
 ... and many fixes for old bugs without, hopefully, introducing too
 many new ones.
@@ -115,7 +126,11 @@ Unfortunately, there are also some things that will NOT work right now:
   latest versions
   
 * PSI-blast searching may not be working with the latest NCBITools/BioPython
-  version. The Mod module needs to be updated to the new blast+ tool set.
+  version. The Mod module needs to be updated to the new blast+ tool
+  set.
+
+See also the list of current bugs (and report new ones) at:
+http://sourceforge.net/tracker/?group_id=150896&atid=779191
 
 As always, feel free to send your comments or questions!
 Good luck!
@@ -322,7 +337,7 @@ The installation of helper applications is described here:
 License
 -------
 
-Biskit is distributed under the GNU GPL version 3. See license.txt!
+Biskit is distributed under the GNU GPL version 3. See COPYING!
 
 
 Open issues
@@ -348,7 +363,7 @@ field if the above link shouldn't work).
     suites. Some of them haven't been used in quite a while. Please,
     report any problems to the bug tracker [Category `scripts`]!
 
-* Amber* classes lack test cases
+* Many Amber* classes lack test cases
 
     We haven't yet written test cases for the AmberCrdEntropist,
     AmberEntropist, AmberParmBuilder. These classes are used for the
