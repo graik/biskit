@@ -668,7 +668,8 @@ class Test(BT.BiskitTest):
         
         ## Loading PDB...
         self.c = PDBCleaner( t.testRoot() + '/rec/1A2P_rec_original.pdb',
-                             log=self.log )
+                             log=self.log,
+                             verbose=self.local)
         
         self.m = self.c.process()
 
@@ -678,7 +679,7 @@ class Test(BT.BiskitTest):
         """PDBCleaner DNA test"""
         ## Loading PDB...
         self.c = PDBCleaner( t.testRoot() + 'amber/entropy/0_com.pdb',
-                             log=self.log )
+                             log=self.log, verbose=self.local )
         
         self.dna = self.c.process(amber=True)
 
