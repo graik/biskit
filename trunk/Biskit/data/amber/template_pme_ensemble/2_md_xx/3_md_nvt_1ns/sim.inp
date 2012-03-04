@@ -1,0 +1,22 @@
+constant volume MD
+ &cntrl
+  ig     = %(rand_seed)i,
+  lastist= 4000000,
+  lastrst= 4000000,
+  ntx    = 5,       irest  = 1,
+  ntpr   = 500,
+  ntwr=5000, ntwx=%(ntwx)i, ntwv=%(ntwv)i,
+  ntwprt = %(lenatoms)i,
+  ntb    = 1,
+  cut    = 9.0,
+  imin   = 0,
+  nstlim = %(n_steps)i,
+  dt     = %(dt)f,   nrespa = 2,
+  ntc    = 2,       tol    = 0.00001,
+  ntf    = 2,
+  temp0  = 300.0,   tempi  = 300.0,
+  ntt    = 1,
+  nscm   = 1000,
+  ntb    = 1,
+  ntp    = 0,
+ &end

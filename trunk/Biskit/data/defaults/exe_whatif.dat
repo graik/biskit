@@ -1,0 +1,27 @@
+[BINARY]
+
+#comment= http://swift.cmbi.kun.nl/whatif/
+
+## binary 
+bin=whatif
+
+## working directory
+cwd=
+
+## wrap process in shell
+shell=0
+
+## use non-default shell
+shellexe=
+
+## communicate with process via STDIN and STDOUT
+pipes=1
+
+## Use new environment containing only variables given below
+replaceEnv=0
+
+##
+## run time environment settings
+## Empty entries mark variables that have to be specified from outside
+##
+[ENVIRONMENT]

@@ -1,0 +1,117 @@
+Changes for revision 2.0.2
+==========================
+
+* switch project from cvs to subversion
+
+Biskit
+------
+
+* bugfixes
+
+* new: Intervor.py
+  a wrapper for Cazal et al.'s interface triangulation program
+
+PVM
+---
+
+* simplified handling of pvm host lists
+
+
+Changes for revision 2.0.1
+==========================
+
+* switch all modules to a new test/BiskitTest testing
+
+Biskit
+------
+
+* add test cases for AmberCrdParser and AmberRstParser
+
+* AmberRstParser:
+  - bugfixes (concerning box info)
+  - disconnect from AmberCrdParser
+
+* ColorSpectrum:
+  - prefer ColorSpectrum class rather than the perl-code
+    (Unfortunately the perl-generated spectrum looks better than the
+    ColorSpectrum one -- so it's too early to completely abandon the
+    perl script.)
+
+* PVM-related classes:
+  - switch to externally installed pypvm
+  - bugfixes
+  - handle empty host lists (raise error rather than hanging)
+
+* Hmmer:
+  - switch all print statements to log.write* or EHandler calls
+  - pass log and verbose flags to Executor instances
+  - smaller bugfixes
+
+* LogFile:
+  - new methods write and writeln should superseed "add" and
+  "add_no_break"
+
+* MSMS:
+  - use by default biskit-internal gpdb_to_xyzrn
+
+* PDBModel:
+  - new: renameAmberRes() (from AmberCrdParser)
+
+* test.py:
+  - classes and script for the new testing system
+
+* tools.py:
+  - fix for bug #1659132
+  - move colorRange() to ColorSpectrum
+  - new: gzopen() opens normal and gzipped files
+
+* Xplorer:
+  - transformed to Executor child class
+
+
+Biskit.Mod
+----------
+
+* modUtils.py:
+  - migrate verify_fasta from modUtils to Hmmer.py where it is only
+    used.  This way, a standard Biskit import does not any longer
+    import Biskit.Mod which is better for installations that have a
+    broken or missing Biopython.
+
+* SequenceSearcher:
+  - bugfix: repair broken localBlast() and remoteBlast();
+  - use XML-based NCBIXML.BlastParser instead of broken text parser in
+    localBlast() and localPSIBlast(); 
+  - bugfix: __blast2dict(): writeFasta was only called if verbose=1
+    but is actually obligatory.
+
+* TemplateCleaner:
+  - write_tcoffee_pdb(): new t-coffee needs Chain ID also in SEQRES
+    record
+
+* TemplateSearcher:
+  - reorganize remote/local PDB fetching
+  - skip multiple NMR models
+  - better error reports and fast failure for connection problems
+
+Biskit.Dock
+-----------
+
+* ContactSlave:
+  - test case that works stand-alone without a master
+  - minor bugfixes
+
+Biskit.PVM
+----------
+
+* replace hand-compiled pypvm_core by normally installed pypvm module
+
+* pvm.py:
+  - remove pvmTools, migrate functions into pvm.py
+  - the previous overloading of pypvm functions in pvm is given up
+    (although it was actually quite a good idea...perhaps revert that
+    later)
+
+* dispatcher.py:
+  - don't start master if there are no nodes registered (hangs
+    otherwise)
