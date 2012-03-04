@@ -1,0 +1,76 @@
+{*** Add hydrogens ***}
+
+{  1. Fix all atoms (including hydrogens) that have 0,0,0 coordinates
+    - these are atoms that are missing in the pdb file and therefore have been added
+   2. Minimize using only bond and dihedral terms
+   3. Build hydrogens
+   4. Minimize all atoms }
+
+
+{*** Mininize all heavy atom with 0,0,0 coordinates using only bond terms ***}
+
+vector identify (store1) ( hydrogen AND NOT known )                       {select all Hydrogens}
+constraints interaction = ( NOT store1 )( NOT store1 ) end                {only consider none-hydrogens}
+
+constraints fix ( NOT ((attr x=0.0)AND(attr y=0.0)AND(attr z=0.0))) end   {fix all atoms exept those with 0,0,0 coordinates}
+
+flags exclude * include bond angle end  			           {only use bond and angle energy}
+
+parameter
+    nbonds  
+    atom rdie switch eps=1. { constant dielectric; electrostatic shifting; dielectric constant }
+    e14fac=0.8333333       { use this to reproduce elec term to amber }
+    cutnb=10.   { nonbonded interaction cutoff }
+    ctonnb=5.  { distance where the switching function becomes effective }
+    ctofnb=9.  { distance where nonbonded forces are zero }
+    nbxmod=5    { excludes some nonbonded interactions }
+    vswitch     { vdw switching }
+end end
+
+minimize 
+    powell
+    nstep=400
+end
+ 
+constraints fix( not all) end
+constraints interaction=(all)(all) end                  {consider all atoms}
+
+
+{*** Build hydrogens ***}
+hbuild
+    selection=( hydrogen )
+    print=on
+end
+
+
+! {*** Mininize all atom using default energy terms ***}
+! flags include bond angl dihe elec impr vdw end
+! 
+! minimize 
+!     powell
+!     nstep=400
+! end
+! 
+! parameter
+!     nbonds  
+!     atom cdie shift eps=1. { constant dielectric; electrostatic shifting; dielectric constant }
+!     e14fac=0.8333333       { use this to reproduce elec term to amber }
+!     cutnb=15.   { nonbonded interaction cutoff }
+!     ctonnb=13.  { distance where the switching function becomes effective }
+!     ctofnb=14.  { distance where nonbonded forces are zero }
+!     nbxmod=5    { excludes some nonbonded interactions }
+!     vswitch     { vdw switching }
+! end end
+! 
+! parameter nbonds EPS=1. WEPS=78.5 {GB settings} 
+!          offset=0.09
+!          gbhct 
+! end end
+! 
+! flags include ace end
+! 
+! energy end
+! 
+! minimize powell 
+!     nstep=20 
+! end

@@ -1,0 +1,35 @@
+[BINARY]
+
+comment=Amber topology builder
+
+## binary
+bin=tleap
+
+## working directory
+cwd=
+
+## wrap process in shell
+shell=0
+
+## use non-default shell
+shellexe=
+
+## communicate with process via STDIN and STDOUT
+pipes=0
+
+## Use new environment containing only the variables given in [ENVIRONMENT]
+replaceEnv=0
+
+## default Amber force field; should be relative to $AMBERHOME
+## can also be a file ending of a leaprc file in $AMBERHOME/dat/leap/cmd
+leaprc=ff10
+
+##
+## run time environment settings
+## Empty entries mark variables that have to be specified from outside
+## Note: non-empty entries are ignored unless replaceEnv=1!
+##
+[ENVIRONMENT]
+
+## root of amber installation
+AMBERHOME=

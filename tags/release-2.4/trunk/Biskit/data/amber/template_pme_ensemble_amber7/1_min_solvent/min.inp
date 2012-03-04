@@ -1,0 +1,26 @@
+Minimize solvent
+ &cntrl
+
+  lastist= 4000000,
+  lastrst= 4000000,
+
+  ntx    = 1,       irest  = 0,
+  ntpr   = 10,
+
+  ntb    = 1,
+  cut    = 9.0,     nsnb   = 10,   
+
+  ntr = 1,
+
+  imin   = 1,       
+  maxcyc = 1000,   
+  ncyc   = 5000,   
+  ntmin  = 1,       dx0    = 0.1,
+
+ &end
+Fix
+500.0
+RES  1  %(lenres)i
+END
+END
+

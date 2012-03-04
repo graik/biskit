@@ -1,0 +1,94 @@
+!! short rigid body minimzation of a randomly oriented pair of rec and lig
+!! Copyright (C) 2004-2005 Michael Nilges
+!!
+!! This program is free software; you can redistribute it and/or
+!! modify it under the terms of the GNU General Public License as
+!! published by the Free Software Foundation; either version 2 of the
+!! License, or any later version.
+!!
+!! This program is distributed in the hope that it will be useful,
+!! but WITHOUT ANY WARRANTY; without even the implied warranty of
+!! MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+!! General Public License for more details.
+!!
+!! You find a copy of the GNU General Public License in the file
+!! license.txt along with this program; if not, write to the Free
+!! Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+!!
+!! $Revision$
+!! last $Author$
+!! last $Date$
+!! adapted by Raik Gruenberg
+
+! ------------------------------------------------------------
+! Place holders to be inserted by Python script
+! ------------------------------------------------------------
+evaluate ($ligandpsf = "%(lig_psf)s")
+evaluate ($ligandpdb = "%(lig_in)s")
+evaluate ($receptorpsf = "%(rec_psf)s")
+evaluate ($receptorpdb = "%(rec_in)s")
+evaluate ($param19 = "%(param19)s" )
+evaluate ($lig_out = "%(lig_out)s" )
+evaluate ($rec_out = "%(rec_out)s" )
+
+! ------------------------------------------------------------
+! read psf and pdb files for the unrefined receptor and ligand
+! ------------------------------------------------------------
+
+structure @@$ligandpsf end
+coor @@$ligandpdb
+delete selection= (resname TIP3) end
+vector ident (vx) (all)
+
+structure @@$receptorpsf end
+coor @@$receptorpdb
+delete selection= (resname TIP3) end
+vector ident (vy) (not (attribute vx>0))
+
+! ------------------
+! set toplogies etc.
+! ------------------
+parameter
+  	reset
+        @@$param19
+end
+
+! ------------------------------------------------------------
+! minimize
+! ------------------------------------------------------------
+
+parameters nbonds
+    atom
+    repel 0.89 irexp 1 rexp 4 rconst 1
+    tolerance 0.5 cutnb 7 ctonnb 5 ctofnb 6
+end end
+
+noe
+   nrestraints 1000
+   ceiling 1000
+   class pull
+   assign ((attribute vx>0) and name ca) ((attribute vy>0) and name ca) 1.0 0.0 0.0
+   potential pull soft
+   average pull center
+   sqconst pull 10
+   scale pull 1
+   rswi pull 1
+   asym pull 2
+end
+
+flags include noe end
+
+mini rigid
+   group (attribute vx>0)
+!   group (attribute vy>0)
+   nstep 100
+end
+
+! ---------------------------------------------------
+! write minimized PDBs
+! ---------------------------------------------------
+
+write coor  selection= (attribute vx>0) output= $lig_out end
+write coor  selection= (attribute vy>0) output= $rec_out end
+
+stop

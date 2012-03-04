@@ -1,0 +1,22 @@
+Source: biskit
+Maintainer: Raik Gruenberg, Johan Leckner and others <raik.gruenberg@crg.es>
+Section: python
+Priority: optional
+Build-Depends: python-all (>= 2.6.6-3), debhelper (>= 7.4.3)
+Standards-Version: 3.9.1
+X-Python-Version: >= 2.4, << 3.0
+
+Package: python-biskit
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}, python-numpy, gnuplot, plotutils, python-scipy, python-scientific, python-biopython, python-pybiggles, python (>= 2.4), python (<< 3.0)
+Recommends: python-dev, pvm, pvm-dev, pymol, ncbi-tools-bin, ncbi-data
+Description: A Python platform for structural bioinformatics
+  Biskit is a modular, object-oriented Python library for structural
+  bioinformatics research. It facilitates the manipulation and analysis
+  of macromolecular structures, protein complexes, and molecular
+  dynamics trajectories. For efficient number crunching, Biskit objects
+  tightly integrate with numpy. Biskit also offers a platform for the
+  rapid integration of external programs and new algorithms into complex
+  workflows. Calculations are thus often delegated to established
+  programs like Xplor, Amber, Hex, Prosa, T-Coffee, TMAlign, Reduce and
+  Modeller; interfaces to further software can be added easily.
