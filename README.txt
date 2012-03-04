@@ -47,6 +47,13 @@ me (Raik) a mail. The "classic" Python versions 2.5 upwards should
 work. A conversion to Python 3.0 is planned but will require some more
 effort.
 
+Warning Windows users: The Windows installation package seems to work
+but we have not developed for this platform and there are some bugs,
+especially, related to the expansion of path and file
+names. Surprisingly enough, many things seem to work. I even received
+a report of the homology modeling pipeline running on Windows.
+See: http://biskit.pasteur.fr/install/windows_install
+
 The most important new features:
 
 * TM-align: structure alignment wrapper and integration into PDBModel
