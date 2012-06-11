@@ -1,7 +1,0 @@
-Files related to packaging Biskit
-
-control .. debian control file to be copied into biskit-2.3/debian
-
-see also: https://wiki.ubuntu.com/PackagingGuide/Python
-
-*distutils  .. alternative setup files using only standard distutils
