@@ -275,13 +275,13 @@ class PDBDope:
         name_curv = 'curvature' + probe_suffix * ('_%3.1f' % probe)
 
         ## hydrogens + waters are not allowed during FastSurf calculation
-        mask = self.m.maskHeavy() * N.logical_not( self.m.maskSolvent() )
         
+        mask = self.m.maskHeavy() * N.logical_not( self.m.maskSolvent() )
         fs = SurfaceRacer( self.m, probe, vdw_set=vdw_set )
         fs_dic = fs.run()
 
         fs_info= fs_dic['surfaceRacerInfo']
-
+        
         self.m.atoms.set( name_MS, fs_dic['MS'], mask, 0,
                                comment='Molecular Surface area in A',
                                version= T.dateString() + ' ' + self.version(),

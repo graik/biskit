@@ -61,11 +61,20 @@ Summary for all
 import Biskit as B
 import Biskit.tools as T
 import Biskit.SettingsManager as M
-
+import subprocess
 import user, sys
 
 __CFG_DEFAULT = T.dataRoot() + '/defaults/settings.cfg'
 __CFG_USER    = user.home + '/.biskit/settings.cfg'
+#I commented the previous out as it was not really working on Centos 5.5 machines
+
+#p=subprocess.Popen("whoami",shell=False,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+#out=p.stdout.read()
+#p.wait()
+#userName=out.strip()
+
+#__CFG_USER    = '/home/'+userName + '/.biskit/settings.cfg'
+#
 
 ## BISKIT_PATH = T.projectRoot()  ## Hack to make test suite path independent
 

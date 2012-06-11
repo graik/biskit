@@ -229,6 +229,8 @@ class SurfaceRacer( Executor ):
         model.renumberResidues()
         if sum(model.maskHeavy()) == model.lenAtoms():
             model.writePdb( f_pdb_out, wrap=1, left=0 )
+            import shutil
+            shutil.copy(f_pdb_out,"/home/peter/Downloads/1uyd.pdb")
         else:
             raise SurfaceRacer_Error, \
                   'The pdb file that was to be written as input for SurfaceRacer contains none heavy atoms.'
