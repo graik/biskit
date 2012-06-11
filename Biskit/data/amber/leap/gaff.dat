@@ -1,0 +1,19 @@
+ATOM_TYPE   vdW_Radius  well_depth  possible_charge_start   possible_charge_end
+H   1.1000  0.0157             Veenstra et al JCC,8,(1992),963 
+HN  0.6000  0.0157            !Ferguson base pair geom.
+HO  0.0000  0.0000             OPLS Jorgensen, JACS,110,(1988),1657
+HP  0.6000  0.0157             same to hs (be careful !) 
+HS  0.6000  0.0157             W. Cornell CH3SH --> CH3OH FEP
+HW  0.0000  0.0000             OPLS Jorgensen, JACS,110,(1988),1657
+O   1.6612  0.2100             OPLS
+OH  1.7210  0.2104             OPLS 
+OS  1.6837  0.1700             OPLS ether
+OW  1.7683  0.1520             TIP3P water model
+C   1.9080  0.0860             OPLS
+N   1.8240  0.1700             OPLS
+S   2.0000  0.2500             W. Cornell CH3SH and CH3SCH3 FEP's
+P   2.1000  0.2000             JCC,7,(1986),230; 
+F   1.75    0.061              Gough et al. JCC 13,(1992),963.
+CL  1.948   0.265              Fox, JPCB,102,8070,(98),flex.mdl CHCl3
+BR  2.22    0.320              Junmei
+I   2.35    0.40               JCC,7,(1986),230;  
