@@ -1,0 +1,31 @@
+ATOM_TYPE   vdW_Radius  well_depth  possible_charge_start   possible_charge_end
+H           0.6000  0.0157  0.0 1.0            !Ferguson base pair geom.
+HO          0.0000  0.0000  0.0 0.0           OPLS Jorgensen, JACS,110,(1988),1657
+HS          0.6000  0.0157  0.0 1.0           W. Cornell CH3SH --> CH3OH FEP
+HC          1.4870  0.0157  0.0 1.0           OPLS
+H1          1.3870  0.0157  0.0 1.0           Veenstra et al JCC,8,(1992),963 
+H2          1.2870  0.0157  0.0 1.0           Veenstra et al JCC,8,(1992),963 
+H3          1.1870  0.0157  0.0 1.0           Veenstra et al JCC,8,(1992),963 
+HP          1.1000  0.0157  0.0 1.0           Veenstra et al JCC,8,(1992),963
+HA          1.4590  0.0150  0.0 1.0           Spellmeyer 
+H4          1.4090  0.0150  0.0 1.0           Spellmeyer, one electrowithdr. neighbor
+H5          1.3590  0.0150  0.0 1.0           Spellmeyer, two electrowithdr. neighbor
+HW          0.0000  0.0000  0.0 0.0           TIP3P water model
+HZ          1.4590  0.0150  0.0 1.0           H bonded to sp C (Howard et al JCC 16)
+O           1.6612  0.2100  -1.0 0.0           OPLS
+O2          1.6612  0.2100  -1.0 0.0           OPLS
+OW          1.7683  0.1520  -1.0 0.0           TIP3P water model
+OH          1.7210  0.2104  -1.0 0.0           OPLS 
+OS          1.6837  0.1700  -1.0 0.0           OPLS ether
+C*          1.9080  0.0860  -0.9 0.9           Spellmeyer
+CT          1.9080  0.1094  -0.9 0.9           Spellmeyer
+C           1.9080  0.0860  -0.9 0.9           OPLS
+N           1.8240  0.1700  -1.0 0.0           OPLS
+N3          1.8240  0.1700  -1.0 0.0           OPLS
+NY          1.8240  0.1700  -1.5 0.8           N in nitrile
+S           2.0000  0.2500  -0.9 0.9            W. Cornell CH3SH and CH3SCH3 FEP's
+SH          2.0000  0.2500  -0.9 0.9           W. Cornell CH3SH and CH3SCH3 FEP's
+F           1.75    0.061    -1.0 0.0        Gough et al. JCC 13,(1992),963.
+Cl          1.948   0.265    -1.0 0.0          Fox, JPCB,102,8070,(98),flex.mdl CHCl3
+Br          2.22    0.320    -1.0 0.0          Junmei(?)
+I           2.35    0.40     -1.0 0.0          JCC,7,(1986),230;  
