@@ -321,8 +321,7 @@ class TrajCluster:
             rms = []
 
         if len(N.ravel(rms)) == 1:
-            ## was: return N.average(rms)[0], 0.0
-            return N.average(rms), 0.0
+            return N.average(rms)[0], 0.0
         if len(N.ravel(rms)) == 0:
             return 0.0, 0.0
 

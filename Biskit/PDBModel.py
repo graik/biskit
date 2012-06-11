@@ -39,6 +39,7 @@ from PDBParseFile import PDBParseFile
 import Biskit as B
 
 import numpy.oldnumeric as N
+import numpy as npy
 import numpy.oldnumeric.mlab as MLab
 import os, sys
 import copy
@@ -179,6 +180,8 @@ class PDBModel:
         self.fileName = None
         self.pdbCode = pdbCode
         self.xyz = None
+        self.AmberCharges=None
+        self.AmberTopology_atom_names=None
 
         #: save atom-/residue-based values
         self.residues = PDBProfiles( self )
@@ -550,7 +553,11 @@ class PDBModel:
         parser.update(self, source, skipRes=skipRes,
                       updateMissing=updateMissing, force=force,
                       headPatterns=headPatterns )
-
+        
+        self.chainSequence={}
+        for c in range( self.lenChains() ):
+            tmp=self.takeChains( [c] )
+            self.chainSequence[c]=tmp.sequence()
 
     def setXyz(self, xyz ):
         """
@@ -569,6 +576,41 @@ class PDBModel:
             not mathUtils.arrayEqual(self.xyz,old )
         return old
 
+    def setAmberCharges(self, charges):
+        """
+        Replace coordinates.
+
+        @param xyz: Numpy array ( 3 x N_atoms ) of float
+        @type  xyz: array
+
+        @return: N.array( 3 x N_atoms ) or None, old coordinates
+        @rtype: array
+        """
+        
+        old = self.AmberCharges
+        self.AmberCharges = charges
+
+        #self.AmberChargesChanged = self.AmberChargesChanged or \
+            #not mathUtils.arrayEqual(self.AmberCharges,old )
+        return old
+
+    def setAmberTopology_atom_names(self, names):
+        """
+        Replace coordinates.
+
+        @param xyz: Numpy array ( 3 x N_atoms ) of float
+        @type  xyz: array
+
+        @return: N.array( 3 x N_atoms ) or None, old coordinates
+        @rtype: array
+        """
+        
+        old = self.AmberTopology_atom_names
+        self.AmberTopology_atom_names = names
+
+        #self.AmberChargesChanged = self.AmberChargesChanged or \
+            #not mathUtils.arrayEqual(self.AmberCharges,old )
+        return old
 
     def setSource( self, source ):
         """
@@ -1066,7 +1108,9 @@ class PDBModel:
                 ## PDBFile prints atom names 1 column too far left
                 if wrap and len(aname) == 4 and aname[0] in numbers:
                     aname = aname[1:] + aname[0]
-                if not left and len(aname) < 4:
+                if len(aname) == 3 and aname[0] in numbers:
+                    aname = aname.strip() + ' '
+                if not left and len(aname) < 4 and not aname[0] in numbers:
                     aname = ' ' + aname.strip()
 
                 a['name'] = aname
@@ -1425,12 +1469,12 @@ class PDBModel:
     def maskRNA( self ):
             """
             Short cut for mask of all atoms in RNA (based on residue name).
-
+                        
             @return: N.array( 1 x N_atoms ) of 0||1
             @rtype: array
             """
             return self.maskFrom( 'residue_name', ['A','C','G','U'] )
-
+            
     def maskNA( self ):
             """
             Short cut for mask of all atoms in DNA or RNA
@@ -1441,7 +1485,7 @@ class PDBModel:
             """
             return self.maskFrom( 'residue_name',
                                   ['A','C','G','U','T','DA','DC','DG','DT'] )
-
+    
     def indicesFrom( self, key, cond ):
         """
         Get atom indices conforming condition applied to an atom profile.
@@ -1457,8 +1501,8 @@ class PDBModel:
         @rtype : N.array of int
         """
         return N.nonzero( self.maskFrom( key, cond) )
-
-
+    
+    
     def indices( self, what ):
         """
         Get atom indices conforming condition. This is a convenience method
@@ -1744,8 +1788,11 @@ class PDBModel:
         @return: array of atom positions
         @rtype: N.array of int
         """
-        if max( indices ) > self.lenResidues() or min( indices ) < 0:
-            raise PDBError, "invalid residue indices"
+        if max( indices ) > self.lenResidues():
+            raise PDBError, "invalid residue indices, indices higher than max index"
+        
+        elif min( indices ) < 0:
+            raise PDBError, "invalid residue indices, lower than 0"
 
         return self.extendIndex( indices, self.resIndex(), self.lenAtoms() )[0]
 
@@ -2120,12 +2167,18 @@ class PDBModel:
         self.update()  ## trigger update if xyz or any profile is None
 
         r.setXyz( N.concatenate( ( self.getXyz(), m.getXyz() )  ) )
+        
+        if self.AmberCharges is not None:
+            r.setAmberCharges(N.concatenate((self.AmberCharges,m.AmberCharges)))
+            r.setAmberTopology_atom_names(N.concatenate((self.AmberTopology_atom_names,m.AmberTopology_atom_names)))
+            
 
         r.setPdbCode( self.pdbCode )
 
         r.residues = self.residues.concat( m.residues, )
         r.atoms = self.atoms.concat( m.atoms, )
         
+
         r.residues.model = r
         r.atoms.model = r
 
@@ -2143,14 +2196,12 @@ class PDBModel:
             r.mergeResidues( m.lenResidues() -1 )
 
         r.info = copy.deepcopy( self.info )
-        
-        try:
-            k = max(self.biounit.keys())+1
-            r.residues['biomol'][self.lenResidues():] += k
-            r.biounit = self.biounit.append(m.biounit)
-            r.biounit.model = r
-        except AttributeError:
-            pass
+
+        r.chainSequence={}
+        for c in range( r.lenChains() ):
+            tmp=r.takeChains( [c] )
+            r.chainSequence[c]=tmp.sequence()
+
 
         return r.concat( *models[1:] )
 
@@ -2207,9 +2258,18 @@ class PDBModel:
         ## the easy part: extract coordinates and atoms
         r.xyz = N.take( self.getXyz(), i )
         r.xyzChanged = self.xyzChanged or not N.all(r.xyz == self.xyz)
-
+        
         r.atoms = self.atoms.take( i, r )
-
+        ## extract Amber Charges and Amber Topology names if present
+        if self.AmberCharges is not None and self.AmberTopology_atom_names is not None:
+            r.AmberCharges = N.take(self.AmberCharges, i)
+            r.AmberTopology_atom_names = N.take(self.AmberTopology_atom_names, i)
+#            r.AmberTopology_A_types = N.take(self.AmberTopology_A_types,i)
+#            r.AmberTopology_n_a_types = len(N.unique(r.AmberTopology_A_types))
+            #r.AmberTopology_ico = self.AmberTopology_ico
+            #r.AmberTopology_a_coefs = self.AmberTopology_a_coefs
+            #r.AmberTopology_b_coefs = self.AmberTopology_b_coefs
+                 
         ## more tricky: rescue residue borders and extract residue profiles
         new_resmap   = N.take( self.resMap(), i )
         if rindex is not None:
@@ -2233,13 +2293,9 @@ class PDBModel:
         r.pdbCode = self.pdbCode
         r.fileName = self.fileName
         r.source = self.source
-        
-        ## copy the biounit
-        try:
-            r.biounit = self.biounit.take(i)
-            r.biounit.model = r
-        except AttributeError:
-            pass
+
+
+
 
         return r
 
@@ -2296,7 +2352,12 @@ class PDBModel:
         @return: compressed PDBModel using mask
         @rtype: PDBModel
         """
-        return self.take( N.nonzero( mask ), *initArgs, **initKw )
+        tmp=self.take( N.nonzero( mask ), *initArgs, **initKw )
+        tmp.chainSequence={}
+        for c in range( tmp.lenChains() ):
+            tmp2=tmp.takeChains( [c] )
+            tmp.chainSequence[c]=tmp2.sequence()
+        return tmp
 
 
     def remove( self, what ):
@@ -2407,8 +2468,8 @@ class PDBModel:
 
         except IndexError:
             raise PDBError, 'Too many chains, running out of letters.'
-
-
+    
+    
     def renumberResidues( self, mask=None, start=1, addChainId=1 ):
         """
         Make all residue numbers consecutive and remove any insertion
@@ -2866,13 +2927,14 @@ class PDBModel:
         @param what: indices or name(s) of residue to be removed
         @type  what: str OR [ str ] OR int OR [ int ]
         """
-        if not isinstance( what, list ) or isinstance( what, N.ndarray):
+        if type( what ) is str:
             what = T.toList( what )
-        
-        if type( what[0] ) is str:
             return self.remove( self.maskFrom( 'residue_name', what) )
 
-        if type( what[0] ) is int:
+        if type( what ) is int:
+            what = [ what ]
+
+        if isinstance(what, list) or isinstance( what, N.ndarray):
             return self.remove( self.res2atomIndices( what ) )
 
         return False
@@ -3510,6 +3572,42 @@ class PDBModel:
 
         return f
 
+    def setCommonAtomMaskBB(self,bbRefMask,m2,maskM2):
+        """
+        Given two DIFFERENT PDBmodels and 2 masks of atoms (meant to be backbone atoms), this function checks the atom types of each backbone atom of one mask versus the other mask. If they are not common, the mask is altered. THis function is useful if you have to calculate RMSD's of the BB of slightly different protein structures (and incomplete structures)
+        
+        @param  bbRefMask : backbone atom mask of the current PDBModel instance
+        @type   bbRefMask : numpy boolean array of len(PDBModel)
+        @param  m2 : PDBModel to what self should be compared to
+        @type   PDBModel
+        @param  maskM2 : backbone atom mask of the m2
+        @type   numpy boolean array of len(m2)
+        """
+        
+        refInd=npy.where(bbRefMask)[0]
+        m2Ind=npy.where(maskM2)[0]
+        
+        #we consider that atom ordering is correct, so if the length between both is OK, we consider that they are OK (this is a big assumption!!)
+        if len(refInd)==len(m2Ind): return
+        
+        if len(refInd)>len(m2Ind):
+            for idx,el in enumerate(refInd):
+                if idx>=len(m2Ind):
+                    bbRefMask[refInd[idx]]=0
+                else :
+                    if self[refInd[idx]]["name"]!=m2[m2Ind[idx]]["name"]:
+                        bbRefMask[refInd[idx]]=0
+                        maskM2[m2Ind[idx]]=0
+                    
+        else : 
+            for idx,el in enumerate(m2Ind):
+                if idx>=len(refInd):
+                    maskM2[m2Ind[idx]]=0
+                else :
+                    if self[refInd[idx]]["name"]!=m2[m2Ind[idx]]["name"]:
+                        bbRefMask[refInd[idx]]=0
+                        maskM2[m2Ind[idx]]=0
+            
 
     def compareChains( self, ref, breaks=0, fractLimit=0.2 ):
         """
@@ -3539,38 +3637,309 @@ class PDBModel:
                if ref.__chainFraction( c, self ) > fractLimit  ]
 
         return c0, c_r
+
+    def fixResidueNumbering(self):
+        """
+        DEPRECATED METHOD
+        This method fixes numbering of residues if it's greater 
+        than 9999. Many PDBWriters and readers do not allow biger numbers
+        dure to the PDB file format convention.
+        Anyway, it can be sometimes annoying to have two residues with the same number.
+        So this function will assign consecutive numbers in the residue_number profile
+        """
+        if self.lenResidues() > 9999:
+            self['resnum'] = self.atom2resProfile('residue_number')
+            self['resnum'][9999:] = 9999
+            self['resnum'][9999:] += npy.arange(1,self.lenResidues() - 9998)
+            self['residue_number'] = self.res2atomProfile('resnum')
         
-    def biomodel(self, assembly = 0):
+    def fixNumbering(self, force=False):
         """
-        Return the 'biologically relevant assembly' of this model
-        according to the information in the PDB's BIOMT record. This
-        removes redundant chains and performs symetry operations to
-        complete multimeric structures.  Some PDBs define several
-        alternative biological units: usually (0) the author-defined
-        one and (1) software-defined -- see L{lenBiounits}.
-
-        @param assembly: assembly index (default: 0 .. author-determined unit)
-        @type  assembly: int
-
-        @return: PDBModel; biologically relevant assembly
-        """
-        try:
-            r = self.biounit.makeMultimer(assembly)
-        except AttributeError:
-            r = self
-        return r
+        This method fixes numbering of residues if it's greater 
+        than 9999. Many PDBWriters and readers do not allow biger numbers
+        dure to the PDB file format convention.
+        Anyway, it can be sometimes annoying to have two residues with the same number.
+        So this function will assign consecutive numbers in the residue_number profile.
         
-    def lenBiounits (self):
+        It will also fix serial_number. Once again, when there is more than 99999 atoms,
+        the numbering restarts at that point repeating serial numbers.
+        
+        If force == True, it will renumber residues and serial_numbers independently of
+        the total number of them.
         """
-        @return: int; number of alternative biological assemblies defined in
-                 PDB header
-        """
-        try:
-            r = len(self.biounit.keys())
-        except AttributeError:
-            r = 0
-        return r
+        if self.lenResidues() > 9999 or force:
+            self['resnum'] = self.atom2resProfile('residue_number')
+            self['resnum'] = npy.arange(self.lenResidues()) + 1
+            self['residue_number'] = self.res2atomProfile('resnum')
+            
+        if len(self) > 99999 or force:
+            self['serial_number'] = npy.arange(len(self)) + 1
+            
+    def readBlock(self, fh,size,npyType):
+        res=npy.fromstring(fh.read(size),sep="  ",dtype=npyType)
+        return res.copy()
 
+    def skipLines(self, fh,n):
+        [fh.readline() for x in range(n)]
+
+    def skipBlock(self, fh,size):
+        fh.read(size)
+    
+    def initAmberCharges(self):
+        self.AmberCharges=npy.zeros(len(self))
+
+    def loadAmberTopology(self, fname):
+        """load Amber topology to the current PDBModel, simply provide the file name of the topology file"""
+        
+        #sysnumbers contains all the numbers that are important, so number of atoms,types, bonds...
+        """FORMAT(12i6)  NATOM,  NTYPES, NBONH,  MBONA,  NTHETH, MTHETA,
+              NPHIH,  MPHIA,  NHPARM, NPARM,  NEXT,   NRES,
+              NBONA,  NTHETA, NPHIA,  NUMBND, NUMANG, NPTRA,
+              NATYP,  NPHB,   IFPERT, NBPER,  NGPER,  NDPER,
+              MBPER,  MGPER,  MDPER,  IFBOX,  NMXRS,  IFCAP
+  NATOM  : total number of atoms 
+  NTYPES : total number of distinct atom types
+  NBONH  : number of bonds containing hydrogen
+  MBONA  : number of bonds not containing hydrogen
+  NTHETH : number of angles containing hydrogen
+  MTHETA : number of angles not containing hydrogen
+  NPHIH  : number of dihedrals containing hydrogen
+  MPHIA  : number of dihedrals not containing hydrogen
+  NHPARM : currently not used
+  NPARM  : currently not used
+  NEXT   : number of excluded atoms
+  NRES   : number of residues
+  NBONA  : MBONA + number of constraint bonds
+  NTHETA : MTHETA + number of constraint angles
+  NPHIA  : MPHIA + number of constraint dihedrals
+  NUMBND : number of unique bond types
+  NUMANG : number of unique angle types
+  NPTRA  : number of unique dihedral types
+  NATYP  : number of atom types in parameter file, see SOLTY below
+  NPHB   : number of distinct 10-12 hydrogen bond pair types
+  IFPERT : set to 1 if perturbation info is to be read in
+  NBPER  : number of bonds to be perturbed
+  NGPER  : number of angles to be perturbed
+  NDPER  : number of dihedrals to be perturbed
+  MBPER  : number of bonds with atoms completely in perturbed group
+  MGPER  : number of angles with atoms completely in perturbed group
+  MDPER  : number of dihedrals with atoms completely in perturbed groups
+  IFBOX  : set to 1 if standard periodic box, 2 when truncated octahedral
+  NMXRS  : number of atoms in the largest residue
+  IFCAP  : set to 1 if the CAP option from edit was specified
+  + one stupid parameter I don't know what it is, but it is in my top files....vive up to date DOCUMENTATION
+  
+  from a amber9 top file
+  %FLAG TITLE
+  %FLAG POINTERS
+%FLAG ATOM_NAME
+%FLAG CHARGE
+%FLAG MASS
+%FLAG ATOM_TYPE_INDEX
+%FLAG NUMBER_EXCLUDED_ATOMS
+%FLAG NONBONDED_PARM_INDEX
+%FLAG RESIDUE_LABEL
+%FLAG RESIDUE_POINTER
+%FLAG BOND_FORCE_CONSTANT
+%FLAG BOND_EQUIL_VALUE
+%FLAG ANGLE_FORCE_CONSTANT
+%FLAG ANGLE_EQUIL_VALUE
+%FLAG DIHEDRAL_FORCE_CONSTANT
+%FLAG DIHEDRAL_PERIODICITY
+%FLAG DIHEDRAL_PHASE
+%FLAG SOLTY
+%FLAG LENNARD_JONES_ACOEF
+%FLAG LENNARD_JONES_BCOEF
+%FLAG BONDS_INC_HYDROGEN
+%FLAG BONDS_WITHOUT_HYDROGEN
+%FLAG ANGLES_INC_HYDROGEN
+%FLAG ANGLES_WITHOUT_HYDROGEN
+%FLAG DIHEDRALS_INC_HYDROGEN
+%FLAG DIHEDRALS_WITHOUT_HYDROGEN
+%FLAG EXCLUDED_ATOMS_LIST
+%FLAG HBOND_ACOEF
+%FLAG HBOND_BCOEF
+%FLAG HBCUT
+%FLAG AMBER_ATOM_TYPE
+%FLAG TREE_CHAIN_CLASSIFICATION
+%FLAG JOIN_ARRAY
+%FLAG IROTAT
+%FLAG SOLVENT_POINTERS
+%FLAG ATOMS_PER_MOLECULE
+%FLAG BOX_DIMENSIONS
+%FLAG RADIUS_SET
+%FLAG RADII
+%FLAG SCREEN
+
+Comment on reading amber A and B vdw coefficients, the opaque indexing game :
+Amber atom types are ordered in the AMBER_ATOM_TYPE list...lets call this list
+amber_atom_type and it goes from 0 to n_atom_types
+
+now the next interesting index to learn about is the iac :
+this maps for each atom of the system the corresponding atom type
+IAC(i), i=1,NATOM)
+  IAC    : index for the atom types involved in Lennard Jones (6-12) interactions
+  so now we have for each atom in the system the corresponding atom type.
+  in the PDBModel this will be called : amber_atype_index
+
+The next thing is a bit confusing, the NONBONDED_PARM_INDEX or ICO index necessary
+to grasp the A and B coefficients
+it's an index of size n_atom_types x n_atom_types
+the resulting index is like :
+index = ICO(NTYPES*(IAC(i)-1)+IAC(j))
+
+this will be called in the PDBModel: ico
+
+now if this index is positive then it's a 6-12 parameter else its a 10-12 parameter
+normally we shall not need the second right now (ASOL, BSOL)...
+
+"""
+  
+        if os.path.exists(fname):
+           # n=len(self)
+            f=open(fname,"r")
+            #skip lines : 
+            [f.readline() for i in range(6)]
+            sysnumbers=self.readBlock(f,8*31+4,"int32")
+            n=sysnumbers[0]
+            
+	    #print n
+            self.skipLines(f,2)
+            if n%20==0: 
+                incr=0
+            else :
+                incr=1
+            self.skipBlock(f,4*n+n/20+incr)
+            
+            self.skipLines(f,2)
+            #### CHARGES
+            if n%5==0: 
+                incr=0
+            else :
+                incr=1
+            self.AmberCharges=self.readBlock(f,16*n+n/5+incr,"float64")
+            
+            try:
+                self.atoms.set('amber_charge', self.AmberCharges)
+            except ProfileError:
+                print "Failed loading Charges, possible missmatch in atom number and charges between topology and pdb file. It might lead to future crash."
+            #print self.AmberCharges
+#TODO :            struct["charge"]=charge
+            self.skipLines(f,2)
+#            print "successfully update charges with AmberPrm partial charges"
+            #### MASSES
+#            print "skipping masses"
+
+            self.skipBlock(f,16*n+n/5+incr)
+            self.skipLines(f,2)
+
+            #### ATOM TYPES
+#            print "reading atom types"
+            if n%10==0: 
+                incr=0
+            else :
+                incr=1
+            self.AmberTopology_A_types = self.readBlock(f,8*n+n/10+incr,"short")
+            
+            try: 
+                self.atoms.set('amber_atype_index', self.AmberTopology_A_types)   
+            except ProfileError:
+                print "Failed loading type index, possible missmatch between topology and pdb file. It might lead to future crash."
+
+            # Number of atom types
+            self.AmberTopology_n_a_types = sysnumbers[1]
+            self.skipLines(f,2)
+            
+            #### NUMBER OF EXCLUDED ATOMS (NUMEX)
+#            print "read in number of excluded atoms excluded atom types"
+
+            self.AmberTopology_N_of_excluded_atoms=self.readBlock(f,8*n+n/10+incr,"short") #this vector contains per atom of the system, how many excluded atoms are associated to each atom
+
+            self.AmberTopology_Excluded_idx_start_list=npy.cumsum(self.AmberTopology_N_of_excluded_atoms)
+            
+            self.skipLines(f,2)
+            ###NON BONDED PARM INDEX (ICO I suppose ?!)
+            n_types=self.AmberTopology_n_a_types
+            if n_types%10==0: 
+                incr=0
+            else :
+                incr=1
+            
+            self.AmberTopology_ico=self.readBlock(f,8*n_types*n_types+n_types*n_types/10+incr,"short")
+            
+            #print nbpidx
+            #if < 0 means that ASOL, BSOL, else in ACOEFF, BCOEFF
+            
+            while(f.readline().strip()!="%FLAG LENNARD_JONES_ACOEF"):
+                1
+            
+            self.skipLines(f,1)
+            nacoefs=n_types*(n_types+1)/2
+            if nacoefs%5==0: 
+                incr=0
+            else :
+                incr=1
+            #print adding, nacoefs, nacoefs%5
+            self.AmberTopology_a_coefs=self.readBlock(f,nacoefs*16+nacoefs/5+incr,"float64")    #vdw a coefficients
+            
+            self.skipLines(f,2)
+            nbcoefs=n_types*(n_types+1)/2
+            self.AmberTopology_b_coefs=self.readBlock(f,nbcoefs*16+nbcoefs/5+incr,"float64")    #vdw b coefficients
+            
+            
+            
+            while(f.readline().strip()!="%FLAG EXCLUDED_ATOMS_LIST"):
+              1
+
+            
+            
+            self.skipLines(f,1)
+            n_ext=sysnumbers[10]
+            if n_ext%10==0: 
+                incr=0
+            else :
+                incr=1
+            self.AmberTopology_Excluded_atoms=self.readBlock(f,n_ext*8+n_ext/10+incr,"int32")    #read the actual excluded atom list
+            
+            self.skipLines(f,2)
+            nphb=sysnumbers[19] #NPHB
+            if nphb%5==0: 
+                incr=0
+            else :
+                incr=1
+            self.AmberTopology_hbond_a_coefs=self.readBlock(f,nphb*16+nphb/5+incr,"float64")    #read the actual excluded atom list
+            #print hbond_a_coefs
+
+            self.skipLines(f,2)
+            self.AmberTopology_hbond_b_coefs=self.readBlock(f,nphb*16+nphb/5+incr,"float64")    #read the actual excluded atom list
+            #print hbond_b_coefs
+            #print excluded_atoms
+            while(f.readline().strip()!="%FLAG AMBER_ATOM_TYPE"):
+              1
+            self.skipLines(f,1)
+            
+            import math
+            splitstring = lambda v, l: [v[i*l:(i+1)*l].strip() for i in range(int(math.ceil(len(v)/float(l))))] #splits a string into bunches of l characters
+            if n%20==0: 
+                incr=0
+            else :
+                incr=1
+            tmp=f.read(4*n+n/20+incr).replace("\n","")
+            
+            #self.AmberTopology_atom_names=self.readBlock(f,4*n+n/20+1,"string")
+            self.AmberTopology_atom_names=npy.array(splitstring(tmp,4))
+            
+            try: 
+                self.atoms.set('amber_atype',self.AmberTopology_atom_names)
+            except ProfileError:
+                print "Failed loading atom types , possible missmatch between topology and pdb file. It might lead to future crash."
+                
+            f.close()
+            
+        else :
+            print "ERROR : Topology file not found"  #TODO : error handling here
+            return None
+            
 
 #############
 ##  TESTING        

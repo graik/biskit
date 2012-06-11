@@ -32,7 +32,7 @@ try:
     from BisList import BisList, BisListError, ConditionError, AmbiguousMatch,\
          ItemNotFound
     from DictList import DictList
-
+    
     from LogFile import LogFile, StdLog, ErrLog
     from Errors import BiskitError
 
@@ -41,6 +41,7 @@ try:
     from Executor import Executor, TemplateError
 
     from AmberCrdParser import AmberCrdParser, ParseError
+    from NamdDCDParser import NamdDCDParser
     from AmberRstParser import AmberRstParser
     from PDBCleaner import PDBCleaner, CleanerError
     from Blast2Seq import Blast2Seq
@@ -49,13 +50,14 @@ try:
     from ChainWriter import ChainWriter
 
     from EDParser import EZDParser
-
+    
     from EnsembleTraj import EnsembleTraj
     from LocalPath import LocalPath, LocalPathError
 
     from PCRModel import PCRModel
     from PDBModel import PDBModel, PDBProfiles, PDBError
-
+    from MOL2Model import MOL2Collection, MOL2Model
+    
     from ProfileCollection import ProfileCollection, ProfileError
     from ProfileMirror import ProfileMirror
     from Prosa import ProsaII
@@ -67,7 +69,7 @@ try:
     from Xplorer import Xplorer, XplorerError, RunError
     from ColorSpectrum import ColorSpectrum
     from MatrixPlot import MatrixPlot
-
+    
     from AmberLeap import AmberLeap
     from AmberParmBuilder import AmberParmBuilder
 
@@ -79,28 +81,41 @@ try:
     from FuzzyCluster import FuzzyCluster
     from PDBDope import PDBDope
     from tmalign import TMAlign
-
+    
     from ModelList import ModelList
     from Ramachandran import Ramachandran
     from CommandLine import CommandLine
     
 ## experimental modules
     from residue import Residue
-
+    
     from Model import Model
     from Polymer import Polymer
     from Polymer import Feature
     
 ## PVM-dependent modules
-
+    
     from QualMaster import QualMaster
     from StructureMaster import StructMaster
     from StructureSlave import StructureSlave
     from TrajFlexMaster import TrajFlexMaster, FlexError
 
+## GRID Management
+    
+    from Grid import gridManager
+    
+## Leap Manager
+    import leapManager
+
+## Solvated Systems PDB Manager
+    import SolvatedPDB
+    
+## NAMD DCD Parser
+    import NamdDCDParser
+
 except Exception, why:
     EHandler.warning('Could not import all biskit modules:', trace=1 )
-
+    
 try:
     import biggles
     del biggles

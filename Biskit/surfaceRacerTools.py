@@ -475,6 +475,7 @@ def __Cter( a, rel, absSurf, key, i ):
                    C-terminal residues appended.
     @rtype: [float]    
     """
+    
     atom = a['name']
     resi = a['residue_name']
     if absSurf[i] != 0:

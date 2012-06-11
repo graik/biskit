@@ -30,6 +30,7 @@ from Biskit.MatrixPlot import Legend
 from Biskit.PDBDope import PDBDope 
 from Biskit import EHandler
 
+import Biskit.mathUtils as MU
 import Biskit.tools as T
 
 import numpy.oldnumeric as N
@@ -217,15 +218,15 @@ class Ramachandran:
         """
         vec21 = coor2 - coor1
         vec32 = coor3 - coor2
-        L = N.cross( vec21, vec32 )
+        L = MU.cross( vec21, vec32 )
         L_norm = N.sqrt(sum(L**2))
 
         vec43 = coor4 - coor3
         vec23 = coor2 - coor3
-        R = N.cross( vec43, vec23 )
+        R = MU.cross( vec43, vec23 )
         R_norm = N.sqrt(sum(R**2))
 
-        S     = N.cross( L, R )
+        S     = MU.cross( L, R )
         angle = sum( L*R ) / ( L_norm * R_norm )
 
         ## sometimes the value turns out to be ever so little greater than 

@@ -27,8 +27,10 @@ Convert single amber crd into Trajectory object
 """
 
 import re
+import mmap
 import numpy.oldnumeric as N
 import sys
+import numpy as npy
 
 import tools as T
 from Trajectory import Trajectory
@@ -63,12 +65,12 @@ class AmberCrdParser:
     """
 
     def __init__( self, fcrd, fref, box=0, rnAmber=0, pdbCode=None,
-                  log=StdLog(), verbose=0 ):
+                  log=StdLog(), verbose=0):
         """
         @param fcrd: path to input coordinate file
         @type  fcrd: str
-        @param fref: PDB or pickled PDBModel with same atom content and order
-        @type  fref: str
+        @param fref: PDB or pickled PDBModel or directly an open PDBModel instancewith same atom content and order
+        @type  fref: str or PDBModel
         @param box: expect line with box info at the end of each frame
                     (default: 0)
         @type  box: 1|0
@@ -83,11 +85,19 @@ class AmberCrdParser:
         """
         self.fcrd = T.absfile( fcrd )
         self.crd  = T.gzopen( self.fcrd )
+        #self.ref  = PDBModel( T.absfile(fref), pdbCode=pdbCode )
 
-        self.ref  = PDBModel( T.absfile(fref), pdbCode=pdbCode )
+        if isinstance(fref, str) :
+            self.ref=PDBModel(T.absfile(fref), pdbCode=pdbCode)
+        elif fref :
+            self.ref = fref
+
         self.box  = box
 
         self.n = self.ref.lenAtoms()
+        #in case we have an empty model with a valid amber topology on it take the number of atoms from the amber topology
+        if self.n==0:
+            self.n=len(self.ref.AmberCharges)
 
         self.log = log
         self.verbose = verbose
@@ -102,7 +112,7 @@ class AmberCrdParser:
 
         ## pre-compute lines expected per frame
         self.lines_per_frame = self.n * 3 / 10
-
+        
         if self.n % 10 != 0:  self.lines_per_frame += 1
         if self.box:          self.lines_per_frame += 1
 
@@ -140,6 +150,31 @@ class AmberCrdParser:
         return self.line2numbers( l )
 
 
+    #def nextFrame( self ):
+        #"""
+        #Collect next complete coordinate frame
+
+        #@return: coordinate frame
+        #@rtype: array
+        #"""
+
+        #i = 0
+        #xyz = []
+        #while i != self.lines_per_frame:
+
+            #if self.box and i+1 == self.lines_per_frame:
+
+                ### skip box info
+                #if len( self.nextLine() ) != 3:
+                    #raise ParseError( "BoxInfo must consist of 3 numbers." )
+
+            #else:
+                #xyz += self.nextLine()
+
+            #i += 1
+
+        #return N.reshape( xyz, ( len(xyz) / 3, 3 ) ).astype(N.Float32)
+
     def nextFrame( self ):
         """
         Collect next complete coordinate frame
@@ -147,23 +182,25 @@ class AmberCrdParser:
         @return: coordinate frame
         @rtype: array
         """
-
-        i = 0
         xyz = []
-        while i != self.lines_per_frame:
-
-            if self.box and i+1 == self.lines_per_frame:
-
-                ## skip box info
-                if len( self.nextLine() ) != 3:
-                    raise ParseError( "BoxInfo must consist of 3 numbers." )
-
-            else:
-                xyz += self.nextLine()
-
-            i += 1
-
+        #number of bytes to read -> the amber crd output uses 8 chars per coordinate having max 10 coords per line + the return char
+        #self.ref.xyz.size*8 -> all chars for coordinates
+        #self.ref.xyz.size/10+1 -> all return to next line chars
+        n=self.n*3
+        
+        nbytes=n*8+n/10+1
+        if self.box:
+            nbytes+=1
+        #read it and convert it to a nympy array of type float 32
+        xyz=npy.fromstring(self.crd.read(nbytes),sep="   ",dtype="float32")
+        
+        if self.box :
+            self.crd.readline() #skip the box information line
+        if len(xyz) <= 1:
+            raise EOFError('EOF')
+        
         return N.reshape( xyz, ( len(xyz) / 3, 3 ) ).astype(N.Float32)
+
 
 
     def crd2traj( self ):
@@ -182,11 +219,10 @@ class AmberCrdParser:
         if self.verbose: self.log.write( "Reading frames .." )
 
         try:
-            while 1==1:
-
+            while 1:
                 xyz += [ self.nextFrame() ]
                 i += 1
-
+                #print "reading frame %d"%(i)
                 if i % 100 == 0 and self.verbose:
                     self.log.write( '#' )
 

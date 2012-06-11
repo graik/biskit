@@ -425,47 +425,9 @@ def getOuterNamespace():
         frames = inspect.stack()
         f = frames[-1][0]   ## isolate outer-most calling frame
         r = f.f_globals
-        #print "DEBUG 1 ", inspect.getouterframes(f)
-        #print
-        #frames = inspect.getouterframes( inspect.currentframe() )
-        #print "DEBUG 2 ", len( frames )
-        #print 
-        #print "DEBUG 2 "
-        #for f in frames:
-            #print f
-            #print
     finally:
         del frames, f
 
-    return r
-
-def getCallingNamespace( callpattern='localTest' ):
-    """
-    Fetch the namespace of the module/script from which the localTest method
-    is running. This is more general than the getOuterNamespace method and 
-    also works with python -m <module> or programs that wrap the python call
-    into their own methods.
-    @param callpattern: str, name of calling method to look for ['localTest']
-    @return: the namespace of the outermost calling stack frame
-    @rtype: dict  
-    """
-    import inspect
-    
-    try:
-        frames = inspect.getouterframes( inspect.currentframe() )
-        
-        i = 0
-        while frames[i][3] != callpattern:
-            i += 1
-            if i >= len( frames ):
-                raise BiskitTestError, \
-                      'cannot find %s in current stack trace' % callpattern
-        
-        f = frames[i + 1][0]
-        r = f.f_globals
-    finally:
-        del frames, f, i
-    
     return r
 
 
@@ -514,7 +476,7 @@ def localTest( testclass=None, verbosity=BiskitTest.VERBOSITY,
     @raise BiskitTestError: if there is no BiskitTest-derived class defined
     """
     ## get calling namespace
-    outer = getCallingNamespace( callpattern='localTest' )
+    outer = getOuterNamespace()
     if testclass:
         testclasses = [testclass]
     else:
