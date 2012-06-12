@@ -117,14 +117,14 @@ def getSubInteractionEnergy(struct, idxrng1,idxrng2,dict=1,eps=78.4):
 
         icoIDs=(struct.AmberTopology_n_a_types * id1) + id2 - 1
         coefIDs = struct.AmberTopology_ico[icoIDs] - 1
-        A = struct.AmberTopology_a_coefs[coefIDs]
-        B = struct.AmberTopology_b_coefs[coefIDs]
+        Acoef = struct.AmberTopology_a_coefs[coefIDs]
+        Bcoef = struct.AmberTopology_b_coefs[coefIDs]
 
         #ico=struct.AmberTopology_ico[struct.AmberTopology_n_a_types*(struct.AmberTopology_A_types[idxs1-1])+struct.AmberTopology_A_types[pos2]-1]-1
 #        acoefs=struct.AmberTopology_a_coefs[ico]
 #        bcoefs=struct.AmberTopology_a_coefs[ico]
         
-        vdw[:,i]=A/(d**12)-B/(d**6)
+        vdw[:,i]=Acoef/(d**12)-Bcoef/(d**6)
 
     #GPU PART TODO
 #    if len(struct1>2300):
