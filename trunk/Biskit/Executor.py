@@ -351,7 +351,7 @@ class Executor:
 
         #: Log object for own messages; undocumented: capture string as well
         self.log = log or StdLog()
-        if type(self.log) is not B.LogFile:
+        if type(self.log) is str:
             self.log = B.LogFile( self.log )
         
         self.verbose = verbose
