@@ -349,8 +349,11 @@ class Executor:
 
         self.cwd = cwd or self.exe.cwd
 
-        #: Log object for own messages
+        #: Log object for own messages; undocumented: capture string as well
         self.log = log or StdLog()
+        if type(self.log) is not B.LogFile:
+            self.log = B.LogFile( self.log )
+        
         self.verbose = verbose
         if self.verbose is None:
             self.verbose = (log is not None)
