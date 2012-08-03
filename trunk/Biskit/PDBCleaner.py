@@ -270,7 +270,7 @@ class PDBCleaner:
             ## replace known synonyms by standard atom name
             for a in res:
                 n = a['name']
-                if not n in standard and MU.atomSyfnonyms.get(n,0) in standard:
+                if not n in standard and MU.atomSynonyms.get(n,0) in standard:
                     a['name'] = MU.atomSynonyms[n]
                     if self.verbose:
                         self.logWrite('%s: renaming %s to %s in %s %i' %\
