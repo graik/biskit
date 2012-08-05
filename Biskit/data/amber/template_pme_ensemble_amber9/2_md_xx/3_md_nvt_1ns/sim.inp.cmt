@@ -32,9 +32,9 @@ constant volume MD
 # don't calculate H-bond energies
   ntf    = 2,
 
-# target T, initial T, Langevin (new)
+# target T, initial T, Behrendsen thermostat
   temp0  = 300.0,   tempi  = 300.0,
-  ntt    = 3, gamma_ln = 4,
+  ntt    = 1,
 
 # remove translation/rotation
   nscm   = 1000,

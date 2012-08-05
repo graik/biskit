@@ -1,4 +1,4 @@
-4ps constant pressure MD, removing restraints on solute.
+4ps constant pressure MD, removing restraints on solute, periodic T re-assignment
  &cntrl
   ig     = %(rand_seed)i,
   ntx    = 5,       irest  = 1,
@@ -15,12 +15,12 @@
   ntf    = 2,
   temp0  = 300.0,   tempi  = 300.0,
   vrand  = 1010,
-  ntt    = 3,
-  lambda_ln = 2,
+  ntt    = 1,
   nscm   = 1000,
   ntb    = 2,
   ntp    = 1,
+  tautp  = 2.0,
   ntr=1,
-  restraint_wt=00.0,
+  restraint_wt=20.0,
   restraintmask=' :1-%(lenres)i',
  &end

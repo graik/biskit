@@ -1,0 +1,27 @@
+Minimize solvent
+ &cntrl
+
+  lastist= 4000000,
+  lastrst= 4000000,
+
+  ntx    = 1,       irest  = 0,
+  ntpr   = 10,
+
+  ntb    = 1,
+  cut    = 9.0,     nsnb   = 10,   
+
+  imin   = 1,       
+  maxcyc = 1000,   
+  ncyc   = 5000,   
+  ntmin  = 1,       dx0    = 0.1,
+
+  dt     = 0.001,
+
+  ntr=1,
+  restraint_wt=500.0,
+  restraintmask=' :1-%(lenres)i',
+ &end
+ &rst
+  iat=0,
+ &end
+

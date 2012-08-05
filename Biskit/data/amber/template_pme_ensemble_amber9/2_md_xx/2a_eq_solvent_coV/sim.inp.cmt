@@ -33,10 +33,9 @@
 # don't calculate H-bond energies
   ntf    = 2,
 
-# temperature, Langevin temp control (new)
+# temperature, Behrendsen thermostat
   temp0  = 300.0,   tempi  = 100.0,
-  ntt    = 3,
-  gamma_ln = 2,
+  ntt    = 1,
 
 # re-assign temperature, remove translation/rotation
   vrand  = 1000,    nscm   = 1010,

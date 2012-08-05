@@ -29,18 +29,18 @@
 # don't calculate H-bond energies
   ntf    = 2,
 
-# temperature, Langevin (new), tight temperature control
+# temperature, Behrendsen thermostat, tight temperature control
   temp0  = 300.0,   tempi  = 300.0,
-  ntt    = 3,
-  gamma_ln  = 1,
+  ntt    = 1,
+  tautp  = 0.5,
 
 # re-assign temperature, remove translation/rotation
 #  vrand  = 1000,    
   nscm   = 1010,
 
 # constant pressure periodic, isotropic box scaling, tight pressure coupling,
-  ntp    = 1,
   ntb    = 2,
+  ntp    = 1,
   taup   = 1.0,
 
 # Restrain solute (protein)
