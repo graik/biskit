@@ -51,6 +51,7 @@ Options:
         capN      - int int, indices of chains that should get ACE cap     []
         capC      - int int, indices of chains that should get NME cap     []
         box       - float, minimal distance of solute from box edge    [10.0]
+        nocenter  - do *not* re-center the input coordinates         [center] 
         fmod      - str str, list of files with amber parameter modifications
                     (to be loaded into leap with loadAmberParams)          []
         fprep     - str str, list of files with amber residue definitions
@@ -109,6 +110,7 @@ try:
     options['hetatm'] = 'hetatm' in options
     options['norun'] = 'norun' in options
     options['debug'] = 'debug' in options
+    options['center'] = not 'nocenter' in options
 
     if 'log' in options:
         options['log'] = LogFile( options['log'] )
