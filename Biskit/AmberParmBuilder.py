@@ -401,7 +401,7 @@ class AmberParmBuilder:
         model.setXyz( model.xyz - center )
 
 
-    def leapModel( self, hetatm=0 ):
+    def leapModel( self, hetatm=0, center=True ):
         """
         Get a clean PDBModel for input into leap.
 
@@ -419,7 +419,8 @@ class AmberParmBuilder:
 
         m.renumberResidues( addChainId=1 )
 
-        self.centerModel( m )
+        if center:
+            self.centerModel( m )
 
         return m
 
@@ -435,7 +436,7 @@ class AmberParmBuilder:
                       hetatm=0, norun=0,
                       cap=0, capN=[], capC=[],
                       fmod=['frcmod.ionsjc_tip3p'], fprep=[],
-                      box=10.0, **kw ):
+                      box=10.0, center=True, **kw ):
         """
         @param f_out: target file for parm (topology)
         @type  f_out: str
@@ -455,6 +456,8 @@ class AmberParmBuilder:
         @type  capC: [int]
         @param box: minimal distance of solute from box edge (default: 10.0)
         @type  box: float
+        @param center: re-center coordinates (default: True)
+        @type  center: bool
         @param fmod: list of files with amber parameter modifications
                      to be loaded into leap with loadAmberParams
                     (default:['frcmod.ionsjc_tip3p'] ... mod file needed for 
@@ -480,7 +483,7 @@ class AmberParmBuilder:
 
         try:
             if self.verbose: self.log.add( '\nCleaning PDB file for Amber:' )
-            m = self.leapModel( hetatm=hetatm )
+            m = self.leapModel( hetatm=hetatm, center=center )
 
             if cap:
                 end_broken = m.atom2chainIndices( m.chainBreaks() )
