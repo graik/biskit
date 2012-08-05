@@ -224,7 +224,7 @@ class PDBCleaner:
                           replaced )
 
 
-    def __standard_res( self, resname ):
+    def __standard_res( self, resname, amber=0 ):
         """
         Check if resname is a standard residue (according to L{MU.atomDic})
         if not return the closest standard residue (according to
@@ -265,44 +265,49 @@ class PDBCleaner:
             resname  = self.__standard_res( res[0]['residue_name'] ).upper()
             if resname == 'DC5':
                 pass
-            standard = copy.copy( MU.atomDic[ resname ] )
-
-            ## replace known synonyms by standard atom name
-            for a in res:
-                n = a['name']
-                if not n in standard and MU.atomSynonyms.get(n,0) in standard:
-                    a['name'] = MU.atomSynonyms[n]
-                    if self.verbose:
-                        self.logWrite('%s: renaming %s to %s in %s %i' %\
-                                      ( self.model.pdbCode, n, a['name'],
-                                       a['residue_name'], a['residue_number']))
-
-            anames   = [ a['name'] for a in res ]
-            keep = 1
-
-            ## kick out all standard atoms that follow a missing one
-            rm = []
-            for n in standard:
-                if (not n in anames) and not (n in self.TOLERATE_MISSING):
-                    keep = 0
-
-                if not keep:
-                    rm += [ n ]
-
-            for n in rm:
-                standard.remove( n )
-
-            ## keep only atoms that are standard (and not kicked out above)
-            for a in res:
-
-                if a['name'] not in standard:
-                    mask += [1]
-                    if self.verbose:
-                        self.logWrite('%s: removing atom %s in %s %i '%\
-                                      ( self.model.pdbCode, a['name'],
-                                       a['residue_name'], a['residue_number']))
-                else:
-                    mask += [0]
+            
+            ## bugfix: ignore non-standard residues that have no matching 
+            ## standard residue
+            if resname in MU.atomDic:
+                
+                standard = copy.copy( MU.atomDic[ resname ] )
+    
+                ## replace known synonyms by standard atom name
+                for a in res:
+                    n = a['name']
+                    if not n in standard and MU.atomSynonyms.get(n,0) in standard:
+                        a['name'] = MU.atomSynonyms[n]
+                        if self.verbose:
+                            self.logWrite('%s: renaming %s to %s in %s %i' %\
+                                          ( self.model.pdbCode, n, a['name'],
+                                           a['residue_name'], a['residue_number']))
+    
+                anames   = [ a['name'] for a in res ]
+                keep = 1
+    
+                ## kick out all standard atoms that follow a missing one
+                rm = []
+                for n in standard:
+                    if (not n in anames) and not (n in self.TOLERATE_MISSING):
+                        keep = 0
+    
+                    if not keep:
+                        rm += [ n ]
+    
+                for n in rm:
+                    standard.remove( n )
+    
+                ## keep only atoms that are standard (and not kicked out above)
+                for a in res:
+    
+                    if a['name'] not in standard:
+                        mask += [1]
+                        if self.verbose:
+                            self.logWrite('%s: removing atom %s in %s %i '%\
+                                          ( self.model.pdbCode, a['name'],
+                                           a['residue_name'], a['residue_number']))
+                    else:
+                        mask += [0]
 
         self.model.remove( mask )
         
