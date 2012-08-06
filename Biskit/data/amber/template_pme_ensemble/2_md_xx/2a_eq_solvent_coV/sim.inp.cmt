@@ -25,8 +25,8 @@
   imin   = 0,
   nstlim = 10000,
        
-# time step, calc. slowly varying forces every 2 steps only
-  dt     = 0.001,   nrespa = 2,
+# time step, nrespa=1 needed for GPU / CUDA computing
+  dt     = 0.001,   nrespa = 1,
 
 # Shake on
   ntc    = 2,       tol    = 0.00001,

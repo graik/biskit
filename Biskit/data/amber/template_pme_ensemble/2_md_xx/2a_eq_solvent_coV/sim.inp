@@ -18,7 +18,7 @@
   imin   = 0,
   nstlim = 10000,
        
-  dt     = 0.001,   nrespa = 2,
+  dt     = 0.001,   nrespa = 1,
 
   ntc    = 2,       tol    = 0.00001,
   ntf    = 2,
