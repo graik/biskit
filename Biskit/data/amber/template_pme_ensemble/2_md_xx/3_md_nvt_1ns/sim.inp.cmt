@@ -11,8 +11,8 @@ constant volume MD
   ntx    = 5,       irest  = 1,
 
 # frequency of report to: out, restart file, crd, vel
-  ntpr   = 500,
-  ntwr=5000, ntwx=%(ntwx)i, ntwv=%(ntwv)i,
+  ntpr   = 5000,
+  ntwr=50000, ntwx=%(ntwx)i, ntwv=%(ntwv)i,
 # last atom to write coordinates for (don't write solvent)
   ntwprt = %(lenatoms)i
 
@@ -24,8 +24,8 @@ constant volume MD
   imin   = 0,
   nstlim = %(n_steps)i,
        
-# time step, full calc every 2nd step (nrespa=1 necessary with ntp>0)
-  dt     = %(dt)f,   nrespa = 2,
+# time step, full calc every step (nrespa=1 necessary with ntp>0 or GPU/CUDA)
+  dt     = %(dt)f,   nrespa = 1,
 
 # Shake on
   ntc    = 2,       tol    = 0.00001,
