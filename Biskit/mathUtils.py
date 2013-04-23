@@ -907,6 +907,7 @@ def cubic(a, b, c, d=None):
 def outliers( a, z=5, it=5 ):
     """
     Iterative detection of outliers in a set of numeric values.
+    Requirement: len(a) > 0; outlier detection is only performed if len(a)>2
     
     @param a: array or list of values
     @type  a: [ float ]
@@ -918,8 +919,12 @@ def outliers( a, z=5, it=5 ):
     @return: outlier mask, median and standard deviation of last iteration
     @rtype: N.array( int ), float, float
     """
+    assert( len(a) > 0 )
     mask = N.ones( len(a) )
     out  = N.zeros( len(a) )
+    
+    if len(a) < 3:
+        return out, N.median(a), N.std(a)
     
     for i in range( it ):
         b  = N.compress( N.logical_not(out), a )
@@ -928,9 +933,10 @@ def outliers( a, z=5, it=5 ):
         
         bz = N.absolute((N.array( a ) - me) / sd)  # pseudo z-score of each value
         o  = bz > z
-##        print 'iteration %i: <%5.2f> +- %5.2f -- %i outliers' % (i,me,sd,N.sum(o))
+        ##        print 'iteration %i: <%5.2f> +- %5.2f -- %i outliers' % (i,me,sd,N.sum(o))
 
-        if N.sum(o) == N.sum(out):
+        ## stop if converged or reached bottom
+        if (N.sum(o) == N.sum(out)) or (N.sum(o) > len(a) - 3):
             return o, me, sd
             
         out = o
