@@ -311,42 +311,8 @@ class AmberParmBuilder:
         @param chain: index of chain to be capped
         @type  chain: int
         """
-        self.log.add('Capping N-terminal of chain %i.' % chain )
-        m_ace = PDBModel( self.F_ace_cap )
-
-        chains_before = model.takeChains( range(chain), breaks=1 )
-        m_chain       = model.takeChains( [chain], breaks=1 )
-        chains_after  = model.takeChains( range(chain+1, model.lenChains(1)),
-                                          breaks=1 )
-
-        m_term  = m_chain.resModels()[0]
-
-        ## we need 3 atoms for superposition, CB might mess things up but
-        ## could help if there is no HN
-        if 'HN' in m_term.atomNames():
-            m_ace.remove( ['CB'] )
-
-        ## rename overhanging residue in cap PDB
-        for a in m_ace:
-            if a['residue_name'] != 'ACE':
-                a['residue_name'] = m_term.atoms['residue_name'][0]
-            else:
-                a['residue_number'] = m_term.atoms['residue_number'][0]-1
-                a['chain_id']       = m_term.atoms['chain_id'][0]
-                a['segment_id']     = m_term.atoms['segment_id'][0]
-                
-        ## fix atom serial numbers
-        serial0 = m_term.atoms['serial_number'][0]
-        m_ace['serial_number'] = N.arange( serial0-len(m_ace), serial0 )
-
-        ## fit cap onto first residue of chain
-        m_ace = m_ace.magicFit( m_term )
-
-        ## concat cap on chain
-        m_chain = m_ace.resModels()[0].concat( m_chain, newChain=False )
-
-        ## re-assemble whole model
-        return chains_before.concat( m_chain, chains_after )
+        cleaner = PDBCleaner( model, log=self.log )
+        return cleaner.capACE( model, chain, breaks=True )
 
 
     def capNME( self, model, chain ):
@@ -358,44 +324,8 @@ class AmberParmBuilder:
         @param chain: index of chain to be capped
         @type  chain: int        
         """
-        self.log.add('Capping C-terminal of chain %i.' % chain )
-        m_nme   = PDBModel( self.F_nme_cap )
-
-        chains_before = model.takeChains( range(chain), breaks=1 )
-        m_chain       = model.takeChains( [chain], breaks=1 )
-        chains_after  = model.takeChains( range(chain+1, model.lenChains(1)),
-                                          breaks=1 )
-
-        m_term  = m_chain.resModels()[-1]
-
-        ## rename overhanging residue in cap PDB, renumber cap residue
-        for a in m_nme:
-            if a['residue_name'] != 'NME':
-                a['residue_name'] = m_term.atoms['residue_name'][0]
-            else:
-                a['residue_number'] = m_term.atoms['residue_number'][0]+1
-                a['chain_id']       = m_term.atoms['chain_id'][0]
-                a['segment_id']     = m_term.atoms['segment_id'][0]
-
-        ## chain should not have any terminal O after capping
-        m_chain.remove( ['OXT'] )       
-        
-        ## fix atom serial numbers
-        serial0 = m_term.atoms['serial_number'][-1] + 1
-        m_nme['serial_number'] = N.arange(serial0 ,serial0 + len(m_nme) )
-        
-        ## fit cap onto last residue of chain
-        m_nme = m_nme.magicFit( m_term )
-
-        ## concat cap on chain
-        m_chain = m_chain.concat( m_nme.resModels()[-1], newChain=False )
-
-        ## should be obsolete now
-        if getattr( m_chain, '_PDBModel__terAtoms', []) != []:
-            m_chain._PDBModel__terAtoms = [ len( m_chain ) - 1 ]
-
-        ## re-assemble whole model
-        return chains_before.concat( m_chain, chains_after )
+        cleaner = PDBCleaner( model, log=self.log )
+        return cleaner.capNME( model, chain, breaks=True)
 
 
     def centerModel( self, model ):
@@ -696,7 +626,7 @@ class Test( BT.BiskitTest ):
             T.tryRemove( self.leapout )
         
 
-    def test_AmberParmMirror(self):
+    def __test_AmberParmMirror(self):
         """AmberParmBuilder.parmMirror test"""
         ref = self.ref
         mask = N.logical_not( ref.maskH2O() ) ## keep protein and Na+ ion
@@ -718,7 +648,7 @@ class Test( BT.BiskitTest ):
         self.assert_( eq.all() )
 
 
-    def test_AmberParmSolvated( self ):
+    def __test_AmberParmSolvated( self ):
         """AmberParmBuilder.parmSolvated test"""
         ## remove waters and hydrogens
         self.mdry = self.ref.compress( self.ref.maskProtein() )

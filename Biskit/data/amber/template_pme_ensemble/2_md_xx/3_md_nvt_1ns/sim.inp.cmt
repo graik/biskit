@@ -11,7 +11,7 @@ constant volume MD
   ntx    = 5,       irest  = 1,
 
 # frequency of report to: out, restart file, crd, vel
-  ntpr   = 5000,
+  ntpr   = 500,
   ntwr=50000, ntwx=%(ntwx)i, ntwv=%(ntwv)i,
 # last atom to write coordinates for (don't write solvent)
   ntwprt = %(lenatoms)i

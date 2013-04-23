@@ -4,7 +4,7 @@
   ntx    = 5,       irest  = 1,
   lastist= 4000000,
   lastrst= 4000000,
-  ntpr   = 50,
+  ntpr   = 500,
   ntwr=5000, ntwx=500, ntwv=500,
   cut    = 9.0,
   ntr    = 1,
