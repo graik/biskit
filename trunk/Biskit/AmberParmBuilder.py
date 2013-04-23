@@ -334,12 +334,16 @@ class AmberParmBuilder:
                 a['residue_number'] = m_term.atoms['residue_number'][0]-1
                 a['chain_id']       = m_term.atoms['chain_id'][0]
                 a['segment_id']     = m_term.atoms['segment_id'][0]
+                
+        ## fix atom serial numbers
+        serial0 = m_term.atoms['serial_number'][0]
+        m_ace['serial_number'] = N.arange( serial0-len(m_ace), serial0 )
 
         ## fit cap onto first residue of chain
         m_ace = m_ace.magicFit( m_term )
 
         ## concat cap on chain
-        m_chain = m_ace.resModels()[0].concat( m_chain )
+        m_chain = m_ace.resModels()[0].concat( m_chain, newChain=False )
 
         ## re-assemble whole model
         return chains_before.concat( m_chain, chains_after )
@@ -374,13 +378,17 @@ class AmberParmBuilder:
                 a['segment_id']     = m_term.atoms['segment_id'][0]
 
         ## chain should not have any terminal O after capping
-        m_chain.remove( ['OXT'] )            
-
+        m_chain.remove( ['OXT'] )       
+        
+        ## fix atom serial numbers
+        serial0 = m_term.atoms['serial_number'][-1] + 1
+        m_nme['serial_number'] = N.arange(serial0 ,serial0 + len(m_nme) )
+        
         ## fit cap onto last residue of chain
         m_nme = m_nme.magicFit( m_term )
 
         ## concat cap on chain
-        m_chain = m_chain.concat( m_nme.resModels()[-1] )
+        m_chain = m_chain.concat( m_nme.resModels()[-1], newChain=False )
 
         ## should be obsolete now
         if getattr( m_chain, '_PDBModel__terAtoms', []) != []:
@@ -733,6 +741,27 @@ class Test( BT.BiskitTest ):
         self.assertEqual( self.ref.lenChains(), self.m3.lenChains() )
         self.assertEqual( refprot.atomNames(), m3prot.atomNames() )
 
+
+    def test_capIrregular( self ):
+        """AmberParmBuilder.capNME & capACE test"""
+        gfp = PDBModel('1GFL')
+        normal = gfp.takeResidues([10,11])
+        chromo = gfp.takeResidues([64,65])
+
+        self.a = AmberParmBuilder( normal )
+        self.m4 = self.a.capACE( normal, 0 )
+
+        self.assertEqual( len(self.m4), 17 )
+        
+##        del chromo.residues['biomol']
+
+        self.m5 = self.a.capACE( chromo, 0 )
+        self.m5 = self.a.capNME( self.m5, 0 )
+        
+        self.assertEqual( self.m5.sequence(), 'XSYX' )
+        
+
+        
 
 
 if __name__ == '__main__':
