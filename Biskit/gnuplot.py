@@ -23,6 +23,7 @@ Simple Gnuplot interface.
 import os, string, tempfile
 
 installed = 0
+old_version = 0
 
 #
 # Test if Gnuplot is new enough to know the option -persist
