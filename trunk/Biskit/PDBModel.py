@@ -2177,13 +2177,14 @@ class PDBModel:
 
         r.info = copy.deepcopy( self.info )
 
-        try:
-            k = max(self.biounit.keys())+1
-            r.residues['biomol'][self.lenResidues():] += k
-            r.biounit = self.biounit.append(m.biounit)
-            r.biounit.model = r
-        except AttributeError:
-            pass
+## leads to bug 3611835 
+##        try:
+##            k = max(self.biounit.keys())+1
+##            r.residues['biomol'][self.lenResidues():] += k
+##            r.biounit = self.biounit.append(m.biounit)
+##            r.biounit.model = r
+##        except AttributeError:
+##            pass
 
         return r.concat( *models[1:] )
 
