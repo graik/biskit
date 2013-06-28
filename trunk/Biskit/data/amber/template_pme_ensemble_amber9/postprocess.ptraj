@@ -3,7 +3,10 @@ trajin sim.crd
 trajout sim_protein.crd
 
 strip :WAT
-image
+
+image center bymask :%(lenres)i
+image byres !:%(lenres)i
+
 center origin
 
 go
