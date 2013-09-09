@@ -278,7 +278,7 @@ class PDBDope:
         ## hydrogens + waters are not allowed during FastSurf calculation
         mask = self.m.maskHeavy() * N.logical_not( self.m.maskSolvent() )
 
-        fs = SurfaceRacer( self.m, probe, vdw_set=vdw_set )
+        fs = SurfaceRacer( self.m, probe, vdw_set=vdw_set, mask=mask )
         fs_dic = fs.run()
 
         fs_info= fs_dic['surfaceRacerInfo']
@@ -394,7 +394,7 @@ class PDBDope:
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT 
+import Biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test class """
@@ -429,6 +429,14 @@ class Test(BT.BiskitTest):
         if self.local: print "Adding surface mask...",
         self.d.addSurfaceMask()
         if self.local: print 'Done.'
+        
+    def test_surfaceRacerBug(self):
+        """PDBDope.addSurfaceRacer mask handling bugfix"""
+        import os
+        from Biskit import PDBModel
+        m = PDBModel(os.path.join(T.testRoot(),'lig/1A19.pdb'))
+        d = PDBDope(m)
+        d.addSurfaceRacer()
 
     def test_addSecondaryStructure(self):
         """PDBDope.addSecondaryStructure test"""
