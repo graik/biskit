@@ -50,6 +50,19 @@ class SurfaceRacer( Executor ):
     Hydrogens should not be present in the pdb-file during the calculation.
     If a probe radius of 1.4 A and the Richards vdw radii set is used the
     relative exposure is also calculated.
+    
+    Note, surfaceRacer does not tolerate most non-protein or hydrogen atoms.
+    Hydrogen andn solvent atoms are filtered out by default before calling
+    the program. The mask used is accessible as SurfaceRacer.mask. This means,
+    the arrays of values comming back from the calculation do not neccessarily
+    have the same lenght as the PDBModel going in. 
+    You will probably want to use PDBDope.addSurfaceRacer which is dealing 
+    with this problem automatically. Better still, filter your model manually
+    before giving it to surfaceRacer. E.g.:
+    
+        >>> model = model.compress( model.maskProtein() )
+        
+    ... should be the most robust approach.
 
     Options
     -------
@@ -88,7 +101,7 @@ class SurfaceRacer( Executor ):
 
 """
 
-    def __init__( self, model, probe, vdw_set=1, mode=3, **kw ):
+    def __init__( self, model, probe, vdw_set=1, mode=3, mask=None, **kw ):
         """
         SurfaceRacer creates three output files::
           result.txt - contains breakdown of surface areas and is writen
@@ -115,6 +128,9 @@ class SurfaceRacer( Executor ):
                       3- Accessible, molecular surface areas and
                          average curvature
         @type  mode: 1|2|3
+        @param mask: optional atom mask to apply before calling surface racer
+                     (default: heavy atoms AND NOT solvent)
+        @type mask: [ bool ]
 
         @param kw: additional key=value parameters for Executor:
         @type  kw: key=value pairs
@@ -131,7 +147,9 @@ class SurfaceRacer( Executor ):
                            **kw )
 
         self.model = model.clone()
-        self.model = self.model.compress( self.model.maskHeavy() )
+        self.mask = mask if mask is not None else \
+            model.maskHeavy() * N.logical_not( model.maskSolvent())
+        self.model = self.model.compress( mask )
 
         ## will be filled in by self.prepare() after the temp folder is ready
         self.f_pdb = None
