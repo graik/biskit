@@ -3,7 +3,7 @@
 comment= FastSurf has to be run in the directory where the application resides. Hompage: http://monte.biochem.wisc.edu/~tsodikov/surface.html
 
 ## binary
-bin=surfrace_3.0_linux.exe
+bin=surfrace
 
 ## working directory
 cwd=

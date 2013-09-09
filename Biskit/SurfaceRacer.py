@@ -424,7 +424,7 @@ class Test(BT.BiskitTest):
 
         if self.local: print 'Starting SurfaceRacer'
 
-        self.x = SurfaceRacer( m, 1.4, vdw_set=1, debug=0, verbose=0 )
+        self.x = SurfaceRacer( m, 1.4, vdw_set=1, debug=self.debug, verbose=0 )
 
         if self.local:
             print 'Running ...'
@@ -442,15 +442,15 @@ class Test(BT.BiskitTest):
 
             print 'Relative AS of atoms 10 to 20:',self.r['relAS'][10:20]
 
-        e = ( N.sum(self.r['relMS'][10:20]), N.sum(self.r['relAS'][10:20]),
+        self.e = ( N.sum(self.r['relMS'][10:20]), N.sum(self.r['relAS'][10:20]),
               N.sum(self.r['curvature'][10:20]) )
 
-        self.assertEqual( e, self.EXPECT )
+        self.assertAlmostEqual( self.e, self.EXPECT )
 
 
-    EXPECT = (570.47829086283639, 356.81939295543083, 0.80000000000000004)
+    EXPECT = (570.29631242113669, 356.72813304721222, 0.80000000000000004)
 
 
 if __name__ == '__main__':
 
-    BT.localTest()
+    BT.localTest(debug=True)
