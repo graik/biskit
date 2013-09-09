@@ -248,7 +248,7 @@ class PDBDope:
         self.m.info['foldX'] = x.run()
 
 
-    def addSurfaceRacer( self, probe=1.4, vdw_set=1, probe_suffix=0 ):
+    def addSurfaceRacer( self, probe=1.4, vdw_set=1, probe_suffix=0, mask=None ):
         """
         Always adds three different profiles as calculated by fastSurf::
            curvature - average curvature (or curvature_1.4 if probe_suffix=1)
@@ -268,6 +268,9 @@ class PDBDope:
         @type  vdw_set: 1|2
         @param probe_suffix: append probe radius to profile names
         @type  probe_suffix: 1|0
+        @param mask: optional atom mask to apply before calling surface racer
+                     (default: heavy atoms AND NOT solvent)
+        @type mask: [ bool ]
 
         @raise ExeConfigError: if external application is missing
         """
@@ -276,8 +279,9 @@ class PDBDope:
         name_curv = 'curvature' + probe_suffix * ('_%3.1f' % probe)
 
         ## hydrogens + waters are not allowed during FastSurf calculation
-        mask = self.m.maskHeavy() * N.logical_not( self.m.maskSolvent() )
-
+        mask = mask if mask is not None else \
+            self.m.maskHeavy() * N.logical_not( self.m.maskSolvent() )
+        
         fs = SurfaceRacer( self.m, probe, vdw_set=vdw_set, mask=mask )
         fs_dic = fs.run()
 
