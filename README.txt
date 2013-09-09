@@ -32,6 +32,13 @@ In this document:  * Release 2.4
 		   * License
 		   * Open issues
 
+Upcomming release
+-----------------
+
+SurfaceRacer.py
+* adapted to surfrace version 5.0
+* modified default mask to exclude both hydrogen and solvent atoms
+
 Release 2.4
 -----------
 
