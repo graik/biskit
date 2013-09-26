@@ -1,26 +1,19 @@
-## This is an alternative setup.py which is using the python built-in
-## distutils rather than the setuptools package. The standard distutils
-## are not quite as convenient as setuptools and we need additional
-## tricks to collect files and data.
+## Setup version using setuptools to let autoinstallation with
+## easy_install or pip install correctly treat the data files
 ## This setup.py has been adapted from the one shipped with django.
 ## It requires MANIFEST.in.
 
 ## building source distro : python setup.py sdist
 ## building windows distro: python setup.py bdist_wininst
 ## building rpm distro    : python setup.py bdist_rpm
+## building egg distro    : python setup.py bdist_egg
 ## install source distro  : python setup.py install
 
-from distutils.core import setup
-from distutils.command.install import INSTALL_SCHEMES
+## For custom installation folder use: --home=/where/i/want
+
+from setuptools import setup
 import os
 import sys
-
-# Tell distutils to put the data_files in platform-specific installation
-# locations. See here for an explanation:
-# http://groups.google.com/group/comp.lang.python/browse_thread/thread/35ec7b2fed36eaec/2105ee4d9e8042cb
-for scheme in INSTALL_SCHEMES.values():
-    scheme['data'] = scheme['purelib']
-
 
 # Compile the list of packages available, because distutils doesn't have
 # an easy way to do this.
@@ -90,10 +83,12 @@ setup(
     author_email = 'raik.gruenberg@crg.es',
     description = 'A Python platform for structural bioinformatics',
     long_description = long_description,
+    provides=['Biskit'],
 
     ## available on PyPi
     requires=['numpy', 'ScientificPython', 'scipy', 'biopython' ],
     packages = packages,
+    include_package_data=True,
     data_files = data_files,
     scripts = ['scripts/Biskit/bis.py'],
 
