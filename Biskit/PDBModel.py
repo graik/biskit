@@ -2928,7 +2928,7 @@ class PDBModel:
         @param maxDist: maximal distance between consequtive residues
                         [ None ] .. defaults median + z * standard dev.
         @type  maxDist: float
-        @param z      : z-score for outlier distances between residues (def 10)
+        @param z      : z-score for outlier distances between residues (def 6.)
         @type  z      : float
         @param solvent: also check selected solvent residues (buggy!) (def 0)
         @type  solvent: 1||0
@@ -2945,6 +2945,8 @@ class PDBModel:
         else:
 
             i_bb = N.nonzero( self.maskBB( solvent=solvent ) )
+            ## outlier detection only works with more than 2,
+            ##  hard cutoff works with more than 1
             if len(i_bb) < 2:
                 r = []
  
