@@ -290,10 +290,10 @@ REMEDY: run the script fixAtomIndices.py
             try:
                 line = pdbFile.readLine()
             except ValueError, what:
-                 self.log.add('Warning: Error parsing line %i of %s' %
-                              (i, T.stripFilename( fname )) )
-                 self.log.add('\tError: '+str(what) )
-                 continue
+                self.log.add('Warning: Error parsing line %i of %s' % 
+                             (i, T.stripFilename( fname )) )
+                self.log.add('\tError: '+str(what) )
+                continue
         # process last molecule group
         biomtDict[moleculeNum] = (targetChains,rtList)
         # return (indexed transformation dictionary , last line which isn't ours)
@@ -469,17 +469,13 @@ class Test(BT.BiskitTest):
         self.m.report( prnt=self.local,
                                 plot=(self.local or self.VERBOSITY > 2) )
         self.m.biomodel(1)
-##      self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P_rec_original.pdb')
-##      self.m2= self.p.parse2new( T.testRoot()+'/com/1BGS.pdb' )
+        ##      self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P_rec_original.pdb')
+        ##      self.m2= self.p.parse2new( T.testRoot()+'/com/1BGS.pdb' )
 
         self.assertAlmostEqual( N.sum( self.m.centerOfMass() ), 
                                 -74.1017, 1 )
-##        self.assertAlmostEqual( N.sum( self.m.centerOfMass() ), 
-##                                100.93785705968378, 4 )
-##        self.assertAlmostEqual( N.sum( self.m.centerOfMass() ), 
-##                                100.93785705968378, 4 )
-##         self.assertAlmostEqual( N.sum( self.m.centerOfMass() ),
-##            113.682601929 )
+
+
 
 if __name__ == '__main__':
 
