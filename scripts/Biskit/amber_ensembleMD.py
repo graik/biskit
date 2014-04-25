@@ -129,16 +129,36 @@ class AmberController:
         self.ntwv    = int( options.get('ntwv', '500') )
 
 
+    def deleteVersionControl(self, path):
+        """
+        Remove all version control folders in path
+        @param path: str, parent folder
+        """
+        hits = ['CVS', '.svn', '.git']
+
+        for root, dirs, files in os.walk(path, topdown=True):
+            for name in files:
+                if name in hits:
+                    os.remove(os.path.join(root, name))
+            for name in dirs:
+                if name in hits:
+                    tryRemove(os.path.join(root, name), verbose=True, tree=True)
+
+
     def prepareFolder(self):
 
         for f in (self.out, self.template, self.parm, self.crd):
             if not os.path.exists( f ):
                 raise AmberError('%s not found.' % f )
 
-        cmd = 'cp -d -r %s/* %s/' % (self.template, self.out)
+        cmd = 'cp -d -r --no-preserve=mode,ownership %s/* %s/' % (self.template, self.out)
 
         flushPrint('copying template files and folders...')
         os.system( cmd )
+        flushPrint('done.\n')
+
+        flushPrint('removing svn / CVS / git files...')
+        self.deleteVersionControl(self.out)
         flushPrint('done.\n')
 
         ## ensure that links are relative to out folder
@@ -161,7 +181,7 @@ class AmberController:
             result = self.createEnsembleFile( self.out + '/' + f )
 
             if result:
-                os.system( 'rm -r ' + self.out + '/' + f)
+                os.system( 'rm -rf ' + self.out + '/' + f)
 
         flushPrint('done.\n')
 
