@@ -70,6 +70,24 @@ class PDBProfiles( ProfileCollection ):
 
     def version( self ):
         return ProfileCollection.version(self)
+    
+
+    def profLength( self, default=0 ):
+        """
+        Length of profile::
+          profLength() -> int; length of first non-None profile or default (0)
+        
+        @param default: ignored
+        @type  default: any
+          
+        @return: length of first non-None profile or atom length of model
+        @rtype: int
+        """
+        r = super(ProfileCollection, self).profLength( default=0 )
+        if r == 0:
+            r = len(self.model)
+            
+        return r
 
 
     def get( self,  name, default=None, update=True, updateMissing=False ):
@@ -117,6 +135,31 @@ class PDBProfiles( ProfileCollection ):
             ## try again
             r = ProfileCollection.get(self, name )
 
+        return r
+
+class PDBResidueProfiles( PDBProfiles ):
+    """
+    A ProfileCollection that triggers an update() of its parent L{PDBModel}
+    if an empty or (optionally) missing profile is requested.
+
+    @see L{ProfileCollection}
+    """
+
+    def profLength( self, default=0 ):
+        """
+        Length of profile::
+          profLength() -> int; length of first non-None profile or default (0)
+        
+        @param default: ignored
+        @type  default: any
+          
+        @return: length of first non-None profile or residue length of model
+        @rtype: int
+        """
+        r = super(ProfileCollection, self).profLength( default=0 )
+        if r == 0:
+            r = len(self.model.lenResidues())
+            
         return r
 
 
@@ -185,7 +228,7 @@ class PDBModel:
         self.xyz = None
 
         #: save atom-/residue-based values
-        self.residues = PDBProfiles( self )
+        self.residues = PDBResidueProfiles( self )
         self.atoms = PDBProfiles( self )
 
         #: cached atom masks, calculated when first needed
@@ -407,7 +450,7 @@ class PDBModel:
         """
         ## convert first generation profile dictionaries into new ProfileCollections
         if 'resProfiles' in self.__dict__:
-            self.residues=PDBProfiles( self,
+            self.residues=PDBResdidueProfiles( self,
                                        profiles=getattr(self,'resProfiles',{}),
                                        infos=getattr(self,'resProfiles_info',{}) )
             try:
@@ -455,7 +498,7 @@ class PDBModel:
         if getattr( self, 'atoms', 0) is 0:
             self.atoms = PDBProfiles(self)
         if getattr( self, 'residues', 0) is 0:
-            self.residues = PDBProfiles(self)
+            self.residues = PDBResidueProfiles(self)
 
         ## between release 2.0.1 and 2.1, aProfiles were renamed to atoms
         if getattr( self, 'aProfiles', None) is not None:
@@ -2928,7 +2971,7 @@ class PDBModel:
         @param maxDist: maximal distance between consequtive residues
                         [ None ] .. defaults median + z * standard dev.
         @type  maxDist: float
-        @param z      : z-score for outlier distances between residues (def 10)
+        @param z      : z-score for outlier distances between residues (def 6.)
         @type  z      : float
         @param solvent: also check selected solvent residues (buggy!) (def 0)
         @type  solvent: 1||0
@@ -2945,6 +2988,8 @@ class PDBModel:
         else:
 
             i_bb = N.nonzero( self.maskBB( solvent=solvent ) )
+            ## outlier detection only works with more than 2,
+            ##  hard cutoff works with more than 1
             if len(i_bb) < 2:
                 r = []
  
