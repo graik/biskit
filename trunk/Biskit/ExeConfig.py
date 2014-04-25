@@ -188,6 +188,8 @@ class ExeConfig( object ):
 
                 ## default type is string
                 t = type( self.__dict__.get( key, '' ) )
+                if t is type(None):
+                    t = str
 
                 ## leave default value if None is given
                 if value is not '':
