@@ -58,16 +58,24 @@ class TMAlign( Executor ):
     'len'   ... length (in residues) of the structure alignment (float)
     'id'    ... sequence identity based on the structure alignment (float)
 
+    Optionally, TMAlign can also apply the transformation to the input
+    (or any other) structure:
+
+    >>> model_transformed = tm.applyTransformation(model)
+
+    The TM result values (score, rmsd, etc) are added to model_transformed.info. 
+
     @note: the alignment itself is currently not parsed in. Adapt parse_tmalign
            if you want to recover this information, too.
     @note: Command configuration: biskit/Biskit/data/defaults/exe_tmalign.dat
     """
+    _f = '\s+([-0-9]+\.[0-9]+)'
+    re_rt1 = re.compile('\s*1' + _f + _f + _f + _f)
+    re_rt2 = re.compile('\s*2' + _f + _f + _f + _f)
+    re_rt3 = re.compile('\s*3' + _f + _f + _f + _f)
 
-    re_rt1 = re.compile(' 1\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)')
-    re_rt2 = re.compile( ' 2\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)')
-    re_rt3 = re.compile( ' 3\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)\s+([-0-9\.]+)')
-
-    re_info = re.compile( 'Aligned length=\s*([0-9]+), RMSD=\s*([0-9\.]+), TM-score=\s*([0-9\.]+), ID=\s*([0-9\.]+)')
+    re_info = re.compile( 'Aligned length=\s*(?P<len>[0-9]+), RMSD=\s*(?P<rmsd>[0-9\.]+), Seq_ID=.+=\s*(?P<id>[0-9\.]+)')
+    re_score= re.compile( 'TM-score=\s*(?P<score>[0-9\.]+)\s+\(if normalized by length of Chain_2\)' ) 
 
     def __init__( self, model, refmodel, **kw ):
         """
@@ -88,9 +96,10 @@ class TMAlign( Executor ):
         """
         self.f_pdbin = tempfile.mktemp( '_tmalign_in.pdb' )
         self.f_pdbref= tempfile.mktemp( '_tmalign_ref.pdb' )
+        self.f_matrix= tempfile.mktemp( '_tmalign_matrix.out' )
 
         Executor.__init__( self, 'tmalign', 
-                           args= '%s %s' % (self.f_pdbin, self.f_pdbref),
+                           args= '%s %s -m %s' % (self.f_pdbin, self.f_pdbref, self.f_matrix),
                            **kw )
 
         self.refmodel = refmodel
@@ -113,6 +122,7 @@ class TMAlign( Executor ):
         if not self.debug:
             T.tryRemove( self.f_pdbin )
             T.tryRemove( self.f_pdbref)
+            T.tryRemove( self.f_matrix )
 
     def __translate_rt( self, rt ):
         """
@@ -120,6 +130,26 @@ class TMAlign( Executor ):
         """
         rt = rt[:, (1,2,3,0)]
         return rt
+    
+    def parse_matrix(self):
+        try:
+            lines = open(self.f_matrix, 'r').readlines()
+            s = ''.join(lines)
+            
+            rt1 = self.re_rt1.findall( s )[0]
+            rt2 = self.re_rt2.findall( s )[0]
+            rt3 = self.re_rt3.findall( s )[0]            
+
+            r = self.__translate_rt( N.array( (rt1, rt2, rt3), float ) )            
+            return r
+        
+        except IOError, why:
+            raise TMAlignError('Cannot find matrix output file.')
+
+        except IndexError, why:
+            raise TMAlignError(
+                'Could not find rotation matrix in TMAlign output')
+
 
     def parse_tmalign( self, output ):
         """
@@ -136,24 +166,15 @@ class TMAlign( Executor ):
             raise TMAlignError, 'no TM-Align result'
 
         r = {}
-
         try:
-            rt1 = self.re_rt1.findall( output )[0]
-            rt2 = self.re_rt2.findall( output )[0]
-            rt3 = self.re_rt3.findall( output )[0]            
-        except IndexError, why:
+            r = self.re_info.search( output ).groupdict()
+            r.update( self.re_score.search(output).groupdict() )
+            r = { k : float(v) for k, v in r.items() }
+        except AttributeError, why:
             raise TMAlignError(
-                'Could not find rotation matrix in TMAlign output')
+                'Could not find score and rmsd values in TMAlign output')
 
-        try:
-            info = self.re_info.findall( output )[0]
-            info = [ float( i ) for i in info ]
-        except IndexError, why:
-            raise TMAlignError(
-                'Could not find score values in TMAlign output')
-
-        r.update( dict( zip( ['len', 'rmsd', 'score', 'id'], info ) ) )        
-        r['rt'] = self.__translate_rt( N.array( (rt1, rt2, rt3), float ) )
+        r['rt'] = self.parse_matrix()
 
         return r
 
@@ -262,4 +283,4 @@ class Test(BT.BiskitTest):
 
 if __name__ == '__main__':
 
-    BT.localTest()
+    BT.localTest(debug=False)
