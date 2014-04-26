@@ -149,7 +149,7 @@ class SurfaceRacer( Executor ):
         self.model = model.clone()
         self.mask = mask if mask is not None else \
             model.maskHeavy() * N.logical_not( model.maskSolvent())
-        self.model = self.model.compress( mask )
+        self.model = self.model.compress( self.mask )
 
         ## will be filled in by self.prepare() after the temp folder is ready
         self.f_pdb = None
