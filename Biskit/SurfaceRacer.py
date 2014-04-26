@@ -45,7 +45,7 @@ class SurfaceRacer( Executor ):
     Run SurfaceRacer
     ================
 
-    Runs surface_racer_3 with given PDBModel, and returns a dictionary with
+    Runs surface_racer_5 with given PDBModel, and returns a dictionary with
     accessible, molecular surface areas (MS and AS) and average curvature.
     Hydrogens should not be present in the pdb-file during the calculation.
     If a probe radius of 1.4 A and the Richards vdw radii set is used the
@@ -107,10 +107,11 @@ class SurfaceRacer( Executor ):
           result.txt - contains breakdown of surface areas and is writen
                          to the directory where the program resides. This
                          file is discarded here.
-          file *.txt - contains the accessible, molecular surface areas
+          <file>.txt - contains the accessible, molecular surface areas
                          and average curvature information parsed here.
                          The filename is that of the input pdb file but
                          with a .txt extension.
+          <file>_residue.txt - new in version 5.0 and not used by this wrapper
           stdout     - some general information about the calculation.
                          Redirected to /dev/null
 
@@ -259,8 +260,11 @@ class SurfaceRacer( Executor ):
         Executor.cleanup( self )
 
         if not self.debug:
-            T.tryRemove( self.f_pdb )
-            T.tryRemove( self.f_out_name )
+            T.tryRemove( self.f_pdb, verbose=self.verbose )
+            T.tryRemove( self.f_out_name, verbose=self.verbose )
+            T.tryRemove( os.path.join(self.cwd, 'result.txt'), 
+                         verbose=self.verbose )
+            T.tryRemove( self.f_pdb[:-4]+'_residue.txt', verbose=self.verbose)
 
 
     def parse_result( self):
@@ -442,7 +446,7 @@ class Test(BT.BiskitTest):
 
         if self.local: print 'Starting SurfaceRacer'
 
-        self.x = SurfaceRacer( m, 1.4, vdw_set=1, debug=self.debug, verbose=0 )
+        self.x = SurfaceRacer( m, 1.4, vdw_set=1, debug=self.DEBUG, verbose=0 )
 
         if self.local:
             print 'Running ...'
