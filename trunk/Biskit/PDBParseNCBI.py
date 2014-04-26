@@ -178,6 +178,9 @@ class PDBParseNCBI( PDBParseModel ):
 
             if first_model_only and l[:6] == 'ENDMDL':
                 break
+        
+        if len(lines) < 10 and '<div>' in lines[0]:
+            raise PDBParserError, 'No PDB found with this ID.'
 
         if res_match:
             if res_match.groups()[0] == 'NOT APPLICABLE':
@@ -262,7 +265,7 @@ import Biskit.test as BT
 class Test(BT.BiskitTest):
     """Test"""
 
-    def test_PDBParseModel( self ):
+    def test_PDBParseNCBI self ):
         """PDBParseNCBI test"""
 
         ## loading output file from X-plor
@@ -273,8 +276,20 @@ class Test(BT.BiskitTest):
         self.m = self.p.parse2new( '1A2P')
 
         self.assert_( len(self.m) == 3042 )
-
-
+    
+    def test_PDBParseNCBI_fail(self):
+        """PDBParseNCBI wrong ID test"""
+        ## loading output file from X-plor
+        if self.local:
+            print 'Requesting non-existing ID ..'
+        
+        self.p = PDBParseNCBI()
+        
+        with self.assertRaises(PDBParserError):
+            self.p.parse2new('liv5')
+       
+        
+    
 if __name__ == '__main__':
 
     BT.localTest()
