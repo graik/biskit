@@ -265,7 +265,7 @@ import Biskit.test as BT
 class Test(BT.BiskitTest):
     """Test"""
 
-    def test_PDBParseNCBI self ):
+    def test_PDBParseNCBI( self ):
         """PDBParseNCBI test"""
 
         ## loading output file from X-plor
