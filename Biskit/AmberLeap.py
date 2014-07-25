@@ -156,8 +156,18 @@ class AmberLeap( Executor ):
         if P.exists( r ):
             return r
 
+        ## interpret ff as file ending ('ff99', 'ff03', etc pointing to 'old' forcefield)
+        r = P.join( amberhome, self.LEAPRC_PATH, 'oldff', self.LEAPRC + ff )
+        if P.exists( r ):
+            return r
+
         ## interpret ff as file name (e.g. 'leaprc.ff99')
         r = P.join( amberhome, self.LEAPRC_PATH, ff )
+        if P.exists( r ):
+            return r
+
+        ## interpret ff as file name (e.g. 'leaprc.ff99') for 'old' forcefield
+        r = P.join( amberhome, self.LEAPRC_PATH, 'oldff', ff )
         if P.exists( r ):
             return r
 
@@ -200,14 +210,14 @@ class Test( BT.BiskitTest ):
     def test_AmberLeap_findLeaprc(self):
         """AmberLeap.findLeaprc test"""
         self.x = AmberLeap(self.template)
-        target = P.join(self.x.exe.env['AMBERHOME'], 'dat/leap/cmd/leaprc.ff10')
+        target = P.join(self.x.exe.env['AMBERHOME'], 'dat/leap/cmd/oldff/leaprc.ff10')
 
         if self.local:
             self.log.add( '\ntarget leaprc: %s' % target )
         
         self.assertEqual( self.x.findLeaprc('ff10'), target )
         self.assertEqual( self.x.findLeaprc('leaprc.ff10'), target )
-        self.assertEqual( self.x.findLeaprc('dat/leap/cmd/leaprc.ff10'),target)
+        self.assertEqual( self.x.findLeaprc('dat/leap/cmd/oldff/leaprc.ff10'),target)
         self.assertEqual( self.x.findLeaprc( target ), target )
 
     def test_AmberLeap_run( self ):
