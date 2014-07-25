@@ -1,0 +1,48 @@
+REMARK Michael Nilges
+REMARK 10 non-interacting segments named L0-L9, R0-R9)
+! four regions:
+! 1) rigid copy (segid F%)
+! 2) fixed region (not segid L* and not segid I* and not segid R*)
+! 3) single copy region (segid I%)
+! 4) multiple copy region (segid L% or segid R%)
+
+constraints
+   ! full interactions within single copy region 
+   interaction (segid I%) (segid I%) weights * 1.0 VDW 1.0 ELEC 1.0 end 
+   ! and within each copy
+   evaluate ($i = 0)
+   while ($i lt $ncopy) loop segi
+      interaction (segid $segiL_$i ) (segid $segiL_$i) weights * 1.0 end
+      interaction (segid $segiR_$i ) (segid $segiR_$i) weights * 1.0 end
+      evaluate ($i = $i + 1)
+   end loop segi
+
+   ! only covalent between single copy region and fixed region
+   interaction (segid I%) (not (segid L% or segid R% or segid I% or segid F%)) 
+                 weights * 1.0 VDW 0.0 ELEC 0.0 end 
+
+   ! reduced interaction between multiple copies
+   evaluate ($i = 0)
+   while ($i lt $ncopy) loop segi
+      evaluate ($wwww = $enerL_$i * 0.1)
+      interaction (segid $segiL_$i ) (segid R%) weights * 1.0 VDW $wwww ELEC $wwww end
+      evaluate ($i = $i + 1)
+   end loop segi
+   evaluate ($i = 0)
+   while ($i lt $ncopy) loop segi
+      evaluate ($wwww = $enerL_$i * 0.1)
+      interaction (segid $segiR_$i ) (segid L%) weights * 1.0 VDW $wwww ELEC $wwww end
+      evaluate ($i = $i + 1)
+   end loop segi
+   ! interactions between multiple copies and single copy
+   evaluate ($i = 0)
+   while ($i lt $ncopy) loop segi
+      interaction (segid $segiL_$i ) (segid I%) weights * 1.0 VDW $enerL_$i ELEC $enerL_$i end
+      evaluate ($i = $i + 1)
+   end loop segi
+   evaluate ($i = 0)
+   while ($i lt $ncopy) loop segi
+      interaction (segid $segiR_$i ) (segid I%) weights * 1.0 VDW $enerR_$i ELEC $enerR_$i end
+      evaluate ($i = $i + 1)
+   end loop segi
+end
