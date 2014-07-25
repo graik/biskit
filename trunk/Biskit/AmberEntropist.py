@@ -544,8 +544,9 @@ class AmberEntropist( AmberCrdEntropist ):
 
         ## adapt reference to type of trajectory input 
         if ref and type(t) is tuple and not isinstance( ref, Complex ):
-            rec = ref.takeChains( range(t[0].lenChains()) )
-            lig = ref.takeChains( range(t[0].lenChains(), t[1].lenChains()) )
+            rec = ref.takeChains( range(t[0].ref.lenChains()) )
+            lig = ref.takeChains( range(t[0].ref.lenChains(),
+                                        t[1].ref.lenChains()) )
             ref = Complex( rec, lig )
 
         if ref and type(t) is not tuple and isinstance( ref, Complex ):
