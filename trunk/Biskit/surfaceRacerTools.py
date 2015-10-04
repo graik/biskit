@@ -1,4 +1,5 @@
 ## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## DAG - substituted Numeric
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -26,7 +27,7 @@
 Reference data for SurfaceRacer.
 """
 
-import numpy.oldnumeric as Numeric
+import numpy as N
 
 
 ## dictionary with average accessabilities in 500 random
@@ -425,9 +426,9 @@ def relExposure( model, absSurf, key='AS', clip=1 ):
             k+=1
 
     if clip:
-        return  Numeric.clip( Numeric.array(rel), 0.0, 100.0 )
+        return  N.clip( N.array(rel), 0.0, 100.0 )
     else:
-        return  Numeric.array(rel)
+        return  N.array(rel)
 
 
 def __Nter( a, rel, absSurf, key, i ):
@@ -534,14 +535,14 @@ class Test(BT.BiskitTest):
         self.m = self.m.compress( self.m.maskHeavy() )
         
         ## some fake surface data
-        surf = Numeric.ones( self.m.lenAtoms()) * 10.0
+        surf = N.ones( self.m.lenAtoms()) * 10.0
 
         relExp = relExposure( self.m, surf )
         
 ##         if self.local:
 ##             globals().update( locals() )
             
-        self.assertEqual( Numeric.sum(relExp), 44276.860852223857 )
+        self.assertEqual( N.sum(relExp), 44276.860852223857 )
     
         
 if __name__ == '__main__':

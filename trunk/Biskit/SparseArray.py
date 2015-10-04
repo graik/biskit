@@ -27,7 +27,7 @@
 Memory saving representation of a sparse array.
 """
 
-import numpy.oldnumeric as N
+import numpy as N
 import types
 import copy
 
@@ -114,7 +114,7 @@ class SparseArray:
         else:
             if atype is int: self.shape = ( a, )
             else:
-                if atype is N.arraytype or atype is list:
+                if atype is N.ndarray or atype is list:
                     self.shape = N.shape( a )
                 else:
                     raise SparseArrayError, '%s argument not allowed.' %\
@@ -127,7 +127,7 @@ class SparseArray:
             self.__default = SparseArray( self.shape[1:], typecode, default )
             self.__typecode = 'SA'
 
-        if atype is N.arraytype or atype is list :
+        if atype is N.ndarray or atype is list :
             self.__setAll( a )
 
 
@@ -163,7 +163,7 @@ class SparseArray:
         if self.is1D:
             return self.__setAll_1D( a )
 
-        if type(a) in [ N.arraytype, list ]:
+        if type(a) in [ N.ndarray, list ]:
             if len(a) != self.shape[0]:
                 raise SparseArrayError, 'dimensions not aligned'
 
@@ -281,7 +281,7 @@ class SparseArray:
         @param v: values
         @type  v: any OR [ any ]
         """
-        if type( i ) in [ list, N.arraytype ]:
+        if type( i ) in [ list, N.ndarray ]:
             self.__setMany( i, v )
         else:
             self.__setitem__( i, v )
@@ -296,7 +296,7 @@ class SparseArray:
         @param values: values, [ any ] OR Numeric.array
         @type  values: [any] OR array
         """
-        if type( values ) not in [ list, N.arraytype ]:
+        if type( values ) not in [ list, N.ndarray ]:
             values = [ values ] * len( indices )
 
         map( self.__setitem__, indices, values )
@@ -666,7 +666,7 @@ class SparseArray:
         if axis == 0:
 
             t_default, t_v = getType( self.__default ), getType( v )
-            if t_default == SparseArray and t_v == N.arraytype:
+            if t_default == SparseArray and t_v == N.ndarray:
                 v = SparseArray( v, self.typecode(), self.default()  )
 
             if getType(v) != t_default:
@@ -738,13 +738,13 @@ class Test(BT.BiskitTest):
     def test_SparseArray(self):
         """SparseArray test"""
 
-        a = N.zeros( (6,), N.Float32 )
+        a = N.zeros( (6,), N.float32 )
 
         self.sa = SparseArray( a.shape )
         self.sa[3] = 1.
         self.sa[5] = 2.
 
-        b = N.zeros( (5, 6), N.Float32 )
+        b = N.zeros( (5, 6), N.float32 )
         b[0,1] = 3.
         b[0,2] = 4
         b[4,2] = 5

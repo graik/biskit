@@ -31,7 +31,7 @@ Parallize calculation of pairwise rmsd between the frames of a trajectory.
 from Biskit.PVM import JobSlave
 import Biskit.tools as T
 import Biskit.rmsFit as rmsFit
-import numpy.oldnumeric as N
+import numpy as N
 from Biskit.LogFile import ErrLog, LogFile
 
 import os, time
@@ -122,7 +122,7 @@ class TrajFlexSlave( JobSlave ):
             i_start, i_stop = window[0]
             j_start, j_stop = window[1]
 
-            a = N.zeros( (i_stop-i_start, j_stop-j_start), N.Float )
+            a = N.zeros( (i_stop-i_start, j_stop-j_start), N.float )
 
             i = j = -1
 

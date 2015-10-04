@@ -32,8 +32,7 @@ import Biskit.tools as t
 from Biskit import Trajectory, mathUtils,  molUtils
 
 
-import numpy.oldnumeric as N
-import numpy.oldnumeric.random_array as RandomArray
+import numpy as N
 import copy
 
 try:
@@ -215,7 +214,7 @@ class Analyzer:
             maskLig = N.ones( l_size )
             maskRec = N.ones( r_size )
 
-        c_mask = N.ravel( N.outerproduct( maskRec, maskLig ) )
+        c_mask = N.ravel( N.outer( maskRec, maskLig ) )
         c_pos = N.nonzero( c_mask )
 
         # get array with surface positions from complex
@@ -247,7 +246,7 @@ class Analyzer:
         @return: shuffeled list
         @rtype: [any]
         """
-        pos = RandomArray.permutation( len( lst ))
+        pos = N.random.permutation( len( lst ))
         return N.take( lst, pos )
 
 

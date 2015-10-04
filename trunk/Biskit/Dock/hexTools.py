@@ -27,7 +27,7 @@
 Various common functions used by the docking modeles.
 """
 
-import numpy.oldnumeric as N
+import numpy as N
 import os
 
 import Biskit.tools as t

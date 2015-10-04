@@ -31,7 +31,7 @@ Utilities for handling structures and sequences
 from Biskit import EHandler
 import tools as t
 
-import numpy.oldnumeric as N
+import numpy as N
 import copy
 import types
 

@@ -34,7 +34,7 @@ Reference::
   PROTEINS: Structure, Function and Genetics 14:249-264 1992
 """
 
-import numpy.oldnumeric as N
+import numpy as N
 import Biskit.mathUtils as MU
 import tools
 
@@ -82,7 +82,7 @@ class FuzzyCluster:
         (default: 0, set seed from clock)
         @type  seedy: int OR 0
         """
-        self.data = N.array(data, N.Float)
+        self.data = N.array(data, N.float)
         self.w = weight
         self.n_cluster = n_cluster
         self.npoints, self.dimension = N.shape(data)

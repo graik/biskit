@@ -38,7 +38,7 @@ from Biskit.Mod.Modeller import Modeller
 
 import os
 from string import *
-import numpy.oldnumeric as N
+import numpy as N
 
 
 class Analyse:

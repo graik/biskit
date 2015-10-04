@@ -29,7 +29,7 @@ Analyze a structure using  Prosa2003.
 
 import os.path
 import string
-import numpy.oldnumeric as N
+import numpy as N
 import tempfile
 
 import Biskit.tools as T

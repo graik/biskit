@@ -32,7 +32,7 @@ from Biskit import EHandler
 
 import Biskit.tools as T
 
-import numpy.oldnumeric as N
+import numpy as N
 
 try:
     import biggles

@@ -28,7 +28,7 @@ Parse output file from hex docking run.
 """
 
 import re
-import numpy.oldnumeric as Numeric  ## array
+import numpy as N  ## array
 from Biskit.Dock import Complex, ComplexList
 
 from Biskit import PCRModel
@@ -139,7 +139,7 @@ class HexParser:
                         for j in range(0,4):
                             matrix.append( numbers[4*j:4*(j+1)] )
                         ## create 4 by 4 Numeric array from 4 by 4 list
-                        matrix = Numeric.array(matrix, Numeric.Float32)
+                        matrix = N.array(matrix, N.float32)
             except AttributeError:
                 print "HexParser.nextComplex(): ",t.lastError()
 

@@ -29,7 +29,7 @@ Trajectory of two proteins.
 from Biskit import Trajectory, TrajError, EnsembleTraj, hist
 from Complex import Complex as ProteinComplex
 
-import numpy.oldnumeric as N
+import numpy as N
 
 import Biskit.gnuplot as gnuplot
 

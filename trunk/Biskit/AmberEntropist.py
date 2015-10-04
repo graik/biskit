@@ -1,4 +1,5 @@
 ## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## DAG - substituted Numeric
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -29,7 +30,7 @@ Run ptraj entropy analysis on Trajectory instance.
 """
 
 import tempfile, os
-import numpy.oldnumeric as N
+import numpy as N
 import random, time
 
 import Biskit.tools as t
@@ -747,7 +748,7 @@ class AmberEntropist( AmberCrdEntropist ):
                     all += [ ( lst[i], lst[j], lst[k] ) ]
 
         ## calculate pairwise "distance" between tripples
-        pw = N.zeros( (len(all), len(all)), N.Float32 )
+        pw = N.zeros( (len(all), len(all)), N.float32 )
         for i in range( len( all ) ):
             for j in range( i, len(all) ):
                 pw[i,j] = pw[j,i] = len( MU.intersection(all[i],all[j]) )**2

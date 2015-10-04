@@ -29,7 +29,7 @@
 List of Complex objects.
 """
 
-import numpy.oldnumeric as N
+import numpy as N
 import types
 import random
 

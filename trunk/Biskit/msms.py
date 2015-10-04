@@ -1,4 +1,5 @@
 ## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## DAG - substituted Numeric
 
 ## Class msms
 ##
@@ -32,7 +33,7 @@ Use MSMS to calculate surface info.
        module for this kind of calculations.
 """
 
-import numpy.oldnumeric as N
+import numpy as N
 import Biskit.tools as T
 import string
 import os

@@ -34,7 +34,7 @@ from Biskit.ModelList import ModelList
 from Biskit.IcmCad import IcmCad as CAD
 
 import Biskit.tools as T
-import numpy.oldnumeric as N
+import numpy as N
 from Biskit import StdLog, EHandler
 
 from Biskit.Mod import Modeller

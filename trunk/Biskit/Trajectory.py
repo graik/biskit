@@ -27,7 +27,7 @@
 Trajectory - Collection of coordinate frames of a molecule 
 """
 
-import numpy.oldnumeric as N
+import numpy as N
 
 ## superposition module from M. Habeck
 import rmsFit
@@ -44,8 +44,6 @@ import re
 import copy
 import tempfile, os, types
 
-## PCA
-import numpy.oldnumeric.linear_algebra as LA
 
 class TrajError( BiskitError ):
     pass
@@ -228,7 +226,7 @@ class Trajectory:
         try:
             if type( self.frames ) == list or self.frames.dtype.char == 'd':
                 EHandler.warning("Converting coordinates to float array.")
-                self.frames = N.array( self.frames ).astype(N.Float32)
+                self.frames = N.array( self.frames ).astype(N.float32)
         except:
             EHandler.warning('Could not convert frames to float array.', 1)
 
@@ -307,7 +305,7 @@ class Trajectory:
         if self.verbose: T.errWrite( 'done\n' )
 
         ## convert to 3-D Numpy Array
-        return N.array(frameList).astype(N.Float32)
+        return N.array(frameList).astype(N.float32)
 
 
     def getRef( self ):
@@ -760,8 +758,8 @@ class Trajectory:
             r, t = (rt[0:3,0:3], rt[0:3, 3])
 
         r = N.transpose( r )
-        r = r.astype(N.Float32)
-        t = t.astype(N.Float32)
+        r = r.astype(N.float32)
+        t = t.astype(N.float32)
 
         for i in range( len( self.frames ) ):
             self.frames[ i ] = N.array( N.dot( self.frames[i], r ) ) + t 
@@ -1044,7 +1042,7 @@ class Trajectory:
         if aMask != None:
             frames = N.compress( aMask, frames, 1 )
 
-        result = N.zeros( (len( frames ), len( frames )), N.Float32 )
+        result = N.zeros( (len( frames ), len( frames )), N.float32 )
 
         for i in range(0, len( frames ) ):
 
@@ -1198,7 +1196,7 @@ class Trajectory:
                 if verbose: T.errWrite('#')
 
             except ZeroDivisionError:
-                result.extend( N.zeros( len(i_res), N.Float32 ) )
+                result.extend( N.zeros( len(i_res), N.float32 ) )
                 T.errWrite('?' + str( res ))
 
         if verbose: T.errWriteln( "done" )
@@ -1525,7 +1523,7 @@ class Trajectory:
         ## reduce to 2D array
         data = N.array( map( N.ravel, data ) )
 
-        V, L, U = LA.singular_value_decomposition( data )
+        V, L, U = N.linalg.svd( data )
 
         return U, V * L, N.power(L, 2)
 

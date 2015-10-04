@@ -27,7 +27,7 @@
 Cluster the members of a trajectory.
 """
 
-import numpy.oldnumeric as N
+import numpy as N
 import tools as T
 
 from mathUtils import aboveDiagonal, SD

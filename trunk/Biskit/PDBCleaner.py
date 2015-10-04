@@ -35,7 +35,7 @@ import Biskit.tools as t
 from Biskit.PDBModel import PDBModel
 from Biskit.LogFile import StdLog
 
-import numpy.oldnumeric as N
+import numpy as N
 
 import copy
 

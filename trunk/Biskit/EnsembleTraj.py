@@ -1,4 +1,5 @@
 ## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## DAG - substituted Numeric
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -34,7 +35,7 @@ from Biskit import EHandler
 import Biskit.mathUtils as M
 
 import types
-import numpy.oldnumeric as N
+import numpy as N
 import Biskit.tools as T
 
 try:

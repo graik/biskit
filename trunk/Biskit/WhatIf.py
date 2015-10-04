@@ -26,7 +26,7 @@
 Run WhatIf, calculate and collect accessibility data
 """
 
-import numpy.oldnumeric as N
+import numpy as N
 import string
 import tempfile
 

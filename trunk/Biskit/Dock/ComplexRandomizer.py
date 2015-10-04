@@ -32,8 +32,7 @@ from Biskit.Dock.Complex import Complex
 import Biskit.mathUtils as ma
 import Biskit.molUtils as mol
 import Biskit.tools as t
-import numpy.oldnumeric.random_array as ra
-import numpy.oldnumeric as N
+import numpy as N
 from Biskit import Xplorer, PCRModel
 
 import tempfile
@@ -119,7 +118,7 @@ class ComplexRandomizer:
         @rtype: array
         """
         radius = (self.d_max_rec + self.d_max_lig) / 2.0
-        xyz = ra.random( 3 ) - 0.5
+        xyz = N.random.random( 3 ) - 0.5
 
         scale = radius*1.0 / N.sqrt( N.sum( xyz**2 ) )
 
@@ -141,7 +140,7 @@ class ComplexRandomizer:
         result = N.concatenate( (r, N.transpose( [ t.tolist() ] )), 1)
 
         ## make it square
-        result = N.concatenate( (result, N.array([[0,0,0,1]], N.Float32)), 0 )
+        result = N.concatenate( (result, N.array([[0,0,0,1]], N.float32)), 0 )
 
         return result
 

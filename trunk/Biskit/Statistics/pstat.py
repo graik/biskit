@@ -717,8 +717,7 @@ Usage:   nonrepeats (inlist)
 #===================   PSTAT ARRAY FUNCTIONS  =====================
 
 try:                         # DEFINE THESE *ONLY* IF NUMERIC IS AVAILABLE
- import numpy.oldnumeric as Numeric
- N = Numeric
+ import numpy as N
 
  def aabut (source, *args):
     """
@@ -758,7 +757,7 @@ column-array (and that the whole array will be returned as a column).
 Usage:   acolex (a,indices,axis=1)
 Returns: the columns of a specified by indices
 """
-    if type(indices) not in [ListType,TupleType,N.ArrayType]:
+    if type(indices) not in [ListType,TupleType,N.ndarray]:
         indices = [indices]
     if len(N.shape(a)) == 1:
         cols = N.resize(a,[a.shape[0],1])
@@ -800,14 +799,14 @@ by keepcols, abutted with the mean(s) of column(s) specified by collapsecols
             means = aabut(means,test)
         return means
     else:
-        if type(keepcols) not in [ListType,TupleType,N.ArrayType]:
+        if type(keepcols) not in [ListType,TupleType,N.ndarray]:
             keepcols = [keepcols]
         values = colex(a,keepcols)   # so that "item" can be appended (below)
         uniques = unique(values)  # get a LIST, so .sort keeps rows intact
         uniques.sort()
         newlist = []
         for item in uniques:
-            if type(item) not in [ListType,TupleType,N.ArrayType]:
+            if type(item) not in [ListType,TupleType,N.ndarray]:
                 item =[item]
             tmprows = alinexand(a,keepcols,item)
             for col in collapsecols:
@@ -864,9 +863,9 @@ Returns the rows of an array where col (from columnlist) = val
 Usage:   alinexand (a,columnlist,valuelist)
 Returns: the rows of a where columnlist[i]=valuelist[i] for ALL i
 """
-    if type(columnlist) not in [ListType,TupleType,N.ArrayType]:
+    if type(columnlist) not in [ListType,TupleType,N.ndarray]:
         columnlist = [columnlist]
-    if type(valuelist) not in [ListType,TupleType,N.ArrayType]:
+    if type(valuelist) not in [ListType,TupleType,N.ndarray]:
         valuelist = [valuelist]
     criterion = ''
     for i in range(len(columnlist)):
@@ -890,9 +889,9 @@ other list.
 Usage:   alinexor (a,columnlist,valuelist)
 Returns: the rows of a where columnlist[i]=valuelist[i] for ANY i
 """
-    if type(columnlist) not in [ListType,TupleType,N.ArrayType]:
+    if type(columnlist) not in [ListType,TupleType,N.ndarray]:
         columnlist = [columnlist]
-    if type(valuelist) not in [ListType,TupleType,N.ArrayType]:
+    if type(valuelist) not in [ListType,TupleType,N.ndarray]:
         valuelist = [valuelist]
     criterion = ''
     if len(columnlist) == 1 and len(valuelist) > 1:
@@ -944,10 +943,10 @@ Returns: a version of array a where listmap[i][0] = (instead) listmap[i][1]
             if col == 'all':
                 return N.reshape(work,ashape)
             else:
-                return N.concatenate([a[:,0:col],work[:,N.NewAxis],a[:,col+1:]],1)
+                return N.concatenate([a[:,0:col],work[:,N.newaxis],a[:,col+1:]],1)
         else:   # must be a non-Object type array and replacement
             work = N.where(N.equal(work,pair[0]),pair[1],work)
-            return N.concatenate([a[:,0:col],work[:,N.NewAxis],a[:,col+1:]],1)
+            return N.concatenate([a[:,0:col],work[:,N.newaxis],a[:,col+1:]],1)
 
 
  def arowcompare(row1, row2):
@@ -1010,7 +1009,7 @@ Usage:   aunique (inarray)
         for item in inarray[1:]:
             if N.add.reduce(N.equal(uniques,item).ravel()) == 0:
                 try:
-                    uniques = N.concatenate([uniques,N.array[N.NewAxis,:]])
+                    uniques = N.concatenate([uniques,N.array[N.newaxis,:]])
                 except TypeError:
                     uniques = N.concatenate([uniques,N.array([item])])
     else:                                  # IT MUST BE A 2+D ARRAY
@@ -1018,7 +1017,7 @@ Usage:   aunique (inarray)
             for item in inarray[1:]:
                 if not N.sum(N.alltrue(N.equal(uniques,item),1)):
                     try:
-                        uniques = N.concatenate( [uniques,item[N.NewAxis,:]] )
+                        uniques = N.concatenate( [uniques,item[N.newaxis,:]] )
                     except TypeError:    # the item to add isn't a list
                         uniques = N.concatenate([uniques,N.array([item])])
                 else:
@@ -1033,7 +1032,7 @@ Usage:   aunique (inarray)
                         break
                 if newflag == 1:
                     try:
-                        uniques = N.concatenate( [uniques,item[N.NewAxis,:]] )
+                        uniques = N.concatenate( [uniques,item[N.newaxis,:]] )
                     except TypeError:    # the item to add isn't a list
                         uniques = N.concatenate([uniques,N.array([item])])
     return uniques

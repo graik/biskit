@@ -28,7 +28,7 @@ Calculates accessible, molecular surface areas and average curvature.
 import tempfile
 import os.path
 import string
-import numpy.oldnumeric as N
+import numpy as N
 
 from Biskit import Executor, TemplateError, EHandler
 import Biskit.settings as S

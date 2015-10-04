@@ -8,7 +8,7 @@
 ## $Revision$
 
 import numpy.random as ra
-import numpy.oldnumeric as N
+import numpy as N
 
 class PatchGeneratorFromOrbit:
     """

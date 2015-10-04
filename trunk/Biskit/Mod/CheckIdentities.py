@@ -27,7 +27,7 @@ Check sequence identity between templates.
 
 import os
 import re
-import numpy.oldnumeric as N
+import numpy as N
 
 import Biskit.tools as T
 

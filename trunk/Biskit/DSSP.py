@@ -1,4 +1,5 @@
 ## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## DAG - substituted Numeric
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -28,7 +29,7 @@ Calculates the secondary structure using DSSP.
 """
 
 import tempfile
-import numpy.oldnumeric as N
+import numpy as N
 from Biskit import Executor, TemplateError
 import Biskit.tools as T
 import Biskit.molUtils as MU

@@ -26,7 +26,7 @@
 create a histogram from data
 """
 
-import numpy.oldnumeric as Numeric
+import numpy as N
 
 
 def histogram(data, nbins, range = None):
@@ -44,22 +44,22 @@ def histogram(data, nbins, range = None):
     @return: array (2 x len(data) ) with start of bin and witdh of bin. 
     @rtype: array
     """
-    data = Numeric.array(data, Numeric.Float)
+    data = N.array(data, N.float)
     if range is None:
-        min = Numeric.minimum.reduce(data)
-        max = Numeric.maximum.reduce(data)
+        min = data.min()
+        max = data.max()
     else:
         min, max = range
-        data = Numeric.repeat(data,
-                              Numeric.logical_and(Numeric.less_equal(data, max),
-                                                  Numeric.greater_equal(data, min)))
+        data = N.repeat(data,
+                        N.logical_and(N.less_equal(data, max),
+                                                  N.greater_equal(data, min)))
     bin_width = (max-min)/nbins
-    data = Numeric.floor((data - min)/bin_width).astype(Numeric.Int)
-    histo = Numeric.add.reduce(Numeric.equal(
-        Numeric.arange(nbins)[:,Numeric.NewAxis], data), -1)
-    histo[-1] = histo[-1] + Numeric.add.reduce(Numeric.equal(nbins, data))
-    bins = min + bin_width*(Numeric.arange(nbins)+0.5)
-    return Numeric.transpose(Numeric.array([bins, histo]))
+    data = N.floor((data - min)/bin_width).astype(N.int)
+    histo = N.add.reduce(N.equal(
+        N.arange(nbins)[:,N.newaxis], data), -1)
+    histo[-1] = histo[-1] + N.add.reduce(N.equal(nbins, data))
+    bins = min + bin_width*(N.arange(nbins)+0.5)
+    return N.transpose(N.array([bins, histo]))
 
 
 def density(x, nBins, range = None, steps = 1, hist = 0):
@@ -85,7 +85,7 @@ def density(x, nBins, range = None, steps = 1, hist = 0):
     binWidth = h[1,0] - h[0,0]
 
     if not hist:
-        i = Numeric.sum(h)[1]*binWidth
+        i = N.sum(h)[1]*binWidth
         h[:,1] = h[:,1]/i
 
     if steps:
@@ -100,7 +100,7 @@ def density(x, nBins, range = None, steps = 1, hist = 0):
 
         h = l
 
-    return Numeric.array(h)
+    return N.array(h)
 
 
 #############
@@ -113,12 +113,12 @@ class Test(BT.BiskitTest):
 
     def test_hist( self ):
         """hist test"""
-        self.x = Numeric.arange( 4, 12, 1.2 )
+        self.x = N.arange( 4, 12, 1.2 )
         self.data = density( self.x, 3, hist=1 )
 
-        self.assert_( Numeric.all( self.data == self.EXPECT) )
+        self.assert_( N.all( self.data == self.EXPECT) )
 
-    EXPECT= Numeric.array([[  4. ,   0. ],
+    EXPECT= N.array([[  4. ,   0. ],
                            [  4. ,   2. ],
                            [  6.4,   2. ],
                            [  6.4,   2. ],

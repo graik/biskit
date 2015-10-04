@@ -35,7 +35,7 @@ from Biskit import StdLog, EHandler
 
 import re
 import os, shutil
-import numpy.oldnumeric as Numeric
+import numpy as N
 
 import urllib
 import string
@@ -436,7 +436,7 @@ class TemplateSearcher( SequenceSearcher ):
         for id in ids_in_cluster:
             resolutions += [ getattr( self.record_dic[id],'resolution', 99. ) ]
 
-        return ids_in_cluster[ Numeric.argmin( resolutions ) ]
+        return ids_in_cluster[ N.argmin( resolutions ) ]
 
 
     def reportClustering( self, raw=None ):

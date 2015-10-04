@@ -38,8 +38,7 @@ from PDBParserFactory import PDBParserFactory
 from PDBParseFile import PDBParseFile
 import Biskit as B
 
-import numpy.oldnumeric as N
-import numpy.oldnumeric.mlab as MLab
+import numpy as N
 import os, sys
 import copy
 import time
@@ -785,7 +784,7 @@ class PDBModel:
 
             else:
 
-                if type( self.residues[ key ] ) is N.arraytype:
+                if type( self.residues[ key ] ) is N.ndarray:
                     self.residues.set( key, self.residues[key].tolist() )
 
         for key in self.atoms:
@@ -795,7 +794,7 @@ class PDBModel:
 
             else:
 
-                if type( self.atoms[ key ] ) is N.arraytype:
+                if type( self.atoms[ key ] ) is N.ndarray:
                     self.atoms.set( key, self.atoms[key].tolist() )
 
 
@@ -814,8 +813,8 @@ class PDBModel:
             if not self.xyzChangedFromDisc():
                 self.xyz = None
 
-            if type( self.xyz ) is N.arraytype and self.xyz.dtype.char != 'f':
-                self.xyz = self.xyz.astype(N.Float32)
+            if type( self.xyz ) is N.ndarray and self.xyz.dtype.char != 'f':
+                self.xyz = self.xyz.astype(N.float32)
 
             self.__slimProfiles()
 
@@ -1514,7 +1513,7 @@ class PDBModel:
         if type( what ) is types.FunctionType:
             return N.nonzero( self.maskF( what) )
 
-        if type( what ) is list or type( what ) is N.arraytype:
+        if type( what ) is list or type( what ) is N.ndarray:
 
             ## atom names
             if type( what[0] ) == str:
@@ -1531,7 +1530,7 @@ class PDBModel:
 
         ## single index
         if isinstance( what , int):
-            return N.array( [what], N.Int )
+            return N.array( [what], N.int )
 
         raise PDBError("PDBModel.indices(): Could not interpret condition ")
 
@@ -1560,7 +1559,7 @@ class PDBModel:
         if type( what ) == types.FunctionType:
             return self.maskF( what )
 
-        if type( what ) == list or type( what ) is N.arraytype:
+        if type( what ) == list or type( what ) is N.ndarray:
 
             ## atom names
             if type( what[0] ) == str:
@@ -1573,7 +1572,7 @@ class PDBModel:
                     return what
                 ## list of indices
                 else:
-                    r = N.zeros( self.lenAtoms(),N.Int )
+                    r = N.zeros( self.lenAtoms(),N.int )
                     N.put( r, what, 1 )
                     return r
 
@@ -1868,7 +1867,7 @@ class PDBModel:
         if type( p ) is str:
             p = self.residues.get( p )
 
-        isArray = isinstance( p, N.arraytype )
+        isArray = isinstance( p, N.ndarray )
 
         resMap = self.resMap()
 
@@ -1898,7 +1897,7 @@ class PDBModel:
         if type( p ) is str:
             p = self.atoms.get( p )
 
-        isArray = isinstance( p, N.arraytype )
+        isArray = isinstance( p, N.ndarray )
 
         if not f:
             r = N.take( p, self.resIndex() )
@@ -2650,7 +2649,7 @@ class PDBModel:
         @rtype: list of int
         """
         ## by default take all atoms
-        if mask is None: mask = N.ones( self.lenAtoms() , N.Int )
+        if mask is None: mask = N.ones( self.lenAtoms() , N.int )
 
         ## apply mask to this list
         return N.compress( mask, self.atoms['residue_number'] )
@@ -2666,7 +2665,7 @@ class PDBModel:
         result = []
 
         if self.lenAtoms() == 0:
-            return N.array( result, N.Int )
+            return N.array( result, N.int )
 
         lastResNumber = -100
         lastResName   = ''
@@ -2696,7 +2695,7 @@ class PDBModel:
 
                 result.append( i )
 
-        return N.array(result, N.Int)        
+        return N.array(result, N.int)        
 
 
     def resIndex( self, mask=None, force=0, cache=1 ):
@@ -2765,7 +2764,7 @@ class PDBModel:
         result = []
 
         if self.lenAtoms() == 0:
-            return N.array( result, N.Int )
+            return N.array( result, N.int )
 
         lastResidue = -100
         lastChainID = None
@@ -2789,7 +2788,7 @@ class PDBModel:
             lastChainID = chn_ids[i]
             lastSegID   = seg_ids[i]
 
-        return N.array( result, N.Int )
+        return N.array( result, N.int )
 
 
     def __filterSingleResChains( self, chainindex, ignore_resnumbers=0 ):
@@ -2820,7 +2819,7 @@ class PDBModel:
         same_seg  =   seg_ids[1:] ==   seg_ids[:-1]
 
         if ignore_resnumbers:
-            delta = N.ones( len(delta), N.Int )
+            delta = N.ones( len(delta), N.int )
 
         is_single = (delta==1) \
                   * same_name * same_chain * same_seg
@@ -2881,7 +2880,7 @@ class PDBModel:
         if not(breaks or force or maxDist or singleRes or solvent) or cache:
             self._chainIndex = r
 
-        return N.array( r, N.Int )
+        return N.array( r, N.int )
 
     def chainEndIndex( self, breaks=0, solvent=0 ):
         """
@@ -3343,7 +3342,7 @@ class PDBModel:
 
             result += resAtoms * 0.0 + masterValue
 
-        return N.array( result, N.Float32 )
+        return N.array( result, N.float32 )
 
 
     def argsort( self, cmpfunc=None ):

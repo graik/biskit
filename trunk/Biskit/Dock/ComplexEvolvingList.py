@@ -29,7 +29,7 @@ List of ComplexEvolving instances.
 
 from Biskit.Dock.ComplexList import ComplexList, ComplexListError
 from Biskit.Dock.ComplexEvolving import ComplexEvolving
-import numpy.oldnumeric as N
+import numpy as N
 
 class ComplexEvolvingList( ComplexList ):
     """

@@ -1,4 +1,5 @@
 ## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## DAG - substituted Numeric
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -27,7 +28,7 @@ Parse Amber restart files.
 """
 
 import re
-import numpy.oldnumeric as N
+import numpy as N
 import os.path
 
 from AmberCrdParser import ParseError
@@ -89,7 +90,7 @@ class AmberRstParser:
         """
         self.xyz = [ self.__nextLine() for i in range(self.lines_per_frame) ]
 
-        return N.reshape(self.xyz, ( self.n, 3 ) ).astype(N.Float32)
+        return N.reshape(self.xyz, ( self.n, 3 ) ).astype(N.float32)
 
 
     def getXyz( self ):

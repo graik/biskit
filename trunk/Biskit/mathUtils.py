@@ -1,4 +1,5 @@
 ## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## DAG - substituted Numeric
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -28,9 +29,8 @@
 general purpose math methods
 """
 
-import numpy.oldnumeric as N
+import numpy as N
 import random
-import numpy.oldnumeric.random_array as RandomArray
 import math, cmath
 
 class MathUtilError( Exception ):
@@ -47,7 +47,7 @@ def accumulate( a ):
     @return: float
     @rtype: float
     """
-    return N.add.accumulate( a ) / N.sum( a )
+    return N.cumsum( a ) / N.sum( a )
 
 
 def variance(x, avg = None):
@@ -437,7 +437,7 @@ def unpackBinaryMatrix( pcm, raveled=0 ):
 
     s = pcm['shape']
 
-    m = N.zeros( N.cumproduct( s )[-1], N.Int)
+    m = N.zeros( N.cumproduct( s )[-1], N.int)
     pass  ## m.savespace( 1 )
     N.put( m, pcm['nonzero'], 1 )
 
@@ -512,7 +512,7 @@ def eulerRotation(alpha, beta, gamma):
     cos_beta  = N.cos(beta);  sin_beta  = N.sin(beta)
     cos_gamma = N.cos(gamma); sin_gamma = N.sin(gamma)
 
-    R = N.zeros((3,3), N.Float32)
+    R = N.zeros((3,3), N.float32)
 
     R[0][0] = cos_gamma * cos_alpha - sin_gamma * cos_beta * sin_alpha
     R[0][1] = cos_gamma * sin_alpha + sin_gamma * cos_beta * cos_alpha
@@ -538,9 +538,9 @@ def randomRotation():
     @return: 3 x 3 array of float
     @rtype: array
     """
-    alpha = RandomArray.random() * 2 * N.pi
-    gamma = RandomArray.random() * 2 * N.pi
-    beta  = N.arccos(2*(RandomArray.random() - 0.5))
+    alpha = N.random.random() * 2 * N.pi
+    gamma = N.random.random() * 2 * N.pi
+    beta  = N.arccos(2*(N.random.random() - 0.5))
 
     return eulerRotation(alpha, beta, gamma)
 
@@ -598,9 +598,9 @@ def union( a, b ):
     @return: list
     @rtype: [any]    
     """
-    if type( a ) is N.arraytype:
+    if type( a ) is N.ndarray:
         a = a.tolist()
-    if type( b ) is N.arraytype:
+    if type( b ) is N.ndarray:
         b = b.tolist()
 
     return nonredundant( a + b )
@@ -687,7 +687,7 @@ def linfit( x, y ):
 
     @raise BiskitError: if x and y have different number of elements
     """
-    x, y = N.array( x, N.Float64), N.array( y, N.Float64)
+    x, y = N.array( x, N.float64), N.array( y, N.float64)
     if len( x ) != len( y ):
         raise Exception, 'linfit: x and y must have same length'
 

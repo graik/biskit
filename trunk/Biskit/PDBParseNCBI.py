@@ -28,7 +28,7 @@ Fetch a PDBModel from the remote or a local NCBI PDB database.
 @see L{PDBModel}
 @see L{PDBParserFactory}
 """
-import numpy.oldnumeric as N
+import numpy as N
 import urllib, re, tempfile, os
 
 import Biskit.tools as T

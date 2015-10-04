@@ -37,7 +37,7 @@ from Biskit.LogFile import ErrLog, LogFile
 from Biskit.EnsembleTraj import EnsembleTraj, traj2ensemble
 
 import tempfile
-import numpy.oldnumeric as N
+import numpy as N
 import os
 
 ## PVM imports
@@ -299,7 +299,7 @@ class TrajFlexMaster(TrackingJobMaster):
         if not isinstance( traj, EnsembleTraj ):
             return None
 
-        r = N.zeros( len(traj), N.Int )
+        r = N.zeros( len(traj), N.int )
 
         for i in range( traj.n_members ):
 
@@ -328,7 +328,7 @@ class TrajFlexMaster(TrackingJobMaster):
         if self.traj_2 is not None:
             n2 = len( self.traj_2 )
 
-        a  = N.zeros( (n1,n2), N.Float32 )
+        a  = N.zeros( (n1,n2), N.float32 )
 
         if self.verbose: self.log.write('#')
 
@@ -337,7 +337,7 @@ class TrajFlexMaster(TrackingJobMaster):
             j_start, j_stop = key[1]
 
             window = N.reshape( value, (i_stop-i_start, j_stop-j_start) )
-            window = window.astype(N.Float32)
+            window = window.astype(N.float32)
 
             a[i_start:i_stop, j_start:j_stop] = window
 
@@ -449,7 +449,7 @@ class Test(BT.BiskitTest):
         frames = []
         for i in range( len( traj_1 ) ):
             f = traj_1.frames[i]
-            d = N.zeros( N.shape( f ), N.Float32)
+            d = N.zeros( N.shape( f ), N.float32)
             if i > 0:
                 d = random( N.shape( f ) ) * ((i / 10) + 1) 
             frames += [f + d]

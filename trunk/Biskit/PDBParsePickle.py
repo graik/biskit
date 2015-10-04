@@ -112,7 +112,7 @@ class Test(BT.BiskitTest):
     def test_PDBParsePickle( self ):
         """PDBParsePickle test"""
 
-        import numpy.oldnumeric as N
+        import numpy as N
 
         ## loading output file from X-plor
         if self.local:

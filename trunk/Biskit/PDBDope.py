@@ -26,7 +26,7 @@
 Calculate and add various properties to PDBModel
 """
 
-import numpy.oldnumeric as N
+import numpy as N
 import Biskit.tools as T
 
 from Biskit.WhatIf import WhatIf 

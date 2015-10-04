@@ -40,7 +40,7 @@ import re
 import os.path
 from time import localtime, sleep
 from threading import Thread, RLock, Condition
-import numpy.oldnumeric as N
+import numpy as N
 
 
 class DockerError( Exception ):

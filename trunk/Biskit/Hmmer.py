@@ -31,7 +31,7 @@ Search Hmmer Pfam database and retrieve conservation data.
 import tempfile
 import re, string
 import types, os.path
-import numpy.oldnumeric as N
+import numpy as N
 import molUtils
 import settings
 

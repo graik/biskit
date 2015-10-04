@@ -28,12 +28,11 @@
 lognormal distribution
 """
 
-import numpy.oldnumeric as N
-import numpy.oldnumeric.random_array as R
+import numpy as N
 
 
 def rand_log_normal(alpha, beta, shape):
-    return N.exp(R.normal(alpha, beta, shape))
+    return N.exp(N.random.normal(alpha, beta, shape))
 
 
 def ln(r, alpha, beta):

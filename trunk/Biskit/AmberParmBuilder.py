@@ -1,4 +1,5 @@
 ## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## DAG - substituted Numeric
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -27,7 +28,7 @@ Create Amber topology and coordinate file from PDB.
 """
 
 import os, tempfile, copy
-import numpy.oldnumeric as N
+import numpy as N
 
 import Biskit.tools as t
 import Biskit.settings as s
@@ -508,7 +509,7 @@ class AmberParmBuilder:
         @return: remaining atom indices of m that are NOT in i_atoms
         @rtype: [int]
         """
-        mask = N.zeros( len( model ),N.Int )
+        mask = N.zeros( len( model ),N.int )
         N.put( mask, i_atoms, 1 )
         return N.nonzero( N.logical_not( mask ) )
 

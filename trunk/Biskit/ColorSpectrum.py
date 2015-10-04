@@ -1,4 +1,5 @@
 ## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## DAG - substituted Numeric
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -28,7 +29,7 @@
 Create color scales.
 """
 
-import numpy.oldnumeric as N
+import numpy as N
 
 from Errors import BiskitError
 

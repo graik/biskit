@@ -29,7 +29,7 @@ Create structures with reduced number of atoms.
 
 from PDBModel import PDBModel
 from DictList import DictList
-import numpy.oldnumeric as N
+import numpy as N
 import tools as T
 import molUtils as MU
 
@@ -170,7 +170,7 @@ class ReduceCoordinates:
             n_centers += 1
 
         ## how many items/atoms go into each group?
-        nAtoms = N.ones(n_centers, N.Int) * int(len( a_indices ) / n_centers)
+        nAtoms = N.ones(n_centers, N.int) * int(len( a_indices ) / n_centers)
         i=0
         while N.sum(nAtoms) != len( a_indices ):
             nAtoms[i] += 1
@@ -295,10 +295,10 @@ class ReduceCoordinates:
             center = N.sum( x * N.transpose([m,]), axis=axis) / N.sum( m )
 
             if axis == 0:
-                center = center[N.NewAxis, :]
+                center = center[N.newaxis, :]
 
             if axis == 1:
-                center = center[:, N.NewAxis, :]
+                center = center[:, N.newaxis, :]
 
             if r_xyz == None:
                 r_xyz = center

@@ -26,7 +26,7 @@
 Analyze a density distribution of values.
 """
 
-import numpy.oldnumeric as N
+import numpy as N
 import math
 import Biskit.hist as H
 
@@ -71,7 +71,7 @@ class Density:
                     of bin (default: None)
         @type  val: array        
         """
-        self.val = N.array(val, N.Float32)
+        self.val = N.array(val, N.float32)
         self.x = self.val[:,0]
         self.p = self.val[:,1]
 
@@ -108,7 +108,7 @@ class Density:
         @rtype: float, float
         """          
         order = N.argsort(self.p).tolist()
-        cumulative = N.add.accumulate(N.take(self.p, order)) * self.delta_x
+        cumulative = N.cumsum(N.take(self.p, order)) * self.delta_x
 
         ind = N.nonzero(N.greater_equal(cumulative, 1. - level))
 
@@ -151,7 +151,7 @@ class Density:
         """
         Median of distribution.
         """
-        cum = N.add.accumulate(self.p) * self.delta_x
+        cum = N.cumsum(self.p) * self.delta_x
         index = N.argmin(abs(cum - 0.5))
 
         return self.x[index]

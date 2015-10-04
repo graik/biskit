@@ -25,7 +25,7 @@
 Plot a 2D matrix (up to 100 x 100)
 """
 
-import numpy.oldnumeric as N
+import numpy as N
 
 from Biskit import ColorSpectrum, EHandler
 import Biskit.tools as T
@@ -204,7 +204,7 @@ class Test(BT.BiskitTest):
         """MatrixPlot test"""
         n = 30
 
-        z = N.zeros((n,n), N.Float)
+        z = N.zeros((n,n), N.float)
 
         for i in range(N.shape(z)[0]):
             for j in range(N.shape(z)[1]):

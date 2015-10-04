@@ -31,7 +31,7 @@ from Biskit.PVM import JobSlave
 import Biskit.tools as T
 from Biskit import mathUtils as MU
 from Biskit.LogFile import StdLog, LogFile
-import numpy.oldnumeric as N
+import numpy as N
 from Complex import Complex
 import os.path
 import time

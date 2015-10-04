@@ -31,10 +31,9 @@ from Biskit.Prosa2003 import Prosa2003
 
 import Biskit.tools as t
 
-import numpy.oldnumeric as N
+import numpy as N
 
 from copy import deepcopy, copy
-from numpy.oldnumeric import arraytype
 
 from difflib import SequenceMatcher
 
@@ -73,7 +72,7 @@ class Complex:
             self.ligandMatrix = N.array([ [1,  0,  0, 0],
                                         [0,  1,  0, 0],
                                         [0,  0,  1, 0],
-                                        [0,  0,  0, 1],], N.Float32)
+                                        [0,  0,  0, 1],], N.float32)
 
         ## compressed by slim
         self.contacts = None
@@ -125,7 +124,7 @@ class Complex:
         called for unpickling the object.
         """
         self.__dict__ = state
-        self.ligandMatrix = N.array( self.ligandMatrix,N.Float32 )
+        self.ligandMatrix = N.array( self.ligandMatrix,N.float32 )
         ## backwards compability
         self.__defaults() 
 
@@ -345,7 +344,7 @@ class Complex:
             m = self.contacts['result']
             self.contacts['shape'] = N.shape( m )
 
-            self.contacts['result'] = N.nonzero( N.ravel( m ) ).astype(N.Int32)
+            self.contacts['result'] = N.nonzero( N.ravel( m ) ).astype(N.int32)
 
 
     def contactsOverlap(self, ref, cutoff=None):
@@ -813,7 +812,7 @@ class Complex:
 
         ## map contacts back to all atoms matrix
         r = N.zeros( l_rec * l_lig )
-        rMask = N.ravel( N.outerproduct( rec_mask, lig_mask ) )
+        rMask = N.ravel( N.outer( rec_mask, lig_mask ) )
 
         ## (Optimization: nonzero is time consuming step)
         N.put( r, N.nonzero( rMask ), N.ravel( contacts ) )
@@ -933,7 +932,7 @@ class Complex:
         ligInd = N.concatenate((self.lig_model.resIndex(),
                               [ self.lig_model.lenAtoms() ] ))
 
-        residueMatrix = N.zeros(( len(recInd)-1, len(ligInd)-1 ), N.Int)
+        residueMatrix = N.zeros(( len(recInd)-1, len(ligInd)-1 ), N.int)
 
         for r in range( len(recInd)-1 ):
 
@@ -1248,13 +1247,13 @@ class Complex:
             d = PDBDope(self.lig())
             d.addSurfaceMask()
 
-        surfMask = N.ravel(N.outerproduct( recSurf, ligSurf ))
+        surfMask = N.ravel(N.outer( recSurf, ligSurf ))
 
-        missing = N.outerproduct( N.equal( recCons, 0), N.equal(ligCons,0))
+        missing = N.outer( N.equal( recCons, 0), N.equal(ligCons,0))
 
         cont = self.resContacts() * N.logical_not(missing)
 
-        consMat = N.outerproduct( recCons, ligCons )
+        consMat = N.outer( recCons, ligCons )
 
         score = cont* consMat
 
@@ -1285,9 +1284,9 @@ class Complex:
         ## create 3 x 4 matrix: 0:3, 0:3 contains rot; 3,0:3 contains trans
         result = N.concatenate( (r, N.transpose( [ t.tolist() ] )), 1)
         ## make it square
-        result = N.concatenate( (result, N.array([[0,0,0,1]],N.Float32)), 0)
+        result = N.concatenate( (result, N.array([[0,0,0,1]],N.float32)), 0)
 
-        return result.astype(N.Float32)
+        return result.astype(N.float32)
 
 
     def extractLigandMatrix( self, lig):
@@ -1360,8 +1359,8 @@ class Complex:
         @author: Wolfgang Rieping.
         """
         ## check input
-        if not type( u ) == arraytype or\
-           not type( v ) == arraytype:
+        if not type( u ) == N.ndarray or\
+           not type( v ) == N.ndarray:
             raise ComplexError('unsupported argument type ' + \
                                str( type(u) ) + ' or ' + str( type(v) ) )
 

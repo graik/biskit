@@ -1,4 +1,5 @@
 ## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## DAG - substituted Numeric
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -27,8 +28,8 @@ superimpose 2 structures iteratively
 """
 
 import Biskit.mathUtils as MU
-import numpy.oldnumeric as N
-from numpy.oldnumeric.linear_algebra import singular_value_decomposition as svd
+import numpy as N
+from numpy.linalg import svd
 
 ## def average(x):
 ##     return N.sum(x) / len(x)

@@ -1,4 +1,5 @@
 ## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Adapted to new versions of numpy. Substituted Numeric.
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -28,7 +29,7 @@ compareStructures() compares sequences of 2 structures and returns
 a residue mask for each of them. 
 """
 
-import numpy.oldnumeric as N
+import numpy as N
 import Biskit.tools as T
 from Biskit.difflib_old import SequenceMatcher
 #from difflib import SequenceMatcher
@@ -322,12 +323,12 @@ class Test(BT.BiskitTest):
                        1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1,
                        1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1,
-                       1, 1, 1, 1],N.Int),\
+                       1, 1, 1, 1],N.int),\
               N.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],N.Int)
+                       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],N.int)
 
 
 
