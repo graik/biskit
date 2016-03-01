@@ -1599,7 +1599,7 @@ class PDBModel:
         """
         index = N.concatenate( (index, [len_i]) )
         delta = index[1:] - index[:-1] 
-        ## Numeric: delta = N.take( index, range(1, len(index) ) ) - index[:-1]
+        ## Numeric: delta = N.take( index, range(1, len(index) ), 0 ) - index[:-1]
         return N.repeat( range(len(delta)), delta.astype( N.int32) )
 
 
@@ -1617,7 +1617,7 @@ class PDBModel:
         try:
             imap = N.concatenate( (imap, [imap[-1]] ) )
             delta = imap[1:] - imap[:-1] 
-            # Numeric: delta = N.take( imap, range(1, len(imap) ) ) - imap[:-1]
+            # Numeric: delta = N.take( imap, range(1, len(imap) ), 0) - imap[:-1]
             r = N.nonzero( delta )[0] + 1
             return N.concatenate( ( [0], r ) )
 
@@ -1673,8 +1673,8 @@ class PDBModel:
         ## last atom of each residue / chain
         stop = N.concatenate( (index[1:], [len_i]) ) - 1
 
-        ifrom = N.take( index, i )
-        ito   = N.take( stop, i )
+        ifrom = N.take( index, i, 0 )
+        ito   = N.take( stop, i, 0 )
 
         ## number of atoms in each of the new residues 
         rangelen = ito - ifrom + 1
@@ -1724,10 +1724,10 @@ class PDBModel:
         @return: indices of residues
         @rtype: list of int
         """
-        new_resmap = N.take( self.resMap(), indices )
+        new_resmap = N.take( self.resMap(), indices, 0 )
         resIndex   = self.map2index( new_resmap )
 
-        return N.take( new_resmap, resIndex )
+        return N.take( new_resmap, resIndex, 0 )
 
 
     def res2atomMask( self, resMask ):
@@ -1795,10 +1795,10 @@ class PDBModel:
         @return: chains any atom which is in indices
         @rtype: list of int
         """
-        new_map = N.take( self.chainMap( breaks=breaks ), indices )
+        new_map = N.take( self.chainMap( breaks=breaks ), indices, 0 )
         index   = self.map2index( new_map )
 
-        return N.take( new_map, index )
+        return N.take( new_map, index, 0 )
 
 
     def atom2chainMask( self, atomMask, breaks=0 ):
@@ -1900,7 +1900,7 @@ class PDBModel:
         isArray = isinstance( p, N.ndarray )
 
         if not f:
-            r = N.take( p, self.resIndex() )
+            r = N.take( p, self.resIndex(), 0 )
         else:
             r = [ f( values ) for values in self.profile2resList( p ) ]
             r = N.array( r )
@@ -2262,20 +2262,20 @@ class PDBModel:
         r = self.__class__( *initArgs, **initKw )
 
         ## the easy part: extract coordinates and atoms
-        r.xyz = N.take( self.getXyz(), i )
+        r.xyz = N.take( self.getXyz(), i, 0 )
         r.xyzChanged = self.xyzChanged or not N.all(r.xyz == self.xyz)
 
         r.atoms = self.atoms.take( i, r )
 
         ## more tricky: rescue residue borders and extract residue profiles
-        new_resmap   = N.take( self.resMap(), i )
+        new_resmap   = N.take( self.resMap(), i, 0 )
         if rindex is not None:
             r._resIndex = rindex
         else:
             ## this can fail if residues are repeated in the selection
             r._resIndex = self.map2index( new_resmap )
 
-        i_res     = N.take( new_resmap, r._resIndex )
+        i_res     = N.take( new_resmap, r._resIndex, 0 )
         r.residues = self.residues.take( i_res, r )
 
         ## now the same with chain borders (and later profiles)
@@ -2283,7 +2283,7 @@ class PDBModel:
             r._chainIndex = cindex
         else:
             ## this can fail if chains are repeated next to each other in i
-            new_chainmap   = N.take( self.chainMap(), i )
+            new_chainmap   = N.take( self.chainMap(), i, 0 )
             r._chainIndex = self.map2index( new_chainmap )
 
         ## copy non-sequential infos
@@ -2478,7 +2478,7 @@ class PDBModel:
 
         old_chains = []
         if keep_old:
-            old_chains = N.take( ids, self.resIndex() )
+            old_chains = N.take( ids, self.resIndex(), 0 )
             old_chains = mathUtils.nonredundant( old_chains )
             if '' in old_chains: old_chains.remove('')
 
@@ -2800,13 +2800,13 @@ class PDBModel:
         @type  check_resnumbers: 1||0
         """
         # residue name of first atom of each chain
-        res_names = N.take( self.atoms['residue_name'], chainindex )
+        res_names = N.take( self.atoms['residue_name'], chainindex, 0 )
         # residue number of first atom of each chain
-        res_nmbrs = N.take( self.atoms['residue_number'], chainindex )
+        res_nmbrs = N.take( self.atoms['residue_number'], chainindex, 0 )
         # chain id of first atom of each chain
-        chain_ids = N.take( self.atoms['chain_id'], chainindex )
+        chain_ids = N.take( self.atoms['chain_id'], chainindex, 0 )
         #segid of first atom of each chain
-        seg_ids   = N.take( self.atoms['segment_id'], chainindex )
+        seg_ids   = N.take( self.atoms['segment_id'], chainindex, 0 )
 
         res_names = N.concatenate( (['-1'], res_names) )
         chain_ids = N.concatenate( (['-1'], chain_ids) )
@@ -2955,10 +2955,10 @@ class PDBModel:
                 bb_re= bb.resEndIndex()
 ##                xyz = [ bb.xyz[ bb_ri[i] : bb_ri[i+1] ] for i in range(len(bb_ri)-1) ]
 ##                xyz +=[ bb.xyz[ bb_ri[-1]: len(bb) ] ]
-##                centroid = N.array([ N.average( x ) for x in xyz ])
+##                centroid = N.array([ N.average( x, 0 ) for x in xyz ])
 
-                last = N.take( bb.xyz, bb_re )[:-1]
-                first= N.take( bb.xyz, bb_ri )[1:]
+                last = N.take( bb.xyz, bb_re, 0 )[:-1]
+                first= N.take( bb.xyz, bb_ri, 0 )[1:]
                 
 ##                dist = N.sqrt( N.sum( N.power(centroid[:-1]-centroid[1:],2), 
 ##                                      axis=1 ) )
@@ -3245,7 +3245,7 @@ class PDBModel:
         r = self.clone()
         if mask is None: mask = N.ones( len(self) )
 
-        avg = N.average( N.compress( mask, r.getXyz(), 0 ) )
+        avg = N.average( N.compress( mask, r.getXyz(), 0 ), 0 )
 
         r.setXyz( r.getXyz() - avg )
 
@@ -3263,9 +3263,9 @@ class PDBModel:
         @rtype: (float, float, float)
         """
         if mask is None:
-            return N.average( self.getXyz() )
+            return N.average( self.getXyz(), 0 )
 
-        return N.average( N.compress( mask, self.getXyz(), axis=0 ) )
+        return N.average( N.compress( mask, self.getXyz(), axis=0 ), 0 )
 
 
     def centerOfMass( self ):

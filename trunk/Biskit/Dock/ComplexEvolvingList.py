@@ -149,7 +149,7 @@ class ComplexEvolvingList( ComplexList ):
         """
         l = self
         if indices != None:
-            l = N.take( l, indices )
+            l = N.take( l, indices, 0 )
 
         if not unique:
             if version is None:

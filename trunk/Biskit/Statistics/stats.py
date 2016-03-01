@@ -1984,7 +1984,7 @@ Returns: geometric mean computed over dim(s) listed in dimension
         dims = list(dimension)
         dims.sort()
         dims.reverse()
-        size = N.array(N.multiply.reduce(N.take(inarray.shape,dims)),N.float)
+        size = N.array(N.multiply.reduce(N.take(inarray.shape,dims,0)),N.float)
         mult = N.power(inarray,1.0/size)
         for dim in dims:
             mult = N.multiply.reduce(mult,dim)
@@ -2041,7 +2041,7 @@ Returns: harmonic mean computed over dim(s) in dimension
             s = N.zeros(loopcap+1,N.float)
             while incr(idx,loopcap) <> -1:
                 s[idx] = asum(1.0/tinarray[idx])
-            size = N.multiply.reduce(N.take(inarray.shape,dims))
+            size = N.multiply.reduce(N.take(inarray.shape,dims,0))
             if keepdims == 1:
                 shp = list(inarray.shape)
                 for dim in dims:
@@ -2083,7 +2083,7 @@ Returns: arithematic mean calculated over dim(s) in dimension
         sum = inarray *1.0
         for dim in dims:
             sum = N.add.reduce(sum,dim)
-        denom = N.array(N.multiply.reduce(N.take(inarray.shape,dims)),N.float)
+        denom = N.array(N.multiply.reduce(N.take(inarray.shape,dims,0)),N.float)
         if keepdims == 1:
             shp = list(inarray.shape)
             for dim in dims:

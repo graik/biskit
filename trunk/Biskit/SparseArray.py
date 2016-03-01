@@ -148,7 +148,7 @@ class SparseArray:
         self.indices = N.nonzero( N.logical_not( N.equal(a, self.__default) ) )[0]
         self.indices = self.indices.tolist()
 
-        self.values = N.take( a, self.indices )
+        self.values = N.take( a, self.indices, 0 )
         self.values = self.values.tolist()
 
 

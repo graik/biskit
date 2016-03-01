@@ -180,7 +180,7 @@ class ReduceCoordinates:
         result = []
         pos = 0
         for n in nAtoms:
-            result += [ N.take( a_indices, N.arange(n) + pos) ]
+            result += [ N.take( a_indices, N.arange(n) + pos, 0) ]
             pos += n
 
         return result
@@ -290,7 +290,7 @@ class ReduceCoordinates:
         for atom_indices in self.groups:
 
             x = N.take( xyz, atom_indices, axis )
-            m = N.take( masses, atom_indices )
+            m = N.take( masses, atom_indices, 0 )
 
             center = N.sum( x * N.transpose([m,]), axis=axis) / N.sum( m )
 
@@ -325,7 +325,7 @@ class ReduceCoordinates:
         mass = self.m.atoms.get('mass')
         if xyz is None: xyz = self.m.getXyz()
 
-        mProf = [ N.sum( N.take( mass, group ) ) for group in self.groups ]
+        mProf = [ N.sum( N.take( mass, group, 0 ) ) for group in self.groups ]
         xyz = self.reduceXyz( xyz )
 
         result = PDBModel()
@@ -362,7 +362,7 @@ class ReduceCoordinates:
             info = from_model.profileInfo( profname )
 
             try:
-                pr = [ N.average( N.take( p0, group ) ) for group in self.groups ]
+                pr = [ N.average( N.take( p0, group, 0 ) ) for group in self.groups ]
 
                 to_model.atoms.set( profname, pr )
             except:

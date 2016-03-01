@@ -38,7 +38,7 @@ import numpy as N
 import Biskit.mathUtils as MU
 import tools
 
-from numpy.oldnumeric.random_array import seed, random
+from numpy.random import seed, random
 
 ## def average(x):
 ##     return N.sum(N.array(x)) / len(x)
@@ -145,7 +145,7 @@ class FuzzyCluster:
                  cluster times number of clusters
         @rtype: array('f')
         """
-        seed(self.seedx, self.seedy)
+        seed(self.seedx*self.seedy)
 
         r = random((self.npoints, self.n_cluster))
         return N.transpose(r / N.sum(r))

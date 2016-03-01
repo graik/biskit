@@ -1,5 +1,5 @@
 ## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
-## DAG - substituted Numeric
+## DAG - substituted Numeric
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -289,7 +289,7 @@ class AmberEntropist( AmberCrdEntropist ):
                 refModel = refModel.take( ref_i )
                 m_avg    = m_avg.take( i )
 
-                if not mask is None:   mask = N.take( mask, i )
+                if not mask is None:   mask = N.take( mask, i, axis=0)
 
             r, t = m_avg.transformation( refModel, mask )
             traj.transform( r, t )
@@ -764,7 +764,7 @@ class AmberEntropist( AmberCrdEntropist ):
             ## select one with lowest overlap to all tripples selected before
             pos = N.argmin( overlap )
 
-        return N.take( all, r )
+        return N.take( all, r, axis=0 )
 
 
     def cleanup( self ):

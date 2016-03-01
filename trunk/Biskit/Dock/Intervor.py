@@ -157,11 +157,11 @@ class Intervor( Executor ):
         """
         ## get numpy array with chain_id of first atom of each chain
         chainids = N.take( model['chain_id'], 
-                           model.chainIndex( breaks=self.breaks ) )
+                           model.chainIndex( breaks=self.breaks ), 0 )
         
         ## extract receptor and ligand chain ids and concat them into string
-        ids_rec = ''.join( N.take( chainids, self.chains_rec ) )
-        ids_lig = ''.join( N.take( chainids, self.chains_lig ) )
+        ids_rec = ''.join( N.take( chainids, self.chains_rec, 0 ) )
+        ids_lig = ''.join( N.take( chainids, self.chains_lig, 0 ) )
         
         return ids_rec, ids_lig
 

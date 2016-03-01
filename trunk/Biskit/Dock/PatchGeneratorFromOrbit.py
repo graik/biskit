@@ -118,7 +118,7 @@ class PatchGeneratorFromOrbit:
 
         dist = self.__distances( origin, points )
 
-        return N.take( points, N.argsort( dist ) )
+        return N.take( points, N.argsort( dist ), 0 )
 
 
     def randomPatches( self, size, n=None, exclude=None,

@@ -196,7 +196,7 @@ class EnsembleTraj( Trajectory ):
         """
         r = range( member, self.lenFrames(), self.n_members )
         if step != 1:
-            r = N.take( r, range( 0, len( r ), step ) ).tolist()
+            r = N.take( r, range( 0, len( r ), step ), 0 ).tolist()
         return r
 
 
@@ -622,7 +622,7 @@ class EnsembleTraj( Trajectory ):
 
         slopes = [ M.linfit( range( l/n - last ), p )[0] for p in pm ]
 
-        mean, sd = N.average( slopes ), M.SD( slopes )
+        mean, sd = N.average( slopes, 0 ), M.SD( slopes )
 
         return [ r - mean < - z * sd for r in slopes ]
 

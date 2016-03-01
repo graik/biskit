@@ -115,7 +115,7 @@ class ProfileMirror( B.ProfileCollection ):
             r = default
 
         if self.pc[ name, 'isarray']:
-            return N.take( r, self.map )
+            return N.take( r, self.map, 0 )
         
         return [ r[i] for i in self.map ]
 
@@ -220,7 +220,7 @@ class ProfileMirror( B.ProfileCollection ):
         @return: new instance that maps to a new subset of positions
         @rtype: ProfileMirror
         """
-        rmap = N.take( self.map, indices )
+        rmap = N.take( self.map, indices, 0 )
         return self.__class__( rmap, self.pc )
 
     def concat( self, *profiles ):

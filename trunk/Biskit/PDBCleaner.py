@@ -481,7 +481,7 @@ class PDBCleaner:
         """
         if len(chains) == 0: 
             return chains
-        i = N.take( model.chainIndex(), chains ) 
+        i = N.take( model.chainIndex(), chains, 0 ) 
         ## convert back to chain indices but this time including chain breaks
         return model.atom2chainIndices( i, breaks=1 )
         
@@ -493,7 +493,7 @@ class PDBCleaner:
             return chains
         ## fetch last atom of given chains
         index = N.concatenate( (model.chainIndex(), [len(model)]) )
-        i = N.take( index, N.array( chains ) + 1 ) - 1
+        i = N.take( index, N.array( chains ) + 1, 0 ) - 1
         ## convert back to chain indices but this time including chain breaks
         return model.atom2chainIndices( i, breaks=1 )
     

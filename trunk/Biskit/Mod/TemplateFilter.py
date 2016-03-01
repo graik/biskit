@@ -105,7 +105,7 @@ class TemplateFilter(object):
         """
         cutoff = cutoff or self.Z_CUTOFF
 
-        avg = N.average( self.identities )
+        avg = N.average( self.identities, 0 )
         sd  = M.SD( self.identities ) or 1e-10  ## replace 0 standard deviation
         z   = (self.identities - avg) / sd
 

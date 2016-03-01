@@ -243,7 +243,7 @@ class Trajectory:
         @rtype: PDBModel
         """
         result = PDBModel( self.getRef(), noxyz=1 )
-        result.setXyz( N.average( self.frames ) )
+        result.setXyz( N.average( self.frames, 0 ) )
 
         return result
 
@@ -1075,9 +1075,9 @@ class Trajectory:
             frames = N.compress( mask, frames, 1 )
 
         ## mean position of each atom in all frames
-        avg = N.average( frames )
+        avg = N.average( frames, 0 )
 
-        return N.average(N.sqrt(N.sum(N.power(frames - avg, 2), 2) ))
+        return N.average(N.sqrt(N.sum(N.power(frames - avg, 2), 2) ), 0)
 
 
     def __resWindow( self, res, n_neighbores, rchainMap=None,
@@ -1103,7 +1103,7 @@ class Trajectory:
         """
         ## some defaults.. time-consuming..
         if rchainMap is None:
-            rchainMap = N.take( self.chainMap(), self.resIndex() )
+            rchainMap = N.take( self.chainMap(), self.resIndex(), 0 )
 
         if left_allowed  is None: left_allowed = N.nonzero( self.ref.maskBB() )[0]
         if right_allowed is None: right_allowed= N.nonzero( self.ref.maskBB() )[0]
@@ -1164,7 +1164,7 @@ class Trajectory:
         fit_atoms_right = N.nonzero( self.ref.mask( right_atoms ) )[0]
         fit_atoms_left  = N.nonzero( self.ref.mask( left_atoms ) )[0]
         ## chain index of each residue
-        rchainMap = N.take( self.ref.chainMap(), self.ref.resIndex() )
+        rchainMap = N.take( self.ref.chainMap(), self.ref.resIndex(), 0 )
 
         result = []
 
@@ -1187,9 +1187,9 @@ class Trajectory:
                 ## .. but calculate only with center residue atoms
                 frames = N.take( t_res.frames, i_center, 1 )
 
-                avg = N.average( frames )
+                avg = N.average( frames, 0 )
 
-                rmsd = N.average(N.sqrt(N.sum(N.power(frames - avg, 2), 2) ))
+                rmsd = N.average(N.sqrt(N.sum(N.power(frames - avg, 2), 2) ), 0)
 
                 result.extend( rmsd )
 
@@ -1284,7 +1284,7 @@ class Trajectory:
         result = self.residusMaximus( atomFluctList, self.ref.maskBB() )
 
         ## take first atoms only
-        result = N.take( result, self.ref.resIndex() )
+        result = N.take( result, self.ref.resIndex(), 0 )
 ##        result = N.compress( self.ref.maskCA(), atomFluctList)
 
         ## check dimension

@@ -354,7 +354,7 @@ class ComplexList( list ):
         """
         l = self
         if indices != None:
-            l = N.take( N.array(l,'O'), indices )
+            l = N.take( N.array(l,'O'), indices, 0 )
 
         if not unique:
             return [ c.info.get(infoKey, default) for c in l ]

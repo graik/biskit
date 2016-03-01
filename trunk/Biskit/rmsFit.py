@@ -55,8 +55,8 @@ def findTransformation(x, y):
     @rtype:  array, array
     """
     ## center configurations
-    x_av = N.average(x)
-    y_av = N.average(y)
+    x_av = N.average(x, 0)
+    y_av = N.average(y, 0)
 
     x = x - x_av
     y = y - y_av
@@ -115,7 +115,7 @@ def match(x, y, n_iterations=1, z=2, eps_rmsd=0.5, eps_stdv=0.05):
         d = N.sqrt(N.sum(N.power(x - xt, 2), 1)) * mask
 
         ## calculate rmsd and stdv
-        rmsd = N.sqrt(N.average(N.compress(mask, d)**2))
+        rmsd = N.sqrt(N.average(N.compress(mask, d)**2, 0))
         stdv = MU.SD(N.compress(mask, d))
 
         ## check conditions for convergence

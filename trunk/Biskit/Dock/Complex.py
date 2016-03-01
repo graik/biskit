@@ -1010,7 +1010,7 @@ class Complex:
 
         if self.pw_dist:
             r.pw_dist = N.take( self.pw_dist, rec_pos, 1 )
-            r.pw_dist = N.take( r.pw_dist, lig_pos )
+            r.pw_dist = N.take( r.pw_dist, lig_pos, 0 )
 
         r.ligandMatrix = copy( self.ligandMatrix )
 

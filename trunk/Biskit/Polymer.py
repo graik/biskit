@@ -99,7 +99,7 @@ class Feature(object):
         
         @return: a new Feature connected to the same Polymer
         """
-        rmap = N.take( self.map, i )
+        rmap = N.take( self.map, i, 0 )
         return self.__class__( self.model, rmap, add2model=add2model )
     
 
@@ -150,7 +150,7 @@ class Feature(object):
         """
         Convert positions in feature into positions in the overall model.
         """
-        return N.take( self.map, i )
+        return N.take( self.map, i, 0 )
     
 
     def model2featureIndices( self, i ):
@@ -166,7 +166,7 @@ class Feature(object):
         @rtype : N.array of int
         """
         ## filter out positions that do not point to any feature atom
-        i = N.compress( N.take( self.modelMask(), i ), i )
+        i = N.compress( N.take( self.modelMask(), i, 0 ), i )
         
         ## shortcut
         if len(i) == 0:
@@ -180,7 +180,7 @@ class Feature(object):
             r[ self.map[j] ] = j
 
         ## extract the 
-        return N.take( r, i )
+        return N.take( r, i, 0 )
 
     
     def _projectMap( self, model_i ):
@@ -189,7 +189,7 @@ class Feature(object):
         see: transfer()
         """
         ## positions in new model that still have a corresponding feature atom
-        mask_f2new_model = N.take( self.modelMask(), model_i )
+        mask_f2new_model = N.take( self.modelMask(), model_i, 0 )
 
         ## the new feature2model map
         return N.flatnonzero( mask_f2new_model )

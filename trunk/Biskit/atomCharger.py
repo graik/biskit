@@ -190,7 +190,7 @@ class AtomCharger( object ):
             
             iref, i = refres.compareAtoms( res )
             
-            qres = N.take( refres['partial_charge'], iref )
+            qres = N.take( refres['partial_charge'], iref, 0 )
             
             if len(iref) < len(refres):
                 if self.verbose:
@@ -198,7 +198,7 @@ class AtomCharger( object ):
                              (len(refres)-len(iref), self.__resinfo(res,j)) )
                     
                     missing = MA.difference( range(len(refres)), iref )
-                    self.log.add('\t'+str(N.take( refres['name'], missing )) )
+                    self.log.add('\t'+str(N.take( refres['name'], missing, 0 )) )
                     self.log.add(
                         '\tIgnored. Residue will have incomplete charge.')
                          
@@ -208,7 +208,7 @@ class AtomCharger( object ):
                              (len(res)-len(i), self.__resinfo(res,j)) )
     
                     missing = MA.difference( range(len(res)), i )
-                    self.log.add('\t'+str(N.take( res['name'], missing )) )
+                    self.log.add('\t'+str(N.take( res['name'], missing, 0 )) )
                     self.log.add('\tGiving up. Whole residue will be set to charge 0.')
 
                 qres = N.zeros( len(res) )

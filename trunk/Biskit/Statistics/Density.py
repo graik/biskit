@@ -108,7 +108,7 @@ class Density:
         @rtype: float, float
         """          
         order = N.argsort(self.p).tolist()
-        cumulative = N.cumsum(N.take(self.p, order)) * self.delta_x
+        cumulative = N.cumsum(N.take(self.p, order, 0)) * self.delta_x
 
         ind = N.nonzero(N.greater_equal(cumulative, 1. - level))[0]
 
@@ -139,7 +139,7 @@ class Density:
         intervals = self.__find_intervals(ind)
 
 ##        lens = N.array([len(i) for i in intervals])
-        levels = [N.sum(N.take(self.p, i)) for i in intervals]
+        levels = [N.sum(N.take(self.p, i, 0)) for i in intervals]
         level = N.sum(levels) * self.delta_x
 
         boundaries = [(self.x[i[0]], self.x[i[-1]]) for i in intervals]
@@ -174,7 +174,7 @@ class Density:
 
     def __find_intervals(self, l):
         l = N.array(l)
-        l = N.take(l, N.argsort(l))
+        l = N.take(l, N.argsort(l), 0)
 
         globals().update( locals() )
 
@@ -185,7 +185,7 @@ class Density:
 
         for i in range(len(break_points)):
             index = break_points[i]
-            intervals.append(tuple(N.take(l, range(start, index + 1))))
+            intervals.append(tuple(N.take(l, range(start, index + 1), 0)))
             start = index + 1
 
         intervals.append(tuple(l[start:]))

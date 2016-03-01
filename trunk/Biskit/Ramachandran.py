@@ -152,7 +152,7 @@ class Ramachandran:
             resIdx += [ m.lenAtoms()]
             for i in range(len(resIdx)-1):
                 prof += [ N.average( N.take(aProfile, range(resIdx[i],
-                                                            resIdx[i+1]) ) )]
+                                                            resIdx[i+1]), 0 ), 0 )]
         else:
             prof = m.profile( self.profileName )
 

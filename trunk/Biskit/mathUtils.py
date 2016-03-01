@@ -1,5 +1,5 @@
 ## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
-## DAG - substituted Numeric
+## DAG-substituted Numeric
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -63,12 +63,12 @@ def variance(x, avg = None):
     @rtype: float    
     """
     if avg is None:
-        avg = N.average(x)
+        avg = N.average(x, 0)
 
     if len(x) == 1:
         return 0.0
 
-    return N.sum(N.power(N.array(x) - avg, 2)) / (len(x) - 1.)
+    return N.sum(N.power(N.array(x) - avg, 2), 0) / (len(x) - 1.)
 
 
 def SD(x, avg = None):
@@ -295,7 +295,7 @@ def slidingAverage( y, window=2 ):
 
     margin = int(round((window-1)/2.))
 
-    return [ N.average( y[i-margin : i+margin] )
+    return [ N.average( y[i-margin : i+margin], 0 )
              for i in range(margin,len(y)-margin) ]
 
 
@@ -332,7 +332,7 @@ def runningAverage( x, interval=2, preserve_boundaries=0 ):
 
             slice = x[left:right]
 
-            l.append(N.average(slice))
+            l.append(N.average(slice, 0))
     else:
 
         for i in range( len(x) ):
@@ -349,7 +349,7 @@ def runningAverage( x, interval=2, preserve_boundaries=0 ):
 
             slice = x[left:right]
 
-            l.append(N.average(slice))
+            l.append(N.average(slice, 0))
 
     return N.array(l)
 
@@ -691,8 +691,8 @@ def linfit( x, y ):
     if len( x ) != len( y ):
         raise Exception, 'linfit: x and y must have same length'
 
-    av_x = N.average( x )
-    av_y = N.average( y )
+    av_x = N.average( x, 0 )
+    av_y = N.average( y, 0 )
     n = len( x )
 
     ss_xy = N.sum( x * y ) - n * av_x * av_y
@@ -767,7 +767,7 @@ def projectOnSphere( xyz, radius=None, center=None ):
     @rtype: array    
     """
     if center is None:
-        center = N.average( xyz )
+        center = N.average( xyz, 0 )
 
     if radius is None:
         radius = max( N.sqrt( N.sum( N.power( xyz - center, 2 ), 1 ) ) )

@@ -116,7 +116,7 @@ class ROCalyzer( object ):
         order = N.argsort( score ).tolist()
         order.reverse()
 
-        ref = N.take( ref, order )
+        ref = N.take( ref, order, 0 )
 
         #: number of true positives identified with decreasing score
         n_pos = N.add.accumulate( ref )
@@ -291,7 +291,7 @@ class ROCThreshold(object):
         """
         import Biskit.tools as T
         ## order from highest to lowest
-        ordered = N.take( self.target, N.argsort( self.target ) )
+        ordered = N.take( self.target, N.argsort( self.target ), 0 )
         ordered = ordered[::-1]
 
         r = N.zeros( (len(self.target), 2) )

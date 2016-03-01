@@ -218,7 +218,7 @@ class Analyzer:
         c_pos = N.nonzero( c_mask )[0]
 
         # get array with surface positions from complex
-        cont = N.take( N.ravel(contMat), c_pos )
+        cont = N.take( N.ravel(contMat), c_pos, 0 )
         length = len( cont )
 
         result = []
@@ -247,7 +247,7 @@ class Analyzer:
         @rtype: [any]
         """
         pos = N.random.permutation( len( lst ))
-        return N.take( lst, pos )
+        return N.take( lst, pos, 0 )
 
 
     def shuffledLists( self, n, lst, mask=None ):
@@ -278,7 +278,7 @@ class Analyzer:
         for p in rand_pos:
 
             r = copy.copy( lst )
-            N.put( r, p, N.take( lst, pos ) )
+            N.put( r, p, N.take( lst, pos, 0 ) )
             result += [r]
 
         return result

@@ -369,7 +369,7 @@ class HmmerProfile( Executor ):
         p = proba
         p4 = []
         for i in range( len(p) ) :
-            p_scale = (p[i] - N.average(p[i]) )/ math.SD(p[i])
+            p_scale = (p[i] - N.average(p[i], 0) )/ math.SD(p[i])
             p4 += [ N.resize( p_scale[N.argmax( N.array(p_scale) )] ,
                               N.shape( p[i] ) ) ]
         profileDic['maxAllScale'] = p4

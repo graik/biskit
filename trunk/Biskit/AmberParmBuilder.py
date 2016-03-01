@@ -336,7 +336,7 @@ class AmberParmBuilder:
         @param model: model
         @type  model: PDBMode
         """
-        center = N.average( model.getXyz() )
+        center = N.average( model.getXyz(), 0 )
         model.setXyz( model.xyz - center )
 
 

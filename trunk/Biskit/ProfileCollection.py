@@ -850,7 +850,7 @@ class ProfileCollection:
                 prof = self.get( key )
 
                 if isinstance( prof, N.ndarray ):
-                    result.set( key, N.take( prof, indices ) )
+                    result.set( key, N.take( prof, indices, 0 ) )
                 else:
                     result.set( key, [ prof[i] for i in indices ], asarray=0 )
 

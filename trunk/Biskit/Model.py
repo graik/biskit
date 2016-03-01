@@ -309,21 +309,21 @@ class Model( object ):
         r.atoms    = self.atoms.take( i )
         
         ## more tricky: rescue residue borders and extract residue profiles
-        new_resmap  = N.take( self.resMap(), i )
+        new_resmap  = N.take( self.resMap(), i, 0 )
         ## Note: this erases ordering information and fails for repeated residues
         ## -- see PDBModel version for fix
         r._resIndex = map2index( new_resmap )
 
-        i_res      = N.take( new_resmap, r._resIndex )
+        i_res      = N.take( new_resmap, r._resIndex, 0 )
         r.residues = self.residues.take( i_res )
 
         ## now the same with chains
-        new_chainmap  = N.take( self.chainMap(), i )
+        new_chainmap  = N.take( self.chainMap(), i, 0 )
         ## Note: this erases ordering information and fails for repeated residues
         ## -- see PDBModel version for fix
         r._chainIndex = map2index( new_chainmap )
         
-        i_chains = N.take( new_chainmap, r._chainIndex )
+        i_chains = N.take( new_chainmap, r._chainIndex, 0 )
         r.chains = self.chains.take( i_chains )
 
         ## copy non-sequential infos

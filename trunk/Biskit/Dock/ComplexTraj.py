@@ -195,7 +195,7 @@ class ComplexTraj( EnsembleTraj ):
         """
         ## todo: looks not very elegant
 
-        oldChainMap = N.take( self.ref.chainMap(), atomIndices )
+        oldChainMap = N.take( self.ref.chainMap(), atomIndices, 0 )
 
         r = {}
         for i in range( len( oldChainMap ) ):
@@ -308,7 +308,7 @@ class ComplexTraj( EnsembleTraj ):
         """
         r = [ self.atomContacts( i, cutoff=cutoff ) 
              for i in range(0, len(self), step ) ]
-        return N.sum( N.array( r ) ) / ( 1. * len(r) )
+        return N.sum( N.array( r ),0 ) / ( 1. * len(r) )
 
 
     def plotContactDensity( self, step=1, cutoff=4.5 ):
@@ -368,7 +368,7 @@ class Test(BT.BiskitTest):
         if self.local:
             print 'Receptor chains: %s    Ligand chains: %s'%(t.cr, t.cl)
             
-        self.assertEqual( N.sum(N.ravel(contactMat)), 308 )
+        self.assertEqual( N.sum(N.ravel(contactMat), 0), 308 )
 
 if __name__ == '__main__':
 

@@ -21,7 +21,8 @@ and DelPhi; interfaces to further software can be added
 easily. Moreover, Biskit simplifies the parallelisation of
 calculations via PVM (Parallel Virtual Machine).
 
-In this document:  * Release 2.4
+In this document:  * Release 2.4.1
+		   * Release 2.4
                    * Release 2.3.1
                    * Release 2.3
                    * Release 2.2
@@ -38,6 +39,14 @@ Upcomming release
 SurfaceRacer.py
 * adapted to surfrace version 5.0
 * modified default mask to exclude both hydrogen and solvent atoms
+
+Release 2.4.1
+-------------
+This release gets rid of oldnumeric library for compatibility with
+newer versions of numpy and fixes errors with the automatic installation
+using easy_install and pip.
+
+Daniel Alvarez
 
 Release 2.4
 -----------
