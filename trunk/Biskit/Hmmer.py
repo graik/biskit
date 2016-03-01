@@ -1013,8 +1013,8 @@ class Hmmer:
             ## one of the two profiles will in most cases not belong to these
             ## positions. We can't decide which one is wrong, let's eliminate
             ## both values. Alternatively we could keep one, or the average, ..
-            N.put( p1, N.nonzero( overlap ), 0 )
-            N.put( p0, N.nonzero( overlap ), 0 )
+            N.put( p1, N.nonzero( overlap )[0], 0 )
+            N.put( p0, N.nonzero( overlap )[0], 0 )
 
             p0 = p0 + p1
 

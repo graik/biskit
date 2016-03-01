@@ -215,7 +215,7 @@ class Analyzer:
             maskRec = N.ones( r_size )
 
         c_mask = N.ravel( N.outer( maskRec, maskLig ) )
-        c_pos = N.nonzero( c_mask )
+        c_pos = N.nonzero( c_mask )[0]
 
         # get array with surface positions from complex
         cont = N.take( N.ravel(contMat), c_pos )
@@ -270,7 +270,7 @@ class Analyzer:
         if type( lst ) == list:
             lst = N.array( lst )
         
-        pos = N.nonzero( mask )
+        pos = N.nonzero( mask )[0]
 
         rand_pos = N.array( [ self.__shuffleList( pos ) for i in range(n) ] )
 

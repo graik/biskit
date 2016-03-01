@@ -388,7 +388,7 @@ class ComplexList( list ):
         maskL = N.greater_equal( vLst, vLow )
         maskH = N.less_equal( vLst, vHigh )
 
-        return N.nonzero( maskL * maskH )
+        return N.nonzero( maskL * maskH )[0]
 
 
     def filterEqual( self, infoKey, lst ):
@@ -407,7 +407,7 @@ class ComplexList( list ):
         @rtype: [int]
         """
         mask = [ c.info.get( infoKey ) in lst for c in self ]
-        return N.nonzero( mask )
+        return N.nonzero( mask )[0]
 
 
     def filterFunct( self, f ):
@@ -424,7 +424,7 @@ class ComplexList( list ):
         @rtype: [int]
         """
         mask = [ f( c ) for c in self ]
-        return N.nonzero( mask )
+        return N.nonzero( mask )[0]
 
 
     def filter( self, infoKey, cond ):

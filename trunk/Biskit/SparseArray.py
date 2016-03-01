@@ -145,7 +145,7 @@ class SparseArray:
         if self.shape != a.shape:
             raise SparseArrayError, 'dimensions not aligned'
 
-        self.indices = N.nonzero( N.logical_not( N.equal(a, self.__default) ) )
+        self.indices = N.nonzero( N.logical_not( N.equal(a, self.__default) ) )[0]
         self.indices = self.indices.tolist()
 
         self.values = N.take( a, self.indices )

@@ -508,7 +508,7 @@ class Trajectory:
         @return: copy of this Trajectory (fewer frames, semi-deep copy of ref)
         @rtype: Trajectory
         """
-        return self.takeFrames( N.nonzero( mask ) )
+        return self.takeFrames( N.nonzero( mask )[0] )
 
 
     def replaceContent( self, traj ):
@@ -597,7 +597,7 @@ class Trajectory:
         @return: copy of Trajectory with fewer atoms
         @rtype: Trajectory
         """
-        return self.takeAtoms( N.nonzero( aMask ), returnClass )
+        return self.takeAtoms( N.nonzero( aMask )[0], returnClass )
 
 
     def keepAtoms( self, indices ):
@@ -635,7 +635,7 @@ class Trajectory:
         ## pass what on to PDBModel, collect resulting mask
         mask = N.logical_not( self.atomMask( what ) )
 
-        self.keepAtoms( N.nonzero( mask ) )
+        self.keepAtoms( N.nonzero( mask )[0] )
 
         return mask
 
@@ -1105,8 +1105,8 @@ class Trajectory:
         if rchainMap is None:
             rchainMap = N.take( self.chainMap(), self.resIndex() )
 
-        if left_allowed  is None: left_allowed = N.nonzero( self.ref.maskBB() )
-        if right_allowed is None: right_allowed= N.nonzero( self.ref.maskBB() )
+        if left_allowed  is None: left_allowed = N.nonzero( self.ref.maskBB() )[0]
+        if right_allowed is None: right_allowed= N.nonzero( self.ref.maskBB() )[0]
 
         ## atom indices of center residue
         result = self.ref.res2atomIndices( [ res ] ).tolist()
@@ -1158,11 +1158,11 @@ class Trajectory:
 
         if verbose: T.errWrite( "rmsd fitting per residue..." )
 
-        residues = N.nonzero( self.ref.atom2resMask( mask ) )
+        residues = N.nonzero( self.ref.atom2resMask( mask ) )[0]
 
         ## backbone atoms used for fit
-        fit_atoms_right = N.nonzero( self.ref.mask( right_atoms ) )
-        fit_atoms_left  = N.nonzero( self.ref.mask( left_atoms ) )
+        fit_atoms_right = N.nonzero( self.ref.mask( right_atoms ) )[0]
+        fit_atoms_left  = N.nonzero( self.ref.mask( left_atoms ) )[0]
         ## chain index of each residue
         rchainMap = N.take( self.ref.chainMap(), self.ref.resIndex() )
 
@@ -1442,7 +1442,7 @@ class Trajectory:
         @return: list of pca values
         @rtype: [float]        
         """
-        return self.__takePca( N.nonzero( fMask ) )
+        return self.__takePca( N.nonzero( fMask )[0] )
 
 
     def getPca( self, aMask=None, fMask=None, fit=1 ):

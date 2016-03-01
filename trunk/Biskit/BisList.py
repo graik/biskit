@@ -247,7 +247,7 @@ class BisList:
         @return: new instance (or sub-class) with specified items
         @rtype: instance
         """
-        return self.take( N.nonzero( mask ), deepcopy=deepcopy )
+        return self.take( N.nonzero( mask )[0], deepcopy=deepcopy )
 
 
     def sortBy( self, sortKey, cmpfunc=cmp ):
@@ -318,7 +318,7 @@ class BisList:
         maskL = N.greater_equal( vLst, vLow )
         maskH = N.less_equal( vLst, vHigh )
 
-        return N.nonzero( maskL * maskH )
+        return N.nonzero( maskL * maskH )[0]
 
 
     def filterEqual( self, key, lst ):
@@ -334,7 +334,7 @@ class BisList:
         @rtype: array
         """
         mask = [ self.getValue( i,key) in lst for i in range( len(self)) ]
-        return N.nonzero( mask )
+        return N.nonzero( mask )[0]
 
 
     def filterFunct( self, f ):
@@ -348,7 +348,7 @@ class BisList:
         @rtype: array
         """
         mask = [ f( c ) for c in self ]
-        return N.nonzero( mask )
+        return N.nonzero( mask )[0]
 
 
     def filter( self, key, cond ):

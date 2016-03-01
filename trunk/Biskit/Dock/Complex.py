@@ -344,7 +344,7 @@ class Complex:
             m = self.contacts['result']
             self.contacts['shape'] = N.shape( m )
 
-            self.contacts['result'] = N.nonzero( N.ravel( m ) ).astype(N.int32)
+            self.contacts['result'] = N.nonzero( N.ravel( m ) )[0].astype(N.int32)
 
 
     def contactsOverlap(self, ref, cutoff=None):
@@ -815,7 +815,7 @@ class Complex:
         rMask = N.ravel( N.outer( rec_mask, lig_mask ) )
 
         ## (Optimization: nonzero is time consuming step)
-        N.put( r, N.nonzero( rMask ), N.ravel( contacts ) )
+        N.put( r, N.nonzero( rMask ), N.ravel( contacts )[0] )
 
         return N.resize( r, (l_rec, l_lig))
 
@@ -1031,7 +1031,7 @@ class Complex:
         @return: compressed complex
         @rtype: Complex
         """
-        return self.take( N.nonzero( rec_mask ), N.nonzero( lig_mask ) )
+        return self.take( N.nonzero( rec_mask )[0], N.nonzero( lig_mask )[0] )
 
 
     def contPairScore(self, cutoff=6.0):

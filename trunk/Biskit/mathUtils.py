@@ -280,7 +280,7 @@ def random2DArray( matrix, ranNr=1, mask=None):
     ## blow up to size of original matix
     if mask is not None:
         r = N.zeros(a*b)
-        N.put( r, N.nonzero(mask), ranArray)
+        N.put( r, N.nonzero(mask)[0], ranArray)
         return N.reshape( r, (a,b) )
 
     if not mask:
@@ -415,7 +415,7 @@ def packBinaryMatrix( cm ):
 
     result = {}
     result['shape'] = N.shape( cm )
-    result['nonzero'] = N.nonzero( N.ravel( cm ) )
+    result['nonzero'] = N.nonzero( N.ravel( cm ) )[0]
     result['nonzero'] = result['nonzero'].tolist()
     return result
 

@@ -227,7 +227,7 @@ class PDBDope:
             mSurf = N.ones( self.m.lenAtoms() )
 
         ## loop over all surface atoms
-        surf_pos = N.nonzero( mSurf )
+        surf_pos = N.nonzero( mSurf )[0]
         contacts = []
 
         for i in surf_pos:

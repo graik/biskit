@@ -133,7 +133,7 @@ def match(x, y, n_iterations=1, z=2, eps_rmsd=0.5, eps_stdv=0.05):
 
         ## throw out non-matching rows
         mask = N.logical_and(mask, N.less(d, rmsd + z * stdv))
-        outliers = N.nonzero( N.logical_not( mask ) )
+        outliers = N.nonzero( N.logical_not( mask ) )[0]
         iter_trace.append([perc, round(rmsd, 3), outliers])
 
         n += 1

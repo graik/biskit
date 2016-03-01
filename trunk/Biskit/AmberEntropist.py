@@ -326,9 +326,9 @@ class AmberEntropist( AmberCrdEntropist ):
         @rtype: PDBModel      
         """
         if self.protein:            
-            m.keep( N.nonzero( m.maskProtein() ) )
+            m.keep( N.nonzero( m.maskProtein() )[0] )
         if self.heavy:
-            m.keep( N.nonzero( m.maskHeavy() ) )
+            m.keep( N.nonzero( m.maskHeavy() )[0] )
         return m
 
 
@@ -666,7 +666,7 @@ class AmberEntropist( AmberCrdEntropist ):
         if self.atoms:
             traj.ref.addChainId()
             aMask = traj.ref.mask( lambda a,ok=self.atoms: a['name'] in ok )
-            traj.removeAtoms( N.nonzero( N.logical_not( aMask ) )  )
+            traj.removeAtoms( N.nonzero( N.logical_not( aMask ) )[0]  )
 
         ## get rid of non-standard atoms, water, ions, etc.
         if not self.solvent:

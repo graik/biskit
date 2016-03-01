@@ -373,7 +373,7 @@ class EnsembleTraj( Trajectory ):
         @return: compressed EnsembleTraj 
         @rtype: EnsembleTraj
         """
-        return self.takeMembers( N.nonzero( mask ) )
+        return self.takeMembers( N.nonzero( mask )[0] )
 
 
     def keepMembers( self, indices ):

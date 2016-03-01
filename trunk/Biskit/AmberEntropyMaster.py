@@ -426,7 +426,7 @@ class AmberEntropyMaster(TrackingJobMaster):
             return outlaws
 
         outliers = N.nonzero( traj.outliers( z=self.zfilter,
-                                             mask=traj.ref.maskCA(), step=10) )
+                                             mask=traj.ref.maskCA(), step=10) )[0]
         self.log.add('identified %i outliers with z-threshold %3.1f' %\
                      ( len(outliers), self.zfilter ) )
 

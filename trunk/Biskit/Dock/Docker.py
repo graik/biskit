@@ -205,7 +205,7 @@ class Docker:
             cMap = m.chainMap()
 
             for chain in range( m.lenChains() ):
-                idx = N.nonzero( cMap == chain )
+                idx = N.nonzero( cMap == chain )[0]
                 for i in idx:
                     m.atoms['chain_id'][i] = ids[chain]
 

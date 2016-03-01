@@ -96,7 +96,7 @@ class PatchGeneratorFromOrbit:
         c    = self.model.center( patch_mask )
         dist = self.__distances( c )
 
-        n_atoms= len( N.nonzero( patch_mask ) )
+        n_atoms= len( N.nonzero( patch_mask )[0] )
         i_dist = N.argsort( dist )[:n_atoms]
 
         result = N.zeros( len( patch_mask ) )
@@ -183,7 +183,7 @@ def test( model, center2center, nAtoms=10, exclude=None ):
     pm  = Pymoler()
     pm.addPdb( model, 'all' )
 
-    ms = [ model.take( N.nonzero(mask) ) for mask in r ]
+    ms = [ model.take( N.nonzero(mask)[0] ) for mask in r ]
 
     pm.addMovie( ms )
 
@@ -229,7 +229,7 @@ if __name__ == '__main__':
     ## get patches and put them into Pymoler for display
     print "Patching"
     excl = N.compress( N.ones( len( rec_if ) ), rec_if )
-    pm = test( rec, c2c, nAtoms=len(N.nonzero(rec_if)), exclude=rec_if )
+    pm = test( rec, c2c, nAtoms=len(N.nonzero(rec_if)[0]), exclude=rec_if )
 
 
     pm.addPdb( rec.compress( rec_if ), 'rec_interface' )

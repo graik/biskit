@@ -221,13 +221,13 @@ class TrajCluster:
         msm = self.memberships()
         maxMemb = N.argmax( msm, 0 )
 
-        r = [N.nonzero( N.equal(maxMemb, i) ) for i in range(0, self.n_clusters)]
+        r = [N.nonzero( N.equal(maxMemb, i) )[0] for i in range(0, self.n_clusters)]
         r = [ x.tolist() for x in r ]
 
         ## same thing but now taking all above threshold
         ## -> same frame can end up in several clusters
         if threshold > 0.:
-            r2 = [ N.nonzero( N.greater( l, threshold) ) for l in msm ]
+            r2 = [ N.nonzero( N.greater( l, threshold) )[0] for l in msm ]
 
             ## add only additional frames
             for i in range(0, len( r ) ):

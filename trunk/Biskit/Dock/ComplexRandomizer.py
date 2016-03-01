@@ -86,7 +86,7 @@ class ComplexRandomizer:
         @rtype: PDBModel
         """
         r = model.clone()
-        r.keep( N.nonzero( N.logical_not( r.maskH2O() ) ) )
+        r.keep( N.nonzero( N.logical_not( r.maskH2O() ) )[0] )
         center = r.centerOfMass()
         r.setXyz( r.getXyz() - center )
 

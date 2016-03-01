@@ -277,8 +277,8 @@ class ContactMaster(TrackingJobMaster):
 
         ## indices to apply for casting, cast reference complex, del. Hydrogens
         i_rec_ref, i_lig_ref, i_rec, i_lig = RC.compareAtoms( NC )
-        h_rec = N.nonzero( RC.rec_model.maskH() )
-        h_lig = N.nonzero( RC.lig_model.maskH() )
+        h_rec = N.nonzero( RC.rec_model.maskH() )[0]
+        h_lig = N.nonzero( RC.lig_model.maskH() )[0]
         i_rec_ref = [ i for i in i_rec_ref if i not in h_rec ]
         i_lig_ref = [ i for i in i_lig_ref if i not in h_lig ]
 
@@ -496,9 +496,9 @@ class ContactMaster(TrackingJobMaster):
         ## keep only (average) surface atoms
         ## play around with cutoff: lower- more atoms, better correl. to fnac
         i_r_surf = N.nonzero( r[ rec_models[0].source ].\
-                              profile2mask( 'relAS', 30 ) )
+                              profile2mask( 'relAS', 30 ) )[0]
         i_l_surf = N.nonzero( l[ lig_models[0].source ].\
-                              profile2mask( 'relAS', 30 ) )
+                              profile2mask( 'relAS', 30 ) )[0]
 
         for m in r.values(): m.keep( i_r_surf )
         for m in l.values(): m.keep( i_l_surf )

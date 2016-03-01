@@ -110,7 +110,7 @@ class Density:
         order = N.argsort(self.p).tolist()
         cumulative = N.cumsum(N.take(self.p, order)) * self.delta_x
 
-        ind = N.nonzero(N.greater_equal(cumulative, 1. - level))
+        ind = N.nonzero(N.greater_equal(cumulative, 1. - level))[0]
 
         sub_set = order[ind[0]:]
 
@@ -134,7 +134,7 @@ class Density:
         """
         closest = N.argmin(abs(self.x - x))
 
-        ind = N.nonzero(N.greater_equal(self.p, self.p[closest])).tolist()
+        ind = N.nonzero(N.greater_equal(self.p, self.p[closest]))[0].tolist()
 
         intervals = self.__find_intervals(ind)
 
@@ -178,7 +178,7 @@ class Density:
 
         globals().update( locals() )
 
-        break_points = N.nonzero(N.greater(l[1:] - l[:-1], 1))
+        break_points = N.nonzero(N.greater(l[1:] - l[:-1], 1))[0]
 
         start = 0
         intervals = []
