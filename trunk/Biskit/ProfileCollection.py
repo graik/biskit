@@ -923,11 +923,11 @@ class ProfileCollection:
         r = self.__class__()
         
         ## special case: concat something to empty profile collection
-##        if self.profLength() == 0:
-##            return next.clone().concat( *profiles[1:] )
-##
-##        if next.profLength() == 0:
-##            return self.clone().concat( *profiles[1:] )
+        if self.profLength() == 0:
+            return next.clone().concat( *profiles[1:] )
+
+        if next.profLength() == 0:
+            return self.clone().concat( *profiles[1:] )
         
 
         for k, p in self.profiles.items():
