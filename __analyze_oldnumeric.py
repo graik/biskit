@@ -6,14 +6,14 @@ lines = f.readlines()
 
 r = {}
 
-ex = re.compile('oldN\.([a-z]+)[\( ].+')
+ex = re.compile('oldN\.([a-z\_]+)[\( \.\)\r].*')
 
 for l in lines:
     method = None
     try:
         method = ex.findall(l)[0]
     except:
-        print 'could not match: ', l
+        print 'could not match: ', l,
 
     if method and not method in r:
         r[method] = 0
@@ -24,4 +24,6 @@ for l in lines:
 print 'RESULT'
 print
 for method, count in r.items():
-    print "%15s: %2i" % (method, count)
+    print "%15s: %3i" % (method, count)
+
+print 'found: ', sum([c for m,c in r.items()])
