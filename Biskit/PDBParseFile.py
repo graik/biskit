@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -29,7 +29,7 @@ Parse a PDB file into a PDBModel.
 @see L{PDBParserFactory}
 """
 import Scientific.IO.PDB as IO
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 import re
 
 import Biskit as B
@@ -279,10 +279,10 @@ REMEDY: run the script fixAtomIndices.py
                 rotation.append([float(x) for x in rawCoords[1:4]])
                 translation.append(float(rawCoords[4]))
                 if matrixLine % 3 == 0:
-                    rotation = N.array( rotation )
-                    translation = N.transpose( [ translation ] )
-                    rotation = N.concatenate( (rotation, translation), axis=1 )
-                    rtList.append(N.array(rotation))
+                    rotation = oldN.array( rotation )
+                    translation = oldN.transpose( [ translation ] )
+                    rotation = oldN.concatenate( (rotation, translation), axis=1 )
+                    rtList.append(oldN.array(rotation))
                     ## rtList.append((rotation,translation))
                     rotation = []
                     translation = []
@@ -427,7 +427,7 @@ REMEDY: run the script fixAtomIndices.py
             raise PDBParserError("Error parsing file "+fname+": "+
                             "Couldn't find any atoms.")
 
-        return aProfs, N.array( xyz, N.Float32 ), info
+        return aProfs, oldN.array( xyz, oldN.Float32 ), info
     
 #############
 ##  TESTING        
@@ -472,7 +472,7 @@ class Test(BT.BiskitTest):
         ##      self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P_rec_original.pdb')
         ##      self.m2= self.p.parse2new( T.testRoot()+'/com/1BGS.pdb' )
 
-        self.assertAlmostEqual( N.sum( self.m.centerOfMass() ), 
+        self.assertAlmostEqual( oldN.sum( self.m.centerOfMass() ), 
                                 -74.1017, 1 )
 
 

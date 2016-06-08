@@ -34,10 +34,10 @@ import tempfile
 import traceback
 from inspect import getframeinfo
 from time import localtime
-import numpy.oldnumeric as Numeric
 import glob
 import subprocess
 import gzip
+import numpy.oldnumeric as oldN
 
 class ToolsError( Exception ):
     pass
@@ -793,12 +793,12 @@ def toIntArray( o ):
     @type  o: int or [int]
 
     @return: array of integer
-    @rtype: Numeric.array('i')    
+    @rtype: oldN.array('i')    
     """
-    if type( o ) == list or type( o ) == type( Numeric.array([])):
-        return Numeric.array( map( int, o ) )
+    if type( o ) == list or type( o ) == type( oldN.array([])):
+        return oldN.array( map( int, o ) )
 
-    return Numeric.array( [ int( o ) ] )
+    return oldN.array( [ int( o ) ] )
 
 
 def toList( o ):
@@ -873,13 +873,13 @@ def hex2int( shex ):
 
     factors = [ 16**(i) for i in range(len(shex)) ]
     factors.reverse()
-    factors = Numeric.array( factors )
+    factors = oldN.array( factors )
 
     table   = dict( zip('0123456789abcdef',range(16)) )
 
     components = [ table[s]*f for s,f in  zip( shex.lower(), factors ) ]
 
-    return Numeric.sum( components )
+    return oldN.sum( components )
     
 
 def colorSpectrum( nColors, firstColor='FF0000', lastColor='FF00FF' ):

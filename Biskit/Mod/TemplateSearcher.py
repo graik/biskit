@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -35,7 +35,7 @@ from Biskit import StdLog, EHandler
 
 import re
 import os, shutil
-import numpy.oldnumeric as Numeric
+import numpy.oldnumeric as oldN
 
 import urllib
 import string
@@ -436,7 +436,7 @@ class TemplateSearcher( SequenceSearcher ):
         for id in ids_in_cluster:
             resolutions += [ getattr( self.record_dic[id],'resolution', 99. ) ]
 
-        return ids_in_cluster[ Numeric.argmin( resolutions ) ]
+        return ids_in_cluster[ oldN.argmin( resolutions ) ]
 
 
     def reportClustering( self, raw=None ):

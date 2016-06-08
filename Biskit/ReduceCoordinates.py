@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -29,7 +29,7 @@ Create structures with reduced number of atoms.
 
 from PDBModel import PDBModel
 from DictList import DictList
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 import tools as T
 import molUtils as MU
 
@@ -113,7 +113,7 @@ class ReduceCoordinates:
 
         ## remove H from internal model and from list of atom positions
         maskH = self.m_sorted.remove( self.m_sorted.maskH() )
-        self.a_indices = N.compress( maskH, self.a_indices )
+        self.a_indices = oldN.compress( maskH, self.a_indices )
 
         self.makeMap( maxPerCenter )
 
@@ -170,9 +170,9 @@ class ReduceCoordinates:
             n_centers += 1
 
         ## how many items/atoms go into each group?
-        nAtoms = N.ones(n_centers, N.Int) * int(len( a_indices ) / n_centers)
+        nAtoms = oldN.ones(n_centers, oldN.Int) * int(len( a_indices ) / n_centers)
         i=0
-        while N.sum(nAtoms) != len( a_indices ):
+        while oldN.sum(nAtoms) != len( a_indices ):
             nAtoms[i] += 1
             i += 1
 
@@ -180,7 +180,7 @@ class ReduceCoordinates:
         result = []
         pos = 0
         for n in nAtoms:
-            result += [ N.take( a_indices, N.arange(n) + pos) ]
+            result += [ oldN.take( a_indices, oldN.arange(n) + pos) ]
             pos += n
 
         return result
@@ -246,9 +246,9 @@ class ReduceCoordinates:
             ## for each center create list of atom indices and a center atom
             if a['residue_name'] != 'GLY' and a['residue_name'] != 'ALA':
 
-                bb_a_indices = N.compress( resModels[i].maskBB(), a_indices)
-                sc_a_indices = N.compress(
-                    N.logical_not( resModels[i].maskBB()), a_indices )
+                bb_a_indices = oldN.compress( resModels[i].maskBB(), a_indices)
+                sc_a_indices = oldN.compress(
+                    oldN.logical_not( resModels[i].maskBB()), a_indices )
 
                 sc_groups = self.group( sc_a_indices, maxPerCenter )
 
@@ -289,22 +289,22 @@ class ReduceCoordinates:
 
         for atom_indices in self.groups:
 
-            x = N.take( xyz, atom_indices, axis )
-            m = N.take( masses, atom_indices )
+            x = oldN.take( xyz, atom_indices, axis )
+            m = oldN.take( masses, atom_indices )
 
-            center = N.sum( x * N.transpose([m,]), axis=axis) / N.sum( m )
+            center = oldN.sum( x * oldN.transpose([m,]), axis=axis) / oldN.sum( m )
 
             if axis == 0:
-                center = center[N.NewAxis, :]
+                center = center[oldN.NewAxis, :]
 
             if axis == 1:
-                center = center[:, N.NewAxis, :]
+                center = center[:, oldN.NewAxis, :]
 
             if r_xyz == None:
                 r_xyz = center
 
             else:
-                r_xyz = N.concatenate( (r_xyz, center), axis )
+                r_xyz = oldN.concatenate( (r_xyz, center), axis )
 
         return r_xyz
 
@@ -325,7 +325,7 @@ class ReduceCoordinates:
         mass = self.m.atoms.get('mass')
         if xyz is None: xyz = self.m.getXyz()
 
-        mProf = [ N.sum( N.take( mass, group ) ) for group in self.groups ]
+        mProf = [ oldN.sum( oldN.take( mass, group ) ) for group in self.groups ]
         xyz = self.reduceXyz( xyz )
 
         result = PDBModel()
@@ -362,7 +362,7 @@ class ReduceCoordinates:
             info = from_model.profileInfo( profname )
 
             try:
-                pr = [ N.average( N.take( p0, group ) ) for group in self.groups ]
+                pr = [ oldN.average( oldN.take( p0, group ) ) for group in self.groups ]
 
                 to_model.atoms.set( profname, pr )
             except:
@@ -384,7 +384,7 @@ class Test(BT.BiskitTest):
         """ReduceCoordinates test"""
 
         self.m = PDBModel( T.testRoot()+'/com/1BGS.pdb' )
-        self.m = self.m.compress( N.logical_not( self.m.maskH2O() ) )
+        self.m = self.m.compress( oldN.logical_not( self.m.maskH2O() ) )
 
         self.m.atoms.set('test', range(len(self.m)))
 

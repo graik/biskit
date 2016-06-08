@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -35,7 +35,7 @@ import Biskit.tools as t
 from Biskit.PDBModel import PDBModel
 from Biskit.LogFile import StdLog
 
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 
 import copy
 
@@ -312,11 +312,11 @@ class PDBCleaner:
         self.model.remove( mask )
         
         if self.verbose:
-            self.logWrite('Removed ' + str(N.sum(mask)) +
+            self.logWrite('Removed ' + str(oldN.sum(mask)) +
                           ' atoms because they were non-standard' +
                           ' or followed a missing atom.' )
 
-        return N.sum( mask )
+        return oldN.sum( mask )
 
     def capACE( self, model, chain, breaks=True ):
         """
@@ -481,7 +481,7 @@ class PDBCleaner:
         """
         if len(chains) == 0: 
             return chains
-        i = N.take( model.chainIndex(), chains ) 
+        i = oldN.take( model.chainIndex(), chains ) 
         ## convert back to chain indices but this time including chain breaks
         return model.atom2chainIndices( i, breaks=1 )
         
@@ -492,8 +492,8 @@ class PDBCleaner:
         if len(chains) == 0: 
             return chains
         ## fetch last atom of given chains
-        index = N.concatenate( (model.chainIndex(), [len(model)]) )
-        i = N.take( index, N.array( chains ) + 1 ) - 1
+        index = oldN.concatenate( (model.chainIndex(), [len(model)]) )
+        i = oldN.take( index, oldN.array( chains ) + 1 ) - 1
         ## convert back to chain indices but this time including chain breaks
         return model.atom2chainIndices( i, breaks=1 )
     
@@ -592,7 +592,7 @@ class PDBCleaner:
             end_broken = m.atom2chainIndices( m.chainBreaks(), breaks=1 )
             
             capC = M.union( capC, end_broken )
-            capN = M.union( capN, N.array( end_broken ) + 1 )
+            capN = M.union( capN, oldN.array( end_broken ) + 1 )
             
         capN = self.filterProteinChains(m, capN, m.chainIndex(breaks=breaks))
         capC = self.filterProteinChains(m, capC, m.chainEndIndex(breaks=breaks))

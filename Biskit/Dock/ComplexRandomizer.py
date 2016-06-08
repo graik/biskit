@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ## generate random orientations of receptor and ligand
 ##
@@ -33,7 +33,7 @@ import Biskit.mathUtils as ma
 import Biskit.molUtils as mol
 import Biskit.tools as t
 import numpy.oldnumeric.random_array as ra
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 from Biskit import Xplorer, PCRModel
 
 import tempfile
@@ -87,7 +87,7 @@ class ComplexRandomizer:
         @rtype: PDBModel
         """
         r = model.clone()
-        r.keep( N.nonzero( N.logical_not( r.maskH2O() ) ) )
+        r.keep( oldoldN.nonzero( oldoldN.logical_not( r.maskH2O() ) ) )
         center = r.centerOfMass()
         r.setXyz( r.getXyz() - center )
 
@@ -105,7 +105,7 @@ class ComplexRandomizer:
         @rtype: float
         """
         center = model.centerOfMass()
-        dist = N.sqrt( N.sum( ( model.getXyz()-center )**2 , 1 ) )
+        dist = oldoldN.sqrt( oldoldN.sum( ( model.getXyz()-center )**2 , 1 ) )
 
         return max( dist )
 
@@ -121,7 +121,7 @@ class ComplexRandomizer:
         radius = (self.d_max_rec + self.d_max_lig) / 2.0
         xyz = ra.random( 3 ) - 0.5
 
-        scale = radius*1.0 / N.sqrt( N.sum( xyz**2 ) )
+        scale = radius*1.0 / oldoldN.sqrt( oldoldN.sum( xyz**2 ) )
 
         return scale * xyz
 
@@ -134,14 +134,14 @@ class ComplexRandomizer:
         @rtype: array
         """
         r = ma.randomRotation()
-##         r = N.array([[1,0,0],[0,1,0],[0,0,1]],'f')
+##         r = oldoldN.array([[1,0,0],[0,1,0],[0,0,1]],'f')
         t = self.__random_translation()
 
         ## create 3 x 4 matrix: 0:3, 0:3 contains rot; 3,0:3 contains trans
-        result = N.concatenate( (r, N.transpose( [ t.tolist() ] )), 1)
+        result = oldoldN.concatenate( (r, oldoldN.transpose( [ t.tolist() ] )), 1)
 
         ## make it square
-        result = N.concatenate( (result, N.array([[0,0,0,1]], N.Float32)), 0 )
+        result = oldoldN.concatenate( (result, oldoldN.array([[0,0,0,1]], oldoldN.Float32)), 0 )
 
         return result
 

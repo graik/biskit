@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -29,7 +29,7 @@ Run ptraj entropy analysis on Trajectory instance.
 """
 
 import tempfile, os
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 import random, time
 
 import Biskit.tools as t
@@ -288,7 +288,7 @@ class AmberEntropist( AmberCrdEntropist ):
                 refModel = refModel.take( ref_i )
                 m_avg    = m_avg.take( i )
 
-                if not mask is None:   mask = N.take( mask, i )
+                if not mask is None:   mask = oldN.take( mask, i )
 
             r, t = m_avg.transformation( refModel, mask )
             traj.transform( r, t )
@@ -325,9 +325,9 @@ class AmberEntropist( AmberCrdEntropist ):
         @rtype: PDBModel      
         """
         if self.protein:            
-            m.keep( N.nonzero( m.maskProtein() ) )
+            m.keep( oldN.nonzero( m.maskProtein() ) )
         if self.heavy:
-            m.keep( N.nonzero( m.maskHeavy() ) )
+            m.keep( oldN.nonzero( m.maskHeavy() ) )
         return m
 
 
@@ -665,12 +665,12 @@ class AmberEntropist( AmberCrdEntropist ):
         if self.atoms:
             traj.ref.addChainId()
             aMask = traj.ref.mask( lambda a,ok=self.atoms: a['name'] in ok )
-            traj.removeAtoms( N.nonzero( N.logical_not( aMask ) )  )
+            traj.removeAtoms( oldN.nonzero( oldN.logical_not( aMask ) )  )
 
         ## get rid of non-standard atoms, water, ions, etc.
         if not self.solvent:
             l = traj.lenAtoms()
-            traj = traj.compressAtoms( N.logical_not(traj.ref.maskSolvent()) )
+            traj = traj.compressAtoms( oldN.logical_not(traj.ref.maskSolvent()) )
 
             if self.verbose:
                 self.log.add('%i solvent/ion atoms deleted.'% (l- traj.lenAtoms()))
@@ -747,7 +747,7 @@ class AmberEntropist( AmberCrdEntropist ):
                     all += [ ( lst[i], lst[j], lst[k] ) ]
 
         ## calculate pairwise "distance" between tripples
-        pw = N.zeros( (len(all), len(all)), N.Float32 )
+        pw = oldN.zeros( (len(all), len(all)), oldN.Float32 )
         for i in range( len( all ) ):
             for j in range( i, len(all) ):
                 pw[i,j] = pw[j,i] = len( MU.intersection(all[i],all[j]) )**2
@@ -759,11 +759,11 @@ class AmberEntropist( AmberCrdEntropist ):
 
             r += [ pos ]
             ## overlap of selected tripples with all others
-            overlap = N.sum( N.array( [ pw[ i ] for i in r ] ) )
+            overlap = oldN.sum( oldN.array( [ pw[ i ] for i in r ] ) )
             ## select one with lowest overlap to all tripples selected before
-            pos = N.argmin( overlap )
+            pos = oldN.argmin( overlap )
 
-        return N.take( all, r )
+        return oldN.take( all, r )
 
 
     def cleanup( self ):

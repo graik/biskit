@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -27,7 +27,7 @@ Create Amber topology and coordinate file from PDB.
 """
 
 import os, tempfile, copy
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 
 import Biskit.tools as t
 import Biskit.settings as s
@@ -273,7 +273,7 @@ class AmberParmBuilder:
 
         pw = MU.pairwiseDistances( m.xyz, m.xyz )
 
-        pw = N.less( pw, cutoff )
+        pw = oldN.less( pw, cutoff )
 
         r = []
         for i in range( len( pw ) ):
@@ -335,7 +335,7 @@ class AmberParmBuilder:
         @param model: model
         @type  model: PDBMode
         """
-        center = N.average( model.getXyz() )
+        center = oldN.average( model.getXyz() )
         model.setXyz( model.xyz - center )
 
 
@@ -426,7 +426,7 @@ class AmberParmBuilder:
             if cap:
                 end_broken = m.atom2chainIndices( m.chainBreaks() )
                 capC = MU.union( capC, end_broken )
-                capN = MU.union( capN, N.array( end_broken ) + 1 )
+                capN = MU.union( capN, oldN.array( end_broken ) + 1 )
 
             for i in capN:
                 if self.verbose:
@@ -508,9 +508,9 @@ class AmberParmBuilder:
         @return: remaining atom indices of m that are NOT in i_atoms
         @rtype: [int]
         """
-        mask = N.zeros( len( model ),N.Int )
-        N.put( mask, i_atoms, 1 )
-        return N.nonzero( N.logical_not( mask ) )
+        mask = oldN.zeros( len( model ),oldN.Int )
+        oldN.put( mask, i_atoms, 1 )
+        return oldN.nonzero( oldN.logical_not( mask ) )
 
 
     def parmMirror( self, f_out, f_out_crd=None, fmod=['frcmod.ionsjc_tip3p'], 
@@ -629,7 +629,7 @@ class Test( BT.BiskitTest ):
     def test_AmberParmMirror(self):
         """AmberParmBuilder.parmMirror test"""
         ref = self.ref
-        mask = N.logical_not( ref.maskH2O() ) ## keep protein and Na+ ion
+        mask = oldN.logical_not( ref.maskH2O() ) ## keep protein and Na+ ion
         self.mdry = ref.compress( mask )
 
         self.a = AmberParmBuilder( self.mdry, verbose=self.local,
@@ -644,7 +644,7 @@ class Test( BT.BiskitTest ):
         self.m1 = PDBModel(self.drypdb)
         self.m2 = PDBModel(self.refdry)
 
-        eq = N.array( self.m1.xyz == self.m2.xyz )
+        eq = oldN.array( self.m1.xyz == self.m2.xyz )
         self.assert_( eq.all() )
 
 

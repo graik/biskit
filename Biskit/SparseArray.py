@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -27,7 +27,7 @@
 Memory saving representation of a sparse array.
 """
 
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 import types
 import copy
 
@@ -114,8 +114,8 @@ class SparseArray:
         else:
             if atype is int: self.shape = ( a, )
             else:
-                if atype is N.arraytype or atype is list:
-                    self.shape = N.shape( a )
+                if atype is oldN.arraytype or atype is list:
+                    self.shape = oldN.shape( a )
                 else:
                     raise SparseArrayError, '%s argument not allowed.' %\
                           str(atype)
@@ -127,7 +127,7 @@ class SparseArray:
             self.__default = SparseArray( self.shape[1:], typecode, default )
             self.__typecode = 'SA'
 
-        if atype is N.arraytype or atype is list :
+        if atype is oldN.arraytype or atype is list :
             self.__setAll( a )
 
 
@@ -140,15 +140,15 @@ class SparseArray:
         @type  a: array OR [ number ]
         """
         if type( a ) is list:
-            a = N.array( a, self.__typecode )
+            a = oldN.array( a, self.__typecode )
 
         if self.shape != a.shape:
             raise SparseArrayError, 'dimensions not aligned'
 
-        self.indices = N.nonzero( N.logical_not( N.equal(a, self.__default) ) )
+        self.indices = oldN.nonzero( oldN.logical_not( oldN.equal(a, self.__default) ) )
         self.indices = self.indices.tolist()
 
-        self.values = N.take( a, self.indices )
+        self.values = oldN.take( a, self.indices )
         self.values = self.values.tolist()
 
 
@@ -163,7 +163,7 @@ class SparseArray:
         if self.is1D:
             return self.__setAll_1D( a )
 
-        if type(a) in [ N.arraytype, list ]:
+        if type(a) in [ oldN.arraytype, list ]:
             if len(a) != self.shape[0]:
                 raise SparseArrayError, 'dimensions not aligned'
 
@@ -218,7 +218,7 @@ class SparseArray:
         r = []
         len_axis_B = self.shape[1]
         for (i,a) in zip( self.indices, self.values ):
-            r += (N.array( a.nondefault() ) + len_axis_B * i ).tolist()
+            r += (oldN.array( a.nondefault() ) + len_axis_B * i ).tolist()
 
         return r
 
@@ -246,17 +246,17 @@ class SparseArray:
     def toarray( self ):
         """
         Reconstruct dense array::
-          L.toarray() -> Numeric.array, normal dense array
+          L.toarray() -> numpy.array, normal dense array
 
         @return: normal dense array
         @rtype: array
         """
         if self.default() is 0:
-            a = N.zeros( ( self.shape ), self.typecode() )
+            a = oldN.zeros( ( self.shape ), self.typecode() )
         else:
-            a = N.ones( (self.shape ), self.typecode() ) * self.default()
+            a = oldN.ones( (self.shape ), self.typecode() ) * self.default()
 
-        N.put( a, self.nondefault(), self.nondefault_values() )
+        oldN.put( a, self.nondefault(), self.nondefault_values() )
 
         return a
 
@@ -281,7 +281,7 @@ class SparseArray:
         @param v: values
         @type  v: any OR [ any ]
         """
-        if type( i ) in [ list, N.arraytype ]:
+        if type( i ) in [ list, oldN.arraytype ]:
             self.__setMany( i, v )
         else:
             self.__setitem__( i, v )
@@ -291,12 +291,12 @@ class SparseArray:
         """
         Add / replace values of the array.
 
-        @param indices: indices, [ int ] OR Numeric.array('i')
+        @param indices: indices, [ int ] OR array('i')
         @type  indices: [int]
-        @param values: values, [ any ] OR Numeric.array
+        @param values: values, [ any ] OR array
         @type  values: [any] OR array
         """
-        if type( values ) not in [ list, N.arraytype ]:
+        if type( values ) not in [ list, oldN.arraytype ]:
             values = [ values ] * len( indices )
 
         map( self.__setitem__, indices, values )
@@ -501,7 +501,7 @@ class SparseArray:
         pos_low  = self.__pos( a )
         pos_high = self.__pos( b )
 
-        result.put( N.array( self.indices[pos_low : pos_high] ) - a,
+        result.put( oldN.array( self.indices[pos_low : pos_high] ) - a,
                     self.values[pos_low : pos_high] )
         return result
 
@@ -666,7 +666,7 @@ class SparseArray:
         if axis == 0:
 
             t_default, t_v = getType( self.__default ), getType( v )
-            if t_default == SparseArray and t_v == N.arraytype:
+            if t_default == SparseArray and t_v == oldN.arraytype:
                 v = SparseArray( v, self.typecode(), self.default()  )
 
             if getType(v) != t_default:
@@ -738,13 +738,13 @@ class Test(BT.BiskitTest):
     def test_SparseArray(self):
         """SparseArray test"""
 
-        a = N.zeros( (6,), N.Float32 )
+        a = oldN.zeros( (6,), oldN.Float32 )
 
         self.sa = SparseArray( a.shape )
         self.sa[3] = 1.
         self.sa[5] = 2.
 
-        b = N.zeros( (5, 6), N.Float32 )
+        b = oldN.zeros( (5, 6), oldN.Float32 )
         b[0,1] = 3.
         b[0,2] = 4
         b[4,2] = 5
@@ -757,10 +757,10 @@ class Test(BT.BiskitTest):
         if self.local:
             print self.sa.toarray()
 
-        self.assert_( N.all( self.sb.toarray() == self.EXPECTED) )
+        self.assert_( oldN.all( self.sb.toarray() == self.EXPECTED) )
 
 
-    EXPECTED = N.array([[ 0.,  3.,  4.,  0.,  0.,  0.],
+    EXPECTED = oldN.array([[ 0.,  3.,  4.,  0.,  0.,  0.],
                         [ 0.,  0.,  0.,  0.,  0.,  0.],
                         [ 0.,  0.,  0.,  0.,  0.,  0.],
                         [ 6.,  0.,  0.,  0.,  0.,  0.],

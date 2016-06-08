@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 # Simple Gnuplot interface.
 #
@@ -386,11 +386,11 @@ class Test(BT.BiskitTest):
         # plot( zip( range(10), range(10) ) )
 
         # Two plots; each given by a 2d array
-        import numpy.oldnumeric as N
-        x = N.arange(10)
+        import numpy.oldnumeric as oldN
+        x = oldN.arange(10)
         y1 = x**2
         y2 = (10-x)**2
-        plot( N.transpose(N.array([x, y1])), N.transpose(N.array([x, y2])))
+        plot( oldN.transpose(oldN.array([x, y1])), oldN.transpose(oldN.array([x, y2])))
 
     def test_parallelAxesPlot(self):
         """gnuplot.parallelAxesPlot test (interactive only)"""

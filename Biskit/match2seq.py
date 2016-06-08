@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -28,7 +28,7 @@ compareStructures() compares sequences of 2 structures and returns
 a residue mask for each of them. 
 """
 
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 import Biskit.tools as T
 from Biskit.difflib_old import SequenceMatcher
 #from difflib import SequenceMatcher
@@ -209,7 +209,7 @@ def getEqual( seqAA, seqNr, equalList ):
 
 def del2mask( seq, *delpos ):
     """convert list of (from, to) delete positions into a mask of 0 or 1"""
-    mask = N.ones( len(seq) )
+    mask = oldN.ones( len(seq) )
 
     for start, size in delpos:
         mask.put( range( start, start+size), 0 )
@@ -225,8 +225,8 @@ def compareSequences( seqAA_1, seqAA_2 ):
     seqNr_2 = range( len( seqAA_2 ) )
 
     # get mask
-    mask_1 = N.zeros( len( seqNr_1 ) )
-    mask_2 = N.zeros( len( seqNr_2 ) )
+    mask_1 = oldN.zeros( len( seqNr_1 ) )
+    mask_2 = oldN.zeros( len( seqNr_2 ) )
 
     # compare sequences
     seqDiff = getOpCodes( seqAA_1, seqAA_2)
@@ -240,10 +240,10 @@ def compareSequences( seqAA_1, seqAA_2 ):
     mask1 = del2mask( seqAA_1, *del_1 )
     mask2 = del2mask( seqAA_2, *del_2 )
  
-    seqAA_1 = N.compress( mask1, seqAA_1 ).tolist()
-    seqNr_1 = N.compress( mask1, seqNr_1 ).tolist()
-    seqAA_2 = N.compress( mask2, seqAA_2 ).tolist()
-    seqNr_2 = N.compress( mask2, seqNr_2 ).tolist()
+    seqAA_1 = oldN.compress( mask1, seqAA_1 ).tolist()
+    seqNr_1 = oldN.compress( mask1, seqNr_1 ).tolist()
+    seqAA_2 = oldN.compress( mask2, seqAA_2 ).tolist()
+    seqNr_2 = oldN.compress( mask2, seqNr_2 ).tolist()
     
     # get equal parts
     seqDiff = getOpCodes( seqAA_1, seqAA_2 )
@@ -251,8 +251,8 @@ def compareSequences( seqAA_1, seqAA_2 ):
     seqAA_1, seqNr_1 = getEqual( seqAA_1, seqNr_1, equal_1)
     seqAA_2, seqNr_2 = getEqual( seqAA_2, seqNr_2, equal_2 )
 
-    N.put( mask_1, seqNr_1 , 1 )
-    N.put( mask_2, seqNr_2 , 1 )
+    oldN.put( mask_1, seqNr_1 , 1 )
+    oldN.put( mask_2, seqNr_2 , 1 )
 
     return mask_1, mask_2
 
@@ -305,29 +305,29 @@ class Test(BT.BiskitTest):
             print 'mask2\n', mask2            
             globals().update( locals() )
 
-        self.assert_( N.all(mask1 == self.EXPECT[0] ) )
-        self.assert_( N.all(mask2 == self.EXPECT[1] ) )
+        self.assert_( oldN.all(mask1 == self.EXPECT[0] ) )
+        self.assert_( oldN.all(mask2 == self.EXPECT[1] ) )
         
     def test_sequenceRepeats(self):
         """match2seq sequence repeat test"""
         seq1 = 'ABCDEFG~~~~~~~~~~~~~~~'
         seq2 = '~~~~~'
         mask1, mask2 = compareSequences( seq1, seq2 )
-        self.assert_( N.all( mask1 == N.zeros( len(seq1 ) )) )
-        self.assert_( N.all( mask2 == N.zeros( len(seq2 ) )) )
+        self.assert_( oldN.all( mask1 == oldN.zeros( len(seq1 ) )) )
+        self.assert_( oldN.all( mask2 == oldN.zeros( len(seq2 ) )) )
 
 
-    EXPECT =  N.array([1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    EXPECT =  oldN.array([1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                        1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                        1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1,
                        1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1,
-                       1, 1, 1, 1],N.Int),\
-              N.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                       1, 1, 1, 1],oldN.Int),\
+              oldN.array([1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],N.Int)
+                       1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],oldN.Int)
 
 
 

@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -38,7 +38,7 @@ from Biskit.Mod.Modeller import Modeller
 
 import os
 from string import *
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 
 
 class Analyse:
@@ -244,7 +244,7 @@ class Analyse:
             lst = self.parseFile( file )
 
             ## identity to mean template
-            identities[folder] = N.sum(lst[0][1:])/nb_templates
+            identities[folder] = oldN.sum(lst[0][1:])/nb_templates
 
         return identities
 

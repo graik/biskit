@@ -28,7 +28,7 @@ Calculates accessible, molecular surface areas and average curvature.
 import tempfile
 import os.path
 import string
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 
 from Biskit import Executor, TemplateError, EHandler
 import Biskit.settings as S
@@ -149,7 +149,7 @@ class SurfaceRacer( Executor ):
 
         self.model = model.clone()
         self.mask = mask if mask is not None else \
-            model.maskHeavy() * N.logical_not( model.maskSolvent())
+            model.maskHeavy() * oldN.logical_not( model.maskSolvent())
         self.model = self.model.compress( self.mask )
 
         ## will be filled in by self.prepare() after the temp folder is ready
@@ -304,9 +304,9 @@ class SurfaceRacer( Executor ):
             ms   += [ float( string.strip( lines[i][-17:-11] ) ) ]
             asa  += [ float( string.strip( lines[i][-24:-17] ) ) ]
 
-        result = {'curvature':N.array(curv),
-                  'MS':N.array(ms),
-                  'AS':N.array(asa),
+        result = {'curvature':oldN.array(curv),
+                  'MS':oldN.array(ms),
+                  'AS':oldN.array(asa),
                   'surfaceRacerInfo':{'probe_radius':self.probe,
                                       'vdw_set':self.vdw_set}
                   }
@@ -335,10 +335,10 @@ class SurfaceRacer( Executor ):
         @return: profile with inspected values
         @rtype: [float]
         """
-        mask = N.greater( profile, upperLimit )
-        mask += N.less( profile, lowerLimit )
+        mask = oldN.greater( profile, upperLimit )
+        mask += oldN.less( profile, lowerLimit )
 
-        for i in  N.nonzero(mask):
+        for i in  oldN.nonzero(mask):
             print 'WARNING! Profile value %.2f set to O\n'%profile[i]
             profile[i] = 0
 
@@ -464,8 +464,8 @@ class Test(BT.BiskitTest):
 
             print 'Relative AS of atoms 10 to 20:',self.r['relAS'][10:20]
 
-        self.e = ( N.sum(self.r['relMS'][10:20]), N.sum(self.r['relAS'][10:20]),
-              N.sum(self.r['curvature'][10:20]) )
+        self.e = ( oldN.sum(self.r['relMS'][10:20]), oldN.sum(self.r['relAS'][10:20]),
+              oldN.sum(self.r['curvature'][10:20]) )
 
         self.assertAlmostEqual( self.e, self.EXPECT )
 

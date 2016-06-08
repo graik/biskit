@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 # Copyright (c) 1999-2000 Gary Strangman; All Rights Reserved.
 #
@@ -46,7 +46,7 @@ this set are members of a "Dispatch" class, c/o David Ascher.  This class
 allows different functions to be called depending on the type of the passed
 arguments.  Thus, stats.mean is a member of the Dispatch class and
 stats.mean(range(20)) will call stats.lmean(range(20)) while
-stats.mean(Numeric.arange(20)) will call stats.amean(Numeric.arange(20)).
+stats.mean(arange(20)) will call stats.amean(arange(20)).
 This is a handy way to keep consistent function names when different
 argument types require different functions to be called.  Having
 implementated the Dispatch class, however, means that to get info on
@@ -186,7 +186,7 @@ both list and array versions but were deemed useful::
 ## 99-07-03 ... improved attest_ind, attest_rel (zero-division errortrap)
 ## 99-06-24 ... fixed bug(?) in attest_ind (n1=a.shape[0])
 ## 04/11/99 ... added asignaltonoise, athreshold functions, changed all
-##                   max/min in array section to N.maximum/N.minimum,
+##                   max/min in array section to oldN.maximum/oldN.minimum,
 ##                   fixed square_of_sums to prevent integer overflow
 ## 04/10/99 ... !!! Changed function name ... sumsquared ==> square_of_sums
 ## 03/18/99 ... Added ar0, ar2, ar3 and ar4 rounding functions
@@ -209,7 +209,7 @@ both list and array versions but were deemed useful::
 ## 12/01/98 ... added anova() function (requires NumPy)
 ##              incorporated Dispatch class
 ## 11/12/98 ... added functionality to amean, aharmonicmean, ageometricmean
-##              added 'asum' function (added functionality to N.add.reduce)
+##              added 'asum' function (added functionality to oldN.add.reduce)
 ##              fixed both moment and amoment (two errors)
 ##              changed name of skewness and askewness to skew and askew
 ##              fixed (a)histogram (which sometimes counted points <lowerlimit)
@@ -1520,18 +1520,18 @@ Returns: F value, one-tailed p-value
     vars = [0]*a
     ns = [0]*a
     alldata = []
-    tmp = map(N.array,lists)
+    tmp = map(oldN.array,lists)
     means = map(amean,tmp)
     vars = map(avar,tmp)
     ns = map(len,lists)
     for i in range(len(lists)):
         alldata = alldata + lists[i]
-    alldata = N.array(alldata)
+    alldata = oldN.array(alldata)
     bign = len(alldata)
     sstot = ass(alldata)-(asquare_of_sums(alldata)/float(bign))
     ssbn = 0
     for list in lists:
-        ssbn = ssbn + asquare_of_sums(N.array(list))/float(len(list))
+        ssbn = ssbn + asquare_of_sums(oldN.array(list))/float(len(list))
     ssbn = ssbn - (asquare_of_sums(alldata)/float(bign))
     sswn = sstot-ssbn
     dfbn = a-1
@@ -1944,7 +1944,7 @@ findwithin = Dispatch ( (lfindwithin, (ListType, TupleType)), )
 #=============  THE ARRAY-VERSION OF THE STATS FUNCTIONS  ===============
 
 try:                         # DEFINE THESE *ONLY* IF NUMERIC IS AVAILABLE
- import numpy.oldnumeric as Numeric
+ import numpy.oldnumeric as oldNumeric
  N = Numeric
  import numpy.oldnumeric.linear_algebra as LinearAlgebra
  LA = LinearAlgebra
@@ -1967,33 +1967,33 @@ inarray, with only 1 'level' per dim that was collapsed over.
 Usage:   ageometricmean(inarray,dimension=None,keepdims=0)
 Returns: geometric mean computed over dim(s) listed in dimension
 """
-    inarray = N.array(inarray,N.Float)
+    inarray = oldN.array(inarray,oldN.Float)
     if dimension == None:
-        inarray = N.ravel(inarray)
+        inarray = oldN.ravel(inarray)
         size = len(inarray)
-        mult = N.power(inarray,1.0/size)
-        mult = N.multiply.reduce(mult)
+        mult = oldN.power(inarray,1.0/size)
+        mult = oldN.multiply.reduce(mult)
     elif type(dimension) in [IntType,FloatType]:
         size = inarray.shape[dimension]
-        mult = N.power(inarray,1.0/size)
-        mult = N.multiply.reduce(mult,dimension)
+        mult = oldN.power(inarray,1.0/size)
+        mult = oldN.multiply.reduce(mult,dimension)
         if keepdims == 1:
             shp = list(inarray.shape)
             shp[dimension] = 1
-            sum = N.reshape(sum,shp)
+            sum = oldN.reshape(sum,shp)
     else: # must be a SEQUENCE of dims to average over
         dims = list(dimension)
         dims.sort()
         dims.reverse()
-        size = N.array(N.multiply.reduce(N.take(inarray.shape,dims)),N.Float)
-        mult = N.power(inarray,1.0/size)
+        size = oldN.array(oldN.multiply.reduce(oldN.take(inarray.shape,dims)),oldN.Float)
+        mult = oldN.power(inarray,1.0/size)
         for dim in dims:
-            mult = N.multiply.reduce(mult,dim)
+            mult = oldN.multiply.reduce(mult,dim)
         if keepdims == 1:
             shp = list(inarray.shape)
             for dim in dims:
                 shp[dim] = 1
-            mult = N.reshape(mult,shp)
+            mult = oldN.reshape(mult,shp)
     return mult
 
 
@@ -2010,18 +2010,18 @@ inarray, with only 1 'level' per dim that was collapsed over.
 Usage:   aharmonicmean(inarray,dimension=None,keepdims=0)
 Returns: harmonic mean computed over dim(s) in dimension
 """
-    inarray = inarray.astype(N.Float)
+    inarray = inarray.astype(oldN.Float)
     if dimension == None:
-        inarray = N.ravel(inarray)
+        inarray = oldN.ravel(inarray)
         size = len(inarray)
-        s = N.add.reduce(1.0 / inarray)
+        s = oldN.add.reduce(1.0 / inarray)
     elif type(dimension) in [IntType,FloatType]:
         size = float(inarray.shape[dimension])
-        s = N.add.reduce(1.0/inarray, dimension)
+        s = oldN.add.reduce(1.0/inarray, dimension)
         if keepdims == 1:
             shp = list(inarray.shape)
             shp[dimension] = 1
-            s = N.reshape(s,shp)
+            s = oldN.reshape(s,shp)
     else: # must be a SEQUENCE of dims to average over
         dims = list(dimension)
         dims.sort()
@@ -2029,25 +2029,25 @@ Returns: harmonic mean computed over dim(s) in dimension
         for i in range(len(inarray.shape)):
             if i not in dims:
                 nondims.append(i)
-        tinarray = N.transpose(inarray,nondims+dims) # put keep-dims first
+        tinarray = oldN.transpose(inarray,nondims+dims) # put keep-dims first
         idx = [0] *len(nondims)
         if idx == []:
-            size = len(N.ravel(inarray))
+            size = len(oldN.ravel(inarray))
             s = asum(1.0 / inarray)
             if keepdims == 1:
-                s = N.reshape([s],N.ones(len(inarray.shape)))
+                s = oldN.reshape([s],oldN.ones(len(inarray.shape)))
         else:
             idx[0] = -1
-            loopcap = N.array(tinarray.shape[0:len(nondims)]) -1
-            s = N.zeros(loopcap+1,N.Float)
+            loopcap = oldN.array(tinarray.shape[0:len(nondims)]) -1
+            s = oldN.zeros(loopcap+1,oldN.Float)
             while incr(idx,loopcap) <> -1:
                 s[idx] = asum(1.0/tinarray[idx])
-            size = N.multiply.reduce(N.take(inarray.shape,dims))
+            size = oldN.multiply.reduce(oldN.take(inarray.shape,dims))
             if keepdims == 1:
                 shp = list(inarray.shape)
                 for dim in dims:
                     shp[dim] = 1
-                s = N.reshape(s,shp)
+                s = oldN.reshape(s,shp)
     return size / s
 
 
@@ -2065,10 +2065,10 @@ Usage:   amean(inarray,dimension=None,keepdims=0)
 Returns: arithematic mean calculated over dim(s) in dimension
 """
     if inarray.dtype.char in ['l','s','b']:
-        inarray = inarray.astype(N.Float)
+        inarray = inarray.astype(oldN.Float)
     if dimension == None:
-        inarray = N.ravel(inarray)
-        sum = N.add.reduce(inarray)
+        inarray = oldN.ravel(inarray)
+        sum = oldN.add.reduce(inarray)
         denom = float(len(inarray))
     elif type(dimension) in [IntType,FloatType]:
         sum = asum(inarray,dimension)
@@ -2076,20 +2076,20 @@ Returns: arithematic mean calculated over dim(s) in dimension
         if keepdims == 1:
             shp = list(inarray.shape)
             shp[dimension] = 1
-            sum = N.reshape(sum,shp)
+            sum = oldN.reshape(sum,shp)
     else: # must be a TUPLE of dims to average over
         dims = list(dimension)
         dims.sort()
         dims.reverse()
         sum = inarray *1.0
         for dim in dims:
-            sum = N.add.reduce(sum,dim)
-        denom = N.array(N.multiply.reduce(N.take(inarray.shape,dims)),N.Float)
+            sum = oldN.add.reduce(sum,dim)
+        denom = oldN.array(oldN.multiply.reduce(oldN.take(inarray.shape,dims)),oldN.Float)
         if keepdims == 1:
             shp = list(inarray.shape)
             for dim in dims:
                 shp[dim] = 1
-            sum = N.reshape(sum,shp)
+            sum = oldN.reshape(sum,shp)
     return sum/denom
 
 
@@ -2104,14 +2104,14 @@ NOTE:  THIS ROUTINE ALWAYS uses the entire passed array (flattens it first).
 Usage:   amedian(inarray,numbins=1000)
 Returns: median calculated over ALL values in inarray
 """
-    inarray = N.ravel(inarray)
+    inarray = oldN.ravel(inarray)
     (hist, smallest, binsize, extras) = ahistogram(inarray,numbins)
-    cumhist = N.cumsum(hist)            # make cumulative histogram
-    otherbins = N.greater_equal(cumhist,len(inarray)/2.0)
+    cumhist = oldN.cumsum(hist)            # make cumulative histogram
+    otherbins = oldN.greater_equal(cumhist,len(inarray)/2.0)
     otherbins = list(otherbins)         # list of 0/1s, 1s start at median bin
     cfbin = otherbins.index(1)                # get 1st(!) index holding 50%ile score
     LRL = smallest + binsize*cfbin        # get lower read limit of that bin
-    cfbelow = N.add.reduce(hist[0:cfbin])        # cum. freq. below bin
+    cfbelow = oldN.add.reduce(hist[0:cfbin])        # cum. freq. below bin
     freq = hist[cfbin]                        # frequency IN the 50%ile bin
     median = LRL + ((len(inarray)/2.0-cfbelow)/float(freq))*binsize # MEDIAN
     return median
@@ -2128,15 +2128,15 @@ Usage:   amedianscore(inarray,dimension=None)
 Returns: 'middle' score of the array, or the mean of the 2 middle scores
 """
     if dimension == None:
-        inarray = N.ravel(inarray)
+        inarray = oldN.ravel(inarray)
         dimension = 0
-    inarray = N.sort(inarray,dimension)
+    inarray = oldN.sort(inarray,dimension)
     if inarray.shape[dimension] % 2 == 0:   # if even number of elements
         indx = inarray.shape[dimension]/2   # integer division correct
-        median = N.asarray(inarray[indx]+inarray[indx-1]) / 2.0
+        median = oldN.asarray(inarray[indx]+inarray[indx-1]) / 2.0
     else:
         indx = inarray.shape[dimension] / 2 # integer division correct
-        median = N.take(inarray,[indx],dimension)
+        median = oldN.take(inarray,[indx],dimension)
         if median.shape == (1,):
             median = median[0]
     return median
@@ -2154,18 +2154,18 @@ Returns: array of bin-counts for mode(s), array of corresponding modal values
 """
 
     if dimension == None:
-        a = N.ravel(a)
+        a = oldN.ravel(a)
         dimension = 0
-    scores = pstat.aunique(N.ravel(a))       # get ALL unique values
+    scores = pstat.aunique(oldN.ravel(a))       # get ALL unique values
     testshape = list(a.shape)
     testshape[dimension] = 1
-    oldmostfreq = N.zeros(testshape)
-    oldcounts = N.zeros(testshape)
+    oldmostfreq = oldN.zeros(testshape)
+    oldcounts = oldN.zeros(testshape)
     for score in scores:
-        template = N.equal(a,score)
+        template = oldN.equal(a,score)
         counts = asum(template,dimension,1)
-        mostfrequent = N.where(N.greater(counts,oldcounts),score,oldmostfreq)
-        oldcounts = N.where(N.greater(counts,oldcounts),counts,oldcounts)
+        mostfrequent = oldN.where(oldN.greater(counts,oldcounts),score,oldmostfreq)
+        oldcounts = oldN.where(oldN.greater(counts,oldcounts),counts,oldcounts)
         oldmostfreq = mostfrequent
     return oldcounts, mostfrequent
 
@@ -2181,15 +2181,15 @@ inclusive list/tuple determines whether the lower and upper limiting bounds
 Usage:   atmean(a,limits=None,inclusive=(1,1))
 """
      if a.dtype.char in ['l','s','b']:
-         a = a.astype(N.Float)
+         a = a.astype(oldN.Float)
      if limits == None:
          return mean(a)
-     assert type(limits) in [ListType,TupleType,N.ArrayType], "Wrong type for limits in atmean"
-     if inclusive[0]:         lowerfcn = N.greater_equal
-     else:               lowerfcn = N.greater
-     if inclusive[1]:         upperfcn = N.less_equal
-     else:               upperfcn = N.less
-     if limits[0] > N.maximum.reduce(N.ravel(a)) or limits[1] < N.minimum.reduce(N.ravel(a)):
+     assert type(limits) in [ListType,TupleType,oldN.ArrayType], "Wrong type for limits in atmean"
+     if inclusive[0]:         lowerfcn = oldN.greater_equal
+     else:               lowerfcn = oldN.greater
+     if inclusive[1]:         upperfcn = oldN.less_equal
+     else:               upperfcn = oldN.less
+     if limits[0] > oldN.maximum.reduce(oldN.ravel(a)) or limits[1] < oldN.minimum.reduce(oldN.ravel(a)):
          raise ValueError, "No array values within given limits (atmean)."
      elif limits[0]==None and limits[1]<>None:
          mask = upperfcn(a,limits[1])
@@ -2197,8 +2197,8 @@ Usage:   atmean(a,limits=None,inclusive=(1,1))
          mask = lowerfcn(a,limits[0])
      elif limits[0]<>None and limits[1]<>None:
          mask = lowerfcn(a,limits[0])*upperfcn(a,limits[1])
-     s = float(N.add.reduce(N.ravel(a*mask)))
-     n = float(N.add.reduce(N.ravel(mask)))
+     s = float(oldN.add.reduce(oldN.ravel(a*mask)))
+     n = float(oldN.add.reduce(oldN.ravel(mask)))
      return s/n
 
 
@@ -2213,18 +2213,18 @@ closed/inclusive (1).
 
 Usage:   atvar(a,limits=None,inclusive=(1,1))
 """
-     a = a.astype(N.Float)
+     a = a.astype(oldN.Float)
      if limits == None or limits == [None,None]:
-         term1 = N.add.reduce(N.ravel(a*a))
-         n = float(len(N.ravel(a))) - 1
-         term2 = N.add.reduce(N.ravel(a))**2 / n
+         term1 = oldN.add.reduce(oldN.ravel(a*a))
+         n = float(len(oldN.ravel(a))) - 1
+         term2 = oldN.add.reduce(oldN.ravel(a))**2 / n
          return (term1 - term2) / n
-     assert type(limits) in [ListType,TupleType,N.ArrayType], "Wrong type for limits in atvar"
-     if inclusive[0]:         lowerfcn = N.greater_equal
-     else:               lowerfcn = N.greater
-     if inclusive[1]:         upperfcn = N.less_equal
-     else:               upperfcn = N.less
-     if limits[0] > N.maximum.reduce(N.ravel(a)) or limits[1] < N.minimum.reduce(N.ravel(a)):
+     assert type(limits) in [ListType,TupleType,oldN.ArrayType], "Wrong type for limits in atvar"
+     if inclusive[0]:         lowerfcn = oldN.greater_equal
+     else:               lowerfcn = oldN.greater
+     if inclusive[1]:         upperfcn = oldN.less_equal
+     else:               upperfcn = oldN.less
+     if limits[0] > oldN.maximum.reduce(oldN.ravel(a)) or limits[1] < oldN.minimum.reduce(oldN.ravel(a)):
          raise ValueError, "No array values within given limits (atvar)."
      elif limits[0]==None and limits[1]<>None:
          mask = upperfcn(a,limits[1])
@@ -2232,9 +2232,9 @@ Usage:   atvar(a,limits=None,inclusive=(1,1))
          mask = lowerfcn(a,limits[0])
      elif limits[0]<>None and limits[1]<>None:
          mask = lowerfcn(a,limits[0])*upperfcn(a,limits[1])
-     term1 = N.add.reduce(N.ravel(a*a*mask))
-     n = float(N.add.reduce(N.ravel(mask))) - 1
-     term2 = N.add.reduce(N.ravel(a*mask))**2 / n
+     term1 = oldN.add.reduce(oldN.ravel(a*a*mask))
+     n = float(oldN.add.reduce(oldN.ravel(mask))) - 1
+     term2 = oldN.add.reduce(oldN.ravel(a*mask))**2 / n
      return (term1 - term2) / n
 
 
@@ -2246,16 +2246,16 @@ all values in the array are used.
 
 Usage:   atmin(a,lowerlimit=None,dimension=None,inclusive=1)
 """
-     if inclusive:         lowerfcn = N.greater
-     else:               lowerfcn = N.greater_equal
+     if inclusive:         lowerfcn = oldN.greater
+     else:               lowerfcn = oldN.greater_equal
      if dimension == None:
-         a = N.ravel(a)
+         a = oldN.ravel(a)
          dimension = 0
      if lowerlimit == None:
-         lowerlimit = N.minimum.reduce(N.ravel(a))-11
-     biggest = N.maximum.reduce(N.ravel(a))
-     ta = N.where(lowerfcn(a,lowerlimit),a,biggest)
-     return N.minimum.reduce(ta,dimension)
+         lowerlimit = oldN.minimum.reduce(oldN.ravel(a))-11
+     biggest = oldN.maximum.reduce(oldN.ravel(a))
+     ta = oldN.where(lowerfcn(a,lowerlimit),a,biggest)
+     return oldN.minimum.reduce(ta,dimension)
 
 
  def atmax(a,upperlimit,dimension=None,inclusive=1):
@@ -2266,16 +2266,16 @@ a limit larger than the max value in the array is used.
 
 Usage:   atmax(a,upperlimit,dimension=None,inclusive=1)
 """
-     if inclusive:         upperfcn = N.less
-     else:               upperfcn = N.less_equal
+     if inclusive:         upperfcn = oldN.less
+     else:               upperfcn = oldN.less_equal
      if dimension == None:
-         a = N.ravel(a)
+         a = oldN.ravel(a)
          dimension = 0
      if upperlimit == None:
-         upperlimit = N.maximum.reduce(N.ravel(a))+1
-     smallest = N.minimum.reduce(N.ravel(a))
-     ta = N.where(upperfcn(a,upperlimit),a,smallest)
-     return N.maximum.reduce(ta,dimension)
+         upperlimit = oldN.maximum.reduce(oldN.ravel(a))+1
+     smallest = oldN.minimum.reduce(oldN.ravel(a))
+     ta = oldN.where(upperfcn(a,upperlimit),a,smallest)
+     return oldN.maximum.reduce(ta,dimension)
 
 
  def atstdev(a,limits=None,inclusive=(1,1)):
@@ -2288,7 +2288,7 @@ inclusive list/tuple determines whether the lower and upper limiting bounds
 
 Usage:   atstdev(a,limits=None,inclusive=(1,1))
 """
-     return N.sqrt(tvar(a,limits,inclusive))
+     return oldN.sqrt(tvar(a,limits,inclusive))
 
 
  def atsem(a,limits=None,inclusive=(1,1)):
@@ -2304,13 +2304,13 @@ Usage:   atsem(a,limits=None,inclusive=(1,1))
 """
      sd = tstdev(a,limits,inclusive)
      if limits == None or limits == [None,None]:
-         n = float(len(N.ravel(a)))
-     assert type(limits) in [ListType,TupleType,N.ArrayType], "Wrong type for limits in atsem"
-     if inclusive[0]:         lowerfcn = N.greater_equal
-     else:               lowerfcn = N.greater
-     if inclusive[1]:         upperfcn = N.less_equal
-     else:               upperfcn = N.less
-     if limits[0] > N.maximum.reduce(N.ravel(a)) or limits[1] < N.minimum.reduce(N.ravel(a)):
+         n = float(len(oldN.ravel(a)))
+     assert type(limits) in [ListType,TupleType,oldN.ArrayType], "Wrong type for limits in atsem"
+     if inclusive[0]:         lowerfcn = oldN.greater_equal
+     else:               lowerfcn = oldN.greater
+     if inclusive[1]:         upperfcn = oldN.less_equal
+     else:               upperfcn = oldN.less
+     if limits[0] > oldN.maximum.reduce(oldN.ravel(a)) or limits[1] < oldN.minimum.reduce(oldN.ravel(a)):
          raise ValueError, "No array values within given limits (atsem)."
      elif limits[0]==None and limits[1]<>None:
          mask = upperfcn(a,limits[1])
@@ -2318,8 +2318,8 @@ Usage:   atsem(a,limits=None,inclusive=(1,1))
          mask = lowerfcn(a,limits[0])
      elif limits[0]<>None and limits[1]<>None:
          mask = lowerfcn(a,limits[0])*upperfcn(a,limits[1])
-     term1 = N.add.reduce(N.ravel(a*a*mask))
-     n = float(N.add.reduce(N.ravel(mask)))
+     term1 = oldN.add.reduce(oldN.ravel(a*a*mask))
+     n = float(oldN.add.reduce(oldN.ravel(mask)))
      return sd/math.sqrt(n)
 
 
@@ -2339,13 +2339,13 @@ Usage:   amoment(a,moment=1,dimension=None)
 Returns: appropriate moment along given dimension
 """
     if dimension == None:
-        a = N.ravel(a)
+        a = oldN.ravel(a)
         dimension = 0
     if moment == 1:
         return 0.0
     else:
         mn = amean(a,dimension,1)  # 1=keepdims
-        s = N.power((a-mn),moment)
+        s = oldN.power((a-mn),moment)
         return amean(s,dimension)
 
 
@@ -2372,12 +2372,12 @@ dimensions).
 Usage:   askew(a, dimension=None)
 Returns: skew of vals in a along dimension, returning ZERO where all vals equal
 """
-    denom = N.power(amoment(a,2,dimension),1.5)
-    zero = N.equal(denom,0)
-    if isinstance(denom, N.ArrayType) and asum(zero) <> 0:
+    denom = oldN.power(amoment(a,2,dimension),1.5)
+    zero = oldN.equal(denom,0)
+    if isinstance(denom, oldN.ArrayType) and asum(zero) <> 0:
         print "Number of zeros in askew: ",asum(zero)
     denom = denom + zero  # prevent divide-by-zero
-    return N.where(zero, 0, amoment(a,3,dimension)/denom)
+    return oldN.where(zero, 0, amoment(a,3,dimension)/denom)
 
 
  def akurtosis(a,dimension=None):
@@ -2391,12 +2391,12 @@ sequence (operate over multiple dimensions).
 Usage:   akurtosis(a,dimension=None)
 Returns: kurtosis of values in a along dimension, and ZERO where all vals equal
 """
-    denom = N.power(amoment(a,2,dimension),2)
-    zero = N.equal(denom,0)
-    if isinstance(denom, N.ArrayType) and asum(zero) <> 0:
+    denom = oldN.power(amoment(a,2,dimension),2)
+    zero = oldN.equal(denom,0)
+    if isinstance(denom, oldN.ArrayType) and asum(zero) <> 0:
         print "Number of zeros in akurtosis: ",asum(zero)
     denom = denom + zero  # prevent divide-by-zero
-    return N.where(zero,0,amoment(a,4,dimension)/denom)
+    return oldN.where(zero,0,amoment(a,4,dimension)/denom)
 
 
  def adescribe(inarray,dimension=None):
@@ -2409,10 +2409,10 @@ Usage:   adescribe(inarray,dimension=None)
 Returns: n, (min,max), mean, standard deviation, skew, kurtosis
 """
      if dimension == None:
-         inarray = N.ravel(inarray)
+         inarray = oldN.ravel(inarray)
          dimension = 0
      n = inarray.shape[dimension]
-     mm = (N.minimum.reduce(inarray),N.maximum.reduce(inarray))
+     mm = (oldN.minimum.reduce(inarray),oldN.maximum.reduce(inarray))
      m = amean(inarray,dimension)
      sd = astdev(inarray,dimension)
      skew = askew(inarray,dimension)
@@ -2435,17 +2435,17 @@ Usage:   askewtest(a,dimension=None)
 Returns: z-score and 2-tail z-probability
 """
     if dimension == None:
-        a = N.ravel(a)
+        a = oldN.ravel(a)
         dimension = 0
     b2 = askew(a,dimension)
     n = float(a.shape[dimension])
-    y = b2 * N.sqrt(((n+1)*(n+3)) / (6.0*(n-2)) )
+    y = b2 * oldN.sqrt(((n+1)*(n+3)) / (6.0*(n-2)) )
     beta2 = ( 3.0*(n*n+27*n-70)*(n+1)*(n+3) ) / ( (n-2.0)*(n+5)*(n+7)*(n+9) )
-    W2 = -1 + N.sqrt(2*(beta2-1))
-    delta = 1/N.sqrt(N.log(N.sqrt(W2)))
-    alpha = N.sqrt(2/(W2-1))
-    y = N.where(N.equal(y,0),1,y)
-    Z = delta*N.log(y/alpha + N.sqrt((y/alpha)**2+1))
+    W2 = -1 + oldN.sqrt(2*(beta2-1))
+    delta = 1/oldN.sqrt(oldN.log(oldN.sqrt(W2)))
+    alpha = oldN.sqrt(2/(W2-1))
+    y = oldN.where(oldN.equal(y,0),1,y)
+    Z = delta*oldN.log(y/alpha + oldN.sqrt((y/alpha)**2+1))
     return Z, (1.0-zprob(Z))*2
 
 
@@ -2460,7 +2460,7 @@ Usage:   akurtosistest(a,dimension=None)
 Returns: z-score and 2-tail z-probability, returns 0 for bad pixels
 """
     if dimension == None:
-        a = N.ravel(a)
+        a = oldN.ravel(a)
         dimension = 0
     n = float(a.shape[dimension])
     if n<20:
@@ -2468,16 +2468,16 @@ Returns: z-score and 2-tail z-probability, returns 0 for bad pixels
     b2 = akurtosis(a,dimension)
     E = 3.0*(n-1) /(n+1)
     varb2 = 24.0*n*(n-2)*(n-3) / ((n+1)*(n+1)*(n+3)*(n+5))
-    x = (b2-E)/N.sqrt(varb2)
-    sqrtbeta1 = 6.0*(n*n-5*n+2)/((n+7)*(n+9)) * N.sqrt((6.0*(n+3)*(n+5))/
+    x = (b2-E)/oldN.sqrt(varb2)
+    sqrtbeta1 = 6.0*(n*n-5*n+2)/((n+7)*(n+9)) * oldN.sqrt((6.0*(n+3)*(n+5))/
                                                        (n*(n-2)*(n-3)))
-    A = 6.0 + 8.0/sqrtbeta1 *(2.0/sqrtbeta1 + N.sqrt(1+4.0/(sqrtbeta1**2)))
+    A = 6.0 + 8.0/sqrtbeta1 *(2.0/sqrtbeta1 + oldN.sqrt(1+4.0/(sqrtbeta1**2)))
     term1 = 1 -2/(9.0*A)
-    denom = 1 +x*N.sqrt(2/(A-4.0))
-    denom = N.where(N.less(denom,0), 99, denom)
-    term2 = N.where(N.equal(denom,0), term1, N.power((1-2.0/A)/denom,1/3.0))
-    Z = ( term1 - term2 ) / N.sqrt(2/(9.0*A))
-    Z = N.where(N.equal(denom,99), 0, Z)
+    denom = 1 +x*oldN.sqrt(2/(A-4.0))
+    denom = oldN.where(oldN.less(denom,0), 99, denom)
+    term2 = oldN.where(oldN.equal(denom,0), term1, oldN.power((1-2.0/A)/denom,1/3.0))
+    Z = ( term1 - term2 ) / oldN.sqrt(2/(9.0*A))
+    Z = oldN.where(oldN.equal(denom,99), 0, Z)
     return Z, (1.0-zprob(Z))*2
 
 
@@ -2492,11 +2492,11 @@ Usage:   anormaltest(a,dimension=None)
 Returns: z-score and 2-tail probability
 """
     if dimension == None:
-        a = N.ravel(a)
+        a = oldN.ravel(a)
         dimension = 0
     s,p = askewtest(a,dimension)
     k,p = akurtosistest(a,dimension)
-    k2 = N.power(s,2) + N.power(k,2)
+    k2 = oldN.power(s,2) + oldN.power(k,2)
     return k2, achisqprob(k2,2)
 
 
@@ -2513,11 +2513,11 @@ Usage:   aitemfreq(a)
 Returns: a 2D frequency table (col [0:n-1]=scores, col n=frequencies)
 """
     scores = pstat.aunique(a)
-    scores = N.sort(scores)
-    freq = N.zeros(len(scores))
+    scores = oldN.sort(scores)
+    freq = oldN.zeros(len(scores))
     for i in range(len(scores)):
-        freq[i] = N.add.reduce(N.equal(a,scores[i]))
-    return N.array(pstat.aabut(scores, freq))
+        freq[i] = oldN.add.reduce(oldN.equal(a,scores[i]))
+    return oldN.array(pstat.aabut(scores, freq))
 
 
  def ascoreatpercentile (inarray, percent):
@@ -2563,18 +2563,18 @@ following: array of bin values, lowerreallimit, binsize, extrapoints.
 Usage:   ahistogram(inarray,numbins=10,defaultlimits=None,printextras=1)
 Returns: (array of bin counts, bin-minimum, min-width, #-points-outside-range)
 """
-    inarray = N.ravel(inarray)               # flatten any >1D arrays
+    inarray = oldN.ravel(inarray)               # flatten any >1D arrays
     if (defaultlimits <> None):
         lowerreallimit = defaultlimits[0]
         upperreallimit = defaultlimits[1]
         binsize = (upperreallimit-lowerreallimit) / float(numbins)
     else:
-        Min = N.minimum.reduce(inarray)
-        Max = N.maximum.reduce(inarray)
+        Min = oldN.minimum.reduce(inarray)
+        Max = oldN.maximum.reduce(inarray)
         estbinwidth = float(Max - Min)/float(numbins) + 1
         binsize = (Max-Min+estbinwidth)/float(numbins)
         lowerreallimit = Min - binsize/2.0  #lower real limit,1st bin
-    bins = N.zeros(numbins)
+    bins = oldN.zeros(numbins)
     extrapoints = 0
     for num in inarray:
         try:
@@ -2614,7 +2614,7 @@ Usage:   arelfreq(a,numbins=10,defaultreallimits=None)
 Returns: array of cumfreq bin values, lowerreallimit, binsize, extrapoints
 """
     h,l,b,e = histogram(a,numbins,defaultreallimits)
-    h = N.array(h/float(a.shape[0]))
+    h = oldN.array(h/float(a.shape[0]))
     return h,l,b,e
 
 
@@ -2635,12 +2635,12 @@ Returns: transformed data for use in an ANOVA
 """
     TINY = 1e-10
     k = len(args)
-    n = N.zeros(k,N.Float)
-    v = N.zeros(k,N.Float)
-    m = N.zeros(k,N.Float)
+    n = oldN.zeros(k,oldN.Float)
+    v = oldN.zeros(k,oldN.Float)
+    m = oldN.zeros(k,oldN.Float)
     nargs = []
     for i in range(k):
-        nargs.append(args[i].astype(N.Float))
+        nargs.append(args[i].astype(oldN.Float))
         n[i] = float(len(nargs[i]))
         v[i] = var(nargs[i])
         m[i] = mean(nargs[i])
@@ -2657,7 +2657,7 @@ Returns: transformed data for use in an ANOVA
     if check <> 1:
         raise ValueError, 'Lack of convergence in obrientransform.'
     else:
-        return N.array(nargs)
+        return oldN.array(nargs)
 
 
  def asamplevar (inarray,dimension=None,keepdims=0):
@@ -2671,10 +2671,10 @@ with the same number of dimensions as inarray.
 Usage:   asamplevar(inarray,dimension=None,keepdims=0)
 """
     if dimension == None:
-        inarray = N.ravel(inarray)
+        inarray = oldN.ravel(inarray)
         dimension = 0
     if dimension == 1:
-        mn = amean(inarray,dimension)[:,N.NewAxis]
+        mn = amean(inarray,dimension)[:,oldN.NewAxis]
     else:
         mn = amean(inarray,dimension,keepdims=1)
     deviations = inarray - mn 
@@ -2698,7 +2698,7 @@ with the same number of dimensions as inarray.
 
 Usage:   asamplestdev(inarray,dimension=None,keepdims=0)
 """
-    return N.sqrt(asamplevar(inarray,dimension,keepdims))
+    return oldN.sqrt(asamplevar(inarray,dimension,keepdims))
 
 
  def asignaltonoise(instack,dimension=0):
@@ -2712,7 +2712,7 @@ Returns: array containing the value of (mean/stdev) along dimension, or 0 when s
 """
     m = mean(instack,dimension)
     sd = stdev(instack,dimension)
-    return N.where(N.equal(sd,0),0,m/sd)
+    return oldN.where(oldN.equal(sd,0),0,m/sd)
 
 
  def avar (inarray, dimension=None,keepdims=0):
@@ -2726,7 +2726,7 @@ same number of dimensions as inarray.
 Usage:   avar(inarray,dimension=None,keepdims=0)
 """
     if dimension == None:
-        inarray = N.ravel(inarray)
+        inarray = oldN.ravel(inarray)
         dimension = 0
     mn = amean(inarray,dimension,1)
     deviations = inarray - mn
@@ -2750,7 +2750,7 @@ an array with the same number of dimensions as inarray.
 
 Usage:   astdev(inarray,dimension=None,keepdims=0)
 """
-    return N.sqrt(avar(inarray,dimension,keepdims))
+    return oldN.sqrt(avar(inarray,dimension,keepdims))
 
 
  def asterr (inarray, dimension=None, keepdims=0):
@@ -2764,9 +2764,9 @@ an array with the same number of dimensions as inarray.
 Usage:   asterr(inarray,dimension=None,keepdims=0)
 """
     if dimension == None:
-        inarray = N.ravel(inarray)
+        inarray = oldN.ravel(inarray)
         dimension = 0
-    return astdev(inarray,dimension,keepdims) / float(N.sqrt(inarray.shape[dimension]))
+    return astdev(inarray,dimension,keepdims) / float(oldN.sqrt(inarray.shape[dimension]))
 
 
  def asem (inarray, dimension=None, keepdims=0):
@@ -2780,7 +2780,7 @@ same number of dimensions as inarray.
 Usage:   asem(inarray,dimension=None, keepdims=0)
 """
     if dimension == None:
-        inarray = N.ravel(inarray)
+        inarray = oldN.ravel(inarray)
         dimension = 0
     if type(dimension) == ListType:
         n = 1
@@ -2788,7 +2788,7 @@ Usage:   asem(inarray,dimension=None, keepdims=0)
             n = n*inarray.shape[d]
     else:
         n = inarray.shape[dimension]
-    s = asamplestdev(inarray,dimension,keepdims) / N.sqrt(n-1)
+    s = asamplestdev(inarray,dimension,keepdims) / oldN.sqrt(n-1)
     return s
 
 
@@ -2814,7 +2814,7 @@ Usage:   azs(a)
     zscores = []
     for item in a:
         zscores.append(z(a,item))
-    return N.array(zscores)
+    return oldN.array(zscores)
 
 
  def azmap (scores, compare, dimension=0):
@@ -2844,18 +2844,18 @@ Returns: a, where each value is rounded to 'digits' decimals
      def ar(x,d=digits):
          return round(x,d)
 
-     if type(a) <> N.ArrayType:
+     if type(a) <> oldN.ArrayType:
          try:
-             a = N.array(a)
+             a = oldN.array(a)
          except:
-             a = N.array(a,'O')
+             a = oldN.array(a,'O')
      shp = a.shape
      if a.dtype.char in ['f','F','d','D']:
-         b = N.ravel(a)
-         b = N.array(map(ar,b))
+         b = oldN.ravel(a)
+         b = oldN.array(map(ar,b))
          b.shape = shp
      elif a.dtype.char in ['o','O']:
-         b = N.ravel(a)*1
+         b = oldN.ravel(a)*1
          for i in range(len(b)):
              if isinstance(b[i], FloatType):
                  b[i] = round(b[i],digits)
@@ -2867,19 +2867,19 @@ Returns: a, where each value is rounded to 'digits' decimals
 
  def athreshold(a,threshmin=None,threshmax=None,newval=0):
     """
-Like Numeric.clip() except that values <threshmid or >threshmax are replaced
+Like numpy.clip() except that values <threshmid or >threshmax are replaced
 by newval instead of by threshmin/threshmax (respectively).
 
 Usage:   athreshold(a,threshmin=None,threshmax=None,newval=0)
 Returns: a, with values <threshmin or >threshmax replaced with newval
 """
-    mask = N.zeros(a.shape)
+    mask = oldN.zeros(a.shape)
     if threshmin <> None:
-        mask = mask + N.where(N.less(a,threshmin),1,0)
+        mask = mask + oldN.where(oldN.less(a,threshmin),1,0)
     if threshmax <> None:
-        mask = mask + N.where(N.greater(a,threshmax),1,0)
-    mask = N.clip(mask,0,1)
-    return N.where(mask,newval,a)
+        mask = mask + oldN.where(oldN.greater(a,threshmax),1,0)
+    mask = oldN.clip(mask,0,1)
+    return oldN.where(mask,newval,a)
 
 
  def atrimboth (a,proportiontocut):
@@ -2933,7 +2933,7 @@ Returns: covariance matrix of X
         raise TypeError, "acovariance requires 2D matrices"
     n = X.shape[0]
     mX = amean(X,0)
-    return N.dot(N.transpose(X),X) / float(n) - N.multiply.outer(mX,mX)
+    return oldN.dot(oldN.transpose(X),X) / float(n) - oldN.multiply.outer(mX,mX)
 
 
  def acorrelation(X):
@@ -2944,8 +2944,8 @@ Usage:   acorrelation(X)
 Returns: correlation matrix of X
 """
     C = acovariance(X)
-    V = N.diagonal(C)
-    return C / N.sqrt(N.multiply.outer(V,V))
+    V = oldN.diagonal(C)
+    return C / oldN.sqrt(oldN.multiply.outer(V,V))
 
 
  def apaired(x,y):
@@ -3024,7 +3024,7 @@ Returns: Pearson's r, two-tailed p-value
     n = len(x)
     xmean = amean(x)
     ymean = amean(y)
-    r_num = n*(N.add.reduce(x*y)) - N.add.reduce(x)*N.add.reduce(y)
+    r_num = n*(oldN.add.reduce(x*y)) - oldN.add.reduce(x)*oldN.add.reduce(y)
     r_den = math.sqrt((n*ass(x) - asquare_of_sums(x))*(n*ass(y)-asquare_of_sums(y)))
     r = (r_num / r_den)
     df = n-2
@@ -3045,7 +3045,7 @@ Returns: Spearman's r, two-tailed p-value
     n = len(x)
     rankx = rankdata(x)
     ranky = rankdata(y)
-    dsq = N.add.reduce((rankx-ranky)**2)
+    dsq = oldN.add.reduce((rankx-ranky)**2)
     rs = 1 - 6*dsq / float(n*(n**2-1))
     t = rs * math.sqrt((n-2) / ((rs+1.0)*(1.0-rs)))
     df = n-2
@@ -3070,7 +3070,7 @@ Returns: Point-biserial r, two-tailed p-value
     if len(categories) <> 2:
         raise ValueError, "Exactly 2 categories required (in x) for pointbiserialr()."
     else:   # there are 2 categories, continue
-        codemap = pstat.aabut(categories,N.arange(2))
+        codemap = pstat.aabut(categories,oldN.arange(2))
         recoded = pstat.arecode(data,codemap,0)
         x = pstat.alinexand(data,0,categories[0])
         y = pstat.alinexand(data,0,categories[1])
@@ -3144,7 +3144,7 @@ Returns: slope, intercept, r, two-tailed prob, sterr-of-the-estimate
     n = len(x)
     xmean = amean(x)
     ymean = amean(y)
-    r_num = n*(N.add.reduce(x*y)) - N.add.reduce(x)*N.add.reduce(y)
+    r_num = n*(oldN.add.reduce(x*y)) - oldN.add.reduce(x)*oldN.add.reduce(y)
     r_den = math.sqrt((n*ass(x) - asquare_of_sums(x))*(n*ass(y)-asquare_of_sums(y)))
     r = r_num / r_den
     z = 0.5*math.log((1.0+r+TINY)/(1.0-r+TINY))
@@ -3171,8 +3171,8 @@ using the given writemode (default=append).  Returns t-value, and prob.
 Usage:   attest_1samp(a,popmean,Name='Sample',printit=0,writemode='a')
 Returns: t-value, two-tailed prob
 """
-    if type(a) != N.ArrayType:
-        a = N.array(a)
+    if type(a) != oldN.ArrayType:
+        a = oldN.array(a)
     x = amean(a)
     v = avar(a)
     n = len(a)
@@ -3185,8 +3185,8 @@ Returns: t-value, two-tailed prob
         statname = 'Single-sample T-test.'
         outputpairedstats(printit,writemode,
                           'Population','--',popmean,0,0,0,
-                          name,n,x,v,N.minimum.reduce(N.ravel(a)),
-                          N.maximum.reduce(N.ravel(a)),
+                          name,n,x,v,oldN.minimum.reduce(oldN.ravel(a)),
+                          oldN.maximum.reduce(oldN.ravel(a)),
                           statname,t,prob)
     return t,prob
 
@@ -3206,8 +3206,8 @@ Usage::
 Returns: t-value, two-tailed p-value
 """
     if dimension == None:
-        a = N.ravel(a)
-        b = N.ravel(b)
+        a = oldN.ravel(a)
+        b = oldN.ravel(b)
         dimension = 0
     x1 = amean(a,dimension)
     x2 = amean(b,dimension)
@@ -3217,27 +3217,27 @@ Returns: t-value, two-tailed p-value
     n2 = b.shape[dimension]
     df = n1+n2-2
     svar = ((n1-1)*v1+(n2-1)*v2) / float(df)
-    zerodivproblem = N.equal(svar,0)
-    t = (x1-x2)/N.sqrt(svar*(1.0/n1 + 1.0/n2))  # N-D COMPUTATION HERE!!!!!!
-    t = N.where(zerodivproblem,1.0,t)           # replace NaN t-values with 1.0
+    zerodivproblem = oldN.equal(svar,0)
+    t = (x1-x2)/oldN.sqrt(svar*(1.0/n1 + 1.0/n2))  # N-D COMPUTATION HERE!!!!!!
+    t = oldN.where(zerodivproblem,1.0,t)           # replace NaN t-values with 1.0
     probs = abetai(0.5*df,0.5,float(df)/(df+t*t))
 
-    if isinstance(t, N.ArrayType):
-        probs = N.reshape(probs,t.shape)
+    if isinstance(t, oldN.ArrayType):
+        probs = oldN.reshape(probs,t.shape)
     if len(probs) == 1:
         probs = probs[0]
         
     if printit <> 0:
-        if isinstance(t, N.ArrayType):
+        if isinstance(t, oldN.ArrayType):
             t = t[0]
-        if isinstance(probs, N.ArrayType):
+        if isinstance(probs, oldN.ArrayType):
             probs = probs[0]
         statname = 'Independent samples T-test.'
         outputpairedstats(printit,writemode,
-                          name1,n1,x1,v1,N.minimum.reduce(N.ravel(a)),
-                          N.maximum.reduce(N.ravel(a)),
-                          name2,n2,x2,v2,N.minimum.reduce(N.ravel(b)),
-                          N.maximum.reduce(N.ravel(b)),
+                          name1,n1,x1,v1,oldN.minimum.reduce(oldN.ravel(a)),
+                          oldN.maximum.reduce(oldN.ravel(a)),
+                          name2,n2,x2,v2,oldN.minimum.reduce(oldN.ravel(b)),
+                          oldN.maximum.reduce(oldN.ravel(b)),
                           statname,t,probs)
         return
     return t, probs
@@ -3258,8 +3258,8 @@ Usage::
 Returns: t-value, two-tailed p-value
 """
     if dimension == None:
-        a = N.ravel(a)
-        b = N.ravel(b)
+        a = oldN.ravel(a)
+        b = oldN.ravel(b)
         dimension = 0
     if len(a)<>len(b):
         raise ValueError, 'Unequal length arrays.'
@@ -3269,26 +3269,26 @@ Returns: t-value, two-tailed p-value
     v2 = avar(b,dimension)
     n = a.shape[dimension]
     df = float(n-1)
-    d = (a-b).astype(N.Float64)
+    d = (a-b).astype(oldN.Float64)
 
-    denom = N.sqrt((n*N.add.reduce(d*d,dimension) - N.add.reduce(d,dimension)**2) /df)
-    zerodivproblem = N.equal(denom,0)
-    t = N.add.reduce(d,dimension) / denom      # N-D COMPUTATION HERE!!!!!!
-    t = N.where(zerodivproblem,1.0,t)          # replace NaN t-values with 1.0
-    t = N.where(zerodivproblem,1.0,t)           # replace NaN t-values with 1.0
+    denom = oldN.sqrt((n*oldN.add.reduce(d*d,dimension) - oldN.add.reduce(d,dimension)**2) /df)
+    zerodivproblem = oldN.equal(denom,0)
+    t = oldN.add.reduce(d,dimension) / denom      # N-D COMPUTATION HERE!!!!!!
+    t = oldN.where(zerodivproblem,1.0,t)          # replace NaN t-values with 1.0
+    t = oldN.where(zerodivproblem,1.0,t)           # replace NaN t-values with 1.0
     probs = abetai(0.5*df,0.5,float(df)/(df+t*t))
-    if isinstance(t, N.ArrayType):
-        probs = N.reshape(probs,t.shape)
+    if isinstance(t, oldN.ArrayType):
+        probs = oldN.reshape(probs,t.shape)
     if len(probs) == 1:
         probs = probs[0]
 
     if printit <> 0:
         statname = 'Related samples T-test.'
         outputpairedstats(printit,writemode,
-                          name1,n,x1,v1,N.minimum.reduce(N.ravel(a)),
-                          N.maximum.reduce(N.ravel(a)),
-                          name2,n,x2,v2,N.minimum.reduce(N.ravel(b)),
-                          N.maximum.reduce(N.ravel(b)),
+                          name1,n,x1,v1,oldN.minimum.reduce(oldN.ravel(a)),
+                          oldN.maximum.reduce(oldN.ravel(a)),
+                          name2,n,x2,v2,oldN.minimum.reduce(oldN.ravel(b)),
+                          oldN.maximum.reduce(oldN.ravel(b)),
                           statname,t,probs)
         return
     return t, probs
@@ -3306,9 +3306,9 @@ Returns: chisquare-statistic, associated p-value
 
     k = len(f_obs)
     if f_exp == None:
-        f_exp = N.array([sum(f_obs)/float(k)] * len(f_obs),N.Float)
-    f_exp = f_exp.astype(N.Float)
-    chisq = N.add.reduce((f_obs-f_exp)**2 / f_exp)
+        f_exp = oldN.array([sum(f_obs)/float(k)] * len(f_obs),oldN.Float)
+    f_exp = f_exp.astype(oldN.Float)
+    chisq = oldN.add.reduce((f_obs-f_exp)**2 / f_exp)
     return chisq, chisqprob(chisq, k-1)
 
 
@@ -3321,17 +3321,17 @@ like.
 Usage:   aks_2samp(data1,data2)  where data1 and data2 are 1D arrays
 Returns: KS D-value, p-value
 """
-    j1 = 0    # N.zeros(data1.shape[1:]) TRIED TO MAKE THIS UFUNC-LIKE
-    j2 = 0    # N.zeros(data2.shape[1:])
-    fn1 = 0.0 # N.zeros(data1.shape[1:],N.Float)
-    fn2 = 0.0 # N.zeros(data2.shape[1:],N.Float)
+    j1 = 0    # oldN.zeros(data1.shape[1:]) TRIED TO MAKE THIS UFUNC-LIKE
+    j2 = 0    # oldN.zeros(data2.shape[1:])
+    fn1 = 0.0 # oldN.zeros(data1.shape[1:],oldN.Float)
+    fn2 = 0.0 # oldN.zeros(data2.shape[1:],oldN.Float)
     n1 = data1.shape[0]
     n2 = data2.shape[0]
     en1 = n1*1
     en2 = n2*1
-    d = N.zeros(data1.shape[1:],N.Float)
-    data1 = N.sort(data1,0)
-    data2 = N.sort(data2,0)
+    d = oldN.zeros(data1.shape[1:],oldN.Float)
+    data1 = oldN.sort(data1,0)
+    data2 = oldN.sort(data2,0)
     while j1 < n1 and j2 < n2:
         d1=data1[j1]
         d2=data2[j2]
@@ -3346,7 +3346,7 @@ Returns: KS D-value, p-value
             d = dt
     try:
         en = math.sqrt(en1*en2/float(en1+en2))
-        prob = aksprob((en+0.12+0.11/en)*N.fabs(d))
+        prob = aksprob((en+0.12+0.11/en)*oldN.fabs(d))
     except:
         prob = 1.0
     return d, prob
@@ -3365,7 +3365,7 @@ Returns: u-statistic, one-tailed p-value (i.e., p(z(U)))
 """
     n1 = len(x)
     n2 = len(y)
-    ranked = rankdata(N.concatenate((x,y)))
+    ranked = rankdata(oldN.concatenate((x,y)))
     rankx = ranked[0:n1]       # get the x-ranks
     ranky = ranked[n1:]        # the rest are y-ranks
     u1 = n1*n2 + (n1*(n1+1))/2.0 - sum(rankx)  # calc U for x
@@ -3390,7 +3390,7 @@ code.
 Usage:   atiecorrect(rankvals)
 Returns: T correction factor for U or H
 """
-    sorted,posn = ashellsort(N.array(rankvals))
+    sorted,posn = ashellsort(oldN.array(rankvals))
     n = len(sorted)
     T = 0.0
     i = 0
@@ -3416,7 +3416,7 @@ Returns: z-statistic, two-tailed p-value
 """
     n1 = len(x)
     n2 = len(y)
-    alldata = N.concatenate((x,y))
+    alldata = oldN.concatenate((x,y))
     ranked = arankdata(alldata)
     x = ranked[:n1]
     y = ranked[n1:]
@@ -3438,7 +3438,7 @@ Returns: t-statistic, two-tailed p-value
     if len(x) <> len(y):
         raise ValueError, 'Unequal N in awilcoxont.  Aborting.'
     d = x-y
-    d = N.compress(N.not_equal(d,0),d) # Keep all non-zero differences
+    d = oldN.compress(oldN.not_equal(d,0),d) # Keep all non-zero differences
     count = len(d)
     absd = abs(d)
     absranked = arankdata(absd)
@@ -3511,7 +3511,7 @@ Returns: chi-square statistic, associated p-value
         raise ValueError, '\nLess than 3 levels.  Friedman test not appropriate.\n'
     n = len(args[0])
     data = apply(pstat.aabut,args)
-    data = data.astype(N.Float)
+    data = data.astype(oldN.Float)
     for i in range(len(data)):
         data[i] = arankdata(data[i])
     ssbn = asum(asum(args,1)**2)
@@ -3534,18 +3534,18 @@ Usage:   achisqprob(chisq,df)    chisq=chisquare stat., df=degrees of freedom
     BIG = 200.0
     def ex(x):
         BIG = 200.0
-        exponents = N.where(N.less(x,-BIG),-BIG,x)
-        return N.exp(exponents)
+        exponents = oldN.where(oldN.less(x,-BIG),-BIG,x)
+        return oldN.exp(exponents)
 
-    if isinstance(chisq, N.ArrayType):
+    if isinstance(chisq, oldN.ArrayType):
         arrayflag = 1
     else:
         arrayflag = 0
-        chisq = N.array([chisq])
+        chisq = oldN.array([chisq])
     if df < 1:
-        return N.ones(chisq.shape,N.float)
-    probs = N.zeros(chisq.shape,N.Float)
-    probs = N.where(N.less_equal(chisq,0),1.0,probs)  # set prob=1 for chisq<0
+        return oldN.ones(chisq.shape,oldN.float)
+    probs = oldN.zeros(chisq.shape,oldN.Float)
+    probs = oldN.where(oldN.less_equal(chisq,0),1.0,probs)  # set prob=1 for chisq<0
     a = 0.5 * chisq
     if df > 1:
         y = ex(-a)
@@ -3555,51 +3555,51 @@ Usage:   achisqprob(chisq,df)    chisq=chisquare stat., df=degrees of freedom
         s2 = s*1
     else:
         even = 0
-        s = 2.0 * azprob(-N.sqrt(chisq))
+        s = 2.0 * azprob(-oldN.sqrt(chisq))
         s2 = s*1
     if (df > 2):
         chisq = 0.5 * (df - 1.0)
         if even:
-            z = N.ones(probs.shape,N.Float)
+            z = oldN.ones(probs.shape,oldN.Float)
         else:
-            z = 0.5 *N.ones(probs.shape,N.Float)
+            z = 0.5 *oldN.ones(probs.shape,oldN.Float)
         if even:
-            e = N.zeros(probs.shape,N.Float)
+            e = oldN.zeros(probs.shape,oldN.Float)
         else:
-            e = N.log(N.sqrt(N.pi)) *N.ones(probs.shape,N.Float)
-        c = N.log(a)
-        mask = N.zeros(probs.shape)
-        a_big = N.greater(a,BIG)
-        a_big_frozen = -1 *N.ones(probs.shape,N.Float)
-        totalelements = N.multiply.reduce(N.array(probs.shape))
+            e = oldN.log(oldN.sqrt(oldN.pi)) *oldN.ones(probs.shape,oldN.Float)
+        c = oldN.log(a)
+        mask = oldN.zeros(probs.shape)
+        a_big = oldN.greater(a,BIG)
+        a_big_frozen = -1 *oldN.ones(probs.shape,oldN.Float)
+        totalelements = oldN.multiply.reduce(oldN.array(probs.shape))
         while asum(mask)<>totalelements:
-            e = N.log(z) + e
+            e = oldN.log(z) + e
             s = s + ex(c*z-a-e)
             z = z + 1.0
             print z, e, s
-            newmask = N.greater(z,chisq)
-            a_big_frozen = N.where(newmask*N.equal(mask,0)*a_big, s, a_big_frozen)
-            mask = N.clip(newmask+mask,0,1)
+            newmask = oldN.greater(z,chisq)
+            a_big_frozen = oldN.where(newmask*oldN.equal(mask,0)*a_big, s, a_big_frozen)
+            mask = oldN.clip(newmask+mask,0,1)
         if even:
-            z = N.ones(probs.shape,N.Float)
-            e = N.ones(probs.shape,N.Float)
+            z = oldN.ones(probs.shape,oldN.Float)
+            e = oldN.ones(probs.shape,oldN.Float)
         else:
-            z = 0.5 *N.ones(probs.shape,N.Float)
-            e = 1.0 / N.sqrt(N.pi) / N.sqrt(a) * N.ones(probs.shape,N.Float)
+            z = 0.5 *oldN.ones(probs.shape,oldN.Float)
+            e = 1.0 / oldN.sqrt(oldN.pi) / oldN.sqrt(a) * oldN.ones(probs.shape,oldN.Float)
         c = 0.0
-        mask = N.zeros(probs.shape)
-        a_notbig_frozen = -1 *N.ones(probs.shape,N.Float)
+        mask = oldN.zeros(probs.shape)
+        a_notbig_frozen = -1 *oldN.ones(probs.shape,oldN.Float)
         while asum(mask)<>totalelements:
-            e = e * (a/z.astype(N.Float))
+            e = e * (a/z.astype(oldN.Float))
             c = c + e
             z = z + 1.0
             print '#2', z, e, c, s, c*y+s2
-            newmask = N.greater(z,chisq)
-            a_notbig_frozen = N.where(newmask*N.equal(mask,0)*(1-a_big),
+            newmask = oldN.greater(z,chisq)
+            a_notbig_frozen = oldN.where(newmask*oldN.equal(mask,0)*(1-a_big),
                                       c*y+s2, a_notbig_frozen)
-            mask = N.clip(newmask+mask,0,1)
-        probs = N.where(N.equal(probs,1),1,
-                        N.where(N.greater(a,BIG),a_big_frozen,a_notbig_frozen))
+            mask = oldN.clip(newmask+mask,0,1)
+        probs = oldN.where(oldN.equal(probs,1),1,
+                        oldN.where(oldN.greater(a,BIG),a_big_frozen,a_notbig_frozen))
         return probs
     else:
         return s
@@ -3615,8 +3615,8 @@ Usage:   aerfcc(x)
 """
     z = abs(x)
     t = 1.0 / (1.0+0.5*z)
-    ans = t * N.exp(-z*z-1.26551223 + t*(1.00002368+t*(0.37409196+t*(0.09678418+t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+t*(-0.82215223+t*0.17087277)))))))))
-    return N.where(N.greater_equal(x,0), ans, 2.0-ans)
+    ans = t * oldN.exp(-z*z-1.26551223 + t*(1.00002368+t*(0.37409196+t*(0.09678418+t*(-0.18628806+t*(0.27886807+t*(-1.13520398+t*(1.48851587+t*(-0.82215223+t*0.17087277)))))))))
+    return oldN.where(oldN.greater_equal(x,0), ans, 2.0-ans)
 
 
  def azprob(z):
@@ -3646,15 +3646,15 @@ Usage:   azprob(z)    where z is a z-value
                     -0.001075204047) * w +0.005198775019) * w
                   -0.019198292004) * w +0.059054035642) * w
                 -0.151968751364) * w +0.319152932694) * w
-              -0.531923007300) * w +0.797884560593) * N.sqrt(w) * 2.0
+              -0.531923007300) * w +0.797884560593) * oldN.sqrt(w) * 2.0
         return x
 
     Z_MAX = 6.0    # maximum meaningful z-value
-    x = N.zeros(z.shape,N.Float) # initialize
-    y = 0.5 * N.fabs(z)
-    x = N.where(N.less(y,1.0),wfunc(y*y),yfunc(y-2.0)) # get x's
-    x = N.where(N.greater(y,Z_MAX*0.5),1.0,x)          # kill those with big Z
-    prob = N.where(N.greater(z,0),(x+1)*0.5,(1-x)*0.5)
+    x = oldN.zeros(z.shape,oldN.Float) # initialize
+    y = 0.5 * oldN.fabs(z)
+    x = oldN.where(oldN.less(y,1.0),wfunc(y*y),yfunc(y-2.0)) # get x's
+    x = oldN.where(oldN.greater(y,Z_MAX*0.5),1.0,x)          # kill those with big Z
+    prob = oldN.where(oldN.greater(z,0),(x+1)*0.5,(1-x)*0.5)
     return prob
 
 
@@ -3665,38 +3665,38 @@ Adapted from Numerical Recipies.  Can handle multiple dimensions.
 
 Usage:   aksprob(alam)
 """
-     if isinstance(alam, N.ArrayType):
-         frozen = -1 *N.ones(alam.shape,N.Float64)
-         alam = alam.astype(N.Float64)
+     if isinstance(alam, oldN.ArrayType):
+         frozen = -1 *oldN.ones(alam.shape,oldN.Float64)
+         alam = alam.astype(oldN.Float64)
          arrayflag = 1
      else:
-         frozen = N.array(-1.)
-         alam = N.array(alam,N.Float64)
-     mask = N.zeros(alam.shape)
-     fac = 2.0 *N.ones(alam.shape,N.Float)
-     sum = N.zeros(alam.shape,N.Float)
-     termbf = N.zeros(alam.shape,N.Float)
-     a2 = N.array(-2.0*alam*alam,N.Float64)
-     totalelements = N.multiply.reduce(N.array(mask.shape))
+         frozen = oldN.array(-1.)
+         alam = oldN.array(alam,oldN.Float64)
+     mask = oldN.zeros(alam.shape)
+     fac = 2.0 *oldN.ones(alam.shape,oldN.Float)
+     sum = oldN.zeros(alam.shape,oldN.Float)
+     termbf = oldN.zeros(alam.shape,oldN.Float)
+     a2 = oldN.array(-2.0*alam*alam,oldN.Float64)
+     totalelements = oldN.multiply.reduce(oldN.array(mask.shape))
      for j in range(1,201):
          if asum(mask) == totalelements:
              break
          exponents = (a2*j*j)
-         overflowmask = N.less(exponents,-746)
-         frozen = N.where(overflowmask,0,frozen)
+         overflowmask = oldN.less(exponents,-746)
+         frozen = oldN.where(overflowmask,0,frozen)
          mask = mask+overflowmask
-         term = fac*N.exp(exponents)
+         term = fac*oldN.exp(exponents)
          sum = sum + term
-         newmask = N.where(N.less_equal(abs(term),(0.001*termbf)) +
-                           N.less(abs(term),1.0e-8*sum), 1, 0)
-         frozen = N.where(newmask*N.equal(mask,0), sum, frozen)
-         mask = N.clip(mask+newmask,0,1)
+         newmask = oldN.where(oldN.less_equal(abs(term),(0.001*termbf)) +
+                           oldN.less(abs(term),1.0e-8*sum), 1, 0)
+         frozen = oldN.where(newmask*oldN.equal(mask,0), sum, frozen)
+         mask = oldN.clip(mask+newmask,0,1)
          fac = -fac
          termbf = abs(term)
      if arrayflag:
-         return N.where(N.equal(frozen,-1), 1.0, frozen)  # 1.0 if doesn't converge
+         return oldN.where(oldN.equal(frozen,-1), 1.0, frozen)  # 1.0 if doesn't converge
      else:
-         return N.where(N.equal(frozen,-1), 1.0, frozen)[0]  # 1.0 if doesn't converge
+         return oldN.where(oldN.equal(frozen,-1), 1.0, frozen)[0]  # 1.0 if doesn't converge
 
 
  def afprob (dfnum, dfden, F):
@@ -3707,7 +3707,7 @@ of freedom for the denominator (dfF).  Can handle multiple dims for F.
 
 Usage:   afprob(dfnum, dfden, F)   where usually dfnum=dfbn, dfden=dfwn
 """
-    if isinstance(F, N.ArrayType):
+    if isinstance(F, oldN.ArrayType):
         return abetai(0.5*dfden, 0.5*dfnum, dfden/(1.0*dfden+dfnum*F))
     else:
         return abetai(0.5*dfden, 0.5*dfnum, dfden/float(dfden+dfnum*F))
@@ -3725,20 +3725,20 @@ Usage:   abetacf(a,b,x,verbose=1)
     EPS = 3.0e-7
 
     arrayflag = 1
-    if isinstance(x, N.ArrayType):
-        frozen = N.ones(x.shape,N.Float) *-1  #start out w/ -1s, should replace all
+    if isinstance(x, oldN.ArrayType):
+        frozen = oldN.ones(x.shape,oldN.Float) *-1  #start out w/ -1s, should replace all
     else:
         arrayflag = 0
-        frozen = N.array([-1])
-        x = N.array([x])
-    mask = N.zeros(x.shape)
+        frozen = oldN.array([-1])
+        x = oldN.array([x])
+    mask = oldN.zeros(x.shape)
     bm = az = am = 1.0
     qab = a+b
     qap = a+1.0
     qam = a-1.0
     bz = 1.0-qab*x/qap
     for i in range(ITMAX+1):
-        if N.sum(N.ravel(N.equal(frozen,-1)))==0:
+        if oldN.sum(oldN.ravel(oldN.equal(frozen,-1)))==0:
             break
         em = float(i+1)
         tem = em + em
@@ -3753,10 +3753,10 @@ Usage:   abetacf(a,b,x,verbose=1)
         bm = bp/bpp
         az = app/bpp
         bz = 1.0
-        newmask = N.less(abs(az-aold),EPS*abs(az))
-        frozen = N.where(newmask*N.equal(mask,0), az, frozen)
-        mask = N.clip(mask+newmask,0,1)
-    noconverge = asum(N.equal(frozen,-1))
+        newmask = oldN.less(abs(az-aold),EPS*abs(az))
+        frozen = oldN.where(newmask*oldN.equal(mask,0), az, frozen)
+        mask = oldN.clip(mask+newmask,0,1)
+    noconverge = asum(oldN.equal(frozen,-1))
     if noconverge <> 0 and verbose:
         print 'a or b too big, or ITMAX too small in Betacf for ',noconverge,' elements'
     if arrayflag:
@@ -3778,12 +3778,12 @@ Usage:   agammln(xx)
              0.120858003e-2, -0.536382e-5]
     x = xx - 1.0
     tmp = x + 5.5
-    tmp = tmp - (x+0.5)*N.log(tmp)
+    tmp = tmp - (x+0.5)*oldN.log(tmp)
     ser = 1.0
     for j in range(len(coeff)):
         x = x + 1
         ser = ser + coeff[j]/x
-    return -tmp + N.log(2.50662827465*ser)
+    return -tmp + oldN.log(2.50662827465*ser)
 
 
  def abetai(a,b,x,verbose=1):
@@ -3800,20 +3800,20 @@ C.)  Can handle multiple dimensions.
 Usage:   abetai(a,b,x,verbose=1)
 """
     TINY = 1e-15
-    if isinstance(a, N.ArrayType):
-        if asum(N.less(x,0)+N.greater(x,1)) <> 0:
+    if isinstance(a, oldN.ArrayType):
+        if asum(oldN.less(x,0)+oldN.greater(x,1)) <> 0:
             raise ValueError, 'Bad x in abetai'
-    x = N.where(N.equal(x,0),TINY,x)
-    x = N.where(N.equal(x,1.0),1-TINY,x)
+    x = oldN.where(oldN.equal(x,0),TINY,x)
+    x = oldN.where(oldN.equal(x,1.0),1-TINY,x)
 
-    bt = N.where(N.equal(x,0)+N.equal(x,1), 0, -1)
-    exponents = ( gammln(a+b)-gammln(a)-gammln(b)+a*N.log(x)+b*
-                  N.log(1.0-x) )
+    bt = oldN.where(oldN.equal(x,0)+oldN.equal(x,1), 0, -1)
+    exponents = ( gammln(a+b)-gammln(a)-gammln(b)+a*oldN.log(x)+b*
+                  oldN.log(1.0-x) )
     # 746 (below) is the MAX POSSIBLE BEFORE OVERFLOW
-    exponents = N.where(N.less(exponents,-740),-740,exponents)
-    bt = N.exp(exponents)
-    if isinstance(x, N.ArrayType):
-        ans = N.where(N.less(x,(a+1)/(a+b+2.0)),
+    exponents = oldN.where(oldN.less(exponents,-740),-740,exponents)
+    bt = oldN.exp(exponents)
+    if isinstance(x, oldN.ArrayType):
+        ans = oldN.where(oldN.less(x,(a+1)/(a+b+2.0)),
                       bt*abetacf(a,b,x,verbose)/float(a),
                       1.0-bt*abetacf(b,a,1.0-x,verbose)/float(b))
     else:
@@ -3847,20 +3847,20 @@ Returns: statistic, p-value ???
         return
     n = len(para)
     p = pstat.aunique(para)
-    x = N.zeros((n,len(p)))  # design matrix
+    x = oldN.zeros((n,len(p)))  # design matrix
     for l in range(len(p)):
-        x[:,l] = N.equal(para,p[l])
-    b = N.dot(N.dot(LA.inverse(N.dot(N.transpose(x),x)),  # i.e., b=inv(X'X)X'Y
-                    N.transpose(x)),
+        x[:,l] = oldN.equal(para,p[l])
+    b = oldN.dot(oldN.dot(LA.inverse(oldN.dot(oldN.transpose(x),x)),  # i.e., b=inv(X'X)X'Y
+                    oldN.transpose(x)),
               data)
-    diffs = (data - N.dot(x,b))
-    s_sq = 1./(n-len(p)) * N.dot(N.transpose(diffs), diffs)
+    diffs = (data - oldN.dot(x,b))
+    s_sq = 1./(n-len(p)) * oldN.dot(oldN.transpose(diffs), diffs)
 
     if len(p) == 2:  # ttest_ind
-        c = N.array([1,-1])
+        c = oldN.array([1,-1])
         df = n-2
         fact = asum(1.0/asum(x,0))  # i.e., 1/n1 + 1/n2 + 1/n3 ...
-        t = N.dot(c,b) / N.sqrt(s_sq*fact)
+        t = oldN.dot(c,b) / oldN.sqrt(s_sq*fact)
         probs = abetai(0.5*df,0.5,float(df)/(df+t*t))
         return t, probs
 
@@ -3878,16 +3878,16 @@ Returns: f-value, probability
     vars = [0]*na
     ns = [0]*na
     alldata = []
-    tmp = map(N.array,args)
+    tmp = map(oldN.array,args)
     means = map(amean,tmp)
     vars = map(avar,tmp)
     ns = map(len,args)
-    alldata = N.concatenate(args)
+    alldata = oldN.concatenate(args)
     bign = len(alldata)
     sstot = ass(alldata)-(asquare_of_sums(alldata)/float(bign))
     ssbn = 0
     for a in args:
-        ssbn = ssbn + asquare_of_sums(N.array(a))/float(len(a))
+        ssbn = ssbn + asquare_of_sums(oldN.array(a))/float(len(a))
     ssbn = ssbn - (asquare_of_sums(alldata)/float(bign))
     sswn = sstot-ssbn
     dfbn = na-1
@@ -3938,9 +3938,9 @@ Returns an F-statistic given the following::
 where ER and EF are matrices from a multivariate F calculation.
 """
      if type(ER) in [IntType, FloatType]:
-         ER = N.array([[ER]])
+         ER = oldN.array([[ER]])
      if type(EF) in [IntType, FloatType]:
-         EF = N.array([[EF]])
+         EF = oldN.array([[EF]])
      n_um = (LA.determinant(ER) - LA.determinant(EF)) / float(dfnum)
      d_en = LA.determinant(EF) / float(dfden)
      return n_um / d_en
@@ -3955,16 +3955,16 @@ where ER and EF are matrices from a multivariate F calculation.
 Usage:   asign(a)
 Returns: array shape of a, with -1 where a<0 and +1 where a>=0
 """
-    a = N.asarray(a)
+    a = oldN.asarray(a)
     if ((type(a) == type(1.4)) or (type(a) == type(1))):
-        return a-a-N.less(a,0)+N.greater(a,0)
+        return a-a-oldN.less(a,0)+oldN.greater(a,0)
     else:
-        return N.zeros(N.shape(a))-N.less(a,0)+N.greater(a,0)
+        return oldN.zeros(oldN.shape(a))-oldN.less(a,0)+oldN.greater(a,0)
 
 
  def asum (a, dimension=None,keepdims=0):
      """
-An alternative to the Numeric.add.reduce function, which allows one to
+An alternative to the numpy.add.reduce function, which allows one to
 (1) collapse over multiple dimensions at once, and/or (2) to retain
 all dimensions in the original array (squashing one down to size.
 Dimension can equal None (ravel array first), an integer (the
@@ -3975,28 +3975,28 @@ dimensions as the input array.
 Usage:   asum(a, dimension=None, keepdims=0)
 Returns: array summed along 'dimension'(s), same _number_ of dims if keepdims=1
 """
-     if isinstance(a, N.ArrayType) and a.dtype.char in ['l','s','b']:
-         a = a.astype(N.Float)
+     if isinstance(a, oldN.ArrayType) and a.dtype.char in ['l','s','b']:
+         a = a.astype(oldN.Float)
      if dimension == None:
-         s = N.sum(N.ravel(a))
+         s = oldN.sum(oldN.ravel(a))
      elif type(dimension) in [IntType,FloatType]:
-         s = N.add.reduce(a, dimension)
+         s = oldN.add.reduce(a, dimension)
          if keepdims == 1:
              shp = list(a.shape)
              shp[dimension] = 1
-             s = N.reshape(s,shp)
+             s = oldN.reshape(s,shp)
      else: # must be a SEQUENCE of dims to sum over
         dims = list(dimension)
         dims.sort()
         dims.reverse()
         s = a *1.0
         for dim in dims:
-            s = N.add.reduce(s,dim)
+            s = oldN.add.reduce(s,dim)
         if keepdims == 1:
             shp = list(a.shape)
             for dim in dims:
                 shp[dim] = 1
-            s = N.reshape(s,shp)
+            s = oldN.reshape(s,shp)
      return s
 
 
@@ -4010,17 +4010,17 @@ over multiple dimensions, but this last one just barely makes sense).
 Usage:   acumsum(a,dimension=None)
 """
     if dimension == None:
-        a = N.ravel(a)
+        a = oldN.ravel(a)
         dimension = 0
-    if type(dimension) in [ListType, TupleType, N.ArrayType]:
+    if type(dimension) in [ListType, TupleType, oldN.ArrayType]:
         dimension = list(dimension)
         dimension.sort()
         dimension.reverse()
         for d in dimension:
-            a = N.add.accumulate(a,d)
+            a = oldN.add.accumulate(a,d)
         return a
     else:
-        return N.add.accumulate(a,dimension)
+        return oldN.add.accumulate(a,dimension)
 
 
  def ass(inarray, dimension=None, keepdims=0):
@@ -4036,7 +4036,7 @@ Usage:   ass(inarray, dimension=None, keepdims=0)
 Returns: sum-along-'dimension' for (inarray*inarray)
 """
     if dimension == None:
-        inarray = N.ravel(inarray)
+        inarray = oldN.ravel(inarray)
         dimension = 0
     return asum(inarray*inarray,dimension,keepdims)
 
@@ -4052,8 +4052,8 @@ dimensions).  A trivial function, but included for completeness.
 Usage:   asummult(array1,array2,dimension=None,keepdims=0)
 """
     if dimension == None:
-        array1 = N.ravel(array1)
-        array2 = N.ravel(array2)
+        array1 = oldN.ravel(array1)
+        array2 = oldN.ravel(array2)
         dimension = 0
     return asum(array1*array2,dimension,keepdims)
 
@@ -4070,11 +4070,11 @@ Usage:   asquare_of_sums(inarray, dimension=None, keepdims=0)
 Returns: the square of the sum over dim(s) in dimension
 """
     if dimension == None:
-        inarray = N.ravel(inarray)
+        inarray = oldN.ravel(inarray)
         dimension = 0
     s = asum(inarray,dimension,keepdims)
-    if isinstance(s, N.ArrayType):
-        return s.astype(N.Float)*s
+    if isinstance(s, oldN.ArrayType):
+        return s.astype(oldN.Float)*s
     else:
         return float(s)*s
 
@@ -4091,7 +4091,7 @@ Usage:   asumdiffsquared(a,b)
 Returns: sum[ravel(a-b)**2]
 """
     if dimension == None:
-        inarray = N.ravel(a)
+        inarray = oldN.ravel(a)
         dimension = 0
     return asum((a-b)**2,dimension,keepdims)
 
@@ -4134,7 +4134,7 @@ Returns: array of length equal to inarray, containing rank scores
     svec, ivec = ashellsort(inarray)
     sumranks = 0
     dupcount = 0
-    newarray = N.zeros(n,N.Float)
+    newarray = oldN.zeros(n,oldN.Float)
     for i in range(n):
         sumranks = sumranks + i
         dupcount = dupcount + 1
@@ -4172,167 +4172,167 @@ Usage:   afindwithin(data)     data in |Stat format
 
 ## CENTRAL TENDENCY:
  geometricmean = Dispatch ( (lgeometricmean, (ListType, TupleType)),
-                            (ageometricmean, (N.ArrayType,)) )
+                            (ageometricmean, (oldN.ArrayType,)) )
  harmonicmean = Dispatch ( (lharmonicmean, (ListType, TupleType)),
-                           (aharmonicmean, (N.ArrayType,)) )
+                           (aharmonicmean, (oldN.ArrayType,)) )
  mean = Dispatch ( (lmean, (ListType, TupleType)),
-                   (amean, (N.ArrayType,)) )
+                   (amean, (oldN.ArrayType,)) )
  median = Dispatch ( (lmedian, (ListType, TupleType)),
-                     (amedian, (N.ArrayType,)) )
+                     (amedian, (oldN.ArrayType,)) )
  medianscore = Dispatch ( (lmedianscore, (ListType, TupleType)),
-                          (amedianscore, (N.ArrayType,)) )
+                          (amedianscore, (oldN.ArrayType,)) )
  mode = Dispatch ( (lmode, (ListType, TupleType)),
-                   (amode, (N.ArrayType,)) )
- tmean = Dispatch ( (atmean, (N.ArrayType,)) )
- tvar = Dispatch ( (atvar, (N.ArrayType,)) )
- tstdev = Dispatch ( (atstdev, (N.ArrayType,)) )
- tsem = Dispatch ( (atsem, (N.ArrayType,)) )
+                   (amode, (oldN.ArrayType,)) )
+ tmean = Dispatch ( (atmean, (oldN.ArrayType,)) )
+ tvar = Dispatch ( (atvar, (oldN.ArrayType,)) )
+ tstdev = Dispatch ( (atstdev, (oldN.ArrayType,)) )
+ tsem = Dispatch ( (atsem, (oldN.ArrayType,)) )
 
 ## VARIATION:
  moment = Dispatch ( (lmoment, (ListType, TupleType)),
-                     (amoment, (N.ArrayType,)) )
+                     (amoment, (oldN.ArrayType,)) )
  variation = Dispatch ( (lvariation, (ListType, TupleType)),
-                        (avariation, (N.ArrayType,)) )
+                        (avariation, (oldN.ArrayType,)) )
  skew = Dispatch ( (lskew, (ListType, TupleType)),
-                   (askew, (N.ArrayType,)) )
+                   (askew, (oldN.ArrayType,)) )
  kurtosis = Dispatch ( (lkurtosis, (ListType, TupleType)),
-                       (akurtosis, (N.ArrayType,)) )
+                       (akurtosis, (oldN.ArrayType,)) )
  describe = Dispatch ( (ldescribe, (ListType, TupleType)),
-                       (adescribe, (N.ArrayType,)) )
+                       (adescribe, (oldN.ArrayType,)) )
 
 ## DISTRIBUTION TESTS
 
  skewtest = Dispatch ( (askewtest, (ListType, TupleType)),
-                       (askewtest, (N.ArrayType,)) )
+                       (askewtest, (oldN.ArrayType,)) )
  kurtosistest = Dispatch ( (akurtosistest, (ListType, TupleType)),
-                           (akurtosistest, (N.ArrayType,)) )
+                           (akurtosistest, (oldN.ArrayType,)) )
  normaltest = Dispatch ( (anormaltest, (ListType, TupleType)),
-                         (anormaltest, (N.ArrayType,)) )
+                         (anormaltest, (oldN.ArrayType,)) )
 
 ## FREQUENCY STATS:
  itemfreq = Dispatch ( (litemfreq, (ListType, TupleType)),
-                       (aitemfreq, (N.ArrayType,)) )
+                       (aitemfreq, (oldN.ArrayType,)) )
  scoreatpercentile = Dispatch ( (lscoreatpercentile, (ListType, TupleType)),
-                                (ascoreatpercentile, (N.ArrayType,)) )
+                                (ascoreatpercentile, (oldN.ArrayType,)) )
  percentileofscore = Dispatch ( (lpercentileofscore, (ListType, TupleType)),
-                                 (apercentileofscore, (N.ArrayType,)) )
+                                 (apercentileofscore, (oldN.ArrayType,)) )
  histogram = Dispatch ( (lhistogram, (ListType, TupleType)),
-                        (ahistogram, (N.ArrayType,)) )
+                        (ahistogram, (oldN.ArrayType,)) )
  cumfreq = Dispatch ( (lcumfreq, (ListType, TupleType)),
-                      (acumfreq, (N.ArrayType,)) )
+                      (acumfreq, (oldN.ArrayType,)) )
  relfreq = Dispatch ( (lrelfreq, (ListType, TupleType)),
-                      (arelfreq, (N.ArrayType,)) )
+                      (arelfreq, (oldN.ArrayType,)) )
  
 ## VARIABILITY:
  obrientransform = Dispatch ( (lobrientransform, (ListType, TupleType)),
-                              (aobrientransform, (N.ArrayType,)) )
+                              (aobrientransform, (oldN.ArrayType,)) )
  samplevar = Dispatch ( (lsamplevar, (ListType, TupleType)),
-                        (asamplevar, (N.ArrayType,)) )
+                        (asamplevar, (oldN.ArrayType,)) )
  samplestdev = Dispatch ( (lsamplestdev, (ListType, TupleType)),
-                          (asamplestdev, (N.ArrayType,)) )
- signaltonoise = Dispatch( (asignaltonoise, (N.ArrayType,)),)
+                          (asamplestdev, (oldN.ArrayType,)) )
+ signaltonoise = Dispatch( (asignaltonoise, (oldN.ArrayType,)),)
  var = Dispatch ( (lvar, (ListType, TupleType)),
-                  (avar, (N.ArrayType,)) )
+                  (avar, (oldN.ArrayType,)) )
  stdev = Dispatch ( (lstdev, (ListType, TupleType)),
-                    (astdev, (N.ArrayType,)) )
+                    (astdev, (oldN.ArrayType,)) )
  sterr = Dispatch ( (lsterr, (ListType, TupleType)),
-                    (asterr, (N.ArrayType,)) )
+                    (asterr, (oldN.ArrayType,)) )
  sem = Dispatch ( (lsem, (ListType, TupleType)),
-                  (asem, (N.ArrayType,)) )
+                  (asem, (oldN.ArrayType,)) )
  z = Dispatch ( (lz, (ListType, TupleType)),
-                (az, (N.ArrayType,)) )
+                (az, (oldN.ArrayType,)) )
  zs = Dispatch ( (lzs, (ListType, TupleType)),
-                 (azs, (N.ArrayType,)) )
+                 (azs, (oldN.ArrayType,)) )
  
 ## TRIMMING FCNS:
- threshold = Dispatch( (athreshold, (N.ArrayType,)),)
+ threshold = Dispatch( (athreshold, (oldN.ArrayType,)),)
  trimboth = Dispatch ( (ltrimboth, (ListType, TupleType)),
-                       (atrimboth, (N.ArrayType,)) )
+                       (atrimboth, (oldN.ArrayType,)) )
  trim1 = Dispatch ( (ltrim1, (ListType, TupleType)),
-                    (atrim1, (N.ArrayType,)) )
+                    (atrim1, (oldN.ArrayType,)) )
  
 ## CORRELATION FCNS:
  paired = Dispatch ( (lpaired, (ListType, TupleType)),
-                     (apaired, (N.ArrayType,)) )
+                     (apaired, (oldN.ArrayType,)) )
  pearsonr = Dispatch ( (lpearsonr, (ListType, TupleType)),
-                       (apearsonr, (N.ArrayType,)) )
+                       (apearsonr, (oldN.ArrayType,)) )
  spearmanr = Dispatch ( (lspearmanr, (ListType, TupleType)),
-                        (aspearmanr, (N.ArrayType,)) )
+                        (aspearmanr, (oldN.ArrayType,)) )
  pointbiserialr = Dispatch ( (lpointbiserialr, (ListType, TupleType)),
-                             (apointbiserialr, (N.ArrayType,)) )
+                             (apointbiserialr, (oldN.ArrayType,)) )
  kendalltau = Dispatch ( (lkendalltau, (ListType, TupleType)),
-                         (akendalltau, (N.ArrayType,)) )
+                         (akendalltau, (oldN.ArrayType,)) )
  linregress = Dispatch ( (llinregress, (ListType, TupleType)),
-                         (alinregress, (N.ArrayType,)) )
+                         (alinregress, (oldN.ArrayType,)) )
  
 ## INFERENTIAL STATS:
  ttest_1samp = Dispatch ( (lttest_1samp, (ListType, TupleType)),
-                          (attest_1samp, (N.ArrayType,)) )
+                          (attest_1samp, (oldN.ArrayType,)) )
  ttest_ind = Dispatch ( (lttest_ind, (ListType, TupleType)),
-                        (attest_ind, (N.ArrayType,)) )
+                        (attest_ind, (oldN.ArrayType,)) )
  ttest_rel = Dispatch ( (lttest_rel, (ListType, TupleType)),
-                        (attest_rel, (N.ArrayType,)) )
+                        (attest_rel, (oldN.ArrayType,)) )
  chisquare = Dispatch ( (lchisquare, (ListType, TupleType)),
-                        (achisquare, (N.ArrayType,)) )
+                        (achisquare, (oldN.ArrayType,)) )
  ks_2samp = Dispatch ( (lks_2samp, (ListType, TupleType)),
-                       (aks_2samp, (N.ArrayType,)) )
+                       (aks_2samp, (oldN.ArrayType,)) )
  mannwhitneyu = Dispatch ( (lmannwhitneyu, (ListType, TupleType)),
-                           (amannwhitneyu, (N.ArrayType,)) )
+                           (amannwhitneyu, (oldN.ArrayType,)) )
  tiecorrect = Dispatch ( (ltiecorrect, (ListType, TupleType)),
-                         (atiecorrect, (N.ArrayType,)) )
+                         (atiecorrect, (oldN.ArrayType,)) )
  ranksums = Dispatch ( (lranksums, (ListType, TupleType)),
-                       (aranksums, (N.ArrayType,)) )
+                       (aranksums, (oldN.ArrayType,)) )
  wilcoxont = Dispatch ( (lwilcoxont, (ListType, TupleType)),
-                        (awilcoxont, (N.ArrayType,)) )
+                        (awilcoxont, (oldN.ArrayType,)) )
  kruskalwallish = Dispatch ( (lkruskalwallish, (ListType, TupleType)),
-                             (akruskalwallish, (N.ArrayType,)) )
+                             (akruskalwallish, (oldN.ArrayType,)) )
  friedmanchisquare = Dispatch ( (lfriedmanchisquare, (ListType, TupleType)),
-                                (afriedmanchisquare, (N.ArrayType,)) )
+                                (afriedmanchisquare, (oldN.ArrayType,)) )
  
 ## PROBABILITY CALCS:
  chisqprob = Dispatch ( (lchisqprob, (IntType, FloatType)),
-                        (achisqprob, (N.ArrayType,)) )
+                        (achisqprob, (oldN.ArrayType,)) )
  zprob = Dispatch ( (lzprob, (IntType, FloatType)),
-                    (azprob, (N.ArrayType,)) )
+                    (azprob, (oldN.ArrayType,)) )
  ksprob = Dispatch ( (lksprob, (IntType, FloatType)),
-                     (aksprob, (N.ArrayType,)) )
+                     (aksprob, (oldN.ArrayType,)) )
  fprob = Dispatch ( (lfprob, (IntType, FloatType)),
-                    (afprob, (N.ArrayType,)) )
+                    (afprob, (oldN.ArrayType,)) )
  betacf = Dispatch ( (lbetacf, (IntType, FloatType)),
-                     (abetacf, (N.ArrayType,)) )
+                     (abetacf, (oldN.ArrayType,)) )
  betai = Dispatch ( (lbetai, (IntType, FloatType)),
-                    (abetai, (N.ArrayType,)) )
+                    (abetai, (oldN.ArrayType,)) )
  erfcc = Dispatch ( (lerfcc, (IntType, FloatType)),
-                    (aerfcc, (N.ArrayType,)) )
+                    (aerfcc, (oldN.ArrayType,)) )
  gammln = Dispatch ( (lgammln, (IntType, FloatType)),
-                     (agammln, (N.ArrayType,)) )
+                     (agammln, (oldN.ArrayType,)) )
  
 ## ANOVA FUNCTIONS:
  F_oneway = Dispatch ( (lF_oneway, (ListType, TupleType)),
-                       (aF_oneway, (N.ArrayType,)) )
+                       (aF_oneway, (oldN.ArrayType,)) )
  F_value = Dispatch ( (lF_value, (ListType, TupleType)),
-                      (aF_value, (N.ArrayType,)) )
+                      (aF_value, (oldN.ArrayType,)) )
 
 ## SUPPORT FUNCTIONS:
- incr = Dispatch ( (lincr, (ListType, TupleType, N.ArrayType)), )
+ incr = Dispatch ( (lincr, (ListType, TupleType, oldN.ArrayType)), )
  sum = Dispatch ( (lsum, (ListType, TupleType)),
-                  (asum, (N.ArrayType,)) )
+                  (asum, (oldN.ArrayType,)) )
  cumsum = Dispatch ( (lcumsum, (ListType, TupleType)),
-                     (acumsum, (N.ArrayType,)) )
+                     (acumsum, (oldN.ArrayType,)) )
  ss = Dispatch ( (lss, (ListType, TupleType)),
-                 (ass, (N.ArrayType,)) )
+                 (ass, (oldN.ArrayType,)) )
  summult = Dispatch ( (lsummult, (ListType, TupleType)),
-                      (asummult, (N.ArrayType,)) )
+                      (asummult, (oldN.ArrayType,)) )
  square_of_sums = Dispatch ( (lsquare_of_sums, (ListType, TupleType)),
-                             (asquare_of_sums, (N.ArrayType,)) )
+                             (asquare_of_sums, (oldN.ArrayType,)) )
  sumdiffsquared = Dispatch ( (lsumdiffsquared, (ListType, TupleType)),
-                             (asumdiffsquared, (N.ArrayType,)) )
+                             (asumdiffsquared, (oldN.ArrayType,)) )
  shellsort = Dispatch ( (lshellsort, (ListType, TupleType)),
-                        (ashellsort, (N.ArrayType,)) )
+                        (ashellsort, (oldN.ArrayType,)) )
  rankdata = Dispatch ( (lrankdata, (ListType, TupleType)),
-                       (arankdata, (N.ArrayType,)) )
+                       (arankdata, (oldN.ArrayType,)) )
  findwithin = Dispatch ( (lfindwithin, (ListType, TupleType)),
-                         (afindwithin, (N.ArrayType,)) )
+                         (afindwithin, (oldN.ArrayType,)) )
 
 ######################  END OF NUMERIC FUNCTION BLOCK  #####################
 

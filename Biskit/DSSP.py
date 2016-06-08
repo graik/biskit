@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -28,7 +28,7 @@ Calculates the secondary structure using DSSP.
 """
 
 import tempfile
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 from Biskit import Executor, TemplateError
 import Biskit.tools as T
 import Biskit.molUtils as MU
@@ -99,7 +99,7 @@ class Dssp( Executor ):
         Overrides Executor method.
         """
         self.model = self.model.compress( self.model.maskHeavy() )
-        if self.model.lenAtoms() == N.sum(self.model.maskCA):
+        if self.model.lenAtoms() == oldN.sum(self.model.maskCA):
             raise Dssp_Error, 'The structure you want to calculate the secondary structure for seems to be a carbon alpha trace. Terminating'
         self.model.writePdb( self.f_pdb )
 

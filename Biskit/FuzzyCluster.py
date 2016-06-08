@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -34,37 +34,37 @@ Reference::
   PROTEINS: Structure, Function and Genetics 14:249-264 1992
 """
 
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 import Biskit.mathUtils as MU
 import tools
 
 from numpy.oldnumeric.random_array import seed, random
 
 ## def average(x):
-##     return N.sum(N.array(x)) / len(x)
+##     return oldN.sum(oldN.array(x)) / len(x)
 
 ## def variance(x, avg = None):
 ##     if avg is None:
-##         avg = N.average(x)
+##         avg = oldN.average(x)
 
-##     return N.sum(N.power(N.array(x) - avg, 2)) / (len(x) - 1.)
+##     return oldN.sum(oldN.power(oldN.array(x) - avg, 2)) / (len(x) - 1.)
 
 ## def standardDeviation(x, avg = None):
-##     return N.sqrt(variance(x, avg))
+##     return oldN.sqrt(variance(x, avg))
 
 def squared_distance_matrix(x, y):
 
-    d1 = N.diagonal(N.dot(x, N.transpose(x)))
-    d2 = N.diagonal(N.dot(y, N.transpose(y)))
+    d1 = oldN.diagonal(oldN.dot(x, oldN.transpose(x)))
+    d2 = oldN.diagonal(oldN.dot(y, oldN.transpose(y)))
 
-    a1 = N.add.outer(d1,d2)
-    a2 = N.dot(x, N.transpose(y))
+    a1 = oldN.add.outer(d1,d2)
+    a2 = oldN.dot(x, oldN.transpose(y))
 
     return a1 - 2 * a2
 
 
 def distance_matrix(x, y):
-    return N.sqrt(squared_distance_matrix(x, y))
+    return oldN.sqrt(squared_distance_matrix(x, y))
 
 
 class FuzzyCluster:
@@ -82,25 +82,25 @@ class FuzzyCluster:
         (default: 0, set seed from clock)
         @type  seedy: int OR 0
         """
-        self.data = N.array(data, N.Float)
+        self.data = oldN.array(data, oldN.Float)
         self.w = weight
         self.n_cluster = n_cluster
-        self.npoints, self.dimension = N.shape(data)
+        self.npoints, self.dimension = oldN.shape(data)
         self.seedx = seedx
         self.seedy = seedy
 
 
     def calc_membership_matrix(self, d2):
         ## remove 0s (if a cluster center is exactly on one item)
-        d2 = N.clip( d2, N.power(1e200, 1-self.w), 1e300 )
-        q = N.power(d2, 1. / (1. - self.w))
-        return q / N.sum(q)
+        d2 = oldN.clip( d2, oldN.power(1e200, 1-self.w), 1e300 )
+        q = oldN.power(d2, 1. / (1. - self.w))
+        return q / oldN.sum(q)
 
 
     def calc_cluster_center(self, msm):
-        p = N.power(msm, self.w)
-        ccenter = N.transpose(N.dot(p, self.data))
-        return N.transpose(ccenter / N.sum(p, 1))
+        p = oldN.power(msm, self.w)
+        ccenter = oldN.transpose(oldN.dot(p, self.data))
+        return oldN.transpose(ccenter / oldN.sum(p, 1))
 
 
     def updateDistanceMatrix(self):
@@ -132,9 +132,9 @@ class FuzzyCluster:
         @return: weighted error 
         @rtype: float
         """
-        p = N.power(msm, self.w)
-        product = N.dot(p, N.transpose(d2))
-        return N.trace(product)
+        p = oldN.power(msm, self.w)
+        product = oldN.dot(p, oldN.transpose(d2))
+        return oldN.trace(product)
 
 
     def create_membership_matrix(self):
@@ -148,7 +148,7 @@ class FuzzyCluster:
         seed(self.seedx, self.seedy)
 
         r = random((self.npoints, self.n_cluster))
-        return N.transpose(r / N.sum(r))
+        return oldN.transpose(r / oldN.sum(r))
 
 
     def go(self, errorthreshold, n_iterations=1e10, nstep=10, verbose=1):
@@ -191,27 +191,27 @@ class FuzzyCluster:
 
 
     def clusterEntropy(self):
-        centropy = N.diagonal(N.dot(self.msm,
-                                    N.transpose(N.log(self.msm))))
+        centropy = oldN.diagonal(oldN.dot(self.msm,
+                                    oldN.transpose(oldN.log(self.msm))))
         return -1/float(self.npoints)*centropy
 
 
     def entropy(self):
-        return N.sum(self.clusterEntropy())
+        return oldN.sum(self.clusterEntropy())
 
 
     def nonFuzzyIndex(self):
-        p = N.power(self.msm, self.w)
-        return (self.n_cluster*N.sum(N.sum(p))-
+        p = oldN.power(self.msm, self.w)
+        return (self.n_cluster*oldN.sum(oldN.sum(p))-
                 self.npoints)/(self.npoints*(self.n_cluster-1))
 
 
     def clusterPartitionCoefficient(self):
-        return N.sum(N.power(self.msm, self.w), 1)/self.npoints
+        return oldN.sum(oldN.power(self.msm, self.w), 1)/self.npoints
 
 
     def partitionCoefficient(self):
-        return N.sum(self.clusterPartitionCoefficient())
+        return oldN.sum(self.clusterPartitionCoefficient())
 
 
     def getMembershipMatrix(self):
@@ -223,7 +223,7 @@ class FuzzyCluster:
 
 
     def entropySD(self):
-        centropy = N.sum(-N.log(self.msm)*\
+        centropy = oldN.sum(-oldN.log(self.msm)*\
                          self.msm)/float(self.n_cluster)
         return MU.SD(centropy)
 
@@ -249,7 +249,7 @@ class Test(BT.BiskitTest):
         x2 = random((500,2)) + 1
         x3 = random((500,2)) + 2
 
-        self.x = N.concatenate((x1, x2, x3))
+        self.x = oldN.concatenate((x1, x2, x3))
 
         self.fuzzy = FuzzyCluster(self.x, n_cluster=5, weight=1.5)
 
@@ -260,7 +260,7 @@ class Test(BT.BiskitTest):
             print "cluster centers are displayed in green"
             G.scatter( self.x, self.centers )
 
-        self.assertEqual( N.shape(self.centers), (5, 2) )
+        self.assertEqual( oldN.shape(self.centers), (5, 2) )
 
 if __name__ == '__main__':
 

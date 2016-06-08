@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -31,7 +31,7 @@ Utilities for handling structures and sequences
 from Biskit import EHandler
 import tools as t
 
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 import copy
 import types
 
@@ -373,7 +373,7 @@ polarH = {'GLY':{'H':'N','H1':'N','H2':'N','H3':'N'},
 ##
 ## Reference:
 ## "Residue Frequencies and Pair Preferences at Protein-Protein Interfaces"
-##            F. Glaser, D. M. Steinberg, I. A. Vakser and N. Ben-Tal,
+##            F. Glaser, D. M. Steinberg, I. A. Vakser and oldN. Ben-Tal,
 ##            Proteins 43:89-102 (2001)
 ##
 ## Warning. This is just half of the matrix (above diagonal), the residue names
@@ -419,7 +419,7 @@ pairScore = {'WW': 5.85, 'WY': 6.19, 'RT': 3.77, 'RV': 4.18, 'RW': 8.57, 'RR': 2
 boltzmann    = 1.38066e-23    ## [J/K]
 NA           = 6.02214199e+23 ## Avogadro constant [1/mol]
 planck2      = 1.0545727e-34  ## [J s], h/2Pi
-euler        = N.e
+euler        = oldN.e
 mu           = 1.66056e-27    ## atomic mass unit in [kg]
 angstroem    = 1e-10          ## [m]
 calorie      = 4.184          ## [J]
@@ -636,7 +636,7 @@ class Test(BT.BiskitTest):
         for a in S.model_1.atomRange():
             cmp += [ cmpAtoms( S.model_1.atoms[a], S.model_2.atoms[a] )]
 
-        self.assertEqual( N.sum(cmp), 159 )
+        self.assertEqual( oldN.sum(cmp), 159 )
 
         ## get the primaty sequence as a string
         S.seq = S.model_1.sequence()

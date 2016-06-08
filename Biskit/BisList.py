@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -27,7 +27,7 @@ organise, sort, and filter collection of dictionaries or similar objects
 S{->} abstract base class (aka interface)
 """
 
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 import types
 
 import Biskit.tools as t
@@ -246,7 +246,7 @@ class BisList:
         @return: new instance (or sub-class) with specified items
         @rtype: instance
         """
-        return self.take( N.nonzero( mask ), deepcopy=deepcopy )
+        return self.take( oldN.nonzero( mask ), deepcopy=deepcopy )
 
 
     def sortBy( self, sortKey, cmpfunc=cmp ):
@@ -314,10 +314,10 @@ class BisList:
         """
         vLst = self.valuesOf( key )
 
-        maskL = N.greater_equal( vLst, vLow )
-        maskH = N.less_equal( vLst, vHigh )
+        maskL = oldN.greater_equal( vLst, vLow )
+        maskH = oldN.less_equal( vLst, vHigh )
 
-        return N.nonzero( maskL * maskH )
+        return oldN.nonzero( maskL * maskH )
 
 
     def filterEqual( self, key, lst ):
@@ -333,7 +333,7 @@ class BisList:
         @rtype: array
         """
         mask = [ self.getValue( i,key) in lst for i in range( len(self)) ]
-        return N.nonzero( mask )
+        return oldN.nonzero( mask )
 
 
     def filterFunct( self, f ):
@@ -347,7 +347,7 @@ class BisList:
         @rtype: array
         """
         mask = [ f( c ) for c in self ]
-        return N.nonzero( mask )
+        return oldN.nonzero( mask )
 
 
     def filter( self, key, cond ):
@@ -399,7 +399,7 @@ class BisList:
         @rtype: int
         """
         vLst = self.valuesOf( key )
-        return N.argmax( vLst )
+        return oldN.argmax( vLst )
 
 
     def max( self, key ):
@@ -422,7 +422,7 @@ class BisList:
         @rtype: int
         """
         vLst = self.valuesOf( key )
-        return N.argmin( vLst )
+        return oldN.argmin( vLst )
 
 
     def min( self, key ):

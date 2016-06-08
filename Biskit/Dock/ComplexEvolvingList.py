@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -29,7 +29,7 @@ List of ComplexEvolving instances.
 
 from Biskit.Dock.ComplexList import ComplexList, ComplexListError
 from Biskit.Dock.ComplexEvolving import ComplexEvolving
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 
 class ComplexEvolvingList( ComplexList ):
     """
@@ -149,7 +149,7 @@ class ComplexEvolvingList( ComplexList ):
         """
         l = self
         if indices != None:
-            l = N.take( l, indices )
+            l = oldN.take( l, indices )
 
         if not unique:
             if version is None:

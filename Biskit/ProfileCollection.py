@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -535,12 +535,12 @@ class ProfileCollection:
         Convert integer arrays to Int32 and float arrays to
         Float32. This function is needed because of Numeric issues
         when pickles are transferred between 64 and 32 bit
-        platforms. Rather than letting Numeric.array select a
+        platforms. Rather than letting numpy.array select a
         platform-dependent default type, it is saver to assign an
         explicit Float32, or Int32.
 
         @param prof: the profile array to recast
-        @type  prof: Numeric.array
+        @type  prof: numpy.array
 
         @return: recast array or unchanged original
         @rtype:  Numpy.array

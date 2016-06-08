@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -29,7 +29,7 @@
 List of Complex objects.
 """
 
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 import types
 import random
 
@@ -354,7 +354,7 @@ class ComplexList( list ):
         """
         l = self
         if indices != None:
-            l = N.take( N.array(l,'O'), indices )
+            l = oldN.take( oldN.array(l,'O'), indices )
 
         if not unique:
             return [ c.info.get(infoKey, default) for c in l ]
@@ -385,10 +385,10 @@ class ComplexList( list ):
         """
         vLst = self.valuesOf( infoKey )
 
-        maskL = N.greater_equal( vLst, vLow )
-        maskH = N.less_equal( vLst, vHigh )
+        maskL = oldN.greater_equal( vLst, vLow )
+        maskH = oldN.less_equal( vLst, vHigh )
 
-        return N.nonzero( maskL * maskH )
+        return oldN.nonzero( maskL * maskH )
 
 
     def filterEqual( self, infoKey, lst ):
@@ -407,7 +407,7 @@ class ComplexList( list ):
         @rtype: [int]
         """
         mask = [ c.info.get( infoKey ) in lst for c in self ]
-        return N.nonzero( mask )
+        return oldN.nonzero( mask )
 
 
     def filterFunct( self, f ):
@@ -424,7 +424,7 @@ class ComplexList( list ):
         @rtype: [int]
         """
         mask = [ f( c ) for c in self ]
-        return N.nonzero( mask )
+        return oldN.nonzero( mask )
 
 
     def filter( self, infoKey, cond ):
@@ -479,7 +479,7 @@ class ComplexList( list ):
         @rtype: int
         """
         vLst = self.valuesOf( infoKey )
-        return N.argmax( vLst )
+        return oldN.argmax( vLst )
 
 
     def max( self, infoKey ):
@@ -506,7 +506,7 @@ class ComplexList( list ):
         @rtype: int
         """
         vLst = self.valuesOf( infoKey )
-        return N.argmin( vLst )
+        return oldN.argmin( vLst )
 
     def min( self, infoKey ):
         """

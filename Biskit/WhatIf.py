@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -26,7 +26,7 @@
 Run WhatIf, calculate and collect accessibility data
 """
 
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 import string
 import tempfile
 
@@ -170,7 +170,7 @@ NOLOG"""
 
         lines = open(self.f_residueASA).readlines()[14:-27]
         ASA_values = map(lambda line: string.split(line)[-3:], lines)
-        ASA_values = N.array(map(lambda row: map(string.atof, row),
+        ASA_values = oldN.array(map(lambda row: map(string.atof, row),
                                  ASA_values))
 
         return ASA_values
@@ -240,13 +240,13 @@ NOLOG"""
         @return: residue mask, where 0 = burried
         @rtype: [1|0]
         """
-        col_0 = N.greater( N.transpose(ASA_values)[0], totalCut )
-        col_1 = N.greater( N.transpose(ASA_values)[1], backboneCut )
-        col_2 = N.greater( N.transpose(ASA_values)[2], sidechainCut )
+        col_0 = oldN.greater( oldN.transpose(ASA_values)[0], totalCut )
+        col_1 = oldN.greater( oldN.transpose(ASA_values)[1], backboneCut )
+        col_2 = oldN.greater( oldN.transpose(ASA_values)[2], sidechainCut )
 
-        col_012 = N.concatenate( ([col_0],[col_1],[col_2]) ) 
+        col_012 = oldN.concatenate( ([col_0],[col_1],[col_2]) ) 
 
-        exposedList = N.greater(N.sum(col_012), 0)
+        exposedList = oldN.greater(oldN.sum(col_012), 0)
 
         return exposedList
 
@@ -260,7 +260,7 @@ NOLOG"""
                         Gly-XXX-Gly tripeptide, an approximation
                         of the unfolded state)
 
-                      -> N.array( 1 x N_atoms )
+                      -> oldN.array( 1 x N_atoms )
 
           residueASA  - array 3 x N_residues of float
                         acc.surf.area per res: sidechain, backbone, total
@@ -350,7 +350,7 @@ class Test(BT.BiskitTest):
             m_ref = PDBModel(f)
             m_ref = m.compress( m.maskProtein() )
             for k in m_ref.atoms.keys():
-                if not N.all(m_ref[k] == m[k]):
+                if not oldN.all(m_ref[k] == m[k]):
                     print 'Not equal ', k
                 else:
                     print 'Equal ', k
@@ -370,7 +370,7 @@ class Test(BT.BiskitTest):
             print '\nTotal atom    accessability (A^2): %.2f'%sum(atomAcc) 
             print '      residue accessability (A^2): %.2f'%sum(resAcc)[0]
 
-        self.assertAlmostEqual( N.sum(resAcc[:,0]), 2814.6903, 7 ) 
+        self.assertAlmostEqual( oldN.sum(resAcc[:,0]), 2814.6903, 7 ) 
 
 
 if __name__ == '__main__':

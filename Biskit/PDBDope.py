@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -26,7 +26,7 @@
 Calculate and add various properties to PDBModel
 """
 
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 import Biskit.tools as T
 
 from Biskit.WhatIf import WhatIf 
@@ -82,7 +82,7 @@ class PDBDope:
 
         atomRelAcc, resASA, resMask = w.run()
 
-##         normalAtoms = N.logical_not( N.logical_or(self.m.maskHetatm(),
+##         normalAtoms = oldN.logical_not( oldN.logical_or(self.m.maskHetatm(),
 ##                                                   self.m.maskSolvent() ) )
 
         normalAtoms = self.m.maskProtein( standard=1 )
@@ -176,7 +176,7 @@ class PDBDope:
         resmask = self.m.atom2resMask( mask )
 
         m = self.m
-        if not N.alltrue( mask ):
+        if not oldN.alltrue( mask ):
             m = self.m.compress( mask )
 
         h = Hmmer( verbose=verbose, log=log )
@@ -216,7 +216,7 @@ class PDBDope:
         """
         mHeavy = self.m.maskHeavy()
 
-        xyz = N.compress( mHeavy, self.m.getXyz(), 0 )
+        xyz = oldN.compress( mHeavy, self.m.getXyz(), 0 )
 
         if minasa and self.m.profile( 'relAS', 0 ) == 0:
             self.addASA()
@@ -224,15 +224,15 @@ class PDBDope:
         if minasa:
             mSurf = self.m.profile2mask( 'relAS', minasa )
         else:
-            mSurf = N.ones( self.m.lenAtoms() )
+            mSurf = oldN.ones( self.m.lenAtoms() )
 
         ## loop over all surface atoms
-        surf_pos = N.nonzero( mSurf )
+        surf_pos = oldN.nonzero( mSurf )
         contacts = []
 
         for i in surf_pos:
-            dist = N.sum(( xyz - self.m.xyz[i])**2, 1)
-            contacts += [ N.sum( N.less(dist, radius**2 )) -1]
+            dist = oldN.sum(( xyz - self.m.xyz[i])**2, 1)
+            contacts += [ oldN.sum( oldN.less(dist, radius**2 )) -1]
 
         self.m.atoms.set( profName, contacts, mSurf, default=-1,
                           comment='atom density radius %3.1fA' % radius,
@@ -280,7 +280,7 @@ class PDBDope:
 
         ## hydrogens + waters are not allowed during FastSurf calculation
         mask = mask if mask is not None else \
-            self.m.maskHeavy() * N.logical_not( self.m.maskSolvent() )
+            self.m.maskHeavy() * oldN.logical_not( self.m.maskSolvent() )
         
         fs = SurfaceRacer( self.m, probe, vdw_set=vdw_set, mask=mask )
         fs_dic = fs.run()
@@ -479,7 +479,7 @@ class Test(BT.BiskitTest):
         for k in m_ref.atoms.keys():
             #ref = [ m_ref.atoms[i][k] for i in m_ref.atomRange() ]
             #mod = [ self.M.atoms[i][k] for i in self.M.atomRange() ]
-            self.assert_( N.all( m_ref[k] == self.M[k]) )
+            self.assert_( oldN.all( m_ref[k] == self.M[k]) )
 
         ## display in Pymol
         if self.local:
@@ -488,7 +488,7 @@ class Test(BT.BiskitTest):
 
             pm = Pymoler()
             pm.addPdb( self.M, 'm' )
-            pm.colorAtoms( 'm', N.clip(self.M.profile('relAS'), 0.0, 100.0) )
+            pm.colorAtoms( 'm', oldN.clip(self.M.profile('relAS'), 0.0, 100.0) )
             pm.show()
 
 class LongTest( BT.BiskitTest ):
@@ -518,7 +518,7 @@ class LongTest( BT.BiskitTest ):
 
             pm = Pymoler()
             pm.addPdb( self.M, 'm' )
-            pm.colorAtoms( 'm', N.clip(self.M.profile('cons_ent'), 0.0, 100.0) )
+            pm.colorAtoms( 'm', oldN.clip(self.M.profile('cons_ent'), 0.0, 100.0) )
             pm.show()
 
     def test_delphi(self):

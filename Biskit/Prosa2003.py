@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -29,7 +29,7 @@ Analyze a structure using  Prosa2003.
 
 import os.path
 import string
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 import tempfile
 
 import Biskit.tools as T
@@ -300,9 +300,9 @@ exit\n
                 prosa_tot += [ float( tot ) ]
 
         ## create dictionary with residue profiles and calc. info
-        result = {'prosa_pair':N.array(prosa_pair),
-                  'prosa_surf':N.array(prosa_surf),
-                  'prosa_tot':N.array(prosa_tot),
+        result = {'prosa_pair':oldN.array(prosa_pair),
+                  'prosa_surf':oldN.array(prosa_surf),
+                  'prosa_tot':oldN.array(prosa_tot),
                   'ProsaInfo':{ 'lower_k':self.lower_k,
                                 'upper_k':self.upper_k,
                                 'pot_lb':self.pot_lb,
@@ -324,7 +324,7 @@ exit\n
         for k in ['prosa_pair', 'prosa_surf', 'prosa_tot']:
             r += [ self.result[k] ]
 
-        return N.sum( r, 1 )
+        return oldN.sum( r, 1 )
 
 
     def isFailed( self ):
@@ -374,7 +374,7 @@ class Test(BT.BiskitTest):
         if self.local:
             print "Result: ", self.result
 
-        self.assert_( N.sum(self.result - [ -94.568,  -64.903, -159.463 ] ) \
+        self.assert_( oldN.sum(self.result - [ -94.568,  -64.903, -159.463 ] ) \
                       < 0.0000001 )
 
         

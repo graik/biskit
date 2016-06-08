@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -112,7 +112,7 @@ class Test(BT.BiskitTest):
     def test_PDBParsePickle( self ):
         """PDBParsePickle test"""
 
-        import numpy.oldnumeric as N
+        import numpy.oldnumeric as oldN
 
         ## loading output file from X-plor
         if self.local:
@@ -121,7 +121,7 @@ class Test(BT.BiskitTest):
         self.p = PDBParsePickle()
         self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P_dry.model')
 
-        self.assertAlmostEqual( N.sum( self.m.centerOfMass() ),
+        self.assertAlmostEqual( oldN.sum( self.m.centerOfMass() ),
                                 114.18037, 5)
 
 if __name__ == '__main__':

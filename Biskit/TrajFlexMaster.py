@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -37,7 +37,7 @@ from Biskit.LogFile import ErrLog, LogFile
 from Biskit.EnsembleTraj import EnsembleTraj, traj2ensemble
 
 import tempfile
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 import os
 
 ## PVM imports
@@ -157,7 +157,7 @@ class TrajFlexMaster(TrackingJobMaster):
         @return: calculate number of frames per chunk
         @rtype: int
         """
-        r = int(round( n_frames * 1.0 / N.sqrt(n_per_node * n_nodes) ))
+        r = int(round( n_frames * 1.0 / oldN.sqrt(n_per_node * n_nodes) ))
         if r > 25:
             return r
 
@@ -299,12 +299,12 @@ class TrajFlexMaster(TrackingJobMaster):
         if not isinstance( traj, EnsembleTraj ):
             return None
 
-        r = N.zeros( len(traj), N.Int )
+        r = oldN.zeros( len(traj), oldN.Int )
 
         for i in range( traj.n_members ):
 
             mi = traj.memberIndices( i )
-            N.put( r, mi, i )
+            oldN.put( r, mi, i )
 
         return r.tolist()
 
@@ -328,7 +328,7 @@ class TrajFlexMaster(TrackingJobMaster):
         if self.traj_2 is not None:
             n2 = len( self.traj_2 )
 
-        a  = N.zeros( (n1,n2), N.Float32 )
+        a  = oldN.zeros( (n1,n2), oldN.Float32 )
 
         if self.verbose: self.log.write('#')
 
@@ -336,16 +336,16 @@ class TrajFlexMaster(TrackingJobMaster):
             i_start, i_stop = key[0]
             j_start, j_stop = key[1]
 
-            window = N.reshape( value, (i_stop-i_start, j_stop-j_start) )
-            window = window.astype(N.Float32)
+            window = oldN.reshape( value, (i_stop-i_start, j_stop-j_start) )
+            window = window.astype(oldN.Float32)
 
             a[i_start:i_stop, j_start:j_stop] = window
 
         if self.verbose: self.log.write('#')
 
         if intra_traj:
-            for i in range( N.shape(a)[0] ):
-                for j in range( i, N.shape(a)[1] ):
+            for i in range( oldN.shape(a)[0] ):
+                for j in range( i, oldN.shape(a)[1] ):
                     if a[j,i] == 0:
                         a[j,i] = a[i,j]
                     else:
@@ -354,8 +354,8 @@ class TrajFlexMaster(TrackingJobMaster):
         if self.verbose: self.log.write('#')
 
         if intra_traj and not mirror:
-            for i in range( N.shape(a)[0] ):
-                for j in range( i, N.shape(a)[1] ):
+            for i in range( oldN.shape(a)[0] ):
+                for j in range( i, oldN.shape(a)[1] ):
                     a[j,i] = 0.
 
         if self.verbose:   self.log.add('done')
@@ -384,12 +384,12 @@ class TrajFlexMaster(TrackingJobMaster):
         if self.traj_2 is not None:
             i2 = self.traj_2.argsortMember( step=step )
 
-        a = N.take( m, i1, 0 )
-        a = N.take( a, i2, 1 )
+        a = oldN.take( m, i1, 0 )
+        a = oldN.take( a, i2, 1 )
 
         if intra_traj and not mirror:
-            for i in range( N.shape(a)[0] ):
-                for j in range( i, N.shape(a)[1] ):
+            for i in range( oldN.shape(a)[0] ):
+                for j in range( i, oldN.shape(a)[1] ):
                     a[j,i] = 0.
 
         return a
@@ -420,7 +420,7 @@ class TrajFlexMaster(TrackingJobMaster):
         @raise FlexError: if there are no results yet
         """
         r = self.rmsList()
-        return N.average(r), mathUtils.SD(r)
+        return oldN.average(r), mathUtils.SD(r)
 
 
 #############
@@ -449,9 +449,9 @@ class Test(BT.BiskitTest):
         frames = []
         for i in range( len( traj_1 ) ):
             f = traj_1.frames[i]
-            d = N.zeros( N.shape( f ), N.Float32)
+            d = oldN.zeros( oldN.shape( f ), oldN.Float32)
             if i > 0:
-                d = random( N.shape( f ) ) * ((i / 10) + 1) 
+                d = random( oldN.shape( f ) ) * ((i / 10) + 1) 
             frames += [f + d]
 
         traj_2 = traj_1.clone()

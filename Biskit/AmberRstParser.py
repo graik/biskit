@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -27,7 +27,7 @@ Parse Amber restart files.
 """
 
 import re
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 import os.path
 
 from AmberCrdParser import ParseError
@@ -89,13 +89,13 @@ class AmberRstParser:
         """
         self.xyz = [ self.__nextLine() for i in range(self.lines_per_frame) ]
 
-        return N.reshape(self.xyz, ( self.n, 3 ) ).astype(N.Float32)
+        return oldN.reshape(self.xyz, ( self.n, 3 ) ).astype(oldN.Float32)
 
 
     def getXyz( self ):
         """Get coordinate array.
 
-        @return: coordinates, N.array( N x 3, 'f')
+        @return: coordinates, oldN.array( N x 3, 'f')
         @rtype: array
 
         @raise ParseError: if can't interprete second line
@@ -156,7 +156,7 @@ class AmberRstParser:
             self.getXyz()
 
         result = ""
-        for x in N.ravel( self.xyz )[:10]:
+        for x in oldN.ravel( self.xyz )[:10]:
             result += "%8.3f" % x
 
         return result + "\n"
@@ -192,7 +192,7 @@ class AmberRstParser:
                 f.write("\n")
 
         i = 0
-        for x in N.ravel( self.xyz ):
+        for x in oldN.ravel( self.xyz ):
             i = i + 1
 
             f.write( "%8.3f" % x )
@@ -226,7 +226,7 @@ class Test(BT.BiskitTest):
     def test_getXyz( self ):
         """AmberRstParser.getXyz test"""
         self.xyz = self.p.getXyz()
-        self.assertEqual( N.shape(self.xyz), (11200,3) )
+        self.assertEqual( oldN.shape(self.xyz), (11200,3) )
 
 class TestLong(Test):
     """long AmberRstParser test"""

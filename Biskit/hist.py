@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -26,7 +26,7 @@
 create a histogram from data
 """
 
-import numpy.oldnumeric as Numeric
+import numpy.oldnumeric as oldN
 
 
 def histogram(data, nbins, range = None):
@@ -44,22 +44,22 @@ def histogram(data, nbins, range = None):
     @return: array (2 x len(data) ) with start of bin and witdh of bin. 
     @rtype: array
     """
-    data = Numeric.array(data, Numeric.Float)
+    data = oldN.array(data, oldN.Float)
     if range is None:
-        min = Numeric.minimum.reduce(data)
-        max = Numeric.maximum.reduce(data)
+        min = oldN.minimum.reduce(data)
+        max = oldN.maximum.reduce(data)
     else:
         min, max = range
-        data = Numeric.repeat(data,
-                              Numeric.logical_and(Numeric.less_equal(data, max),
-                                                  Numeric.greater_equal(data, min)))
+        data = oldN.repeat(data,
+                              oldN.logical_and(oldN.less_equal(data, max),
+                                                  oldN.greater_equal(data, min)))
     bin_width = (max-min)/nbins
-    data = Numeric.floor((data - min)/bin_width).astype(Numeric.Int)
-    histo = Numeric.add.reduce(Numeric.equal(
-        Numeric.arange(nbins)[:,Numeric.NewAxis], data), -1)
-    histo[-1] = histo[-1] + Numeric.add.reduce(Numeric.equal(nbins, data))
-    bins = min + bin_width*(Numeric.arange(nbins)+0.5)
-    return Numeric.transpose(Numeric.array([bins, histo]))
+    data = oldN.floor((data - min)/bin_width).astype(oldN.Int)
+    histo = oldN.add.reduce(oldN.equal(
+        oldN.arange(nbins)[:,oldN.NewAxis], data), -1)
+    histo[-1] = histo[-1] + oldN.add.reduce(oldN.equal(nbins, data))
+    bins = min + bin_width*(oldN.arange(nbins)+0.5)
+    return oldN.transpose(oldN.array([bins, histo]))
 
 
 def density(x, nBins, range = None, steps = 1, hist = 0):
@@ -85,7 +85,7 @@ def density(x, nBins, range = None, steps = 1, hist = 0):
     binWidth = h[1,0] - h[0,0]
 
     if not hist:
-        i = Numeric.sum(h)[1]*binWidth
+        i = oldN.sum(h)[1]*binWidth
         h[:,1] = h[:,1]/i
 
     if steps:
@@ -100,7 +100,7 @@ def density(x, nBins, range = None, steps = 1, hist = 0):
 
         h = l
 
-    return Numeric.array(h)
+    return oldN.array(h)
 
 
 #############
@@ -113,12 +113,12 @@ class Test(BT.BiskitTest):
 
     def test_hist( self ):
         """hist test"""
-        self.x = Numeric.arange( 4, 12, 1.2 )
+        self.x = oldN.arange( 4, 12, 1.2 )
         self.data = density( self.x, 3, hist=1 )
 
-        self.assert_( Numeric.all( self.data == self.EXPECT) )
+        self.assert_( oldN.all( self.data == self.EXPECT) )
 
-    EXPECT= Numeric.array([[  4. ,   0. ],
+    EXPECT= oldN.array([[  4. ,   0. ],
                            [  4. ,   2. ],
                            [  6.4,   2. ],
                            [  6.4,   2. ],

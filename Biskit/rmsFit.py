@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -27,17 +27,17 @@ superimpose 2 structures iteratively
 """
 
 import Biskit.mathUtils as MU
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 from numpy.oldnumeric.linear_algebra import singular_value_decomposition as svd
 
 ## def average(x):
-##     return N.sum(x) / len(x)
+##     return oldN.sum(x) / len(x)
 
 ## def variance(x):
-##     return N.average(N.power(x - N.average(x), 2))
+##     return oldN.average(oldN.power(x - oldN.average(x), 2))
 
 ## def standardDev(x):
-##     return N.sqrt(variance(x))
+##     return oldN.sqrt(variance(x))
 
 
 def findTransformation(x, y):
@@ -54,20 +54,20 @@ def findTransformation(x, y):
     @rtype:  array, array
     """
     ## center configurations
-    x_av = N.average(x)
-    y_av = N.average(y)
+    x_av = oldN.average(x)
+    y_av = oldN.average(y)
 
     x = x - x_av
     y = y - y_av
 
 
     ## svd of correlation matrix
-    v, l, u = svd(N.dot(N.transpose(x), y))
+    v, l, u = svd(oldN.dot(oldN.transpose(x), y))
 
     ## build rotation matrix and translation vector
-    r = N.dot(v, u)
+    r = oldN.dot(v, u)
 
-    t = x_av - N.dot(r, y_av)
+    t = x_av - oldN.dot(r, y_av)
 
     return r, t
 
@@ -75,7 +75,7 @@ def findTransformation(x, y):
 def match(x, y, n_iterations=1, z=2, eps_rmsd=0.5, eps_stdv=0.05):
     """
     Matches two arrays onto each other, while iteratively removing outliers.
-    Superimposed array y would be C{ N.dot(y, N.transpose(r)) + t }.
+    Superimposed array y would be C{ oldN.dot(y, oldN.transpose(r)) + t }.
 
     @param n_iterations: number of calculations::
                            1 .. no iteration 
@@ -99,23 +99,23 @@ def match(x, y, n_iterations=1, z=2, eps_rmsd=0.5, eps_stdv=0.05):
     n = 0
     converged = 0
 
-    mask = N.ones(len(y), N.int32 )
+    mask = oldN.ones(len(y), oldN.int32 )
 
     while not converged:
 
         ## find transformation for best match
-        r, t = findTransformation(N.compress(mask, x, 0),
-                                  N.compress(mask, y, 0))
+        r, t = findTransformation(oldN.compress(mask, x, 0),
+                                  oldN.compress(mask, y, 0))
 
         ## transform coordinates
-        xt = N.dot(y, N.transpose(r)) + t
+        xt = oldN.dot(y, oldN.transpose(r)) + t
 
         ## calculate row distances
-        d = N.sqrt(N.sum(N.power(x - xt, 2), 1)) * mask
+        d = oldN.sqrt(oldN.sum(oldN.power(x - xt, 2), 1)) * mask
 
         ## calculate rmsd and stdv
-        rmsd = N.sqrt(N.average(N.compress(mask, d)**2))
-        stdv = MU.SD(N.compress(mask, d))
+        rmsd = oldN.sqrt(oldN.average(oldN.compress(mask, d)**2))
+        stdv = MU.SD(oldN.compress(mask, d))
 
         ## check conditions for convergence
         d_rmsd = abs(rmsd - rmsd_old)
@@ -128,11 +128,11 @@ def match(x, y, n_iterations=1, z=2, eps_rmsd=0.5, eps_stdv=0.05):
             stdv_old = stdv
 
         ## store result
-        perc = round(float(N.sum(mask)) / float(len(mask)), 2)
+        perc = round(float(oldN.sum(mask)) / float(len(mask)), 2)
 
         ## throw out non-matching rows
-        mask = N.logical_and(mask, N.less(d, rmsd + z * stdv))
-        outliers = N.nonzero( N.logical_not( mask ) )
+        mask = oldN.logical_and(mask, oldN.less(d, rmsd + z * stdv))
+        outliers = oldN.nonzero( oldN.logical_not( mask ) )
         iter_trace.append([perc, round(rmsd, 3), outliers])
 
         n += 1
@@ -160,10 +160,10 @@ def rowDistances( x, y ):
     r, t = findTransformation(x, y)
 
     ## transform coordinates
-    z = N.dot(y, N.transpose(r)) + t
+    z = oldN.dot(y, oldN.transpose(r)) + t
 
     ## calculate row distances
-    return N.sqrt(N.sum(N.power(x - z, 2), 1)) 
+    return oldN.sqrt(oldN.sum(oldN.power(x - z, 2), 1)) 
 
 
 
@@ -187,12 +187,12 @@ class Test(BT.BiskitTest):
             print 'RMSD: %.2f' % rmsdLst[0][1]
 
         # return rotation matrix
-        r = abs( N.sum( N.ravel( rt[0] )))
-        e = abs( N.sum( N.ravel( self.EXPECT )))
+        r = abs( oldN.sum( oldN.ravel( rt[0] )))
+        e = abs( oldN.sum( oldN.ravel( self.EXPECT )))
 
         self.assertAlmostEqual(r, e, 6)
 
-    EXPECT = N.array( [[ 0.9999011,   0.01311352,  0.00508244,],
+    EXPECT = oldN.array( [[ 0.9999011,   0.01311352,  0.00508244,],
                        [-0.01310219,  0.99991162, -0.00225578,],
                        [-0.00511157,  0.00218896,  0.99998454 ]] )
 

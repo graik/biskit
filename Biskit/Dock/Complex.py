@@ -31,7 +31,7 @@ from Biskit.Prosa2003 import Prosa2003
 
 import Biskit.tools as t
 
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 
 from copy import deepcopy, copy
 from numpy.oldnumeric import arraytype
@@ -70,10 +70,10 @@ class Complex:
 
         self.ligandMatrix = ligMatrix
         if self.ligandMatrix == None:
-            self.ligandMatrix = N.array([ [1,  0,  0, 0],
+            self.ligandMatrix = oldN.array([ [1,  0,  0, 0],
                                         [0,  1,  0, 0],
                                         [0,  0,  1, 0],
-                                        [0,  0,  0, 1],], N.Float32)
+                                        [0,  0,  0, 1],], oldN.Float32)
 
         ## compressed by slim
         self.contacts = None
@@ -125,7 +125,7 @@ class Complex:
         called for unpickling the object.
         """
         self.__dict__ = state
-        self.ligandMatrix = N.array( self.ligandMatrix,N.Float32 )
+        self.ligandMatrix = oldN.array( self.ligandMatrix,oldN.Float32 )
         ## backwards compability
         self.__defaults() 
 
@@ -341,11 +341,11 @@ class Complex:
 
         ## compress contact matrix array
         if self.contacts != None and \
-               len(N.shape( self.contacts['result'] ) )==2:
+               len(oldN.shape( self.contacts['result'] ) )==2:
             m = self.contacts['result']
-            self.contacts['shape'] = N.shape( m )
+            self.contacts['shape'] = oldN.shape( m )
 
-            self.contacts['result'] = N.nonzero( N.ravel( m ) ).astype(N.Int32)
+            self.contacts['result'] = oldN.nonzero( oldN.ravel( m ) ).astype(oldN.Int32)
 
 
     def contactsOverlap(self, ref, cutoff=None):
@@ -362,12 +362,12 @@ class Complex:
                  (normalized to number of all contacts)
         @rtype: float
         """
-        equal = N.logical_and(self.resContacts( cutoff=cutoff ),
+        equal = oldN.logical_and(self.resContacts( cutoff=cutoff ),
                             ref.resContacts( cutoff=cutoff ) )
-        total = N.logical_or( self.resContacts(cutoff),
+        total = oldN.logical_or( self.resContacts(cutoff),
                               ref.resContacts(cutoff) )
 
-        return N.sum(N.sum( equal )) * 1.0 / N.sum(N.sum( total ))
+        return oldN.sum(oldN.sum( equal )) * 1.0 / oldN.sum(oldN.sum( total ))
 
 
     def contactsShared(self, reference, cutoff=None):
@@ -381,12 +381,12 @@ class Complex:
         @type  cutoff: float
         @return: the number or residue-residue contacts that are common to
                  both this and reference::
-                   abs( N.sum( N.sum( contactMatrix_a - contactMatrix_b )))
+                   abs( oldN.sum( oldN.sum( contactMatrix_a - contactMatrix_b )))
         @rtype: int
         """
-        equality = N.logical_and(self.resContacts( cutoff=cutoff ),
+        equality = oldN.logical_and(self.resContacts( cutoff=cutoff ),
                                reference.resContacts( cutoff=cutoff ) )
-        return abs(N.sum(N.sum( equality )))
+        return abs(oldN.sum(oldN.sum( equality )))
 
 
     def contactsDiff(self, ref, cutoff=None):
@@ -402,8 +402,8 @@ class Complex:
         @return: number of contacts different in this and refererence complex.
         @rtype: int
         """
-        both = N.logical_or( self.resContacts(cutoff), ref.resContacts(cutoff))
-        return N.sum(N.sum(both)) - self.contactsShared( ref, cutoff )
+        both = oldN.logical_or( self.resContacts(cutoff), ref.resContacts(cutoff))
+        return oldN.sum(oldN.sum(both)) - self.contactsShared( ref, cutoff )
 
 
     def fractionNativeContacts(self, ref, cutoff=None ):
@@ -421,8 +421,8 @@ class Complex:
         cont     = self.resContacts( cutoff, refComplex=ref )
         ref_cont = ref.resContacts( cutoff )
 
-        result = N.sum(N.sum( ref_cont * cont ))*1.0
-        return result / N.sum( N.sum( ref_cont ))
+        result = oldN.sum(oldN.sum( ref_cont * cont ))*1.0
+        return result / oldN.sum( oldN.sum( ref_cont ))
 
 
     def fractionNativeSurface(self, cont, contRef ):
@@ -440,12 +440,12 @@ class Complex:
         @rtype: (float, float)
            
         """
-        lig, ligRef = N.clip( N.sum(cont),0,1),  N.clip( N.sum(contRef), 0,1)
-        rec    = N.clip( N.sum(cont, 1),0,1)
-        recRef = N.clip( N.sum(contRef, 1), 0,1)
+        lig, ligRef = oldN.clip( oldN.sum(cont),0,1),  oldN.clip( oldN.sum(contRef), 0,1)
+        rec    = oldN.clip( oldN.sum(cont, 1),0,1)
+        recRef = oldN.clip( oldN.sum(contRef, 1), 0,1)
 
-        fLig = N.sum( N.logical_and( lig, ligRef )) *1./ N.sum( ligRef )
-        fRec = N.sum( N.logical_and( rec, recRef )) *1./ N.sum( recRef )
+        fLig = oldN.sum( oldN.logical_and( lig, ligRef )) *1./ oldN.sum( ligRef )
+        fRec = oldN.sum( oldN.logical_and( rec, recRef )) *1./ oldN.sum( recRef )
 
         return (fRec, fLig)
 
@@ -495,11 +495,11 @@ class Complex:
         ## determine interface
         contacts = ref.resContacts( cutoff )
 
-        if_rec = ref.rec_model.res2atomMask( N.sum( contacts, 1 ) )
-        if_lig = ref.lig_model.res2atomMask( N.sum( contacts, 0 ) )
+        if_rec = ref.rec_model.res2atomMask( oldN.sum( contacts, 1 ) )
+        if_lig = ref.lig_model.res2atomMask( oldN.sum( contacts, 0 ) )
 
-        mask_interface = N.concatenate( (if_rec, if_lig) )
-        mask_heavy = N.concatenate( (ref.rec().maskHeavy(),
+        mask_interface = oldN.concatenate( (if_rec, if_lig) )
+        mask_heavy = oldN.concatenate( (ref.rec().maskHeavy(),
                                    ref.lig_model.maskHeavy()) )
         mask_interface = mask_interface * mask_heavy
 
@@ -554,12 +554,12 @@ class Complex:
             cm = self.resContacts()
 
         ## get mask for residues involved in contacts
-        maskLig = N.sum( cm )
-        maskRec = N.sum( N.transpose( cm ))
+        maskLig = oldN.sum( cm )
+        maskRec = oldN.sum( oldN.transpose( cm ))
 
         ## get sequence of contact residues only
-        seqLig = N.compress( maskLig, self.lig().sequence() )
-        seqRec = N.compress( maskRec, self.rec().sequence() )
+        seqLig = oldN.compress( maskLig, self.lig().sequence() )
+        seqRec = oldN.compress( maskRec, self.rec().sequence() )
         seq    = ''.join( seqLig ) + ''.join(seqRec) ## convert back to string
 
         ## count occurrence of letters
@@ -589,7 +589,7 @@ class Complex:
             result[ molUtils.resType( r )[0] ] += resDistr[ r ]
 
         ## normalize
-        s = N.sum( result.values() )
+        s = oldN.sum( result.values() )
         for r in result.keys():
             result[r] = result[r]*1.0 / s
 
@@ -643,7 +643,7 @@ class Complex:
 
         ## New, uncompression from list of indices into raveled array
         if self.contacts != None and \
-           len( N.shape( self.contacts['result'])) == 1:
+           len( oldN.shape( self.contacts['result'])) == 1:
 
             try:
                 lenRec, lenLig = self.contacts['shape']
@@ -652,10 +652,10 @@ class Complex:
                 lenRec = self.rec().lenResidues()
                 lenLig = self.lig().lenResidues()
 
-            m = N.zeros( lenRec * lenLig )
-            N.put( m, self.contacts['result'], 1 )
+            m = oldN.zeros( lenRec * lenLig )
+            oldN.put( m, self.contacts['result'], 1 )
 
-            self.contacts['result'] = N.reshape( m, (lenRec, lenLig) )
+            self.contacts['result'] = oldN.reshape( m, (lenRec, lenLig) )
 
         return self.contacts
 
@@ -754,7 +754,7 @@ class Complex:
 
         # decide which dimension to work on
         if not axis:
-            cm = N.transpose( cm )
+            cm = oldN.transpose( cm )
 
         seqCount = 0   # keep track of sequence length changes
         i=0
@@ -769,7 +769,7 @@ class Complex:
                 matrixSeg1 = cm[ :, : seqDiff[i][1] + seqCount ]
                 matrixSeg2 = cm[ :, seqDiff[i][2] + seqCount : ]
                 # concatenate part
-                cm = N.concatenate( ( matrixSeg1, matrixSeg2 ), 1)
+                cm = oldN.concatenate( ( matrixSeg1, matrixSeg2 ), 1)
                 seqCount = seqCount + seqDiff[i][1] - seqDiff[i][2]
 
             # inserts zeros in the column where there is a insertion in the
@@ -778,18 +778,18 @@ class Complex:
 
                 # create a matrix to be inserted
                 insertZeros= seqDiff[i][4] - seqDiff[i][3]
-                insertColumns = N.array( [ [0] * insertZeros ] * N.size(cm,0) )
+                insertColumns = oldN.array( [ [0] * insertZeros ] * oldN.size(cm,0) )
                 # separate matrix into before and after insertion
                 matrixSeg1 = cm[ :, : seqDiff[i][1] + seqCount ]
                 matrixSeg2 = cm[ :, seqDiff[i][2] + seqCount : ]
                 # concatenate parts with the zero matrix
-                cm = N.concatenate( (matrixSeg1,insertColumns,matrixSeg2), 1)
+                cm = oldN.concatenate( (matrixSeg1,insertColumns,matrixSeg2), 1)
                 seqCount = seqCount + seqDiff[i][4] - seqDiff[i][3]
 
             i=i+1
 
         if not axis:
-            return N.transpose( cm )
+            return oldN.transpose( cm )
         return cm
 
 
@@ -812,13 +812,13 @@ class Complex:
         l_lig = len( self.lig_model )
 
         ## map contacts back to all atoms matrix
-        r = N.zeros( l_rec * l_lig )
-        rMask = N.ravel( N.outerproduct( rec_mask, lig_mask ) )
+        r = oldN.zeros( l_rec * l_lig )
+        rMask = oldN.ravel( oldN.outerproduct( rec_mask, lig_mask ) )
 
         ## (Optimization: nonzero is time consuming step)
-        N.put( r, N.nonzero( rMask ), N.ravel( contacts ) )
+        oldN.put( r, oldN.nonzero( rMask ), oldN.ravel( contacts ) )
 
-        return N.resize( r, (l_rec, l_lig))
+        return oldN.resize( r, (l_rec, l_lig))
 
 
     def __atomContacts(self, cutoff, rec_mask, lig_mask, cache):
@@ -844,14 +844,14 @@ class Complex:
         ## get pair-wise distances -> atoms_rec x atoms_lig
         dist = getattr( self, 'pw_dist', None )
         if dist is None or \
-               N.shape( dist ) != ( N.sum(rec_mask), N.sum(lig_mask) ):
-            dist = self.__pairwiseDistances(N.compress( rec_mask, rec_xyz, 0),
-                                            N.compress( lig_mask, lig_xyz, 0) )
+               oldN.shape( dist ) != ( oldN.sum(rec_mask), oldN.sum(lig_mask) ):
+            dist = self.__pairwiseDistances(oldN.compress( rec_mask, rec_xyz, 0),
+                                            oldN.compress( lig_mask, lig_xyz, 0) )
         if cache:
             self.pw_dist = dist
 
         ## reduce to 1 (distance < cutoff) or 0 -> n_atoms_rec x n_atoms_lig
-        return N.less( dist, cutoff )
+        return oldN.less( dist, cutoff )
 
 
     def atomContacts( self, cutoff=4.5, rec_mask=None, lig_mask=None, cache=0,
@@ -905,7 +905,7 @@ class Complex:
         @type  cache: 1|0
         
         @return: residue contact matrix, 2-D Numpy
-                 N.array(residues_receptor x residues_ligand) where
+                 oldN.array(residues_receptor x residues_ligand) where
                  1-contact, 0-no contact
         @rtype: array
         """
@@ -928,12 +928,12 @@ class Complex:
                  2-D numpy array(residues_receptor x residues_ligand)
         @rtype: array
         """
-        recInd = N.concatenate((self.rec().resIndex(),
+        recInd = oldN.concatenate((self.rec().resIndex(),
                               [ self.rec().lenAtoms()] ))
-        ligInd = N.concatenate((self.lig_model.resIndex(),
+        ligInd = oldN.concatenate((self.lig_model.resIndex(),
                               [ self.lig_model.lenAtoms() ] ))
 
-        residueMatrix = N.zeros(( len(recInd)-1, len(ligInd)-1 ), N.Int)
+        residueMatrix = oldN.zeros(( len(recInd)-1, len(ligInd)-1 ), oldN.Int)
 
         for r in range( len(recInd)-1 ):
 
@@ -942,7 +942,7 @@ class Complex:
                 res2res = m[ int(recInd[r]):int(recInd[r+1]),
                              int(ligInd[l]):int(ligInd[l+1]) ]
 
-                if N.any( res2res ):
+                if oldN.any( res2res ):
                     residueMatrix[r, l] = 1
 
         return residueMatrix
@@ -1010,8 +1010,8 @@ class Complex:
         r.info = deepcopy( self.info )
 
         if self.pw_dist:
-            r.pw_dist = N.take( self.pw_dist, rec_pos, 1 )
-            r.pw_dist = N.take( r.pw_dist, lig_pos )
+            r.pw_dist = oldN.take( self.pw_dist, rec_pos, 1 )
+            r.pw_dist = oldN.take( r.pw_dist, lig_pos )
 
         r.ligandMatrix = copy( self.ligandMatrix )
 
@@ -1032,7 +1032,7 @@ class Complex:
         @return: compressed complex
         @rtype: Complex
         """
-        return self.take( N.nonzero( rec_mask ), N.nonzero( lig_mask ) )
+        return self.take( oldN.nonzero( rec_mask ), oldN.nonzero( lig_mask ) )
 
 
     def contPairScore(self, cutoff=6.0):
@@ -1139,9 +1139,9 @@ class Complex:
 ##     def prosaEnergy( self ):
 ##         """
 ##         Calculate ProsaII total energies for the complex.
-##         -> N.array(pair energy, surface energy, combined energy ) 
+##         -> oldN.array(pair energy, surface energy, combined energy ) 
 ##         """
-##         return N.sum( self.prosaProfile() )
+##         return oldN.sum( self.prosaProfile() )
 
 
     def prosa2003Energy( self ):
@@ -1149,7 +1149,7 @@ class Complex:
         Calculate Prosa2003 total energies for the complex.
         
         @return: Prosa energy profiles,
-                 N.array(pair energy, surface energy, combined energy )
+                 oldN.array(pair energy, surface energy, combined energy )
         @rtype: (array, array, array)
         """
         rec, lig = self.rec_model, self.lig_model
@@ -1227,14 +1227,14 @@ class Complex:
             if verbose:
                 log.add('\n'+'*'*30+'\nNO HHM PROFILE FOR RECEPTOR\n'+\
                         '*'*30+'\n')
-            recCons = N.ones( self.rec().lenResidues() )
+            recCons = oldN.ones( self.rec().lenResidues() )
         try:
             ligCons = self.lig().profile( cons_type, updateMissing=1 )
         except:
             if verbose:
                 log.add(\
                             '\n'+'*'*30+'\nNO HHM PROFILE FOR LIGAND\n'+'*'*30+'\n')
-            ligCons = N.ones( self.lig().lenResidues() )
+            ligCons = oldN.ones( self.lig().lenResidues() )
 
         if self.rec().profile( 'surfMask' ):
             recSurf = self.rec().profile( 'surfMask' )
@@ -1248,13 +1248,13 @@ class Complex:
             d = PDBDope(self.lig())
             d.addSurfaceMask()
 
-        surfMask = N.ravel(N.outerproduct( recSurf, ligSurf ))
+        surfMask = oldN.ravel(oldN.outerproduct( recSurf, ligSurf ))
 
-        missing = N.outerproduct( N.equal( recCons, 0), N.equal(ligCons,0))
+        missing = oldN.outerproduct( oldN.equal( recCons, 0), oldN.equal(ligCons,0))
 
-        cont = self.resContacts() * N.logical_not(missing)
+        cont = self.resContacts() * oldN.logical_not(missing)
 
-        consMat = N.outerproduct( recCons, ligCons )
+        consMat = oldN.outerproduct( recCons, ligCons )
 
         score = cont* consMat
 
@@ -1263,11 +1263,11 @@ class Complex:
             if self.verbose:
                 self.log.write('.')
             ranMat =  mathUtils.random2DArray( cont, ranNr, mask=surfMask )
-            random_score = N.sum(N.sum( ranMat * consMat ))/( ranNr*1.0 )
-            return N.sum(N.sum(score))/random_score
+            random_score = oldN.sum(oldN.sum( ranMat * consMat ))/( ranNr*1.0 )
+            return oldN.sum(oldN.sum(score))/random_score
 
         else:
-            return N.sum(N.sum(score))/ N.sum(N.sum(cont))
+            return oldN.sum(oldN.sum(score))/ oldN.sum(oldN.sum(cont))
 
 
     def rtTuple2matrix( self, r, t):
@@ -1283,11 +1283,11 @@ class Complex:
         @rtype: array
         """
         ## create 3 x 4 matrix: 0:3, 0:3 contains rot; 3,0:3 contains trans
-        result = N.concatenate( (r, N.transpose( [ t.tolist() ] )), 1)
+        result = oldN.concatenate( (r, oldN.transpose( [ t.tolist() ] )), 1)
         ## make it square
-        result = N.concatenate( (result, N.array([[0,0,0,1]],N.Float32)), 0)
+        result = oldN.concatenate( (result, oldN.array([[0,0,0,1]],oldN.Float32)), 0)
 
-        return result.astype(N.Float32)
+        return result.astype(oldN.Float32)
 
 
     def extractLigandMatrix( self, lig):
@@ -1314,10 +1314,10 @@ class Complex:
         rotation matrix and the translation vector.
         Back transformation:
         for atom i new coordinates will be::
-            y_new[i] = N.dot(r, y[i]) + t
+            y_new[i] = oldN.dot(r, y[i]) + t
             
         for all atoms in one step::
-            y_new = N.dot(y, N.transpose(r)) + t
+            y_new = oldN.dot(y, oldN.transpose(r)) + t
 
         @param x: coordinates
         @type  x: array
@@ -1332,15 +1332,15 @@ class Complex:
         from numpy.oldnumeric.linear_algebra import singular_value_decomposition as svd
 
         ## center configurations
-        x_av = N.sum(x) / len(x)
-        y_av = N.sum(y) / len(y)
+        x_av = oldN.sum(x) / len(x)
+        y_av = oldN.sum(y) / len(y)
         x = x - x_av
         y = y - y_av
         ## svd of correlation matrix
-        v, l, u = svd(N.dot(N.transpose(x), y))
+        v, l, u = svd(oldN.dot(oldN.transpose(x), y))
         ## build rotation matrix and translation vector
-        r = N.dot(v, u)
-        t = x_av - N.dot(r, y_av)
+        r = oldN.dot(v, u)
+        t = x_av - oldN.dot(r, y_av)
 
         return r, t
 
@@ -1365,13 +1365,13 @@ class Complex:
             raise ComplexError('unsupported argument type ' + \
                                str( type(u) ) + ' or ' + str( type(v) ) )
 
-        diag1= N.diagonal(N.dot(u,N.transpose(u)))
-        diag2= N.diagonal(N.dot(v,N.transpose(v)))
-        dist= -N.dot(v,N.transpose(u))-N.transpose(N.dot(u,N.transpose(v)))
-        dist= N.transpose(N.asarray(map(lambda column,a:column+a, \
-                                   N.transpose(dist), diag1)))
+        diag1= oldN.diagonal(oldN.dot(u,oldN.transpose(u)))
+        diag2= oldN.diagonal(oldN.dot(v,oldN.transpose(v)))
+        dist= -oldN.dot(v,oldN.transpose(u))-oldN.transpose(oldN.dot(u,oldN.transpose(v)))
+        dist= oldN.transpose(oldN.asarray(map(lambda column,a:column+a, \
+                                   oldN.transpose(dist), diag1)))
 
-        return N.transpose(N.sqrt(N.asarray(
+        return oldN.transpose(oldN.sqrt(oldN.asarray(
             map(lambda row,a: row+a, dist, diag2))))
 
 
@@ -1389,8 +1389,8 @@ class Complex:
         """
         docked_pdb = self._extractLigandStructure(fcomplex)
 
-        xyz_docked = N.compress( docked_pdb.maskCA(), docked_pdb.xyz )
-        xyz_template = N.compress( self.lig_model.maskCA(),
+        xyz_docked = oldN.compress( docked_pdb.maskCA(), docked_pdb.xyz )
+        xyz_template = oldN.compress( self.lig_model.maskCA(),
                                  self.lig_model.xyz )
 
         (r, t) = self._findTransformation(xyz_docked, xyz_template)
@@ -1422,8 +1422,8 @@ class Test(BT.BiskitTest):
         c.info['soln'] = 1
 
         cont = c.atomContacts( 6.0 )
-        contProfile_lig = N.sum( cont )
-        contProfile_rec = N.sum( cont, 1 )
+        contProfile_lig = oldN.sum( cont )
+        contProfile_rec = oldN.sum( cont, 1 )
 
         try:
             dope = PDBDope( c.rec_model )
@@ -1470,7 +1470,7 @@ class Test(BT.BiskitTest):
             
             globals().update( locals() )
 
-        self.assertEqual( N.sum(contProfile_lig) + N.sum(contProfile_rec),
+        self.assertEqual( oldN.sum(contProfile_lig) + oldN.sum(contProfile_rec),
                           2462 )
    
 

@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -31,7 +31,7 @@ from Biskit.PVM import JobSlave
 import Biskit.tools as T
 from Biskit import mathUtils as MU
 from Biskit.LogFile import StdLog, LogFile
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 from Complex import Complex
 import os.path
 import time
@@ -213,19 +213,19 @@ class ContactSlave(JobSlave):
                 ## cache pairwise atom distances for following calculations
                 contacts = c.atomContacts( 4.5, self.mask_rec, self.mask_lig,
                                            cache=1, map_back=0 )
-                ref = N.ravel( self.c_ref_atom_4_5 )
+                ref = oldN.ravel( self.c_ref_atom_4_5 )
 
-                c['fnac_4.5'] = N.sum( N.ravel(contacts) * ref )\
-                 / float( N.sum(ref))
+                c['fnac_4.5'] = oldN.sum( oldN.ravel(contacts) * ref )\
+                 / float( oldN.sum(ref))
 
             if self.requested(c, 'fnac_10') and self.c_ref_atom_10 != None:
 
                 contacts = c.atomContacts( 10., self.mask_rec, self.mask_lig,
                                            cache=1, map_back=0 )
 
-                ref = N.ravel( self.c_ref_atom_10 )
-                c['fnac_10'] = N.sum( N.ravel(contacts) * ref ) \
-                 / float( N.sum(ref))
+                ref = oldN.ravel( self.c_ref_atom_10 )
+                c['fnac_10'] = oldN.sum( oldN.ravel(contacts) * ref ) \
+                 / float( oldN.sum(ref))
 
             if self.requested(c, 'c_res_4.5') \
                or ( self.c_ref_res_4_5 != None \
@@ -236,9 +236,9 @@ class ContactSlave(JobSlave):
 
                 if self.c_ref_res_4_5 != None \
                    and self.requested(c, 'fnrc_4.5' ):
-                    ref = N.ravel( self.c_ref_res_4_5 )
-                    c['fnrc_4.5'] = N.sum(N.ravel(res_cont)*ref) \
-                     /float(N.sum(ref))
+                    ref = oldN.ravel( self.c_ref_res_4_5 )
+                    c['fnrc_4.5'] = oldN.sum(oldN.ravel(res_cont)*ref) \
+                     /float(oldN.sum(ref))
 
                 if self.c_ref_res_4_5 != None \
                    and self.requested(c, 'fnSurf_rec'):
@@ -287,9 +287,9 @@ class ContactSlave(JobSlave):
                 c['c_ratom_10'] = MU.packBinaryMatrix(contacts)
 
             if self.c_ref_ratom_10 is not None:
-                ref = N.ravel( self.c_ref_ratom_10 )
-                c['fnarc_10'] = N.sum( N.ravel(contacts) * ref )\
-                 / float( N.sum(ref))
+                ref = oldN.ravel( self.c_ref_ratom_10 )
+                c['fnarc_10'] = oldN.sum( oldN.ravel(contacts) * ref )\
+                 / float( oldN.sum(ref))
 
         except:
             self.reportError('reduced contacts error', soln)

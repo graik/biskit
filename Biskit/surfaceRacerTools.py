@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -26,8 +26,7 @@
 Reference data for SurfaceRacer.
 """
 
-import numpy.oldnumeric as Numeric
-
+import numpy.oldnumeric as oldN
 
 ## dictionary with average accessabilities in 500 random
 ## GLY-XX-GLY peptides calculated with SurfaceRacer using
@@ -425,9 +424,9 @@ def relExposure( model, absSurf, key='AS', clip=1 ):
             k+=1
 
     if clip:
-        return  Numeric.clip( Numeric.array(rel), 0.0, 100.0 )
+        return  oldN.clip( oldN.array(rel), 0.0, 100.0 )
     else:
-        return  Numeric.array(rel)
+        return  oldN.array(rel)
 
 
 def __Nter( a, rel, absSurf, key, i ):
@@ -534,14 +533,14 @@ class Test(BT.BiskitTest):
         self.m = self.m.compress( self.m.maskHeavy() )
         
         ## some fake surface data
-        surf = Numeric.ones( self.m.lenAtoms()) * 10.0
+        surf = oldN.ones( self.m.lenAtoms()) * 10.0
 
         relExp = relExposure( self.m, surf )
         
 ##         if self.local:
 ##             globals().update( locals() )
             
-        self.assertEqual( Numeric.sum(relExp), 44276.860852223857 )
+        self.assertEqual( oldN.sum(relExp), 44276.860852223857 )
     
         
 if __name__ == '__main__':

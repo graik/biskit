@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -26,7 +26,7 @@
 Various structure related calculations.
 """
 
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 from Biskit import molUtils as molU
 import Biskit.tools as T
 
@@ -72,7 +72,7 @@ def hbonds( model ):
             a_cid  = model.atoms['chain_id'][a]
             a_segi = model.atoms['segment_id'][a]
             
-            dist = N.sqrt( sum( (d_xyz - a_xyz)**2 ) )
+            dist = oldN.sqrt( sum( (d_xyz - a_xyz)**2 ) )
 
             ## don't calculate angles within the same residue and 
             ##  for distances definately are not are h-bonds
@@ -85,12 +85,12 @@ def hbonds( model ):
                 d_vec = d_xyz_cov - d_xyz
                 a_vec = a_xyz - a_xyz_cov
                 
-                d_len = N.sqrt( sum( (d_vec)**2 ) )
-                a_len = N.sqrt( sum( (a_vec)**2 ) )
+                d_len = oldN.sqrt( sum( (d_vec)**2 ) )
+                a_len = oldN.sqrt( sum( (a_vec)**2 ) )
                 
-                da_dot = N.dot( d_vec, a_vec)
+                da_dot = oldN.dot( d_vec, a_vec)
                 
-                angle = 180 - N.arccos( da_dot / (d_len * a_len) )*180/N.pi
+                angle = 180 - oldN.arccos( da_dot / (d_len * a_len) )*180/oldN.pi
     
                 if hbondCheck( angle, dist ):
                     hbond_lst += [[ d, a, dist, angle ]]
@@ -150,12 +150,12 @@ def xyzOfNearestCovalentNeighbour( i, model ):
     @rtype: [float, float, float]
     """
     resModel = model.filter( residue_number=model.atoms['residue_number'][i] )
-    dist = N.sqrt( N.sum( (resModel.xyz - model.xyz[i])**2 , 1) )
+    dist = oldN.sqrt( oldN.sum( (resModel.xyz - model.xyz[i])**2 , 1) )
 
     ## set distance to self to something high
-    dist[ N.argmin(dist) ] = 100.
+    dist[ oldN.argmin(dist) ] = 100.
     
-    pos_shortest =  N.nonzero( dist == min(dist) )[0]
+    pos_shortest =  oldN.nonzero( dist == min(dist) )[0]
  
     return resModel.xyz[ pos_shortest ]
 
@@ -226,7 +226,7 @@ class Test(BT.BiskitTest):
                 
             globals().update( locals() )
                               
-        self.r = N.sum(N.ravel(hb[3:5])) + N.sum(xyz)
+        self.r = oldN.sum(oldN.ravel(hb[3:5])) + oldN.sum(xyz)
 
         self.assertAlmostEqual( self.r, self.EXPECT, 3 )
 
