@@ -87,7 +87,7 @@ class ComplexRandomizer:
         @rtype: PDBModel
         """
         r = model.clone()
-        r.keep( oldoldN.nonzero( oldoldN.logical_not( r.maskH2O() ) ) )
+        r.keep( oldN.nonzero( oldN.logical_not( r.maskH2O() ) ) )
         center = r.centerOfMass()
         r.setXyz( r.getXyz() - center )
 
@@ -105,7 +105,7 @@ class ComplexRandomizer:
         @rtype: float
         """
         center = model.centerOfMass()
-        dist = oldoldN.sqrt( oldoldN.sum( ( model.getXyz()-center )**2 , 1 ) )
+        dist = oldN.sqrt( oldN.sum( ( model.getXyz()-center )**2 , 1 ) )
 
         return max( dist )
 
@@ -121,7 +121,7 @@ class ComplexRandomizer:
         radius = (self.d_max_rec + self.d_max_lig) / 2.0
         xyz = ra.random( 3 ) - 0.5
 
-        scale = radius*1.0 / oldoldN.sqrt( oldoldN.sum( xyz**2 ) )
+        scale = radius*1.0 / oldN.sqrt( oldN.sum( xyz**2 ) )
 
         return scale * xyz
 
@@ -134,14 +134,14 @@ class ComplexRandomizer:
         @rtype: array
         """
         r = ma.randomRotation()
-##         r = oldoldN.array([[1,0,0],[0,1,0],[0,0,1]],'f')
+##         r = oldN.array([[1,0,0],[0,1,0],[0,0,1]],'f')
         t = self.__random_translation()
 
         ## create 3 x 4 matrix: 0:3, 0:3 contains rot; 3,0:3 contains trans
-        result = oldoldN.concatenate( (r, oldoldN.transpose( [ t.tolist() ] )), 1)
+        result = oldN.concatenate( (r, oldN.transpose( [ t.tolist() ] )), 1)
 
         ## make it square
-        result = oldoldN.concatenate( (result, oldoldN.array([[0,0,0,1]], oldoldN.Float32)), 0 )
+        result = oldN.concatenate( (result, oldN.array([[0,0,0,1]], oldN.Float32)), 0 )
 
         return result
 
