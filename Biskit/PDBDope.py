@@ -27,6 +27,8 @@ Calculate and add various properties to PDBModel
 """
 
 import numpy.oldnumeric as oldN
+import numpy as N
+
 import Biskit.tools as T
 
 from Biskit.WhatIf import WhatIf 
@@ -479,7 +481,7 @@ class Test(BT.BiskitTest):
         for k in m_ref.atoms.keys():
             #ref = [ m_ref.atoms[i][k] for i in m_ref.atomRange() ]
             #mod = [ self.M.atoms[i][k] for i in self.M.atomRange() ]
-            self.assert_( oldN.all( m_ref[k] == self.M[k]) )
+            self.assert_( N.all( m_ref[k] == self.M[k]) )
 
         ## display in Pymol
         if self.local:

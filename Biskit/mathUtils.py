@@ -29,6 +29,8 @@ general purpose math methods
 """
 
 import numpy.oldnumeric as oldN
+import numpy as N
+
 import random
 import numpy.oldnumeric.random_array as RandomArray
 import math, cmath
@@ -827,7 +829,7 @@ def cbrt(x):
     if x >= 0: 
         return math.pow(x, 1.0/3.0) 
     else:
-        return -math.pow(oldN.abs(x), 1.0/3.0) 
+        return -math.pow(N.abs(x), 1.0/3.0) 
 
 
 def cartesian2D(r, w, deg=0): # radian if deg=0; degree if deg=1 

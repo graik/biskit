@@ -28,6 +28,8 @@ Memory saving representation of a sparse array.
 """
 
 import numpy.oldnumeric as oldN
+import numpy as N
+
 import types
 import copy
 
@@ -757,7 +759,7 @@ class Test(BT.BiskitTest):
         if self.local:
             print self.sa.toarray()
 
-        self.assert_( oldN.all( self.sb.toarray() == self.EXPECTED) )
+        self.assert_( N.all( self.sb.toarray() == self.EXPECTED) )
 
 
     EXPECTED = oldN.array([[ 0.,  3.,  4.,  0.,  0.,  0.],

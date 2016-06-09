@@ -693,7 +693,7 @@ class Trajectory:
             refxyz = ref.getXyz()
 
         if mask is None:
-            mask = oldN.ones( len( refxyz ), oldN.int32 )
+            mask = oldN.ones( len( refxyz ), oldN.Int32 )
 
         refxyz = oldN.compress( mask, refxyz, 0 )
 
@@ -731,7 +731,7 @@ class Trajectory:
 
 
             if fit:
-                self.frames[i] = xyz_transformed.astype(oldN.float32)
+                self.frames[i] = xyz_transformed.astype(oldN.Float32)
 
             if verbose and i%100 == 0:
                 T.errWrite( '#' )
@@ -1156,7 +1156,7 @@ class Trajectory:
         @rtype: array
         """
         if mask is None:
-            mask = oldN.ones( len( self.frames[0] ), oldN.int32 )
+            mask = oldN.ones( len( self.frames[0] ), oldN.Int32 )
 
         if verbose: T.errWrite( "rmsd fitting per residue..." )
 
@@ -1221,7 +1221,7 @@ class Trajectory:
         @rtype: array
         """
         if mask is None:
-            mask = oldN.ones( len( self.frames[0] ), oldN.int32 )
+            mask = oldN.ones( len( self.frames[0] ), oldN.Int32 )
 
         ## eliminate all values that do not belong to the selected atoms
         masked = atomValues * mask
@@ -1466,7 +1466,7 @@ class Trajectory:
         @rtype: dict
         """
         if aMask == None:
-            aMask = oldN.ones( self.getRef().lenAtoms(), oldN.int32 )
+            aMask = oldN.ones( self.getRef().lenAtoms(), oldN.Int32 )
 
         pc = getattr(self, 'pc', None)
 
@@ -1506,10 +1506,10 @@ class Trajectory:
                  projection of each frame in PC space, eigenvalue of each PC
         @rtype: array, array, array
         """
-        if frameMask is None: frameMask = oldN.ones( len( self.frames ), oldN.int32 )
+        if frameMask is None: frameMask = oldN.ones( len( self.frames ), oldN.Int32 )
 
         if atomMask is None: atomMask = oldN.ones(self.getRef().lenAtoms(),
-                                               oldN.int32)
+                                               oldN.Int32)
 
         if fit:
             self.fit( atomMask )

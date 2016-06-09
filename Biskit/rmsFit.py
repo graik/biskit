@@ -99,7 +99,7 @@ def match(x, y, n_iterations=1, z=2, eps_rmsd=0.5, eps_stdv=0.05):
     n = 0
     converged = 0
 
-    mask = oldN.ones(len(y), oldN.int32 )
+    mask = oldN.ones(len(y), oldN.Int32 )
 
     while not converged:
 

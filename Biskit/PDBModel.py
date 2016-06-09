@@ -606,7 +606,7 @@ class PDBModel:
 
         if self.xyz is None:
             ## empty array that can be concatenated to other xyz arrays
-            return oldN.zeros( (0,3), oldN.float32 )
+            return oldN.zeros( (0,3), oldN.Float32 )
 
         if mask is None:
             return self.xyz
@@ -1604,7 +1604,7 @@ class PDBModel:
         index = oldN.concatenate( (index, [len_i]) )
         delta = index[1:] - index[:-1] 
         ## Numeric: delta = oldN.take( index, range(1, len(index) ) ) - index[:-1]
-        return oldN.repeat( range(len(delta)), delta.astype( oldN.int32) )
+        return oldN.repeat( range(len(delta)), delta.astype( oldN.Int32) )
 
 
     def map2index( self, imap ):
@@ -1648,7 +1648,7 @@ class PDBModel:
         index = oldN.concatenate( (index, [len_i]) )
         delta = index[1:] - index[:-1] 
 
-        return oldN.repeat( mask, delta.astype( oldN.int32 ) )
+        return oldN.repeat( mask, delta.astype( oldN.Int32 ) )
 
 
     def extendIndex( self, i, index, len_i ):
@@ -1693,7 +1693,7 @@ class PDBModel:
         ri    = oldN.repeat( ifrom,  rangelen )
         delta = oldN.repeat( rindex, rangelen )
 
-        ri =  ri + oldN.arange( len(ri), dtype=oldN.int32 ) - delta
+        ri =  ri + oldN.arange( len(ri), dtype=oldN.Int32 ) - delta
 
         return ri, rindex
 
@@ -1757,7 +1757,7 @@ class PDBModel:
 
         indices = copy.copy( oldN.array( indices ) )
 
-        negatives = oldN.flatnonzero( indices < 0 )
+        negatives = N.flatnonzero( indices < 0 )
 
         a = oldN.zeros( len( indices ) )
         oldN.put( a, negatives, length )
@@ -2052,7 +2052,7 @@ class PDBModel:
         if rmOxt:
             ## overkill: we actually would only need to look into last residue
             anames = oldN.array( self.atoms['name'][i_start:i_scar] )
-            i_oxt = oldN.flatnonzero( oldN.logical_or( anames=='OXT', anames=='OT2' ))
+            i_oxt = N.flatnonzero( oldN.logical_or( anames=='OXT', anames=='OT2' ))
             if len( i_oxt ) > 0:
                 self.remove( i_oxt )
 
@@ -2116,7 +2116,7 @@ class PDBModel:
         ## shift chain boundary (if any) to end of fused residue
         ## unless it's the end of the model or there is already a boundary there
         if i_scar in self.chainIndex():
-            i = oldN.flatnonzero( self._chainIndex == i_scar )[0]
+            i = N.flatnonzero( self._chainIndex == i_scar )[0]
             if (not i_next in self._chainIndex) and (i_next != len(self)):
                 self._chainIndex[ i ] = i_next
             else:
@@ -2267,7 +2267,7 @@ class PDBModel:
 
         ## the easy part: extract coordinates and atoms
         r.xyz = oldN.take( self.getXyz(), i )
-        r.xyzChanged = self.xyzChanged or not oldN.all(r.xyz == self.xyz)
+        r.xyzChanged = self.xyzChanged or not N.all(r.xyz == self.xyz)
 
         r.atoms = self.atoms.take( i, r )
 
@@ -2441,7 +2441,7 @@ class PDBModel:
         if not force:
             chains = oldN.array( chains, int )
             delta = oldN.concatenate( (chains[1:], [chains[-1]+1]) ) - chains
-            if not oldN.all( delta != 0 ):
+            if not N.all( delta != 0 ):
                 raise PDBIndexError,\
                    'Chain boundaries cannot be preserved for repeats.' +\
                    "Use 'force=1' to override, then re-calculate chainIndex()."
@@ -3983,7 +3983,7 @@ class Test(BT.BiskitTest):
 
         ## this should now trigger the reloading of fout2
         self.assertEqual( self._m2.atoms['name'], anames )
-        self.assert_( oldN.all( self._m2.getXyz()[0] == xyz0) )
+        self.assert_( N.all( self._m2.getXyz()[0] == xyz0) )
 
         ## after disconnection, slim() should not have any effect
         self._m2.disconnect()
@@ -4013,8 +4013,8 @@ class Test(BT.BiskitTest):
         r.mergeChains( 0 )
         self.r = r
         self.assert_( r.lenChains() == m.lenChains() )
-        self.assert_( oldN.all( oldN.array(r['chain_id']) == chain_ids ) )
-        self.assert_( oldN.all( oldN.array(r['residue_number']) == res_numbers ) )
+        self.assert_( N.all( oldN.array(r['chain_id']) == chain_ids ) )
+        self.assert_( N.all( oldN.array(r['residue_number']) == res_numbers ) )
 
     def test_mergeResidues( self ):
         """PDBModel.mergeResidues test"""
@@ -4096,7 +4096,7 @@ class TestExe( BT.Test ):
             print 'center of mass deviation: \n%r' % diff
 
         self.assertEqual( r.info['tm_rmsd'], 1.76 )
-        self.assert_( oldN.all( oldN.absolute(diff) < 1 ),
+        self.assert_( N.all( oldN.absolute(diff) < 1 ),
                       'superposition failed: %r' % diff)
 
 

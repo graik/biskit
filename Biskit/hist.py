@@ -27,6 +27,7 @@ create a histogram from data
 """
 
 import numpy.oldnumeric as oldN
+import numpy as N
 
 
 def histogram(data, nbins, range = None):
@@ -116,9 +117,9 @@ class Test(BT.BiskitTest):
         self.x = oldN.arange( 4, 12, 1.2 )
         self.data = density( self.x, 3, hist=1 )
 
-        self.assert_( oldN.all( self.data == self.EXPECT) )
+        self.assert_( N.all( self.data == self.EXPECT) )
 
-    EXPECT= oldN.array([[  4. ,   0. ],
+    EXPECT= N.array([[  4. ,   0. ],
                            [  4. ,   2. ],
                            [  6.4,   2. ],
                            [  6.4,   2. ],

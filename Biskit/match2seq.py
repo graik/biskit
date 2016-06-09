@@ -29,6 +29,8 @@ a residue mask for each of them.
 """
 
 import numpy.oldnumeric as oldN
+import numpy as N
+
 import Biskit.tools as T
 from Biskit.difflib_old import SequenceMatcher
 #from difflib import SequenceMatcher
@@ -305,16 +307,16 @@ class Test(BT.BiskitTest):
             print 'mask2\n', mask2            
             globals().update( locals() )
 
-        self.assert_( oldN.all(mask1 == self.EXPECT[0] ) )
-        self.assert_( oldN.all(mask2 == self.EXPECT[1] ) )
+        self.assert_( N.all(mask1 == self.EXPECT[0] ) )
+        self.assert_( N.all(mask2 == self.EXPECT[1] ) )
         
     def test_sequenceRepeats(self):
         """match2seq sequence repeat test"""
         seq1 = 'ABCDEFG~~~~~~~~~~~~~~~'
         seq2 = '~~~~~'
         mask1, mask2 = compareSequences( seq1, seq2 )
-        self.assert_( oldN.all( mask1 == oldN.zeros( len(seq1 ) )) )
-        self.assert_( oldN.all( mask2 == oldN.zeros( len(seq2 ) )) )
+        self.assert_( N.all( mask1 == oldN.zeros( len(seq1 ) )) )
+        self.assert_( N.all( mask2 == oldN.zeros( len(seq2 ) )) )
 
 
     EXPECT =  oldN.array([1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,

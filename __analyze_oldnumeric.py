@@ -6,7 +6,7 @@ lines = f.readlines()
 
 r = {}
 
-ex = re.compile('oldN\.([a-z\_]+)[\( \.\)\r].*')
+ex = re.compile('oldN\.([a-zA-Z\_0-9]+)[\(\.\s\)\:\,].*')
 
 for l in lines:
     method = None
