@@ -14,6 +14,12 @@ example = '''            return oldN.zeros( (0,3), oldN.Float32 )
 ex_method = re.compile('oldN\.([a-zA-Z\_0-9]+)[\(\.\s\)\:\,]')
 ex_oldN = re.compile('oldN\.')
 
+
+def replaceimport(l):
+    if 'import' in l:
+        return l.replace('import numpy.oldnumeric as oldN', 'import Biskit.oldnumeric as N0')
+    return l
+
 def valid(method):
     if method in oldnumeric.__all__:
         return True
@@ -27,6 +33,9 @@ def report_problem(l):
 
 def processline(l):
     """@return (str, int) - processed input line, number of replacements"""
+    
+    l = replaceimport(l)
+    
     if ex_oldN.findall(l):
         methods = ex_method.findall(l)
         if N.all( [ valid(m) for m in methods ] ):
