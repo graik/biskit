@@ -3,7 +3,7 @@
 comment=Amber trajectory analysis and manipulation
 
 ## binary
-bin=ptraj
+bin=cpptraj
 
 ## working directory
 cwd=
