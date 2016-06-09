@@ -30,7 +30,7 @@ import Biskit.mathUtils as MaU
 from Biskit import TrajCluster, EnsembleTraj, PCRModel, molUtils
 from Biskit.Dock import hexTools
 from Biskit.EnsembleTraj import traj2ensemble
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 
 import os.path
 import copy, sys
@@ -157,7 +157,7 @@ def report( tc ):
 
     tr = clTrajs[0].concat( *tuple( clTrajs[1:] ) )
 
-    avgall = N.average( MaU.aboveDiagonal( tr.pairwiseRmsd( tc.aMask ) ) )
+    avgall = oldN.average( MaU.aboveDiagonal( tr.pairwiseRmsd( tc.aMask ) ) )
     print "avg rms all: %4.2f" %  avgall
 
 
@@ -182,7 +182,7 @@ def setChainID( m ):
         id = T.toList( options['id'] )
         cMap = m.chainMap()
         for chain in range( m.lenChains() ):
-            idx = N.nonzero( cMap == chain )
+            idx = oldN.nonzero( cMap == chain )
             for i in idx:
                 m.atoms['chain_id'][i] = id[chain]
 

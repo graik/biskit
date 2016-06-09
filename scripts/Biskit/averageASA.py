@@ -28,7 +28,7 @@ from Biskit import molUtils as MOU
 import Biskit.mathUtils as MAU
 from Biskit import tools as T
 import os, os.path
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 from Biskit.PDBDope import PDBDope
 from Biskit.PDBModel import PDBModel
 import time, sys
@@ -173,8 +173,8 @@ def randomSurfaces( base_folder, label, mask ):
         j = 0
         #atoms =  [ a['name'] for a in m.atoms ]
         for n in m['name']:
-            msDic[n]    = N.average(msLst)[j]
-            asDic[n]    = N.average(asLst)[j]
+            msDic[n]    = oldN.average(msLst)[j]
+            asDic[n]    = oldN.average(asLst)[j]
             msDic_sd[n] = MAU.SD( msLst )[j]
             asDic_sd[n] = MAU.SD( asLst )[j]
             j += 1

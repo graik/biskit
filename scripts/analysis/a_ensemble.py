@@ -27,7 +27,7 @@ import sys
 import os.path as osp
 
 import biggles
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 
 from Biskit.tools import *
 from Biskit.EnsembleTraj import EnsembleTraj, traj2ensemble
@@ -69,13 +69,13 @@ def plot( traj, title ):
 
 def markOutliers( traj, z, page ):
 
-    outliers = N.nonzero( traj.outliers( z=z, mask=traj.ref.maskCA() ) )
+    outliers = oldN.nonzero( traj.outliers( z=z, mask=traj.ref.maskCA() ) )
 
     for o in outliers:
         t = traj.takeMember( o )
 
         ## cross out outliers in plot
-        prof = N.array( t.profiles['rmsCA_ref'] ).tolist()
+        prof = oldN.array( t.profiles['rmsCA_ref'] ).tolist()
         prof.extend( t.profiles['rmsCA_last'] )
         maxV = max( prof )
         

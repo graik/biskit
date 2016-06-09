@@ -36,9 +36,10 @@ from mathUtils import *
 from PDBModel import *
 import molUtils as MU
 
+## Deprecated: would need to be converted to numpy -- not making any further changes
+## without testing
 from Numeric import *
-from numpy.oldnumeric.linear_algebra import singular_value_decomposition as svd
-from numpy.oldnumeric.linear_algebra import determinant as det
+from numpy.linalg import  svd, det
 from LinearAlgebra import *
 
 from gnuplot import *

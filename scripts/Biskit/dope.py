@@ -25,7 +25,7 @@
 
 import os.path
 import sys
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 
 import Biskit.tools as T
 from Biskit.PDBModel import PDBModel
@@ -154,9 +154,9 @@ def changeModel( inFile, prefix, sourceModel ):
 
     #model.atomsChanged = 0
     for k in model.atoms:
-        model.atoms[k,'changed'] = N.all( model[k] == sourceModel[k] )
+        model.atoms[k,'changed'] = oldN.all( model[k] == sourceModel[k] )
 
-    model.xyzChanged = ( 0 != N.sum( N.ravel( model.xyz - sourceModel.xyz)) )
+    model.xyzChanged = ( 0 != oldN.sum( oldN.ravel( model.xyz - sourceModel.xyz)) )
 
     model.update( updateMissing=1 )
 

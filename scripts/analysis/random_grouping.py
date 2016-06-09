@@ -26,7 +26,7 @@
 
 import time
 import random
-import numpy.oldnumeric as N
+import numpy.oldnumeric as oldN
 import os.path, os
 
 from Biskit.tools import *
@@ -84,7 +84,7 @@ def filter_zero_contacts( cl ):
     """
     s = [ len( c['c_ratom_10']['nonzero'] ) for c in cl ]
 
-    return cl.take( N.nonzero( s ) )
+    return cl.take( oldN.nonzero( s ) )
 
 def group( cl, pw, pwmin ):
     """
