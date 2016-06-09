@@ -30,7 +30,7 @@ lognormal distribution
 """
 
 import Biskit.oldnumeric as N0
-import numpy.oldnumeric.random_array as R
+import numpy.random.mtrand as R
 
 
 def rand_log_normal(alpha, beta, shape):

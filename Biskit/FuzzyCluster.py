@@ -39,7 +39,7 @@ import Biskit.oldnumeric as N0
 import Biskit.mathUtils as MU
 import tools
 
-from numpy.oldnumeric.random_array import seed, random
+import numpy.random.mtrand as R # seed, random / converted from oldnumeric/random_array
 
 ## def average(x):
 ##     return N0.sum(N0.array(x)) / len(x)
@@ -146,9 +146,13 @@ class FuzzyCluster:
                  cluster times number of clusters
         @rtype: array('f')
         """
-        seed(self.seedx, self.seedy)
+        ## default signature has changed oldnumeric->numpy
+        if (self.seedx==0 or self.seedy==0):  
+            R.seed()
+        else:
+            R.seed((self.seedx, self.seedy))
 
-        r = random((self.npoints, self.n_cluster))
+        r = R.random_sample((self.npoints, self.n_cluster))
         return N0.transpose(r / N0.sum(r))
 
 
@@ -206,7 +210,6 @@ class FuzzyCluster:
         return (self.n_cluster*N0.sum(N0.sum(p))-
                 self.npoints)/(self.npoints*(self.n_cluster-1))
 
-
     def clusterPartitionCoefficient(self):
         return N0.sum(N0.power(self.msm, self.w), 1)/self.npoints
 
@@ -246,9 +249,9 @@ class Test(BT.BiskitTest):
         """FuzzyCluster test"""
         import gnuplot as G
 
-        x1 = random((500,2))
-        x2 = random((500,2)) + 1
-        x3 = random((500,2)) + 2
+        x1 = R.random_sample((500,2))
+        x2 = R.random_sample((500,2)) + 1
+        x3 = R.random_sample((500,2)) + 2
 
         self.x = N0.concatenate((x1, x2, x3))
 

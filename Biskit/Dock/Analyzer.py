@@ -34,7 +34,7 @@ from Biskit import Trajectory, mathUtils,  molUtils
 
 
 import Biskit.oldnumeric as N0
-import numpy.oldnumeric.random_array as RandomArray
+import numpy.random.mtrand as R
 import copy
 
 try:
@@ -248,7 +248,7 @@ class Analyzer:
         @return: shuffeled list
         @rtype: [any]
         """
-        pos = RandomArray.permutation( len( lst ))
+        pos = R.permutation( len( lst ))
         return N0.take( lst, pos )
 
 

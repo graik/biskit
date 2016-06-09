@@ -33,7 +33,7 @@ import Biskit.oldnumeric as N0
 import numpy as N
 
 import random
-import numpy.oldnumeric.random_array as RandomArray
+import numpy.random.mtrand as R
 import math, cmath
 
 class MathUtilError( Exception ):
@@ -541,9 +541,9 @@ def randomRotation():
     @return: 3 x 3 array of float
     @rtype: array
     """
-    alpha = RandomArray.random() * 2 * N0.pi
-    gamma = RandomArray.random() * 2 * N0.pi
-    beta  = N0.arccos(2*(RandomArray.random() - 0.5))
+    alpha = R.random() * 2 * N0.pi
+    gamma = R.random() * 2 * N0.pi
+    beta  = N0.arccos(2*(R.random() - 0.5))
 
     return eulerRotation(alpha, beta, gamma)
 

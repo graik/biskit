@@ -376,7 +376,7 @@ class Test(BT.BiskitTest):
 
     def test_scatter(self):
         """gnuplot.scatter test (interactive only)"""
-        from numpy.oldnumeric.random_array import poisson
+        from numpy.random.mtrand import poisson
         if self.local:
             self.p = scatter( poisson(50,(1000,2))  )
 

@@ -437,7 +437,7 @@ class Test(BT.BiskitTest):
     def test_FlexMaster(self):
         """TrajFlexMaster test"""
         from Biskit.MatrixPlot import MatrixPlot
-        from numpy.oldnumeric.random_array import random
+        from numpy.random.mtrand import random_sample as random
 
         assert len(hosts.cpus_all) > 0,\
                'Master requires at least 1 PVM node for initialisation.'

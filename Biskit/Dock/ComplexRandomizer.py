@@ -33,7 +33,7 @@ from Biskit.Dock.Complex import Complex
 import Biskit.mathUtils as ma
 import Biskit.molUtils as mol
 import Biskit.tools as t
-import numpy.oldnumeric.random_array as ra
+import numpy.random.mtrand as R
 import Biskit.oldnumeric as N0
 from Biskit import Xplorer, PCRModel
 
@@ -120,7 +120,7 @@ class ComplexRandomizer:
         @rtype: array
         """
         radius = (self.d_max_rec + self.d_max_lig) / 2.0
-        xyz = ra.random( 3 ) - 0.5
+        xyz = R.random_sample( 3 ) - 0.5
 
         scale = radius*1.0 / N0.sqrt( N0.sum( xyz**2 ) )
 
