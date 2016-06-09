@@ -225,30 +225,6 @@ class FilteredTestSuite( U.TestSuite ):
             U.TestSuite.addTest( self, test )
 
 
-class Flushing_TextTestResult( U._TextTestResult ):
-    """
-    Helper class for (Flushing)TextTestRunner.
-    Customize _TextTestResult so that the reported test id is flushed
-    B{before} the test starts. Otherwise the 'sometest.id ...' is only
-    printed together with the '...ok' after the test has finished.
-    """
-
-    def startTest(self, test):
-        """print id at start of test... and flush it"""
-        super( self.__class__, self ).startTest( test )
-        self.stream.flush()
-
-class FlushingTextTestRunner( U.TextTestRunner ):
-    """
-    Convince TextTestRunner to use the flushing text output rather
-    than the default one.
-    """
-
-    def _makeResult(self):
-        return Flushing_TextTestResult(self.stream, self.descriptions,
-                                       self.verbosity)
-
-
 class BiskitTestLoader( object ):
     """
     A replacement for the unittest TestLoaders. It automatically
@@ -405,7 +381,7 @@ class BiskitTestLoader( object ):
             testclass.VERBOSITY = self.verbosity
             testclass.TESTLOG = self.log
 
-        runner = FlushingTextTestRunner(self.log.f(), verbosity=self.verbosity)
+        runner = U.TextTestRunner(self.log.f(), verbosity=self.verbosity)
         if not dry:
             self.result = runner.run( self.suite )
 
