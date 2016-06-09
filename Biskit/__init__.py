@@ -58,7 +58,7 @@ try:
 
     from ProfileCollection import ProfileCollection, ProfileError
     from ProfileMirror import ProfileMirror
-    from Prosa import ProsaII
+    
     from Pymoler import Pymoler
 
     from TrajCluster import TrajCluster
