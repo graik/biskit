@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## 
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (c) 2004 Wolfgang Rieping & Michael Habeck
@@ -26,7 +27,7 @@
 Analyze a density distribution of values.
 """
 
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 import math
 import Biskit.hist as H
 
@@ -71,13 +72,13 @@ class Density:
                     of bin (default: None)
         @type  val: array        
         """
-        self.val = oldN.array(val, oldN.Float32)
+        self.val = N0.array(val, N0.Float32)
         self.x = self.val[:,0]
         self.p = self.val[:,1]
 
         self.delta_x = abs(self.x[0] - self.x[1])
 
-        Z = oldN.sum(self.p) * self.delta_x
+        Z = N0.sum(self.p) * self.delta_x
 
         self.p /= Z
 
@@ -107,10 +108,10 @@ class Density:
                  containing |level|*100 % of the probability
         @rtype: float, float
         """          
-        order = oldN.argsort(self.p).tolist()
-        cumulative = oldN.add.accumulate(oldN.take(self.p, order)) * self.delta_x
+        order = N0.argsort(self.p).tolist()
+        cumulative = N0.add.accumulate(N0.take(self.p, order)) * self.delta_x
 
-        ind = oldN.nonzero(oldN.greater_equal(cumulative, 1. - level))
+        ind = N0.nonzero(N0.greater_equal(cumulative, 1. - level))
 
         sub_set = order[ind[0]:]
 
@@ -132,15 +133,15 @@ class Density:
         @return: convidence level, interval start and end
         @rtype: float, (float,float)
         """
-        closest = oldN.argmin(abs(self.x - x))
+        closest = N0.argmin(abs(self.x - x))
 
-        ind = oldN.nonzero(oldN.greater_equal(self.p, self.p[closest])).tolist()
+        ind = N0.nonzero(N0.greater_equal(self.p, self.p[closest])).tolist()
 
         intervals = self.__find_intervals(ind)
 
-##        lens = oldN.array([len(i) for i in intervals])
-        levels = [oldN.sum(oldN.take(self.p, i)) for i in intervals]
-        level = oldN.sum(levels) * self.delta_x
+##        lens = N0.array([len(i) for i in intervals])
+        levels = [N0.sum(N0.take(self.p, i)) for i in intervals]
+        level = N0.sum(levels) * self.delta_x
 
         boundaries = [(self.x[i[0]], self.x[i[-1]]) for i in intervals]
 
@@ -151,8 +152,8 @@ class Density:
         """
         Median of distribution.
         """
-        cum = oldN.add.accumulate(self.p) * self.delta_x
-        index = oldN.argmin(abs(cum - 0.5))
+        cum = N0.add.accumulate(self.p) * self.delta_x
+        index = N0.argmin(abs(cum - 0.5))
 
         return self.x[index]
 
@@ -161,31 +162,31 @@ class Density:
         """
         Average of distribution.
         """
-        return self.delta_x * oldN.sum(self.p * self.x)
+        return self.delta_x * N0.sum(self.p * self.x)
 
 
     def max(self):
         """
         Max height of distribution.
         """        
-        index = oldN.argmax(self.p)
+        index = N0.argmax(self.p)
         return self.x[index]
 
 
     def __find_intervals(self, l):
-        l = oldN.array(l)
-        l = oldN.take(l, oldN.argsort(l))
+        l = N0.array(l)
+        l = N0.take(l, N0.argsort(l))
 
         globals().update( locals() )
 
-        break_points = oldN.nonzero(oldN.greater(l[1:] - l[:-1], 1))
+        break_points = N0.nonzero(N0.greater(l[1:] - l[:-1], 1))
 
         start = 0
         intervals = []
 
         for i in range(len(break_points)):
             index = break_points[i]
-            intervals.append(tuple(oldN.take(l, range(start, index + 1))))
+            intervals.append(tuple(N0.take(l, range(start, index + 1))))
             start = index + 1
 
         intervals.append(tuple(l[start:]))
@@ -201,8 +202,8 @@ def p_lognormal(x, alpha, beta):
     are the mean and stdev of the distribution after log-transformation.
     The two parameters can hence be calculated from n sample values v::
 
-      alpha = 1/n oldN.sum( ln(vi) )
-      beta = oldN.sqrt( 1/(n-1) oldN.sum( ln(vi) - alpha )^2  )
+      alpha = 1/n N0.sum( ln(vi) )
+      beta = N0.sqrt( 1/(n-1) N0.sum( ln(vi) - alpha )^2  )
 
     @param x: value
     @type  x: float
@@ -235,20 +236,20 @@ def logConfidence( x, R, clip=1e-32 ):
     @rtype: (float, float)
     """
     if clip and 0 in R:
-        R = oldN.clip( R, clip, max( R ) )
+        R = N0.clip( R, clip, max( R ) )
     ## get mean and stdv of log-transformed random sample
-    mean = oldN.average( oldN.log( R ) )
+    mean = N0.average( N0.log( R ) )
 
     n = len( R )
 
-    stdv = oldN.sqrt(oldN.sum(oldN.power(oldN.log( R ) - mean, 2)) / (n - 1.))
+    stdv = N0.sqrt(N0.sum(N0.power(N0.log( R ) - mean, 2)) / (n - 1.))
 
     ## create dense lognormal distribution representing the random sample
     stop = max( R ) * 50.0
     step = stop / 100000
     start = step / 10.0
 
-    X = [(v, p_lognormal(v, mean, stdv) ) for v in oldN.arange(start, stop, step)]
+    X = [(v, p_lognormal(v, mean, stdv) ) for v in N0.arange(start, stop, step)]
 
     ## analyse distribution
     d = Density( X )
@@ -273,7 +274,7 @@ class Test(BT.BiskitTest):
         ## a lognormal density distribution the log of which has mean 1.0
         ## and stdev 0.5
         self.X = [ (x, p_lognormal(x, 1.0, 0.5))
-                   for x in oldN.arange(0.00001, 50, 0.001)]
+                   for x in N0.arange(0.00001, 50, 0.001)]
 
         alpha = 2.
         beta = 0.6

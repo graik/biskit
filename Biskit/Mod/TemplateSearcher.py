@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
@@ -35,7 +36,7 @@ from Biskit import StdLog, EHandler
 
 import re
 import os, shutil
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 
 import urllib
 import string
@@ -436,7 +437,7 @@ class TemplateSearcher( SequenceSearcher ):
         for id in ids_in_cluster:
             resolutions += [ getattr( self.record_dic[id],'resolution', 99. ) ]
 
-        return ids_in_cluster[ oldN.argmin( resolutions ) ]
+        return ids_in_cluster[ N0.argmin( resolutions ) ]
 
 
     def reportClustering( self, raw=None ):

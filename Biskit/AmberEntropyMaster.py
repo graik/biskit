@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
@@ -27,7 +28,7 @@ Parallellized AmberEntropist calculation.
 """
 
 import os.path, copy
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 
 import Biskit.tools as T
 import Biskit.settings as settings
@@ -227,7 +228,7 @@ class AmberEntropyMaster(TrackingJobMaster):
             return [ self.__float_int(x) for x in v ]
         if type( v ) is str and ':' in v:
             v = tuple( [ self.__float_int(x) for x in v.split(':') ] )
-            return oldN.arange( *v )
+            return N0.arange( *v )
 
         return self.__float_int( v )
 
@@ -424,7 +425,7 @@ class AmberEntropyMaster(TrackingJobMaster):
         if not self.zfilter:
             return outlaws
 
-        outliers = oldN.nonzero( traj.outliers( z=self.zfilter,
+        outliers = N0.nonzero( traj.outliers( z=self.zfilter,
                                              mask=traj.ref.maskCA(), step=10) )
         self.log.add('identified %i outliers with z-threshold %3.1f' %\
                      ( len(outliers), self.zfilter ) )

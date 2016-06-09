@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2007 Raik Gruenberg & Johan Leckner
@@ -37,7 +38,7 @@ from time import localtime
 import glob
 import subprocess
 import gzip
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 
 class ToolsError( Exception ):
     pass
@@ -793,12 +794,12 @@ def toIntArray( o ):
     @type  o: int or [int]
 
     @return: array of integer
-    @rtype: oldN.array('i')    
+    @rtype: N0.array('i')    
     """
-    if type( o ) == list or type( o ) == type( oldN.array([])):
-        return oldN.array( map( int, o ) )
+    if type( o ) == list or type( o ) == type( N0.array([])):
+        return N0.array( map( int, o ) )
 
-    return oldN.array( [ int( o ) ] )
+    return N0.array( [ int( o ) ] )
 
 
 def toList( o ):
@@ -873,13 +874,13 @@ def hex2int( shex ):
 
     factors = [ 16**(i) for i in range(len(shex)) ]
     factors.reverse()
-    factors = oldN.array( factors )
+    factors = N0.array( factors )
 
     table   = dict( zip('0123456789abcdef',range(16)) )
 
     components = [ table[s]*f for s,f in  zip( shex.lower(), factors ) ]
 
-    return oldN.sum( components )
+    return N0.sum( components )
     
 
 def colorSpectrum( nColors, firstColor='FF0000', lastColor='FF00FF' ):

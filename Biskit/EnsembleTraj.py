@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
@@ -34,7 +35,7 @@ from Biskit import EHandler
 import Biskit.mathUtils as M
 
 import types
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 import Biskit.tools as T
 
 try:
@@ -150,13 +151,13 @@ class EnsembleTraj( Trajectory ):
         ## 10 x lenFrames/10, frame indices of each member
         mI = [ self.memberIndices( i ) for i in range(self.n_members) ]
 
-        mI = oldN.array( mI )
+        mI = N0.array( mI )
 
-        mI = oldN.take( mI, range( -1, oldN.shape( mI )[1], step )[1:], 1 )
+        mI = N0.take( mI, range( -1, N0.shape( mI )[1], step )[1:], 1 )
 
-        mI = oldN.transpose( mI )
+        mI = N0.transpose( mI )
 
-        return self.takeFrames( oldN.ravel( mI ))
+        return self.takeFrames( N0.ravel( mI ))
 
 
     def memberList( self, step = 1 ):
@@ -195,7 +196,7 @@ class EnsembleTraj( Trajectory ):
         """
         r = range( member, self.lenFrames(), self.n_members )
         if step != 1:
-            r = oldN.take( r, range( 0, len( r ), step ) ).tolist()
+            r = N0.take( r, range( 0, len( r ), step ) ).tolist()
         return r
 
 
@@ -206,17 +207,17 @@ class EnsembleTraj( Trajectory ):
         @param member: member index starting with 0
         @type  member: int
         
-        @return: member mask, oldN.array( N_frames x 1) of 1||0
+        @return: member mask, N0.array( N_frames x 1) of 1||0
         @rtype: [1|0]
         """
-        result = oldN.zeros( self.lenFrames() )
+        result = N0.zeros( self.lenFrames() )
 
         if isinstance( member , types.IntType):
-            oldN.put( result, self.memberIndices( member ), 1 )
+            N0.put( result, self.memberIndices( member ), 1 )
 
         if type( member ) == types.ListType:
             for m in member:
-                oldN.put( result, self.memberIndices( m ), 1 )
+                N0.put( result, self.memberIndices( m ), 1 )
 
         return result
 
@@ -268,8 +269,8 @@ class EnsembleTraj( Trajectory ):
         """
         try:
             ## assumes that each member traj has same number of frames
-            fi = oldN.array( [ self.memberIndices( i ) for i in mIndices ] )
-            fi = oldN.ravel( oldN.transpose( fi ) )
+            fi = N0.array( [ self.memberIndices( i ) for i in mIndices ] )
+            fi = N0.ravel( N0.transpose( fi ) )
 
             n_members = len( mIndices )
 
@@ -335,7 +336,7 @@ class EnsembleTraj( Trajectory ):
                                traj[0].frames, min_members,
                                min_frames, steps )
 
-        r.frames = oldN.array(frames) 
+        r.frames = N0.array(frames) 
         r.setRef( self.ref.clone())
 
         if self.frameNames and traj[0].frameNames:
@@ -351,8 +352,8 @@ class EnsembleTraj( Trajectory ):
                 r.pc['u'] =  __everyOther( self, traj[0], self.pc['u'],
                                traj[0].pc['u'], min_members, steps )
 
-#                r.pc['p'] = oldN.concatenate( (self.pc['p'], traj[0].pc['p']),0)
-#                r.pc['u'] = oldN.concatenate( (self.pc['u'], traj[0].pc['u']),0)
+#                r.pc['p'] = N0.concatenate( (self.pc['p'], traj[0].pc['p']),0)
+#                r.pc['u'] = N0.concatenate( (self.pc['u'], traj[0].pc['u']),0)
         except TypeError, why:
             EHandler.error('cannot concat PC '+str(why) )
 
@@ -372,7 +373,7 @@ class EnsembleTraj( Trajectory ):
         @return: compressed EnsembleTraj 
         @rtype: EnsembleTraj
         """
-        return self.takeMembers( oldN.nonzero( mask ) )
+        return self.takeMembers( N0.nonzero( mask ) )
 
 
     def keepMembers( self, indices ):
@@ -394,7 +395,7 @@ class EnsembleTraj( Trajectory ):
         @type  indices: [int]
         """
         i = range( self.n_members )
-        i.remove( oldN.array(indices) )
+        i.remove( N0.array(indices) )
         self.keepMembers( i )
 
 
@@ -577,7 +578,7 @@ class EnsembleTraj( Trajectory ):
             traj.transform( r, t )
 
             ## replace original frames of this member
-            oldN.put( self.frames, indices, traj.frames )
+            N0.put( self.frames, indices, traj.frames )
 
 
 
@@ -621,7 +622,7 @@ class EnsembleTraj( Trajectory ):
 
         slopes = [ M.linfit( range( l/n - last ), p )[0] for p in pm ]
 
-        mean, sd = oldN.average( slopes ), M.SD( slopes )
+        mean, sd = N0.average( slopes ), M.SD( slopes )
 
         return [ r - mean < - z * sd for r in slopes ]
 
@@ -666,7 +667,7 @@ class Test(BT.BiskitTest):
             self.p.show()
 
         self.assertAlmostEqual( 26.19851,
-                                 oldN.sum( self.tr.profile('rms_CA_av') ), 2 )
+                                 N0.sum( self.tr.profile('rms_CA_av') ), 2 )
 
     def test_outliers(self, traj=None):
         """EnsembleTraj.outliers/concat test"""
@@ -678,7 +679,7 @@ class Test(BT.BiskitTest):
         if self.local:
             print self.o
 
-        self.t = self.t2.compressMembers( oldN.logical_not( self.o ) )
+        self.t = self.t2.compressMembers( N0.logical_not( self.o ) )
 
         self.p2 = self.t.plotMemberProfiles( 'rms', xlabel='frame' )
 

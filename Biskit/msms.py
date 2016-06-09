@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ## Class msms
@@ -32,7 +33,7 @@ Use MSMS to calculate surface info.
        module for this kind of calculations.
 """
 
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 import Biskit.tools as T
 import string
 import os
@@ -142,7 +143,7 @@ class Pdb2xyzrn( Executor ):
                           float(l[2]), float(l[3]) ]
                 n += [ l[5] ]
 
-        xyzr = oldN.reshape( xyzr, ( len(xyzr)/4, 4 ) )
+        xyzr = N0.reshape( xyzr, ( len(xyzr)/4, 4 ) )
 
         r = xyzr[:,3]
 
@@ -224,7 +225,7 @@ class Pdb2xyzrn( Executor ):
 ##         """
 ##         xyz = self.model.xyz
 
-##         print oldN.shape(xyz), oldN.shape(self.r)
+##         print N0.shape(xyz), N0.shape(self.r)
 ##         print xyz[0], self.r[0]
 ##         print xyz[-1], self.r[-1]
 ##         ## run msms
@@ -263,13 +264,13 @@ class Pdb2xyzrn( Executor ):
 ##             atmList += [ line[3] ]
 
 ##         ## polar and nonepolar surfaces
-##         N_mask = oldN.transpose(atmList)[0] == 'N'
-##         O_mask = oldN.transpose(atmList)[0] == 'O'
-##         C_mask = oldN.transpose(atmList)[0] == 'C'
-##         out['ses_polar'] = oldN.sum( sesList * O_mask ) + oldN.sum( sesList * N_mask )
-##         out['ses_non-polar'] = oldN.sum( sesList * C_mask )
-##         out['sas_polar'] = oldN.sum( sasList * O_mask ) + oldN.sum( sasList * N_mask )
-##         out['sas_non-polar'] = oldN.sum( sasList * C_mask )
+##         N_mask = N0.transpose(atmList)[0] == 'N'
+##         O_mask = N0.transpose(atmList)[0] == 'O'
+##         C_mask = N0.transpose(atmList)[0] == 'C'
+##         out['ses_polar'] = N0.sum( sesList * O_mask ) + N0.sum( sesList * N_mask )
+##         out['ses_non-polar'] = N0.sum( sesList * C_mask )
+##         out['sas_polar'] = N0.sum( sasList * O_mask ) + N0.sum( sasList * N_mask )
+##         out['sas_non-polar'] = N0.sum( sasList * C_mask )
 
 ##         ## cleanup 
 ##         try:
@@ -344,7 +345,7 @@ class MSMS( Executor ):
         r, n = p2x.run()
 
         xyz = self.model.xyz  
-        xyzr = oldN.concatenate( ( xyz, oldN.transpose([r]) ) ,axis=1 )
+        xyzr = N0.concatenate( ( xyz, N0.transpose([r]) ) ,axis=1 )
 
         f = open( self.f_xyzrn, 'w' )
         i = 0

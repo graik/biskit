@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 #!/usr/bin/env python
@@ -40,7 +41,7 @@ import re
 import os.path
 from time import localtime, sleep
 from threading import Thread, RLock, Condition
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 
 
 class DockerError( Exception ):
@@ -205,7 +206,7 @@ class Docker:
             cMap = m.chainMap()
 
             for chain in range( m.lenChains() ):
-                idx = oldN.nonzero( cMap == chain )
+                idx = N0.nonzero( cMap == chain )
                 for i in idx:
                     m.atoms['chain_id'][i] = ids[chain]
 

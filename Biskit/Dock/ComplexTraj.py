@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
@@ -29,7 +30,7 @@ Trajectory of two proteins.
 from Biskit import Trajectory, TrajError, EnsembleTraj, hist
 from Complex import Complex as ProteinComplex
 
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 
 import Biskit.gnuplot as gnuplot
 
@@ -79,7 +80,7 @@ class ComplexTraj( EnsembleTraj ):
             if rec:
                 self.cr = self.ref.compareChains( rec )[0]
             else:
-                self.cr = oldN.sort( recChains ).tolist()
+                self.cr = N0.sort( recChains ).tolist()
 
             self.cl = range( 0, self.getRef().lenChains() )
             for c in self.cr:
@@ -195,7 +196,7 @@ class ComplexTraj( EnsembleTraj ):
         """
         ## todo: looks not very elegant
 
-        oldChainMap = oldN.take( self.ref.chainMap(), atomIndices )
+        oldChainMap = N0.take( self.ref.chainMap(), atomIndices )
 
         r = {}
         for i in range( len( oldChainMap ) ):
@@ -308,7 +309,7 @@ class ComplexTraj( EnsembleTraj ):
         """
         r = [ self.atomContacts( i, cutoff=cutoff ) 
              for i in range(0, len(self), step ) ]
-        return oldN.sum( oldN.array( r ) ) / ( 1. * len(r) )
+        return N0.sum( N0.array( r ) ) / ( 1. * len(r) )
 
 
     def plotContactDensity( self, step=1, cutoff=4.5 ):
@@ -320,8 +321,8 @@ class ComplexTraj( EnsembleTraj ):
         if not gnuplot.installed:
             raise ComplexTrajError, 'gnuplot program is not installed'
         r = self.averageContacts( step, cutoff )
-        r = oldN.ravel( r )
-        r = oldN.compress( r, r )
+        r = N0.ravel( r )
+        r = N0.compress( r, r )
         gnuplot.plot( hist.density( r, 10 ) )
 
 
@@ -359,7 +360,7 @@ class Test(BT.BiskitTest):
         t.ref.chainIndex( force=1, cache=1 )
         t.cl = [1,2]
 
-        r = oldN.concatenate((range(1093,1191), range(0,1093), range(1191,1968)))
+        r = N0.concatenate((range(1093,1191), range(0,1093), range(1191,1968)))
 
         tt = t.takeAtoms( r )
 
@@ -368,7 +369,7 @@ class Test(BT.BiskitTest):
         if self.local:
             print 'Receptor chains: %s    Ligand chains: %s'%(t.cr, t.cl)
             
-        self.assertEqual( oldN.sum(oldN.ravel(contactMat)), 308 )
+        self.assertEqual( N0.sum(N0.ravel(contactMat)), 308 )
 
 if __name__ == '__main__':
 
@@ -390,7 +391,7 @@ if __name__ == '__main__':
     #t.ref.chainIndex( force=1, cache=1 )
     #t.cl = [1,2]
 
-    #r = oldN.concatenate((range(1093,1191), range(0,1093), range(1191,1968)))
+    #r = N0.concatenate((range(1093,1191), range(0,1093), range(1191,1968)))
 
     #tt = t.takeAtoms( r )
 

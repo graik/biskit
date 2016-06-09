@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
@@ -33,7 +34,7 @@ for a while unitl  all transitions are made to the new version of Prosa.
 
 import tempfile
 import os
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 
 import tools as T
 import Table
@@ -191,7 +192,7 @@ def parse_ANA_output(prosa_output):
 
     t = Table.fromFile(prosa_output)
 
-    return oldN.array(t[2:]).astype(oldN.Float32)
+    return N0.array(t[2:]).astype(N0.Float32)
 
 #############
 ##  TESTING        

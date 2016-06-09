@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ## class ChainSeperator:
@@ -41,7 +42,7 @@ import Biskit.tools as T
 from LogFile import LogFile
 
 from Scientific.IO.PDB import *
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 import string
 from difflib import SequenceMatcher
 import re
@@ -199,7 +200,7 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
         @rtype: int
         """
         chainCount = len(self.chains)
-        matrix = 1.0 * oldN.zeros((chainCount,chainCount))
+        matrix = 1.0 * N0.zeros((chainCount,chainCount))
         chain_ids = []
 
         ## create identity matrix for all chains against all chains
@@ -232,7 +233,7 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
         ## chain mask to this function
         if chainMask:
             if len(chainMask) == chainCount:
-                self.chains = oldN.compress(chainMask, self.chains)
+                self.chains = N0.compress(chainMask, self.chains)
                 self.log.add("NOTE: chain mask %s used for removing chains.\n"%chainMask)
            
             else:
@@ -246,9 +247,9 @@ If you want to keep the HETATM -  prepare the file for Xplor manualy \n"""
             ## (each chain against each)
             duplicate = len(self.chains)
             for offset in range(1,chainCount):
-                diag = oldN.diagonal(matrix, offset ,0,1)
+                diag = N0.diagonal(matrix, offset ,0,1)
                 # diagonal of 1's mark begin of duplicate
-                avg = 1.0 * oldN.sum(diag)/len(diag)
+                avg = 1.0 * N0.sum(diag)/len(diag)
                 if (avg >= self.threshold):
                     duplicate = offset
                     break

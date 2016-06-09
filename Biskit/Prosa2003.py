@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
@@ -29,7 +30,7 @@ Analyze a structure using  Prosa2003.
 
 import os.path
 import string
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 import tempfile
 
 import Biskit.tools as T
@@ -300,9 +301,9 @@ exit\n
                 prosa_tot += [ float( tot ) ]
 
         ## create dictionary with residue profiles and calc. info
-        result = {'prosa_pair':oldN.array(prosa_pair),
-                  'prosa_surf':oldN.array(prosa_surf),
-                  'prosa_tot':oldN.array(prosa_tot),
+        result = {'prosa_pair':N0.array(prosa_pair),
+                  'prosa_surf':N0.array(prosa_surf),
+                  'prosa_tot':N0.array(prosa_tot),
                   'ProsaInfo':{ 'lower_k':self.lower_k,
                                 'upper_k':self.upper_k,
                                 'pot_lb':self.pot_lb,
@@ -324,7 +325,7 @@ exit\n
         for k in ['prosa_pair', 'prosa_surf', 'prosa_tot']:
             r += [ self.result[k] ]
 
-        return oldN.sum( r, 1 )
+        return N0.sum( r, 1 )
 
 
     def isFailed( self ):
@@ -374,7 +375,7 @@ class Test(BT.BiskitTest):
         if self.local:
             print "Result: ", self.result
 
-        self.assert_( oldN.sum(self.result - [ -94.568,  -64.903, -159.463 ] ) \
+        self.assert_( N0.sum(self.result - [ -94.568,  -64.903, -159.463 ] ) \
                       < 0.0000001 )
 
         

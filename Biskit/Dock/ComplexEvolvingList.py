@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
@@ -29,7 +30,7 @@ List of ComplexEvolving instances.
 
 from Biskit.Dock.ComplexList import ComplexList, ComplexListError
 from Biskit.Dock.ComplexEvolving import ComplexEvolving
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 
 class ComplexEvolvingList( ComplexList ):
     """
@@ -149,7 +150,7 @@ class ComplexEvolvingList( ComplexList ):
         """
         l = self
         if indices != None:
-            l = oldN.take( l, indices )
+            l = N0.take( l, indices )
 
         if not unique:
             if version is None:

@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
@@ -27,7 +28,7 @@ organise, sort, and filter collection of dictionaries or similar objects
 S{->} abstract base class (aka interface)
 """
 
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 import types
 
 import Biskit.tools as t
@@ -246,7 +247,7 @@ class BisList:
         @return: new instance (or sub-class) with specified items
         @rtype: instance
         """
-        return self.take( oldN.nonzero( mask ), deepcopy=deepcopy )
+        return self.take( N0.nonzero( mask ), deepcopy=deepcopy )
 
 
     def sortBy( self, sortKey, cmpfunc=cmp ):
@@ -314,10 +315,10 @@ class BisList:
         """
         vLst = self.valuesOf( key )
 
-        maskL = oldN.greater_equal( vLst, vLow )
-        maskH = oldN.less_equal( vLst, vHigh )
+        maskL = N0.greater_equal( vLst, vLow )
+        maskH = N0.less_equal( vLst, vHigh )
 
-        return oldN.nonzero( maskL * maskH )
+        return N0.nonzero( maskL * maskH )
 
 
     def filterEqual( self, key, lst ):
@@ -333,7 +334,7 @@ class BisList:
         @rtype: array
         """
         mask = [ self.getValue( i,key) in lst for i in range( len(self)) ]
-        return oldN.nonzero( mask )
+        return N0.nonzero( mask )
 
 
     def filterFunct( self, f ):
@@ -347,7 +348,7 @@ class BisList:
         @rtype: array
         """
         mask = [ f( c ) for c in self ]
-        return oldN.nonzero( mask )
+        return N0.nonzero( mask )
 
 
     def filter( self, key, cond ):
@@ -399,7 +400,7 @@ class BisList:
         @rtype: int
         """
         vLst = self.valuesOf( key )
-        return oldN.argmax( vLst )
+        return N0.argmax( vLst )
 
 
     def max( self, key ):
@@ -422,7 +423,7 @@ class BisList:
         @rtype: int
         """
         vLst = self.valuesOf( key )
-        return oldN.argmin( vLst )
+        return N0.argmin( vLst )
 
 
     def min( self, key ):

@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ## Class conservation
@@ -31,7 +32,7 @@ Search Hmmer Pfam database and retrieve conservation data.
 import tempfile
 import re, string
 import types, os.path
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 import molUtils
 import settings
 
@@ -338,40 +339,40 @@ class HmmerProfile( Executor ):
             e = [ float(j) for j in string.split(re.findall(pattern, out)[0]) ]
             prob += [ e ]
 
-        profileDic['seqNr'] = oldN.transpose( oldN.take( prob, (0,),1 ) )
-        profileDic['emmScore'] = oldN.array(prob)[:,1:]
+        profileDic['seqNr'] = N0.transpose( N0.take( prob, (0,),1 ) )
+        profileDic['emmScore'] = N0.array(prob)[:,1:]
 
         ## calculate emission probablitities
         emmProb, nullProb = self.hmmEmm2Prob( nullEmm, profileDic['emmScore'])
 
-        ent = [ oldN.resize( self.entropy(e, nullProb), (1,20) )[0] for e in emmProb ]
-        profileDic['ent'] = oldN.array(ent)
+        ent = [ N0.resize( self.entropy(e, nullProb), (1,20) )[0] for e in emmProb ]
+        profileDic['ent'] = N0.array(ent)
 
         ###### TEST #####
 
-        proba = oldN.array(prob)[:,1:]
+        proba = N0.array(prob)[:,1:]
 
 ##         # test set all to max score
 ##         p = proba
 ##         p1 = []
 ##         for i in range( len(p) ):
-##             p1 += [ oldN.resize( p[i][oldN.argmax( oldN.array( p[i] ) )] , oldN.shape( p[i] ) ) ]
+##             p1 += [ N0.resize( p[i][N0.argmax( N0.array( p[i] ) )] , N0.shape( p[i] ) ) ]
 ##         profileDic['maxAll'] = p1
 
-        # test set all to oldN.sum( abs( probabilities ) )
+        # test set all to N0.sum( abs( probabilities ) )
         p = proba
         p2 = []
         for i in range( len(p) ) :
-            p2 += [ oldN.resize( oldN.sum( oldN.absolute( p[i] )), oldN.shape( p[i] ) ) ]
+            p2 += [ N0.resize( N0.sum( N0.absolute( p[i] )), N0.shape( p[i] ) ) ]
         profileDic['absSum'] = p2
 
         # set all to normalized max score 
         p = proba
         p4 = []
         for i in range( len(p) ) :
-            p_scale = (p[i] - oldN.average(p[i]) )/ math.SD(p[i])
-            p4 += [ oldN.resize( p_scale[oldN.argmax( oldN.array(p_scale) )] ,
-                              oldN.shape( p[i] ) ) ]
+            p_scale = (p[i] - N0.average(p[i]) )/ math.SD(p[i])
+            p4 += [ N0.resize( p_scale[N0.argmax( N0.array(p_scale) )] ,
+                              N0.shape( p[i] ) ) ]
         profileDic['maxAllScale'] = p4
 
         return profileDic
@@ -391,11 +392,11 @@ class HmmerProfile( Executor ):
         @rtype:  array( len_seq x 20 ), array( 1 x 20 )    
         """
         ## Null probabilities: prob = 2 ^ (nullEmm / 1000) * 1/len(alphabet)
-        nullProb = oldN.power( 2, oldN.array( nullEmm )/1000.0 )*(1./20)
+        nullProb = N0.power( 2, N0.array( nullEmm )/1000.0 )*(1./20)
 
         ## Emmission probabilities: prob = nullProb 2 ^ (nullEmm / 1000)
         ## see http://www.ebc.ee/WWW/hmmer2-html/node26.html
-        emmProb = nullProb * oldN.power( 2, ( emmScore/1000.0) )
+        emmProb = nullProb * N0.power( 2, ( emmScore/1000.0) )
 
         return emmProb, nullProb
 
@@ -418,10 +419,10 @@ class HmmerProfile( Executor ):
         @rtype:  float
         """
         ## avoid log error
-        if oldN.sum( emmProb ) == 0.:
+        if N0.sum( emmProb ) == 0.:
             return 0.
 
-        return oldN.sum( emmProb * oldN.log(emmProb/nullProb) )
+        return N0.sum( emmProb * N0.log(emmProb/nullProb) )
 
             
     def fail( self ):
@@ -863,12 +864,12 @@ class Hmmer:
         s = hmmDic[key]
 
         for i in range( repete ):
-            mask = oldN.ones( len(s) )
-            oldN.put( mask, hmmGap[i], 0 )
+            mask = N0.ones( len(s) )
+            N0.put( mask, hmmGap[i], 0 )
             if i == 0:
-                score = oldN.compress( mask, s, 0 )
+                score = N0.compress( mask, s, 0 )
             if i > 0:
-                score = oldN.concatenate( ( oldN.compress( mask, s, 0 ), score ) )
+                score = N0.concatenate( ( N0.compress( mask, s, 0 ), score ) )
 
         hmmDic[key] = score
 
@@ -985,7 +986,7 @@ class Hmmer:
 
     def __list2array( self, lstOrAr ):
         if type( lstOrAr ) == list:
-            return oldN.array( lstOrAr )
+            return N0.array( lstOrAr )
         return lstOrAr
 
 
@@ -1007,14 +1008,14 @@ class Hmmer:
         p0 = self.__list2array( p0 )
         p1 = self.__list2array( p1 )
 
-        overlap = oldN.greater( oldN.greater(p0,0) + oldN.greater(p1,0), 1 )
+        overlap = N0.greater( N0.greater(p0,0) + N0.greater(p1,0), 1 )
 
-        if oldN.sum( overlap ) <= maxOverlap:
+        if N0.sum( overlap ) <= maxOverlap:
             ## one of the two profiles will in most cases not belong to these
             ## positions. We can't decide which one is wrong, let's eliminate
             ## both values. Alternatively we could keep one, or the average, ..
-            oldN.put( p1, oldN.nonzero( overlap ), 0 )
-            oldN.put( p0, oldN.nonzero( overlap ), 0 )
+            N0.put( p1, N0.nonzero( overlap ), 0 )
+            N0.put( p0, N0.nonzero( overlap ), 0 )
 
             p0 = p0 + p1
 

@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 #!/usr/bin/env python
@@ -32,7 +33,7 @@ import Biskit.tools as t
 from Biskit import Trajectory, mathUtils,  molUtils
 
 
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 import numpy.oldnumeric.random_array as RandomArray
 import copy
 
@@ -90,8 +91,8 @@ class Analyzer:
         i_bnd_rec, i_t_rec = bnd_rec.compareAtoms( self.t_rec.getRef() )
         i_bnd_lig, i_t_lig = bnd_lig.compareAtoms( self.t_lig.getRef() )
 
-        #self.t_rec.removeAtoms( oldN.logical_not( m_t_rec ) )
-        #self.t_lig.removeAtoms( oldN.logical_not( m_t_lig ) )
+        #self.t_rec.removeAtoms( N0.logical_not( m_t_rec ) )
+        #self.t_lig.removeAtoms( N0.logical_not( m_t_lig ) )
 
         self.t_rec = self.t_rec.takeAtoms( i_t_rec )
         self.t_lig = self.t_lig.takeAtoms( i_t_lig )
@@ -101,8 +102,8 @@ class Analyzer:
         self.i_free_lig = i_t_lig
         self.i_free_rec = i_t_rec
 
-        #bnd_rec.remove( oldN.logical_not( m_bnd_rec ) )
-        #bnd_lig.remove( oldN.logical_not( m_bnd_lig ) )
+        #bnd_rec.remove( N0.logical_not( m_bnd_rec ) )
+        #bnd_lig.remove( N0.logical_not( m_bnd_lig ) )
         bnd_rec = bnd_rec.take( i_bnd_rec )
         bnd_lig = bnd_lig.take( i_bnd_lig )
 
@@ -144,7 +145,7 @@ class Analyzer:
         result = [ self.com.fractionNativeSurface( c, self.contacts )
                    for c in self.hexContacts ]
 
-        result = [ oldN.sum( oldN.greater( o, cutoff ) ) for o in result ]
+        result = [ N0.sum( N0.greater( o, cutoff ) ) for o in result ]
         return result
 
 
@@ -207,19 +208,19 @@ class Analyzer:
         @return: list of [n] random contact matricies
         @rtype: [matrix]
         """
-        a,b = oldN.shape( contMat )
-        nContacts = oldN.sum( oldN.sum( contMat ))
+        a,b = N0.shape( contMat )
+        nContacts = N0.sum( N0.sum( contMat ))
 
         if not maskLig:
-            r_size, l_size = oldN.shape( contMat )
-            maskLig = oldN.ones( l_size )
-            maskRec = oldN.ones( r_size )
+            r_size, l_size = N0.shape( contMat )
+            maskLig = N0.ones( l_size )
+            maskRec = N0.ones( r_size )
 
-        c_mask = oldN.ravel( oldN.outerproduct( maskRec, maskLig ) )
-        c_pos = oldN.nonzero( c_mask )
+        c_mask = N0.ravel( N0.outerproduct( maskRec, maskLig ) )
+        c_pos = N0.nonzero( c_mask )
 
         # get array with surface positions from complex
-        cont = oldN.take( oldN.ravel(contMat), c_pos )
+        cont = N0.take( N0.ravel(contMat), c_pos )
         length = len( cont )
 
         result = []
@@ -229,10 +230,10 @@ class Analyzer:
             ranCont = mathUtils.randomMask( nContacts,length )
 
             # blow up to size of original matrix
-            r = oldN.zeros(a*b)
-            oldN.put( r, c_pos, ranCont)
+            r = N0.zeros(a*b)
+            N0.put( r, c_pos, ranCont)
 
-            result += [ oldN.reshape( r, (a,b) ) ]
+            result += [ N0.reshape( r, (a,b) ) ]
 
         return result
 
@@ -248,7 +249,7 @@ class Analyzer:
         @rtype: [any]
         """
         pos = RandomArray.permutation( len( lst ))
-        return oldN.take( lst, pos )
+        return N0.take( lst, pos )
 
 
     def shuffledLists( self, n, lst, mask=None ):
@@ -266,20 +267,20 @@ class Analyzer:
         @rtype: [[any]]        
         """
         if not mask:
-            mask = oldN.ones( len(lst)  )
+            mask = N0.ones( len(lst)  )
 
         if type( lst ) == list:
-            lst = oldN.array( lst )
+            lst = N0.array( lst )
         
-        pos = oldN.nonzero( mask )
+        pos = N0.nonzero( mask )
 
-        rand_pos = oldN.array( [ self.__shuffleList( pos ) for i in range(n) ] )
+        rand_pos = N0.array( [ self.__shuffleList( pos ) for i in range(n) ] )
 
         result = []
         for p in rand_pos:
 
             r = copy.copy( lst )
-            oldN.put( r, p, oldN.take( lst, pos ) )
+            N0.put( r, p, N0.take( lst, pos ) )
             result += [r]
 
         return result
@@ -371,7 +372,7 @@ class Test(BT.BiskitTest):
         ## create two random contact matrices
         rand_mat = self.a.random_contacts( cl[0].atomContacts(), 2 )
         
-        self.assertEqual( oldN.shape(rand_mat[1]), (1075, 876) ) 
+        self.assertEqual( N0.shape(rand_mat[1]), (1075, 876) ) 
     
         
 if __name__ == '__main__':

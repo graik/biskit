@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
@@ -26,7 +27,7 @@
 """
 Parse output file from hex docking run.
 """
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 
 import re
 from Biskit.Dock import Complex, ComplexList
@@ -139,7 +140,7 @@ class HexParser:
                         for j in range(0,4):
                             matrix.append( numbers[4*j:4*(j+1)] )
                         ## create 4 by 4 Numeric array from 4 by 4 list
-                        matrix = oldN.array(matrix, oldN.Float32)
+                        matrix = N0.array(matrix, N0.Float32)
             except AttributeError:
                 print "HexParser.nextComplex(): ",t.lastError()
 

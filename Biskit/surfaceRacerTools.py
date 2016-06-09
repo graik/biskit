@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
@@ -26,7 +27,7 @@
 Reference data for SurfaceRacer.
 """
 
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 
 ## dictionary with average accessabilities in 500 random
 ## GLY-XX-GLY peptides calculated with SurfaceRacer using
@@ -424,9 +425,9 @@ def relExposure( model, absSurf, key='AS', clip=1 ):
             k+=1
 
     if clip:
-        return  oldN.clip( oldN.array(rel), 0.0, 100.0 )
+        return  N0.clip( N0.array(rel), 0.0, 100.0 )
     else:
-        return  oldN.array(rel)
+        return  N0.array(rel)
 
 
 def __Nter( a, rel, absSurf, key, i ):
@@ -533,14 +534,14 @@ class Test(BT.BiskitTest):
         self.m = self.m.compress( self.m.maskHeavy() )
         
         ## some fake surface data
-        surf = oldN.ones( self.m.lenAtoms()) * 10.0
+        surf = N0.ones( self.m.lenAtoms()) * 10.0
 
         relExp = relExposure( self.m, surf )
         
 ##         if self.local:
 ##             globals().update( locals() )
             
-        self.assertEqual( oldN.sum(relExp), 44276.860852223857 )
+        self.assertEqual( N0.sum(relExp), 44276.860852223857 )
     
         
 if __name__ == '__main__':

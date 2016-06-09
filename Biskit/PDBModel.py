@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2012 Raik Gruenberg & Johan Leckner
@@ -38,7 +39,7 @@ from PDBParserFactory import PDBParserFactory
 from PDBParseFile import PDBParseFile
 import Biskit as B
 
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 import oldnumeric as N0
 import numpy as N
 
@@ -606,12 +607,12 @@ class PDBModel:
 
         if self.xyz is None:
             ## empty array that can be concatenated to other xyz arrays
-            return oldN.zeros( (0,3), oldN.Float32 )
+            return N0.zeros( (0,3), N0.Float32 )
 
         if mask is None:
             return self.xyz
 
-        return oldN.compress( mask, self.xyz, 0 )
+        return N0.compress( mask, self.xyz, 0 )
 
 
     def getAtoms( self, mask=None ):
@@ -631,7 +632,7 @@ class PDBModel:
         if mask is None:
             return r
 
-        return [ r[i] for i in oldN.nonzero( mask ) ]
+        return [ r[i] for i in N0.nonzero( mask ) ]
 
 
     def profile( self, name, default=None, update=True, updateMissing=False ):
@@ -788,7 +789,7 @@ class PDBModel:
 
             else:
 
-                if type( self.residues[ key ] ) is oldN.arraytype:
+                if type( self.residues[ key ] ) is N0.arraytype:
                     self.residues.set( key, self.residues[key].tolist() )
 
         for key in self.atoms:
@@ -798,7 +799,7 @@ class PDBModel:
 
             else:
 
-                if type( self.atoms[ key ] ) is oldN.arraytype:
+                if type( self.atoms[ key ] ) is N0.arraytype:
                     self.atoms.set( key, self.atoms[key].tolist() )
 
 
@@ -817,8 +818,8 @@ class PDBModel:
             if not self.xyzChangedFromDisc():
                 self.xyz = None
 
-            if type( self.xyz ) is oldN.arraytype and self.xyz.dtype.char != 'f':
-                self.xyz = self.xyz.astype(oldN.Float32)
+            if type( self.xyz ) is N0.arraytype and self.xyz.dtype.char != 'f':
+                self.xyz = self.xyz.astype(N0.Float32)
 
             self.__slimProfiles()
 
@@ -930,10 +931,10 @@ class PDBModel:
         """
         firstAtm = self.resIndex()
         if mask is not None:
-            m_first = oldN.zeros( self.lenAtoms() )
-            oldN.put( m_first, firstAtm, 1 )
+            m_first = N0.zeros( self.lenAtoms() )
+            N0.put( m_first, firstAtm, 1 )
             m_first = mask * m_first
-            firstAtm = oldN.nonzero( m_first )
+            firstAtm = N0.nonzero( m_first )
 
         l = self.atoms['residue_name']
         l = [ l[i] for i in firstAtm ]
@@ -977,7 +978,7 @@ class PDBModel:
             self.atoms['name'] = map( __parm10rename, self.atoms['name'] )
 
         resI = self.resIndex().tolist()
-        resI = oldN.concatenate( (resI, [len(self)] ) )
+        resI = N0.concatenate( (resI, [len(self)] ) )
 
         names    = self.atoms['name']
         resnames = self.atoms['residue_name']
@@ -1063,9 +1064,9 @@ class PDBModel:
 
             if ter == 2 or ter == 3:
                 ## tolist to workaround numeric bug
-                terIndex = oldN.array( self.chainIndex( breaks=(ter==3) ).tolist()[1:] )
+                terIndex = N0.array( self.chainIndex( breaks=(ter==3) ).tolist()[1:] )
             if ter == 1:
-                terIndex = oldN.nonzero( self.atoms['after_ter'] )
+                terIndex = N0.nonzero( self.atoms['after_ter'] )
 
             if headlines:
                 for l in headlines:
@@ -1140,7 +1141,7 @@ class PDBModel:
 ##             i=0
 
 ##             if ter == 2:
-##                 terIndex = oldN.array( self.chainIndex()[1:] ) - 1
+##                 terIndex = N0.array( self.chainIndex()[1:] ) - 1
 ##             if ter == 1:
 ##                 terIndex = self.__terAtoms
 
@@ -1264,7 +1265,7 @@ class PDBModel:
                     result.append(0)
 
         if numpy:
-            return oldN.array( result )
+            return N0.array( result )
         return result
 
 
@@ -1275,7 +1276,7 @@ class PDBModel:
 
           >>> mask = m.maskFrom( 'name', 'CA' )
           >>> mask = m.maskFrom( 'name', lambda a: a == 'CA' )
-          >>> mask = oldN.array( [ a == 'CA' for a in m.atoms['name'] ] )
+          >>> mask = N0.array( [ a == 'CA' for a in m.atoms['name'] ] )
 
         People having numpy installed can also simply use::
           >>> mask = numpy.array(m.atoms['name']) == 'CA'
@@ -1290,16 +1291,16 @@ class PDBModel:
         """
 
         if type( cond ) is types.FunctionType:
-            return oldN.array( map( cond, self.atoms[ key ] ) )
+            return N0.array( map( cond, self.atoms[ key ] ) )
 
         ## several allowed values given
         elif type( cond ) in [ list, tuple ]:
-            return oldN.array( [ x in cond for x in self.atoms[key] ] )
+            return N0.array( [ x in cond for x in self.atoms[key] ] )
 
         ## one allowed value given
         ## Numeric splits lists of str into 2-D char arrays, 'O' prevents that
         else:
-            return oldN.array( self.atoms[key] ) == cond
+            return N0.array( self.atoms[key] ) == cond
 
 
     def maskCA( self, force=0 ):
@@ -1336,7 +1337,7 @@ class PDBModel:
             mask = self.maskFrom( 'name', ['CA', 'C', 'N', 'O', 'H','OXT',
                                            "P","O5'","C5'","C4'","C3'","O3'"])
             if not solvent:
-                mask = oldN.logical_not(self.maskSolvent()) * mask
+                mask = N0.logical_not(self.maskSolvent()) * mask
 
                 self.__maskBB = mask  ## cache
             else:
@@ -1367,7 +1368,7 @@ class PDBModel:
         @return: array( 1 x N_atoms ) of 0||1
         @rtype: array
         """
-        return oldN.logical_not( self.maskHeavy() )
+        return N0.logical_not( self.maskHeavy() )
 
 
     def _maskCB( self ):
@@ -1443,7 +1444,7 @@ class PDBModel:
             d = molUtils.aaDicStandard
 
         names = map( string.upper, d.keys() )
-        return oldN.array(
+        return N0.array(
             [ n.upper() in names for n in self.atoms['residue_name'] ] )
 
 
@@ -1490,7 +1491,7 @@ class PDBModel:
         @return: array of indices where condition is met
         @rtype : array of int
         """
-        return oldN.nonzero( self.maskFrom( key, cond) )
+        return N0.nonzero( self.maskFrom( key, cond) )
 
 
     def indices( self, what ):
@@ -1515,9 +1516,9 @@ class PDBModel:
         """
         ## lambda funcion
         if type( what ) is types.FunctionType:
-            return oldN.nonzero( self.maskF( what) )
+            return N0.nonzero( self.maskF( what) )
 
-        if type( what ) is list or type( what ) is oldN.arraytype:
+        if type( what ) is list or type( what ) is N0.arraytype:
 
             ## atom names
             if type( what[0] ) == str:
@@ -1527,14 +1528,14 @@ class PDBModel:
                (isinstance(what, N.ndarray) and what.dtype in [int, bool]):
                 ## mask
                 if len( what ) == self.lenAtoms() and max( what ) < 2:
-                    return oldN.nonzero( what )
+                    return N0.nonzero( what )
                 ## list of indices
                 else:
                     return what
 
         ## single index
         if isinstance( what , int):
-            return oldN.array( [what], oldN.Int )
+            return N0.array( [what], N0.Int )
 
         raise PDBError("PDBModel.indices(): Could not interpret condition ")
 
@@ -1563,7 +1564,7 @@ class PDBModel:
         if type( what ) == types.FunctionType:
             return self.maskF( what )
 
-        if type( what ) == list or type( what ) is oldN.arraytype:
+        if type( what ) == list or type( what ) is N0.arraytype:
 
             ## atom names
             if type( what[0] ) == str:
@@ -1576,8 +1577,8 @@ class PDBModel:
                     return what
                 ## list of indices
                 else:
-                    r = oldN.zeros( self.lenAtoms(),oldN.Int )
-                    oldN.put( r, what, 1 )
+                    r = N0.zeros( self.lenAtoms(),N0.Int )
+                    N0.put( r, what, 1 )
                     return r
 
         ## single index
@@ -1601,10 +1602,10 @@ class PDBModel:
                  e.g. [0,0,0, 1,1,1,1,1, 2,2] from above example
         @rtype: array of int (and of len_i length)
         """
-        index = oldN.concatenate( (index, [len_i]) )
+        index = N0.concatenate( (index, [len_i]) )
         delta = index[1:] - index[:-1] 
-        ## Numeric: delta = oldN.take( index, range(1, len(index) ) ) - index[:-1]
-        return oldN.repeat( range(len(delta)), delta.astype( oldN.Int32) )
+        ## Numeric: delta = N0.take( index, range(1, len(index) ) ) - index[:-1]
+        return N0.repeat( range(len(delta)), delta.astype( N0.Int32) )
 
 
     def map2index( self, imap ):
@@ -1619,15 +1620,15 @@ class PDBModel:
         @rtype: array of int
         """
         try:
-            imap = oldN.concatenate( (imap, [imap[-1]] ) )
+            imap = N0.concatenate( (imap, [imap[-1]] ) )
             delta = imap[1:] - imap[:-1] 
-            # Numeric: delta = oldN.take( imap, range(1, len(imap) ) ) - imap[:-1]
-            r = oldN.nonzero( delta ) + 1
-            return oldN.concatenate( ( [0], r ) )
+            # Numeric: delta = N0.take( imap, range(1, len(imap) ) ) - imap[:-1]
+            r = N0.nonzero( delta ) + 1
+            return N0.concatenate( ( [0], r ) )
 
         except IndexError:
             ## handle empty imap parameter
-            return oldN.zeros(0)
+            return N0.zeros(0)
 
 
     def extendMask( self, mask, index, len_i ):
@@ -1645,10 +1646,10 @@ class PDBModel:
         @return: mask that blows up the residue / chain mask to an atom mask
         @rtype: array of bool
         """
-        index = oldN.concatenate( (index, [len_i]) )
+        index = N0.concatenate( (index, [len_i]) )
         delta = index[1:] - index[:-1] 
 
-        return oldN.repeat( mask, delta.astype( oldN.Int32 ) )
+        return N0.repeat( mask, delta.astype( N0.Int32 ) )
 
 
     def extendIndex( self, i, index, len_i ):
@@ -1670,30 +1671,30 @@ class PDBModel:
         ## catch invalid indices
         i = self.__convert_negative_indices( i, len( index ) )
         if len(i)==0:
-            return i, oldN.array( [], int )
+            return i, N0.array( [], int )
         if max( i ) >= len( index ) or min( i ) < 0:
             raise PDBError, "invalid indices"
 
         ## last atom of each residue / chain
-        stop = oldN.concatenate( (index[1:], [len_i]) ) - 1
+        stop = N0.concatenate( (index[1:], [len_i]) ) - 1
 
-        ifrom = oldN.take( index, i )
-        ito   = oldN.take( stop, i )
+        ifrom = N0.take( index, i )
+        ito   = N0.take( stop, i )
 
         ## number of atoms in each of the new residues 
         rangelen = ito - ifrom + 1
 
-        rindex   = oldN.concatenate( ([0], oldN.cumsum( rangelen[:-1] )) )
+        rindex   = N0.concatenate( ([0], N0.cumsum( rangelen[:-1] )) )
 
         ## (1) repeat position of first atom in each residue as often as there
         ## are atoms in this residue. (2) add a range array so that numbers
         ## are increasing from each atom to the next but (3) reset the added
         ## range to 0 at each residue starting position (-delta).
 
-        ri    = oldN.repeat( ifrom,  rangelen )
-        delta = oldN.repeat( rindex, rangelen )
+        ri    = N0.repeat( ifrom,  rangelen )
+        delta = N0.repeat( rindex, rangelen )
 
-        ri =  ri + oldN.arange( len(ri), dtype=oldN.Int32 ) - delta
+        ri =  ri + N0.arange( len(ri), dtype=N0.Int32 ) - delta
 
         return ri, rindex
 
@@ -1708,9 +1709,9 @@ class PDBModel:
         @return: 1 x N_residues (0||1 )
         @rtype: array of int
         """
-        res_indices = self.atom2resIndices( oldN.nonzero( atomMask) )
-        r = oldN.zeros( self.lenResidues() )
-        oldN.put( r, res_indices, 1 )
+        res_indices = self.atom2resIndices( N0.nonzero( atomMask) )
+        r = N0.zeros( self.lenResidues() )
+        N0.put( r, res_indices, 1 )
         return r
 
 
@@ -1728,10 +1729,10 @@ class PDBModel:
         @return: indices of residues
         @rtype: list of int
         """
-        new_resmap = oldN.take( self.resMap(), indices )
+        new_resmap = N0.take( self.resMap(), indices )
         resIndex   = self.map2index( new_resmap )
 
-        return oldN.take( new_resmap, resIndex )
+        return N0.take( new_resmap, resIndex )
 
 
     def res2atomMask( self, resMask ):
@@ -1755,12 +1756,12 @@ class PDBModel:
         if len(indices)==0 or min( indices ) >= 0:
             return indices
 
-        indices = copy.copy( oldN.array( indices ) )
+        indices = copy.copy( N0.array( indices ) )
 
         negatives = N.flatnonzero( indices < 0 )
 
-        a = oldN.zeros( len( indices ) )
-        oldN.put( a, negatives, length )
+        a = N0.zeros( len( indices ) )
+        N0.put( a, negatives, length )
 
         indices += a
 
@@ -1799,10 +1800,10 @@ class PDBModel:
         @return: chains any atom which is in indices
         @rtype: list of int
         """
-        new_map = oldN.take( self.chainMap( breaks=breaks ), indices )
+        new_map = N0.take( self.chainMap( breaks=breaks ), indices )
         index   = self.map2index( new_map )
 
-        return oldN.take( new_map, index )
+        return N0.take( new_map, index )
 
 
     def atom2chainMask( self, atomMask, breaks=0 ):
@@ -1817,9 +1818,9 @@ class PDBModel:
         @return: 1 x N_residues (0||1 )
         @rtype: array of int
         """
-        indices = self.atom2chainIndices( oldN.nonzero( atomMask), breaks=breaks )
-        r = oldN.zeros( self.lenChains(breaks=breaks) )
-        oldN.put( r, indices, 1 )
+        indices = self.atom2chainIndices( N0.nonzero( atomMask), breaks=breaks )
+        r = N0.zeros( self.lenChains(breaks=breaks) )
+        N0.put( r, indices, 1 )
         return r
 
 
@@ -1849,7 +1850,7 @@ class PDBModel:
         @return: array of atom positions, new chain index
         @rtype: array of int
         """
-        if max( oldN.absolute(indices) ) > self.lenChains( breaks=breaks ):
+        if max( N0.absolute(indices) ) > self.lenChains( breaks=breaks ):
             raise PDBError, "invalid chain indices"
 
         return self.extendIndex( indices, self.chainIndex( breaks=breaks ),
@@ -1871,14 +1872,14 @@ class PDBModel:
         if type( p ) is str:
             p = self.residues.get( p )
 
-        isArray = isinstance( p, oldN.arraytype )
+        isArray = isinstance( p, N0.arraytype )
 
         resMap = self.resMap()
 
         r = [ p[ resMap[a] ] for a in range( len(resMap) ) ]
 
         if isArray:
-            r = oldN.array( r )
+            r = N0.array( r )
 
         return r
 
@@ -1901,13 +1902,13 @@ class PDBModel:
         if type( p ) is str:
             p = self.atoms.get( p )
 
-        isArray = isinstance( p, oldN.arraytype )
+        isArray = isinstance( p, N0.arraytype )
 
         if not f:
-            r = oldN.take( p, self.resIndex() )
+            r = N0.take( p, self.resIndex() )
         else:
             r = [ f( values ) for values in self.profile2resList( p ) ]
-            r = oldN.array( r )
+            r = N0.array( r )
 
         if not isArray:
             return r.tolist()
@@ -2010,7 +2011,7 @@ class PDBModel:
         assert len(oldI) > c1 + 1, 'no adjacent chain to be merged'
 
         ## remove chain boundary from chainIndex
-        self._chainIndex = oldN.concatenate( (oldI[:c1+1], oldI[c1+2:] ) ) 
+        self._chainIndex = N0.concatenate( (oldI[:c1+1], oldI[c1+2:] ) ) 
 
         ## starting and ending position of (old) second chain
         i_start= oldI[ c1 ]
@@ -2046,13 +2047,13 @@ class PDBModel:
             n = i_next - i_scar
             first = self['serial_number'][ i_scar-1 ] + 1 
 
-            self['serial_number'][i_scar:i_next] = oldN.arange(first, first + n)
+            self['serial_number'][i_scar:i_next] = N0.arange(first, first + n)
 
         ## remove OXT and OT2 if requested
         if rmOxt:
             ## overkill: we actually would only need to look into last residue
-            anames = oldN.array( self.atoms['name'][i_start:i_scar] )
-            i_oxt = N.flatnonzero( oldN.logical_or( anames=='OXT', anames=='OT2' ))
+            anames = N0.array( self.atoms['name'][i_start:i_scar] )
+            i_oxt = N.flatnonzero( N0.logical_or( anames=='OXT', anames=='OT2' ))
             if len( i_oxt ) > 0:
                 self.remove( i_oxt )
 
@@ -2074,7 +2075,7 @@ class PDBModel:
         assert len(oldI) > r1 + 1, 'no adjacent residue to be merged'
 
         ## remove residue boundary from residue Index
-        self._resIndex = oldN.concatenate( (oldI[:r1+1], oldI[r1+2:] ) ) 
+        self._resIndex = N0.concatenate( (oldI[:r1+1], oldI[r1+2:] ) ) 
 
         ## starting and ending position of new fused and (old) second residue
         i_start= oldI[ r1 ]
@@ -2111,7 +2112,7 @@ class PDBModel:
             n = i_next - i_scar
             first = self['serial_number'][ i_scar-1 ] + 1 
 
-            self['serial_number'][i_scar:i_next] = oldN.arange(first, first + n)
+            self['serial_number'][i_scar:i_next] = N0.arange(first, first + n)
 
         ## shift chain boundary (if any) to end of fused residue
         ## unless it's the end of the model or there is already a boundary there
@@ -2120,7 +2121,7 @@ class PDBModel:
             if (not i_next in self._chainIndex) and (i_next != len(self)):
                 self._chainIndex[ i ] = i_next
             else:
-                self._chainIndex = oldN.concatenate( self._chainIndex[:i],
+                self._chainIndex = N0.concatenate( self._chainIndex[:i],
                                                   self._chainIndex[i+1:] )
 
         ## mark duplicate atoms in the 'alternate' field of the new residue
@@ -2155,7 +2156,7 @@ class PDBModel:
 
         self.update()  ## trigger update if xyz or any profile is None
 
-        r.setXyz( oldN.concatenate( ( self.getXyz(), m.getXyz() )  ) )
+        r.setXyz( N0.concatenate( ( self.getXyz(), m.getXyz() )  ) )
 
         r.setPdbCode( self.pdbCode )
 
@@ -2166,10 +2167,10 @@ class PDBModel:
         r.atoms.model = r
 
         append_I = m.resIndex() + self.lenAtoms()
-        r._resIndex  = oldN.concatenate((self.resIndex(), append_I ))
+        r._resIndex  = N0.concatenate((self.resIndex(), append_I ))
 
         append_I = m.chainIndex() +self.lenAtoms()
-        r._chainIndex =oldN.concatenate((self.chainIndex( singleRes=1 ), append_I))
+        r._chainIndex =N0.concatenate((self.chainIndex( singleRes=1 ), append_I))
 
         ## remove traces of residue or chain breaks
         if not newChain:
@@ -2221,10 +2222,10 @@ class PDBModel:
 ##         ## update chain index
 ##         cindex = self.chainIndex( breaks=breaks )
 
-##         mask = oldN.ones( len( cindex ) )
-##         oldN.put( mask, chains, 0 )
+##         mask = N0.ones( len( cindex ) )
+##         N0.put( mask, chains, 0 )
 
-##         self._chainIndex = oldN.compress( mask, cindex )
+##         self._chainIndex = N0.compress( mask, cindex )
 
 
     def take( self, i, rindex=None, cindex=None,
@@ -2266,20 +2267,20 @@ class PDBModel:
         r = self.__class__( *initArgs, **initKw )
 
         ## the easy part: extract coordinates and atoms
-        r.xyz = oldN.take( self.getXyz(), i )
+        r.xyz = N0.take( self.getXyz(), i )
         r.xyzChanged = self.xyzChanged or not N.all(r.xyz == self.xyz)
 
         r.atoms = self.atoms.take( i, r )
 
         ## more tricky: rescue residue borders and extract residue profiles
-        new_resmap   = oldN.take( self.resMap(), i )
+        new_resmap   = N0.take( self.resMap(), i )
         if rindex is not None:
             r._resIndex = rindex
         else:
             ## this can fail if residues are repeated in the selection
             r._resIndex = self.map2index( new_resmap )
 
-        i_res     = oldN.take( new_resmap, r._resIndex )
+        i_res     = N0.take( new_resmap, r._resIndex )
         r.residues = self.residues.take( i_res, r )
 
         ## now the same with chain borders (and later profiles)
@@ -2287,7 +2288,7 @@ class PDBModel:
             r._chainIndex = cindex
         else:
             ## this can fail if chains are repeated next to each other in i
-            new_chainmap   = oldN.take( self.chainMap(), i )
+            new_chainmap   = N0.take( self.chainMap(), i )
             r._chainIndex = self.map2index( new_chainmap )
 
         ## copy non-sequential infos
@@ -2310,7 +2311,7 @@ class PDBModel:
     def keep( self, i ):
         """
         Replace atoms,coordinates,profiles of this(!) model with sub-set.
-        (in-place version of oldN.take() )
+        (in-place version of N0.take() )
 
         @param i: atom positions to be kept
         @type  i: list or array of int
@@ -2358,7 +2359,7 @@ class PDBModel:
         @return: compressed PDBModel using mask
         @rtype: PDBModel
         """
-        return self.take( oldN.nonzero( mask ), *initArgs, **initKw )
+        return self.take( N0.nonzero( mask ), *initArgs, **initKw )
 
 
     def remove( self, what ):
@@ -2381,8 +2382,8 @@ class PDBModel:
 
         @raise PDBError: if what is neither of above
         """
-        mask = oldN.logical_not( self.mask( what ) )
-        self.keep( oldN.nonzero(mask) )
+        mask = N0.logical_not( self.mask( what ) )
+        self.keep( N0.nonzero(mask) )
         return mask
 
 
@@ -2439,8 +2440,8 @@ class PDBModel:
 
         ## test for repeats:
         if not force:
-            chains = oldN.array( chains, int )
-            delta = oldN.concatenate( (chains[1:], [chains[-1]+1]) ) - chains
+            chains = N0.array( chains, int )
+            delta = N0.concatenate( (chains[1:], [chains[-1]+1]) ) - chains
             if not N.all( delta != 0 ):
                 raise PDBIndexError,\
                    'Chain boundaries cannot be preserved for repeats.' +\
@@ -2482,7 +2483,7 @@ class PDBModel:
 
         old_chains = []
         if keep_old:
-            old_chains = oldN.take( ids, self.resIndex() )
+            old_chains = N0.take( ids, self.resIndex() )
             old_chains = mathUtils.nonredundant( old_chains )
             if '' in old_chains: old_chains.remove('')
 
@@ -2611,11 +2612,11 @@ class PDBModel:
           [ CrossView{'name':'CA', 'residue_name':'GLY', ..}, .. ] ]      
         @rtype: list of list of CrossView    
         """
-        ri = oldN.concatenate( (self.resIndex( mask=mask ), [self.lenAtoms()] ) )
+        ri = N0.concatenate( (self.resIndex( mask=mask ), [self.lenAtoms()] ) )
         resLen = len( ri ) - 1
         atoms = self.getAtoms()
         if mask is not None:
-            atoms = oldN.compress( mask, atoms ).tolist()
+            atoms = N0.compress( mask, atoms ).tolist()
 
         return [ atoms[ ri[res] : ri[res+1] ] for res in range( resLen ) ] 
 
@@ -2632,10 +2633,10 @@ class PDBModel:
         ri = self.resIndex()
         re = self.resEndIndex()
         if i is None:
-            i = oldN.arange( len(ri) )
+            i = N0.arange( len(ri) )
 ##        xyz = self.getXyz()
 
-        result = [ self.take(oldN.arange(ri[x],re[x]+1)) for x in i ]
+        result = [ self.take(N0.arange(ri[x],re[x]+1)) for x in i ]
         return result
 
 
@@ -2653,10 +2654,10 @@ class PDBModel:
         @rtype: list of int
         """
         ## by default take all atoms
-        if mask is None: mask = oldN.ones( self.lenAtoms() , oldN.Int )
+        if mask is None: mask = N0.ones( self.lenAtoms() , N0.Int )
 
         ## apply mask to this list
-        return oldN.compress( mask, self.atoms['residue_number'] )
+        return N0.compress( mask, self.atoms['residue_number'] )
 
 
     def __inferResIndex( self ):
@@ -2669,7 +2670,7 @@ class PDBModel:
         result = []
 
         if self.lenAtoms() == 0:
-            return oldN.array( result, oldN.Int )
+            return N0.array( result, N0.Int )
 
         lastResNumber = -100
         lastResName   = ''
@@ -2699,7 +2700,7 @@ class PDBModel:
 
                 result.append( i )
 
-        return oldN.array(result, oldN.Int)        
+        return N0.array(result, N0.Int)        
 
 
     def resIndex( self, mask=None, force=0, cache=1 ):
@@ -2725,7 +2726,7 @@ class PDBModel:
 
         if mask is not None:
             m = self.index2map( r, len( mask ) )
-            m = oldN.compress( mask, m )
+            m = N0.compress( mask, m )
             r = self.map2index( m )
 
         if mask is None and cache:
@@ -2761,14 +2762,14 @@ class PDBModel:
         @rtype: list of int
         """
         r = self.resIndex()
-        return oldN.concatenate( (r[1:], [self.lenAtoms()]) ) - 1 
+        return N0.concatenate( (r[1:], [self.lenAtoms()]) ) - 1 
 
     def __inferChainIndex( self ):
 
         result = []
 
         if self.lenAtoms() == 0:
-            return oldN.array( result, oldN.Int )
+            return N0.array( result, N0.Int )
 
         lastResidue = -100
         lastChainID = None
@@ -2792,7 +2793,7 @@ class PDBModel:
             lastChainID = chn_ids[i]
             lastSegID   = seg_ids[i]
 
-        return oldN.array( result, oldN.Int )
+        return N0.array( result, N0.Int )
 
 
     def __filterSingleResChains( self, chainindex, ignore_resnumbers=0 ):
@@ -2804,18 +2805,18 @@ class PDBModel:
         @type  check_resnumbers: 1||0
         """
         # residue name of first atom of each chain
-        res_names = oldN.take( self.atoms['residue_name'], chainindex )
+        res_names = N0.take( self.atoms['residue_name'], chainindex )
         # residue number of first atom of each chain
-        res_nmbrs = oldN.take( self.atoms['residue_number'], chainindex )
+        res_nmbrs = N0.take( self.atoms['residue_number'], chainindex )
         # chain id of first atom of each chain
-        chain_ids = oldN.take( self.atoms['chain_id'], chainindex )
+        chain_ids = N0.take( self.atoms['chain_id'], chainindex )
         #segid of first atom of each chain
-        seg_ids   = oldN.take( self.atoms['segment_id'], chainindex )
+        seg_ids   = N0.take( self.atoms['segment_id'], chainindex )
 
-        res_names = oldN.concatenate( (['-1'], res_names) )
-        chain_ids = oldN.concatenate( (['-1'], chain_ids) )
-        seg_ids   = oldN.concatenate( (['-1'], seg_ids ) )
-        res_nmbrs = oldN.concatenate( ([-100], res_nmbrs) )
+        res_names = N0.concatenate( (['-1'], res_names) )
+        chain_ids = N0.concatenate( (['-1'], chain_ids) )
+        seg_ids   = N0.concatenate( (['-1'], seg_ids ) )
+        res_nmbrs = N0.concatenate( ([-100], res_nmbrs) )
 
         delta     = res_nmbrs[1:] - res_nmbrs[:-1] 
         same_name = res_names[1:] == res_names[:-1]
@@ -2823,12 +2824,12 @@ class PDBModel:
         same_seg  =   seg_ids[1:] ==   seg_ids[:-1]
 
         if ignore_resnumbers:
-            delta = oldN.ones( len(delta), oldN.Int )
+            delta = N0.ones( len(delta), N0.Int )
 
         is_single = (delta==1) \
                   * same_name * same_chain * same_seg
 
-        return oldN.compress( oldN.logical_not(is_single), chainindex)
+        return N0.compress( N0.logical_not(is_single), chainindex)
 
 
     def chainIndex( self, breaks=0, maxDist=None, force=0, cache=0,
@@ -2884,7 +2885,7 @@ class PDBModel:
         if not(breaks or force or maxDist or singleRes or solvent) or cache:
             self._chainIndex = r
 
-        return oldN.array( r, oldN.Int )
+        return N0.array( r, N0.Int )
 
     def chainEndIndex( self, breaks=0, solvent=0 ):
         """
@@ -2893,7 +2894,7 @@ class PDBModel:
         @rtype: list of int
         """
         r = self.chainIndex( breaks=breaks, solvent=solvent )
-        return oldN.concatenate( (r[1:], [self.lenAtoms()]) ) - 1 
+        return N0.concatenate( (r[1:], [self.lenAtoms()]) ) - 1 
 
 
     def chainMap( self, breaks=0, maxDist=None ):
@@ -2947,7 +2948,7 @@ class PDBModel:
 
         else:
 
-            i_bb = oldN.nonzero( self.maskBB( solvent=solvent ) )
+            i_bb = N0.nonzero( self.maskBB( solvent=solvent ) )
             ## outlier detection only works with more than 2,
             ##  hard cutoff works with more than 1
             if len(i_bb) < 2:
@@ -2959,20 +2960,20 @@ class PDBModel:
                 bb_re= bb.resEndIndex()
 ##                xyz = [ bb.xyz[ bb_ri[i] : bb_ri[i+1] ] for i in range(len(bb_ri)-1) ]
 ##                xyz +=[ bb.xyz[ bb_ri[-1]: len(bb) ] ]
-##                centroid = oldN.array([ oldN.average( x ) for x in xyz ])
+##                centroid = N0.array([ N0.average( x ) for x in xyz ])
 
-                last = oldN.take( bb.xyz, bb_re )[:-1]
-                first= oldN.take( bb.xyz, bb_ri )[1:]
+                last = N0.take( bb.xyz, bb_re )[:-1]
+                first= N0.take( bb.xyz, bb_ri )[1:]
                 
-##                dist = oldN.sqrt( oldN.sum( oldN.power(centroid[:-1]-centroid[1:],2), 
+##                dist = N0.sqrt( N0.sum( N0.power(centroid[:-1]-centroid[1:],2), 
 ##                                      axis=1 ) )
-                dist = oldN.sqrt( oldN.sum( oldN.power(last-first,2), axis=1 ) )
+                dist = N0.sqrt( N0.sum( N0.power(last-first,2), axis=1 ) )
                 
                 outliers, median, sd = mathUtils.outliers( dist, z=z, it=5 )
                 
                 ## get distances above mean
                 cutoff = maxDist or median + z * sd
-                r = oldN.nonzero( oldN.greater( dist, cutoff ) )
+                r = N0.nonzero( N0.greater( dist, cutoff ) )
 
             if len(r) > 0:
                 
@@ -2997,7 +2998,7 @@ class PDBModel:
                 if maxDist is None and not solvent and z==6.:
                     self.__chainBreaks = r
 
-        return oldN.array( r, int )
+        return N0.array( r, int )
 
 
     def removeRes( self, what ):
@@ -3048,22 +3049,22 @@ class PDBModel:
             fx, fy = x, y
 
             if mask_fit is not None:
-                fx = oldN.compress( mask_fit, x, 0 )
-                fy = oldN.compress( mask_fit, y, 0 )
+                fx = N0.compress( mask_fit, x, 0 )
+                fy = N0.compress( mask_fit, y, 0 )
             ## find transformation for best match
             r, t = rmsFit.match( fx, fy, n_iterations=n_it )[0]
 
             ## transform coordinates
-            y = oldN.dot(y, oldN.transpose(r)) + t
+            y = N0.dot(y, N0.transpose(r)) + t
 
         if mask is not None:
-            x = oldN.compress( mask, x, 0 )
-            y = oldN.compress( mask, y, 0 )
+            x = N0.compress( mask, x, 0 )
+            y = N0.compress( mask, y, 0 )
 
         ## calculate row distances
-        d = oldN.sqrt(oldN.sum(oldN.power(x - y, 2), 1))
+        d = N0.sqrt(N0.sum(N0.power(x - y, 2), 1))
 
-        return oldN.sqrt( oldN.average(d**2) )
+        return N0.sqrt( N0.average(d**2) )
 
 
     def transformation( self, refModel, mask=None, n_it=1,
@@ -3096,17 +3097,17 @@ class PDBModel:
         x, y = refModel.getXyz(), self.getXyz()
 
         if mask is not None:
-            x = oldN.compress( mask, x, 0 )
-            y = oldN.compress( mask, y, 0 )
-            outlier_mask = oldN.zeros( oldN.sum(mask)  )
+            x = N0.compress( mask, x, 0 )
+            y = N0.compress( mask, y, 0 )
+            outlier_mask = N0.zeros( N0.sum(mask)  )
 
         else:
-            outlier_mask = oldN.zeros( len(self) )
+            outlier_mask = N0.zeros( len(self) )
 
         r, iter_trace = rmsFit.match( x, y, n_iterations=n_it, z=z,
                                       eps_rmsd=eps_rmsd, eps_stdv=eps_stdv)
 
-        oldN.put( outlier_mask, iter_trace[-1][-1], 1 )
+        N0.put( outlier_mask, iter_trace[-1][-1], 1 )
 
         if n_it != 1:
             self.atoms.set( profname, outlier_mask, mask=mask,
@@ -3138,7 +3139,7 @@ class PDBModel:
             r, t = (rt[0:3,0:3], rt[0:3, 3])
 
         result = self.clone()
-        result.setXyz( oldN.dot( self.getXyz(), oldN.transpose(r) ) + t  )
+        result.setXyz( N0.dot( self.getXyz(), N0.transpose(r) ) + t  )
 
         return result
 
@@ -3247,9 +3248,9 @@ class PDBModel:
         @rtype: PDBModel
         """
         r = self.clone()
-        if mask is None: mask = oldN.ones( len(self) )
+        if mask is None: mask = N0.ones( len(self) )
 
-        avg = oldN.average( oldN.compress( mask, r.getXyz(), 0 ) )
+        avg = N0.average( N0.compress( mask, r.getXyz(), 0 ) )
 
         r.setXyz( r.getXyz() - avg )
 
@@ -3267,9 +3268,9 @@ class PDBModel:
         @rtype: (float, float, float)
         """
         if mask is None:
-            return oldN.average( self.getXyz() )
+            return N0.average( self.getXyz() )
 
-        return oldN.average( oldN.compress( mask, self.getXyz(), axis=0 ) )
+        return N0.average( N0.compress( mask, self.getXyz(), axis=0 ) )
 
 
     def centerOfMass( self ):
@@ -3298,7 +3299,7 @@ class PDBModel:
         except KeyError, why:
             raise PDBError('Cannot find mass for '+str(why))
 
-        return oldN.array( M )
+        return N0.array( M )
 
 
     def mass( self ):
@@ -3310,7 +3311,7 @@ class PDBModel:
 
         @raise PDBError: if the model contains elements of unknown mass
         """
-        return oldN.sum( self.masses() )
+        return N0.sum( self.masses() )
 
 
     def residusMaximus( self, atomValues, mask=None ):
@@ -3328,7 +3329,7 @@ class PDBModel:
         @rtype: array of float
         """
         if mask is None:
-            mask = oldN.ones( len(atomValues) )
+            mask = N0.ones( len(atomValues) )
 
         ## eliminate all values that do not belong to the selected atoms
         masked = atomValues * mask
@@ -3339,14 +3340,14 @@ class PDBModel:
         for res in range( 0, self.lenResidues() ):
 
             ## get atom entries for this residue
-            resAtoms = oldN.compress( oldN.equal( self.resMap(), res ), masked )
+            resAtoms = N0.compress( N0.equal( self.resMap(), res ), masked )
 
             ## get maximum value
             masterValue = max( resAtoms )
 
             result += resAtoms * 0.0 + masterValue
 
-        return oldN.array( result, oldN.Float32 )
+        return N0.array( result, N0.Float32 )
 
 
     def argsort( self, cmpfunc=None ):
@@ -3589,8 +3590,8 @@ class PDBModel:
         seqMask, seqMask_ref = match2seq.compareModels(self, ref)
 
         ## get list of matching RESIDUES
-        equal = oldN.nonzero(seqMask)
-        equal_ref = oldN.nonzero(seqMask_ref)
+        equal = N0.nonzero(seqMask)
+        equal_ref = N0.nonzero(seqMask_ref)
 
         result, result_ref = [], []
         
@@ -3656,13 +3657,13 @@ class PDBModel:
         """
         if i is None or iref is None:
             i, iref = self.compareAtoms( ref )
-        mask_self = oldN.ones( len(self), int )
-        mask_ref  = oldN.ones( len(ref ), int )
+        mask_self = N0.ones( len(self), int )
+        mask_ref  = N0.ones( len(ref ), int )
         
-        oldN.put( mask_self, i, 0 )
-        oldN.put( mask_ref, iref, 0 )
+        N0.put( mask_self, i, 0 )
+        N0.put( mask_ref, iref, 0 )
         
-        return oldN.nonzero( mask_self ), oldN.nonzero( mask_ref )
+        return N0.nonzero( mask_self ), N0.nonzero( mask_ref )
     
 
     def reportAtoms( self, i=None, n=None ):
@@ -3788,7 +3789,7 @@ class PDBModel:
         @rtype: str
         """
         import zlib
-        rindex = oldN.concatenate( (self.resIndex(), [len(self)] ) )
+        rindex = N0.concatenate( (self.resIndex(), [len(self)] ) )
         r = ''
         if len(rindex) == 0:
             return r
@@ -3878,7 +3879,7 @@ class Test(BT.BiskitTest):
 
 
             ## mask out atoms of all other chains
-            chainMask  = oldN.equal( self._m.chainMap( breaks=1 ), c )
+            chainMask  = N0.equal( self._m.chainMap( breaks=1 ), c )
             if self.local:
                 print self._m.sequence( chainMask )
 
@@ -3893,7 +3894,7 @@ class Test(BT.BiskitTest):
         sort = m2.argsort()
         m2 = m2.sort( sort )
 
-        self.assertAlmostEqual( oldN.sum( m2.centerOfMass() ),  23.1032009125,2)
+        self.assertAlmostEqual( N0.sum( m2.centerOfMass() ),  23.1032009125,2)
 
 
     def test_chainBreaks(self):
@@ -4013,8 +4014,8 @@ class Test(BT.BiskitTest):
         r.mergeChains( 0 )
         self.r = r
         self.assert_( r.lenChains() == m.lenChains() )
-        self.assert_( N.all( oldN.array(r['chain_id']) == chain_ids ) )
-        self.assert_( N.all( oldN.array(r['residue_number']) == res_numbers ) )
+        self.assert_( N.all( N0.array(r['chain_id']) == chain_ids ) )
+        self.assert_( N.all( N0.array(r['residue_number']) == res_numbers ) )
 
     def test_mergeResidues( self ):
         """PDBModel.mergeResidues test"""
@@ -4096,7 +4097,7 @@ class TestExe( BT.Test ):
             print 'center of mass deviation: \n%r' % diff
 
         self.assertEqual( r.info['tm_rmsd'], 1.76 )
-        self.assert_( N.all( oldN.absolute(diff) < 1 ),
+        self.assert_( N.all( N0.absolute(diff) < 1 ),
                       'superposition failed: %r' % diff)
 
 

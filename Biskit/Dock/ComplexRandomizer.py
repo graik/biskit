@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ## generate random orientations of receptor and ligand
@@ -33,7 +34,7 @@ import Biskit.mathUtils as ma
 import Biskit.molUtils as mol
 import Biskit.tools as t
 import numpy.oldnumeric.random_array as ra
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 from Biskit import Xplorer, PCRModel
 
 import tempfile
@@ -87,7 +88,7 @@ class ComplexRandomizer:
         @rtype: PDBModel
         """
         r = model.clone()
-        r.keep( oldN.nonzero( oldN.logical_not( r.maskH2O() ) ) )
+        r.keep( N0.nonzero( N0.logical_not( r.maskH2O() ) ) )
         center = r.centerOfMass()
         r.setXyz( r.getXyz() - center )
 
@@ -105,7 +106,7 @@ class ComplexRandomizer:
         @rtype: float
         """
         center = model.centerOfMass()
-        dist = oldN.sqrt( oldN.sum( ( model.getXyz()-center )**2 , 1 ) )
+        dist = N0.sqrt( N0.sum( ( model.getXyz()-center )**2 , 1 ) )
 
         return max( dist )
 
@@ -121,7 +122,7 @@ class ComplexRandomizer:
         radius = (self.d_max_rec + self.d_max_lig) / 2.0
         xyz = ra.random( 3 ) - 0.5
 
-        scale = radius*1.0 / oldN.sqrt( oldN.sum( xyz**2 ) )
+        scale = radius*1.0 / N0.sqrt( N0.sum( xyz**2 ) )
 
         return scale * xyz
 
@@ -134,14 +135,14 @@ class ComplexRandomizer:
         @rtype: array
         """
         r = ma.randomRotation()
-##         r = oldN.array([[1,0,0],[0,1,0],[0,0,1]],'f')
+##         r = N0.array([[1,0,0],[0,1,0],[0,0,1]],'f')
         t = self.__random_translation()
 
         ## create 3 x 4 matrix: 0:3, 0:3 contains rot; 3,0:3 contains trans
-        result = oldN.concatenate( (r, oldN.transpose( [ t.tolist() ] )), 1)
+        result = N0.concatenate( (r, N0.transpose( [ t.tolist() ] )), 1)
 
         ## make it square
-        result = oldN.concatenate( (result, oldN.array([[0,0,0,1]], oldN.Float32)), 0 )
+        result = N0.concatenate( (result, N0.array([[0,0,0,1]], N0.Float32)), 0 )
 
         return result
 

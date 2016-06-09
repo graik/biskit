@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
@@ -112,7 +113,7 @@ class Test(BT.BiskitTest):
     def test_PDBParsePickle( self ):
         """PDBParsePickle test"""
 
-        import numpy.oldnumeric as oldN
+        import Biskit.oldnumeric as N0
 
         ## loading output file from X-plor
         if self.local:
@@ -121,7 +122,7 @@ class Test(BT.BiskitTest):
         self.p = PDBParsePickle()
         self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P_dry.model')
 
-        self.assertAlmostEqual( oldN.sum( self.m.centerOfMass() ),
+        self.assertAlmostEqual( N0.sum( self.m.centerOfMass() ),
                                 114.18037, 5)
 
 if __name__ == '__main__':

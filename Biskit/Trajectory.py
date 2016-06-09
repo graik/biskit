@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
@@ -27,7 +28,7 @@
 Trajectory - Collection of coordinate frames of a molecule 
 """
 
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 
 ## superposition module from M. Habeck
 import rmsFit
@@ -215,10 +216,10 @@ class Trajectory:
         self.frameNames = getattr( self, 'frameNames', None)
         self.profiles = getattr( self, 'profiles', TrajProfiles() )
 
-        if type( self.frames ) is not oldN.ndarray:
-            self.frames = oldN.array( self.frames )
-        if type( self.resIndex ) is not oldN.ndarray:
-            self.resIndex = oldN.array( self.resIndex )
+        if type( self.frames ) is not N0.ndarray:
+            self.frames = N0.array( self.frames )
+        if type( self.resIndex ) is not N0.ndarray:
+            self.resIndex = N0.array( self.resIndex )
 
 
     def __getstate__(self):
@@ -228,7 +229,7 @@ class Trajectory:
         try:
             if type( self.frames ) == list or self.frames.dtype.char == 'd':
                 EHandler.warning("Converting coordinates to float array.")
-                self.frames = oldN.array( self.frames ).astype(oldN.Float32)
+                self.frames = N0.array( self.frames ).astype(N0.Float32)
         except:
             EHandler.warning('Could not convert frames to float array.', 1)
 
@@ -245,7 +246,7 @@ class Trajectory:
         @rtype: PDBModel
         """
         result = PDBModel( self.getRef(), noxyz=1 )
-        result.setXyz( oldN.average( self.frames ) )
+        result.setXyz( N0.average( self.frames ) )
 
         return result
 
@@ -285,7 +286,7 @@ class Trajectory:
                     raise TrajError("Reference PDB doesn't match %s."
                                     %m.fileName)
 
-                if oldN.all( atomCast == range( len( m ) ) ):
+                if N0.all( atomCast == range( len( m ) ) ):
                     atomCast = None   ## no casting necessary
                 else:
                     if self.verbose: T.errWrite(' casting ')
@@ -307,7 +308,7 @@ class Trajectory:
         if self.verbose: T.errWrite( 'done\n' )
 
         ## convert to 3-D Numpy Array
-        return oldN.array(frameList).astype(oldN.Float32)
+        return N0.array(frameList).astype(N0.Float32)
 
 
     def getRef( self ):
@@ -357,7 +358,7 @@ class Trajectory:
 
         r = self.__class__()
 
-        r.frames = oldN.concatenate( (self.frames, traj[0].frames), 0 )
+        r.frames = N0.concatenate( (self.frames, traj[0].frames), 0 )
 
         r.setRef( self.ref.clone())
 
@@ -366,8 +367,8 @@ class Trajectory:
 
         try:
             if self.pc is not None and traj[0].pc is not None:
-                r.pc['p'] = oldN.concatenate( (self.pc['p'], traj[0].pc['p']),0)
-                r.pc['u'] = oldN.concatenate( (self.pc['u'], traj[0].pc['u']),0)
+                r.pc['p'] = N0.concatenate( (self.pc['p'], traj[0].pc['p']),0)
+                r.pc['u'] = N0.concatenate( (self.pc['u'], traj[0].pc['u']),0)
         except TypeError, why:
             EHandler.error('cannot concat PC '+str(why) )
 
@@ -396,7 +397,7 @@ class Trajectory:
 
         r = self.__class__()
 
-        r.frames = oldN.concatenate( (self.frames, traj[0].frames), 1 )
+        r.frames = N0.concatenate( (self.frames, traj[0].frames), 1 )
         r.setRef( self.ref.concat( traj[0].getRef() ) )
 
         r.profiles = self.profiles.clone()
@@ -419,7 +420,7 @@ class Trajectory:
         @return: number of atoms in frames
         @rtype: int
         """
-        return oldN.shape( self.frames )[1]
+        return N0.shape( self.frames )[1]
 
 
     def atomMask( self, what ):
@@ -467,18 +468,18 @@ class Trajectory:
         @rtype: Trajectory
         """
         ## remove out-of-bound indices
-        indices = oldN.compress( oldN.less( indices, len( self.frames) ), indices )
+        indices = N0.compress( N0.less( indices, len( self.frames) ), indices )
 
         r = self.__class__()
 
         ## this step takes some time for large frames !
-        r.frames = oldN.take( self.frames, indices, 0 )
+        r.frames = N0.take( self.frames, indices, 0 )
 
         ## semi-deep copy of reference model
         r.setRef( self.ref.take( range( self.ref.lenAtoms() )) )
 
         if self.frameNames != None:
-            r.frameNames = oldN.take( self.frameNames, indices, 0 )
+            r.frameNames = N0.take( self.frameNames, indices, 0 )
             r.frameNames = map( ''.join, r.frameNames.tolist() )
 
         r.pc = self.__takePca( indices )
@@ -510,7 +511,7 @@ class Trajectory:
         @return: copy of this Trajectory (fewer frames, semi-deep copy of ref)
         @rtype: Trajectory
         """
-        return self.takeFrames( oldN.nonzero( mask ) )
+        return self.takeFrames( N0.nonzero( mask ) )
 
 
     def replaceContent( self, traj ):
@@ -547,7 +548,7 @@ class Trajectory:
         @type  indices: [int]
         """
         i = range( self.lenFrames() )
-        i.remove( oldN.array(indices) )
+        i.remove( N0.array(indices) )
         self.keepFrames( i )
 
 
@@ -572,7 +573,7 @@ class Trajectory:
         r.__dict__.update( self.__dict__ )
         r.frames = r.ref = r.frameNames = r.profiles = None
 
-        r.frames = oldN.take( self.frames, indices, 1 )
+        r.frames = N0.take( self.frames, indices, 1 )
 
         r.setRef( self.ref.take( indices ) )
 
@@ -599,7 +600,7 @@ class Trajectory:
         @return: copy of Trajectory with fewer atoms
         @rtype: Trajectory
         """
-        return self.takeAtoms( oldN.nonzero( aMask ), returnClass )
+        return self.takeAtoms( N0.nonzero( aMask ), returnClass )
 
 
     def keepAtoms( self, indices ):
@@ -628,16 +629,16 @@ class Trajectory:
         @type  what: any
 
 
-        @return: oldN.array(1 x N_atoms_old) of 0||1, mask used to compress the
+        @return: N0.array(1 x N_atoms_old) of 0||1, mask used to compress the
                  atoms and xyz arrays. This mask can be used to apply the
                  same change to another array of same dimension as the
                  old(!) xyz and atoms.
         @rtype: array
         """
         ## pass what on to PDBModel, collect resulting mask
-        mask = oldN.logical_not( self.atomMask( what ) )
+        mask = N0.logical_not( self.atomMask( what ) )
 
-        self.keepAtoms( oldN.nonzero( mask ) )
+        self.keepAtoms( N0.nonzero( mask ) )
 
         return mask
 
@@ -688,14 +689,14 @@ class Trajectory:
         @type profInfos: key=value
         """
         if ref == None:
-            refxyz = oldN.average( self.frames, 0 )
+            refxyz = N0.average( self.frames, 0 )
         else:
             refxyz = ref.getXyz()
 
         if mask is None:
-            mask = oldN.ones( len( refxyz ), oldN.Int32 )
+            mask = N0.ones( len( refxyz ), N0.Int32 )
 
-        refxyz = oldN.compress( mask, refxyz, 0 )
+        refxyz = N0.compress( mask, refxyz, 0 )
 
         if verbose: T.errWrite( "rmsd fitting..." )
 
@@ -709,29 +710,29 @@ class Trajectory:
 
             if n_it != 1:
                 (r, t), rmsdList = rmsFit.match( refxyz,
-                                                 oldN.compress( mask, xyz, 0), n_it)
+                                                 N0.compress( mask, xyz, 0), n_it)
                 iterations.append( len( rmsdList ) )
                 non_outliers.append( rmsdList[-1][0] )
 
-                xyz_transformed = oldN.dot( xyz, oldN.transpose(r)) + t
+                xyz_transformed = N0.dot( xyz, N0.transpose(r)) + t
 
                 rms += [ rmsdList[-1][1] ]
 
             else:
                 r, t = rmsFit.findTransformation( refxyz,
-                                                  oldN.compress( mask, xyz, 0))
+                                                  N0.compress( mask, xyz, 0))
 
-                xyz_transformed = oldN.dot( xyz, oldN.transpose(r)) + t
+                xyz_transformed = N0.dot( xyz, N0.transpose(r)) + t
 
-                d = oldN.sqrt(oldN.sum(oldN.power( oldN.compress(mask, xyz_transformed,0)\
+                d = N0.sqrt(N0.sum(N0.power( N0.compress(mask, xyz_transformed,0)\
                                           - refxyz, 2), 1))
 
 
-                rms += [ oldN.sqrt( oldN.average(d**2) ) ]
+                rms += [ N0.sqrt( N0.average(d**2) ) ]
 
 
             if fit:
-                self.frames[i] = xyz_transformed.astype(oldN.Float32)
+                self.frames[i] = xyz_transformed.astype(N0.Float32)
 
             if verbose and i%100 == 0:
                 T.errWrite( '#' )
@@ -759,14 +760,14 @@ class Trajectory:
             rt = rt[0]
             r, t = (rt[0:3,0:3], rt[0:3, 3])
 
-        r = oldN.transpose( r )
-        r = r.astype(oldN.Float32)
-        t = t.astype(oldN.Float32)
+        r = N0.transpose( r )
+        r = r.astype(N0.Float32)
+        t = t.astype(N0.Float32)
 
         for i in range( len( self.frames ) ):
-            self.frames[ i ] = oldN.array( oldN.dot( self.frames[i], r ) ) + t 
+            self.frames[ i ] = N0.array( N0.dot( self.frames[i], r ) ) + t 
 
-##         self.frames = oldN.array( [ oldN.dot( f, r )  for f in self.frames ] )
+##         self.frames = N0.array( [ N0.dot( f, r )  for f in self.frames ] )
 ##         self.frames += t
 
 
@@ -893,7 +894,7 @@ class Trajectory:
         n_lines = None
 
         for fi in frames:
-            f = oldN.ravel( self.frames[ fi ] )
+            f = N0.ravel( self.frames[ fi ] )
 
             if n_lines is None:
                 n_lines = n_lines or len( f ) / 10
@@ -938,7 +939,7 @@ class Trajectory:
 
         @param mask: list 1 x N_items of 0|1, if there are less values
                      than items, provide mask for missing values,
-                     oldN.sum(mask)==N_items
+                     N0.sum(mask)==N_items
         @type  mask: [0|1]
         @param default: value for items masked.
         @type  default: any
@@ -1042,16 +1043,16 @@ class Trajectory:
         frames = self.frames
 
         if aMask != None:
-            frames = oldN.compress( aMask, frames, 1 )
+            frames = N0.compress( aMask, frames, 1 )
 
-        result = oldN.zeros( (len( frames ), len( frames )), oldN.Float32 )
+        result = N0.zeros( (len( frames ), len( frames )), N0.Float32 )
 
         for i in range(0, len( frames ) ):
 
             for j in range( i+1, len( frames ) ):
                 if noFit:
-                    d = oldN.sqrt(oldN.sum(oldN.power(frames[i]-frames[j], 2), 1))
-                    result[i,j] = result[j,i] = oldN.sqrt( oldN.average(d**2) )
+                    d = N0.sqrt(N0.sum(N0.power(frames[i]-frames[j], 2), 1))
+                    result[i,j] = result[j,i] = N0.sqrt( N0.average(d**2) )
 
                 else:
                     rt, rmsdLst = rmsFit.match( frames[i], frames[j], 1 )
@@ -1074,12 +1075,12 @@ class Trajectory:
         """
         frames = self.frames
         if mask is not None:
-            frames = oldN.compress( mask, frames, 1 )
+            frames = N0.compress( mask, frames, 1 )
 
         ## mean position of each atom in all frames
-        avg = oldN.average( frames )
+        avg = N0.average( frames )
 
-        return oldN.average(oldN.sqrt(oldN.sum(oldN.power(frames - avg, 2), 2) ))
+        return N0.average(N0.sqrt(N0.sum(N0.power(frames - avg, 2), 2) ))
 
 
     def __resWindow( self, res, n_neighbores, rchainMap=None,
@@ -1105,10 +1106,10 @@ class Trajectory:
         """
         ## some defaults.. time-consuming..
         if rchainMap is None:
-            rchainMap = oldN.take( self.chainMap(), self.resIndex() )
+            rchainMap = N0.take( self.chainMap(), self.resIndex() )
 
-        if left_allowed  is None: left_allowed = oldN.nonzero( self.ref.maskBB() )
-        if right_allowed is None: right_allowed= oldN.nonzero( self.ref.maskBB() )
+        if left_allowed  is None: left_allowed = N0.nonzero( self.ref.maskBB() )
+        if right_allowed is None: right_allowed= N0.nonzero( self.ref.maskBB() )
 
         ## atom indices of center residue
         result = self.ref.res2atomIndices( [ res ] ).tolist()
@@ -1156,17 +1157,17 @@ class Trajectory:
         @rtype: array
         """
         if mask is None:
-            mask = oldN.ones( len( self.frames[0] ), oldN.Int32 )
+            mask = N0.ones( len( self.frames[0] ), N0.Int32 )
 
         if verbose: T.errWrite( "rmsd fitting per residue..." )
 
-        residues = oldN.nonzero( self.ref.atom2resMask( mask ) )
+        residues = N0.nonzero( self.ref.atom2resMask( mask ) )
 
         ## backbone atoms used for fit
-        fit_atoms_right = oldN.nonzero( self.ref.mask( right_atoms ) )
-        fit_atoms_left  = oldN.nonzero( self.ref.mask( left_atoms ) )
+        fit_atoms_right = N0.nonzero( self.ref.mask( right_atoms ) )
+        fit_atoms_left  = N0.nonzero( self.ref.mask( left_atoms ) )
         ## chain index of each residue
-        rchainMap = oldN.take( self.ref.chainMap(), self.ref.resIndex() )
+        rchainMap = N0.take( self.ref.chainMap(), self.ref.resIndex() )
 
         result = []
 
@@ -1187,18 +1188,18 @@ class Trajectory:
                 ## fit with border atoms ..
                 t_res.fit( ref=t_res.ref, mask=mask_BB, verbose=0 )
                 ## .. but calculate only with center residue atoms
-                frames = oldN.take( t_res.frames, i_center, 1 )
+                frames = N0.take( t_res.frames, i_center, 1 )
 
-                avg = oldN.average( frames )
+                avg = N0.average( frames )
 
-                rmsd = oldN.average(oldN.sqrt(oldN.sum(oldN.power(frames - avg, 2), 2) ))
+                rmsd = N0.average(N0.sqrt(N0.sum(N0.power(frames - avg, 2), 2) ))
 
                 result.extend( rmsd )
 
                 if verbose: T.errWrite('#')
 
             except ZeroDivisionError:
-                result.extend( oldN.zeros( len(i_res), oldN.Float32 ) )
+                result.extend( N0.zeros( len(i_res), N0.Float32 ) )
                 T.errWrite('?' + str( res ))
 
         if verbose: T.errWriteln( "done" )
@@ -1221,7 +1222,7 @@ class Trajectory:
         @rtype: array
         """
         if mask is None:
-            mask = oldN.ones( len( self.frames[0] ), oldN.Int32 )
+            mask = N0.ones( len( self.frames[0] ), N0.Int32 )
 
         ## eliminate all values that do not belong to the selected atoms
         masked = atomValues * mask
@@ -1232,14 +1233,14 @@ class Trajectory:
         for res in range( 0, self.resMap()[-1]+1 ):
 
             ## get atom entries for this residue
-            resAtoms = oldN.compress( oldN.equal( self.resMap(), res ), masked )
+            resAtoms = N0.compress( N0.equal( self.resMap(), res ), masked )
 
             ## get maximum value
             masterValue = max( resAtoms )
 
             result += resAtoms * 0.0 + masterValue
 
-        return oldN.array( result )
+        return N0.array( result )
 
 
     def getGammaFluct( self, fluctList=None ):
@@ -1286,8 +1287,8 @@ class Trajectory:
         result = self.residusMaximus( atomFluctList, self.ref.maskBB() )
 
         ## take first atoms only
-        result = oldN.take( result, self.ref.resIndex() )
-##        result = oldN.compress( self.ref.maskCA(), atomFluctList)
+        result = N0.take( result, self.ref.resIndex() )
+##        result = N0.compress( self.ref.maskCA(), atomFluctList)
 
         ## check dimension
         if len( result ) <> self.ref.lenResidues():
@@ -1424,12 +1425,12 @@ class Trajectory:
 
         if result != None:
 
-            result['p'] = oldN.take( result['p'], indices, 0 )
+            result['p'] = N0.take( result['p'], indices, 0 )
 
-            result['u'] = oldN.take( result['u'], indices, 0 )
+            result['u'] = N0.take( result['u'], indices, 0 )
 
             if result['fMask'] != None:
-                result['fMask'] = oldN.take( result['fMask'], indices, 0 )
+                result['fMask'] = N0.take( result['fMask'], indices, 0 )
 
         return result
 
@@ -1444,7 +1445,7 @@ class Trajectory:
         @return: list of pca values
         @rtype: [float]        
         """
-        return self.__takePca( oldN.nonzero( fMask ) )
+        return self.__takePca( N0.nonzero( fMask ) )
 
 
     def getPca( self, aMask=None, fMask=None, fit=1 ):
@@ -1466,7 +1467,7 @@ class Trajectory:
         @rtype: dict
         """
         if aMask == None:
-            aMask = oldN.ones( self.getRef().lenAtoms(), oldN.Int32 )
+            aMask = N0.ones( self.getRef().lenAtoms(), N0.Int32 )
 
         pc = getattr(self, 'pc', None)
 
@@ -1506,28 +1507,28 @@ class Trajectory:
                  projection of each frame in PC space, eigenvalue of each PC
         @rtype: array, array, array
         """
-        if frameMask is None: frameMask = oldN.ones( len( self.frames ), oldN.Int32 )
+        if frameMask is None: frameMask = N0.ones( len( self.frames ), N0.Int32 )
 
-        if atomMask is None: atomMask = oldN.ones(self.getRef().lenAtoms(),
-                                               oldN.Int32)
+        if atomMask is None: atomMask = N0.ones(self.getRef().lenAtoms(),
+                                               N0.Int32)
 
         if fit:
             self.fit( atomMask )
 
-        refxyz = oldN.average( self.frames, 0 )
+        refxyz = N0.average( self.frames, 0 )
 
-        data = oldN.compress( frameMask, self.frames, 0 )
+        data = N0.compress( frameMask, self.frames, 0 )
 
         data = data - refxyz
 
-        data = oldN.compress( atomMask, data, 1 )
+        data = N0.compress( atomMask, data, 1 )
 
         ## reduce to 2D array
-        data = oldN.array( map( oldN.ravel, data ) )
+        data = N0.array( map( N0.ravel, data ) )
 
         V, L, U = LA.singular_value_decomposition( data )
 
-        return U, V * L, oldN.power(L, 2)
+        return U, V * L, N0.power(L, 2)
 
 
     def pcMovie( self, ev, steps, factor=1., ref=0, morph=1 ):
@@ -1559,14 +1560,14 @@ class Trajectory:
         U = pc['u']
 
         ## raveled and centered frames
-        x_avg = oldN.average(self.frames, 0)
-        X = oldN.array( [oldN.ravel(x) for x in self.frames - x_avg] )
+        x_avg = N0.average(self.frames, 0)
+        X = N0.array( [N0.ravel(x) for x in self.frames - x_avg] )
 
         ## ev'th eigenvector of reference frame
-        alpha_0 = oldN.dot( X[ref], U[ev] )
+        alpha_0 = N0.dot( X[ref], U[ev] )
 
         ## list of deviations of ev'th eigenvector of each frame from ref
-        alpha_range = oldN.dot(X, U[ev]) - alpha_0
+        alpha_range = N0.dot(X, U[ev]) - alpha_0
 
         ## get some representative alphas...
         if morph:
@@ -1575,16 +1576,16 @@ class Trajectory:
             delta = (a_max - a_min) / steps
             alpha_range = [ a_min + i*(delta) for i in range(0, steps) ]
         else:
-            alpha_range = oldN.sort( alpha_range )
+            alpha_range = N0.sort( alpha_range )
             delta = len(alpha_range) / (steps * 1.0)
             alpha_range = [ alpha_range[ int(round( i*delta )) ]
                             for i in range(0,steps) ]
 
         ## scale ev'th eigenvector of ref with different alphas 
-        Y = oldN.array( [ X[ref] + alpha * U[ev] for alpha in alpha_range] )
+        Y = N0.array( [ X[ref] + alpha * U[ev] for alpha in alpha_range] )
 
         ## back convert to N x 3 coordinates
-        Y = oldN.reshape(Y, (Y.shape[0], -1, 3))
+        Y = N0.reshape(Y, (Y.shape[0], -1, 3))
         Y = x_avg + Y
 
         result = self.__class__()
@@ -1630,7 +1631,7 @@ class Test(BT.BiskitTest):
 
         ## remove waters
         self.traj = self.traj.compressAtoms(
-            oldN.logical_not( self.traj.ref.maskH2O()) )
+            N0.logical_not( self.traj.ref.maskH2O()) )
 
         ## get fluctuation on a residue level
         r1 = self.traj.getFluct_local( verbose=self.local )
@@ -1639,7 +1640,7 @@ class Test(BT.BiskitTest):
         self.traj.fit( ref=self.traj.ref,
                        mask=self.traj.ref.maskBB(), verbose=self.local )
 
-        self.assertAlmostEqual( oldN.sum( self.traj.profile('rms') ),
+        self.assertAlmostEqual( N0.sum( self.traj.profile('rms') ),
                                 58.101235746353879, 2 )
 
 

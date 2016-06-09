@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
@@ -27,7 +28,7 @@
 Various common functions used by the docking modeles.
 """
 
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 import os
 
 import Biskit.tools as t
@@ -121,10 +122,10 @@ def centerSurfDist( model, surf_mask, mask=None ):
     center = model.centerOfMass()
 
     ## surface atom coordinates
-    surf_xyz = oldN.compress( mask*surf_mask, model.getXyz(), 0 )
+    surf_xyz = N0.compress( mask*surf_mask, model.getXyz(), 0 )
 
     ## find the atom closest and furthest away from center
-    dist = oldN.sqrt( oldN.sum( (surf_xyz-center)**2 , 1 ) )
+    dist = N0.sqrt( N0.sum( (surf_xyz-center)**2 , 1 ) )
     minDist = min(dist)
     maxDist = max(dist)
 
@@ -186,8 +187,8 @@ def createHexInp( recPdb, recModel, ligPdb, ligModel, comPdb=None,
         lig_asa.addSurfaceRacer()
 
     ## surface masks, > 95% exposed
-    rec_surf_mask = oldN.greater( recModel.profile('relAS'), 95 )
-    lig_surf_mask = oldN.greater( ligModel.profile('relAS'), 95 )
+    rec_surf_mask = N0.greater( recModel.profile('relAS'), 95 )
+    lig_surf_mask = N0.greater( ligModel.profile('relAS'), 95 )
 
     ## maximun and medisn distance from centre of mass to any surface atom
     recMax, recMin = centerSurfDist( recModel, rec_surf_mask )

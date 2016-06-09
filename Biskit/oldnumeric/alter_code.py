@@ -6,7 +6,7 @@ import time
 
 ## OPTIONS
 fname = sys.argv[1]
-replacefile = len(sys.argv) > 2 and sys.argv[1] == '-replacefile'
+replacefile = len(sys.argv) > 2 and sys.argv[2] == '-replacefile'
 
 if ('alter_code.py' in fname) or ('altered.py' in fname):
     print 'refusing to change %s' % fname

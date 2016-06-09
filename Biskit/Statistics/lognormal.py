@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
@@ -28,17 +29,17 @@
 lognormal distribution
 """
 
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 import numpy.oldnumeric.random_array as R
 
 
 def rand_log_normal(alpha, beta, shape):
-    return oldN.exp(R.normal(alpha, beta, shape))
+    return N0.exp(R.normal(alpha, beta, shape))
 
 
 def ln(r, alpha, beta):
-    return oldN.exp(-0.5/beta**2 * (oldN.log(r) - alpha)**2 \
-                 - 0.5*oldN.log(2*oldN.pi)-oldN.log(beta*r))
+    return N0.exp(-0.5/beta**2 * (N0.log(r) - alpha)**2 \
+                 - 0.5*N0.log(2*N0.pi)-N0.log(beta*r))
 
 
 def erf(x):
@@ -58,7 +59,7 @@ def erf(x):
     z = abs(x)
     t = 1. / (1. + 0.5 * z)
 
-    r = t * oldN.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + \
+    r = t * N0.exp(-z * z - 1.26551223 + t * (1.00002368 + t * (0.37409196 + \
                                                                t * (0.09678418 + t * (-0.18628806 + t * (0.27886807 + t * \
                                                                                                          (-1.13520398 + t * (1.48851587 + t * (-0.82215223 + t * \
                                                                                                                                                0.17087277)))))))))
@@ -84,13 +85,13 @@ def logArea(x, alpha, beta):
     @return: probability that x is NOT drawn from the given distribution
     @rtype: float
     """
-    r_max = oldN.exp(alpha - beta**2)
+    r_max = N0.exp(alpha - beta**2)
 
     if x < r_max: x = r_max**2 / x
 
-    upper = (oldN.log(x) - alpha) / beta 
+    upper = (N0.log(x) - alpha) / beta 
 
-    return 0.5 * (erf(upper / oldN.sqrt(2)) - erf(-(upper + 2*beta) / oldN.sqrt(2)))
+    return 0.5 * (erf(upper / N0.sqrt(2)) - erf(-(upper + 2*beta) / N0.sqrt(2)))
 
 
 def logMean( alpha, beta ):
@@ -103,7 +104,7 @@ def logMean( alpha, beta ):
     @return: mean of the original lognormal distribution
     @rtype: float
     """
-    return oldN.exp( alpha + (beta**2)/2. )
+    return N0.exp( alpha + (beta**2)/2. )
 
 
 def logSigma( alpha, beta ):
@@ -116,7 +117,7 @@ def logSigma( alpha, beta ):
     @return: 'standard deviation' of the original lognormal distribution
     @rtype: float
     """
-    return logMean( alpha, beta ) * oldN.sqrt( oldN.exp(beta**2) - 1.)
+    return logMean( alpha, beta ) * N0.sqrt( N0.exp(beta**2) - 1.)
 
 
 def logMedian( alpha, beta=None ):
@@ -129,7 +130,7 @@ def logMedian( alpha, beta=None ):
     @return: median of the original lognormal distribution
     @rtype: float
     """
-    return oldN.exp( alpha )
+    return N0.exp( alpha )
 
 
 def logConfidence( x, R, clip=0 ):
@@ -148,21 +149,21 @@ def logConfidence( x, R, clip=0 ):
     @rtype: (float, float)
     """
     if clip and 0 in R:
-        R = oldN.clip( R, clip, max( R ) )
+        R = N0.clip( R, clip, max( R ) )
     if clip and x == 0:
         x = clip
 
     ## remove 0 instead of clipping
-    R = oldN.compress( R, R )
+    R = N0.compress( R, R )
     if x == 0:
         return 0, 0
 
     ## get mean and stdv of log-transformed random sample
-    alpha = oldN.average( oldN.log( R ) )
+    alpha = N0.average( N0.log( R ) )
 
     n = len( R )
 
-    beta = oldN.sqrt(oldN.sum(oldN.power(oldN.log( R ) - alpha, 2)) / (n - 1.))
+    beta = N0.sqrt(N0.sum(N0.power(N0.log( R ) - alpha, 2)) / (n - 1.))
 
     return logArea( x, alpha, beta ), logMedian( alpha )
 
@@ -200,7 +201,7 @@ class Test(BT.BiskitTest):
         ca = logArea( x, alpha, beta )
 
         if self.local:
-            gnuplot.plot( H.density( oldN.array(cr) - ca, 100 ) )
+            gnuplot.plot( H.density( N0.array(cr) - ca, 100 ) )
 
             globals().update( locals() )
 
