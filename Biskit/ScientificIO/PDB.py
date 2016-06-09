@@ -70,7 +70,7 @@ from .TextFile import TextFile
 from .FortranFormat import FortranFormat, FortranLine
 from .PDBExportFilters import export_filters
 
-from Scientific.Geometry import Vector, Tensor
+from Scientific.Geometry import Vector, Tensor  # last Scientifc dependency
 ##from Scientific import N
 import numpy as N
 
