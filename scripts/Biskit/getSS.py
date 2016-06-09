@@ -25,21 +25,8 @@
 
 from Biskit import PDBModel
 from Biskit.tools import *
-from numpy.oldnumeric import *
-
-def __pairwiseDistances( u, v):
-    """
-    pairwise distance between 2 3-D numpy arrays of atom coordinates.
-    -> Numpy array len(u) x len(v)
-    donated by Wolfgang Rieping.
-    """
-    diag1= diagonal(dot(u,transpose(u)))
-    diag2= diagonal(dot(v,transpose(v)))
-    dist= -dot(v,transpose(u))-transpose(dot(u,transpose(v)))
-    dist= transpose(asarray(map(lambda column,a:column+a, \
-                               transpose(dist), diag1)))
-
-    return transpose(sqrt(asarray(map(lambda row,a: row+a, dist, diag2))))
+import numpy as N
+import Biskit.mathUtils as MU
 
 
 def getSS( model, cutoff=4.0 ):
@@ -47,11 +34,11 @@ def getSS( model, cutoff=4.0 ):
     cys_mask = model.mask( lambda a: a['residue_name'] in ['CYS', 'CYX']\
                            and a['name'] == 'SG')
 
-    model.compress( cys_mask )
+    model = model.compress( cys_mask )
 
-    diff = __pairwiseDistances( model.xyz, model.xyz )
+    diff = MU.pairwiseDistances( model.xyz, model.xyz )
 
-    count = sum( sum( less( diff, cutoff ) ) ) - model.lenAtoms()
+    count = N.sum( N.sum( N.less( diff, cutoff ) ) ) - model.lenAtoms()
 
     return count / 2
 
