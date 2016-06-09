@@ -24,13 +24,15 @@
 ## $Date$
 
 from Biskit.Dock import HexParser
-from Biskit.tools import *
 from Biskit import CommandLine
 import Biskit.settings as S
 
-from numpy.oldnumeric import *
+from Biskit.oldnumeric import *
 import string
 import biggles
+
+from Biskit.tools import *
+import os.path as osp
 
 
 def testSuccess():
@@ -66,18 +68,19 @@ Example:    hex2complex -rec 1BZY_models.dic -lig 2AKZ_models.dic
                p=  'create biggles plot of rmsd vs. solution',
                mac="force rec and lig 'model 1' to be used for all" )
 
-    f = testRoot() + '/'
+    f = testRoot()
     ftemp = S.tempDirLocal
 
-    o.setTest( lig= f + 'dock/lig/1A19_model.dic',
-               rec= f + 'dock/rec/1A2P_model.dic',
-               hex= f + 'dock/hex/1A2P-1A19_hex.out',
-               o=   ftemp + '/complexes.cl',
-               p= 1,
+    o.setTest( lig= osp.join(f, 'dock/lig/1A19_model.dic'),
+               rec= osp.join(f, 'dock/rec/1A2P_model.dic'),
+               hex= osp.join(f, 'dock/hex/1A2P-1A19_hex.out'),
+               o=   osp.join(ftemp, 'complexes.cl'),
+               p= 0,
                fsuccess=testSuccess )
+    
 
-    o.setTestCleanup( [ ftemp + '/complexes.cl',
-                        ftemp + '/complexes.eps' ] )
+    o.setTestCleanup( [ osp.join(ftemp, 'complexes.cl'),
+                        osp.join(ftemp, 'complexes.eps') ] )
 
     o.parse()
 
