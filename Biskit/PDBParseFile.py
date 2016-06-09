@@ -29,7 +29,7 @@ Parse a PDB file into a PDBModel.
 @see L{PDBModel}
 @see L{PDBParserFactory}
 """
-import Scientific.IO.PDB as IO
+import Biskit.ScientificIO.PDB as IO
 import Biskit.oldnumeric as N0
 import re
 
@@ -126,29 +126,29 @@ class PDBParseFile( PDBParser ):
         try:
             ## atoms and/or coordinates need to be updated from PDB
             if force or self.needsUpdate( model ):
-
+    
                 atoms, xyz, info = self.__collectAll( source, skipRes, 
                                                       headPatterns )
-
+    
                 keys = M.union( atoms.keys(),  self.DEFAULTS.keys() )
-
+    
                 for k in keys:
-
+    
                     a = model.atoms.get( k, default=0, update=False )
                     if (a is 0) or (a is None):
                     
                         dflt = self.DEFAULTS.get( k, None )
                         model.atoms.set(k, atoms.get(k, dflt), changed=0 )
-
+    
                 if model.xyz is None:
                     model.xyz = xyz
                     model.xyzChanged = 0
-
+    
                 model._resIndex  =None
                 model._chainIndex=None
-
+    
                 model.fileName = model.fileName or source
-
+    
                 model.pdbCode = model.pdbCode or info.get('pdb_code', None) or \
                                 self.idFromName( model.fileName)
                 
@@ -159,7 +159,7 @@ class PDBParseFile( PDBParser ):
                     del info['BIOMT']
                 
                 model.info.update( info )
-                               
+                           
         except:
             msg = self.__xplorAtomIndicesTest( source ) or ' '
             raise PDBParserError('Cannot read ' + str(source) + ' as PDB\n'\
