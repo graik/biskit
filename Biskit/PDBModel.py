@@ -43,7 +43,6 @@ import Biskit.oldnumeric as N0
 import oldnumeric as N0
 import numpy as N
 
-import numpy.oldnumeric.mlab as MLab
 import os, sys
 import copy
 import time
