@@ -1,11 +1,23 @@
 import sys, re
 import Biskit.oldnumeric as oldnumeric
 import numpy as N
+import sys
+import time
 
+## OPTIONS
 fname = sys.argv[1]
-# fname = '/data/raik/py/biskit/Biskit/PDBModel.py'
-foutname = fname + '.altered.py'
+replacefile = len(sys.argv) > 2 and sys.argv[1] == '-replacefile'
 
+if ('alter_code.py' in fname) or ('altered.py' in fname):
+    print 'refusing to change %s' % fname
+    sys.exit(0)
+
+foutname = fname + '.altered.py'
+if replacefile:
+    foutname = fname
+
+## Example Input
+# fname = '/data/raik/py/biskit/Biskit/PDBModel.py'
 example = '''            return oldN.zeros( (0,3), oldN.Float32 )
 '''
 
@@ -56,5 +68,10 @@ for i, l in enumerate(open(fname).readlines()):
 
 if count > 0:
     print '%3i replacements in %-30s' % (count, fname),
+    
+    cmt = ['## numpy-oldnumeric calls replaced by custom script; %s\n' % time.strftime("%d/%m/%Y")] 
+    result = cmt + result
+    
     open(foutname,'w').writelines(result)
+    
     print '\t-> %s' % foutname
