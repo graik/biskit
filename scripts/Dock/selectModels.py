@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -30,7 +31,7 @@ import Biskit.mathUtils as MaU
 from Biskit import TrajCluster, EnsembleTraj, PCRModel, molUtils
 from Biskit.Dock import hexTools
 from Biskit.EnsembleTraj import traj2ensemble
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 
 import os.path
 import copy, sys
@@ -157,7 +158,7 @@ def report( tc ):
 
     tr = clTrajs[0].concat( *tuple( clTrajs[1:] ) )
 
-    avgall = oldN.average( MaU.aboveDiagonal( tr.pairwiseRmsd( tc.aMask ) ) )
+    avgall = N0.average( MaU.aboveDiagonal( tr.pairwiseRmsd( tc.aMask ) ) )
     print "avg rms all: %4.2f" %  avgall
 
 
@@ -182,7 +183,7 @@ def setChainID( m ):
         id = T.toList( options['id'] )
         cMap = m.chainMap()
         for chain in range( m.lenChains() ):
-            idx = oldN.nonzero( cMap == chain )
+            idx = N0.nonzero( cMap == chain )
             for i in idx:
                 m.atoms['chain_id'][i] = id[chain]
 

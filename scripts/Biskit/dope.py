@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -25,7 +26,7 @@
 
 import os.path
 import sys
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 
 import Biskit.tools as T
 from Biskit.PDBModel import PDBModel
@@ -154,9 +155,9 @@ def changeModel( inFile, prefix, sourceModel ):
 
     #model.atomsChanged = 0
     for k in model.atoms:
-        model.atoms[k,'changed'] = oldN.all( model[k] == sourceModel[k] )
+        model.atoms[k,'changed'] = N0.all( model[k] == sourceModel[k] )
 
-    model.xyzChanged = ( 0 != oldN.sum( oldN.ravel( model.xyz - sourceModel.xyz)) )
+    model.xyzChanged = ( 0 != N0.sum( N0.ravel( model.xyz - sourceModel.xyz)) )
 
     model.update( updateMissing=1 )
 

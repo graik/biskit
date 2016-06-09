@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -26,7 +27,7 @@
 
 import time
 import random
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 import os.path, os
 
 from Biskit.tools import *
@@ -84,7 +85,7 @@ def filter_zero_contacts( cl ):
     """
     s = [ len( c['c_ratom_10']['nonzero'] ) for c in cl ]
 
-    return cl.take( oldN.nonzero( s ) )
+    return cl.take( N0.nonzero( s ) )
 
 def group( cl, pw, pwmin ):
     """

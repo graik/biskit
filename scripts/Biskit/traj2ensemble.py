@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -31,7 +32,7 @@ from Biskit import Trajectory
 from Biskit import EnsembleTraj
 from Biskit.EnsembleTraj import traj2ensemble
 
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 
 def use():
     if len( sys.argv ) < 2:
@@ -110,7 +111,7 @@ for i in range( len( inLst ) ):
     t = loadTraj( inLst[i], i, start, end, step )
 
     if 'prot' in o:
-        t.keepAtoms( oldN.nonzero(t.ref.maskProtein()) )
+        t.keepAtoms( N0.nonzero(t.ref.maskProtein()) )
 
     result_ref = result_ref or ref or t.ref
 
@@ -135,7 +136,7 @@ result.ref.disconnect()
 if 'pdb' in o:
     result.ref.pdbCode = o['pdb']
 
-result.frames      = oldN.array( result_xyz, 'f' )
+result.frames      = N0.array( result_xyz, 'f' )
 result.frameNames  = result_frameNames
 
 del result_xyz

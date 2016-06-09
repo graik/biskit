@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 #!/usr/bin/env python
 ## -*- coding: iso-8859-1 -*-
 ##
@@ -27,7 +28,7 @@ import sys
 import os.path as osp
 
 import biggles
-import numpy.oldnumeric as oldN
+import Biskit.oldnumeric as N0
 
 from Biskit.tools import *
 from Biskit.EnsembleTraj import EnsembleTraj, traj2ensemble
@@ -69,13 +70,13 @@ def plot( traj, title ):
 
 def markOutliers( traj, z, page ):
 
-    outliers = oldN.nonzero( traj.outliers( z=z, mask=traj.ref.maskCA() ) )
+    outliers = N0.nonzero( traj.outliers( z=z, mask=traj.ref.maskCA() ) )
 
     for o in outliers:
         t = traj.takeMember( o )
 
         ## cross out outliers in plot
-        prof = oldN.array( t.profiles['rmsCA_ref'] ).tolist()
+        prof = N0.array( t.profiles['rmsCA_ref'] ).tolist()
         prof.extend( t.profiles['rmsCA_last'] )
         maxV = max( prof )
         
