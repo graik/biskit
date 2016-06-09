@@ -225,6 +225,57 @@ class FilteredTestSuite( U.TestSuite ):
             U.TestSuite.addTest( self, test )
 
 
+import time
+
+class PrettyTextTestResult( U.TextTestResult ):
+    """
+    Helper class for TextTestRunner.
+    Only print either test description or doc-string.
+    """
+
+    
+    def getDescription(self, test):
+        s = test.id() + '  '
+        ## remove leading package name
+        if s.count('.') > 2:
+            s = s[s.index('.')+1:]
+        return s
+    
+    def startTest(self, test):
+        super(U.TextTestResult, self).startTest(test)
+        if self.showAll:
+            desc = self.getDescription(test)
+            self.stream.write(desc.ljust(60,'.'))
+            self.stream.write("... ")
+            self.stream.flush()
+        self.startclock = time.clock()
+
+    def addSuccess(self, test):
+        ## super(U.TextTestResult, self).addSuccess(test)
+        dt = time.clock() - self.startclock
+        
+        if self.showAll:
+            if dt > 0.5:
+                self.stream.writeln('ok  [%5.2fs]' % dt)
+            else:
+                self.stream.writeln('ok')
+
+        elif self.dots:
+            self.stream.write('.')
+            self.stream.flush()
+
+
+class SimpleTextTestRunner( U.TextTestRunner ):
+    """
+    Convince TextTestRunner to use the flushing text output rather
+    than the default one.
+    """
+
+    def _makeResult(self):
+        return PrettyTextTestResult(self.stream, self.descriptions,
+                                    self.verbosity)
+
+
 class BiskitTestLoader( object ):
     """
     A replacement for the unittest TestLoaders. It automatically
@@ -381,7 +432,7 @@ class BiskitTestLoader( object ):
             testclass.VERBOSITY = self.verbosity
             testclass.TESTLOG = self.log
 
-        runner = U.TextTestRunner(self.log.f(), verbosity=self.verbosity)
+        runner = SimpleTextTestRunner(self.log.f(), verbosity=self.verbosity)
         if not dry:
             self.result = runner.run( self.suite )
 
