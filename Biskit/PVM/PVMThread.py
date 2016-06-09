@@ -243,7 +243,7 @@ class PVMThread(Thread):
 
     def run(self):
         import time
-        from numpy.oldnumeric import argsort
+        from numpy import argsort
 
         while not self.isStopped():
 

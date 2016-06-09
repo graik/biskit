@@ -35,7 +35,7 @@ import Biskit.tools as t
 import Biskit.oldnumeric as N0
 
 from copy import deepcopy, copy
-from numpy.oldnumeric import arraytype
+from numpy import ndarray as arraytype
 
 from difflib import SequenceMatcher
 

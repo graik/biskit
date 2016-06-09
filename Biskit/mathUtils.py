@@ -541,9 +541,9 @@ def randomRotation():
     @return: 3 x 3 array of float
     @rtype: array
     """
-    alpha = R.random() * 2 * N0.pi
-    gamma = R.random() * 2 * N0.pi
-    beta  = N0.arccos(2*(R.random() - 0.5))
+    alpha = R.random_sample() * 2 * N0.pi
+    gamma = R.random_sample() * 2 * N0.pi
+    beta  = N0.arccos(2*(R.random_sample() - 0.5))
 
     return eulerRotation(alpha, beta, gamma)
 
