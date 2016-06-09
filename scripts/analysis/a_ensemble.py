@@ -1,5 +1,5 @@
-## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 #!/usr/bin/env python
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## -*- coding: iso-8859-1 -*-
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -65,7 +65,7 @@ def plot( traj, title ):
     p = t.plotMemberProfiles('rmsCA_ref', 'rmsCA_av', 'rmsCA_last')
     p.title = title
     p.xlabel= 'frame #'
-    p.ylabel= 'RMSD [Å]'
+    p.ylabel= 'RMSD [Ã…]'
     return p
 
 def markOutliers( traj, z, page ):

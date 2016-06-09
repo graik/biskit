@@ -1,5 +1,5 @@
-## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 #!/usr/bin/env python
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2012 Raik Gruenberg & Johan Leckner
