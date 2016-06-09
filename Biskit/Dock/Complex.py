@@ -1330,7 +1330,7 @@ class Complex:
         
         @author: Michael Habeck
         """
-        from numpy.oldnumeric.linear_algebra import singular_value_decomposition as svd
+        from numpy.linalg import svd
 
         ## center configurations
         x_av = N0.sum(x) / len(x)

@@ -46,7 +46,7 @@ import copy
 import tempfile, os, types
 
 ## PCA
-import numpy.oldnumeric.linear_algebra as LA
+import numpy.linalg as LA
 
 class TrajError( BiskitError ):
     pass
@@ -1526,7 +1526,7 @@ class Trajectory:
         ## reduce to 2D array
         data = N0.array( map( N0.ravel, data ) )
 
-        V, L, U = LA.singular_value_decomposition( data )
+        V, L, U = LA.svd( data )
 
         return U, V * L, N0.power(L, 2)
 

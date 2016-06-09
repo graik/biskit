@@ -29,7 +29,7 @@ superimpose 2 structures iteratively
 
 import Biskit.mathUtils as MU
 import Biskit.oldnumeric as N0
-from numpy.oldnumeric.linear_algebra import singular_value_decomposition as svd
+from numpy.linalg import svd
 
 ## def average(x):
 ##     return N0.sum(x) / len(x)
