@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -28,7 +28,6 @@ Fetch a PDBModel from the remote or a local NCBI PDB database.
 @see L{PDBModel}
 @see L{PDBParserFactory}
 """
-import numpy.oldnumeric as N
 import urllib, re, tempfile, os
 
 import Biskit.tools as T

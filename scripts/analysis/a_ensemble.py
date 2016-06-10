@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ## -*- coding: iso-8859-1 -*-
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -27,7 +28,7 @@ import sys
 import os.path as osp
 
 import biggles
-import numpy.oldnumeric as N
+import Biskit.oldnumeric as N0
 
 from Biskit.tools import *
 from Biskit.EnsembleTraj import EnsembleTraj, traj2ensemble
@@ -64,18 +65,18 @@ def plot( traj, title ):
     p = t.plotMemberProfiles('rmsCA_ref', 'rmsCA_av', 'rmsCA_last')
     p.title = title
     p.xlabel= 'frame #'
-    p.ylabel= 'RMSD [Å]'
+    p.ylabel= 'RMSD [Ã…]'
     return p
 
 def markOutliers( traj, z, page ):
 
-    outliers = N.nonzero( traj.outliers( z=z, mask=traj.ref.maskCA() ) )
+    outliers = N0.nonzero( traj.outliers( z=z, mask=traj.ref.maskCA() ) )
 
     for o in outliers:
         t = traj.takeMember( o )
 
         ## cross out outliers in plot
-        prof = N.array( t.profiles['rmsCA_ref'] ).tolist()
+        prof = N0.array( t.profiles['rmsCA_ref'] ).tolist()
         prof.extend( t.profiles['rmsCA_last'] )
         maxV = max( prof )
         

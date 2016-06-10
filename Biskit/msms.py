@@ -1,4 +1,5 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ## Class msms
 ##
@@ -32,7 +33,7 @@ Use MSMS to calculate surface info.
        module for this kind of calculations.
 """
 
-import numpy.oldnumeric as N
+import Biskit.oldnumeric as N0
 import Biskit.tools as T
 import string
 import os
@@ -142,7 +143,7 @@ class Pdb2xyzrn( Executor ):
                           float(l[2]), float(l[3]) ]
                 n += [ l[5] ]
 
-        xyzr = N.reshape( xyzr, ( len(xyzr)/4, 4 ) )
+        xyzr = N0.reshape( xyzr, ( len(xyzr)/4, 4 ) )
 
         r = xyzr[:,3]
 
@@ -166,118 +167,6 @@ class Pdb2xyzrn( Executor ):
         Executor.finish( self )
         self.result = self.parse_xyzrn( self.output )
 
-
-## class MSLIB_Error( Exception ):
-##     pass
-
-
-## class MSLIB:
-##     """
-##     MSLIB
-##     =====
-##     Calculate SAS (Solvent Accessible surface) and
-##     SES (Solvent Excluded Surface) using MSLIB.
-
-##     @note: This class has been retired. If you need to run MSMS
-##            use the L[Biskit.MSMS} class insted. The current default class for
-##            calculating MS and AS is otherwise L{Biskit.SurfaceRacer}
-
-##     @bug: MSLIB fails when calling Mslib.MSMS()
-##           The error seems to go back to Scientificpython:
-
-##           ERROR::
-##             File "/usr/tmp/python-8778q1e", line 160, in calc
-##             surf = Mslib.MSMS( coords = xyz, radii = self.r )
-##             File "Mslib/__init__.py", line 120, in __init__
-##             msms.MOLSRF.__init__(self, name=name, coord=c, nat=nat, maxat=maxnat, names=atnames)
-##             File "Mslib/msms.py", line 1832, in __init__
-##             self.this = apply(msmsc.new_MOLSRF,_args,_kwargs)
-##             ValueError: Failed to make a contiguous array of type 6
-##     """
-
-##     def __init__( self , model ): 
-
-##         self.model = model
-
-##         ## get radiia and name array
-##         p2x = pdb2xyzrn(self.model)
-##         self.r, self.n = p2x.run()
-
-
-##     def calc( self, descr='no_name', probeRadius=1.5 ):
-##         """
-##         Run msms analytical surface calculation, i.e.::
-##           msms -if xyzr.coord -af atoms.area -surface ases
-
-##         @param descr: descriptive name
-##         @type  descr: str
-##         @param probeRadius: probe radius
-##         @type  probeRadius: float
-
-##         @return: out,  probe radii used, total SAS and SES
-##                  sesList, array of lenght atoms with SES
-##                         (Solvent Excluded Surface)
-##                  sasList, array of lenght atoms with SAS
-##                         (Solvent Accessible surface)
-##                  atmList, list of atom names
-##         @rtype: dict, array, array, [str]
-##         """
-##         xyz = self.model.xyz
-
-##         print N.shape(xyz), N.shape(self.r)
-##         print xyz[0], self.r[0]
-##         print xyz[-1], self.r[-1]
-##         ## run msms
-##         surf = Mslib.MSMS( coords = xyz,
-##                            radii = self.r, 
-##                            atnames = self.n,
-##                            name = descr,
-##                            maxnat = len(xyz)+100 )
-
-##         surf = Mslib.MSMS( coords = xyz, radii = self.r )
-
-##         surf.compute( probe_radius = probeRadius, density=1.0 )
-##         area = surf.compute_ses_area()
-
-##         out = {}
-##         if area == 0:
-##             surf.write_ses_area( surfName )
-##             out['ses'] = surf.sesr.fst.a_ses_area
-##             out['sas'] = surf.sesr.fst.a_sas_area
-##         else:
-##             raise MSLIB_Error('compute_ses_area not successfull')
-
-##         ## parse atom specific SAS (Solvent Accessible surface)
-##         ## and SES (Solvent Excluded Surface)
-##         surfName = surfName + '_0'
-##         outList = open( surfName  , 'r').readlines()
-
-##         sasList = []
-##         sesList = []
-##         atmList = []
-
-##         for i in range( 1, len(outList) ):
-##             line = string.split( outList[i] )
-##             sesList += [ float( line[1] ) ]
-##             sasList += [ float( line[2] ) ]
-##             atmList += [ line[3] ]
-
-##         ## polar and nonepolar surfaces
-##         N_mask = N.transpose(atmList)[0] == 'N'
-##         O_mask = N.transpose(atmList)[0] == 'O'
-##         C_mask = N.transpose(atmList)[0] == 'C'
-##         out['ses_polar'] = N.sum( sesList * O_mask ) + N.sum( sesList * N_mask )
-##         out['ses_non-polar'] = N.sum( sesList * C_mask )
-##         out['sas_polar'] = N.sum( sasList * O_mask ) + N.sum( sasList * N_mask )
-##         out['sas_non-polar'] = N.sum( sasList * C_mask )
-
-##         ## cleanup 
-##         try:
-##             os.remove( surfName )
-##         except:
-##             pass
-
-##         return out, sesList, sasList, atmList
 
 
 class MSMS_Error( Exception ):
@@ -344,7 +233,7 @@ class MSMS( Executor ):
         r, n = p2x.run()
 
         xyz = self.model.xyz  
-        xyzr = N.concatenate( ( xyz, N.transpose([r]) ) ,axis=1 )
+        xyzr = N0.concatenate( ( xyz, N0.transpose([r]) ) ,axis=1 )
 
         f = open( self.f_xyzrn, 'w' )
         i = 0

@@ -1,4 +1,5 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -25,7 +26,7 @@
 Plot a 2D matrix (up to 100 x 100)
 """
 
-import numpy.oldnumeric as N
+import Biskit.oldnumeric as N0
 
 from Biskit import ColorSpectrum, EHandler
 import Biskit.tools as T
@@ -51,7 +52,7 @@ class Legend(FramedPlot):
 
         FramedPlot.__init__(self)
 
-        values = N.array(values)
+        values = N0.array(values)
 
         self.frame.draw_spine = 1
 
@@ -121,14 +122,14 @@ class MatrixPlot(FramedPlot):
             matrix = self.__thinarray( matrix, step )
 
         if vmin is None:
-            vmin = N.amin( matrix )
+            vmin = N0.amin( matrix )
 
         if vmax is None:
-            vmax = N.amax( matrix )
+            vmax = N0.amax( matrix )
         self.palette = ColorSpectrum( palette, vmin=vmin, vmax=vmax )
 
         self.matrix = self.palette.color_array( matrix, resetLimits=0 )
-        s = N.shape( self.matrix )
+        s = N0.shape( self.matrix )
 
         for i in range(s[0]):
             for j in range(s[1]):
@@ -181,14 +182,14 @@ class MatrixPlot(FramedPlot):
     def __thinarray( self, a, step ):
         """
         @param a: input array
-        @type  a: N.array
+        @type  a: N0.array
         @param step: stepping in both dimensions
         @type  step: int
         @return: smaller array
-        @rtype: N.array
+        @rtype: N0.array
         """
-        r = N.take( a, range( 0, len(a), step ), axis=0 )
-        r = N.take( r, range( 0, len(r[0]), step ), axis=1 )
+        r = N0.take( a, range( 0, len(a), step ), axis=0 )
+        r = N0.take( r, range( 0, len(r[0]), step ), axis=1 )
         return r
 
 
@@ -204,11 +205,11 @@ class Test(BT.BiskitTest):
         """MatrixPlot test"""
         n = 30
 
-        z = N.zeros((n,n), N.Float)
+        z = N0.zeros((n,n), N0.Float)
 
-        for i in range(N.shape(z)[0]):
-            for j in range(N.shape(z)[1]):
-                z[i,j] = N.exp(-0.01*((i-n/2)**2+(j-n/2)**2))
+        for i in range(N0.shape(z)[0]):
+            for j in range(N0.shape(z)[1]):
+                z[i,j] = N0.exp(-0.01*((i-n/2)**2+(j-n/2)**2))
 
         self.p = MatrixPlot(z, palette='sausage', legend=1)
 

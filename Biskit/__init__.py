@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -44,9 +44,6 @@ try:
     from AmberRstParser import AmberRstParser
     from PDBCleaner import PDBCleaner, CleanerError
     from Blast2Seq import Blast2Seq
-    from ChainCleaner import ChainCleaner
-    from ChainSeparator import ChainSeparator
-    from ChainWriter import ChainWriter
 
     from EDParser import EZDParser
 
@@ -58,7 +55,7 @@ try:
 
     from ProfileCollection import ProfileCollection, ProfileError
     from ProfileMirror import ProfileMirror
-    from Prosa import ProsaII
+    
     from Pymoler import Pymoler
 
     from TrajCluster import TrajCluster

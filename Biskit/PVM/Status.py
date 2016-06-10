@@ -113,7 +113,7 @@ class Status:
         @rtype: [object]
         """
         o = self.objects
-        r = [ k for k in o.keys() if (o[k] != None) and (o[k] > 0) ]
+        r = [ k for k in o.keys() if (o[k] is not None) and (o[k] > 0) ]
 
         return r
 

@@ -1,4 +1,5 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -28,9 +29,11 @@
 general purpose math methods
 """
 
-import numpy.oldnumeric as N
+import Biskit.oldnumeric as N0
+import numpy as N
+
 import random
-import numpy.oldnumeric.random_array as RandomArray
+import numpy.random.mtrand as R
 import math, cmath
 
 class MathUtilError( Exception ):
@@ -39,7 +42,7 @@ class MathUtilError( Exception ):
 def accumulate( a ):
     """
     cumulative sum of C{ a[0], a[0]+a[1], a[0]+a[1]+[a2], ... }
-    normalized by C{ N.sum( a ) }
+    normalized by C{ N0.sum( a ) }
 
     @param a: array('f') or float
     @type  a: array
@@ -47,7 +50,7 @@ def accumulate( a ):
     @return: float
     @rtype: float
     """
-    return N.add.accumulate( a ) / N.sum( a )
+    return N0.add.accumulate( a ) / N0.sum( a )
 
 
 def variance(x, avg = None):
@@ -63,12 +66,12 @@ def variance(x, avg = None):
     @rtype: float    
     """
     if avg is None:
-        avg = N.average(x)
+        avg = N0.average(x)
 
     if len(x) == 1:
         return 0.0
 
-    return N.sum(N.power(N.array(x) - avg, 2)) / (len(x) - 1.)
+    return N0.sum(N0.power(N0.array(x) - avg, 2)) / (len(x) - 1.)
 
 
 def SD(x, avg = None):
@@ -83,7 +86,7 @@ def SD(x, avg = None):
     @return: float
     @rtype: float        
     """
-    return N.sqrt(variance(x, avg))
+    return N0.sqrt(variance(x, avg))
 
 
 def wMean(x, w=None):
@@ -103,7 +106,7 @@ def wMean(x, w=None):
     else:
         wx = [ x[i] * 1. * w[i] for i in range( len(x) ) ]
 
-    return N.sum(wx)/N.sum(w)
+    return N0.sum(wx)/N0.sum(w)
 
 
 def wVar(x, w):
@@ -119,7 +122,7 @@ def wVar(x, w):
     @rtype: array('f') or float    
     """
     wm = wMean(x,w)
-    return ( N.sum(w) / ( (N.sum(w)**2-N.sum(w**2)) ) ) * N.sum(w*(x-wm)**2)
+    return ( N0.sum(w) / ( (N0.sum(w)**2-N0.sum(w**2)) ) ) * N0.sum(w*(x-wm)**2)
 
 
 def wSD(x, w):
@@ -134,7 +137,7 @@ def wSD(x, w):
     @return: array('f') or float
     @rtype: array('f') or float     
     """
-    return N.sqrt( wVar(x, w) )
+    return N0.sqrt( wVar(x, w) )
 
 
 def aboveDiagonal( pw_m ):
@@ -176,13 +179,13 @@ def arrayEqual( a, b ):
     if len(a) != len(b):
         return 0
 
-    if type(a) is list:  a = N.array( a )
-    if type(b) is list:  b = N.array( b )
+    if type(a) is list:  a = N0.array( a )
+    if type(b) is list:  b = N0.array( b )
 
-    a = N.ravel( a )
-    b = N.ravel( b )
+    a = N0.ravel( a )
+    b = N0.ravel( b )
 
-    return N.sum( a==b ) == len(a)
+    return N0.sum( a==b ) == len(a)
 
 
 def pairwiseDistances(u, v):
@@ -194,16 +197,16 @@ def pairwiseDistances(u, v):
     @param v: second array 
     @type  v: array
 
-    @return: Numeric.array( len(u) x len(v) ) of double
+    @return: array( len(u) x len(v) ) of double
     @rtype: array
     """
-    diag1 = N.diagonal( N.dot( u, N.transpose(u) ) )
-    diag2 = N.diagonal( N.dot( v, N.transpose(v) ) )
-    dist = -N.dot( v,N.transpose(u) )\
-         -N.transpose( N.dot( u, N.transpose(v) ) )
-    dist = N.transpose( N.asarray( map( lambda column,a:column+a, \
-                                        N.transpose(dist), diag1) ) )
-    return N.transpose( N.sqrt( N.asarray(
+    diag1 = N0.diagonal( N0.dot( u, N0.transpose(u) ) )
+    diag2 = N0.diagonal( N0.dot( v, N0.transpose(v) ) )
+    dist = -N0.dot( v,N0.transpose(u) )\
+         -N0.transpose( N0.dot( u, N0.transpose(v) ) )
+    dist = N0.transpose( N0.asarray( map( lambda column,a:column+a, \
+                                        N0.transpose(dist), diag1) ) )
+    return N0.transpose( N0.sqrt( N0.asarray(
         map( lambda row,a: row+a, dist, diag2 ) ) ))
 
 
@@ -219,18 +222,18 @@ def randomMask( nOnes, length ):
     @return: array with ones and zeros
     @rtype: array( 1|0 )
     """
-    r = N.zeros( length )
+    r = N0.zeros( length )
     pos = []
 
     ## add random ones
     for i in range( nOnes ):
         pos += [ int( random.random() * length ) ]      
-    N.put( r, pos, 1 ) 
+    N0.put( r, pos, 1 ) 
 
     ## if two ones ended up on the same position
-    while nOnes != N.sum(r):
+    while nOnes != N0.sum(r):
         pos = int( random.random() * length )
-        N.put( r, pos, 1 )
+        N0.put( r, pos, 1 )
 
     return r
 
@@ -252,26 +255,26 @@ def random2DArray( matrix, ranNr=1, mask=None):
     @raise MathUtilError: if mask does not fit matrix
     """
     ## get shape of matrix
-    a,b = N.shape( matrix )
+    a,b = N0.shape( matrix )
 
     ## get array from matrix that is to be randomized
     if mask is not None:
-        if len(mask) == len( N.ravel(matrix) ):
-            array = N.compress( mask, N.ravel(matrix) )
+        if len(mask) == len( N0.ravel(matrix) ):
+            array = N0.compress( mask, N0.ravel(matrix) )
 
-        if len(mask) != len( N.ravel(matrix) ):
+        if len(mask) != len( N0.ravel(matrix) ):
             raise MathUtilError(
                 'MatUtils.random2DArray - mask of incorrect length' +
                 '\tMatrix length: %i Mask length: %i'\
-                %(len( N.ravel(matrix) ), len(mask)))
+                %(len( N0.ravel(matrix) ), len(mask)))
 
     if not mask:
-        array = N.ravel(matrix)
+        array = N0.ravel(matrix)
 
     ## number of ones and length of array
-    nOnes = int( N.sum( array ) )
+    nOnes = int( N0.sum( array ) )
     lenArray = len( array )
-    ranArray = N.zeros( lenArray )
+    ranArray = N0.zeros( lenArray )
 
     ## create random array
     for n in range(ranNr):
@@ -279,12 +282,12 @@ def random2DArray( matrix, ranNr=1, mask=None):
 
     ## blow up to size of original matix
     if mask is not None:
-        r = N.zeros(a*b)
-        N.put( r, N.nonzero(mask), ranArray)
-        return N.reshape( r, (a,b) )
+        r = N0.zeros(a*b)
+        N0.put( r, N0.nonzero(mask), ranArray)
+        return N0.reshape( r, (a,b) )
 
     if not mask:
-        return  N.reshape( ranArray, (a,b) )
+        return  N0.reshape( ranArray, (a,b) )
 
 
 def slidingAverage( y, window=2 ):
@@ -295,7 +298,7 @@ def slidingAverage( y, window=2 ):
 
     margin = int(round((window-1)/2.))
 
-    return [ N.average( y[i-margin : i+margin] )
+    return [ N0.average( y[i-margin : i+margin] )
              for i in range(margin,len(y)-margin) ]
 
 
@@ -332,7 +335,7 @@ def runningAverage( x, interval=2, preserve_boundaries=0 ):
 
             slice = x[left:right]
 
-            l.append(N.average(slice))
+            l.append(N0.average(slice))
     else:
 
         for i in range( len(x) ):
@@ -349,9 +352,9 @@ def runningAverage( x, interval=2, preserve_boundaries=0 ):
 
             slice = x[left:right]
 
-            l.append(N.average(slice))
+            l.append(N0.average(slice))
 
-    return N.array(l)
+    return N0.array(l)
 
 def area(curve, start=0.0, stop=1.0 ):
     """
@@ -361,7 +364,7 @@ def area(curve, start=0.0, stop=1.0 ):
     (originally taken from Biskit.Statistics.ROCalyzer)
 
     @param curve: a list of x,y coordinates
-    @type  curve: [ (y,x), ] or N.array
+    @type  curve: [ (y,x), ] or N0.array
     @param start: lower boundary (in x) (default: 0.0)
     @type  start: float
     @param stop: upper boundary (in x) (default: 1.0)
@@ -370,22 +373,22 @@ def area(curve, start=0.0, stop=1.0 ):
     @rtype: float
     """
     ## convert and swap axes
-    curve = N.array( curve )
-    c = N.zeros( N.shape(curve), curve.dtype )
+    curve = N0.array( curve )
+    c = N0.zeros( N0.shape(curve), curve.dtype )
     c[:,0] = curve[:,1]
     c[:,1] = curve[:,0]
 
-    assert len( N.shape( c ) ) == 2
+    assert len( N0.shape( c ) ) == 2
 
     ## apply boundaries  ## here we have a problem with flat curves
-    mask = N.greater_equal( c[:,1], start )
-    mask *= N.less_equal( c[:,1], stop )
-    c = N.compress( mask, c, axis=0 )
+    mask = N0.greater_equal( c[:,1], start )
+    mask *= N0.less_equal( c[:,1], stop )
+    c = N0.compress( mask, c, axis=0 )
 
     ## fill to boundaries -- not absolutely accurate: we actually should
     ## interpolate to the neighboring points instead
-    c = N.concatenate((N.array([[c[0,0], start],]), c,
-                       N.array([[c[-1,0],stop ],])) )
+    c = N0.concatenate((N0.array([[c[0,0], start],]), c,
+                       N0.array([[c[-1,0],stop ],])) )
     x = c[:,1]
     y = c[:,0]
 
@@ -395,7 +398,7 @@ def area(curve, start=0.0, stop=1.0 ):
     areas1 = y[:-1] * dx  # the rectangles between all points
     areas2 = dx * dy / 2.0 # the triangles between all points
 
-    return N.sum(areas1) + N.sum(areas2)
+    return N0.sum(areas1) + N0.sum(areas2)
 
 
 
@@ -410,12 +413,12 @@ def packBinaryMatrix( cm ):
     @return: {'shape':(X,Y), 'nonzero':[int] }
     @rtype: dict
     """
-    if cm == None or type( cm ) == dict:
+    if cm is None or type( cm ) == dict:
         return cm
 
     result = {}
-    result['shape'] = N.shape( cm )
-    result['nonzero'] = N.nonzero( N.ravel( cm ) )
+    result['shape'] = N0.shape( cm )
+    result['nonzero'] = N0.nonzero( N0.ravel( cm ) )
     result['nonzero'] = result['nonzero'].tolist()
     return result
 
@@ -429,7 +432,7 @@ def unpackBinaryMatrix( pcm, raveled=0 ):
     @param raveled: return raveled (default: 0)
     @type  raveled: 1|0
 
-    @return: N.array(X by Y by ..) of int
+    @return: N0.array(X by Y by ..) of int
     @rtype: 2D array
     """
     if type( pcm ) != dict:
@@ -437,14 +440,14 @@ def unpackBinaryMatrix( pcm, raveled=0 ):
 
     s = pcm['shape']
 
-    m = N.zeros( N.cumproduct( s )[-1], N.Int)
+    m = N0.zeros( N0.cumproduct( s )[-1], N0.Int)
     pass  ## m.savespace( 1 )
-    N.put( m, pcm['nonzero'], 1 )
+    N0.put( m, pcm['nonzero'], 1 )
 
     if raveled:
         return m
 
-    return N.reshape( m, s )
+    return N0.reshape( m, s )
 
 
 def matrixToList( cm ):
@@ -460,12 +463,12 @@ def matrixToList( cm ):
     @return: {'shape':(int,..), 'lst':[..] }
     @rtype: dict
     """
-    if cm == None or type( cm ) == dict:
+    if cm is None or type( cm ) == dict:
         return cm
 
     result = {}
-    result['shape'] = N.shape( cm )
-    result['lst'] = N.ravel( cm ).tolist()
+    result['shape'] = N0.shape( cm )
+    result['lst'] = N0.ravel( cm ).tolist()
 
     return result
 
@@ -479,14 +482,14 @@ def listToMatrix( lcm ):
     @param lcm: {'shape':(int,..), 'lst':[..] }
     @type  lcm: dict    
 
-    @return: Numeric.array
+    @return: array
     @rtype: 
     """
     if type( lcm ) != dict:
         return lcm
 
     s = lcm['shape']
-    return N.reshape( lcm['lst'], s )
+    return N0.reshape( lcm['lst'], s )
 
 
 def eulerRotation(alpha, beta, gamma):
@@ -508,11 +511,11 @@ def eulerRotation(alpha, beta, gamma):
     @return: 3 x 3 array of float
     @rtype: array
     """
-    cos_alpha = N.cos(alpha); sin_alpha = N.sin(alpha)
-    cos_beta  = N.cos(beta);  sin_beta  = N.sin(beta)
-    cos_gamma = N.cos(gamma); sin_gamma = N.sin(gamma)
+    cos_alpha = N0.cos(alpha); sin_alpha = N0.sin(alpha)
+    cos_beta  = N0.cos(beta);  sin_beta  = N0.sin(beta)
+    cos_gamma = N0.cos(gamma); sin_gamma = N0.sin(gamma)
 
-    R = N.zeros((3,3), N.Float32)
+    R = N0.zeros((3,3), N0.Float32)
 
     R[0][0] = cos_gamma * cos_alpha - sin_gamma * cos_beta * sin_alpha
     R[0][1] = cos_gamma * sin_alpha + sin_gamma * cos_beta * cos_alpha
@@ -538,9 +541,9 @@ def randomRotation():
     @return: 3 x 3 array of float
     @rtype: array
     """
-    alpha = RandomArray.random() * 2 * N.pi
-    gamma = RandomArray.random() * 2 * N.pi
-    beta  = N.arccos(2*(RandomArray.random() - 0.5))
+    alpha = R.random_sample() * 2 * N0.pi
+    gamma = R.random_sample() * 2 * N0.pi
+    beta  = N0.arccos(2*(R.random_sample() - 0.5))
 
     return eulerRotation(alpha, beta, gamma)
 
@@ -598,9 +601,9 @@ def union( a, b ):
     @return: list
     @rtype: [any]    
     """
-    if type( a ) is N.arraytype:
+    if type( a ) is N0.arraytype:
         a = a.tolist()
-    if type( b ) is N.arraytype:
+    if type( b ) is N0.arraytype:
         b = b.tolist()
 
     return nonredundant( a + b )
@@ -687,17 +690,17 @@ def linfit( x, y ):
 
     @raise BiskitError: if x and y have different number of elements
     """
-    x, y = N.array( x, N.Float64), N.array( y, N.Float64)
+    x, y = N0.array( x, N0.Float64), N0.array( y, N0.Float64)
     if len( x ) != len( y ):
         raise Exception, 'linfit: x and y must have same length'
 
-    av_x = N.average( x )
-    av_y = N.average( y )
+    av_x = N0.average( x )
+    av_y = N0.average( y )
     n = len( x )
 
-    ss_xy = N.sum( x * y ) - n * av_x * av_y
-    ss_xx = N.sum( x * x ) - n * av_x * av_x
-    ss_yy = N.sum( y * y ) - n * av_y * av_y
+    ss_xy = N0.sum( x * y ) - n * av_x * av_y
+    ss_xx = N0.sum( x * x ) - n * av_x * av_x
+    ss_yy = N0.sum( y * y ) - n * av_y * av_y
 
     slope = ss_xy / ss_xx
 
@@ -719,8 +722,8 @@ def cartesianToPolar( xyz ):
     @return: array of polar coordinates (r, theta, phi)
     @rtype: array
     """
-    r = N.sqrt( N.sum( xyz**2, 1 ) )
-    p = N.arccos( xyz[:,2] / r )
+    r = N0.sqrt( N0.sum( xyz**2, 1 ) )
+    p = N0.arccos( xyz[:,2] / r )
 
     ## have to take care of that we end up in the correct quadrant
     t=[]
@@ -728,7 +731,7 @@ def cartesianToPolar( xyz ):
         ## for theta (arctan)
         t += [math.atan2( xyz[i,1], xyz[i,0] )]
 
-    return N.transpose( N.concatenate( ([r],[t],[p]) ) )
+    return N0.transpose( N0.concatenate( ([r],[t],[p]) ) )
 
 
 def polarToCartesian( rtp ):
@@ -742,11 +745,11 @@ def polarToCartesian( rtp ):
     @return: array of cartesian coordinates (x, y, z)
     @rtype: array
     """
-    x = rtp[:,0] * N.cos( rtp[:,1] ) * N.sin( rtp[:,2] )
-    y = rtp[:,0] * N.sin( rtp[:,1] ) * N.sin( rtp[:,2] )
-    z = rtp[:,0] * N.cos( rtp[:,2] )
+    x = rtp[:,0] * N0.cos( rtp[:,1] ) * N0.sin( rtp[:,2] )
+    y = rtp[:,0] * N0.sin( rtp[:,1] ) * N0.sin( rtp[:,2] )
+    z = rtp[:,0] * N0.cos( rtp[:,2] )
 
-    return N.transpose( N.concatenate( ([x],[y],[z]) ) )
+    return N0.transpose( N0.concatenate( ([x],[y],[z]) ) )
 
 
 def projectOnSphere( xyz, radius=None, center=None ):
@@ -767,10 +770,10 @@ def projectOnSphere( xyz, radius=None, center=None ):
     @rtype: array    
     """
     if center is None:
-        center = N.average( xyz )
+        center = N0.average( xyz )
 
     if radius is None:
-        radius = max( N.sqrt( N.sum( N.power( xyz - center, 2 ), 1 ) ) )
+        radius = max( N0.sqrt( N0.sum( N0.power( xyz - center, 2 ), 1 ) ) )
 
     rtp = cartesianToPolar( xyz - center )
     rtp[ :, 0 ] = radius
@@ -787,7 +790,7 @@ def rotateAxis(theta, vector):
 
     Example:
 
-    >>> m=rotateAxis(pi, N.array([1,0,0]))
+    >>> m=rotateAxis(pi, N0.array([1,0,0]))
 
     @type theta: float
     @param theta: the rotation angle
@@ -798,12 +801,12 @@ def rotateAxis(theta, vector):
 
     @return: The rotation matrix, a 3x3 Numeric array.
     """
-    vector = vector / N.linalg.norm(vector)
+    vector = vector / N0.linalg.norm(vector)
     x,y,z=vector
-    c=N.cos(theta)
-    s=N.sin(theta)
+    c=N0.cos(theta)
+    s=N0.sin(theta)
     t=1-c
-    rot=N.zeros((3,3), "d")
+    rot=N0.zeros((3,3), "d")
     # 1st row
     rot[0,0]=t*x*x+c
     rot[0,1]=t*x*y-s*z
@@ -917,26 +920,26 @@ def outliers( a, z=5, it=5 ):
     @type  it: int
     
     @return: outlier mask, median and standard deviation of last iteration
-    @rtype: N.array( int ), float, float
+    @rtype: N0.array( int ), float, float
     """
     assert( len(a) > 0 )
-    mask = N.ones( len(a) )
-    out  = N.zeros( len(a) )
+    mask = N0.ones( len(a) )
+    out  = N0.zeros( len(a) )
     
     if len(a) < 3:
-        return out, N.median(a), N.std(a)
+        return out, N0.median(a), N0.std(a)
     
     for i in range( it ):
-        b  = N.compress( N.logical_not(out), a )
-        me = N.median( b )
-        sd = N.std( b )
+        b  = N0.compress( N0.logical_not(out), a )
+        me = N0.median( b )
+        sd = N0.std( b )
         
-        bz = N.absolute((N.array( a ) - me) / sd)  # pseudo z-score of each value
+        bz = N0.absolute((N0.array( a ) - me) / sd)  # pseudo z-score of each value
         o  = bz > z
-        ##        print 'iteration %i: <%5.2f> +- %5.2f -- %i outliers' % (i,me,sd,N.sum(o))
+        ##        print 'iteration %i: <%5.2f> +- %5.2f -- %i outliers' % (i,me,sd,N0.sum(o))
 
         ## stop if converged or reached bottom
-        if (N.sum(o) == N.sum(out)) or (N.sum(o) > len(a) - 3):
+        if (N0.sum(o) == N0.sum(out)) or (N0.sum(o) > len(a) - 3):
             return o, me, sd
             
         out = o
@@ -955,21 +958,21 @@ class Test(BT.BiskitTest):
     def test_mathUtils(self):
         """mathUtils.polar/euler test"""
         ## Calculating something ..
-        self.d = N.array([[20.,30.,40.],[23., 31., 50.]])
+        self.d = N0.array([[20.,30.,40.],[23., 31., 50.]])
 
         self.a = polarToCartesian( cartesianToPolar( self.d ) )
 
         self.t = eulerRotation( self.a[0][0], self.a[0][1], self.a[0][2]  )
 
-        self.assertAlmostEqual( N.sum( SD(self.a) ), self.EXPECT )
+        self.assertAlmostEqual( N0.sum( SD(self.a) ), self.EXPECT )
 
     def test_area(self):
         """mathUtils.area test"""
-        self.c = zip( N.arange(0,1.01,0.1), N.arange(0,1.01,0.1) )
+        self.c = zip( N0.arange(0,1.01,0.1), N0.arange(0,1.01,0.1) )
         self.area = area( self.c )
         self.assertAlmostEqual( self.area, 0.5, 7 )
 
-    EXPECT = N.sum( N.array([ 2.12132034,  0.70710678,  7.07106781]) )
+    EXPECT = N0.sum( N0.array([ 2.12132034,  0.70710678,  7.07106781]) )
 
 if __name__ == '__main__':
 

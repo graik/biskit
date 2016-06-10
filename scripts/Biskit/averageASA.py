@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2012 Raik Gruenberg & Johan Leckner
@@ -28,7 +29,7 @@ from Biskit import molUtils as MOU
 import Biskit.mathUtils as MAU
 from Biskit import tools as T
 import os, os.path
-import numpy.oldnumeric as N
+import Biskit.oldnumeric as N0
 from Biskit.PDBDope import PDBDope
 from Biskit.PDBModel import PDBModel
 import time, sys
@@ -173,8 +174,8 @@ def randomSurfaces( base_folder, label, mask ):
         j = 0
         #atoms =  [ a['name'] for a in m.atoms ]
         for n in m['name']:
-            msDic[n]    = N.average(msLst)[j]
-            asDic[n]    = N.average(asLst)[j]
+            msDic[n]    = N0.average(msLst)[j]
+            asDic[n]    = N0.average(asLst)[j]
             msDic_sd[n] = MAU.SD( msLst )[j]
             asDic_sd[n] = MAU.SD( asLst )[j]
             j += 1

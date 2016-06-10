@@ -1,4 +1,5 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -27,7 +28,7 @@
 Cluster the members of a trajectory.
 """
 
-import numpy.oldnumeric as N
+import Biskit.oldnumeric as N0
 import tools as T
 
 from mathUtils import aboveDiagonal, SD
@@ -69,7 +70,7 @@ class TrajCluster:
         Apply current atom mask and return list of raveled frames.
         """
         t = self.traj.compressAtoms( self.aMask )
-        return N.array( map( N.ravel, t.frames ) )
+        return N0.array( map( N0.ravel, t.frames ) )
 
 
     def cluster( self, n_clusters, weight=1.13, converged=1e-11,
@@ -90,11 +91,11 @@ class TrajCluster:
                       (default:0)
         @type  force: 1|0
         """
-        if aMask == None:
-            aMask = N.ones( self.traj.getRef().lenAtoms() )
+        if aMask is None:
+            aMask = N0.ones( self.traj.getRef().lenAtoms() )
 
-        if self.fc == None or force or self.fcWeight != weight \
-           or self.n_clusters != n_clusters or N.any( self.aMask != aMask) \
+        if self.fc is None or force or self.fcWeight != weight \
+           or self.n_clusters != n_clusters or N0.any( self.aMask != aMask) \
            or self.fcConverged != converged:
 
             self.n_clusters = n_clusters
@@ -139,23 +140,23 @@ class TrajCluster:
         pos = [ min_clst, max_clst ]
 
         while 1:
-            clst = int( N.average(pos) )
+            clst = int( N0.average(pos) )
             self.cluster( clst, weight, converged, aMask, force=force )
             rmsLst = [ self.avgRmsd(i, aMask)[0] for i in range(clst)]
 
-            if N.average( rmsLst ) > rmsLimit:
+            if N0.average( rmsLst ) > rmsLimit:
                 pos[0] = clst
             else:
                 pos[1] = clst
 
             if pos[1]-pos[0] == 1:
                 if self.verbose:
-                    T.flushPrint('Converged at %i clusters, current average cluster rmsd %.2f\n'%( clst, N.average( rmsLst ) ))
+                    T.flushPrint('Converged at %i clusters, current average cluster rmsd %.2f\n'%( clst, N0.average( rmsLst ) ))
                 return pos[1]
 
             if pos[1]-pos[0] != 1:
                 if self.verbose:
-                    T.flushPrint('Current cluster setting %i, current average cluster rmsd %.2f\n'%( clst, N.average( rmsLst ) ))
+                    T.flushPrint('Current cluster setting %i, current average cluster rmsd %.2f\n'%( clst, N0.average( rmsLst ) ))
 
             if pos[1]-pos[0]<= 0 or pos[0]<min_clst or pos[1]>max_clst:
                 raise ClusterError, "Error determining number of clusters"
@@ -165,7 +166,7 @@ class TrajCluster:
         """
         Get degree of membership of each frame to each cluster.
 
-        @return: N.array( n_clusters x n_frames )
+        @return: N0.array( n_clusters x n_frames )
         @rtype: array
         """
         return self.fc.getMembershipMatrix()
@@ -186,11 +187,11 @@ class TrajCluster:
         """
         Get 'center structure' for each cluster.
 
-        @return: N.array( n_clusters x n_atoms_masked x 3 )
+        @return: N0.array( n_clusters x n_atoms_masked x 3 )
         @rtype: array
         """
-        lenAtoms = N.shape( self.fcCenters )[1] / 3
-        return N.reshape( self.fcCenters, ( self.n_clusters, lenAtoms, 3))
+        lenAtoms = N0.shape( self.fcCenters )[1] / 3
+        return N0.reshape( self.fcCenters, ( self.n_clusters, lenAtoms, 3))
 
 
     def centerFrames( self ):
@@ -200,7 +201,7 @@ class TrajCluster:
         @return: list of cluster center indecies
         @rtype: [int]
         """
-        return N.argmax( self.memberships(), 1 )
+        return N0.argmax( self.memberships(), 1 )
 
 
     def memberFrames( self, threshold=0. ):
@@ -219,15 +220,15 @@ class TrajCluster:
         """
         ## best cluster for each frame
         msm = self.memberships()
-        maxMemb = N.argmax( msm, 0 )
+        maxMemb = N0.argmax( msm, 0 )
 
-        r = [N.nonzero( N.equal(maxMemb, i) ) for i in range(0, self.n_clusters)]
+        r = [N0.nonzero( N0.equal(maxMemb, i) ) for i in range(0, self.n_clusters)]
         r = [ x.tolist() for x in r ]
 
         ## same thing but now taking all above threshold
         ## -> same frame can end up in several clusters
         if threshold > 0.:
-            r2 = [ N.nonzero( N.greater( l, threshold) ) for l in msm ]
+            r2 = [ N0.nonzero( N0.greater( l, threshold) ) for l in msm ]
 
             ## add only additional frames
             for i in range(0, len( r ) ):
@@ -320,13 +321,13 @@ class TrajCluster:
         except:
             rms = []
 
-        if len(N.ravel(rms)) == 1:
-            ## was: return N.average(rms)[0], 0.0
-            return N.average(rms), 0.0
-        if len(N.ravel(rms)) == 0:
+        if len(N0.ravel(rms)) == 1:
+            ## was: return N0.average(rms)[0], 0.0
+            return N0.average(rms), 0.0
+        if len(N0.ravel(rms)) == 0:
             return 0.0, 0.0
 
-        return N.average( rms ), SD( rms )
+        return N0.average( rms ), SD( rms )
 
 
     def avgRmsd2Ref( self, cluster, ref, avg=1 ):
@@ -353,7 +354,7 @@ class TrajCluster:
             rt, rmsdLst = rmsFit.match( ref, frame)
             rms += [ rmsdLst[0][1] ]
         if avg ==1:
-            return  N.average(rms)
+            return  N0.average(rms)
         return rms
 
 

@@ -188,8 +188,7 @@ class AmberPrepParser( object ):
         
         s = s[ : endpos ]
         s = s.strip()
-        r = N.array( s.split() )
-        return r
+        return s.split()
 
     
     def parseResidue( self, s ):

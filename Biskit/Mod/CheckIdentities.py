@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2012 Raik Gruenberg & Johan Leckner
@@ -27,7 +28,7 @@ Check sequence identity between templates.
 
 import os
 import re
-import numpy.oldnumeric as N
+import Biskit.oldnumeric as N0
 
 import Biskit.tools as T
 
@@ -251,7 +252,7 @@ class CheckIdentities:
 
                 ## number of positions in which any other sequence
                 ## contains alignment information
-                nb_cov_res = N.sum( N.greater(template_info, 0) )
+                nb_cov_res = N0.sum( N0.greater(template_info, 0) )
 
                 ## calculate identities
                 info_ID[y] = ID[y] = cov_ID[y] = 0

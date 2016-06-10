@@ -28,14 +28,22 @@ from Scientific.Geometry import Vector
 from Biskit.tools import *
 
 from Biskit import LogFile
-from Biskit import ChainSeparator, ChainWriter, ChainCleaner, XplorInput
+from Biskit import XplorInput
+
+from Biskit.deprecated.ChainCleaner import ChainCleaner
+from Biskit.deprecated.ChainSeparator import ChainSeparator
+from Biskit.deprecated.ChainWriter import ChainWriter
+
 from Biskit.Errors import XplorInputError
 
 from Biskit import Executor
 from Biskit import settings
 from Biskit import Pymoler
 
-from numpy.oldnumeric import *
+## from numpy.oldnumeric import *
+## migration not tested (!!):
+from Biskit.oldnumeric import *
+
 from string import *
 import sys        # sys.exc_type, os.abspath
 import re, os, os.path

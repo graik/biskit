@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2007 Raik Gruenberg & Johan Leckner
@@ -34,10 +35,10 @@ import tempfile
 import traceback
 from inspect import getframeinfo
 from time import localtime
-import numpy.oldnumeric as Numeric
 import glob
 import subprocess
 import gzip
+import Biskit.oldnumeric as N0
 
 class ToolsError( Exception ):
     pass
@@ -340,7 +341,7 @@ def tempDir():
     @return: directort for temporary files
     @rtype: str    
     """
-    if tempfile.tempdir != None:
+    if tempfile.tempdir is not None:
         return  tempfile.tempdir
 
     return osp.dirname( tempfile.mktemp() )
@@ -793,12 +794,12 @@ def toIntArray( o ):
     @type  o: int or [int]
 
     @return: array of integer
-    @rtype: Numeric.array('i')    
+    @rtype: N0.array('i')    
     """
-    if type( o ) == list or type( o ) == type( Numeric.array([])):
-        return Numeric.array( map( int, o ) )
+    if type( o ) == list or type( o ) == type( N0.array([])):
+        return N0.array( map( int, o ) )
 
-    return Numeric.array( [ int( o ) ] )
+    return N0.array( [ int( o ) ] )
 
 
 def toList( o ):
@@ -853,7 +854,7 @@ def toInt( o, default=None ):
     @return: integer OR None 
     @rtype: int OR None     
     """
-    if o == None or o == '':
+    if o is None or o == '':
         return default
     try:
         return int( o )
@@ -873,13 +874,13 @@ def hex2int( shex ):
 
     factors = [ 16**(i) for i in range(len(shex)) ]
     factors.reverse()
-    factors = Numeric.array( factors )
+    factors = N0.array( factors )
 
     table   = dict( zip('0123456789abcdef',range(16)) )
 
     components = [ table[s]*f for s,f in  zip( shex.lower(), factors ) ]
 
-    return Numeric.sum( components )
+    return N0.sum( components )
     
 
 def colorSpectrum( nColors, firstColor='FF0000', lastColor='FF00FF' ):

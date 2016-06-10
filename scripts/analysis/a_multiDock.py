@@ -648,7 +648,7 @@ def analyzeRmsd( t, aMask=None ):
     -> 1xN arrays of pairwise rmsds
     """
     ## create copies with less atoms, if requested
-    if aMask != None:
+    if aMask is not None:
         traj = t.compressAtoms( aMask )
 
 

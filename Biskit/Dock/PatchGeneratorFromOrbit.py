@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## (C) 2004-2006 Raik Gruenberg & Johan Leckner; All rights reserved
@@ -8,7 +9,7 @@
 ## $Revision$
 
 import numpy.random as ra
-import numpy.oldnumeric as N
+import Biskit.oldnumeric as N0
 
 class PatchGeneratorFromOrbit:
     """
@@ -51,7 +52,7 @@ class PatchGeneratorFromOrbit:
         """
         if xyz is None:
             xyz = self.model.getXyz()
-        return N.sqrt( N.sum( N.power( xyz - point, 2), 1 ) )
+        return N0.sqrt( N0.sum( N0.power( xyz - point, 2), 1 ) )
 
 
     def random_translations( self, n=1, center=None ):
@@ -67,9 +68,9 @@ class PatchGeneratorFromOrbit:
 
         xyz = ra.random( (n,3) ) - 0.5
 
-        scale = self.orbit*1.0 / N.sqrt( N.sum( xyz**2, 1 ) )
+        scale = self.orbit*1.0 / N0.sqrt( N0.sum( xyz**2, 1 ) )
 
-        r = N.array( [ scale[i]*xyz[i] for i in range(n) ] )
+        r = N0.array( [ scale[i]*xyz[i] for i in range(n) ] )
 
         return r + center
 
@@ -80,10 +81,10 @@ class PatchGeneratorFromOrbit:
         Create single patch of nAtoms atoms that are closest to center.
         """
         dist = self.__distances( center )
-        order = N.argsort( dist )
+        order = N0.argsort( dist )
 
-        r = N.zeros( len( self.model ), 'i' )
-        N.put( r, order[:nAtoms], 1 )
+        r = N0.zeros( len( self.model ), 'i' )
+        N0.put( r, order[:nAtoms], 1 )
 
         return self.centerPatch( r )
 
@@ -96,11 +97,11 @@ class PatchGeneratorFromOrbit:
         c    = self.model.center( patch_mask )
         dist = self.__distances( c )
 
-        n_atoms= len( N.nonzero( patch_mask ) )
-        i_dist = N.argsort( dist )[:n_atoms]
+        n_atoms= len( N0.nonzero( patch_mask ) )
+        i_dist = N0.argsort( dist )[:n_atoms]
 
-        result = N.zeros( len( patch_mask ) )
-        N.put( result, i_dist, 1 )
+        result = N0.zeros( len( patch_mask ) )
+        N0.put( result, i_dist, 1 )
 
         return result
 
@@ -118,7 +119,7 @@ class PatchGeneratorFromOrbit:
 
         dist = self.__distances( origin, points )
 
-        return N.take( points, N.argsort( dist ) )
+        return N0.take( points, N0.argsort( dist ) )
 
 
     def randomPatches( self, size, n=None, exclude=None,
@@ -133,10 +134,10 @@ class PatchGeneratorFromOrbit:
         -> [ [ 1|0 ] ], list of atom masks
         """
         if exclude is None:
-            exclude = N.zeros( self.model.lenAtoms(), 'i' )
+            exclude = N0.zeros( self.model.lenAtoms(), 'i' )
 
         if exclude_all is None:
-            exclude_all = N.zeros( self.model.lenAtoms(), 'i' )
+            exclude_all = N0.zeros( self.model.lenAtoms(), 'i' )
 
         n = n or 500
 
@@ -146,7 +147,7 @@ class PatchGeneratorFromOrbit:
         origin = centers[0]
 
         tabu = exclude_all
-        if not N.any( tabu ):
+        if not N0.any( tabu ):
             tabu = exclude
         else:
             origin = self.model.center( mask=tabu )
@@ -159,8 +160,8 @@ class PatchGeneratorFromOrbit:
 
             m = self.patchAround( centers[i], size )
 
-            if N.sum( m * exclude ) <= max_overlap \
-               and N.sum( m * exclude_all ) == 0:
+            if N0.sum( m * exclude ) <= max_overlap \
+               and N0.sum( m * exclude_all ) == 0:
 
                 exclude = exclude + m
                 r += [ m ]
@@ -178,12 +179,12 @@ def test( model, center2center, nAtoms=10, exclude=None ):
 
     r = g.randomPatches( nAtoms, 500, max_overlap=overlap, exclude=exclude )
 
-    profile = N.sum( N.array(r) )
+    profile = N0.sum( N0.array(r) )
 
     pm  = Pymoler()
     pm.addPdb( model, 'all' )
 
-    ms = [ model.take( N.nonzero(mask) ) for mask in r ]
+    ms = [ model.take( N0.nonzero(mask) ) for mask in r ]
 
     pm.addMovie( ms )
 
@@ -219,17 +220,17 @@ if __name__ == '__main__':
 
     ## get interface patch
     cont = com.atomContacts( cutoff=6.0 )
-    rec_if = N.sum( cont, 1 )
-    lig_if = N.sum( cont, 0 )
+    rec_if = N0.sum( cont, 1 )
+    lig_if = N0.sum( cont, 0 )
 
     ## center distance
-    c2c = N.sqrt( N.sum( (rec.center() - lig.center())**2, 0 ) )
+    c2c = N0.sqrt( N0.sum( (rec.center() - lig.center())**2, 0 ) )
     print "Center2Center: ", c2c
 
     ## get patches and put them into Pymoler for display
     print "Patching"
-    excl = N.compress( N.ones( len( rec_if ) ), rec_if )
-    pm = test( rec, c2c, nAtoms=len(N.nonzero(rec_if)), exclude=rec_if )
+    excl = N0.compress( N0.ones( len( rec_if ) ), rec_if )
+    pm = test( rec, c2c, nAtoms=len(N0.nonzero(rec_if)), exclude=rec_if )
 
 
     pm.addPdb( rec.compress( rec_if ), 'rec_interface' )

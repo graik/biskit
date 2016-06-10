@@ -56,7 +56,7 @@ class Xplorer(Executor):
                          template itself or the path to a file containing it.
         @type  template: str
         @param pipes: push input script directly through a pipe rather
-                      than writing it to disc; If != None, this option
+                      than writing it to disc; If is not None, this option
                       overrides the default setting from exe_xplor.dat.
                       The default in exe_xplor is pipes = 1 (True).
         @type  pipes: 1|0 or bool
@@ -102,7 +102,7 @@ class Xplorer(Executor):
         @return: if xplor died
         @rtype: 1
         """
-        return self.logLines == None or \
+        return self.logLines is None or \
                self.logLines[-1].find("X-PLOR: exit time") == -1
 
 

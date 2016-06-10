@@ -1,4 +1,5 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -28,8 +29,8 @@ Parse a PDB file into a PDBModel.
 @see L{PDBModel}
 @see L{PDBParserFactory}
 """
-import Scientific.IO.PDB as IO
-import numpy.oldnumeric as N
+import Biskit.ScientificIO.PDB as IO
+import Biskit.oldnumeric as N0
 import re
 
 import Biskit as B
@@ -125,29 +126,29 @@ class PDBParseFile( PDBParser ):
         try:
             ## atoms and/or coordinates need to be updated from PDB
             if force or self.needsUpdate( model ):
-
+    
                 atoms, xyz, info = self.__collectAll( source, skipRes, 
                                                       headPatterns )
-
+    
                 keys = M.union( atoms.keys(),  self.DEFAULTS.keys() )
-
+    
                 for k in keys:
-
+    
                     a = model.atoms.get( k, default=0, update=False )
                     if (a is 0) or (a is None):
                     
                         dflt = self.DEFAULTS.get( k, None )
                         model.atoms.set(k, atoms.get(k, dflt), changed=0 )
-
+    
                 if model.xyz is None:
                     model.xyz = xyz
                     model.xyzChanged = 0
-
+    
                 model._resIndex  =None
                 model._chainIndex=None
-
+    
                 model.fileName = model.fileName or source
-
+    
                 model.pdbCode = model.pdbCode or info.get('pdb_code', None) or \
                                 self.idFromName( model.fileName)
                 
@@ -158,7 +159,7 @@ class PDBParseFile( PDBParser ):
                     del info['BIOMT']
                 
                 model.info.update( info )
-                               
+                           
         except:
             msg = self.__xplorAtomIndicesTest( source ) or ' '
             raise PDBParserError('Cannot read ' + str(source) + ' as PDB\n'\
@@ -279,10 +280,10 @@ REMEDY: run the script fixAtomIndices.py
                 rotation.append([float(x) for x in rawCoords[1:4]])
                 translation.append(float(rawCoords[4]))
                 if matrixLine % 3 == 0:
-                    rotation = N.array( rotation )
-                    translation = N.transpose( [ translation ] )
-                    rotation = N.concatenate( (rotation, translation), axis=1 )
-                    rtList.append(N.array(rotation))
+                    rotation = N0.array( rotation )
+                    translation = N0.transpose( [ translation ] )
+                    rotation = N0.concatenate( (rotation, translation), axis=1 )
+                    rtList.append(N0.array(rotation))
                     ## rtList.append((rotation,translation))
                     rotation = []
                     translation = []
@@ -402,13 +403,7 @@ REMEDY: run the script fixAtomIndices.py
                     if a['element'] == '':
                         a['element'] = self.__firstLetter( a['name'] )
 
-                    if a['position'].is_vector:
-                        lst = [ a['position'][0],
-                                a['position'][1],
-                                a['position'][2]]
-                        xyz.append( lst )
-                    else:
-                        xyz.append( a['position'] )
+                    xyz.append( a['position'] )
 
                     del a['position']
 
@@ -427,7 +422,7 @@ REMEDY: run the script fixAtomIndices.py
             raise PDBParserError("Error parsing file "+fname+": "+
                             "Couldn't find any atoms.")
 
-        return aProfs, N.array( xyz, N.Float32 ), info
+        return aProfs, N0.array( xyz, N0.Float32 ), info
     
 #############
 ##  TESTING        
@@ -472,7 +467,7 @@ class Test(BT.BiskitTest):
         ##      self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P_rec_original.pdb')
         ##      self.m2= self.p.parse2new( T.testRoot()+'/com/1BGS.pdb' )
 
-        self.assertAlmostEqual( N.sum( self.m.centerOfMass() ), 
+        self.assertAlmostEqual( N0.sum( self.m.centerOfMass() ), 
                                 -74.1017, 1 )
 
 

@@ -174,13 +174,13 @@ for line in pdb_file:
     elif (remark_flag == False) and (remark_block == True): #deal with non-remark lines stuck in the top before main record types
         print_line += remark4 + "\n"
         remark_flag = True
-    if previous == None:
+    if previous is None:
         previous = current
     if previous == current:
         print_line += line + "\n"
     elif previous != current:
         if re.search(r'.\S..  .[ACTGIU]',print_line):
-            if re.search(r'O2[\'|\*]   .',print_line) == None:
+            if re.search(r'O2[\'|\*]   .',print_line) is None:
                 DNA_base = previous[1]
                 if remediated_out == True:
                     print_line = re.sub(r'(.\S..)   '+DNA_base+' ',r'\g<1>  D'+DNA_base+' ',print_line)
@@ -201,7 +201,7 @@ for line in pdb_file:
 pdb_file.close()
 
 if re.search(r'.\S..  .[ACTGIU]',print_line):
-    if re.search(r'O2[\'|\*]   .',print_line) == None:
+    if re.search(r'O2[\'|\*]   .',print_line) is None:
         DNA_base = previous[1]
         if remediated_out == True:
             print_line = re.sub(r'(.\S..)   '+DNA_base,r'\g<1>  D'+DNA_base,print_line)

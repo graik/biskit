@@ -1,4 +1,5 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ## generate random orientations of receptor and ligand
 ##
@@ -32,8 +33,8 @@ from Biskit.Dock.Complex import Complex
 import Biskit.mathUtils as ma
 import Biskit.molUtils as mol
 import Biskit.tools as t
-import numpy.oldnumeric.random_array as ra
-import numpy.oldnumeric as N
+import numpy.random.mtrand as R
+import Biskit.oldnumeric as N0
 from Biskit import Xplorer, PCRModel
 
 import tempfile
@@ -87,7 +88,7 @@ class ComplexRandomizer:
         @rtype: PDBModel
         """
         r = model.clone()
-        r.keep( N.nonzero( N.logical_not( r.maskH2O() ) ) )
+        r.keep( N0.nonzero( N0.logical_not( r.maskH2O() ) ) )
         center = r.centerOfMass()
         r.setXyz( r.getXyz() - center )
 
@@ -105,7 +106,7 @@ class ComplexRandomizer:
         @rtype: float
         """
         center = model.centerOfMass()
-        dist = N.sqrt( N.sum( ( model.getXyz()-center )**2 , 1 ) )
+        dist = N0.sqrt( N0.sum( ( model.getXyz()-center )**2 , 1 ) )
 
         return max( dist )
 
@@ -119,9 +120,9 @@ class ComplexRandomizer:
         @rtype: array
         """
         radius = (self.d_max_rec + self.d_max_lig) / 2.0
-        xyz = ra.random( 3 ) - 0.5
+        xyz = R.random_sample( 3 ) - 0.5
 
-        scale = radius*1.0 / N.sqrt( N.sum( xyz**2 ) )
+        scale = radius*1.0 / N0.sqrt( N0.sum( xyz**2 ) )
 
         return scale * xyz
 
@@ -134,14 +135,14 @@ class ComplexRandomizer:
         @rtype: array
         """
         r = ma.randomRotation()
-##         r = N.array([[1,0,0],[0,1,0],[0,0,1]],'f')
+##         r = N0.array([[1,0,0],[0,1,0],[0,0,1]],'f')
         t = self.__random_translation()
 
         ## create 3 x 4 matrix: 0:3, 0:3 contains rot; 3,0:3 contains trans
-        result = N.concatenate( (r, N.transpose( [ t.tolist() ] )), 1)
+        result = N0.concatenate( (r, N0.transpose( [ t.tolist() ] )), 1)
 
         ## make it square
-        result = N.concatenate( (result, N.array([[0,0,0,1]], N.Float32)), 0 )
+        result = N0.concatenate( (result, N0.array([[0,0,0,1]], N0.Float32)), 0 )
 
         return result
 

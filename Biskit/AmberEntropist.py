@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -28,8 +28,10 @@
 Run ptraj entropy analysis on Trajectory instance.
 """
 
+##import numpy.oldnumeric as oldN
+import oldnumeric as N0
+
 import tempfile, os
-import numpy.oldnumeric as N
 import random, time
 
 import Biskit.tools as t
@@ -182,9 +184,9 @@ class AmberEntropist( AmberCrdEntropist ):
             self.ex3 = None
         else:
             self.ex3 = ex3-1
-        if ex3 != None: self.ex_n = 0
+        if ex3 is not None: self.ex_n = 0
 
-        if ex1 != None:
+        if ex1 is not None:
             self.ex3 = None
             self.ex_n = 0
         if ex1 in [0, None]:
@@ -288,7 +290,7 @@ class AmberEntropist( AmberCrdEntropist ):
                 refModel = refModel.take( ref_i )
                 m_avg    = m_avg.take( i )
 
-                if not mask is None:   mask = N.take( mask, i )
+                if not mask is None:   mask = N0.take( mask, i )
 
             r, t = m_avg.transformation( refModel, mask )
             traj.transform( r, t )
@@ -325,9 +327,9 @@ class AmberEntropist( AmberCrdEntropist ):
         @rtype: PDBModel      
         """
         if self.protein:            
-            m.keep( N.nonzero( m.maskProtein() ) )
+            m.keep( N0.nonzero( m.maskProtein() ) )
         if self.heavy:
-            m.keep( N.nonzero( m.maskHeavy() ) )
+            m.keep( N0.nonzero( m.maskHeavy() ) )
         return m
 
 
@@ -451,7 +453,7 @@ class AmberEntropist( AmberCrdEntropist ):
         @return: 
         @rtype: EnsembleTraj
         """
-        if exclude == None or len( exclude ) == 0:
+        if exclude is None or len( exclude ) == 0:
             return traj
 
         members = range( traj.n_members )
@@ -485,18 +487,18 @@ class AmberEntropist( AmberCrdEntropist ):
         else:
             n_memb = t.n_members
 
-        if self.ex3 != None and type( self.exclude ) is tuple:
+        if self.ex3 is not None and type( self.exclude ) is tuple:
             self.exclude = self.__add3(n_memb[0], self.exclude[0], self.ex3),\
                            self.__add3(n_memb[1], self.exclude[1], self.ex3)
 
-        if self.ex3 != None and type( self.exclude ) is list:
+        if self.ex3 is not None and type( self.exclude ) is list:
             self.exclude = self.__add3( n_memb, self.exclude, self.ex3 )
 
-        if self.ex1 != None and type( self.exclude ) is tuple:
+        if self.ex1 is not None and type( self.exclude ) is tuple:
             self.exclude = self.__add1(n_memb[0], self.exclude[0], self.ex1),\
                            self.__add1(n_memb[1], self.exclude[1], self.ex1)
 
-        if self.ex1 != None and type( self.exclude ) is list:
+        if self.ex1 is not None and type( self.exclude ) is list:
             self.exclude = self.__add1( n_memb, self.exclude, self.ex1 )
 
         if type( t ) is tuple:
@@ -665,12 +667,12 @@ class AmberEntropist( AmberCrdEntropist ):
         if self.atoms:
             traj.ref.addChainId()
             aMask = traj.ref.mask( lambda a,ok=self.atoms: a['name'] in ok )
-            traj.removeAtoms( N.nonzero( N.logical_not( aMask ) )  )
+            traj.removeAtoms( N0.nonzero( N0.logical_not( aMask ) )  )
 
         ## get rid of non-standard atoms, water, ions, etc.
         if not self.solvent:
             l = traj.lenAtoms()
-            traj = traj.compressAtoms( N.logical_not(traj.ref.maskSolvent()) )
+            traj = traj.compressAtoms( N0.logical_not(traj.ref.maskSolvent()) )
 
             if self.verbose:
                 self.log.add('%i solvent/ion atoms deleted.'% (l- traj.lenAtoms()))
@@ -747,7 +749,7 @@ class AmberEntropist( AmberCrdEntropist ):
                     all += [ ( lst[i], lst[j], lst[k] ) ]
 
         ## calculate pairwise "distance" between tripples
-        pw = N.zeros( (len(all), len(all)), N.Float32 )
+        pw = N0.zeros( (len(all), len(all)), N0.Float32 )
         for i in range( len( all ) ):
             for j in range( i, len(all) ):
                 pw[i,j] = pw[j,i] = len( MU.intersection(all[i],all[j]) )**2
@@ -759,11 +761,11 @@ class AmberEntropist( AmberCrdEntropist ):
 
             r += [ pos ]
             ## overlap of selected tripples with all others
-            overlap = N.sum( N.array( [ pw[ i ] for i in r ] ) )
+            overlap = N0.sum( N0.array( [ pw[ i ] for i in r ] ) )
             ## select one with lowest overlap to all tripples selected before
-            pos = N.argmin( overlap )
+            pos = N0.argmin( overlap )
 
-        return N.take( all, r )
+        return N0.take( all, r )
 
 
     def cleanup( self ):

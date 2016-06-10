@@ -23,7 +23,7 @@
 
 import os.path
 import os
-from numpy.oldnumeric import sum, logical_not
+import numpy as N
 
 from Biskit.tools import *
 from Biskit.PVM.hosts import nodes_own
@@ -200,9 +200,13 @@ class AmberController:
         flushPrint("parsing "+fpdb+"...")
         m = PDBModel( fpdb )
         
-        solute_res = m.atom2resMask( logical_not( m.maskSolvent() )  )
-        self.lenres = self.lenres or sum( solute_res )
-        self.lenatoms = len( m ) - sum( m.maskH2O() )
+        solute_res = m.atom2resMask( N.logical_not( m.maskSolvent() )  )
+        
+        self.lenres = self.lenres or N.sum( solute_res)
+        assert isinstance( self.lenres, N.integer )
+        
+        self.lenatoms = len( m ) - N.sum( m.maskH2O() )
+        assert isinstance( self.lenatoms, N.integer)
 
         if dry_out:
             m.remove( m.maskH2O() )

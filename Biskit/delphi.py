@@ -362,7 +362,7 @@ class Delphi( Executor ):
         
         self.f_pdb = tempfile.mktemp( '.pdb', 'delphi_', dir=tempdir)
 
-        self.keep_map = f_map != None
+        self.keep_map = f_map is not None
         self.f_map = f_map or \
             tempfile.mktemp( '_mapout.phi', 'delphi_', dir=tempdir )
 

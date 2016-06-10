@@ -34,7 +34,7 @@ import numpy as N
 import copy, random
 
 import lognormal as L
-import stats
+import scipy.stats as stats
 
 class ROCError( Exception ):
     pass

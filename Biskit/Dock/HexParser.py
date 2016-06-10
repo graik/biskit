@@ -1,4 +1,5 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -26,9 +27,9 @@
 """
 Parse output file from hex docking run.
 """
+import Biskit.oldnumeric as N0
 
 import re
-import numpy.oldnumeric as Numeric  ## array
 from Biskit.Dock import Complex, ComplexList
 
 from Biskit import PCRModel
@@ -81,7 +82,7 @@ class HexParser:
         """
         ## get set of lines describing next complex:
         lines = self._nextBlock()
-        if lines == None:
+        if lines is None:
             ## EOF
             return None
         ## skip incomplete records
@@ -95,7 +96,7 @@ class HexParser:
             try:
                 ## labels has to be in the same order as in hex.out
                 m = self.ex_line.search( l )
-                if m != None:
+                if m is not None:
                     m = m.groups()
 
                     if m[0] == 'Orientation':
@@ -139,7 +140,7 @@ class HexParser:
                         for j in range(0,4):
                             matrix.append( numbers[4*j:4*(j+1)] )
                         ## create 4 by 4 Numeric array from 4 by 4 list
-                        matrix = Numeric.array(matrix, Numeric.Float32)
+                        matrix = N0.array(matrix, N0.Float32)
             except AttributeError:
                 print "HexParser.nextComplex(): ",t.lastError()
 
@@ -161,7 +162,7 @@ class HexParser:
         while line:
             if line[:4] != "# --":
                 ## found matrix line, append it to previous line
-                if self.ex_matrix.search(line) != None:
+                if self.ex_matrix.search(line) is not None:
                     result[-1] = result[-1] + line
                 else:
                     result += [line]

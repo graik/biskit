@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -243,7 +243,7 @@ class PVMThread(Thread):
 
     def run(self):
         import time
-        from numpy.oldnumeric import argsort
+        from numpy import argsort
 
         while not self.isStopped():
 

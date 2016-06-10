@@ -45,10 +45,10 @@ pvm_installed = T.tryImport( 'TrackingJobMaster', 'TrackingJobMaster',
 pvm_installed = T.tryImport( 'dispatcher', 'JobSlave',
                              namespace=globals() ) and pvm_installed
 
-if not pvm_installed:
-    EHandler.warning('Could not import PVM (Parallel Virtual Machine) modules.'+
-        ' Please check that PVM and pypvm are installed!\n'+
-        '\tParallelisation is not available.')
+##if not pvm_installed:
+##    EHandler.warning('Could not import PVM (Parallel Virtual Machine) modules.'+
+##        ' Please check that PVM and pypvm are installed!\n'+
+##        '\tParallelisation is not available.')
 
 ##
 ## clean up

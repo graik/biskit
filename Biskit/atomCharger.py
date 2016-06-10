@@ -229,6 +229,8 @@ import Biskit.tools as T
 class Test(BT.BiskitTest):
     """Test class"""
 
+    TAGS = [ BT.EXE ]
+
     def test_reduce( self ):
         """AtomCharger test"""
         if self.local: self.log.add('\nLoading PDB...')

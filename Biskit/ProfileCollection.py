@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -451,6 +451,19 @@ class ProfileCollection:
         """
         return [ self.get( key ) for key in self.keys() ]
 
+    def hasNoneProfile(self):
+        """
+        Check wether any profile is None, which means it is 
+        waiting to be updated from a source ProfileCollection.
+        This method is written such that it is *not* triggering the 
+        updating mechanism.
+        @return bool
+        """
+        for v in self.profiles.values():
+            if v is None:
+                return True
+        return False
+            
 
     def items( self ):
         """
@@ -535,12 +548,12 @@ class ProfileCollection:
         Convert integer arrays to Int32 and float arrays to
         Float32. This function is needed because of Numeric issues
         when pickles are transferred between 64 and 32 bit
-        platforms. Rather than letting Numeric.array select a
+        platforms. Rather than letting numpy.array select a
         platform-dependent default type, it is saver to assign an
         explicit Float32, or Int32.
 
         @param prof: the profile array to recast
-        @type  prof: Numeric.array
+        @type  prof: numpy.array
 
         @return: recast array or unchanged original
         @rtype:  Numpy.array
@@ -1041,8 +1054,7 @@ class ProfileCollection:
 
                 self.set( key, prof, **info )
 
-        if not allowEmpty and ( None in self.profiles.values() \
-                                or [] in self.profiles.values() ):
+        if not allowEmpty and self.hasNoneProfile():
             for key, prof in self.profiles.items():
                 if not prof:
                     raise ProfileError, \

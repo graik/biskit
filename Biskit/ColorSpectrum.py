@@ -1,4 +1,5 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -28,7 +29,7 @@
 Create color scales.
 """
 
-import numpy.oldnumeric as N
+import Biskit.oldnumeric as N0
 
 from Errors import BiskitError
 
@@ -170,12 +171,12 @@ class ColorSpectrum:
         @return: matrix of color codes with same dimensions as a
         @rtype: array of float
         """
-        s = N.shape( a )
-        v = N.ravel( a )
+        s = N0.shape( a )
+        v = N0.ravel( a )
 
         r = self.colors( v, resetLimits=resetLimits )
 
-        r = N.reshape( r, s )
+        r = N0.reshape( r, s )
 
         return r
 
@@ -291,7 +292,7 @@ def colorRange( nColors, palette='plasma2' ):
     """
     c = ColorSpectrum( palette=palette, vmin=0, vmax=1. )
 
-    r = 1. * N.arange( 0, nColors ) / nColors
+    r = 1. * N0.arange( 0, nColors ) / nColors
 
     return c.colors( r )
 

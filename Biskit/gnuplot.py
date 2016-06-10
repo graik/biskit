@@ -1,4 +1,5 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 # Simple Gnuplot interface.
 #
@@ -375,7 +376,7 @@ class Test(BT.BiskitTest):
 
     def test_scatter(self):
         """gnuplot.scatter test (interactive only)"""
-        from numpy.oldnumeric.random_array import poisson
+        from numpy.random.mtrand import poisson
         if self.local:
             self.p = scatter( poisson(50,(1000,2))  )
 
@@ -386,11 +387,11 @@ class Test(BT.BiskitTest):
         # plot( zip( range(10), range(10) ) )
 
         # Two plots; each given by a 2d array
-        import numpy.oldnumeric as N
-        x = N.arange(10)
+        import Biskit.oldnumeric as N0
+        x = N0.arange(10)
         y1 = x**2
         y2 = (10-x)**2
-        plot( N.transpose(N.array([x, y1])), N.transpose(N.array([x, y2])))
+        plot( N0.transpose(N0.array([x, y1])), N0.transpose(N0.array([x, y2])))
 
     def test_parallelAxesPlot(self):
         """gnuplot.parallelAxesPlot test (interactive only)"""

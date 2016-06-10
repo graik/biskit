@@ -110,7 +110,7 @@ if __name__ == '__main__':
 
     o = cmdDict( o )
 
-    if o['mac'] != None:
+    if o['mac'] is not None:
         o['mac'] = int( o['mac'] )
 
 ##    used_nodes = ['daredevil', 'goblin', 'joker']

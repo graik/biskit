@@ -714,7 +714,7 @@ class SequenceSearcher:
         """
         iter = 1
         while (self.clustersCurrent > self.clusterLimit \
-              or self.clustersCurrent == None) \
+              or self.clustersCurrent is None) \
               and (simCut > 0 and lenCut > 0):
 
             self.clusterFasta( fastaIn, simCut, lenCut, ncpu )

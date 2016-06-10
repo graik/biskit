@@ -1,4 +1,5 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -29,7 +30,7 @@
 List of Complex objects.
 """
 
-import numpy.oldnumeric as N
+import Biskit.oldnumeric as N0
 import types
 import random
 
@@ -219,7 +220,7 @@ class ComplexList( list ):
         """
         Add eithem to list of it is not already there.
         """
-        if lst == None:
+        if lst is None:
             lst = []
         if not item in lst:
             lst.append( item )
@@ -353,8 +354,8 @@ class ComplexList( list ):
         @rtype: [any]
         """
         l = self
-        if indices != None:
-            l = N.take( N.array(l,'O'), indices )
+        if indices is not None:
+            l = N0.take( N0.array(l,'O'), indices )
 
         if not unique:
             return [ c.info.get(infoKey, default) for c in l ]
@@ -385,10 +386,10 @@ class ComplexList( list ):
         """
         vLst = self.valuesOf( infoKey )
 
-        maskL = N.greater_equal( vLst, vLow )
-        maskH = N.less_equal( vLst, vHigh )
+        maskL = N0.greater_equal( vLst, vLow )
+        maskH = N0.less_equal( vLst, vHigh )
 
-        return N.nonzero( maskL * maskH )
+        return N0.nonzero( maskL * maskH )
 
 
     def filterEqual( self, infoKey, lst ):
@@ -407,7 +408,7 @@ class ComplexList( list ):
         @rtype: [int]
         """
         mask = [ c.info.get( infoKey ) in lst for c in self ]
-        return N.nonzero( mask )
+        return N0.nonzero( mask )
 
 
     def filterFunct( self, f ):
@@ -424,7 +425,7 @@ class ComplexList( list ):
         @rtype: [int]
         """
         mask = [ f( c ) for c in self ]
-        return N.nonzero( mask )
+        return N0.nonzero( mask )
 
 
     def filter( self, infoKey, cond ):
@@ -459,7 +460,7 @@ class ComplexList( list ):
 
             indices = self.filterFunct( cond )
 
-        if indices == None:
+        if indices is None:
             try:
                 indices = self.filterEqual( infoKey, [cond] )
             except:
@@ -479,7 +480,7 @@ class ComplexList( list ):
         @rtype: int
         """
         vLst = self.valuesOf( infoKey )
-        return N.argmax( vLst )
+        return N0.argmax( vLst )
 
 
     def max( self, infoKey ):
@@ -506,7 +507,7 @@ class ComplexList( list ):
         @rtype: int
         """
         vLst = self.valuesOf( infoKey )
-        return N.argmin( vLst )
+        return N0.argmin( vLst )
 
     def min( self, infoKey ):
         """
@@ -627,7 +628,7 @@ class ComplexList( list ):
         r1, r2 = [],[]
 
         for i in range( len(l1)):
-            if l1[i] != None and l2[i] != None:
+            if l1[i] is not None and l2[i] is not None:
                 r1 += [ l1[i] ]
                 r2 += [ l2[i] ]
 

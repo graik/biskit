@@ -25,13 +25,8 @@ import numpy as N
 import copy, random
 
 import lognormal as L
-try:
-    import scipy.stats as stats
-    USING_SCIPY = True
-except:
-    # import outdated stand-alone internal copy with some numeric issues
-    import stats
-    USING_SCIPY = False
+
+import scipy.stats as stats
 
 class ROCError( Exception ):
     pass
@@ -326,9 +321,6 @@ def pfisher( pvalues ):
     clipped = N.clip( pvalues, 1.0e-16, 1.0 )
 
     x2 = -2 * N.sum( N.log( clipped ) )
-
-    if not USING_SCIPY:
-        x2 = float( x2 )
 
     return stats.chisqprob( x2, 2*len(pvalues) )
 

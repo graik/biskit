@@ -1,3 +1,4 @@
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2012 Raik Gruenberg & Johan Leckner
@@ -32,7 +33,7 @@ from Biskit import EHandler
 
 import Biskit.tools as T
 
-import numpy.oldnumeric as N
+import Biskit.oldnumeric as N0
 
 try:
     import biggles
@@ -76,9 +77,9 @@ class Ramachandran:
         # calculate angles, profiles ...
         self.calc( models )
         
-        self.prof = N.ravel(self.prof)
-        self.gly = N.ravel(self.gly)
-        self.pro = N.ravel(self.pro)
+        self.prof = N0.ravel(self.prof)
+        self.gly = N0.ravel(self.gly)
+        self.pro = N0.ravel(self.pro)
 
 
     def calc( self, models ):
@@ -100,9 +101,9 @@ class Ramachandran:
 
             ## get list with GLY and PRO residue indices
             gly_atomInd = m.indices(lambda a: a['residue_name']=='GLY')
-            gly_resInd  = N.array( m.atom2resIndices( gly_atomInd ) )
+            gly_resInd  = N0.array( m.atom2resIndices( gly_atomInd ) )
             pro_atomInd = m.indices(lambda a: a['residue_name']=='PRO')
-            pro_resInd  = N.array( m.atom2resIndices( pro_atomInd ) )    
+            pro_resInd  = N0.array( m.atom2resIndices( pro_atomInd ) )    
             self.gly.append( gly_resInd + res_count )
             self.pro.append( pro_resInd + res_count )
             res_count += m.lenResidues()
@@ -151,7 +152,7 @@ class Ramachandran:
             resIdx =  m.resIndex().tolist()
             resIdx += [ m.lenAtoms()]
             for i in range(len(resIdx)-1):
-                prof += [ N.average( N.take(aProfile, range(resIdx[i],
+                prof += [ N0.average( N0.take(aProfile, range(resIdx[i],
                                                             resIdx[i+1]) ) )]
         else:
             prof = m.profile( self.profileName )
@@ -177,9 +178,9 @@ class Ramachandran:
 
             xyz = cModel.xyz
 
-            xyz_CA =  N.compress( cModel.maskCA(), xyz, 0 )
-            xyz_N  =  N.compress( cModel.mask( ['N'] ), xyz, 0 )
-            xyz_C  =  N.compress( cModel.mask( ['C'] ), xyz, 0 )
+            xyz_CA =  N0.compress( cModel.maskCA(), xyz, 0 )
+            xyz_N  =  N0.compress( cModel.mask( ['N'] ), xyz, 0 )
+            xyz_C  =  N0.compress( cModel.mask( ['C'] ), xyz, 0 )
 
             ## phi: c1 - N
             ##      c2 - CA
@@ -217,24 +218,24 @@ class Ramachandran:
         """
         vec21 = coor2 - coor1
         vec32 = coor3 - coor2
-        L = N.cross( vec21, vec32 )
-        L_norm = N.sqrt(sum(L**2))
+        L = N0.cross( vec21, vec32 )
+        L_norm = N0.sqrt(sum(L**2))
 
         vec43 = coor4 - coor3
         vec23 = coor2 - coor3
-        R = N.cross( vec43, vec23 )
-        R_norm = N.sqrt(sum(R**2))
+        R = N0.cross( vec43, vec23 )
+        R_norm = N0.sqrt(sum(R**2))
 
-        S     = N.cross( L, R )
+        S     = N0.cross( L, R )
         angle = sum( L*R ) / ( L_norm * R_norm )
 
         ## sometimes the value turns out to be ever so little greater than 
-        ## one, to prevent N.arccos errors for this, set angle = 1.0
+        ## one, to prevent N0.arccos errors for this, set angle = 1.0
         if angle >  1.0: angle = 1.0
             
         if angle < -1.0: angle = -1.0
 
-        angle = N.arccos(angle) *180/N.pi
+        angle = N0.arccos(angle) *180/N0.pi
         if sum(S*vec32) < 0.0:
             angle = -angle
 
@@ -291,7 +292,7 @@ class Ramachandran:
         bg = []
         mat = biggles.read_matrix( T.dataRoot() +
                                    '/biggles/ramachandran_bg.dat')
-        x, y = N.shape(mat)
+        x, y = N0.shape(mat)
         for i in range(x):
             for j in range(y):
                 if mat[i,j] < 200:
@@ -356,12 +357,12 @@ class Test(BT.BiskitTest):
         self.rama = Ramachandran( self.mdl , name='test', profileName='mass',
                                   verbose=self.local)
 
-        self.psi = N.array( self.rama.psi )
+        self.psi = N0.array( self.rama.psi )
 
         if self.local:
             self.rama.show()
             
-        r = N.sum( N.compress( N.logical_not(N.equal(self.psi, None)),
+        r = N0.sum( N0.compress( N0.logical_not(N0.equal(self.psi, None)),
                                self.psi ) )
         self.assertAlmostEqual( r, -11717.909796797909, 2 )
 

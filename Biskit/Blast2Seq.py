@@ -117,7 +117,7 @@ class Blast2Seq( Executor ):
 
         try:
             _id = self.ex_identity.match(hitStr)  # Blast Identity
-            if (_id == None):
+            if (_id is None):
                 return {'res_id':0, 'aln_id':0, 'aln_len':0}
             res_identical, res_number = int(_id.group(1)), int(_id.group(2))
             id = 1.0 * res_identical/res_number

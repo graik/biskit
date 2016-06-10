@@ -1,4 +1,5 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -44,7 +45,7 @@ from Complex import Complex
 from ComplexList import ComplexList
 from ComplexEvolvingList import ComplexEvolvingList
 
-import numpy.oldnumeric as N
+import Biskit.oldnumeric as N0
 import tempfile
 import os.path
 
@@ -277,18 +278,18 @@ class ContactMaster(TrackingJobMaster):
 
         ## indices to apply for casting, cast reference complex, del. Hydrogens
         i_rec_ref, i_lig_ref, i_rec, i_lig = RC.compareAtoms( NC )
-        h_rec = N.nonzero( RC.rec_model.maskH() )
-        h_lig = N.nonzero( RC.lig_model.maskH() )
+        h_rec = N0.nonzero( RC.rec_model.maskH() )
+        h_lig = N0.nonzero( RC.lig_model.maskH() )
         i_rec_ref = [ i for i in i_rec_ref if i not in h_rec ]
         i_lig_ref = [ i for i in i_lig_ref if i not in h_lig ]
 
         RC = RC.take( i_rec_ref, i_lig_ref )
 
         ## convert casting indices for normalCom to mask
-        m_rec = N.zeros( len( NC.rec_model ), N.Int )
-        N.put( m_rec, i_rec, 1 )
-        m_lig = N.zeros( len( NC.lig_model ), N.Int )
-        N.put( m_lig, i_lig, 1 )
+        m_rec = N0.zeros( len( NC.rec_model ), N0.Int )
+        N0.put( m_rec, i_rec, 1 )
+        m_lig = N0.zeros( len( NC.lig_model ), N0.Int )
+        N0.put( m_lig, i_lig, 1 )
 
         self.mask_rec = m_rec * NC.rec_model.maskHeavy()
         self.mask_lig = m_lig * NC.lig_model.maskHeavy()
@@ -347,22 +348,22 @@ class ContactMaster(TrackingJobMaster):
         """
         try:
             ## calculate atom mask that extracts all interface residues from NC
-            if_rec = NC.rec_model.res2atomMask( N.sum( res_contacts, 1) )
+            if_rec = NC.rec_model.res2atomMask( N0.sum( res_contacts, 1) )
             if_rec = if_rec * NC.rec_model.maskHeavy() * mask_rec
             if bb:
                 if_rec = if_rec * NC.rec_model.maskBB()
 
-            if_lig = NC.lig_model.res2atomMask( N.sum( res_contacts, 0) )
+            if_lig = NC.lig_model.res2atomMask( N0.sum( res_contacts, 0) )
             if_lig = if_lig * NC.lig_model.maskHeavy() * mask_lig
             if bb:
                 if_lig = if_lig * NC.lig_model.maskBB()
 
-            mask_interface = N.concatenate( (if_rec, if_lig) )
+            mask_interface = N0.concatenate( (if_rec, if_lig) )
 
             ## extract all interface residues of ref complex RC into a PDBModel
-            if_rec = N.compress( mask_rec, if_rec ) ## reduce to mask for RC
-            if_lig = N.compress( mask_lig, if_lig )
-            mask_interface_ref = N.concatenate( (if_rec, if_lig) )
+            if_rec = N0.compress( mask_rec, if_rec ) ## reduce to mask for RC
+            if_lig = N0.compress( mask_lig, if_lig )
+            mask_interface_ref = N0.concatenate( (if_rec, if_lig) )
 
             ref_interface_model = RC.model().compress(mask_interface_ref)
             ref_interface_model.residues = PDBProfiles()
@@ -401,7 +402,7 @@ class ContactMaster(TrackingJobMaster):
             return 1
 
         for ikey in com.keys():
-            if com[ikey] == None:
+            if com[ikey] is None:
 
                 return 1
 
@@ -495,9 +496,9 @@ class ContactMaster(TrackingJobMaster):
 
         ## keep only (average) surface atoms
         ## play around with cutoff: lower- more atoms, better correl. to fnac
-        i_r_surf = N.nonzero( r[ rec_models[0].source ].\
+        i_r_surf = N0.nonzero( r[ rec_models[0].source ].\
                               profile2mask( 'relAS', 30 ) )
-        i_l_surf = N.nonzero( l[ lig_models[0].source ].\
+        i_l_surf = N0.nonzero( l[ lig_models[0].source ].\
                               profile2mask( 'relAS', 30 ) )
 
         for m in r.values(): m.keep( i_r_surf )
@@ -665,7 +666,7 @@ class Test(BT.BiskitTest):
                 self.p = self.cl_cont.plot( 'rms', 'fnac_10','fnarc_10' )
                 self.p.show()
 
-            self.assertAlmostEqual(N.sum(self.cl_cont.valuesOf('fnac_10')),
+            self.assertAlmostEqual(N0.sum(self.cl_cont.valuesOf('fnac_10')),
                                    0.50811038550663579, 5 )
 
 

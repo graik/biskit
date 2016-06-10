@@ -1,4 +1,4 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -26,8 +26,10 @@
 Convert single amber crd into Trajectory object
 """
 
+import numpy as N
+import oldnumeric as N0
+
 import re
-import numpy.oldnumeric as N
 import sys
 
 import tools as T
@@ -163,7 +165,7 @@ class AmberCrdParser:
 
             i += 1
 
-        return N.reshape( xyz, ( len(xyz) / 3, 3 ) ).astype(N.Float32)
+        return N0.reshape( xyz, ( len(xyz) / 3, 3 ) ).astype(N0.Float32)
 
 
     def crd2traj( self ):
@@ -195,7 +197,7 @@ class AmberCrdParser:
 
         t = Trajectory( refpdb=self.ref )
 
-        t.frames = N.array( xyz ).astype(N.Float32)
+        t.frames = N0.array( xyz ).astype(N0.Float32)
 
         t.setRef( self.ref )
         t.ref.disconnect()

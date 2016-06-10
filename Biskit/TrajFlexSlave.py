@@ -1,4 +1,5 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -31,7 +32,7 @@ Parallize calculation of pairwise rmsd between the frames of a trajectory.
 from Biskit.PVM import JobSlave
 import Biskit.tools as T
 import Biskit.rmsFit as rmsFit
-import numpy.oldnumeric as N
+import Biskit.oldnumeric as N0
 from Biskit.LogFile import ErrLog, LogFile
 
 import os, time
@@ -122,7 +123,7 @@ class TrajFlexSlave( JobSlave ):
             i_start, i_stop = window[0]
             j_start, j_stop = window[1]
 
-            a = N.zeros( (i_stop-i_start, j_stop-j_start), N.Float )
+            a = N0.zeros( (i_stop-i_start, j_stop-j_start), N0.Float )
 
             i = j = -1
 
@@ -138,7 +139,7 @@ class TrajFlexSlave( JobSlave ):
                                                     f2[j-j_start], 1 )
                         a[i-i_start,j-j_start] = rmsdLst[0][1]
 
-            return N.ravel(a).tolist()
+            return N0.ravel(a).tolist()
 
         except Exception, why:
             self.reportError( 'ERROR '+str(why), (i,j) )

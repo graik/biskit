@@ -1,4 +1,5 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -27,7 +28,7 @@ organise, sort, and filter collection of dictionaries or similar objects
 S{->} abstract base class (aka interface)
 """
 
-import numpy.oldnumeric as N
+import Biskit.oldnumeric as N0
 import types
 
 import Biskit.tools as t
@@ -246,7 +247,7 @@ class BisList:
         @return: new instance (or sub-class) with specified items
         @rtype: instance
         """
-        return self.take( N.nonzero( mask ), deepcopy=deepcopy )
+        return self.take( N0.nonzero( mask ), deepcopy=deepcopy )
 
 
     def sortBy( self, sortKey, cmpfunc=cmp ):
@@ -285,7 +286,7 @@ class BisList:
         @rtype: list
         """
         l = self
-        if indices != None:
+        if indices is not None:
             l = self.take( indices )
 
         if not unique:
@@ -314,10 +315,10 @@ class BisList:
         """
         vLst = self.valuesOf( key )
 
-        maskL = N.greater_equal( vLst, vLow )
-        maskH = N.less_equal( vLst, vHigh )
+        maskL = N0.greater_equal( vLst, vLow )
+        maskH = N0.less_equal( vLst, vHigh )
 
-        return N.nonzero( maskL * maskH )
+        return N0.nonzero( maskL * maskH )
 
 
     def filterEqual( self, key, lst ):
@@ -333,7 +334,7 @@ class BisList:
         @rtype: array
         """
         mask = [ self.getValue( i,key) in lst for i in range( len(self)) ]
-        return N.nonzero( mask )
+        return N0.nonzero( mask )
 
 
     def filterFunct( self, f ):
@@ -347,7 +348,7 @@ class BisList:
         @rtype: array
         """
         mask = [ f( c ) for c in self ]
-        return N.nonzero( mask )
+        return N0.nonzero( mask )
 
 
     def filter( self, key, cond ):
@@ -381,7 +382,7 @@ class BisList:
 
             indices = self.filterFunct( cond )
 
-        if indices == None:
+        if indices is None:
             try:
                 indices = self.filterEqual( key, [cond] )
             except:
@@ -399,7 +400,7 @@ class BisList:
         @rtype: int
         """
         vLst = self.valuesOf( key )
-        return N.argmax( vLst )
+        return N0.argmax( vLst )
 
 
     def max( self, key ):
@@ -422,7 +423,7 @@ class BisList:
         @rtype: int
         """
         vLst = self.valuesOf( key )
-        return N.argmin( vLst )
+        return N0.argmin( vLst )
 
 
     def min( self, key ):
@@ -521,7 +522,7 @@ class BisList:
         r1, r2 = [],[]
 
         for i in range( len(l1)):
-            if l1[i] != None and l2[i] != None:
+            if l1[i] is not None and l2[i] is not None:
                 r1 += [ l1[i] ]
                 r2 += [ l2[i] ]
 

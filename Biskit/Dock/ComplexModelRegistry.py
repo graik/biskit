@@ -75,16 +75,16 @@ class ComplexModelRegistry:
         com.lig_model,fl = self.__sync_model( com.lig_model, self.lig_f2model )
 
         ## optimized for speed, that's why a bit awkward
-        if fr != None:
+        if fr is not None:
             coms = self.rec_f2com.get( fr, None )
-            if coms == None:
+            if coms is None:
                 self.rec_f2com[ fr ] = [ com ]
             else:
                 coms.append( com )
 
-        if fl != None:
+        if fl is not None:
             coms = self.lig_f2com.get( fl, None )
-            if coms == None:
+            if coms is None:
                 self.lig_f2com[ fl ] = [ com ]
             else:
                 coms.append( com )

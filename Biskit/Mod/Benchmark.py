@@ -1,4 +1,5 @@
-## Automatically adapted for numpy.oldnumeric Mar 26, 2007 by alter_code1.py
+## numpy-oldnumeric calls replaced by custom script; 09/06/2016
+## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
@@ -34,7 +35,7 @@ from Biskit.ModelList import ModelList
 from Biskit.IcmCad import IcmCad as CAD
 
 import Biskit.tools as T
-import numpy.oldnumeric as N
+import Biskit.oldnumeric as N0
 from Biskit import StdLog, EHandler
 
 from Biskit.Mod import Modeller
@@ -161,7 +162,7 @@ class Benchmark:
         model.info["rmsd2ref_aa_wo_if"] = rmsd_aa
         model.info["rmsd2ref_ca_wo_if"] = rmsd_ca
 
-        outliers_mask = N.logical_not(fitted_model_if.profile("rms_outliers"))
+        outliers_mask = N0.logical_not(fitted_model_if.profile("rms_outliers"))
 
         ## Now remove the residues that were outliers in the iterative fit
         ## and calculate the rmsd again
@@ -176,10 +177,10 @@ class Benchmark:
         model.info["rmsd2ref_aa_if"] = rmsd_aa_if
         model.info["rmsd2ref_ca_if"] = rmsd_ca_if
         model.info["rmsd2ref_aa_outliers"] = 1.*(len(outliers_mask) \
-                                                 - N.sum(outliers_mask)) / len(outliers_mask)
-        model.info["rmsd2ref_ca_outliers"] = 1.*(N.sum(mask_CA) \
-                                                 - N.sum(N.compress(mask_CA, outliers_mask))) \
-             / N.sum(mask_CA)
+                                                 - N0.sum(outliers_mask)) / len(outliers_mask)
+        model.info["rmsd2ref_ca_outliers"] = 1.*(N0.sum(mask_CA) \
+                                                 - N0.sum(N0.compress(mask_CA, outliers_mask))) \
+             / N0.sum(mask_CA)
 
 
     def output_rmsd_aa(self, pdb_list, output_file = None):
@@ -250,9 +251,9 @@ class Benchmark:
         rmsd_res = []
 
         for i in range( len(coord1) ):
-            rmsd = N.sqrt( (N.power(coord1[i][0]-coord2[i][0],2) +  \
-                            N.power(coord1[i][1]-coord2[i][1],2 )+ \
-                            N.power(coord1[i][2]-coord2[i][2],2 )))
+            rmsd = N0.sqrt( (N0.power(coord1[i][0]-coord2[i][0],2) +  \
+                            N0.power(coord1[i][1]-coord2[i][1],2 )+ \
+                            N0.power(coord1[i][2]-coord2[i][2],2 )))
             rmsd_res.append(rmsd)
 
         return rmsd_res
@@ -340,19 +341,19 @@ class Benchmark:
         # check with python 2.4
         iref, imodel = reference.compareAtoms(pdb_list[0])
 
-        mask_casting = N.zeros(len(pdb_list[0]))
-        N.put(mask_casting, imodel, 1)
+        mask_casting = N0.zeros(len(pdb_list[0]))
+        N0.put(mask_casting, imodel, 1)
 
         reference = reference.take(iref)
         #reference_mask_CA = reference_rmsd.maskCA()
 
-        atom_mask = N.zeros(len(pdb_list[0]))
-        N.put(atom_mask,imodel,1)
+        atom_mask = N0.zeros(len(pdb_list[0]))
+        N0.put(atom_mask,imodel,1)
 
         rmask = pdb_list[0].profile2mask("n_templates", 1,1000)
         amask = pdb_list[0].res2atomMask(rmask)
 
-        mask_final_ref = N.compress(mask_casting, amask)
+        mask_final_ref = N0.compress(mask_casting, amask)
         mask_final = mask_casting * amask
 
         reference = reference.compress(mask_final_ref)
