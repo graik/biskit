@@ -44,9 +44,6 @@ try:
     from AmberRstParser import AmberRstParser
     from PDBCleaner import PDBCleaner, CleanerError
     from Blast2Seq import Blast2Seq
-    from ChainCleaner import ChainCleaner
-    from ChainSeparator import ChainSeparator
-    from ChainWriter import ChainWriter
 
     from EDParser import EZDParser
 
