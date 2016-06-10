@@ -549,7 +549,7 @@ class ProfileCollection:
         Float32. This function is needed because of Numeric issues
         when pickles are transferred between 64 and 32 bit
         platforms. Rather than letting numpy.array select a
-        platform-dependent default type, it is saver to assign an
+        platform-dependent default type, it is safer to assign an
         explicit Float32, or Int32.
 
         @param prof: the profile array to recast
@@ -570,6 +570,8 @@ class ProfileCollection:
     def array_or_list( self, prof, asarray ):
         """
         Convert to array or list depending on asarray option
+        
+        Beware: empty lists will be upgraded to empty Float arrays.
 
         @param prof: profile
         @type  prof: list OR array
@@ -592,6 +594,9 @@ class ProfileCollection:
                 if type( prof ) is str:  # tolerate strings as profiles
                     return list( prof )
     
+                if len(prof) == 0: # don't create arrays from empty lists
+                    return list( prof )
+                
                 p = self.__picklesave_array( N.array( prof ) )
                 if p.dtype.char not in ['O','c','S']: ## no char or object arrays!
                     return p
@@ -936,6 +941,8 @@ class ProfileCollection:
         r = self.__class__()
         
         ## special case 1: concat something to empty profile collection
+        ##!! ATTENTION / BUG: this magically changes array types of another profile
+        ## collection connected to the parent model of next
         if not self.keys():
             return next.clone().concat( *profiles[1:] )
 
@@ -948,8 +955,14 @@ class ProfileCollection:
 
             try:
                 if isinstance( p, N.ndarray ):
+                    
+                    next_p = next.get(k)
+                    if len(next_p) == 0:
+                        next_p = next_p.astype(p.dtype)
+                        
                     r.set( k, N.concatenate( (p, next.get(k)) ),
                            **self.infos[k] )
+                    
                 else:
                     r.set( k, p + next.get(k), **self.infos[k] )
             except:
@@ -1082,12 +1095,18 @@ class ProfileCollection:
 
     def clone( self ):
         """
-        Clone (deepcopy) profile::
-          clone() -> ProfileCollection (or sub-class, actually a deepcopy)
+        Clone (deepcopy) profiles::
+          clone() -> ProfileCollection (or sub-class)
 
         @return: profile
         @rtype: ProfileCollection          
         """
+##        r = ProfileCollection()
+##        r.profiles = copy.deepcopy(self.profiles)
+##        r.infos = copy.copy(self.infos)
+##        return r
+##        
+        ## calls slim method on parent PDBModel and all connected profilecollections
         return copy.deepcopy( self )
 
 
@@ -1293,7 +1312,7 @@ class ProfileCollection:
         for k in self.keys():
             s += k + '\n'
             s += str(self.getInfo(k)) + '\n'
-            s += '\t' + self.__shortString( str(self[k]), 50 ) + '\n'
+            s += '\t' + self.__shortString( str(self.profiles[k]), 50 ) + '\n'
         return s
 
 

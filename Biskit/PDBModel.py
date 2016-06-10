@@ -70,6 +70,14 @@ class PDBProfiles( ProfileCollection ):
         """
         ProfileCollection.__init__( self, profiles=profiles, infos=infos )
         self.model = model
+    
+##    def clone(self):
+##        """
+##        Include reference to (same) parent model.
+##        """
+##        r = ProfileCollection(self).clone()
+##        r.model = self.model
+##        return r
 
     def version( self ):
         return ProfileCollection.version(self)
@@ -233,7 +241,7 @@ class PDBModel:
 
     def __getstate__(self):
         """
-        called before pickling the object.
+        called before pickling the object. (but also called by deepcopy)
         """
         self.slim()
         self.forcePickle = 0
@@ -779,27 +787,17 @@ class PDBModel:
         """
         Remove profiles, that haven't been changed from a direct
         or indirect source on disc
-        B{AUTOMATICALLY CALLED BEFORE PICKLING}
+        B{AUTOMATICALLY CALLED BEFORE PICKLING and by deepcopy}
         """
         for key in self.residues:
 
             if not self.profileChangedFromDisc( key ):
                 self.residues.set( key, None )
 
-            else:
-
-                if type( self.residues[ key ] ) is N0.arraytype:
-                    self.residues.set( key, self.residues[key].tolist() )
-
         for key in self.atoms:
 
             if not self.profileChangedFromDisc( key ):
                 self.atoms.set( key,  None )
-
-            else:
-
-                if type( self.atoms[ key ] ) is N0.arraytype:
-                    self.atoms.set( key, self.atoms[key].tolist() )
 
 
     def slim( self ):
@@ -808,6 +806,7 @@ class PDBModel:
         could hence be loaded from the source file (only if there is a source
         file...).
         B{AUTOMATICALLY CALLED BEFORE PICKLING}
+        B{Currently also called by deepcopy (via __getstate__)}
         """
         ## remove atoms/coordinates if they are unchanged from an existing
         ## source
@@ -2087,8 +2086,8 @@ class PDBModel:
 
         r.setPdbCode( self.pdbCode )
 
-        r.residues = self.residues.concat( m.residues, )
-        r.atoms = self.atoms.concat( m.atoms, )
+        r.residues = self.residues.concat( m.residues, ) ####!!! this changes type of m.atoms['serial_number']
+        r.atoms = self.atoms.concat( m.atoms, )  # at this point m.atoms['serial_number'] is float
 
         r.residues.model = r
         r.atoms.model = r

@@ -387,8 +387,9 @@ class PDBCleaner:
 
         ## re-assemble whole model
         r = chains_before.concat( m_chain, newChain=not Nterm_is_break)
+            
         r = r.concat( chains_after, newChain=not Cterm_is_break)
-
+        
         if len(c_start) != r.lenChains( breaks=breaks ):
             raise CappingError, 'Capping ACE would mask a chain break. '+\
                   'This typically indicates a tight gap with high risk of '+\
@@ -603,6 +604,7 @@ class PDBCleaner:
             assert m.lenChains() == c_len, '%i != %i' % \
                    (m.lenChains(), c_len)
             assert len(m.chainBreaks(force=True)) == len(i_breaks)
+            assert m['serial_number'].dtype == N0.Int32, 'serial_number not int'
 
         for i in capC:
             m = self.capNME( m, i, breaks=breaks )
