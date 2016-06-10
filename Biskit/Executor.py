@@ -139,7 +139,7 @@ class Executor:
 
         Condition:
 
-          - template == None
+          - template is None
 
       2. B{ input pipe from STDIN
         (== ``myprogram | 'some input string'``) }
@@ -147,7 +147,7 @@ class Executor:
         Condition:
 
           - exe.pipes == 1 / True
-          - template != None ((or f_in points to existing file))
+          - template is not None ((or f_in points to existing file))
 
         Setup:
 
@@ -163,7 +163,7 @@ class Executor:
                  directly to the program. This is the fastest option
                  as it avoids file access alltogether.
 
-             3. `template` == None but f_in points to an *existing* file:
+             3. `template` is None but f_in points to an *existing* file:
 
                   Executor will read this file and push it unmodified to
                   the program via StdIn. (kind of an exception, if used at
@@ -176,7 +176,7 @@ class Executor:
         Condition:
 
             - exe.pipes == 0 / False
-            - template != None
+            - template is not None
             - push_inp == 1 / True (default)
 
         Setup:
@@ -790,7 +790,7 @@ class Test(BT.BiskitTest):
         if self.local:
             print 'Emacs was running for %.2f seconds'%self.e.runTime
 
-        self.assert_( self.e.pid != None )
+        self.assert_( self.e.pid is not None )
     
     def test_tempfiles(self):
         """Executor test temporary file creation and removal"""

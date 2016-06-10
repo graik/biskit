@@ -107,7 +107,7 @@ class ExeConfig( object ):
     created from the above file can be used as follows:
 
       >>> x = ExeConfig( 'emacs' )
-      >>> x.cwd == None
+      >>> x.cwd is None
       >>> True
       >>> print x.comment
       >>> the emacs editor

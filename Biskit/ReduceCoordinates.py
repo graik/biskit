@@ -301,7 +301,7 @@ class ReduceCoordinates:
             if axis == 1:
                 center = center[:, N0.NewAxis, :]
 
-            if r_xyz == None:
+            if r_xyz is None:
                 r_xyz = center
 
             else:

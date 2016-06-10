@@ -149,7 +149,7 @@ class ComplexEvolvingList( ComplexList ):
         @rtype: [any]
         """
         l = self
-        if indices != None:
+        if indices is not None:
             l = N0.take( l, indices )
 
         if not unique:

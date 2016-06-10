@@ -105,7 +105,7 @@ class Trajectory:
         self.profiles = TrajProfiles()
         self.verbose= verbose
 
-        if pdbs != None:
+        if pdbs is not None:
             refpdb = refpdb or pdbs[0]
 
             self.__create( pdbs, refpdb, rmwat=rmwat, castAll=castAll )
@@ -478,7 +478,7 @@ class Trajectory:
         ## semi-deep copy of reference model
         r.setRef( self.ref.take( range( self.ref.lenAtoms() )) )
 
-        if self.frameNames != None:
+        if self.frameNames is not None:
             r.frameNames = N0.take( self.frameNames, indices, 0 )
             r.frameNames = map( ''.join, r.frameNames.tolist() )
 
@@ -688,7 +688,7 @@ class Trajectory:
         @param profInfos: additional key=value pairs for rms profile info []
         @type profInfos: key=value
         """
-        if ref == None:
+        if ref is None:
             refxyz = N0.average( self.frames, 0 )
         else:
             refxyz = ref.getXyz()
@@ -880,7 +880,7 @@ class Trajectory:
         @param frames: frame indices (default: all)
         @type  frames: [int]
         """
-        if frames == None:
+        if frames is None:
             frames = range( self.lenFrames() )
 
         template = " %7.3f" * 10 + '\n'
@@ -1042,7 +1042,7 @@ class Trajectory:
         """
         frames = self.frames
 
-        if aMask != None:
+        if aMask is not None:
             frames = N0.compress( aMask, frames, 1 )
 
         result = N0.zeros( (len( frames ), len( frames )), N0.Float32 )
@@ -1255,7 +1255,7 @@ class Trajectory:
         @return: Numpy array 1 x N of float
         @rtype: [float]
         """
-        if fluctList == None:
+        if fluctList is None:
             fluctList = self.getFluct_local()
 
         ## define mask for gamma atoms in all Amino acids
@@ -1279,7 +1279,7 @@ class Trajectory:
 
         @raise TrajError: if result length <> N_residues: 
         """
-        if atomFluctList == None:
+        if atomFluctList is None:
             atomFluctList = self.getFluct_global()
 
         ## Give all atoms of each res. the same fluct. value
@@ -1382,7 +1382,7 @@ class Trajectory:
 
         @raise TrajError: if sortList doesn't fit number of frames or names
         """
-        if sortList == None:
+        if sortList is None:
             sortList = self.argsortFrames()
 
         if len(sortList) != len(self.frames) or\
@@ -1423,13 +1423,13 @@ class Trajectory:
         """
         result = copy.deepcopy( getattr(self, 'pc', None ))
 
-        if result != None:
+        if result is not None:
 
             result['p'] = N0.take( result['p'], indices, 0 )
 
             result['u'] = N0.take( result['u'], indices, 0 )
 
-            if result['fMask'] != None:
+            if result['fMask'] is not None:
                 result['fMask'] = N0.take( result['fMask'], indices, 0 )
 
         return result
@@ -1466,13 +1466,13 @@ class Trajectory:
                         'fit':.., 'aMask':.., 'fMask':.. parameters used}
         @rtype: dict
         """
-        if aMask == None:
+        if aMask is None:
             aMask = N0.ones( self.getRef().lenAtoms(), N0.Int32 )
 
         pc = getattr(self, 'pc', None)
 
         ## return chached result if parameters haven't changed
-        if pc != None and pc['fMask'] == fMask and pc['fit'] == fit and \
+        if pc is not None and pc['fMask'] == fMask and pc['fit'] == fit and \
            aMask == pc['aMask']:
 
             return pc

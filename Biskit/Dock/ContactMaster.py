@@ -402,7 +402,7 @@ class ContactMaster(TrackingJobMaster):
             return 1
 
         for ikey in com.keys():
-            if com[ikey] == None:
+            if com[ikey] is None:
 
                 return 1
 

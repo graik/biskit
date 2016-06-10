@@ -413,7 +413,7 @@ def packBinaryMatrix( cm ):
     @return: {'shape':(X,Y), 'nonzero':[int] }
     @rtype: dict
     """
-    if cm == None or type( cm ) == dict:
+    if cm is None or type( cm ) == dict:
         return cm
 
     result = {}
@@ -463,7 +463,7 @@ def matrixToList( cm ):
     @return: {'shape':(int,..), 'lst':[..] }
     @rtype: dict
     """
-    if cm == None or type( cm ) == dict:
+    if cm is None or type( cm ) == dict:
         return cm
 
     result = {}

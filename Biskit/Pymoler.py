@@ -75,7 +75,7 @@ class PymolModel:
                     ('occupancy' OR 'temperature_factor')
         @type  key: occupancy|temperature_factor
         """
-        if self.struct == None:
+        if self.struct is None:
             self.struct = PDBModel( self.fname )
             self.temporary = 1
 
@@ -97,7 +97,7 @@ class PymolModel:
         @type  key: occupancy|temperature_factor
         """
         try:
-            if self.struct == None:
+            if self.struct is None:
                 self.struct = PDBModel( self.fname )
                 self.temporary = 1
 
@@ -224,7 +224,7 @@ class Pymoler( Executor ):
             pdb = [pdb]
 
         ## dream up a nice model name
-        if modName == None:
+        if modName is None:
 
             if type( pdb[0]) is str:
                 modName = T.stripFilename( pdb[0] )

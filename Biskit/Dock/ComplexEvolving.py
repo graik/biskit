@@ -76,7 +76,7 @@ class ComplexEvolving( ProtComplex ):
             ## ... or create a new history
             self.history = ComplexList()
 
-        if com_0 != None:
+        if com_0 is not None:
             self.history.append( com_0 )
 
             ## save only differences between old and new conformations

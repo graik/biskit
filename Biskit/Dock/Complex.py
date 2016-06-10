@@ -70,7 +70,7 @@ class Complex:
         self.info.update( info )
 
         self.ligandMatrix = ligMatrix
-        if self.ligandMatrix == None:
+        if self.ligandMatrix is None:
             self.ligandMatrix = N0.array([ [1,  0,  0, 0],
                                         [0,  1,  0, 0],
                                         [0,  0,  1, 0],
@@ -225,7 +225,7 @@ class Complex:
         except:
             lig = None
 
-        if lig == None or force:
+        if lig is None or force:
             ## get transformation matrix and apply it
             lig = self.lig_model.transform( *self.ligMatrix() )
 
@@ -341,7 +341,7 @@ class Complex:
             del self.info['matrix']
 
         ## compress contact matrix array
-        if self.contacts != None and \
+        if self.contacts is not None and \
                len(N0.shape( self.contacts['result'] ) )==2:
             m = self.contacts['result']
             self.contacts['shape'] = N0.shape( m )
@@ -521,7 +521,7 @@ class Complex:
         @return: list of tuples [('N','G'), ('P','C')..]
         @rtype: [(str.str)..]
         """
-        if cm == None:
+        if cm is None:
             cm = self.resContacts()
 
         seq_lig = self.lig().sequence()
@@ -551,7 +551,7 @@ class Complex:
         @return: dict {'A':3, 'C':1, .. } (20 standard amino acids)
         @rtype: dict
         """
-        if cm == None:
+        if cm is None:
             cm = self.resContacts()
 
         ## get mask for residues involved in contacts
@@ -637,13 +637,13 @@ class Complex:
         @rtype: dict OR None
         """
         ## Backwards compatibility
-        if self.contacts != None and type( self.contacts ) == str:
+        if self.contacts is not None and type( self.contacts ) == str:
             self.contacts = t.load( self.contacts )
             EHandler.warning("loading old-style pickled contacts.") 
             return self.contacts
 
         ## New, uncompression from list of indices into raveled array
-        if self.contacts != None and \
+        if self.contacts is not None and \
            len( N0.shape( self.contacts['result'])) == 1:
 
             try:
@@ -693,13 +693,13 @@ class Complex:
                  2-D array(residues_receptor x residues_ligand) of 0 or 1
         @rtype: array
         """
-        if cutoff == None:
-            if self.contacts != None:
+        if cutoff is None:
+            if self.contacts is not None:
                 cutoff = self.contacts['cutoff']
             else:
                 cutoff = 4.5
 
-        if not force and self.loadResContacts() != None \
+        if not force and self.loadResContacts() is not None \
            and self.contacts['cutoff'] == cutoff \
            and self.contacts['maskRec'] == maskRec \
            and self.contacts['maskLig'] == maskLig:
@@ -717,7 +717,7 @@ class Complex:
             self.contacts['result'] = result
 
         # delete/insert rows or columns to match sequence of reference complex
-        if refComplex != None:
+        if refComplex is not None:
             result = self.__alignMatrixDimension(result,
                                                  self.rec_model.sequence(),
                                                  refComplex.rec_model.sequence() )
@@ -874,10 +874,10 @@ class Complex:
         @return: atom contact matrix, Numpy array N(atoms_lig) x N(atoms_rec)
         @rtype: array
         """
-        if lig_mask == None:
+        if lig_mask is None:
             lig_mask = self.lig().maskHeavy()
 
-        if rec_mask == None:
+        if rec_mask is None:
             rec_mask = self.rec().maskHeavy()
 
         contacts = self.__atomContacts( cutoff, rec_mask, lig_mask, cache )

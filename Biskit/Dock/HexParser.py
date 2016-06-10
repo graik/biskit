@@ -82,7 +82,7 @@ class HexParser:
         """
         ## get set of lines describing next complex:
         lines = self._nextBlock()
-        if lines == None:
+        if lines is None:
             ## EOF
             return None
         ## skip incomplete records
@@ -96,7 +96,7 @@ class HexParser:
             try:
                 ## labels has to be in the same order as in hex.out
                 m = self.ex_line.search( l )
-                if m != None:
+                if m is not None:
                     m = m.groups()
 
                     if m[0] == 'Orientation':
@@ -162,7 +162,7 @@ class HexParser:
         while line:
             if line[:4] != "# --":
                 ## found matrix line, append it to previous line
-                if self.ex_matrix.search(line) != None:
+                if self.ex_matrix.search(line) is not None:
                     result[-1] = result[-1] + line
                 else:
                     result += [line]

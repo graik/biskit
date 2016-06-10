@@ -341,7 +341,7 @@ def tempDir():
     @return: directort for temporary files
     @rtype: str    
     """
-    if tempfile.tempdir != None:
+    if tempfile.tempdir is not None:
         return  tempfile.tempdir
 
     return osp.dirname( tempfile.mktemp() )
@@ -854,7 +854,7 @@ def toInt( o, default=None ):
     @return: integer OR None 
     @rtype: int OR None     
     """
-    if o == None or o == '':
+    if o is None or o == '':
         return default
     try:
         return int( o )

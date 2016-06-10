@@ -179,7 +179,7 @@ class AmberEntropyMaster(TrackingJobMaster):
         self.clean = clean
         self.all = all
 
-        ## members to exclude, outliers will be added if zfilter != None
+        ## members to exclude, outliers will be added if zfilter is not None
         self.ex_frec = exrec
         self.ex_flig = exlig
         self.ex_com  = excom

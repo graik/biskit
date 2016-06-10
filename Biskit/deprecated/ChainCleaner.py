@@ -234,7 +234,7 @@ class ChainCleaner:
         @rtype: chain object OR  None
         """
         chain = self.reader.next()
-        if (chain == None):
+        if (chain is None):
             ## extract all waters into separate pdb
             self.reader.extractWaters( )
 

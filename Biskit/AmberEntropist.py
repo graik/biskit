@@ -184,9 +184,9 @@ class AmberEntropist( AmberCrdEntropist ):
             self.ex3 = None
         else:
             self.ex3 = ex3-1
-        if ex3 != None: self.ex_n = 0
+        if ex3 is not None: self.ex_n = 0
 
-        if ex1 != None:
+        if ex1 is not None:
             self.ex3 = None
             self.ex_n = 0
         if ex1 in [0, None]:
@@ -453,7 +453,7 @@ class AmberEntropist( AmberCrdEntropist ):
         @return: 
         @rtype: EnsembleTraj
         """
-        if exclude == None or len( exclude ) == 0:
+        if exclude is None or len( exclude ) == 0:
             return traj
 
         members = range( traj.n_members )
@@ -487,18 +487,18 @@ class AmberEntropist( AmberCrdEntropist ):
         else:
             n_memb = t.n_members
 
-        if self.ex3 != None and type( self.exclude ) is tuple:
+        if self.ex3 is not None and type( self.exclude ) is tuple:
             self.exclude = self.__add3(n_memb[0], self.exclude[0], self.ex3),\
                            self.__add3(n_memb[1], self.exclude[1], self.ex3)
 
-        if self.ex3 != None and type( self.exclude ) is list:
+        if self.ex3 is not None and type( self.exclude ) is list:
             self.exclude = self.__add3( n_memb, self.exclude, self.ex3 )
 
-        if self.ex1 != None and type( self.exclude ) is tuple:
+        if self.ex1 is not None and type( self.exclude ) is tuple:
             self.exclude = self.__add1(n_memb[0], self.exclude[0], self.ex1),\
                            self.__add1(n_memb[1], self.exclude[1], self.ex1)
 
-        if self.ex1 != None and type( self.exclude ) is list:
+        if self.ex1 is not None and type( self.exclude ) is list:
             self.exclude = self.__add1( n_memb, self.exclude, self.ex1 )
 
         if type( t ) is tuple:

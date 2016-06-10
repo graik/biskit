@@ -91,10 +91,10 @@ class TrajCluster:
                       (default:0)
         @type  force: 1|0
         """
-        if aMask == None:
+        if aMask is None:
             aMask = N0.ones( self.traj.getRef().lenAtoms() )
 
-        if self.fc == None or force or self.fcWeight != weight \
+        if self.fc is None or force or self.fcWeight != weight \
            or self.n_clusters != n_clusters or N0.any( self.aMask != aMask) \
            or self.fcConverged != converged:
 

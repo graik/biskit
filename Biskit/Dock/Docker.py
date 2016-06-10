@@ -285,7 +285,7 @@ class Docker:
                                                       macDock=self.macroDock, sol=self.soln,
                                                       silent=silent)
 
-        if self.macroDock == None:
+        if self.macroDock is None:
             self.macroDock = macro
         else:
             if self.macroDock != macro:

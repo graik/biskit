@@ -210,7 +210,7 @@ class ContactSlave(JobSlave):
         @type  c: Complex
         """
         try:
-            if self.requested(c, 'fnac_4.5') and self.c_ref_atom_4_5 != None:
+            if self.requested(c, 'fnac_4.5') and self.c_ref_atom_4_5 is not None:
                 ## cache pairwise atom distances for following calculations
                 contacts = c.atomContacts( 4.5, self.mask_rec, self.mask_lig,
                                            cache=1, map_back=0 )
@@ -219,7 +219,7 @@ class ContactSlave(JobSlave):
                 c['fnac_4.5'] = N0.sum( N0.ravel(contacts) * ref )\
                  / float( N0.sum(ref))
 
-            if self.requested(c, 'fnac_10') and self.c_ref_atom_10 != None:
+            if self.requested(c, 'fnac_10') and self.c_ref_atom_10 is not None:
 
                 contacts = c.atomContacts( 10., self.mask_rec, self.mask_lig,
                                            cache=1, map_back=0 )
@@ -229,19 +229,19 @@ class ContactSlave(JobSlave):
                  / float( N0.sum(ref))
 
             if self.requested(c, 'c_res_4.5') \
-               or ( self.c_ref_res_4_5 != None \
+               or ( self.c_ref_res_4_5 is not None \
                     and (self.requested(c,'fnrc_4.5','fnSurf_rec'))):
 
                 res_cont = c.resContacts( 4.5,
                                           cache=self.requested(c, 'c_res_4.5'))
 
-                if self.c_ref_res_4_5 != None \
+                if self.c_ref_res_4_5 is not None \
                    and self.requested(c, 'fnrc_4.5' ):
                     ref = N0.ravel( self.c_ref_res_4_5 )
                     c['fnrc_4.5'] = N0.sum(N0.ravel(res_cont)*ref) \
                      /float(N0.sum(ref))
 
-                if self.c_ref_res_4_5 != None \
+                if self.c_ref_res_4_5 is not None \
                    and self.requested(c, 'fnSurf_rec'):
                     r, l = c.fractionNativeSurface(res_cont,
                                                    self.c_ref_res_4_5 )

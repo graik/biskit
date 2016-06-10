@@ -1240,7 +1240,7 @@ class PDBModel:
         @return: array( 1 x N_atoms ) of 0||1
         @rtype: array
         """
-        if self.__maskCA == None or force:
+        if self.__maskCA is None or force:
             self.__maskCA = self.maskFrom( 'name', 'CA' )
 
         return self.__maskCA
@@ -1260,7 +1260,7 @@ class PDBModel:
         @return: array( 1 x N_atoms ) of 0||1
         @rtype: array
         """
-        if self.__maskBB == None or force or solvent:
+        if self.__maskBB is None or force or solvent:
             mask = self.maskFrom( 'name', ['CA', 'C', 'N', 'O', 'H','OXT',
                                            "P","O5'","C5'","C4'","C3'","O3'"])
             if not solvent:
@@ -1283,7 +1283,7 @@ class PDBModel:
         @return: array( 1 x N_atoms ) of 0||1
         @rtype: array
         """
-        if self.__maskHeavy == None or force:
+        if self.__maskHeavy is None or force:
             self.__maskHeavy = self.maskFrom( 'element', lambda a: a != 'H' )
 
         return self.__maskHeavy
@@ -3482,7 +3482,7 @@ class PDBModel:
         """
         ## By default compare all residues
         start = start or 0
-        if stop == None:    ## don't use stop = stop or .. stop might be 0!
+        if stop is None:    ## don't use stop = stop or .. stop might be 0!
             stop = self.lenResidues()
 
         ## set to 1 when identical

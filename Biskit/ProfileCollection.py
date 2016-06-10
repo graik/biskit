@@ -451,6 +451,19 @@ class ProfileCollection:
         """
         return [ self.get( key ) for key in self.keys() ]
 
+    def hasNoneProfile(self):
+        """
+        Check wether any profile is None, which means it is 
+        waiting to be updated from a source ProfileCollection.
+        This method is written such that it is *not* triggering the 
+        updating mechanism.
+        @return bool
+        """
+        for v in self.profiles.values():
+            if v is None:
+                return True
+        return False
+            
 
     def items( self ):
         """

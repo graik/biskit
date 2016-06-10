@@ -83,7 +83,7 @@ def addHosts( number=None, hosts=H.nodes_all, expand=1 ):
 
     @param number: number of requested nodes
                    if number == 0, nothing happens
-                   if number == None, all hosts are added (default)
+                   if number is None, all hosts are added (default)
     @type  number: int
     @param hosts: list of host names (default: Biskit.PVM.hosts.nodes_all)
     @type  hosts: [str]

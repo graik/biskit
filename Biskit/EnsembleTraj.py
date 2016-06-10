@@ -102,7 +102,7 @@ class EnsembleTraj( Trajectory ):
 
         self.n_members = n_members
 
-        if self.frameNames != None:
+        if self.frameNames is not None:
             self.sortFrames()
 
         if self.n_members and self.frames is not None and \
@@ -518,7 +518,7 @@ class EnsembleTraj( Trajectory ):
     
         @param refIndex: index of reference frame within member traj.
                          If None -> fit to average coordinates
-                         (if refModel == None)
+                         (if refModel is None)
         @type  refIndex: int OR None
         @param refModel: fit to this structure (default: None)
         @type  refModel: PDBModel
@@ -537,7 +537,7 @@ class EnsembleTraj( Trajectory ):
         ml = self.memberList()
 
         for m in ml:
-            if refIndex == None:
+            if refIndex is None:
                 if refModel==None:
                     ref = None
                 else:

@@ -220,7 +220,7 @@ class ComplexList( list ):
         """
         Add eithem to list of it is not already there.
         """
-        if lst == None:
+        if lst is None:
             lst = []
         if not item in lst:
             lst.append( item )
@@ -354,7 +354,7 @@ class ComplexList( list ):
         @rtype: [any]
         """
         l = self
-        if indices != None:
+        if indices is not None:
             l = N0.take( N0.array(l,'O'), indices )
 
         if not unique:
@@ -460,7 +460,7 @@ class ComplexList( list ):
 
             indices = self.filterFunct( cond )
 
-        if indices == None:
+        if indices is None:
             try:
                 indices = self.filterEqual( infoKey, [cond] )
             except:
@@ -628,7 +628,7 @@ class ComplexList( list ):
         r1, r2 = [],[]
 
         for i in range( len(l1)):
-            if l1[i] != None and l2[i] != None:
+            if l1[i] is not None and l2[i] is not None:
                 r1 += [ l1[i] ]
                 r2 += [ l2[i] ]
 
