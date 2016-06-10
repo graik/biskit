@@ -22,9 +22,6 @@
 
 ## Contributions: olivier PERIN
 ##
-## last $Author$
-## last $Date$
-## $Revision$
 
 """
 Analyze model quality

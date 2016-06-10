@@ -19,9 +19,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## last $Author: graik $
-## last $Date: 2007-06-22 17:34:10 +0200 (Fri, 22 Jun 2007) $
-## $Revision: 459 $
 """
 Fetch a PDBModel from the remote or a local NCBI PDB database.
 

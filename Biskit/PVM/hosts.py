@@ -1,9 +1,6 @@
 ##
 ## Adapt this file and save it under ~/.biskit/hosts.py !
 ##
-## last $Date$
-## last $Author$
-## $Revision$
 """
 The list of cluster computers available to PVM.
 Each host must be accessible via ssh w/o password.

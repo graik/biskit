@@ -20,9 +20,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## last $Date$
-## last $Author$
-## $Revision$
 
 """
 Calculate contact matrix and some scores for complexes.

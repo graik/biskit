@@ -20,8 +20,6 @@
 ##
 
 ## Start XPlor MD for interface project
-## last $Author$
-## $Date$
 
 from os.path import *
 import os

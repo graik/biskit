@@ -20,8 +20,6 @@
 ##
 
 ## Add file names of frames to trajectory
-## last $Author$
-## last $Date$
 
 from Biskit.tools import *
 from Biskit import Trajectory

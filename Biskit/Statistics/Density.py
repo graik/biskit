@@ -19,9 +19,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ## Contributions: Wolfgang Rieping, Michael Habeck, Raik Gruenberg
-## last $Author$
-## last $Date$
-## $Revision$
 
 """
 Analyze a density distribution of values.

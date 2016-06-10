@@ -20,9 +20,6 @@
 ##
 
 ##
-## last $Author$
-## $Date$
-## $Revision$
 ##
 
 from Biskit import molUtils as MOU

@@ -4,9 +4,6 @@
 ## (C) 2004-2006 Raik Gruenberg & Johan Leckner; All rights reserved
 ##
 
-## last $Author$
-## last $Date$
-## $Revision$
 
 import numpy.random as ra
 import Biskit.oldnumeric as N0

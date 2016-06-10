@@ -17,9 +17,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ## Contributions: Benjamin Bouvier
-## last $Author$
-## last $Date$
-## $Revision$
 """Generate and analyze ROC curves of specificity versus sensitivity."""
 import numpy as N
 import copy, random

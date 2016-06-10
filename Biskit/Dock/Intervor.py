@@ -18,9 +18,6 @@
 ##
 ##
 
-## last $Author$
-## last $Date$
-## $Revision$
 
 """
 Triangulate a protein-protein interface with Intervor.

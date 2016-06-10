@@ -18,9 +18,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## last $Author$
-## last $Date$
-## $Revision$
 
 ## Shorter Replacement of a_rmsd_vs_docking_performance
 ## creates one plot and two data files for external plotting

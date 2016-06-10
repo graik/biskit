@@ -17,9 +17,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ## Contributions: Olivier PERIN, Raik Gruenberg
-## last $Author$
-## last $Date$
-## $Revision$
 """
 Parallelize Modeller runs
 """

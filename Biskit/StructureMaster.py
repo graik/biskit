@@ -18,9 +18,6 @@
 ##
 ##
 ##
-## last $Author$
-## last $Date$
-## $Revision$
 
 """
 Parallizes the convertion of PDB files into pickled PDBModel objects.

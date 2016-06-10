@@ -21,9 +21,6 @@
 ##
 ##
 
-## last $Author$
-## last $Date$
-## $Revision$
 
 """
 Multi-copy trajectory

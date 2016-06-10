@@ -17,9 +17,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## $Revision$
-## last $Author$
-## last $Date$
 """
 Defines method decorators. Decorators are wrapping functions
 that can preceed the definition of methods (since Python 2.4, using the '@'

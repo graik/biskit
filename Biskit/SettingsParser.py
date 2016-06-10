@@ -17,9 +17,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## last $Author$
-## last $Date$
-## $Revision$
 """
 Parse a Biskit settings file.
 """

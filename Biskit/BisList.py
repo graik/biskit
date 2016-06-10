@@ -20,9 +20,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## last $Author$
-## last $Date$
-## $Revision$
 """
 organise, sort, and filter collection of dictionaries or similar objects
 S{->} abstract base class (aka interface)

@@ -20,9 +20,6 @@
 ## original authors: Raik Gruenberg, Johan Leckner
 ## contributing    : Olivier Perin (post-processing)
 ##
-## last $Author$
-## last $Date$
-## $Revision$
 """
 Interface to Modeller
 """

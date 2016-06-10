@@ -20,9 +20,6 @@
 ##
 ## Analyze entropy of a single trajectory with ptraj
 
-## last $Author$
-## last $Date$
-## $Revision$
 
 import sys
 

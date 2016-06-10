@@ -28,8 +28,6 @@
 ## Schlitter (1993) Chem. Phys. Lett. 215. 617
 ## uses such a covariance matrix (from MD) for an entropy estimate. 
 ##
-## last $Date$
-## last $Author$
 
 from tools import *
 from mathUtils import *

@@ -18,9 +18,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## $Revision$
-## last $Date$
-## last $Author$
 ##
 ## required by pdbs2struct.py
 

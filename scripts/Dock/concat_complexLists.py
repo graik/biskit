@@ -19,8 +19,6 @@
 ##
 ##
 ##
-## last $Author$
-## $Date$
 
 import Biskit.tools as T
 from Biskit.Dock import ComplexList

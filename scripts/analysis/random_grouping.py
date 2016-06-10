@@ -21,9 +21,6 @@
 ##
 ## select set of non-redundant, non-native random complexes
 ##
-## last $Author$
-## $Revision$
-## $Date$
 
 import time
 import random

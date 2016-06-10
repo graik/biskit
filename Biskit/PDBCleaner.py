@@ -21,9 +21,6 @@
 ##
 ##
 ##
-## last $Author$
-## last $Date$
-## $Revision$
 
 """
 Clean PDB-files so that they can be used for MD. This module is a 

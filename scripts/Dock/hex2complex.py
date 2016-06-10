@@ -20,8 +20,6 @@
 ##
 ## hex2complex
 ##
-## last $Author$
-## $Date$
 
 from Biskit.Dock import HexParser
 from Biskit import CommandLine

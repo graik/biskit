@@ -22,8 +22,6 @@
 ##
 ## Compare rmsd vs. fraction nativ residue and/or atom contacts
 ##
-## last $Author$
-## $Date$
 
 import Biskit.tools as T
 from Numeric import *

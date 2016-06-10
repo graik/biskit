@@ -19,9 +19,6 @@
 ##
 ##
 ## Convert single amber crd into Trajectory object
-## $Revision$
-## last $Date$
-## last $Author$
 
 import sys
 from Biskit.tools import *

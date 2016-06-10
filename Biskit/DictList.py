@@ -18,9 +18,6 @@
 ##
 ##
 
-## last $Author$
-## last $Date$
-## $Revision$
 """
 organise, sort, and filter list of dictionaries or similar objects
 """

@@ -20,9 +20,6 @@
 ##
 ## contacter
 ##
-## last $Author$
-## $Date$
-## $Revision$
 
 import Biskit.tools as t
 import sys

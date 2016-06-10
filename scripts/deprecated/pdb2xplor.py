@@ -19,9 +19,6 @@
 ##
 ##
 
-## last $Author$
-## last $Date$
-## $Revision$
 
 from Scientific.Geometry import Vector
 

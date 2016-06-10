@@ -19,9 +19,6 @@
 ##
 ##
 ##
-## last $Author$
-## $Date$
-## $Revision$
 
 from Biskit.tools import *
 from Biskit.EnsembleTraj import traj2ensemble

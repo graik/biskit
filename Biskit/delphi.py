@@ -16,9 +16,6 @@
 ## license.txt along with this program; if not, write to the Free
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-## $Revision: 1086 $
-## last $Date: 2012-02-23 19:10:59 -0500 (Thu, 23 Feb 2012) $
-## last $Author: graik $
 """
 Wrapper for Delphi -- Poisson-Boltzman electrostatic potential calculation.
 """

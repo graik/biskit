@@ -20,9 +20,6 @@
 ##
 ##
 
-## last $Author$
-## last $Date$
-## $Revision$
 
 """
 Run ptraj entropy analysis on Trajectory instance.

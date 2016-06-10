@@ -18,9 +18,6 @@
 ##
 ##
 
-## last $Author$
-## last $Date$
-## $Revision$
 
 """
 Calculate Contact Area Difference (CAD) with ICMBrowser.

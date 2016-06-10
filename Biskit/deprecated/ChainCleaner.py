@@ -17,9 +17,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## $Revision$
-## last $Date$
-## last $Author$
 """
 Fill in missing atoms, and report low occupancies
 

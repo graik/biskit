@@ -20,9 +20,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## last $Author$
-## last $Date$
-## $Revision$
 
 """
 Analyze a structure using  Prosa2003.

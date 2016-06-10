@@ -21,9 +21,6 @@
 ## Calculate vibrational entropy of binding from trajectory of rec, lig, and
 ## complex
 
-## last $Author$
-## last $Date$
-## $Revision$
 
 import sys, time
 

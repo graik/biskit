@@ -21,9 +21,6 @@
 ##
 ##
 
-## $Revision$
-## last $Author$
-## last $Date$
 
 """
 general purpose math methods

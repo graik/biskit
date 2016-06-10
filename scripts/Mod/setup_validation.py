@@ -18,9 +18,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ## Contributions: Olivier PERIN
-## last $Author$
-## last $Date$
-## $Revision$
 
 from Biskit.Mod.ValidationSetup import ValidationSetup as VS
 import Biskit.tools as T

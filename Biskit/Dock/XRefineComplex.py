@@ -17,9 +17,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 
-## last $Revision$
-## last $Date$
-## last $Author$
 """work in progress!"""
 
 from Biskit import Xplorer, XplorerError

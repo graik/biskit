@@ -20,9 +20,6 @@
 ##
 ## create list of random complex orientations
 ##
-## last $Author$
-## $Revision$
-## $Date$
 
 from Biskit.tools import *
 from Biskit.Dock import ComplexRandomizer, ComplexList

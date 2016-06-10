@@ -17,9 +17,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## $Revision$
-## last $Author$
-## last $Date$
 
 """
 Add some extra functionality to JobMaster

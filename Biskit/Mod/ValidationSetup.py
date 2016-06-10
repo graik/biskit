@@ -18,9 +18,6 @@
 ##
 ##
 ## Contributions: olivier PERIN
-## last $Author$
-## last $Date$
-## $Revision$
 
 """
 Setup directory structure for the validation.  

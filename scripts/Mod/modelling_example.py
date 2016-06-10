@@ -18,9 +18,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 
-## $Revision$
-## last $Author$
-## last $Date$
 
 from Biskit.Mod import SequenceSearcher
 from Biskit.Mod import TemplateSearcher

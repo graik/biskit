@@ -21,9 +21,6 @@
 ##
 ## pool several trajectory objects to one ensemble trajectory
 ##
-## last $Author$
-## last $Date$
-## $Revision$
 
 import sys
 

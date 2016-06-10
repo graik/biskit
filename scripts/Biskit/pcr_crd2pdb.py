@@ -20,8 +20,6 @@
 ##
 
 ## extract pdb files from xplor PCR trajectories
-## last $Author$
-## $Date$
 
 from Biskit.tools import *
 from Biskit import ExeConfig

@@ -22,9 +22,6 @@
 
 ## Select frames from trajectory for docking
 
-## last $Author$
-## last $Date$
-## $Revision$
 
 import Biskit.tools as T
 import Biskit.mathUtils as MaU

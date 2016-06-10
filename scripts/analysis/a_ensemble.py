@@ -21,8 +21,6 @@
 ##
 ##
 ##
-## last $Date$
-## last $Author$
 
 import sys
 import os.path as osp

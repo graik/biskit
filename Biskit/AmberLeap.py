@@ -18,9 +18,6 @@
 ##
 ##
 
-## last $Author: graik $
-## last $Date: 2007-10-08 12:53:03 +0200 (Mon, 08 Oct 2007) $
-## $Revision: 543 $
 
 """
 Wrap the Amber tleap program.

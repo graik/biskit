@@ -3,9 +3,6 @@
 ## (C) 2004-2006 Raik Gruenberg & Johan Leckner; All rights reserved
 ##
 
-## last $Author$
-## last $Date$
-## $Revision$
 
 import random
 import numpy as N

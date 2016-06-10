@@ -20,9 +20,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## $Revision$
-## last $Date$
-## last $Author$
 """
 Create Amber topology and coordinate file from PDB.
 """

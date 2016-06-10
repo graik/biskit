@@ -21,9 +21,6 @@
 ##
 
 ##
-## last $Author$
-## last $Date$
-## $revision: $
 
 """
 Utilities for handling structures and sequences

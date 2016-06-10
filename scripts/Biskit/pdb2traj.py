@@ -21,8 +21,6 @@
 
 ## pdb2traj.py
 ## Collect coordinate frames of a molecule
-## last $Author$
-## last $Date$
 
 import Biskit.tools as tools
 from Biskit import Trajectory, EnsembleTraj

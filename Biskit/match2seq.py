@@ -20,9 +20,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## $Revision$
-## last $Date$
-## last $Author$
 """
 Match 2 sequences against each other, deleting all positions that differ.
 compareStructures() compares sequences of 2 structures and returns

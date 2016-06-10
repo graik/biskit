@@ -23,8 +23,6 @@
 ## The parm file will have the same atom content as the PDB -
 ## i.e. it will have missing atoms and cannot be used for simulation.
 ## 
-## last $Author$
-## last $Date$
 
 import sys
 

@@ -22,9 +22,6 @@
 
 ## Contributions: Olivier PERIN
 ##
-## last $Author$
-## $Date$
-## $Revision$
 """
 Modeling benchmark
 """

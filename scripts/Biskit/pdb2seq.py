@@ -19,9 +19,6 @@
 ##
 ##
 
-## last $Author$
-## last $Date$
-## $Revision$
 
 import sys
 

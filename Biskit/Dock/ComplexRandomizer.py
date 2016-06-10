@@ -22,9 +22,6 @@
 ##
 ##
 ##
-## $Revision$
-## last $Author$
-## last $Date$
 """
 Create Complexes with random orientation from a receptor and ligand structure.
 """

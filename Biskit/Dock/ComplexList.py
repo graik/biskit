@@ -22,9 +22,6 @@
 ##
 ## organise, sort, and filter Complexes
 ##
-## last $Author$
-## last $Date$
-## $Revision$
 
 """
 List of Complex objects.

@@ -21,9 +21,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ## Contributions: Michael Habeck, Raik Gruenberg
-## $Revision$
-## last $Date$
-## last $Author$
 
 """
 lognormal distribution

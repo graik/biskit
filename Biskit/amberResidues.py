@@ -17,9 +17,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-## last $Author: graik $
-## last $Date: $
-## $Revision: $
 """
 Read Amber residue topology from Amber "off" libraries.
 """

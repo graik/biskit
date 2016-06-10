@@ -22,9 +22,6 @@
 ##
 ##
 ##
-## $Revision$
-## last $Author$
-## last $Date$
 """
 Use MSMS to calculate surface info.
 

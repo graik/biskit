@@ -21,8 +21,6 @@
 
 ## trajFluct.py
 ## Calculate global and side chain fluctuation per atom
-## last $Author$
-## last $Date$
 
 from Biskit.tools import *
 from Biskit import Trajectory, PDBDope

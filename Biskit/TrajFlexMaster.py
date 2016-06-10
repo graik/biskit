@@ -21,9 +21,6 @@
 ##
 ##
 ##
-## last $Author$
-## last $Date$
-## $Revision$
 
 """
 Parallize calculation of pairwise rmsd between the frames of a trajectory

@@ -18,9 +18,6 @@
 ##
 ##
 ## Contributions: Raik Gruenberg
-## last $Author$
-## last $Date$
-## $Revision$
 
 """
 Thread - save job handling for JobMaster (see L{dispatcher}).

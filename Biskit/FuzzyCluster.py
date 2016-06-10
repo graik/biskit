@@ -20,9 +20,6 @@
 ## license.txt along with this program; if not, write to the Free
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-## $Revision$
-## last $Date$
-## last $Author$
 
 """
 Implementation of the fuzzy c-means algorithm

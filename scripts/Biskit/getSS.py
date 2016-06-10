@@ -19,9 +19,6 @@
 ##
 ##
 
-## last $Author$
-## last $Date$
-## $Revision$
 
 from Biskit import PDBModel
 from Biskit.tools import *

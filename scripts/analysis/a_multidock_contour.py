@@ -21,9 +21,6 @@
 
 ## 
 ## 
-## last $Author$
-## last $Date$
-## $Revision$
 
 from Numeric import *
 import sys

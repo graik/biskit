@@ -18,9 +18,6 @@
 ##
 ## Contributions: Marc-Michael Blum (transition to Bio.SeqIO)
 ##
-## last $Author$
-## last $Date$
-## $Revision$
 """
 Search one or more sequence databases (SwissProt, Tremble) with a sequence
 using the method of choice (Blast , FastA)

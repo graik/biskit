@@ -19,9 +19,6 @@
 ##
 
 ## Contributions: Olivier PERIN
-## last $Author$
-## last $Date$
-## $Revision$
 
 from Biskit.Mod.Benchmark import Benchmark as B
 from Biskit.Mod.ValidationSetup import ValidationSetup as VS

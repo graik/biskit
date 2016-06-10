@@ -20,9 +20,6 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 ## Contributions: Michael Habeck, Raik Gruenberg, Johan Leckner
-## last $Author$
-## last $Date$
-## $Revision$
 """
 superimpose 2 structures iteratively
 """

@@ -20,9 +20,6 @@
 ##
 ## convert one normal Trajectory into EnsembleTraj
 ##
-## last $Author$
-## last $Date$
-## $Revision$
 
 import os, sys
 

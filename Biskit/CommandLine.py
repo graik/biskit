@@ -15,9 +15,6 @@
 ## license.txt along with this program; if not, write to the Free
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
-## last $Author: graik $
-## last $Date: 2007-09-30 19:58:21 +0200 (Sun, 30 Sep 2007) $
-## $Revision: 536 $
 """
 Parse and organize commandline options into a dictionary.
 """

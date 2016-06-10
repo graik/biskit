@@ -19,9 +19,6 @@
 ##
 ##
 ##
-## last $Author$
-## $Date$
-## $Revision$
 
 import Biskit.Mod.modUtils as modUtils
 from Biskit.Mod import *

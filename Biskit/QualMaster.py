@@ -18,9 +18,6 @@
 ##
 ##
 ##
-## last $Author$
-## last $Date$
-## $Revision$
 
 """
 Parallizes calculation and plotting of ensemble trajectory RMSDs
