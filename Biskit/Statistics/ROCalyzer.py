@@ -180,7 +180,9 @@ class ROCalyzer( object ):
         @return: a.area( a.roccurve( score) )
         @rtype: float
         """
+        ## Note: returning area - 0.5 may make more sense.
         return self.area( self.roccurve( score ) )
+
 
 
     def isnoise( self, score, n_samples=1000 ):
