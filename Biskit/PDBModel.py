@@ -40,15 +40,15 @@ from PDBParseFile import PDBParseFile
 import Biskit as B
 
 import Biskit.oldnumeric as N0
-import oldnumeric as N0
 import numpy as N
+
+import ScientificIO.PDB as IO
 
 import os, sys
 import copy
 import time
 import string
 import types
-import Scientific.IO.PDB as IO
 
 
 class PDBProfiles( ProfileCollection ):

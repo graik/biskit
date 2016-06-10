@@ -403,13 +403,7 @@ REMEDY: run the script fixAtomIndices.py
                     if a['element'] == '':
                         a['element'] = self.__firstLetter( a['name'] )
 
-                    if a['position'].is_vector:
-                        lst = [ a['position'][0],
-                                a['position'][1],
-                                a['position'][2]]
-                        xyz.append( lst )
-                    else:
-                        xyz.append( a['position'] )
+                    xyz.append( a['position'] )
 
                     del a['position']
 
