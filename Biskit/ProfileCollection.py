@@ -941,8 +941,6 @@ class ProfileCollection:
         r = self.__class__()
         
         ## special case 1: concat something to empty profile collection
-        ##!! ATTENTION / BUG: this magically changes array types of another profile
-        ## collection connected to the parent model of next
         if not self.keys():
             return next.clone().concat( *profiles[1:] )
 
@@ -1102,11 +1100,8 @@ class ProfileCollection:
         @rtype: ProfileCollection          
         """
         r = self.__class__(profiles=copy.deepcopy(self.profiles),
-                           infos=copy.copy(self.infos))
+                           infos=copy.deepcopy(self.infos))
         return r
-##        
-##        ## calls slim method on parent PDBModel and all connected profilecollections
-##        return copy.deepcopy( self )
 
 
     def killViews(self):

@@ -76,7 +76,7 @@ class PDBProfiles( ProfileCollection ):
         Include reference to (same) parent model.
         """
         return self.__class__(self.model, copy.deepcopy(self.profiles),
-                              copy.copy(self.infos))
+                              copy.deepcopy(self.infos))
 
     def version( self ):
         return ProfileCollection.version(self)
@@ -2085,8 +2085,8 @@ class PDBModel:
 
         r.setPdbCode( self.pdbCode )
 
-        r.residues = self.residues.concat( m.residues, ) ####!!! this changes type of m.atoms['serial_number']
-        r.atoms = self.atoms.concat( m.atoms, )  # at this point m.atoms['serial_number'] is float
+        r.residues = self.residues.concat( m.residues, ) 
+        r.atoms = self.atoms.concat( m.atoms, )  
 
         r.residues.model = r
         r.atoms.model = r
