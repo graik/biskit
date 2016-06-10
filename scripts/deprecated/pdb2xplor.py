@@ -28,7 +28,12 @@ from Scientific.Geometry import Vector
 from Biskit.tools import *
 
 from Biskit import LogFile
-from Biskit import ChainSeparator, ChainWriter, ChainCleaner, XplorInput
+from Biskit import XplorInput
+
+from Biskit.deprecated.ChainCleaner import ChainCleaner
+from Biskit.deprecated.ChainSeparator import ChainSeparator
+from Biskit.deprecated.ChainWriter import ChainWriter
+
 from Biskit.Errors import XplorInputError
 
 from Biskit import Executor
