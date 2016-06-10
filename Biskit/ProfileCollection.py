@@ -1101,13 +1101,12 @@ class ProfileCollection:
         @return: profile
         @rtype: ProfileCollection          
         """
-##        r = ProfileCollection()
-##        r.profiles = copy.deepcopy(self.profiles)
-##        r.infos = copy.copy(self.infos)
-##        return r
+        r = self.__class__(profiles=copy.deepcopy(self.profiles),
+                           infos=copy.copy(self.infos))
+        return r
 ##        
-        ## calls slim method on parent PDBModel and all connected profilecollections
-        return copy.deepcopy( self )
+##        ## calls slim method on parent PDBModel and all connected profilecollections
+##        return copy.deepcopy( self )
 
 
     def killViews(self):

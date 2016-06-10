@@ -71,13 +71,12 @@ class PDBProfiles( ProfileCollection ):
         ProfileCollection.__init__( self, profiles=profiles, infos=infos )
         self.model = model
     
-##    def clone(self):
-##        """
-##        Include reference to (same) parent model.
-##        """
-##        r = ProfileCollection(self).clone()
-##        r.model = self.model
-##        return r
+    def clone(self):
+        """
+        Include reference to (same) parent model.
+        """
+        return self.__class__(self.model, copy.deepcopy(self.profiles),
+                              copy.copy(self.infos))
 
     def version( self ):
         return ProfileCollection.version(self)
