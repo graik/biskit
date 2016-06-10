@@ -541,7 +541,7 @@ class Test(BT.BiskitTest):
 ##         if self.local:
 ##             globals().update( locals() )
             
-        self.assertEqual( N0.sum(relExp), 44276.860852223857 )
+        self.assertAlmostEqual( N0.sum(relExp), 44276.86085222386, 8 )
     
         
 if __name__ == '__main__':
