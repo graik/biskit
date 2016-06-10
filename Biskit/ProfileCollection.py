@@ -1054,8 +1054,7 @@ class ProfileCollection:
 
                 self.set( key, prof, **info )
 
-        if not allowEmpty and ( None in self.profiles.values() \
-                                or [] in self.profiles.values() ):
+        if not allowEmpty and self.hasNoneProfile():
             for key, prof in self.profiles.items():
                 if not prof:
                     raise ProfileError, \
