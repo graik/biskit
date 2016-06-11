@@ -783,7 +783,7 @@ class Test(BT.BiskitTest):
                            f_out=self.fout,
                            verbose=self.local, cwd=t.absfile('~'),
                            tempdir=True,
-                           debug=self.debug )
+                           debug=self.DEBUG )
         
         self.r = self.e.run()
 
@@ -791,6 +791,12 @@ class Test(BT.BiskitTest):
             print 'Emacs was running for %.2f seconds'%self.e.runTime
 
         self.assert_( self.e.pid is not None )
+        
+        if self.DEBUG:
+            if self.verbose: self.log.add("DEBUGGING mode active")
+        else:
+            self.assert_( not os.path.exists(self.e.tempdir),
+                          'tempfolder not removed')
     
     def test_tempfiles(self):
         """Executor test temporary file creation and removal"""
