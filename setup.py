@@ -76,9 +76,9 @@ long_description = \
 
 setup(
     name = "biskit",
-    version = "2.4.0",
+    version = "2.4.2",
     url = 'http://biskit.pasteur.fr',
-    download_url= 'http://downloads.sourceforge.net/biskit/biskit-2.4.0.tar.gz',
+    download_url= 'https://github.com/graik/biskit/archive/v2.4.2.tar.gz',
     author = 'Raik Gruenberg, Johan Leckner and others',
     author_email = 'raik.gruenberg@crg.es',
     description = 'A Python platform for structural bioinformatics',
@@ -86,7 +86,7 @@ setup(
     provides=['Biskit'],
 
     ## available on PyPi
-    requires=['numpy', 'ScientificPython', 'scipy', 'biopython' ],
+    requires=['numpy', 'scipy', 'biopython' ],
     packages = packages,
     include_package_data=True,
     data_files = data_files,
