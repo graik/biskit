@@ -808,7 +808,7 @@ class Test(BT.BiskitTest):
                                  verbose=self.local, debug=self.DEBUG,
                                  log=self.log)
         self.r = self.a.run()
-        self.assertEqual( int(self.r['S_total']), 398 )
+        self.assert_( abs(int(self.r['S_total']) - 398) < 2 )
         self.assertAlmostEqual( self.r['mass'], 3254, 0 )
         self.assertAlmostEqual( self.r['S_vibes'], 298, 0 )
         self.assertEqual( int(self.r['S_rot']), 50 )
