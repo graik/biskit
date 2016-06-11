@@ -294,7 +294,7 @@ class Delphi( Executor ):
     RE_E_SELF = r'self-reaction field energy\s+:\s+(?P<eself>[0-9\-\.]+)\s+kt'
     RE_E_RXN  = r'corrected reaction field energy\s*:\s+(?P<erxn>[0-9\-\.]+)\s+kt'
     RE_E_RXNT = r'total reaction field energy\s*:\s+(?P<erxnt>[0-9\-\.]+)\s+kt'
-    RE_SURFCH = r'total s\.charge\,no epsin carrying\s+:\s+(?P<scharge>[0-9\-\.]+)'
+    RE_SURFCH = r'total s\.charge\,no epsin carrying\s*:\s+(?P<scharge>[0-9\-\.]+)'
     
     
     def __init__( self, model, template=None, topologies=None,
@@ -684,8 +684,13 @@ class Test(BT.BiskitTest):
             print "Result: "
             print self.r
             
-        expect = {'scharge': 1.427, 'egrid': 9091., 'ecoul': -9870, 
-                  'eself': -20420, 'erxn': -666.7}
+        expect_delphi_v5 = {'scharge': 1.427, 'egrid': 9091., 
+                            'ecoul': -9870, 'eself': -20420, 'erxn': -666.7}
+
+        expect_delphi_v6 = {'scharge': 1.426, 'egrid': 8765., 
+                            'ecoul': -10335., 'eself': -20420., 'erxn': -664.} 
+##                            'erxnt': -21083. }
+        expect = expect_delphi_v6
 
         if self.local:
             print "verifying results... "
