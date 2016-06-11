@@ -914,6 +914,21 @@ class ProfileCollection:
 
         return 1
 
+    def __clonedefault(self, a, length, default):
+        """
+        array mirroring shape and type of <a> but with length <length>
+        and filled with default value
+        """
+        x = a if isinstance(a, N.ndarray) else N.array(a)
+        s = list(x.shape)
+        s[0] = length
+        
+        r = N.empty(s, dtype=x.dtype)
+        r.fill(default)
+        
+        if isinstance(a, list):
+            return r.tolist()
+        return r
 
     def concat( self, *profiles ):
         """
@@ -937,29 +952,52 @@ class ProfileCollection:
 
         r = self.__class__()
         
-        ## special case 1: concat something to empty profile collection
-        if not self.keys():
-            return next.clone().concat( *profiles[1:] )
-
-        ## special case 2: concat empty profile collection to this one
-        if not next.keys():
-            return self.clone().concat( *profiles[1:] )
+        mylength = self.profLength()  ## 0 if there are no (non-None) profiles
         
+        ##!!! BIG FAT WARNING: empty profilecollection does not imply empty model
+        ## an empty PC w/o any profiles currently doesn't know which length
+        ## is is supposed to have. If profLength == 0 for real, then
+        ## the next PC's profiles could don't need to be skipped
+        ## Otherwise,
+        ## this creates too-short profiles if the PC parent model has 
+        ## non-zero length and simply doesn't have any profiles registered.
+        
+##        ## special case 1: concat something to empty profile collection
+##        if not self.keys():
+##            return next.clone().concat( *profiles[1:] )
+##
+##        ## special case 2: concat empty profile collection to this one
+##        if not next.keys():
+##            return self.clone().concat( *profiles[1:] )
+##                
+        allkeys = M.union( self.profiles.keys(), next.keys() )
 
-        for k, p in self.profiles.items():
+##        for k, p in self.profiles.items():
+        for k in allkeys:
+            p = self.profiles.get(k, None)
+            pnext = next.profiles.get(k, None)
+            infos = {}
+            
+            if p is None:
+                default = next[k,'default']
+                p = self.__clonedefault(pnext, self.profLength(), default)
+                infos = next.infos[k]
+                
+            if pnext is None:
+                default = self[k,'default']
+                pnext = self.__clonedefault(p, next.profLength(), default)
+                infos = self.infos[k]
 
             try:
                 if isinstance( p, N.ndarray ):
                     
-                    next_p = next.get(k)
-                    if len(next_p) == 0:
-                        next_p = next_p.astype(p.dtype)
+                    if len(pnext) == 0:
+                        pnext = pnext.astype(p.dtype)
                         
-                    r.set( k, N.concatenate( (p, next.get(k)) ),
-                           **self.infos[k] )
+                    r.set( k, N.concatenate( (p, pnext) ), **infos )
                     
                 else:
-                    r.set( k, p + next.get(k), **self.infos[k] )
+                    r.set( k, p + pnext, **infos )
             except:
                 EHandler.warning("Profile %s skipped during concat." % k, 
                                  error=0)
@@ -1376,7 +1414,12 @@ class Test(BT.BiskitTest):
         
         self.p5 = self.p3.concat( empty, empty, self.p3 )
         self.assertEqual( double['letters'], self.p5['letters'] )
-        
+    
+    def test_concatempty(self):
+        p0 = ProfileCollection()
+        p1 = ProfileCollection()
+        p1.set('test', [0,0], asarray=1,)
+
 
     def test_crossvies(self):
         """ProfileCollection.crossviews test"""

@@ -624,7 +624,7 @@ class Test( BT.BiskitTest ):
             T.tryRemove( self.leapout )
         
 
-    def test_AmberParmMirror(self):
+    def __test_AmberParmMirror(self):
         """AmberParmBuilder.parmMirror test"""
         ref = self.ref
         mask = N0.logical_not( ref.maskH2O() ) ## keep protein and Na+ ion
@@ -646,7 +646,7 @@ class Test( BT.BiskitTest ):
         self.assert_( eq.all() )
 
 
-    def test_AmberParmSolvated( self ):
+    def __test_AmberParmSolvated( self ):
         """AmberParmBuilder.parmSolvated test"""
         ## remove waters and hydrogens
         self.mdry = self.ref.compress( self.ref.maskProtein() )
@@ -669,6 +669,8 @@ class Test( BT.BiskitTest ):
         self.assertEqual( self.ref.lenChains(), self.m3.lenChains() )
         self.assertEqual( refprot.atomNames(), m3prot.atomNames() )
 
+class TestNoLeap( BT.BiskitTest ):
+    """Test AmberParmBuilder (no dependency on tleap)"""
 
     def test_capIrregular( self ):
         """AmberParmBuilder.capNME & capACE test"""
@@ -688,9 +690,6 @@ class Test( BT.BiskitTest ):
         self.m5 = self.a.capNME( self.m5, 0 )
         
         self.assertEqual( self.m5.sequence(), 'XSYX' )
-        
-
-        
 
 
 if __name__ == '__main__':

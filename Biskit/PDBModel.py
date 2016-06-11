@@ -79,6 +79,17 @@ class PDBProfiles( ProfileCollection ):
         return ProfileCollection.version(self)
 
 
+##    def profLength(self, default=0):
+##        r = ProfileCollection.profLength(self, default=None)
+##        if r is not None:
+##            return r
+##        
+##        if self.model.xyz is not None:
+##            return len(self.model.xyz)
+##        
+##        return default
+##        
+
     def get( self,  name, default=None, update=True, updateMissing=False ):
         """
         Fetch a profile::
@@ -125,6 +136,15 @@ class PDBProfiles( ProfileCollection ):
             r = ProfileCollection.get(self, name )
 
         return r
+
+class PDBResidueProfiles(PDBProfiles):
+    """Work in progress -- give residue profiles a default length"""
+    
+    def profLength(self, default=0):
+        r = ProfileCollection.profLength(self, default=None)
+        if r is not None:
+            return r
+        return self.model.lenResidues()
 
 
 class PDBError(BiskitError):
@@ -2082,8 +2102,8 @@ class PDBModel:
 
         r.setPdbCode( self.pdbCode )
 
-        r.residues = self.residues.concat( m.residues, ) 
         r.atoms = self.atoms.concat( m.atoms, )  
+        r.residues = self.residues.concat( m.residues, ) 
 
         r.residues.model = r
         r.atoms.model = r
