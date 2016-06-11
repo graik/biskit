@@ -624,7 +624,7 @@ class Test( BT.BiskitTest ):
             T.tryRemove( self.leapout )
         
 
-    def __test_AmberParmMirror(self):
+    def test_AmberParmMirror(self):
         """AmberParmBuilder.parmMirror test"""
         ref = self.ref
         mask = N0.logical_not( ref.maskH2O() ) ## keep protein and Na+ ion
@@ -646,7 +646,7 @@ class Test( BT.BiskitTest ):
         self.assert_( eq.all() )
 
 
-    def __test_AmberParmSolvated( self ):
+    def test_AmberParmSolvated( self ):
         """AmberParmBuilder.parmSolvated test"""
         ## remove waters and hydrogens
         self.mdry = self.ref.compress( self.ref.maskProtein() )
