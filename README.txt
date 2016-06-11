@@ -3,7 +3,6 @@ Biskit -- a software platform for structural bioinformatics
 
 Please refer to 
                    http://biskit.pasteur.fr
-               (mirrored at http://biskit.sf.net)
 
 for installation and usage instructions, troubleshooting and
 everything else!
