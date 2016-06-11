@@ -623,7 +623,8 @@ class Delphi( Executor ):
             try:
                 r.update( hit.groupdict() )
             except:
-                self.log.writeln('Warning, no match for: ' + pattern)
+                if self.verbose:
+                    self.log.writeln('Warning, no match for: ' + pattern)
         
         for k, v in r.items():
             r[k] = float( v )

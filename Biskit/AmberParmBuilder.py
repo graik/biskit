@@ -242,7 +242,7 @@ class AmberParmBuilder:
         args = '-p %s %s' % (f_parm, '-aatm'*aatm )
 
         x = Executor('ambpdb', args, f_in=f_crd, f_out=f_out,
-                     log=self.log, verbose=1, catch_err=1)
+                     log=self.log, verbose=self.verbose, catch_err=1)
 
         output,error,status = x.run()
 
@@ -309,7 +309,7 @@ class AmberParmBuilder:
         @param chain: index of chain to be capped
         @type  chain: int
         """
-        cleaner = PDBCleaner( model, log=self.log )
+        cleaner = PDBCleaner( model, log=self.log, verbose=self.verbose)
         return cleaner.capACE( model, chain, breaks=True )
 
 
@@ -322,7 +322,7 @@ class AmberParmBuilder:
         @param chain: index of chain to be capped
         @type  chain: int        
         """
-        cleaner = PDBCleaner( model, log=self.log )
+        cleaner = PDBCleaner( model, log=self.log, verbose=self.verbose )
         return cleaner.capNME( model, chain, breaks=True)
 
 
@@ -676,7 +676,8 @@ class Test( BT.BiskitTest ):
         normal = gfp.takeResidues([10,11])
         chromo = gfp.takeResidues([64,65])
 
-        self.a = AmberParmBuilder( normal )
+        self.a = AmberParmBuilder( normal,
+                                   verbose=self.local)
         self.m4 = self.a.capACE( normal, 0 )
 
         self.assertEqual( len(self.m4), 17 )

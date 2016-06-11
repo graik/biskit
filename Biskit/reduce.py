@@ -124,7 +124,7 @@ class Reduce( Executor ):
         return 'Reduce $Revision: $'
 
     def capTerminals( self ):
-        c = PDBCleaner( self.model )
+        c = PDBCleaner( self.model, verbose=self.verbose )
         self.model = c.capTerminals( auto=self.autocap, 
                                      capN=self.capN, capC=self.capC )
     

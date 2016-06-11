@@ -200,26 +200,26 @@ import Biskit.test as BT
 import tempfile
 
 class Test( BT.BiskitTest ):
-   """Test AmberCrdEntropist"""
-
-   TAGS=[BT.EXE, BT.LONG]
-
-   def prepare(self):
-       root = T.testRoot() + '/amber/crdentropist/'
-       self.fcrd = root + 'ligand.crd'
-       self.fparm = root + 'ligand.prmtop'
-       self.fout = tempfile.mktemp('.out', 'cpptraj_')
-
-   def cleanUp(self):
-       T.tryRemove( self.fout )
-       
-   def test_AmberCrdEntropist(self):
-       """AmberCrdEntropist (low-level entropy analysis) test"""
-       
-       self.e = AmberCrdEntropist( self.fparm, self.fcrd, debug=self.DEBUG,
-                              verbose=self.VERBOSITY )
-       
-       self.e.run()
+    """Test AmberCrdEntropist"""
+ 
+    TAGS=[BT.EXE, BT.LONG]
+ 
+    def prepare(self):
+        root = T.testRoot() + '/amber/crdentropist/'
+        self.fcrd = root + 'ligand.crd'
+        self.fparm = root + 'ligand.prmtop'
+        self.fout = tempfile.mktemp('.out', 'cpptraj_')
+ 
+    def cleanUp(self):
+        T.tryRemove( self.fout )
+        
+    def test_AmberCrdEntropist(self):
+        """AmberCrdEntropist (low-level entropy analysis) test"""
+        
+        self.e = AmberCrdEntropist( self.fparm, self.fcrd, debug=self.DEBUG,
+                               verbose=self.local)
+        
+        self.e.run()
 
 ## class DryTest( BT.BiskitTest ):
 ##     """Test AmberCrdEntropist.parser"""

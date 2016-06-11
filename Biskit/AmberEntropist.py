@@ -202,7 +202,7 @@ class AmberEntropist( AmberCrdEntropist ):
         self.start = 0
         self.stop = len( self.traj )
         self.step = 1
-
+        
 
     def prepare( self ):
         """
@@ -255,7 +255,7 @@ class AmberEntropist( AmberCrdEntropist ):
         self.fit_e = self.fit_e or len( traj )
         self.fit_s = self.fit_s or 0
 
-        traj.fit( ref=traj.ref, mask=mask )
+        traj.fit( ref=traj.ref, mask=mask, verbose=self.verbose )
 
         m_avg = traj[self.fit_s : self.fit_e ].avgModel()
 
@@ -264,7 +264,7 @@ class AmberEntropist( AmberCrdEntropist ):
         dd= 1.
         while dd >= conv:
 
-            traj.fit( ref=m_avg, mask=mask )
+            traj.fit( ref=m_avg, mask=mask, verbose=self.verbose )
             m_new_avg = traj[self.fit_s : self.fit_e].avgModel()
 
             oldD, d    = d, m_avg.rms( m_new_avg, mask=mask )
