@@ -436,6 +436,7 @@ class Test(BT.BiskitTest):
 
         from Biskit import PDBModel
         import Biskit.mathUtils as MA
+        import numpy as N
 
         if self.local: print 'Loading PDB...'
         f = T.testRoot()+'/lig/1A19.pdb'
@@ -465,7 +466,8 @@ class Test(BT.BiskitTest):
         self.e = ( N0.sum(self.r['relMS'][10:20]), N0.sum(self.r['relAS'][10:20]),
               N0.sum(self.r['curvature'][10:20]) )
 
-        self.assertAlmostEqual( self.e, self.EXPECT )
+        delta = N.sum(N.abs(N.array(self.e) - N.array(self.EXPECT)))
+        self.assertAlmostEqual( delta, 0.0, 5 )
 
 
     EXPECT = (570.29631242113669, 356.72813304721222, 0.80000000000000004)
