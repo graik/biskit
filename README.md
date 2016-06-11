@@ -1,9 +1,9 @@
-Biskit -- a software platform for structural bioinformatics
-===========================================================
+Biskit
+==========
+**a software platform for structural bioinformatics**
 
 Please refer to 
-                   http://biskit.pasteur.fr
-
+            **http://biskit.pasteur.fr**
 for installation and usage instructions, troubleshooting and
 everything else!
 
