@@ -221,24 +221,24 @@ class Test( BT.BiskitTest ):
         
         self.e.run()
 
-## class DryTest( BT.BiskitTest ):
-##     """Test AmberCrdEntropist.parser"""
+class DryTest( BT.BiskitTest ):
+    """Test AmberCrdEntropist.parser"""
 
-##     def prepare(self):
-##         root = T.testRoot() + 'amber/crdentropist/'
-##         self.fcrd = root + 'ligand.crd'
-##         self.fparm = root + 'ligand.prmtop'
-##         self.fout = root + 'cpptraj.out'
-    
-##     def test_ptrajParseEntropy(self):
-        
-##         self.e = AmberCrdEntropist( self.fparm, self.fcrd, debug=self.DEBUG,
-##                                     verbose=self.VERBOSITY)
-        
-##         self.r = self.e.parsePtrajResult(self.fout)
+    def prepare(self):
+        root = T.testRoot() + 'amber/crdentropist/'
+        self.fcrd = root + 'ligand.crd'
+        self.fparm = root + 'ligand.prmtop'
+        self.fout = root + 'cpptraj.out'
+   
+    def test_ptrajParseEntropy(self):
+       
+        self.e = AmberCrdEntropist( self.fparm, self.fcrd, debug=self.DEBUG,
+                                    verbose=self.VERBOSITY)
+       
+        self.r = self.e.parsePtrajResult(self.fout)
         
 
 if __name__ == '__main__':
 
-    BT.localTest(debug=True)
+    BT.localTest(debug=False)
  

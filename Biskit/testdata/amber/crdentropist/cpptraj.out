@@ -1,0 +1,2199 @@
+
+CPPTRAJ: Trajectory Analysis. V15.00
+    ___  ___  ___  ___
+     | \/ | \/ | \/ | 
+    _|_/\_|_/\_|_/\_|_
+
+| Date/time: 06/11/16  19:45:05
+| Available memory: 5200.79 MB
+
+	Reading '/data/raik/py/biskit/Biskit/testdata/amber/crdentropist/ligand.prmtop' as Amber Topology
+INPUT: Reading Input from file /tmp/ptraj__km3bG.inp
+  [trajin /data/raik/py/biskit/Biskit/testdata/amber/crdentropist/ligand.crd 0 10000000 1]
+	Reading '/data/raik/py/biskit/Biskit/testdata/amber/crdentropist/ligand.crd' as Amber Trajectory
+Warning: start argument 0 < 1, setting to 1.
+Warning: stop 10000000 > #Frames (50), setting to max.
+  [matrix mwcovar name mwc]
+    MATRIX: Calculating mass-weighted covariance matrix, output is by atom.
+	Matrix data set is 'mwc'
+	Start: 1  Stop: Final frame
+	Mask1 is '*'
+  [analyze matrix mwc vecs 0 thermo]
+    DIAGMATRIX: Diagonalizing matrix mwc
+	Calculating 0 eigenvectors and thermodynamic data at 298.15 K, output to STDOUT
+---------- RUN BEGIN -------------------------------------------------
+
+PARAMETER FILES:
+ 0: 'ligand.prmtop', 471 atoms, 34 res, box: None, 1 mol, 50 frames
+
+INPUT TRAJECTORIES:
+ 0: 'ligand.crd' is an AMBER trajectory, Parm ligand.prmtop (reading 50 of 50)
+  Coordinate processing will occur on 50 frames.
+TIME: Run Initialization took 0.0000 seconds.
+
+BEGIN TRAJECTORY PROCESSING:
+.....................................................
+ACTION SETUP FOR PARM 'ligand.prmtop' (1 actions):
+  0: [matrix mwcovar name mwc]
+	Mask [*] corresponds to 471 atoms.
+----- ligand.crd (1-50, 1) -----
+ 0% 10% 20% 31% 41% 51% 61% 71% 82% 92% 100% Complete.
+
+Read 50 frames and processed 50 frames.
+TIME: Trajectory processing: 0.0765 s
+TIME: Avg. throughput= 653.7230 frames / second.
+
+ACTION OUTPUT:
+
+ANALYSIS: Performing 1 analyses:
+  0: [analyze matrix mwc vecs 0 thermo]
+Warning: In matrix 'mwc', # of frames 50 is less than # of columns 1413.
+Warning: The max # of non-zero eigenvalues will be 50
+	Converting eigenvalues to frequencies (cm^-1), T= 298.15 K.
+
+                    *******************
+                    - Thermochemistry -
+                    *******************
+
+
+ temperature   298.150 kelvin
+ pressure      1.00000 atm
+ molecular mass (principal isotopes)  3594.32000 amu
+
+ principal moments of inertia (nuclei only) in amu-A**2:
+          74236.20   111912.36   142745.13
+
+ rotational symmetry number   1
+
+ Warning-- assumption of classical behavior for rotation
+           may cause significant error
+
+ rotational temperatures (kelvin)      0.00033     0.00022     0.00017
+
+ zero point vibrational energy -889237033.6 (joules/mol) 
+                               -212393.66038 (kcal/mol)
+                               -338.6873979 (hartree/particle)
+
+ Warning-- 732 vibrations have low frequencies and may represent hindered 
+         internal rotations.  The contributions printed below assume that these 
+         really are vibrations.
+ warning: setting vibrational entropy to zero for mode 731 with vtemp = -775331070.875893
+ warning: setting vibrational entropy to zero for mode 732 with vtemp = -642761751.353119
+ warning: setting vibrational entropy to zero for mode 733 with vtemp = -450845369.083181
+ warning: setting vibrational entropy to zero for mode 734 with vtemp = -344432930.046723
+ warning: setting vibrational entropy to zero for mode 735 with vtemp = -303807258.913435
+ warning: setting vibrational entropy to zero for mode 736 with vtemp = -259488725.403736
+ warning: setting vibrational entropy to zero for mode 737 with vtemp = -242398791.692921
+ warning: setting vibrational entropy to zero for mode 738 with vtemp = -218511934.777469
+ warning: setting vibrational entropy to zero for mode 739 with vtemp = -207125473.098994
+ warning: setting vibrational entropy to zero for mode 740 with vtemp = -190057437.370102
+ warning: setting vibrational entropy to zero for mode 741 with vtemp = -186068255.519590
+ warning: setting vibrational entropy to zero for mode 742 with vtemp = -179739097.108379
+ warning: setting vibrational entropy to zero for mode 743 with vtemp = -172672000.350786
+ warning: setting vibrational entropy to zero for mode 744 with vtemp = -165157151.547785
+ warning: setting vibrational entropy to zero for mode 745 with vtemp = -158724628.539829
+ warning: setting vibrational entropy to zero for mode 746 with vtemp = -156917584.325798
+ warning: setting vibrational entropy to zero for mode 747 with vtemp = -151603673.703246
+ warning: setting vibrational entropy to zero for mode 748 with vtemp = -148221249.414109
+ warning: setting vibrational entropy to zero for mode 749 with vtemp = -141003654.180468
+ warning: setting vibrational entropy to zero for mode 750 with vtemp = -139550635.647825
+ warning: setting vibrational entropy to zero for mode 751 with vtemp = -132374159.243251
+ warning: setting vibrational entropy to zero for mode 752 with vtemp = -129695590.954520
+ warning: setting vibrational entropy to zero for mode 753 with vtemp = -125609310.248551
+ warning: setting vibrational entropy to zero for mode 754 with vtemp = -124469183.436789
+ warning: setting vibrational entropy to zero for mode 755 with vtemp = -122931992.482475
+ warning: setting vibrational entropy to zero for mode 756 with vtemp = -121880806.464067
+ warning: setting vibrational entropy to zero for mode 757 with vtemp = -115765042.875457
+ warning: setting vibrational entropy to zero for mode 758 with vtemp = -115256627.397859
+ warning: setting vibrational entropy to zero for mode 759 with vtemp = -113013133.373155
+ warning: setting vibrational entropy to zero for mode 760 with vtemp = -111999633.773297
+ warning: setting vibrational entropy to zero for mode 761 with vtemp = -111596476.973689
+ warning: setting vibrational entropy to zero for mode 762 with vtemp = -109415896.948980
+ warning: setting vibrational entropy to zero for mode 763 with vtemp = -107509401.840249
+ warning: setting vibrational entropy to zero for mode 764 with vtemp = -106089103.337687
+ warning: setting vibrational entropy to zero for mode 765 with vtemp = -103265830.772585
+ warning: setting vibrational entropy to zero for mode 766 with vtemp = -101515532.867549
+ warning: setting vibrational entropy to zero for mode 767 with vtemp = -100339480.110050
+ warning: setting vibrational entropy to zero for mode 768 with vtemp = -99094550.192770
+ warning: setting vibrational entropy to zero for mode 769 with vtemp = -97762051.361192
+ warning: setting vibrational entropy to zero for mode 770 with vtemp = -96194887.777726
+ warning: setting vibrational entropy to zero for mode 771 with vtemp = -95285146.135924
+ warning: setting vibrational entropy to zero for mode 772 with vtemp = -92795998.366753
+ warning: setting vibrational entropy to zero for mode 773 with vtemp = -91529897.219151
+ warning: setting vibrational entropy to zero for mode 774 with vtemp = -91058592.685755
+ warning: setting vibrational entropy to zero for mode 775 with vtemp = -89767297.984769
+ warning: setting vibrational entropy to zero for mode 776 with vtemp = -88961267.282728
+ warning: setting vibrational entropy to zero for mode 777 with vtemp = -88076969.952896
+ warning: setting vibrational entropy to zero for mode 778 with vtemp = -87077900.897416
+ warning: setting vibrational entropy to zero for mode 779 with vtemp = -86829084.728895
+ warning: setting vibrational entropy to zero for mode 780 with vtemp = -86035196.328575
+ warning: setting vibrational entropy to zero for mode 781 with vtemp = -84930458.277657
+ warning: setting vibrational entropy to zero for mode 782 with vtemp = -84576252.745359
+ warning: setting vibrational entropy to zero for mode 783 with vtemp = -83312632.678100
+ warning: setting vibrational entropy to zero for mode 784 with vtemp = -82224547.518950
+ warning: setting vibrational entropy to zero for mode 785 with vtemp = -81405888.651493
+ warning: setting vibrational entropy to zero for mode 786 with vtemp = -80907139.126285
+ warning: setting vibrational entropy to zero for mode 787 with vtemp = -79911003.953450
+ warning: setting vibrational entropy to zero for mode 788 with vtemp = -79877005.737739
+ warning: setting vibrational entropy to zero for mode 789 with vtemp = -78888697.322840
+ warning: setting vibrational entropy to zero for mode 790 with vtemp = -78753807.920136
+ warning: setting vibrational entropy to zero for mode 791 with vtemp = -78070094.244177
+ warning: setting vibrational entropy to zero for mode 792 with vtemp = -77616771.322717
+ warning: setting vibrational entropy to zero for mode 793 with vtemp = -77084094.074413
+ warning: setting vibrational entropy to zero for mode 794 with vtemp = -76164980.316174
+ warning: setting vibrational entropy to zero for mode 795 with vtemp = -75770987.860321
+ warning: setting vibrational entropy to zero for mode 796 with vtemp = -74783759.024947
+ warning: setting vibrational entropy to zero for mode 797 with vtemp = -74401536.023493
+ warning: setting vibrational entropy to zero for mode 798 with vtemp = -73875823.894506
+ warning: setting vibrational entropy to zero for mode 799 with vtemp = -73040148.669037
+ warning: setting vibrational entropy to zero for mode 800 with vtemp = -72417670.591485
+ warning: setting vibrational entropy to zero for mode 801 with vtemp = -72096621.619554
+ warning: setting vibrational entropy to zero for mode 802 with vtemp = -71544677.657341
+ warning: setting vibrational entropy to zero for mode 803 with vtemp = -70633869.853647
+ warning: setting vibrational entropy to zero for mode 804 with vtemp = -70104348.607673
+ warning: setting vibrational entropy to zero for mode 805 with vtemp = -69775932.156864
+ warning: setting vibrational entropy to zero for mode 806 with vtemp = -69424612.378081
+ warning: setting vibrational entropy to zero for mode 807 with vtemp = -68827208.531058
+ warning: setting vibrational entropy to zero for mode 808 with vtemp = -68364995.840740
+ warning: setting vibrational entropy to zero for mode 809 with vtemp = -68063914.191329
+ warning: setting vibrational entropy to zero for mode 810 with vtemp = -67799991.324809
+ warning: setting vibrational entropy to zero for mode 811 with vtemp = -67535606.069047
+ warning: setting vibrational entropy to zero for mode 812 with vtemp = -67296159.205223
+ warning: setting vibrational entropy to zero for mode 813 with vtemp = -66719218.976829
+ warning: setting vibrational entropy to zero for mode 814 with vtemp = -66610384.056124
+ warning: setting vibrational entropy to zero for mode 815 with vtemp = -66294438.382194
+ warning: setting vibrational entropy to zero for mode 816 with vtemp = -65753039.433022
+ warning: setting vibrational entropy to zero for mode 817 with vtemp = -65260264.631897
+ warning: setting vibrational entropy to zero for mode 818 with vtemp = -64866557.331599
+ warning: setting vibrational entropy to zero for mode 819 with vtemp = -64282258.499282
+ warning: setting vibrational entropy to zero for mode 820 with vtemp = -63766825.500487
+ warning: setting vibrational entropy to zero for mode 821 with vtemp = -63524777.872180
+ warning: setting vibrational entropy to zero for mode 822 with vtemp = -63113368.735268
+ warning: setting vibrational entropy to zero for mode 823 with vtemp = -63049619.056818
+ warning: setting vibrational entropy to zero for mode 824 with vtemp = -62823312.173449
+ warning: setting vibrational entropy to zero for mode 825 with vtemp = -62649916.738627
+ warning: setting vibrational entropy to zero for mode 826 with vtemp = -62166305.000491
+ warning: setting vibrational entropy to zero for mode 827 with vtemp = -61537691.686599
+ warning: setting vibrational entropy to zero for mode 828 with vtemp = -61083364.810186
+ warning: setting vibrational entropy to zero for mode 829 with vtemp = -60699993.928245
+ warning: setting vibrational entropy to zero for mode 830 with vtemp = -60627111.357972
+ warning: setting vibrational entropy to zero for mode 831 with vtemp = -59971566.112878
+ warning: setting vibrational entropy to zero for mode 832 with vtemp = -59788687.258283
+ warning: setting vibrational entropy to zero for mode 833 with vtemp = -59519491.194949
+ warning: setting vibrational entropy to zero for mode 834 with vtemp = -59200014.979549
+ warning: setting vibrational entropy to zero for mode 835 with vtemp = -59107924.433860
+ warning: setting vibrational entropy to zero for mode 836 with vtemp = -58663904.177458
+ warning: setting vibrational entropy to zero for mode 837 with vtemp = -58025767.480209
+ warning: setting vibrational entropy to zero for mode 838 with vtemp = -57700858.270311
+ warning: setting vibrational entropy to zero for mode 839 with vtemp = -57509475.419491
+ warning: setting vibrational entropy to zero for mode 840 with vtemp = -57392896.187463
+ warning: setting vibrational entropy to zero for mode 841 with vtemp = -56918748.261753
+ warning: setting vibrational entropy to zero for mode 842 with vtemp = -56615051.312310
+ warning: setting vibrational entropy to zero for mode 843 with vtemp = -56259125.665212
+ warning: setting vibrational entropy to zero for mode 844 with vtemp = -55904128.434795
+ warning: setting vibrational entropy to zero for mode 845 with vtemp = -55804678.882613
+ warning: setting vibrational entropy to zero for mode 846 with vtemp = -55294694.639225
+ warning: setting vibrational entropy to zero for mode 847 with vtemp = -55131051.184743
+ warning: setting vibrational entropy to zero for mode 848 with vtemp = -55020813.345729
+ warning: setting vibrational entropy to zero for mode 849 with vtemp = -54816434.170635
+ warning: setting vibrational entropy to zero for mode 850 with vtemp = -54615320.964233
+ warning: setting vibrational entropy to zero for mode 851 with vtemp = -54321260.292944
+ warning: setting vibrational entropy to zero for mode 852 with vtemp = -53974316.130407
+ warning: setting vibrational entropy to zero for mode 853 with vtemp = -53854649.889813
+ warning: setting vibrational entropy to zero for mode 854 with vtemp = -53438368.343229
+ warning: setting vibrational entropy to zero for mode 855 with vtemp = -53338096.489350
+ warning: setting vibrational entropy to zero for mode 856 with vtemp = -53203421.770550
+ warning: setting vibrational entropy to zero for mode 857 with vtemp = -52934244.765453
+ warning: setting vibrational entropy to zero for mode 858 with vtemp = -52707662.240620
+ warning: setting vibrational entropy to zero for mode 859 with vtemp = -52280072.230882
+ warning: setting vibrational entropy to zero for mode 860 with vtemp = -52070404.618310
+ warning: setting vibrational entropy to zero for mode 861 with vtemp = -52061809.348366
+ warning: setting vibrational entropy to zero for mode 862 with vtemp = -51550169.545544
+ warning: setting vibrational entropy to zero for mode 863 with vtemp = -51486967.478488
+ warning: setting vibrational entropy to zero for mode 864 with vtemp = -51384403.533093
+ warning: setting vibrational entropy to zero for mode 865 with vtemp = -50843549.874979
+ warning: setting vibrational entropy to zero for mode 866 with vtemp = -50694200.581484
+ warning: setting vibrational entropy to zero for mode 867 with vtemp = -50499473.212724
+ warning: setting vibrational entropy to zero for mode 868 with vtemp = -50119574.348326
+ warning: setting vibrational entropy to zero for mode 869 with vtemp = -49873229.256038
+ warning: setting vibrational entropy to zero for mode 870 with vtemp = -49711625.392808
+ warning: setting vibrational entropy to zero for mode 871 with vtemp = -49416669.062980
+ warning: setting vibrational entropy to zero for mode 872 with vtemp = -49346980.828055
+ warning: setting vibrational entropy to zero for mode 873 with vtemp = -49068020.445600
+ warning: setting vibrational entropy to zero for mode 874 with vtemp = -48867735.425606
+ warning: setting vibrational entropy to zero for mode 875 with vtemp = -48757347.678676
+ warning: setting vibrational entropy to zero for mode 876 with vtemp = -48740061.626322
+ warning: setting vibrational entropy to zero for mode 877 with vtemp = -48404308.429739
+ warning: setting vibrational entropy to zero for mode 878 with vtemp = -48229585.846508
+ warning: setting vibrational entropy to zero for mode 879 with vtemp = -47998965.386812
+ warning: setting vibrational entropy to zero for mode 880 with vtemp = -47958024.525141
+ warning: setting vibrational entropy to zero for mode 881 with vtemp = -47646853.167133
+ warning: setting vibrational entropy to zero for mode 882 with vtemp = -47542885.193247
+ warning: setting vibrational entropy to zero for mode 883 with vtemp = -47366651.403953
+ warning: setting vibrational entropy to zero for mode 884 with vtemp = -47262066.952051
+ warning: setting vibrational entropy to zero for mode 885 with vtemp = -46952090.780040
+ warning: setting vibrational entropy to zero for mode 886 with vtemp = -46677983.763467
+ warning: setting vibrational entropy to zero for mode 887 with vtemp = -46540767.299603
+ warning: setting vibrational entropy to zero for mode 888 with vtemp = -46407582.359717
+ warning: setting vibrational entropy to zero for mode 889 with vtemp = -46128509.031009
+ warning: setting vibrational entropy to zero for mode 890 with vtemp = -46019220.255741
+ warning: setting vibrational entropy to zero for mode 891 with vtemp = -45946109.483324
+ warning: setting vibrational entropy to zero for mode 892 with vtemp = -45804598.192493
+ warning: setting vibrational entropy to zero for mode 893 with vtemp = -45592290.153340
+ warning: setting vibrational entropy to zero for mode 894 with vtemp = -45509690.941368
+ warning: setting vibrational entropy to zero for mode 895 with vtemp = -45284718.075948
+ warning: setting vibrational entropy to zero for mode 896 with vtemp = -45236859.220096
+ warning: setting vibrational entropy to zero for mode 897 with vtemp = -44908640.534925
+ warning: setting vibrational entropy to zero for mode 898 with vtemp = -44699419.618902
+ warning: setting vibrational entropy to zero for mode 899 with vtemp = -44544818.634006
+ warning: setting vibrational entropy to zero for mode 900 with vtemp = -44377330.029991
+ warning: setting vibrational entropy to zero for mode 901 with vtemp = -44229262.399424
+ warning: setting vibrational entropy to zero for mode 902 with vtemp = -44004924.536351
+ warning: setting vibrational entropy to zero for mode 903 with vtemp = -43901624.358783
+ warning: setting vibrational entropy to zero for mode 904 with vtemp = -43710280.528618
+ warning: setting vibrational entropy to zero for mode 905 with vtemp = -43644104.016444
+ warning: setting vibrational entropy to zero for mode 906 with vtemp = -43592702.610449
+ warning: setting vibrational entropy to zero for mode 907 with vtemp = -43494674.241975
+ warning: setting vibrational entropy to zero for mode 908 with vtemp = -43117597.053133
+ warning: setting vibrational entropy to zero for mode 909 with vtemp = -42871985.465736
+ warning: setting vibrational entropy to zero for mode 910 with vtemp = -42817992.340538
+ warning: setting vibrational entropy to zero for mode 911 with vtemp = -42700057.923876
+ warning: setting vibrational entropy to zero for mode 912 with vtemp = -42640750.744751
+ warning: setting vibrational entropy to zero for mode 913 with vtemp = -42413851.139574
+ warning: setting vibrational entropy to zero for mode 914 with vtemp = -42211938.930787
+ warning: setting vibrational entropy to zero for mode 915 with vtemp = -42119265.732137
+ warning: setting vibrational entropy to zero for mode 916 with vtemp = -42044786.370387
+ warning: setting vibrational entropy to zero for mode 917 with vtemp = -41994397.454219
+ warning: setting vibrational entropy to zero for mode 918 with vtemp = -41758686.484590
+ warning: setting vibrational entropy to zero for mode 919 with vtemp = -41637029.102600
+ warning: setting vibrational entropy to zero for mode 920 with vtemp = -41443782.693367
+ warning: setting vibrational entropy to zero for mode 921 with vtemp = -41388568.704223
+ warning: setting vibrational entropy to zero for mode 922 with vtemp = -41137378.528998
+ warning: setting vibrational entropy to zero for mode 923 with vtemp = -40919465.840579
+ warning: setting vibrational entropy to zero for mode 924 with vtemp = -40697060.029200
+ warning: setting vibrational entropy to zero for mode 925 with vtemp = -40681305.876770
+ warning: setting vibrational entropy to zero for mode 926 with vtemp = -40524379.375407
+ warning: setting vibrational entropy to zero for mode 927 with vtemp = -40276612.307907
+ warning: setting vibrational entropy to zero for mode 928 with vtemp = -40248087.046984
+ warning: setting vibrational entropy to zero for mode 929 with vtemp = -40067000.765446
+ warning: setting vibrational entropy to zero for mode 930 with vtemp = -40041899.031467
+ warning: setting vibrational entropy to zero for mode 931 with vtemp = -39687765.244278
+ warning: setting vibrational entropy to zero for mode 932 with vtemp = -39584664.209557
+ warning: setting vibrational entropy to zero for mode 933 with vtemp = -39503718.996759
+ warning: setting vibrational entropy to zero for mode 934 with vtemp = -39408469.604801
+ warning: setting vibrational entropy to zero for mode 935 with vtemp = -39258497.007074
+ warning: setting vibrational entropy to zero for mode 936 with vtemp = -39098890.189006
+ warning: setting vibrational entropy to zero for mode 937 with vtemp = -39017297.672509
+ warning: setting vibrational entropy to zero for mode 938 with vtemp = -38960209.226167
+ warning: setting vibrational entropy to zero for mode 939 with vtemp = -38788821.566501
+ warning: setting vibrational entropy to zero for mode 940 with vtemp = -38612606.321476
+ warning: setting vibrational entropy to zero for mode 941 with vtemp = -38453238.936960
+ warning: setting vibrational entropy to zero for mode 942 with vtemp = -38315669.267866
+ warning: setting vibrational entropy to zero for mode 943 with vtemp = -38193124.277088
+ warning: setting vibrational entropy to zero for mode 944 with vtemp = -38031374.001210
+ warning: setting vibrational entropy to zero for mode 945 with vtemp = -38009698.304106
+ warning: setting vibrational entropy to zero for mode 946 with vtemp = -37956890.911055
+ warning: setting vibrational entropy to zero for mode 947 with vtemp = -37713779.123037
+ warning: setting vibrational entropy to zero for mode 948 with vtemp = -37419700.313216
+ warning: setting vibrational entropy to zero for mode 949 with vtemp = -37371923.748278
+ warning: setting vibrational entropy to zero for mode 950 with vtemp = -37300449.578427
+ warning: setting vibrational entropy to zero for mode 951 with vtemp = -37123317.375634
+ warning: setting vibrational entropy to zero for mode 952 with vtemp = -37059791.686059
+ warning: setting vibrational entropy to zero for mode 953 with vtemp = -36920897.071140
+ warning: setting vibrational entropy to zero for mode 954 with vtemp = -36832218.317024
+ warning: setting vibrational entropy to zero for mode 955 with vtemp = -36707160.019989
+ warning: setting vibrational entropy to zero for mode 956 with vtemp = -36581925.155705
+ warning: setting vibrational entropy to zero for mode 957 with vtemp = -36467115.109896
+ warning: setting vibrational entropy to zero for mode 958 with vtemp = -36383978.086054
+ warning: setting vibrational entropy to zero for mode 959 with vtemp = -36178443.990411
+ warning: setting vibrational entropy to zero for mode 960 with vtemp = -36057549.854180
+ warning: setting vibrational entropy to zero for mode 961 with vtemp = -35953091.533474
+ warning: setting vibrational entropy to zero for mode 962 with vtemp = -35815641.291831
+ warning: setting vibrational entropy to zero for mode 963 with vtemp = -35640873.478232
+ warning: setting vibrational entropy to zero for mode 964 with vtemp = -35519080.559952
+ warning: setting vibrational entropy to zero for mode 965 with vtemp = -35423911.677415
+ warning: setting vibrational entropy to zero for mode 966 with vtemp = -35307898.279846
+ warning: setting vibrational entropy to zero for mode 967 with vtemp = -35114251.087498
+ warning: setting vibrational entropy to zero for mode 968 with vtemp = -35005605.111524
+ warning: setting vibrational entropy to zero for mode 969 with vtemp = -34968468.507477
+ warning: setting vibrational entropy to zero for mode 970 with vtemp = -34809956.361506
+ warning: setting vibrational entropy to zero for mode 971 with vtemp = -34791995.167293
+ warning: setting vibrational entropy to zero for mode 972 with vtemp = -34640247.118992
+ warning: setting vibrational entropy to zero for mode 973 with vtemp = -34534574.263607
+ warning: setting vibrational entropy to zero for mode 974 with vtemp = -34431931.997902
+ warning: setting vibrational entropy to zero for mode 975 with vtemp = -34378639.798467
+ warning: setting vibrational entropy to zero for mode 976 with vtemp = -34245308.953405
+ warning: setting vibrational entropy to zero for mode 977 with vtemp = -33992301.350843
+ warning: setting vibrational entropy to zero for mode 978 with vtemp = -33904883.835963
+ warning: setting vibrational entropy to zero for mode 979 with vtemp = -33845379.051866
+ warning: setting vibrational entropy to zero for mode 980 with vtemp = -33720379.922269
+ warning: setting vibrational entropy to zero for mode 981 with vtemp = -33602333.000573
+ warning: setting vibrational entropy to zero for mode 982 with vtemp = -33522057.603179
+ warning: setting vibrational entropy to zero for mode 983 with vtemp = -33385536.570282
+ warning: setting vibrational entropy to zero for mode 984 with vtemp = -33373726.904362
+ warning: setting vibrational entropy to zero for mode 985 with vtemp = -33247133.773712
+ warning: setting vibrational entropy to zero for mode 986 with vtemp = -33132013.510178
+ warning: setting vibrational entropy to zero for mode 987 with vtemp = -32902770.441487
+ warning: setting vibrational entropy to zero for mode 988 with vtemp = -32724249.871301
+ warning: setting vibrational entropy to zero for mode 989 with vtemp = -32635652.076565
+ warning: setting vibrational entropy to zero for mode 990 with vtemp = -32504709.829759
+ warning: setting vibrational entropy to zero for mode 991 with vtemp = -32412449.125756
+ warning: setting vibrational entropy to zero for mode 992 with vtemp = -32351168.942758
+ warning: setting vibrational entropy to zero for mode 993 with vtemp = -32142701.282422
+ warning: setting vibrational entropy to zero for mode 994 with vtemp = -32004898.974735
+ warning: setting vibrational entropy to zero for mode 995 with vtemp = -31923068.861300
+ warning: setting vibrational entropy to zero for mode 996 with vtemp = -31873152.262400
+ warning: setting vibrational entropy to zero for mode 997 with vtemp = -31771720.512542
+ warning: setting vibrational entropy to zero for mode 998 with vtemp = -31620607.153858
+ warning: setting vibrational entropy to zero for mode 999 with vtemp = -31578802.955073
+ warning: setting vibrational entropy to zero for mode 1000 with vtemp = -31403868.602510
+ warning: setting vibrational entropy to zero for mode 1001 with vtemp = -31291869.305244
+ warning: setting vibrational entropy to zero for mode 1002 with vtemp = -31184121.637095
+ warning: setting vibrational entropy to zero for mode 1003 with vtemp = -31074640.488156
+ warning: setting vibrational entropy to zero for mode 1004 with vtemp = -30957424.164852
+ warning: setting vibrational entropy to zero for mode 1005 with vtemp = -30887834.169137
+ warning: setting vibrational entropy to zero for mode 1006 with vtemp = -30734568.409695
+ warning: setting vibrational entropy to zero for mode 1007 with vtemp = -30603737.693919
+ warning: setting vibrational entropy to zero for mode 1008 with vtemp = -30439648.864541
+ warning: setting vibrational entropy to zero for mode 1009 with vtemp = -30338099.997777
+ warning: setting vibrational entropy to zero for mode 1010 with vtemp = -30227347.641327
+ warning: setting vibrational entropy to zero for mode 1011 with vtemp = -30092432.190474
+ warning: setting vibrational entropy to zero for mode 1012 with vtemp = -30059650.182558
+ warning: setting vibrational entropy to zero for mode 1013 with vtemp = -29958749.703866
+ warning: setting vibrational entropy to zero for mode 1014 with vtemp = -29910581.918359
+ warning: setting vibrational entropy to zero for mode 1015 with vtemp = -29817895.824382
+ warning: setting vibrational entropy to zero for mode 1016 with vtemp = -29723316.050045
+ warning: setting vibrational entropy to zero for mode 1017 with vtemp = -29594327.129167
+ warning: setting vibrational entropy to zero for mode 1018 with vtemp = -29460028.890923
+ warning: setting vibrational entropy to zero for mode 1019 with vtemp = -29361975.339013
+ warning: setting vibrational entropy to zero for mode 1020 with vtemp = -29346049.163772
+ warning: setting vibrational entropy to zero for mode 1021 with vtemp = -29080119.884644
+ warning: setting vibrational entropy to zero for mode 1022 with vtemp = -28945076.173512
+ warning: setting vibrational entropy to zero for mode 1023 with vtemp = -28840134.338326
+ warning: setting vibrational entropy to zero for mode 1024 with vtemp = -28755548.544754
+ warning: setting vibrational entropy to zero for mode 1025 with vtemp = -28634124.603347
+ warning: setting vibrational entropy to zero for mode 1026 with vtemp = -28475709.396520
+ warning: setting vibrational entropy to zero for mode 1027 with vtemp = -28368156.903800
+ warning: setting vibrational entropy to zero for mode 1028 with vtemp = -28296682.433320
+ warning: setting vibrational entropy to zero for mode 1029 with vtemp = -28212384.387301
+ warning: setting vibrational entropy to zero for mode 1030 with vtemp = -28126370.604917
+ warning: setting vibrational entropy to zero for mode 1031 with vtemp = -28090858.522534
+ warning: setting vibrational entropy to zero for mode 1032 with vtemp = -27952475.653298
+ warning: setting vibrational entropy to zero for mode 1033 with vtemp = -27890071.337935
+ warning: setting vibrational entropy to zero for mode 1034 with vtemp = -27843184.765580
+ warning: setting vibrational entropy to zero for mode 1035 with vtemp = -27757975.458479
+ warning: setting vibrational entropy to zero for mode 1036 with vtemp = -27527180.015433
+ warning: setting vibrational entropy to zero for mode 1037 with vtemp = -27452342.225485
+ warning: setting vibrational entropy to zero for mode 1038 with vtemp = -27355610.304749
+ warning: setting vibrational entropy to zero for mode 1039 with vtemp = -27260047.826666
+ warning: setting vibrational entropy to zero for mode 1040 with vtemp = -27134367.025181
+ warning: setting vibrational entropy to zero for mode 1041 with vtemp = -27054728.500995
+ warning: setting vibrational entropy to zero for mode 1042 with vtemp = -26954268.589297
+ warning: setting vibrational entropy to zero for mode 1043 with vtemp = -26873100.376497
+ warning: setting vibrational entropy to zero for mode 1044 with vtemp = -26771137.966187
+ warning: setting vibrational entropy to zero for mode 1045 with vtemp = -26759125.641021
+ warning: setting vibrational entropy to zero for mode 1046 with vtemp = -26615420.146463
+ warning: setting vibrational entropy to zero for mode 1047 with vtemp = -26529659.052233
+ warning: setting vibrational entropy to zero for mode 1048 with vtemp = -26319402.543043
+ warning: setting vibrational entropy to zero for mode 1049 with vtemp = -26266819.192992
+ warning: setting vibrational entropy to zero for mode 1050 with vtemp = -26204426.714210
+ warning: setting vibrational entropy to zero for mode 1051 with vtemp = -26105435.296833
+ warning: setting vibrational entropy to zero for mode 1052 with vtemp = -25945241.331722
+ warning: setting vibrational entropy to zero for mode 1053 with vtemp = -25892346.267296
+ warning: setting vibrational entropy to zero for mode 1054 with vtemp = -25698152.827406
+ warning: setting vibrational entropy to zero for mode 1055 with vtemp = -25650238.394276
+ warning: setting vibrational entropy to zero for mode 1056 with vtemp = -25568524.908813
+ warning: setting vibrational entropy to zero for mode 1057 with vtemp = -25490758.028726
+ warning: setting vibrational entropy to zero for mode 1058 with vtemp = -25411728.801319
+ warning: setting vibrational entropy to zero for mode 1059 with vtemp = -25268425.646629
+ warning: setting vibrational entropy to zero for mode 1060 with vtemp = -25120423.180896
+ warning: setting vibrational entropy to zero for mode 1061 with vtemp = -25074508.399564
+ warning: setting vibrational entropy to zero for mode 1062 with vtemp = -24916242.840146
+ warning: setting vibrational entropy to zero for mode 1063 with vtemp = -24835029.790979
+ warning: setting vibrational entropy to zero for mode 1064 with vtemp = -24752106.238676
+ warning: setting vibrational entropy to zero for mode 1065 with vtemp = -24607930.528625
+ warning: setting vibrational entropy to zero for mode 1066 with vtemp = -24535062.298934
+ warning: setting vibrational entropy to zero for mode 1067 with vtemp = -24420920.923777
+ warning: setting vibrational entropy to zero for mode 1068 with vtemp = -24374201.990615
+ warning: setting vibrational entropy to zero for mode 1069 with vtemp = -24327535.931509
+ warning: setting vibrational entropy to zero for mode 1070 with vtemp = -24179036.664790
+ warning: setting vibrational entropy to zero for mode 1071 with vtemp = -24156772.210748
+ warning: setting vibrational entropy to zero for mode 1072 with vtemp = -24077842.429336
+ warning: setting vibrational entropy to zero for mode 1073 with vtemp = -24042257.058628
+ warning: setting vibrational entropy to zero for mode 1074 with vtemp = -23893139.869717
+ warning: setting vibrational entropy to zero for mode 1075 with vtemp = -23839454.793676
+ warning: setting vibrational entropy to zero for mode 1076 with vtemp = -23657372.614579
+ warning: setting vibrational entropy to zero for mode 1077 with vtemp = -23536593.433417
+ warning: setting vibrational entropy to zero for mode 1078 with vtemp = -23494588.889995
+ warning: setting vibrational entropy to zero for mode 1079 with vtemp = -23446477.950683
+ warning: setting vibrational entropy to zero for mode 1080 with vtemp = -23371893.997050
+ warning: setting vibrational entropy to zero for mode 1081 with vtemp = -23233714.494579
+ warning: setting vibrational entropy to zero for mode 1082 with vtemp = -23223469.303124
+ warning: setting vibrational entropy to zero for mode 1083 with vtemp = -23074543.686598
+ warning: setting vibrational entropy to zero for mode 1084 with vtemp = -22963721.077049
+ warning: setting vibrational entropy to zero for mode 1085 with vtemp = -22943676.791098
+ warning: setting vibrational entropy to zero for mode 1086 with vtemp = -22818043.619032
+ warning: setting vibrational entropy to zero for mode 1087 with vtemp = -22741050.008957
+ warning: setting vibrational entropy to zero for mode 1088 with vtemp = -22708991.087627
+ warning: setting vibrational entropy to zero for mode 1089 with vtemp = -22593513.052306
+ warning: setting vibrational entropy to zero for mode 1090 with vtemp = -22442205.902088
+ warning: setting vibrational entropy to zero for mode 1091 with vtemp = -22250797.094078
+ warning: setting vibrational entropy to zero for mode 1092 with vtemp = -22217760.187181
+ warning: setting vibrational entropy to zero for mode 1093 with vtemp = -22121140.730939
+ warning: setting vibrational entropy to zero for mode 1094 with vtemp = -22085659.987115
+ warning: setting vibrational entropy to zero for mode 1095 with vtemp = -22013362.770252
+ warning: setting vibrational entropy to zero for mode 1096 with vtemp = -21996812.356336
+ warning: setting vibrational entropy to zero for mode 1097 with vtemp = -21932614.742187
+ warning: setting vibrational entropy to zero for mode 1098 with vtemp = -21881870.750096
+ warning: setting vibrational entropy to zero for mode 1099 with vtemp = -21706089.324079
+ warning: setting vibrational entropy to zero for mode 1100 with vtemp = -21680941.510861
+ warning: setting vibrational entropy to zero for mode 1101 with vtemp = -21510661.912389
+ warning: setting vibrational entropy to zero for mode 1102 with vtemp = -21478898.440235
+ warning: setting vibrational entropy to zero for mode 1103 with vtemp = -21359715.752435
+ warning: setting vibrational entropy to zero for mode 1104 with vtemp = -21258020.262037
+ warning: setting vibrational entropy to zero for mode 1105 with vtemp = -21251577.728473
+ warning: setting vibrational entropy to zero for mode 1106 with vtemp = -21163135.834026
+ warning: setting vibrational entropy to zero for mode 1107 with vtemp = -21106971.329842
+ warning: setting vibrational entropy to zero for mode 1108 with vtemp = -21054759.823920
+ warning: setting vibrational entropy to zero for mode 1109 with vtemp = -20951549.584452
+ warning: setting vibrational entropy to zero for mode 1110 with vtemp = -20924351.346976
+ warning: setting vibrational entropy to zero for mode 1111 with vtemp = -20830003.936534
+ warning: setting vibrational entropy to zero for mode 1112 with vtemp = -20719187.104327
+ warning: setting vibrational entropy to zero for mode 1113 with vtemp = -20571465.067642
+ warning: setting vibrational entropy to zero for mode 1114 with vtemp = -20520239.230957
+ warning: setting vibrational entropy to zero for mode 1115 with vtemp = -20425925.020435
+ warning: setting vibrational entropy to zero for mode 1116 with vtemp = -20407495.404173
+ warning: setting vibrational entropy to zero for mode 1117 with vtemp = -20310063.628956
+ warning: setting vibrational entropy to zero for mode 1118 with vtemp = -20275038.683692
+ warning: setting vibrational entropy to zero for mode 1119 with vtemp = -20169966.464456
+ warning: setting vibrational entropy to zero for mode 1120 with vtemp = -20064712.673856
+ warning: setting vibrational entropy to zero for mode 1121 with vtemp = -19986108.400419
+ warning: setting vibrational entropy to zero for mode 1122 with vtemp = -19942735.502711
+ warning: setting vibrational entropy to zero for mode 1123 with vtemp = -19928952.844253
+ warning: setting vibrational entropy to zero for mode 1124 with vtemp = -19822170.436309
+ warning: setting vibrational entropy to zero for mode 1125 with vtemp = -19768794.245046
+ warning: setting vibrational entropy to zero for mode 1126 with vtemp = -19716036.711309
+ warning: setting vibrational entropy to zero for mode 1127 with vtemp = -19678205.373293
+ warning: setting vibrational entropy to zero for mode 1128 with vtemp = -19590277.220289
+ warning: setting vibrational entropy to zero for mode 1129 with vtemp = -19549171.221895
+ warning: setting vibrational entropy to zero for mode 1130 with vtemp = -19413693.438325
+ warning: setting vibrational entropy to zero for mode 1131 with vtemp = -19397294.863150
+ warning: setting vibrational entropy to zero for mode 1132 with vtemp = -19305048.556886
+ warning: setting vibrational entropy to zero for mode 1133 with vtemp = -19232157.371553
+ warning: setting vibrational entropy to zero for mode 1134 with vtemp = -19200411.396366
+ warning: setting vibrational entropy to zero for mode 1135 with vtemp = -19163701.642645
+ warning: setting vibrational entropy to zero for mode 1136 with vtemp = -19000416.263412
+ warning: setting vibrational entropy to zero for mode 1137 with vtemp = -18932900.711176
+ warning: setting vibrational entropy to zero for mode 1138 with vtemp = -18912420.063765
+ warning: setting vibrational entropy to zero for mode 1139 with vtemp = -18786813.229407
+ warning: setting vibrational entropy to zero for mode 1140 with vtemp = -18769199.933559
+ warning: setting vibrational entropy to zero for mode 1141 with vtemp = -18700669.588873
+ warning: setting vibrational entropy to zero for mode 1142 with vtemp = -18633081.106742
+ warning: setting vibrational entropy to zero for mode 1143 with vtemp = -18541667.798837
+ warning: setting vibrational entropy to zero for mode 1144 with vtemp = -18472541.975103
+ warning: setting vibrational entropy to zero for mode 1145 with vtemp = -18435431.657698
+ warning: setting vibrational entropy to zero for mode 1146 with vtemp = -18326670.141686
+ warning: setting vibrational entropy to zero for mode 1147 with vtemp = -18300543.230360
+ warning: setting vibrational entropy to zero for mode 1148 with vtemp = -18170855.219339
+ warning: setting vibrational entropy to zero for mode 1149 with vtemp = -18096427.567459
+ warning: setting vibrational entropy to zero for mode 1150 with vtemp = -18055663.417601
+ warning: setting vibrational entropy to zero for mode 1151 with vtemp = -18020408.113112
+ warning: setting vibrational entropy to zero for mode 1152 with vtemp = -17940238.007609
+ warning: setting vibrational entropy to zero for mode 1153 with vtemp = -17917333.279101
+ warning: setting vibrational entropy to zero for mode 1154 with vtemp = -17899096.137387
+ warning: setting vibrational entropy to zero for mode 1155 with vtemp = -17753225.248489
+ warning: setting vibrational entropy to zero for mode 1156 with vtemp = -17699115.157738
+ warning: setting vibrational entropy to zero for mode 1157 with vtemp = -17640843.575951
+ warning: setting vibrational entropy to zero for mode 1158 with vtemp = -17579979.809905
+ warning: setting vibrational entropy to zero for mode 1159 with vtemp = -17512384.674551
+ warning: setting vibrational entropy to zero for mode 1160 with vtemp = -17461241.638280
+ warning: setting vibrational entropy to zero for mode 1161 with vtemp = -17434094.868488
+ warning: setting vibrational entropy to zero for mode 1162 with vtemp = -17368301.594065
+ warning: setting vibrational entropy to zero for mode 1163 with vtemp = -17328539.015332
+ warning: setting vibrational entropy to zero for mode 1164 with vtemp = -17199223.381518
+ warning: setting vibrational entropy to zero for mode 1165 with vtemp = -17165874.556974
+ warning: setting vibrational entropy to zero for mode 1166 with vtemp = -17103660.505546
+ warning: setting vibrational entropy to zero for mode 1167 with vtemp = -17058248.274479
+ warning: setting vibrational entropy to zero for mode 1168 with vtemp = -16984400.165632
+ warning: setting vibrational entropy to zero for mode 1169 with vtemp = -16960988.821112
+ warning: setting vibrational entropy to zero for mode 1170 with vtemp = -16929673.040620
+ warning: setting vibrational entropy to zero for mode 1171 with vtemp = -16875436.813256
+ warning: setting vibrational entropy to zero for mode 1172 with vtemp = -16810857.552634
+ warning: setting vibrational entropy to zero for mode 1173 with vtemp = -16758728.515607
+ warning: setting vibrational entropy to zero for mode 1174 with vtemp = -16708071.770357
+ warning: setting vibrational entropy to zero for mode 1175 with vtemp = -16661495.430818
+ warning: setting vibrational entropy to zero for mode 1176 with vtemp = -16587832.812278
+ warning: setting vibrational entropy to zero for mode 1177 with vtemp = -16560885.417416
+ warning: setting vibrational entropy to zero for mode 1178 with vtemp = -16459068.643846
+ warning: setting vibrational entropy to zero for mode 1179 with vtemp = -16445556.188899
+ warning: setting vibrational entropy to zero for mode 1180 with vtemp = -16317706.756029
+ warning: setting vibrational entropy to zero for mode 1181 with vtemp = -16306410.320122
+ warning: setting vibrational entropy to zero for mode 1182 with vtemp = -16289304.154817
+ warning: setting vibrational entropy to zero for mode 1183 with vtemp = -16165511.734146
+ warning: setting vibrational entropy to zero for mode 1184 with vtemp = -16108326.794839
+ warning: setting vibrational entropy to zero for mode 1185 with vtemp = -16095925.107229
+ warning: setting vibrational entropy to zero for mode 1186 with vtemp = -16034404.358654
+ warning: setting vibrational entropy to zero for mode 1187 with vtemp = -15992724.692392
+ warning: setting vibrational entropy to zero for mode 1188 with vtemp = -15980343.649480
+ warning: setting vibrational entropy to zero for mode 1189 with vtemp = -15939650.118108
+ warning: setting vibrational entropy to zero for mode 1190 with vtemp = -15879145.690577
+ warning: setting vibrational entropy to zero for mode 1191 with vtemp = -15834970.651938
+ warning: setting vibrational entropy to zero for mode 1192 with vtemp = -15784025.259440
+ warning: setting vibrational entropy to zero for mode 1193 with vtemp = -15746028.199225
+ warning: setting vibrational entropy to zero for mode 1194 with vtemp = -15691507.569520
+ warning: setting vibrational entropy to zero for mode 1195 with vtemp = -15612904.599014
+ warning: setting vibrational entropy to zero for mode 1196 with vtemp = -15597848.674981
+ warning: setting vibrational entropy to zero for mode 1197 with vtemp = -15568731.132068
+ warning: setting vibrational entropy to zero for mode 1198 with vtemp = -15513298.540622
+ warning: setting vibrational entropy to zero for mode 1199 with vtemp = -15495852.292854
+ warning: setting vibrational entropy to zero for mode 1200 with vtemp = -15417853.698414
+ warning: setting vibrational entropy to zero for mode 1201 with vtemp = -15372534.533269
+ warning: setting vibrational entropy to zero for mode 1202 with vtemp = -15342767.098717
+ warning: setting vibrational entropy to zero for mode 1203 with vtemp = -15290671.434318
+ warning: setting vibrational entropy to zero for mode 1204 with vtemp = -15219203.272061
+ warning: setting vibrational entropy to zero for mode 1205 with vtemp = -15195221.871744
+ warning: setting vibrational entropy to zero for mode 1206 with vtemp = -15123860.893187
+ warning: setting vibrational entropy to zero for mode 1207 with vtemp = -15068562.386162
+ warning: setting vibrational entropy to zero for mode 1208 with vtemp = -15042626.942865
+ warning: setting vibrational entropy to zero for mode 1209 with vtemp = -14992916.682218
+ warning: setting vibrational entropy to zero for mode 1210 with vtemp = -14964756.821996
+ warning: setting vibrational entropy to zero for mode 1211 with vtemp = -14920769.075982
+ warning: setting vibrational entropy to zero for mode 1212 with vtemp = -14869549.600159
+ warning: setting vibrational entropy to zero for mode 1213 with vtemp = -14838593.237160
+ warning: setting vibrational entropy to zero for mode 1214 with vtemp = -14804716.685814
+ warning: setting vibrational entropy to zero for mode 1215 with vtemp = -14762232.550905
+ warning: setting vibrational entropy to zero for mode 1216 with vtemp = -14733335.034912
+ warning: setting vibrational entropy to zero for mode 1217 with vtemp = -14694961.890320
+ warning: setting vibrational entropy to zero for mode 1218 with vtemp = -14661402.591671
+ warning: setting vibrational entropy to zero for mode 1219 with vtemp = -14624984.432101
+ warning: setting vibrational entropy to zero for mode 1220 with vtemp = -14595938.439386
+ warning: setting vibrational entropy to zero for mode 1221 with vtemp = -14564375.397515
+ warning: setting vibrational entropy to zero for mode 1222 with vtemp = -14513838.196211
+ warning: setting vibrational entropy to zero for mode 1223 with vtemp = -14496853.192878
+ warning: setting vibrational entropy to zero for mode 1224 with vtemp = -14418668.939089
+ warning: setting vibrational entropy to zero for mode 1225 with vtemp = -14369581.049455
+ warning: setting vibrational entropy to zero for mode 1226 with vtemp = -14345341.022937
+ warning: setting vibrational entropy to zero for mode 1227 with vtemp = -14330144.450811
+ warning: setting vibrational entropy to zero for mode 1228 with vtemp = -14290413.797991
+ warning: setting vibrational entropy to zero for mode 1229 with vtemp = -14271406.655726
+ warning: setting vibrational entropy to zero for mode 1230 with vtemp = -14205704.750812
+ warning: setting vibrational entropy to zero for mode 1231 with vtemp = -14153866.183948
+ warning: setting vibrational entropy to zero for mode 1232 with vtemp = -14150832.450767
+ warning: setting vibrational entropy to zero for mode 1233 with vtemp = -14044468.052531
+ warning: setting vibrational entropy to zero for mode 1234 with vtemp = -14020438.535836
+ warning: setting vibrational entropy to zero for mode 1235 with vtemp = -13965756.739531
+ warning: setting vibrational entropy to zero for mode 1236 with vtemp = -13954870.835107
+ warning: setting vibrational entropy to zero for mode 1237 with vtemp = -13865455.675833
+ warning: setting vibrational entropy to zero for mode 1238 with vtemp = -13842806.393182
+ warning: setting vibrational entropy to zero for mode 1239 with vtemp = -13811414.126018
+ warning: setting vibrational entropy to zero for mode 1240 with vtemp = -13762522.748973
+ warning: setting vibrational entropy to zero for mode 1241 with vtemp = -13709677.427662
+ warning: setting vibrational entropy to zero for mode 1242 with vtemp = -13682825.800895
+ warning: setting vibrational entropy to zero for mode 1243 with vtemp = -13643717.283271
+ warning: setting vibrational entropy to zero for mode 1244 with vtemp = -13633476.638295
+ warning: setting vibrational entropy to zero for mode 1245 with vtemp = -13600052.877214
+ warning: setting vibrational entropy to zero for mode 1246 with vtemp = -13565681.143959
+ warning: setting vibrational entropy to zero for mode 1247 with vtemp = -13553316.337750
+ warning: setting vibrational entropy to zero for mode 1248 with vtemp = -13482069.173223
+ warning: setting vibrational entropy to zero for mode 1249 with vtemp = -13439764.103681
+ warning: setting vibrational entropy to zero for mode 1250 with vtemp = -13429762.596544
+ warning: setting vibrational entropy to zero for mode 1251 with vtemp = -13417633.932520
+ warning: setting vibrational entropy to zero for mode 1252 with vtemp = -13357633.098980
+ warning: setting vibrational entropy to zero for mode 1253 with vtemp = -13340043.916457
+ warning: setting vibrational entropy to zero for mode 1254 with vtemp = -13262232.812196
+ warning: setting vibrational entropy to zero for mode 1255 with vtemp = -13241040.346249
+ warning: setting vibrational entropy to zero for mode 1256 with vtemp = -13215016.693423
+ warning: setting vibrational entropy to zero for mode 1257 with vtemp = -13187286.635351
+ warning: setting vibrational entropy to zero for mode 1258 with vtemp = -13155492.912380
+ warning: setting vibrational entropy to zero for mode 1259 with vtemp = -13137955.952889
+ warning: setting vibrational entropy to zero for mode 1260 with vtemp = -13112824.554352
+ warning: setting vibrational entropy to zero for mode 1261 with vtemp = -13042859.760971
+ warning: setting vibrational entropy to zero for mode 1262 with vtemp = -13003778.127837
+ warning: setting vibrational entropy to zero for mode 1263 with vtemp = -12950518.667662
+ warning: setting vibrational entropy to zero for mode 1264 with vtemp = -12919840.897237
+ warning: setting vibrational entropy to zero for mode 1265 with vtemp = -12900930.283455
+ warning: setting vibrational entropy to zero for mode 1266 with vtemp = -12863229.821692
+ warning: setting vibrational entropy to zero for mode 1267 with vtemp = -12839377.902429
+ warning: setting vibrational entropy to zero for mode 1268 with vtemp = -12779521.876788
+ warning: setting vibrational entropy to zero for mode 1269 with vtemp = -12766371.409799
+ warning: setting vibrational entropy to zero for mode 1270 with vtemp = -12746462.480858
+ warning: setting vibrational entropy to zero for mode 1271 with vtemp = -12690577.269415
+ warning: setting vibrational entropy to zero for mode 1272 with vtemp = -12688035.187897
+ warning: setting vibrational entropy to zero for mode 1273 with vtemp = -12679471.677725
+ warning: setting vibrational entropy to zero for mode 1274 with vtemp = -12633732.834757
+ warning: setting vibrational entropy to zero for mode 1275 with vtemp = -12610976.079728
+ warning: setting vibrational entropy to zero for mode 1276 with vtemp = -12573650.416401
+ warning: setting vibrational entropy to zero for mode 1277 with vtemp = -12546053.059316
+ warning: setting vibrational entropy to zero for mode 1278 with vtemp = -12495942.419583
+ warning: setting vibrational entropy to zero for mode 1279 with vtemp = -12486161.000434
+ warning: setting vibrational entropy to zero for mode 1280 with vtemp = -12446557.356637
+ warning: setting vibrational entropy to zero for mode 1281 with vtemp = -12436048.261245
+ warning: setting vibrational entropy to zero for mode 1282 with vtemp = -12415169.003320
+ warning: setting vibrational entropy to zero for mode 1283 with vtemp = -12364957.702527
+ warning: setting vibrational entropy to zero for mode 1284 with vtemp = -12325420.045439
+ warning: setting vibrational entropy to zero for mode 1285 with vtemp = -12292060.960074
+ warning: setting vibrational entropy to zero for mode 1286 with vtemp = -12263207.834687
+ warning: setting vibrational entropy to zero for mode 1287 with vtemp = -12219689.163314
+ warning: setting vibrational entropy to zero for mode 1288 with vtemp = -12179666.864494
+ warning: setting vibrational entropy to zero for mode 1289 with vtemp = -12152366.402223
+ warning: setting vibrational entropy to zero for mode 1290 with vtemp = -12133560.466984
+ warning: setting vibrational entropy to zero for mode 1291 with vtemp = -12055799.880450
+ warning: setting vibrational entropy to zero for mode 1292 with vtemp = -12053383.323297
+ warning: setting vibrational entropy to zero for mode 1293 with vtemp = -12009862.487294
+ warning: setting vibrational entropy to zero for mode 1294 with vtemp = -11973929.113260
+ warning: setting vibrational entropy to zero for mode 1295 with vtemp = -11944157.669688
+ warning: setting vibrational entropy to zero for mode 1296 with vtemp = -11923416.883365
+ warning: setting vibrational entropy to zero for mode 1297 with vtemp = -11886272.000913
+ warning: setting vibrational entropy to zero for mode 1298 with vtemp = -11872641.822829
+ warning: setting vibrational entropy to zero for mode 1299 with vtemp = -11818721.140889
+ warning: setting vibrational entropy to zero for mode 1300 with vtemp = -11795754.882833
+ warning: setting vibrational entropy to zero for mode 1301 with vtemp = -11780195.359008
+ warning: setting vibrational entropy to zero for mode 1302 with vtemp = -11732312.311467
+ warning: setting vibrational entropy to zero for mode 1303 with vtemp = -11710915.776349
+ warning: setting vibrational entropy to zero for mode 1304 with vtemp = -11702253.217189
+ warning: setting vibrational entropy to zero for mode 1305 with vtemp = -11657280.159119
+ warning: setting vibrational entropy to zero for mode 1306 with vtemp = -11630664.649623
+ warning: setting vibrational entropy to zero for mode 1307 with vtemp = -11626218.613661
+ warning: setting vibrational entropy to zero for mode 1308 with vtemp = -11589678.151619
+ warning: setting vibrational entropy to zero for mode 1309 with vtemp = -11560924.382650
+ warning: setting vibrational entropy to zero for mode 1310 with vtemp = -11505898.630174
+ warning: setting vibrational entropy to zero for mode 1311 with vtemp = -11480522.321146
+ warning: setting vibrational entropy to zero for mode 1312 with vtemp = -11472153.884983
+ warning: setting vibrational entropy to zero for mode 1313 with vtemp = -11436312.715877
+ warning: setting vibrational entropy to zero for mode 1314 with vtemp = -11411335.715811
+ warning: setting vibrational entropy to zero for mode 1315 with vtemp = -11393638.826390
+ warning: setting vibrational entropy to zero for mode 1316 with vtemp = -11361902.385220
+ warning: setting vibrational entropy to zero for mode 1317 with vtemp = -11332981.788040
+ warning: setting vibrational entropy to zero for mode 1318 with vtemp = -11304474.798346
+ warning: setting vibrational entropy to zero for mode 1319 with vtemp = -11296635.579829
+ warning: setting vibrational entropy to zero for mode 1320 with vtemp = -11243442.772285
+ warning: setting vibrational entropy to zero for mode 1321 with vtemp = -11220406.813659
+ warning: setting vibrational entropy to zero for mode 1322 with vtemp = -11180369.915746
+ warning: setting vibrational entropy to zero for mode 1323 with vtemp = -11148569.395541
+ warning: setting vibrational entropy to zero for mode 1324 with vtemp = -11120943.913460
+ warning: setting vibrational entropy to zero for mode 1325 with vtemp = -11101534.129678
+ warning: setting vibrational entropy to zero for mode 1326 with vtemp = -11086183.679838
+ warning: setting vibrational entropy to zero for mode 1327 with vtemp = -11060122.477265
+ warning: setting vibrational entropy to zero for mode 1328 with vtemp = -11038810.141872
+ warning: setting vibrational entropy to zero for mode 1329 with vtemp = -11006915.034257
+ warning: setting vibrational entropy to zero for mode 1330 with vtemp = -10998923.636098
+ warning: setting vibrational entropy to zero for mode 1331 with vtemp = -10943298.477961
+ warning: setting vibrational entropy to zero for mode 1332 with vtemp = -10929656.280359
+ warning: setting vibrational entropy to zero for mode 1333 with vtemp = -10893630.069458
+ warning: setting vibrational entropy to zero for mode 1334 with vtemp = -10878692.276912
+ warning: setting vibrational entropy to zero for mode 1335 with vtemp = -10848474.453383
+ warning: setting vibrational entropy to zero for mode 1336 with vtemp = -10824890.816351
+ warning: setting vibrational entropy to zero for mode 1337 with vtemp = -10806114.499342
+ warning: setting vibrational entropy to zero for mode 1338 with vtemp = -10798539.626441
+ warning: setting vibrational entropy to zero for mode 1339 with vtemp = -10789365.929773
+ warning: setting vibrational entropy to zero for mode 1340 with vtemp = -10729366.804192
+ warning: setting vibrational entropy to zero for mode 1341 with vtemp = -10710775.465714
+ warning: setting vibrational entropy to zero for mode 1342 with vtemp = -10669968.781239
+ warning: setting vibrational entropy to zero for mode 1343 with vtemp = -10655696.427450
+ warning: setting vibrational entropy to zero for mode 1344 with vtemp = -10630723.760379
+ warning: setting vibrational entropy to zero for mode 1345 with vtemp = -10597113.425879
+ warning: setting vibrational entropy to zero for mode 1346 with vtemp = -10592573.739153
+ warning: setting vibrational entropy to zero for mode 1347 with vtemp = -10537156.246614
+ warning: setting vibrational entropy to zero for mode 1348 with vtemp = -10504172.586862
+ warning: setting vibrational entropy to zero for mode 1349 with vtemp = -10482461.576808
+ warning: setting vibrational entropy to zero for mode 1350 with vtemp = -10467577.392300
+ warning: setting vibrational entropy to zero for mode 1351 with vtemp = -10407569.256327
+ warning: setting vibrational entropy to zero for mode 1352 with vtemp = -10400289.567722
+ warning: setting vibrational entropy to zero for mode 1353 with vtemp = -10368932.081051
+ warning: setting vibrational entropy to zero for mode 1354 with vtemp = -10346280.387062
+ warning: setting vibrational entropy to zero for mode 1355 with vtemp = -10326856.529932
+ warning: setting vibrational entropy to zero for mode 1356 with vtemp = -10314633.419760
+ warning: setting vibrational entropy to zero for mode 1357 with vtemp = -10299868.148804
+ warning: setting vibrational entropy to zero for mode 1358 with vtemp = -10261784.832693
+ warning: setting vibrational entropy to zero for mode 1359 with vtemp = -10239881.807475
+ warning: setting vibrational entropy to zero for mode 1360 with vtemp = -10212355.871123
+ warning: setting vibrational entropy to zero for mode 1361 with vtemp = -10171369.162040
+ warning: setting vibrational entropy to zero for mode 1362 with vtemp = -10150968.180018
+ warning: setting vibrational entropy to zero for mode 1363 with vtemp = -10139229.716844
+ warning: setting vibrational entropy to zero for mode 1364 with vtemp = -10094364.524952
+ warning: setting vibrational entropy to zero for mode 1365 with vtemp = -10073384.016647
+ warning: setting vibrational entropy to zero for mode 1366 with vtemp = -10060621.252238
+ warning: setting vibrational entropy to zero for mode 1367 with vtemp = -10027611.371310
+ warning: setting vibrational entropy to zero for mode 1368 with vtemp = -9996305.012648
+ warning: setting vibrational entropy to zero for mode 1369 with vtemp = -9980481.293304
+ warning: setting vibrational entropy to zero for mode 1370 with vtemp = -9944730.351779
+ warning: setting vibrational entropy to zero for mode 1371 with vtemp = -9912214.257989
+ warning: setting vibrational entropy to zero for mode 1372 with vtemp = -9838961.238071
+ warning: setting vibrational entropy to zero for mode 1373 with vtemp = -9829312.621776
+ warning: setting vibrational entropy to zero for mode 1374 with vtemp = -9804443.159723
+ warning: setting vibrational entropy to zero for mode 1375 with vtemp = -9763882.538989
+ warning: setting vibrational entropy to zero for mode 1376 with vtemp = -9748238.043139
+ warning: setting vibrational entropy to zero for mode 1377 with vtemp = -9711413.509846
+ warning: setting vibrational entropy to zero for mode 1378 with vtemp = -9681999.617811
+ warning: setting vibrational entropy to zero for mode 1379 with vtemp = -9648316.439699
+ warning: setting vibrational entropy to zero for mode 1380 with vtemp = -9641469.944157
+ warning: setting vibrational entropy to zero for mode 1381 with vtemp = -9594726.924069
+ warning: setting vibrational entropy to zero for mode 1382 with vtemp = -9574627.653454
+ warning: setting vibrational entropy to zero for mode 1383 with vtemp = -9552605.068508
+ warning: setting vibrational entropy to zero for mode 1384 with vtemp = -9515407.817509
+ warning: setting vibrational entropy to zero for mode 1385 with vtemp = -9503521.664489
+ warning: setting vibrational entropy to zero for mode 1386 with vtemp = -9477738.648354
+ warning: setting vibrational entropy to zero for mode 1387 with vtemp = -9438023.286978
+ warning: setting vibrational entropy to zero for mode 1388 with vtemp = -9427440.993323
+ warning: setting vibrational entropy to zero for mode 1389 with vtemp = -9407630.513888
+ warning: setting vibrational entropy to zero for mode 1390 with vtemp = -9361787.595699
+ warning: setting vibrational entropy to zero for mode 1391 with vtemp = -9320084.171765
+ warning: setting vibrational entropy to zero for mode 1392 with vtemp = -9276707.994884
+ warning: setting vibrational entropy to zero for mode 1393 with vtemp = -9261375.181319
+ warning: setting vibrational entropy to zero for mode 1394 with vtemp = -9205483.677239
+ warning: setting vibrational entropy to zero for mode 1395 with vtemp = -9173603.390272
+ warning: setting vibrational entropy to zero for mode 1396 with vtemp = -9118836.084723
+ warning: setting vibrational entropy to zero for mode 1397 with vtemp = -9090882.534671
+ warning: setting vibrational entropy to zero for mode 1398 with vtemp = -9063440.785350
+ warning: setting vibrational entropy to zero for mode 1399 with vtemp = -9017562.048262
+ warning: setting vibrational entropy to zero for mode 1400 with vtemp = -8977794.338381
+ warning: setting vibrational entropy to zero for mode 1401 with vtemp = -8947885.649039
+ warning: setting vibrational entropy to zero for mode 1402 with vtemp = -8913550.561825
+ warning: setting vibrational entropy to zero for mode 1403 with vtemp = -8880303.353698
+ warning: setting vibrational entropy to zero for mode 1404 with vtemp = -8830158.522159
+ warning: setting vibrational entropy to zero for mode 1405 with vtemp = -8822825.845876
+ warning: setting vibrational entropy to zero for mode 1406 with vtemp = -8732345.633361
+ warning: setting vibrational entropy to zero for mode 1407 with vtemp = -8630713.000892
+ warning: setting vibrational entropy to zero for mode 1408 with vtemp = -8567372.151365
+ warning: setting vibrational entropy to zero for mode 1409 with vtemp = -8540593.068094
+ warning: setting vibrational entropy to zero for mode 1410 with vtemp = -8455677.027314
+ warning: setting vibrational entropy to zero for mode 1411 with vtemp = -8340821.828797
+ warning: setting vibrational entropy to zero for mode 1412 with vtemp = -8225976.059521
+ warning: setting vibrational entropy to zero for mode 1413 with vtemp = -3491495.386351
+
+
+           freq.         E                  Cv                 S
+          cm**-1      kcal/mol        cal/mol-kelvin    cal/mol-kelvin
+--------------------------------------------------------------------------------
+ Total              51815198.278               -nan            507.756
+ translational            0.888              2.979             50.362
+ rotational               0.888              2.979             46.054
+ vibrational        51815196.501               -nan            411.340
+     1     0.369          0.592              1.986             14.559
+     2     0.515          0.592              1.986             13.896
+     3     0.885          0.592              1.986             12.820
+     4     0.965          0.592              1.986             12.647
+     5     1.895          0.592              1.986             11.308
+     6     1.980          0.592              1.986             11.220
+     7     2.231          0.592              1.986             10.983
+     8     2.767          0.592              1.986             10.556
+     9     3.414          0.592              1.986             10.139
+    10     4.173          0.592              1.986              9.740
+    11     4.704          0.592              1.986              9.502
+    12     5.636          0.592              1.986              9.143
+    13     5.787          0.592              1.986              9.091
+    14     6.330          0.592              1.986              8.912
+    15     6.689          0.592              1.986              8.803
+    16     7.778          0.592              1.986              8.503
+    17     8.372          0.592              1.986              8.357
+    18     8.738          0.592              1.986              8.272
+    19     8.940          0.592              1.986              8.227
+    20     9.199          0.592              1.986              8.170
+    21    10.063          0.592              1.986              7.992
+    22    10.464          0.592              1.985              7.914
+    23    10.745          0.592              1.985              7.862
+    24    10.792          0.592              1.985              7.853
+    25    11.385          0.592              1.985              7.747
+    26    11.876          0.592              1.985              7.663
+    27    12.231          0.592              1.985              7.605
+    28    12.504          0.592              1.985              7.561
+    29    13.062          0.592              1.985              7.474
+    30    13.585          0.592              1.985              7.396
+    31    14.158          0.592              1.985              7.314
+    32    14.377          0.592              1.985              7.284
+    33    15.005          0.592              1.985              7.199
+    34    15.294          0.592              1.985              7.161
+    35    15.632          0.592              1.985              7.117
+    36    15.727          0.592              1.985              7.105
+    37    16.702          0.592              1.985              6.986
+    38    17.407          0.592              1.985              6.904
+    39    17.499          0.592              1.985              6.894
+    40    18.060          0.592              1.985              6.831
+    41    19.035          0.593              1.985              6.727
+    42    19.511          0.593              1.984              6.678
+    43    19.876          0.593              1.984              6.641
+    44    20.028          0.593              1.984              6.626
+    45    21.155          0.593              1.984              6.517
+    46    21.777          0.593              1.984              6.460
+    47    22.574          0.593              1.984              6.388
+    48    23.136          0.593              1.984              6.339
+    49    24.113          0.593              1.984              6.257
+    502452156.855       3505.800               -nan              0.000
+    515713538.946       8168.534               -nan              0.000
+    525774716.558       8255.998               -nan              0.000
+    535825929.191       8329.216               -nan              0.000
+    545899614.213       8434.562               -nan              0.000
+    555940940.062       8493.645               -nan              0.000
+    565993711.431       8569.091               -nan              0.000
+    576029327.034       8620.010               -nan              0.000
+    586067634.679       8674.777               -nan              0.000
+    596090094.840       8706.888               -nan              0.000
+    606124485.444       8756.056               -nan              0.000
+    616173251.337       8825.775               -nan              0.000
+    626222127.203       8895.652               -nan              0.000
+    636240042.717       8921.266               -nan              0.000
+    646258914.873       8948.247               -nan              0.000
+    656287121.975       8988.574               -nan              0.000
+    666300328.815       9007.456               -nan              0.000
+    676328643.869       9047.937               -nan              0.000
+    686340264.945       9064.551               -nan              0.000
+    696368256.214       9104.570               -nan              0.000
+    706379147.049       9120.140               -nan              0.000
+    716392185.123       9138.781               -nan              0.000
+    726462855.005       9239.816               -nan              0.000
+    736486187.910       9273.175               -nan              0.000
+    746502457.297       9296.435               -nan              0.000
+    756503760.950       9298.298               -nan              0.000
+    766533593.705       9340.950               -nan              0.000
+    776570163.385       9393.233               -nan              0.000
+    786602642.531       9439.668               -nan              0.000
+    796603524.432       9440.928               -nan              0.000
+    806619384.929       9463.604               -nan              0.000
+    816622088.259       9467.469               -nan              0.000
+    826663149.574       9526.173               -nan              0.000
+    836694486.041       9570.974               -nan              0.000
+    846699729.585       9578.471               -nan              0.000
+    856707999.323       9590.294               -nan              0.000
+    866733237.267       9626.376               -nan              0.000
+    876741826.534       9638.656               -nan              0.000
+    886792737.738       9711.443               -nan              0.000
+    896811056.731       9737.633               -nan              0.000
+    906828319.796       9762.314               -nan              0.000
+    916835877.389       9773.119               -nan              0.000
+    926860721.504       9808.638               -nan              0.000
+    936863888.340       9813.166               -nan              0.000
+    946911083.547       9880.640               -nan              0.000
+    956914139.105       9885.008               -nan              0.000
+    966950738.081       9937.333               -nan              0.000
+    976973230.981       9969.491               -nan              0.000
+    986996378.619      10002.584               -nan              0.000
+    997007993.858      10019.190               -nan              0.000
+   1007015002.397      10029.210               -nan              0.000
+   1017031955.218      10053.447               -nan              0.000
+   1027063555.842      10098.626               -nan              0.000
+   1037075437.306      10115.613               -nan              0.000
+   1047081916.673      10124.876               -nan              0.000
+   1057098703.866      10148.877               -nan              0.000
+   1067121611.535      10181.627               -nan              0.000
+   1077137509.828      10204.357               -nan              0.000
+   1087161483.095      10238.631               -nan              0.000
+   1097176253.599      10259.748               -nan              0.000
+   1107185429.098      10272.866               -nan              0.000
+   1117220480.507      10322.978               -nan              0.000
+   1127249559.242      10364.552               -nan              0.000
+   1137260001.764      10379.481               -nan              0.000
+   1147269736.483      10393.399               -nan              0.000
+   1157284158.700      10414.018               -nan              0.000
+   1167310635.542      10451.871               -nan              0.000
+   1177320223.187      10465.578               -nan              0.000
+   1187353734.346      10513.489               -nan              0.000
+   1197368256.553      10534.251               -nan              0.000
+   1207383174.684      10555.579               -nan              0.000
+   1217397223.527      10575.664               -nan              0.000
+   1227412203.527      10597.081               -nan              0.000
+   1237448762.557      10649.349               -nan              0.000
+   1247463616.596      10670.585               -nan              0.000
+   1257478689.879      10692.135               -nan              0.000
+   1267499789.694      10722.301               -nan              0.000
+   1277514275.373      10743.011               -nan              0.000
+   1287546840.904      10789.569               -nan              0.000
+   1297554320.513      10800.263               -nan              0.000
+   1307567974.120      10819.783               -nan              0.000
+   1317586948.173      10846.910               -nan              0.000
+   1327616979.788      10889.845               -nan              0.000
+   1337630505.250      10909.183               -nan              0.000
+   1347649971.466      10937.013               -nan              0.000
+   1357659662.190      10950.868               -nan              0.000
+   1367670786.480      10966.772               -nan              0.000
+   1377711805.264      11025.416               -nan              0.000
+   1387735521.539      11059.322               -nan              0.000
+   1397750726.436      11081.060               -nan              0.000
+   1407756424.960      11089.207               -nan              0.000
+   1417775595.081      11116.615               -nan              0.000
+   1427794535.571      11143.693               -nan              0.000
+   1437813263.330      11170.468               -nan              0.000
+   1447835034.273      11201.594               -nan              0.000
+   1457851251.898      11224.780               -nan              0.000
+   1467866506.487      11246.589               -nan              0.000
+   1477871737.448      11254.067               -nan              0.000
+   1487918323.495      11320.671               -nan              0.000
+   1497932906.954      11341.520               -nan              0.000
+   1507956736.635      11375.589               -nan              0.000
+   1517996410.320      11432.310               -nan              0.000
+   1527999266.328      11436.393               -nan              0.000
+   1538010020.253      11451.768               -nan              0.000
+   1548016985.595      11461.726               -nan              0.000
+   1558054312.735      11515.092               -nan              0.000
+   1568066474.472      11532.479               -nan              0.000
+   1578088553.323      11564.045               -nan              0.000
+   1588105856.498      11588.783               -nan              0.000
+   1598113101.984      11599.142               -nan              0.000
+   1608148575.406      11649.857               -nan              0.000
+   1618160284.828      11666.598               -nan              0.000
+   1628203358.583      11728.180               -nan              0.000
+   1638220192.145      11752.246               -nan              0.000
+   1648245757.083      11788.796               -nan              0.000
+   1658264848.392      11816.090               -nan              0.000
+   1668304546.177      11872.846               -nan              0.000
+   1678322877.718      11899.054               -nan              0.000
+   1688328612.868      11907.253               -nan              0.000
+   1698360999.504      11953.556               -nan              0.000
+   1708388151.119      11992.374               -nan              0.000
+   1718398550.912      12007.242               -nan              0.000
+   1728421272.335      12039.727               -nan              0.000
+   1738449370.716      12079.898               -nan              0.000
+   1748458995.069      12093.658               -nan              0.000
+   1758474645.380      12116.033               -nan              0.000
+   1768493750.653      12143.347               -nan              0.000
+   1778502474.079      12155.819               -nan              0.000
+   1788535877.322      12203.575               -nan              0.000
+   1798542324.523      12212.793               -nan              0.000
+   1808559893.692      12237.911               -nan              0.000
+   1818582149.574      12269.730               -nan              0.000
+   1828615793.218      12317.829               -nan              0.000
+   1838624860.676      12330.793               -nan              0.000
+   1848672802.715      12399.335               -nan              0.000
+   1858702774.709      12442.185               -nan              0.000
+   1868711579.327      12454.773               -nan              0.000
+   1878722758.830      12470.756               -nan              0.000
+   1888738940.388      12493.890               -nan              0.000
+   1898748042.318      12506.903               -nan              0.000
+   1908783466.435      12557.548               -nan              0.000
+   1918810407.204      12596.065               -nan              0.000
+   1928843321.129      12643.121               -nan              0.000
+   1938855110.590      12659.977               -nan              0.000
+   1948878126.148      12692.881               -nan              0.000
+   1958904903.453      12731.164               -nan              0.000
+   1968911561.125      12740.683               -nan              0.000
+   1978944168.366      12787.301               -nan              0.000
+   1988970026.466      12824.270               -nan              0.000
+   1999001346.538      12869.047               -nan              0.000
+   2009003195.231      12871.690               -nan              0.000
+   2019035667.883      12918.116               -nan              0.000
+   2029058268.268      12950.427               -nan              0.000
+   2039075780.717      12975.464               -nan              0.000
+   2049097846.284      13007.011               -nan              0.000
+   2059108548.558      13022.312               -nan              0.000
+   2069143168.110      13071.807               -nan              0.000
+   2079155070.783      13088.824               -nan              0.000
+   2089193874.739      13144.301               -nan              0.000
+   2099217143.990      13177.569               -nan              0.000
+   2109242607.133      13213.973               -nan              0.000
+   2119273812.285      13258.586               -nan              0.000
+   2129293291.380      13286.435               -nan              0.000
+   2139309951.402      13310.254               -nan              0.000
+   2149369990.862      13396.091               -nan              0.000
+   2159403284.209      13443.690               -nan              0.000
+   2169405376.640      13446.681               -nan              0.000
+   2179426030.653      13476.210               -nan              0.000
+   2189460112.334      13524.936               -nan              0.000
+   2199467750.195      13535.855               -nan              0.000
+   2209491257.975      13569.464               -nan              0.000
+   2219510714.615      13597.281               -nan              0.000
+   2229521049.698      13612.057               -nan              0.000
+   2239559024.473      13666.348               -nan              0.000
+   2249590356.054      13711.143               -nan              0.000
+   2259599443.510      13724.135               -nan              0.000
+   2269636560.339      13777.200               -nan              0.000
+   2279664601.275      13817.289               -nan              0.000
+   2289687417.781      13849.910               -nan              0.000
+   2299713929.476      13887.813               -nan              0.000
+   2309768132.806      13965.306               -nan              0.000
+   2319816906.542      14035.037               -nan              0.000
+   2329843443.260      14072.976               -nan              0.000
+   2339857698.952      14093.357               -nan              0.000
+   2349874300.960      14117.093               -nan              0.000
+   2359893537.426      14144.595               -nan              0.000
+   2369932632.389      14200.488               -nan              0.000
+   2379954112.430      14231.198               -nan              0.000
+   2389976446.841      14263.129               -nan              0.000
+   23910007386.986      14307.363               -nan              0.000
+   24010035371.564      14347.372               -nan              0.000
+   24110074046.836      14402.666               -nan              0.000
+   24210102798.502      14443.771               -nan              0.000
+   24310139424.868      14496.135               -nan              0.000
+   24410156050.808      14519.905               -nan              0.000
+   24510194121.613      14574.334               -nan              0.000
+   24610226000.857      14619.911               -nan              0.000
+   24710257648.274      14665.157               -nan              0.000
+   24810286040.462      14705.749               -nan              0.000
+   24910323716.449      14759.613               -nan              0.000
+   25010331163.836      14770.261               -nan              0.000
+   25110344760.371      14789.699               -nan              0.000
+   25210384279.948      14846.200               -nan              0.000
+   25310408426.806      14880.722               -nan              0.000
+   25410423867.061      14902.797               -nan              0.000
+   25510484183.192      14989.030               -nan              0.000
+   25610512920.267      15030.114               -nan              0.000
+   25710558335.604      15095.044               -nan              0.000
+   25810578001.980      15123.160               -nan              0.000
+   25910600856.866      15155.836               -nan              0.000
+   26010642762.631      15215.747               -nan              0.000
+   26110654555.432      15232.607               -nan              0.000
+   26210697689.540      15294.275               -nan              0.000
+   26310730774.724      15341.577               -nan              0.000
+   26410742799.490      15358.768               -nan              0.000
+   26510774321.591      15403.835               -nan              0.000
+   26610821840.782      15471.772               -nan              0.000
+   26710856671.443      15521.569               -nan              0.000
+   26810906670.961      15593.052               -nan              0.000
+   26910915906.008      15606.255               -nan              0.000
+   27010978067.028      15695.125               -nan              0.000
+   27111018457.745      15752.871               -nan              0.000
+   27211045967.857      15792.202               -nan              0.000
+   27311080990.139      15842.273               -nan              0.000
+   27411092272.881      15858.403               -nan              0.000
+   27511124506.482      15904.487               -nan              0.000
+   27611148497.176      15938.786               -nan              0.000
+   27711192678.278      16001.951               -nan              0.000
+   27811267648.719      16109.135               -nan              0.000
+   27911283636.066      16131.991               -nan              0.000
+   28011337233.082      16208.618               -nan              0.000
+   28111362641.775      16244.944               -nan              0.000
+   28211399941.449      16298.271               -nan              0.000
+   28311426412.664      16336.116               -nan              0.000
+   28411457952.432      16381.208               -nan              0.000
+   28511486482.913      16421.998               -nan              0.000
+   28611521700.262      16472.347               -nan              0.000
+   28711533138.701      16488.700               -nan              0.000
+   28811551904.501      16515.530               -nan              0.000
+   28911579963.207      16555.645               -nan              0.000
+   29011616678.939      16608.136               -nan              0.000
+   29111631552.267      16629.400               -nan              0.000
+   29211699353.073      16726.334               -nan              0.000
+   29311783201.404      16846.210               -nan              0.000
+   29411819882.904      16898.653               -nan              0.000
+   29511837192.865      16923.401               -nan              0.000
+   29611863696.596      16961.293               -nan              0.000
+   29711882120.578      16987.633               -nan              0.000
+   29811928881.877      17054.487               -nan              0.000
+   29911998937.556      17154.644               -nan              0.000
+   30012034212.635      17205.076               -nan              0.000
+   30112059783.305      17241.634               -nan              0.000
+   30212115389.649      17321.133               -nan              0.000
+   30312182949.210      17417.722               -nan              0.000
+   30412252635.743      17517.351               -nan              0.000
+   30512272133.536      17545.227               -nan              0.000
+   30612290963.375      17572.147               -nan              0.000
+   30712317936.589      17610.711               -nan              0.000
+   30812379434.696      17698.633               -nan              0.000
+   30912410537.173      17743.100               -nan              0.000
+   31012498019.439      17868.171               -nan              0.000
+   31112525639.285      17907.659               -nan              0.000
+   31212563491.971      17961.776               -nan              0.000
+   31312627295.456      18052.995               -nan              0.000
+   31412661081.961      18101.299               -nan              0.000
+   31512707711.956      18167.965               -nan              0.000
+   31612737935.478      18211.175               -nan              0.000
+   31712796025.520      18294.225               -nan              0.000
+   31812875560.290      18407.934               -nan              0.000
+   31912908345.544      18454.807               -nan              0.000
+   32012922862.609      18475.561               -nan              0.000
+   32112952487.322      18517.915               -nan              0.000
+   32213016463.305      18609.380               -nan              0.000
+   32313072813.474      18689.943               -nan              0.000
+   32413107931.331      18740.150               -nan              0.000
+   32513128127.209      18769.024               -nan              0.000
+   32613181088.796      18844.742               -nan              0.000
+   32713221301.213      18902.233               -nan              0.000
+   32813297454.078      19011.107               -nan              0.000
+   32913389675.038      19142.954               -nan              0.000
+   33013422743.068      19190.230               -nan              0.000
+   33113453424.690      19234.095               -nan              0.000
+   33213531325.116      19345.468               -nan              0.000
+   33313584649.209      19421.705               -nan              0.000
+   33413602856.415      19447.735               -nan              0.000
+   33513646751.628      19510.491               -nan              0.000
+   33613756725.338      19667.718               -nan              0.000
+   33713784179.891      19706.970               -nan              0.000
+   33813830737.989      19773.533               -nan              0.000
+   33913843690.891      19792.051               -nan              0.000
+   34013876816.584      19839.410               -nan              0.000
+   34113953922.308      19949.647               -nan              0.000
+   34214000738.163      20016.579               -nan              0.000
+   34314020796.935      20045.256               -nan              0.000
+   34414061546.006      20103.514               -nan              0.000
+   34514107024.485      20168.534               -nan              0.000
+   34614174390.513      20264.846               -nan              0.000
+   34714215603.969      20323.768               -nan              0.000
+   34814251722.909      20375.407               -nan              0.000
+   34914299911.749      20444.301               -nan              0.000
+   35014378383.224      20556.490               -nan              0.000
+   35114475095.273      20694.758               -nan              0.000
+   35214499193.628      20729.211               -nan              0.000
+   35314543790.616      20792.970               -nan              0.000
+   35414587098.300      20854.886               -nan              0.000
+   35514731950.156      21061.978               -nan              0.000
+   35614811827.536      21176.177               -nan              0.000
+   35714860251.121      21245.407               -nan              0.000
+   35814886005.514      21282.228               -nan              0.000
+   35914976990.083      21412.307               -nan              0.000
+   36014990286.329      21431.316               -nan              0.000
+   36115051302.710      21518.550               -nan              0.000
+   36215149267.465      21658.608               -nan              0.000
+   36315182423.544      21706.011               -nan              0.000
+   36415211393.776      21747.429               -nan              0.000
+   36515253064.350      21807.005               -nan              0.000
+   36615303737.667      21879.451               -nan              0.000
+   36715370583.347      21975.019               -nan              0.000
+   36815384224.901      21994.522               -nan              0.000
+   36915468239.468      22114.636               -nan              0.000
+   37015533552.903      22208.014               -nan              0.000
+   37115571085.692      22261.673               -nan              0.000
+   37215702069.925      22448.939               -nan              0.000
+   37315737788.319      22500.005               -nan              0.000
+   37415835687.064      22639.969               -nan              0.000
+   37515916723.056      22755.824               -nan              0.000
+   37615919563.892      22759.886               -nan              0.000
+   37715978787.440      22844.557               -nan              0.000
+   37816001943.993      22877.663               -nan              0.000
+   37916085978.318      22997.805               -nan              0.000
+   38016172675.746      23121.755               -nan              0.000
+   38116245160.490      23225.385               -nan              0.000
+   38216321614.297      23334.689               -nan              0.000
+   38316343524.596      23366.014               -nan              0.000
+   38416431532.910      23491.838               -nan              0.000
+   38516477849.747      23558.056               -nan              0.000
+   38616527736.152      23629.378               -nan              0.000
+   38716606333.409      23741.747               -nan              0.000
+   38816634449.944      23781.944               -nan              0.000
+   38916687492.028      23857.778               -nan              0.000
+   39016747635.696      23943.764               -nan              0.000
+   39116840052.519      24075.890               -nan              0.000
+   39216843552.551      24080.894               -nan              0.000
+   39317002992.797      24308.843               -nan              0.000
+   39417057142.814      24386.260               -nan              0.000
+   39517083208.949      24423.526               -nan              0.000
+   39617192791.726      24580.195               -nan              0.000
+   39717265635.343      24684.338               -nan              0.000
+   39817333137.736      24780.844               -nan              0.000
+   39917375445.234      24841.331               -nan              0.000
+   40017438755.834      24931.845               -nan              0.000
+   40117562827.232      25109.227               -nan              0.000
+   40217583104.575      25138.217               -nan              0.000
+   40317626826.698      25200.726               -nan              0.000
+   40417664163.848      25254.106               -nan              0.000
+   40517706070.804      25314.020               -nan              0.000
+   40617827443.132      25487.543               -nan              0.000
+   40717869279.136      25547.355               -nan              0.000
+   40817897432.315      25587.605               -nan              0.000
+   40917954169.456      25668.721               -nan              0.000
+   41018040107.112      25791.585               -nan              0.000
+   41118086929.649      25858.526               -nan              0.000
+   41218104055.033      25883.010               -nan              0.000
+   41318252241.445      26094.869               -nan              0.000
+   41418267195.667      26116.249               -nan              0.000
+   41518322432.573      26195.220               -nan              0.000
+   41618513182.485      26467.931               -nan              0.000
+   41718552866.508      26524.667               -nan              0.000
+   41818638371.717      26646.912               -nan              0.000
+   41918757530.430      26817.271               -nan              0.000
+   42018792427.295      26867.162               -nan              0.000
+   42118902413.380      27024.407               -nan              0.000
+   42218912052.624      27038.188               -nan              0.000
+   42319003124.510      27168.392               -nan              0.000
+   42419095303.707      27300.178               -nan              0.000
+   42519138434.039      27361.841               -nan              0.000
+   42619216898.387      27474.020               -nan              0.000
+   42719236211.420      27501.631               -nan              0.000
+   42819363669.127      27683.855               -nan              0.000
+   42919419680.385      27763.933               -nan              0.000
+   43019455288.258      27814.841               -nan              0.000
+   43119596149.691      28016.228               -nan              0.000
+   43219612731.458      28039.935               -nan              0.000
+   43319765247.137      28257.983               -nan              0.000
+   43419824334.017      28342.459               -nan              0.000
+   43519841711.126      28367.302               -nan              0.000
+   43619869503.692      28407.037               -nan              0.000
+   43719917067.826      28475.038               -nan              0.000
+   43820040349.709      28651.292               -nan              0.000
+   43920083204.651      28712.561               -nan              0.000
+   44020158857.868      28820.721               -nan              0.000
+   44120272397.938      28983.047               -nan              0.000
+   44220341670.052      29082.084               -nan              0.000
+   44320366220.712      29117.183               -nan              0.000
+   44420438452.153      29220.451               -nan              0.000
+   44520479141.865      29278.624               -nan              0.000
+   44620562995.786      29398.509               -nan              0.000
+   44720669996.647      29551.486               -nan              0.000
+   44820743340.924      29656.345               -nan              0.000
+   44920805514.707      29745.233               -nan              0.000
+   45020963137.052      29970.583               -nan              0.000
+   45121026782.000      30061.575               -nan              0.000
+   45221055757.875      30103.001               -nan              0.000
+   45321078749.504      30135.872               -nan              0.000
+   45421228866.850      30350.491               -nan              0.000
+   45521258701.934      30393.146               -nan              0.000
+   45621402984.677      30599.424               -nan              0.000
+   45721492551.746      30727.476               -nan              0.000
+   45821512398.490      30755.851               -nan              0.000
+   45921578683.113      30850.617               -nan              0.000
+   46021618747.752      30907.896               -nan              0.000
+   46121702199.201      31027.205               -nan              0.000
+   46221816198.965      31190.189               -nan              0.000
+   46321860438.937      31253.438               -nan              0.000
+   46421948644.283      31379.543               -nan              0.000
+   46521999716.392      31452.560               -nan              0.000
+   46622107204.893      31606.234               -nan              0.000
+   46722203138.391      31743.388               -nan              0.000
+   46822268859.118      31837.348               -nan              0.000
+   46922410444.243      32039.769               -nan              0.000
+   47022468265.929      32122.436               -nan              0.000
+   47122558468.107      32251.396               -nan              0.000
+   47222647735.966      32379.021               -nan              0.000
+   47322662085.335      32399.536               -nan              0.000
+   47422861340.102      32684.406               -nan              0.000
+   47522899370.400      32738.777               -nan              0.000
+   47622956794.735      32820.876               -nan              0.000
+   47723002756.841      32886.587               -nan              0.000
+   47823081563.448      32999.255               -nan              0.000
+   47923116697.603      33049.486               -nan              0.000
+   48023181117.597      33141.586               -nan              0.000
+   48123199274.983      33167.545               -nan              0.000
+   48223392653.588      33444.015               -nan              0.000
+   48323519131.472      33624.837               -nan              0.000
+   48423547851.373      33665.898               -nan              0.000
+   48523650943.734      33813.287               -nan              0.000
+   48623739348.448      33939.677               -nan              0.000
+   48723804925.854      34033.432               -nan              0.000
+   48823899867.837      34169.169               -nan              0.000
+   48923996863.860      34307.842               -nan              0.000
+   49024176744.062      34565.013               -nan              0.000
+   49124179411.343      34568.827               -nan              0.000
+   49224224397.718      34633.143               -nan              0.000
+   49324355412.181      34820.451               -nan              0.000
+   49424418560.839      34910.734               -nan              0.000
+   49524464855.431      34976.920               -nan              0.000
+   49624624823.814      35205.624               -nan              0.000
+   49724684360.326      35290.742               -nan              0.000
+   49824759217.638      35397.764               -nan              0.000
+   49924841943.071      35516.035               -nan              0.000
+   50024904486.278      35605.452               -nan              0.000
+   50124962336.898      35688.160               -nan              0.000
+   50225037736.069      35795.956               -nan              0.000
+   50325110547.448      35900.053               -nan              0.000
+   50425252563.375      36103.091               -nan              0.000
+   50525289118.807      36155.353               -nan              0.000
+   50625427545.954      36353.260               -nan              0.000
+   50725540220.503      36514.349               -nan              0.000
+   50825583236.508      36575.848               -nan              0.000
+   50925625477.824      36636.239               -nan              0.000
+   51025730252.823      36786.034               -nan              0.000
+   51125833710.535      36933.945               -nan              0.000
+   51225845104.384      36950.235               -nan              0.000
+   51325998107.957      37168.981               -nan              0.000
+   51426105589.319      37322.645               -nan              0.000
+   51526212904.099      37476.071               -nan              0.000
+   51626281794.256      37574.562               -nan              0.000
+   51726348046.031      37669.281               -nan              0.000
+   51826435818.467      37794.767               -nan              0.000
+   51926513015.179      37905.134               -nan              0.000
+   52026619100.554      38056.802               -nan              0.000
+   52126724770.234      38207.876               -nan              0.000
+   52226826660.360      38353.546               -nan              0.000
+   52326980529.170      38573.529               -nan              0.000
+   52427071860.690      38704.104               -nan              0.000
+   52527124616.898      38779.529               -nan              0.000
+   52627309651.366      39044.069               -nan              0.000
+   52727373543.387      39135.414               -nan              0.000
+   52827430740.789      39217.188               -nan              0.000
+   52927497094.327      39312.052               -nan              0.000
+   53027603616.918      39464.346               -nan              0.000
+   53127721243.095      39632.513               -nan              0.000
+   53227869971.009      39845.147               -nan              0.000
+   53327909654.150      39901.881               -nan              0.000
+   53427973105.420      39992.596               -nan              0.000
+   53528113216.773      40192.910               -nan              0.000
+   53628144852.999      40238.140               -nan              0.000
+   53728217946.275      40342.640               -nan              0.000
+   53828431838.499      40648.438               -nan              0.000
+   53928554426.067      40823.699               -nan              0.000
+   54028601342.957      40890.775               -nan              0.000
+   54128720157.863      41060.642               -nan              0.000
+   54228774141.755      41137.822               -nan              0.000
+   54328797384.842      41171.052               -nan              0.000
+   54428947574.202      41385.775               -nan              0.000
+   54528982468.295      41435.662               -nan              0.000
+   54629047473.458      41528.599               -nan              0.000
+   54729138024.064      41658.057               -nan              0.000
+   54829310573.457      41904.748               -nan              0.000
+   54929357786.122      41972.247               -nan              0.000
+   55029564548.243      42267.850               -nan              0.000
+   55129664111.838      42410.194               -nan              0.000
+   55229775386.034      42569.281               -nan              0.000
+   55329936767.001      42800.004               -nan              0.000
+   55430004425.603      42896.734               -nan              0.000
+   55530101688.512      43035.789               -nan              0.000
+   55630270609.814      43277.293               -nan              0.000
+   55730346021.886      43385.108               -nan              0.000
+   55830557928.933      43688.067               -nan              0.000
+   55930593797.083      43739.347               -nan              0.000
+   56030759733.394      43976.583               -nan              0.000
+   56130769507.883      43990.557               -nan              0.000
+   56230910177.318      44191.670               -nan              0.000
+   56331008858.834      44332.753               -nan              0.000
+   56431171344.749      44565.056               -nan              0.000
+   56531244991.448      44670.347               -nan              0.000
+   56631355058.865      44827.708               -nan              0.000
+   56731414358.754      44912.488               -nan              0.000
+   56831592253.697      45166.821               -nan              0.000
+   56931759494.815      45405.922               -nan              0.000
+   57031821490.742      45494.556               -nan              0.000
+   57131888846.048      45590.853               -nan              0.000
+   57232111026.170      45908.500               -nan              0.000
+   57332179362.438      46006.199               -nan              0.000
+   57432335690.167      46229.697               -nan              0.000
+   57532514270.929      46485.011               -nan              0.000
+   57632554312.452      46542.257               -nan              0.000
+   57732684053.172      46727.745               -nan              0.000
+   57832768074.007      46847.868               -nan              0.000
+   57932874766.241      47000.404               -nan              0.000
+   58032942661.190      47097.472               -nan              0.000
+   58133071167.279      47281.194               -nan              0.000
+   58233182876.185      47440.902               -nan              0.000
+   58333285518.420      47587.648               -nan              0.000
+   58433539228.620      47950.372               -nan              0.000
+   58533660784.164      48124.158               -nan              0.000
+   58633719165.867      48207.625               -nan              0.000
+   58733878949.433      48436.064               -nan              0.000
+   58833960762.088      48553.030               -nan              0.000
+   58934307509.108      49048.768               -nan              0.000
+   59034566341.118      49418.815               -nan              0.000
+   59134638911.869      49522.568               -nan              0.000
+   59234840737.361      49811.114               -nan              0.000
+   59334963702.708      49986.915               -nan              0.000
+   59435050917.514      50111.604               -nan              0.000
+   59535244432.757      50388.269               -nan              0.000
+   59635414031.520      50630.741               -nan              0.000
+   59735471267.852      50712.571               -nan              0.000
+   59835606973.914      50906.587               -nan              0.000
+   59935696640.372      51034.781               -nan              0.000
+   60035842079.603      51242.713               -nan              0.000
+   60136071934.046      51571.331               -nan              0.000
+   60236303105.347      51901.832               -nan              0.000
+   60336616278.316      52349.569               -nan              0.000
+   60436749730.559      52540.363               -nan              0.000
+   60536771810.677      52571.931               -nan              0.000
+   60636903317.837      52759.944               -nan              0.000
+   60737085089.816      53019.820               -nan              0.000
+   60837137551.009      53094.823               -nan              0.000
+   60937389745.028      53455.380               -nan              0.000
+   61037567918.013      53710.110               -nan              0.000
+   61137737484.677      53952.536               -nan              0.000
+   61237926175.205      54222.303               -nan              0.000
+   61338017660.933      54353.098               -nan              0.000
+   61438061168.835      54415.301               -nan              0.000
+   61538337403.262      54810.228               -nan              0.000
+   61638512062.990      55059.935               -nan              0.000
+   61738634971.756      55235.656               -nan              0.000
+   61838764222.710      55420.443               -nan              0.000
+   61938939253.366      55670.681               -nan              0.000
+   62039161893.685      55988.985               -nan              0.000
+   62139308161.205      56198.101               -nan              0.000
+   62239656324.425      56695.863               -nan              0.000
+   62339713903.202      56778.183               -nan              0.000
+   62440053235.908      57263.320               -nan              0.000
+   62540077596.045      57298.147               -nan              0.000
+   62640582843.552      58020.489               -nan              0.000
+   62740755124.240      58266.796               -nan              0.000
+   62840881992.023      58448.176               -nan              0.000
+   62940961154.074      58561.352               -nan              0.000
+   63041240194.498      58960.291               -nan              0.000
+   63141717180.397      59642.228               -nan              0.000
+   63241973360.509      60008.484               -nan              0.000
+   63342134010.629      60238.162               -nan              0.000
+   63442292423.291      60464.642               -nan              0.000
+   63542570162.505      60861.720               -nan              0.000
+   63642810069.466      61204.710               -nan              0.000
+   63742924499.109      61368.308               -nan              0.000
+   63843015391.654      61498.255               -nan              0.000
+   63943275989.283      61870.827               -nan              0.000
+   64043690711.730      62463.747               -nan              0.000
+   64143924057.010      62797.356               -nan              0.000
+   64244045518.400      62971.007               -nan              0.000
+   64344493598.296      63611.618               -nan              0.000
+   64444880101.065      64164.194               -nan              0.000
+   64545160171.880      64564.605               -nan              0.000
+   64645562147.177      65139.301               -nan              0.000
+   64745727849.344      65376.202               -nan              0.000
+   64846335096.377      66244.372               -nan              0.000
+   64946642956.862      66684.514               -nan              0.000
+   65046885912.825      67031.863               -nan              0.000
+   65147285157.639      67602.655               -nan              0.000
+   65247797449.320      68335.069               -nan              0.000
+   65347907044.491      68491.755               -nan              0.000
+   65448128132.188      68807.839               -nan              0.000
+   65548230944.503      68954.828               -nan              0.000
+   65648672881.334      69586.657               -nan              0.000
+   65748998797.482      70052.612               -nan              0.000
+   65849393592.927      70617.044               -nan              0.000
+   65949781730.450      71171.956               -nan              0.000
+   66049916496.533      71364.629               -nan              0.000
+   66150469003.707      72154.537               -nan              0.000
+   66250744432.071      72548.312               -nan              0.000
+   66350753472.572      72561.237               -nan              0.000
+   66451511689.034      73645.244               -nan              0.000
+   66551945631.354      74265.643               -nan              0.000
+   66652357083.631      74853.888               -nan              0.000
+   66752651105.494      75274.245               -nan              0.000
+   66853377952.686      76313.404               -nan              0.000
+   66953916672.706      77083.601               -nan              0.000
+   67054253156.020      77564.665               -nan              0.000
+   67154691510.710      78191.372               -nan              0.000
+   67255233913.688      78966.835               -nan              0.000
+   67355476814.726      79314.106               -nan              0.000
+   67456380402.031      80605.947               -nan              0.000
+   67556554806.826      80855.290               -nan              0.000
+   67657322522.597      81952.878               -nan              0.000
+   67757695837.010      82486.598               -nan              0.000
+   67858888172.638      84191.257               -nan              0.000
+   67959217253.540      84661.737               -nan              0.000
+   68059429450.058      84965.110               -nan              0.000
+   68160208744.895      86079.253               -nan              0.000
+   68260683368.828      86757.813               -nan              0.000
+   68361536433.972      87977.424               -nan              0.000
+   68462230969.732      88970.388               -nan              0.000
+   68562881110.031      89899.880               -nan              0.000
+   68663503468.615      90789.654               -nan              0.000
+   68764954050.124      92863.522               -nan              0.000
+   68865793056.336      94063.032               -nan              0.000
+   68966673338.206      95321.554               -nan              0.000
+   69066935322.900      95696.108               -nan              0.000
+   69167949806.998      97146.496               -nan              0.000
+   69268759212.502      98303.687               -nan              0.000
+   69368877770.218      98473.187               -nan              0.000
+   69469847853.505      99860.096               -nan              0.000
+   69570649857.534     101006.705               -nan              0.000
+   69671456988.012     102160.644               -nan              0.000
+   69772320168.335     103394.715               -nan              0.000
+   69873020409.084     104395.836               -nan              0.000
+   69974241612.448     106141.766               -nan              0.000
+   70075731384.741     108271.664               -nan              0.000
+   70177543118.214     110861.864               -nan              0.000
+   70279541678.104     113719.165               -nan              0.000
+   70381429920.860     116418.749               -nan              0.000
+   70482041287.384     117292.807               -nan              0.000
+   70583516368.835     119401.702               -nan              0.000
+   70683949962.444     120021.602               -nan              0.000
+   70786013973.849     122972.479               -nan              0.000
+   70889102694.186     127388.361               -nan              0.000
+   70990638803.223     129584.506               -nan              0.000
+   71091521905.068     130847.059               -nan              0.000
+   71193001847.766     132962.904               -nan              0.000
+   71295289300.057     136233.229               -nan              0.000
+   71397977533.083     140076.543               -nan              0.000
+   714100004672.148     142974.703               -nan              0.000
+   715103851446.468     148474.361               -nan              0.000
+   716104729909.334     149730.282               -nan              0.000
+   717111405592.019     159274.373               -nan              0.000
+   718114786570.902     164108.092               -nan              0.000
+   719125572386.149     179528.359               -nan              0.000
+   720128669188.775     183955.796               -nan              0.000
+   721140012580.375     200173.219               -nan              0.000
+   722144452475.900     206520.850               -nan              0.000
+   723159769085.976     228418.705               -nan              0.000
+   724163777494.129     234149.447               -nan              0.000
+   725176631620.689     252526.737               -nan              0.000
+   726193817077.963     277096.446               -nan              0.000
+   727232818236.170     332855.631               -nan              0.000
+   728312050279.406     446132.117               -nan              0.000
+   729381655831.835     545645.800               -nan              0.000
+   730542834994.239     776080.463               -nan              0.000
+   731-538488515.248     769866.388              0.000              0.000
+   732-446415517.378     638231.443              0.000              0.000
+   733-313124370.380     447667.724              0.000              0.000
+   734-239218037.391     342005.300              0.000              0.000
+   735-211002403.901     301665.967              0.000              0.000
+   736-180221977.056     257659.799              0.000              0.000
+   737-168352553.302     240690.318              0.000              0.000
+   738-151762481.529     216971.821              0.000              0.000
+   739-143854274.218     205665.613              0.000              0.000
+   740-132000059.208     188717.876              0.000              0.000
+   741-129229463.920     184756.811              0.000              0.000
+   742-124833691.270     178472.261              0.000              0.000
+   743-119925400.370     171454.975              0.000              0.000
+   744-114706133.496     163993.092              0.000              0.000
+   745-110238571.323     157605.907              0.000              0.000
+   746-108983529.971     155811.599              0.000              0.000
+   747-105292874.522     150535.142              0.000              0.000
+   748-102943688.862     147176.557              0.000              0.000
+   749-97930872.677     140009.833              0.000              0.000
+   750-96921711.788     138567.056              0.000              0.000
+   751-91937453.748     131441.161              0.000              0.000
+   752-90077115.223     128781.471              0.000              0.000
+   753-87239082.139     124723.992              0.000              0.000
+   754-86447233.060     123591.901              0.000              0.000
+   755-85379612.136     122065.544              0.000              0.000
+   756-84649534.857     121021.767              0.000              0.000
+   757-80401970.716     114949.109              0.000              0.000
+   758-80048862.339     114444.276              0.000              0.000
+   759-78490694.723     112216.595              0.000              0.000
+   760-77786791.687     111210.239              0.000              0.000
+   761-77506788.325     110809.924              0.000              0.000
+   762-75992316.193     108644.713              0.000              0.000
+   763-74668203.490     106751.655              0.000              0.000
+   764-73681767.552     105341.367              0.000              0.000
+   765-71720927.972     102537.993              0.000              0.000
+   766-70505298.474     100800.032              0.000              0.000
+   767-69688497.849      99632.268              0.000              0.000
+   768-68823860.164      98396.113              0.000              0.000
+   769-67898403.485      97073.006              0.000              0.000
+   770-66809965.755      95516.888              0.000              0.000
+   771-66178125.443      94613.558              0.000              0.000
+   772-64449344.620      92141.954              0.000              0.000
+   773-63570002.939      90884.777              0.000              0.000
+   774-63242669.123      90416.794              0.000              0.000
+   775-62345829.834      89134.601              0.000              0.000
+   776-61786019.590      88334.251              0.000              0.000
+   777-61171851.044      87456.187              0.000              0.000
+   778-60477970.414      86464.159              0.000              0.000
+   779-60305160.818      86217.097              0.000              0.000
+   780-59753783.732      85428.804              0.000              0.000
+   781-58986513.111      84331.852              0.000              0.000
+   782-58740507.735      83980.143              0.000              0.000
+   783-57862889.232      82725.429              0.000              0.000
+   784-57107184.497      81645.013              0.000              0.000
+   785-56538603.648      80832.124              0.000              0.000
+   786-56192208.539      80336.890              0.000              0.000
+   787-55500365.569      79347.776              0.000              0.000
+   788-55476752.884      79314.017              0.000              0.000
+   789-54790345.811      78332.675              0.000              0.000
+   790-54696661.452      78198.736              0.000              0.000
+   791-54221803.709      77519.841              0.000              0.000
+   792-53906958.612      77069.713              0.000              0.000
+   793-53536999.775      76540.791              0.000              0.000
+   794-52898650.273      75628.155              0.000              0.000
+   795-52625011.797      75236.939              0.000              0.000
+   796-51939354.522      74256.669              0.000              0.000
+   797-51673890.252      73877.140              0.000              0.000
+   798-51308768.881      73355.133              0.000              0.000
+   799-50728369.709      72525.348              0.000              0.000
+   800-50296041.755      71907.257              0.000              0.000
+   801-50073064.512      71588.471              0.000              0.000
+   802-49689724.419      71040.417              0.000              0.000
+   803-49057143.629      70136.029              0.000              0.000
+   804-48689376.722      69610.240              0.000              0.000
+   805-48461282.565      69284.138              0.000              0.000
+   806-48217281.424      68935.294              0.000              0.000
+   807-47802368.205      68342.101              0.000              0.000
+   808-47481348.921      67883.146              0.000              0.000
+   809-47272239.527      67584.187              0.000              0.000
+   810-47088937.918      67322.124              0.000              0.000
+   811-46905315.167      67059.602              0.000              0.000
+   812-46739012.808      66821.843              0.000              0.000
+   813-46338312.129      66248.969              0.000              0.000
+   814-46262723.316      66140.901              0.000              0.000
+   815-46043290.453      65827.182              0.000              0.000
+   816-45667274.159      65289.599              0.000              0.000
+   817-45325028.657      64800.298              0.000              0.000
+   818-45051588.230      64409.365              0.000              0.000
+   819-44645776.800      63829.185              0.000              0.000
+   820-44287794.564      63317.385              0.000              0.000
+   821-44119685.903      63077.043              0.000              0.000
+   822-43833951.068      62668.534              0.000              0.000
+   823-43789675.183      62605.233              0.000              0.000
+   824-43632498.898      62380.521              0.000              0.000
+   825-43512071.052      62208.348              0.000              0.000
+   826-43176189.547      61728.145              0.000              0.000
+   827-42739600.505      61103.962              0.000              0.000
+   828-42424058.133      60652.837              0.000              0.000
+   829-42157796.629      60272.169              0.000              0.000
+   830-42107177.702      60199.800              0.000              0.000
+   831-41651883.700      59548.875              0.000              0.000
+   832-41524869.362      59367.285              0.000              0.000
+   833-41337905.375      59099.986              0.000              0.000
+   834-41116020.454      58782.762              0.000              0.000
+   835-41052061.066      58691.320              0.000              0.000
+   836-40743676.922      58250.430              0.000              0.000
+   837-40300473.630      57616.791              0.000              0.000
+   838-40074815.347      57294.172              0.000              0.000
+   839-39941894.753      57104.138              0.000              0.000
+   840-39860927.305      56988.380              0.000              0.000
+   841-39531618.676      56517.574              0.000              0.000
+   842-39320692.885      56216.018              0.000              0.000
+   843-39073492.843      55862.601              0.000              0.000
+   844-38826937.611      55510.105              0.000              0.000
+   845-38757867.193      55411.357              0.000              0.000
+   846-38403669.266      54904.967              0.000              0.000
+   847-38290014.436      54742.477              0.000              0.000
+   848-38213451.259      54633.016              0.000              0.000
+   849-38071504.363      54430.077              0.000              0.000
+   850-37931825.772      54230.382              0.000              0.000
+   851-37727592.638      53938.394              0.000              0.000
+   852-37486630.481      53593.895              0.000              0.000
+   853-37403519.023      53475.072              0.000              0.000
+   854-37114400.167      53061.724              0.000              0.000
+   855-37044758.637      52962.159              0.000              0.000
+   856-36951223.383      52828.434              0.000              0.000
+   857-36764272.632      52561.154              0.000              0.000
+   858-36606904.906      52336.168              0.000              0.000
+   859-36309932.015      51911.592              0.000              0.000
+   860-36164312.156      51703.402              0.000              0.000
+   861-36158342.507      51694.868              0.000              0.000
+   862-35802994.749      51186.834              0.000              0.000
+   863-35759099.195      51124.077              0.000              0.000
+   864-35687865.745      51022.236              0.000              0.000
+   865-35312228.170      50485.195              0.000              0.000
+   866-35208501.024      50336.898              0.000              0.000
+   867-35073257.570      50143.543              0.000              0.000
+   868-34809407.477      49766.322              0.000              0.000
+   869-34638314.111      49521.713              0.000              0.000
+   870-34526075.832      49361.248              0.000              0.000
+   871-34321220.640      49068.371              0.000              0.000
+   872-34272820.265      48999.174              0.000              0.000
+   873-34079074.693      48722.180              0.000              0.000
+   874-33939971.299      48523.306              0.000              0.000
+   875-33863304.007      48413.697              0.000              0.000
+   876-33851298.373      48396.532              0.000              0.000
+   877-33618108.647      48063.146              0.000              0.000
+   878-33496759.061      47889.654              0.000              0.000
+   879-33336586.879      47660.659              0.000              0.000
+   880-33308152.338      47620.007              0.000              0.000
+   881-33092035.367      47311.029              0.000              0.000
+   882-33019826.781      47207.794              0.000              0.000
+   883-32897427.621      47032.802              0.000              0.000
+   884-32824790.875      46928.955              0.000              0.000
+   885-32609503.993      46621.163              0.000              0.000
+   886-32419129.216      46348.988              0.000              0.000
+   887-32323828.650      46212.739              0.000              0.000
+   888-32231328.087      46080.493              0.000              0.000
+   889-32037504.070      45803.386              0.000              0.000
+   890-31961600.043      45694.868              0.000              0.000
+   891-31910822.623      45622.272              0.000              0.000
+   892-31812539.183      45481.759              0.000              0.000
+   893-31665085.476      45270.947              0.000              0.000
+   894-31607718.077      45188.930              0.000              0.000
+   895-31451468.303      44965.543              0.000              0.000
+   896-31418229.026      44918.021              0.000              0.000
+   897-31190272.223      44592.116              0.000              0.000
+   898-31044962.607      44384.369              0.000              0.000
+   899-30937588.018      44230.858              0.000              0.000
+   900-30821262.627      44064.550              0.000              0.000
+   901-30718425.631      43917.526              0.000              0.000
+   902-30562616.884      43694.769              0.000              0.000
+   903-30490872.101      43592.197              0.000              0.000
+   904-30357978.607      43402.202              0.000              0.000
+   905-30312017.219      43336.492              0.000              0.000
+   906-30276317.545      43285.453              0.000              0.000
+   907-30208234.177      43188.115              0.000              0.000
+   908-29946343.814      42813.696              0.000              0.000
+   909-29775759.887      42569.815              0.000              0.000
+   910-29738260.193      42516.203              0.000              0.000
+   911-29656351.533      42399.100              0.000              0.000
+   912-29615161.084      42340.211              0.000              0.000
+   913-29457573.137      42114.910              0.000              0.000
+   914-29317339.617      41914.421              0.000              0.000
+   915-29252975.560      41822.401              0.000              0.000
+   916-29201247.618      41748.447              0.000              0.000
+   917-29166251.145      41698.413              0.000              0.000
+   918-29002543.466      41464.363              0.000              0.000
+   919-28918049.106      41343.563              0.000              0.000
+   920-28783834.219      41151.679              0.000              0.000
+   921-28745486.602      41096.854              0.000              0.000
+   922-28571028.193      40847.434              0.000              0.000
+   923-28419681.905      40631.058              0.000              0.000
+   924-28265215.020      40410.219              0.000              0.000
+   925-28254273.333      40394.576              0.000              0.000
+   926-28145283.610      40238.756              0.000              0.000
+   927-27973202.643      39992.735              0.000              0.000
+   928-27953391.073      39964.411              0.000              0.000
+   929-27827621.726      39784.601              0.000              0.000
+   930-27810187.889      39759.676              0.000              0.000
+   931-27564232.342      39408.038              0.000              0.000
+   932-27492625.870      39305.664              0.000              0.000
+   933-27436407.218      39225.289              0.000              0.000
+   934-27370253.925      39130.711              0.000              0.000
+   935-27266093.877      38981.796              0.000              0.000
+   936-27155242.601      38823.314              0.000              0.000
+   937-27098574.379      38742.296              0.000              0.000
+   938-27058924.901      38685.610              0.000              0.000
+   939-26939891.510      38515.430              0.000              0.000
+   940-26817505.230      38340.457              0.000              0.000
+   941-26706820.247      38182.213              0.000              0.000
+   942-26611274.370      38045.613              0.000              0.000
+   943-26526163.541      37923.932              0.000              0.000
+   944-26413823.576      37763.322              0.000              0.000
+   945-26398769.214      37741.799              0.000              0.000
+   946-26362093.044      37689.363              0.000              0.000
+   947-26193245.295      37447.965              0.000              0.000
+   948-25988999.564      37155.959              0.000              0.000
+   949-25955817.440      37108.519              0.000              0.000
+   950-25906176.685      37037.549              0.000              0.000
+   951-25783153.553      36861.665              0.000              0.000
+   952-25739033.234      36798.587              0.000              0.000
+   953-25642567.146      36660.671              0.000              0.000
+   954-25580977.340      36572.618              0.000              0.000
+   955-25494120.951      36448.441              0.000              0.000
+   956-25407141.932      36324.089              0.000              0.000
+   957-25327403.233      36210.088              0.000              0.000
+   958-25269662.309      36127.537              0.000              0.000
+   959-25126913.289      35923.451              0.000              0.000
+   960-25042949.024      35803.409              0.000              0.000
+   961-24970399.879      35699.687              0.000              0.000
+   962-24874936.948      35563.206              0.000              0.000
+   963-24753555.948      35389.670              0.000              0.000
+   964-24668967.454      35268.735              0.000              0.000
+   965-24602870.077      35174.237              0.000              0.000
+   966-24522295.617      35059.041              0.000              0.000
+   967-24387802.376      34866.759              0.000              0.000
+   968-24312344.790      34758.879              0.000              0.000
+   969-24286552.409      34722.004              0.000              0.000
+   970-24176461.413      34564.609              0.000              0.000
+   971-24163986.875      34546.774              0.000              0.000
+   972-24058593.728      34396.096              0.000              0.000
+   973-23985201.056      34291.168              0.000              0.000
+   974-23913913.211      34189.249              0.000              0.000
+   975-23876900.329      34136.333              0.000              0.000
+   976-23784298.431      34003.941              0.000              0.000
+   977-23608577.770      33752.717              0.000              0.000
+   978-23547863.928      33665.916              0.000              0.000
+   979-23506536.238      33606.830              0.000              0.000
+   980-23419720.942      33482.712              0.000              0.000
+   981-23337734.145      33365.497              0.000              0.000
+   982-23281980.698      33285.788              0.000              0.000
+   983-23187163.128      33150.229              0.000              0.000
+   984-23178960.994      33138.502              0.000              0.000
+   985-23091038.622      33012.802              0.000              0.000
+   986-23011084.468      32898.493              0.000              0.000
+   987-22851868.922      32670.865              0.000              0.000
+   988-22727881.531      32493.603              0.000              0.000
+   989-22666347.953      32405.630              0.000              0.000
+   990-22575405.001      32275.610              0.000              0.000
+   991-22511327.433      32184.000              0.000              0.000
+   992-22468766.679      32123.152              0.000              0.000
+   993-22323980.219      31916.153              0.000              0.000
+   994-22228272.769      31779.322              0.000              0.000
+   995-22171439.530      31698.069              0.000              0.000
+   996-22136771.094      31648.504              0.000              0.000
+   997-22066323.985      31547.787              0.000              0.000
+   998-21961371.648      31397.739              0.000              0.000
+   999-21932337.495      31356.229              0.000              0.000
+  1000-21810840.829      31182.528              0.000              0.000
+  1001-21733054.271      31071.318              0.000              0.000
+  1002-21658220.585      30964.330              0.000              0.000
+  1003-21582182.950      30855.620              0.000              0.000
+  1004-21500773.025      30739.230              0.000              0.000
+  1005-21452440.881      30670.131              0.000              0.000
+  1006-21345993.642      30517.945              0.000              0.000
+  1007-21255128.152      30388.037              0.000              0.000
+  1008-21141163.997      30225.104              0.000              0.000
+  1009-21070635.548      30124.271              0.000              0.000
+  1010-20993715.024      30014.299              0.000              0.000
+  1011-20900012.574      29880.335              0.000              0.000
+  1012-20877244.578      29847.784              0.000              0.000
+  1013-20807166.451      29747.595              0.000              0.000
+  1014-20773712.614      29699.766              0.000              0.000
+  1015-20709339.601      29607.734              0.000              0.000
+  1016-20643651.376      29513.820              0.000              0.000
+  1017-20554065.062      29385.741              0.000              0.000
+  1018-20460791.283      29252.389              0.000              0.000
+  1019-20392690.425      29155.026              0.000              0.000
+  1020-20381629.263      29139.213              0.000              0.000
+  1021-20196934.146      28875.158              0.000              0.000
+  1022-20103142.616      28741.066              0.000              0.000
+  1023-20030257.657      28636.864              0.000              0.000
+  1024-19971510.523      28552.874              0.000              0.000
+  1025-19887178.294      28432.306              0.000              0.000
+  1026-19777154.624      28275.007              0.000              0.000
+  1027-19702456.493      28168.213              0.000              0.000
+  1028-19652815.529      28097.242              0.000              0.000
+  1029-19594268.244      28013.538              0.000              0.000
+  1030-19534529.332      27928.131              0.000              0.000
+  1031-19509865.225      27892.869              0.000              0.000
+  1032-19413754.559      27755.461              0.000              0.000
+  1033-19370413.065      27693.497              0.000              0.000
+  1034-19337849.065      27646.941              0.000              0.000
+  1035-19278668.884      27562.332              0.000              0.000
+  1036-19118375.172      27333.163              0.000              0.000
+  1037-19066398.291      27258.853              0.000              0.000
+  1038-18999215.342      27162.803              0.000              0.000
+  1039-18932844.602      27067.914              0.000              0.000
+  1040-18845555.867      26943.119              0.000              0.000
+  1041-18790244.746      26864.042              0.000              0.000
+  1042-18720472.605      26764.290              0.000              0.000
+  1043-18664099.074      26683.694              0.000              0.000
+  1044-18593283.407      26582.450              0.000              0.000
+  1045-18584940.520      26570.522              0.000              0.000
+  1046-18485133.146      26427.830              0.000              0.000
+  1047-18425569.734      26342.673              0.000              0.000
+  1048-18279540.870      26133.898              0.000              0.000
+  1049-18243020.303      26081.686              0.000              0.000
+  1050-18199687.030      26019.733              0.000              0.000
+  1051-18130934.798      25921.439              0.000              0.000
+  1052-18019675.732      25762.374              0.000              0.000
+  1053-17982938.672      25709.852              0.000              0.000
+  1054-17848066.046      25517.027              0.000              0.000
+  1055-17814788.169      25469.451              0.000              0.000
+  1056-17758035.931      25388.313              0.000              0.000
+  1057-17704024.718      25311.094              0.000              0.000
+  1058-17649136.770      25232.622              0.000              0.000
+  1059-17549608.832      25090.329              0.000              0.000
+  1060-17446817.094      24943.370              0.000              0.000
+  1061-17414928.030      24897.778              0.000              0.000
+  1062-17305008.295      24740.628              0.000              0.000
+  1063-17248603.623      24659.988              0.000              0.000
+  1064-17191010.961      24577.649              0.000              0.000
+  1065-17090877.009      24434.489              0.000              0.000
+  1066-17040268.042      24362.134              0.000              0.000
+  1067-16960993.752      24248.798              0.000              0.000
+  1068-16928546.183      24202.408              0.000              0.000
+  1069-16896135.336      24156.071              0.000              0.000
+  1070-16792998.556      24008.618              0.000              0.000
+  1071-16777535.287      23986.511              0.000              0.000
+  1072-16722716.407      23908.137              0.000              0.000
+  1073-16698001.400      23872.803              0.000              0.000
+  1074-16594435.456      23724.736              0.000              0.000
+  1075-16557149.711      23671.430              0.000              0.000
+  1076-16430688.686      23490.631              0.000              0.000
+  1077-16346804.260      23370.703              0.000              0.000
+  1078-16317630.962      23328.995              0.000              0.000
+  1079-16284216.606      23281.223              0.000              0.000
+  1080-16232416.022      23207.164              0.000              0.000
+  1081-16136446.599      23069.959              0.000              0.000
+  1082-16129331.035      23059.786              0.000              0.000
+  1083-16025898.144      22911.910              0.000              0.000
+  1084-15948928.828      22801.868              0.000              0.000
+  1085-15935007.526      22781.965              0.000              0.000
+  1086-15847751.871      22657.218              0.000              0.000
+  1087-15794277.715      22580.767              0.000              0.000
+  1088-15772011.922      22548.934              0.000              0.000
+  1089-15691809.286      22434.270              0.000              0.000
+  1090-15586722.355      22284.029              0.000              0.000
+  1091-15453783.732      22093.969              0.000              0.000
+  1092-15430838.702      22061.165              0.000              0.000
+  1093-15363733.862      21965.227              0.000              0.000
+  1094-15339091.520      21929.996              0.000              0.000
+  1095-15288879.137      21858.208              0.000              0.000
+  1096-15277384.424      21841.775              0.000              0.000
+  1097-15232797.435      21778.029              0.000              0.000
+  1098-15197554.353      21727.643              0.000              0.000
+  1099-15075469.372      21553.101              0.000              0.000
+  1100-15058003.532      21528.130              0.000              0.000
+  1101-14939739.719      21359.051              0.000              0.000
+  1102-14917679.124      21327.511              0.000              0.000
+  1103-14834903.506      21209.168              0.000              0.000
+  1104-14764273.222      21108.190              0.000              0.000
+  1105-14759798.707      21101.793              0.000              0.000
+  1106-14698373.406      21013.974              0.000              0.000
+  1107-14659365.631      20958.205              0.000              0.000
+  1108-14623103.320      20906.362              0.000              0.000
+  1109-14551421.002      20803.879              0.000              0.000
+  1110-14532531.086      20776.872              0.000              0.000
+  1111-14467004.243      20683.190              0.000              0.000
+  1112-14390038.940      20573.154              0.000              0.000
+  1113-14287441.968      20426.473              0.000              0.000
+  1114-14251864.231      20375.609              0.000              0.000
+  1115-14186360.447      20281.959              0.000              0.000
+  1116-14173560.577      20263.659              0.000              0.000
+  1117-14105891.559      20166.914              0.000              0.000
+  1118-14081565.782      20132.136              0.000              0.000
+  1119-14008590.268      20027.805              0.000              0.000
+  1120-13935488.648      19923.293              0.000              0.000
+  1121-13880895.842      19845.242              0.000              0.000
+  1122-13850772.185      19802.175              0.000              0.000
+  1123-13841199.754      19788.490              0.000              0.000
+  1124-13767036.468      19682.460              0.000              0.000
+  1125-13729965.251      19629.460              0.000              0.000
+  1126-13693323.709      19577.074              0.000              0.000
+  1127-13667048.816      19539.510              0.000              0.000
+  1128-13605980.322      19452.201              0.000              0.000
+  1129-13577431.089      19411.385              0.000              0.000
+  1130-13483338.083      19276.862              0.000              0.000
+  1131-13471948.827      19260.579              0.000              0.000
+  1132-13407881.258      19168.983              0.000              0.000
+  1133-13357256.348      19096.605              0.000              0.000
+  1134-13335207.905      19065.083              0.000              0.000
+  1135-13309711.982      19028.632              0.000              0.000
+  1136-13196305.845      18866.498              0.000              0.000
+  1137-13149414.458      18799.458              0.000              0.000
+  1138-13135190.092      18779.122              0.000              0.000
+  1139-13047952.729      18654.400              0.000              0.000
+  1140-13035719.816      18636.911              0.000              0.000
+  1141-12988123.628      18568.864              0.000              0.000
+  1142-12941181.589      18501.752              0.000              0.000
+  1143-12877692.560      18410.983              0.000              0.000
+  1144-12829682.796      18342.344              0.000              0.000
+  1145-12803908.671      18305.495              0.000              0.000
+  1146-12728370.840      18197.500              0.000              0.000
+  1147-12710224.990      18171.557              0.000              0.000
+  1148-12620153.139      18042.784              0.000              0.000
+  1149-12568461.111      17968.880              0.000              0.000
+  1150-12540149.300      17928.404              0.000              0.000
+  1151-12515663.532      17893.397              0.000              0.000
+  1152-12459983.213      17813.792              0.000              0.000
+  1153-12444075.256      17791.048              0.000              0.000
+  1154-12431409.066      17772.940              0.000              0.000
+  1155-12330097.766      17628.097              0.000              0.000
+  1156-12292516.836      17574.368              0.000              0.000
+  1157-12252045.638      17516.508              0.000              0.000
+  1158-12209774.097      17456.073              0.000              0.000
+  1159-12162827.437      17388.954              0.000              0.000
+  1160-12127307.208      17338.171              0.000              0.000
+  1161-12108453.038      17311.216              0.000              0.000
+  1162-12062757.819      17245.886              0.000              0.000
+  1163-12035141.627      17206.404              0.000              0.000
+  1164-11945328.402      17078.000              0.000              0.000
+  1165-11922166.737      17044.886              0.000              0.000
+  1166-11878957.386      16983.111              0.000              0.000
+  1167-11847417.356      16938.018              0.000              0.000
+  1168-11796127.836      16864.691              0.000              0.000
+  1169-11779868.021      16841.445              0.000              0.000
+  1170-11758118.360      16810.349              0.000              0.000
+  1171-11720449.825      16756.495              0.000              0.000
+  1172-11675597.772      16692.371              0.000              0.000
+  1173-11639392.738      16640.610              0.000              0.000
+  1174-11604210.251      16590.310              0.000              0.000
+  1175-11571861.716      16544.062              0.000              0.000
+  1176-11520701.024      16470.919              0.000              0.000
+  1177-11501985.325      16444.161              0.000              0.000
+  1178-11431270.807      16343.062              0.000              0.000
+  1179-11421886.040      16329.645              0.000              0.000
+  1180-11333091.131      16202.696              0.000              0.000
+  1181-11325245.450      16191.480              0.000              0.000
+  1182-11313364.752      16174.494              0.000              0.000
+  1183-11227387.550      16051.574              0.000              0.000
+  1184-11187671.054      15994.792              0.000              0.000
+  1185-11179057.745      15982.478              0.000              0.000
+  1186-11136329.912      15921.391              0.000              0.000
+  1187-11107382.250      15880.005              0.000              0.000
+  1188-11098783.279      15867.711              0.000              0.000
+  1189-11070520.515      15827.304              0.000              0.000
+  1190-11028498.544      15767.226              0.000              0.000
+  1191-10997817.778      15723.363              0.000              0.000
+  1192-10962434.818      15672.776              0.000              0.000
+  1193-10936044.826      15635.047              0.000              0.000
+  1194-10898178.766      15580.911              0.000              0.000
+  1195-10843586.865      15502.862              0.000              0.000
+  1196-10833130.116      15487.912              0.000              0.000
+  1197-10812907.191      15459.000              0.000              0.000
+  1198-10774407.749      15403.958              0.000              0.000
+  1199-10762290.855      15386.635              0.000              0.000
+  1200-10708118.710      15309.186              0.000              0.000
+  1201-10676643.317      15264.186              0.000              0.000
+  1202-10655969.024      15234.628              0.000              0.000
+  1203-10619787.168      15182.900              0.000              0.000
+  1204-10570150.586      15111.935              0.000              0.000
+  1205-10553494.851      15088.123              0.000              0.000
+  1206-10503932.711      15017.265              0.000              0.000
+  1207-10465526.394      14962.356              0.000              0.000
+  1208-10447513.523      14936.604              0.000              0.000
+  1209-10412988.395      14887.244              0.000              0.000
+  1210-10393430.606      14859.282              0.000              0.000
+  1211-10362879.920      14815.605              0.000              0.000
+  1212-10327306.601      14764.746              0.000              0.000
+  1213-10305806.565      14734.008              0.000              0.000
+  1214-10282278.379      14700.370              0.000              0.000
+  1215-10252771.992      14658.185              0.000              0.000
+  1216-10232701.881      14629.492              0.000              0.000
+  1217-10206050.689      14591.389              0.000              0.000
+  1218-10182742.843      14558.066              0.000              0.000
+  1219-10157449.441      14521.905              0.000              0.000
+  1220-10137276.209      14493.063              0.000              0.000
+  1221-10115354.818      14461.723              0.000              0.000
+  1222-10080255.357      14411.542              0.000              0.000
+  1223-10068458.810      14394.677              0.000              0.000
+  1224-10014157.720      14317.043              0.000              0.000
+  1225-9980064.845      14268.301              0.000              0.000
+  1226-9963229.488      14244.232              0.000              0.000
+  1227-9952675.055      14229.143              0.000              0.000
+  1228-9925081.036      14189.692              0.000              0.000
+  1229-9911880.059      14170.819              0.000              0.000
+  1230-9866248.299      14105.580              0.000              0.000
+  1231-9830245.005      14054.107              0.000              0.000
+  1232-9828137.994      14051.095              0.000              0.000
+  1233-9754265.027      13945.480              0.000              0.000
+  1234-9737575.874      13921.620              0.000              0.000
+  1235-9699597.880      13867.323              0.000              0.000
+  1236-9692037.323      13856.514              0.000              0.000
+  1237-9629936.063      13767.729              0.000              0.000
+  1238-9614205.520      13745.240              0.000              0.000
+  1239-9592402.737      13714.069              0.000              0.000
+  1240-9558446.346      13665.522              0.000              0.000
+  1241-9521743.833      13613.049              0.000              0.000
+  1242-9503094.648      13586.387              0.000              0.000
+  1243-9475932.719      13547.554              0.000              0.000
+  1244-9468820.312      13537.385              0.000              0.000
+  1245-9445606.601      13504.197              0.000              0.000
+  1246-9421734.498      13470.068              0.000              0.000
+  1247-9413146.803      13457.790              0.000              0.000
+  1248-9363663.710      13387.045              0.000              0.000
+  1249-9334281.689      13345.038              0.000              0.000
+  1250-9327335.370      13335.107              0.000              0.000
+  1251-9318911.683      13323.064              0.000              0.000
+  1252-9277239.472      13263.486              0.000              0.000
+  1253-9265023.306      13246.021              0.000              0.000
+  1254-9210981.378      13168.758              0.000              0.000
+  1255-9196262.634      13147.715              0.000              0.000
+  1256-9178188.500      13121.875              0.000              0.000
+  1257-9158929.220      13094.340              0.000              0.000
+  1258-9136847.615      13062.770              0.000              0.000
+  1259-9124667.720      13045.357              0.000              0.000
+  1260-9107213.280      13020.403              0.000              0.000
+  1261-9058620.828      12950.931              0.000              0.000
+  1262-9031477.571      12912.125              0.000              0.000
+  1263-8994487.427      12859.241              0.000              0.000
+  1264-8973180.881      12828.779              0.000              0.000
+  1265-8960046.946      12810.002              0.000              0.000
+  1266-8933862.950      12772.567              0.000              0.000
+  1267-8917297.143      12748.883              0.000              0.000
+  1268-8875725.506      12689.449              0.000              0.000
+  1269-8866592.149      12676.392              0.000              0.000
+  1270-8852764.856      12656.623              0.000              0.000
+  1271-8813951.057      12601.132              0.000              0.000
+  1272-8812185.512      12598.607              0.000              0.000
+  1273-8806237.921      12590.104              0.000              0.000
+  1274-8774471.051      12544.688              0.000              0.000
+  1275-8758665.866      12522.091              0.000              0.000
+  1276-8732742.177      12485.029              0.000              0.000
+  1277-8713575.062      12457.626              0.000              0.000
+  1278-8678771.860      12407.869              0.000              0.000
+  1279-8671978.398      12398.156              0.000              0.000
+  1280-8644472.591      12358.832              0.000              0.000
+  1281-8637173.738      12348.397              0.000              0.000
+  1282-8622672.526      12327.665              0.000              0.000
+  1283-8587799.412      12277.807              0.000              0.000
+  1284-8560339.434      12238.548              0.000              0.000
+  1285-8537170.642      12205.424              0.000              0.000
+  1286-8517131.361      12176.774              0.000              0.000
+  1287-8486906.460      12133.562              0.000              0.000
+  1288-8459109.885      12093.822              0.000              0.000
+  1289-8440148.972      12066.714              0.000              0.000
+  1290-8427087.738      12048.041              0.000              0.000
+  1291-8373080.896      11970.828              0.000              0.000
+  1292-8371402.531      11968.429              0.000              0.000
+  1293-8341176.127      11925.215              0.000              0.000
+  1294-8316219.422      11889.535              0.000              0.000
+  1295-8295542.344      11859.973              0.000              0.000
+  1296-8281137.304      11839.378              0.000              0.000
+  1297-8255339.173      11802.495              0.000              0.000
+  1298-8245872.644      11788.961              0.000              0.000
+  1299-8208423.264      11735.421              0.000              0.000
+  1300-8192472.573      11712.616              0.000              0.000
+  1301-8181666.060      11697.166              0.000              0.000
+  1302-8148409.982      11649.621              0.000              0.000
+  1303-8133549.506      11628.375              0.000              0.000
+  1304-8127533.123      11619.773              0.000              0.000
+  1305-8096298.111      11575.117              0.000              0.000
+  1306-8077812.916      11548.689              0.000              0.000
+  1307-8074725.023      11544.275              0.000              0.000
+  1308-8049346.678      11507.992              0.000              0.000
+  1309-8029376.404      11479.441              0.000              0.000
+  1310-7991159.522      11424.803              0.000              0.000
+  1311-7973534.986      11399.605              0.000              0.000
+  1312-7967722.879      11391.296              0.000              0.000
+  1313-7942830.212      11355.707              0.000              0.000
+  1314-7925483.006      11330.906              0.000              0.000
+  1315-7913192.035      11313.334              0.000              0.000
+  1316-7891150.214      11281.822              0.000              0.000
+  1317-7871064.073      11253.105              0.000              0.000
+  1318-7851265.193      11224.799              0.000              0.000
+  1319-7845820.643      11217.015              0.000              0.000
+  1320-7808876.791      11164.197              0.000              0.000
+  1321-7792877.691      11141.323              0.000              0.000
+  1322-7765070.977      11101.569              0.000              0.000
+  1323-7742984.651      11069.992              0.000              0.000
+  1324-7723798.002      11042.561              0.000              0.000
+  1325-7710317.379      11023.288              0.000              0.000
+  1326-7699656.074      11008.046              0.000              0.000
+  1327-7681555.860      10982.169              0.000              0.000
+  1328-7666753.864      10961.006              0.000              0.000
+  1329-7644601.844      10929.336              0.000              0.000
+  1330-7639051.601      10921.401              0.000              0.000
+  1331-7600418.416      10866.168              0.000              0.000
+  1332-7590943.538      10852.622              0.000              0.000
+  1333-7565922.355      10816.850              0.000              0.000
+  1334-7555547.652      10802.017              0.000              0.000
+  1335-7534560.552      10772.012              0.000              0.000
+  1336-7518181.074      10748.595              0.000              0.000
+  1337-7505140.412      10729.951              0.000              0.000
+  1338-7499879.456      10722.429              0.000              0.000
+  1339-7493508.074      10713.320              0.000              0.000
+  1340-7451837.050      10653.744              0.000              0.000
+  1341-7438924.860      10635.284              0.000              0.000
+  1342-7410583.508      10594.765              0.000              0.000
+  1343-7400670.970      10580.593              0.000              0.000
+  1344-7383326.773      10555.796              0.000              0.000
+  1345-7359983.482      10522.423              0.000              0.000
+  1346-7356830.546      10517.915              0.000              0.000
+  1347-7318341.590      10462.888              0.000              0.000
+  1348-7295433.541      10430.137              0.000              0.000
+  1349-7280354.655      10408.579              0.000              0.000
+  1350-7270017.184      10393.800              0.000              0.000
+  1351-7228339.901      10334.215              0.000              0.000
+  1352-7223283.959      10326.986              0.000              0.000
+  1353-7201505.332      10295.850              0.000              0.000
+  1354-7185773.115      10273.358              0.000              0.000
+  1355-7172282.717      10254.071              0.000              0.000
+  1356-7163793.435      10241.934              0.000              0.000
+  1357-7153538.553      10227.273              0.000              0.000
+  1358-7127088.654      10189.458              0.000              0.000
+  1359-7111876.407      10167.709              0.000              0.000
+  1360-7092758.896      10140.377              0.000              0.000
+  1361-7064292.512      10099.679              0.000              0.000
+  1362-7050123.475      10079.422              0.000              0.000
+  1363-7041970.793      10067.766              0.000              0.000
+  1364-7010810.697      10023.217              0.000              0.000
+  1365-6996239.163      10002.385              0.000              0.000
+  1366-6987375.076       9989.712              0.000              0.000
+  1367-6964448.816       9956.935              0.000              0.000
+  1368-6942705.699       9925.849              0.000              0.000
+  1369-6931715.695       9910.137              0.000              0.000
+  1370-6906885.694       9874.638              0.000              0.000
+  1371-6884302.383       9842.351              0.000              0.000
+  1372-6833426.168       9769.614              0.000              0.000
+  1373-6826724.942       9760.034              0.000              0.000
+  1374-6809452.424       9735.340              0.000              0.000
+  1375-6781281.970       9695.065              0.000              0.000
+  1376-6770416.442       9679.531              0.000              0.000
+  1377-6744840.802       9642.966              0.000              0.000
+  1378-6724412.054       9613.759              0.000              0.000
+  1379-6701018.171       9580.313              0.000              0.000
+  1380-6696263.093       9573.515              0.000              0.000
+  1381-6663798.795       9527.101              0.000              0.000
+  1382-6649839.305       9507.144              0.000              0.000
+  1383-6634544.020       9485.276              0.000              0.000
+  1384-6608709.518       9448.341              0.000              0.000
+  1385-6600454.261       9436.539              0.000              0.000
+  1386-6582547.255       9410.938              0.000              0.000
+  1387-6554963.857       9371.502              0.000              0.000
+  1388-6547614.166       9360.995              0.000              0.000
+  1389-6533855.249       9341.324              0.000              0.000
+  1390-6502016.096       9295.804              0.000              0.000
+  1391-6473051.934       9254.394              0.000              0.000
+  1392-6442925.999       9211.324              0.000              0.000
+  1393-6432276.943       9196.099              0.000              0.000
+  1394-6393458.774       9140.602              0.000              0.000
+  1395-6371317.047       9108.946              0.000              0.000
+  1396-6333279.664       9054.565              0.000              0.000
+  1397-6313865.163       9026.808              0.000              0.000
+  1398-6294806.122       8999.560              0.000              0.000
+  1399-6262942.091       8954.005              0.000              0.000
+  1400-6235322.335       8914.517              0.000              0.000
+  1401-6214549.937       8884.819              0.000              0.000
+  1402-6190703.285       8850.726              0.000              0.000
+  1403-6167612.195       8817.713              0.000              0.000
+  1404-6132785.246       8767.922              0.000              0.000
+  1405-6127692.503       8760.641              0.000              0.000
+  1406-6064851.534       8670.798              0.000              0.000
+  1407-5994264.907       8569.882              0.000              0.000
+  1408-5950272.964       8506.988              0.000              0.000
+  1409-5931674.163       8480.397              0.000              0.000
+  1410-5872697.663       8396.080              0.000              0.000
+  1411-5792927.604       8282.034              0.000              0.000
+  1412-5713164.094       8167.998              0.000              0.000
+  1413-2424938.503       3466.887              0.000              0.000
+
+TIME: Analyses took 1.2479 seconds.
+
+DATASETS:
+  2 data sets:
+	mwc "mwc" (double matrix, matrix(mass-weighted covariance)), size is 998991
+	Modes_00001 "Modes_00001" (eigenmodes(mass-weighted covariance)), size is 1413
+---------- RUN END ---------------------------------------------------
+TIME: Total execution time: 1.3320 seconds.
+--------------------------------------------------------------------------------
+To cite CPPTRAJ use:
+Daniel R. Roe and Thomas E. Cheatham, III, "PTRAJ and CPPTRAJ: Software for
+  Processing and Analysis of Molecular Dynamics Trajectory Data". J. Chem.
+  Theory Comput., 2013, 9 (7), pp 3084-3095.
+
