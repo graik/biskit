@@ -3,7 +3,7 @@
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2012 Wolfgang Rieping
+## Copyright (C) 2004-2016 Wolfgang Rieping
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
