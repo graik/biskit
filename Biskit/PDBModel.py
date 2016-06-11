@@ -79,16 +79,17 @@ class PDBProfiles( ProfileCollection ):
         return ProfileCollection.version(self)
 
 
+## should work but leads to some kind of loop condition
 ##    def profLength(self, default=0):
 ##        r = ProfileCollection.profLength(self, default=None)
 ##        if r is not None:
 ##            return r
 ##        
-##        if self.model.xyz is not None:
+##        if self.model and self.model.xyz is not None:
 ##            return len(self.model.xyz)
 ##        
 ##        return default
-##        
+        
 
     def get( self,  name, default=None, update=True, updateMissing=False ):
         """
@@ -144,7 +145,11 @@ class PDBResidueProfiles(PDBProfiles):
         r = ProfileCollection.profLength(self, default=None)
         if r is not None:
             return r
-        return self.model.lenResidues()
+        
+        if self.model and self.model._resIndex is not None:
+            return len(self.model._resIndex)
+        
+        return default
 
 
 class PDBError(BiskitError):
@@ -212,7 +217,7 @@ class PDBModel:
         self.xyz = None
 
         #: save atom-/residue-based values
-        self.residues = PDBProfiles( self )
+        self.residues = PDBResidueProfiles( self )
         self.atoms = PDBProfiles( self )
 
         #: cached atom masks, calculated when first needed
@@ -482,7 +487,7 @@ class PDBModel:
         if getattr( self, 'atoms', 0) is 0:
             self.atoms = PDBProfiles(self)
         if getattr( self, 'residues', 0) is 0:
-            self.residues = PDBProfiles(self)
+            self.residues = PDBResidueProfiles(self)
 
         ## between release 2.0.1 and 2.1, aProfiles were renamed to atoms
         if getattr( self, 'aProfiles', None) is not None:

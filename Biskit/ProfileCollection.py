@@ -952,12 +952,10 @@ class ProfileCollection:
 
         r = self.__class__()
         
-        mylength = self.profLength()  ## 0 if there are no (non-None) profiles
-        
         ##!!! BIG FAT WARNING: empty profilecollection does not imply empty model
         ## an empty PC w/o any profiles currently doesn't know which length
         ## is is supposed to have. If profLength == 0 for real, then
-        ## the next PC's profiles could don't need to be skipped
+        ## the next PC's profiles don't need to be skipped
         ## Otherwise,
         ## this creates too-short profiles if the PC parent model has 
         ## non-zero length and simply doesn't have any profiles registered.
@@ -1000,7 +998,7 @@ class ProfileCollection:
                     r.set( k, p + pnext, **infos )
             except:
                 EHandler.warning("Profile %s skipped during concat." % k, 
-                                 error=0)
+                                 error=1)
                 r.remove( k )
 
         return r.concat( *profiles[1:] )
