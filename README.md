@@ -1,6 +1,6 @@
 Biskit
 ==========
-**a software platform for structural bioinformatics**
+___a software platform for structural bioinformatics___
 
 Please refer to 
             **http://biskit.pasteur.fr**
