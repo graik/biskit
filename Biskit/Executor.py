@@ -636,11 +636,14 @@ class Executor:
         if self.f_err and not self.debug:
             t.tryRemove( self.f_err )
         
-        if not self.keep_tempdir and not self.debug and self.verbose:
-            if os.listdir( self.tempdir ):  
-                self.log.add('Warning: Removing non-empty temporary folder %s'%\
-                             self.tempdir )
-            self.log.writeln( 'Removing temporary folder %s' % self.tempdir )
+        if not self.keep_tempdir and not self.debug:
+            if self.verbose:
+                if os.listdir( self.tempdir ):  
+                    self.log.writeln('Removing non-empty temporary folder %s'\
+                                     % self.tempdir )
+                else:
+                    self.log.writeln( 'Removing temporary folder %s'\
+                                      % self.tempdir )
             t.tryRemove( self.tempdir, tree=True )
 
 
@@ -760,7 +763,7 @@ class Test(BT.BiskitTest):
     def prepare(self):
         import tempfile
         self.fout = tempfile.mktemp('_testexecutor.out')
-
+        
     def cleanUp(self):
         t.tryRemove(self.fout)
     
@@ -798,6 +801,7 @@ class Test(BT.BiskitTest):
         self.assert_( os.path.exists( self.e.tempdir ), 
                       'cannot find temp. folder' )
         self.e.cleanup()
+
         self.assert_( not os.path.exists( self.e.tempdir ),
                       'tempfolder has not been removed.')
         
