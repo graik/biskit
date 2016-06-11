@@ -369,25 +369,16 @@ class Pymoler( Executor ):
                 if self.verbose: print n
 
 
-    def addDeleteScript(self):
-        """
-        Deletes the pymol script file from disc
-        """
-        self.add( "/ import os" )
-        self.add("/ os.system('rm " + self.foutName+ "')")
-
-
-    def addDeletePdbs(self):
+    def deletePdbs(self):
         """
         Deletes the pdb-files in the list from disc
         """
-        self.add( "/ import os" )
         for key in self.dic.keys():
 
             for model in self.dic[ key ]:
                 ## only remove files created by PymolInput!
                 if model.temporary:
-                        self.add( "/ os.system('rm " + model.fname + "')" )
+                    T.tryRemove(model.fname)
 
 
     def setAtomValues( self, model, values, key='temperature_factor',
@@ -551,16 +542,20 @@ class Pymoler( Executor ):
         """
         Overrides Executor method.
         """
-        # clean up files from disc
-        if cleanUp:
-            self.addDeletePdbs()
-            self.addDeleteScript()
-
-        self.flush()
+        Executor.prepare(self)
+        
+        self.flush() ## important to avoid empty input file
 
         ## Write PDB's to disc if needed
         self.writeStructures()
 
+    def cleanup(self):
+        if not self.debug:
+            T.tryRemove( self.foutName )
+            self.deletePdbs()
+    
+        Executor.cleanup( self )
+        
 
     def show( self ):
         """
