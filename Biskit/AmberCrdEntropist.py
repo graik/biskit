@@ -100,7 +100,7 @@ class AmberCrdEntropist( Executor ):
         @return: version
         @rtype: str
         """
-        return 'AmberCrdEntropist $Revision$'
+        return 'AmberCrdEntropist $Revision: 1086 $'
 
 
     def command( self ):
@@ -157,7 +157,7 @@ class AmberCrdEntropist( Executor ):
         re_vibes = re.compile('^\s*Warning--\s*(\d+)\s*vibrations have low')
         re_table = re.compile('^-{80}$')
         re_value = re.compile('(-*\d+\.\d+)$')
-        re_nsets = re.compile('Successfully read in (\d+) sets')
+        re_nsets = re.compile('Read \d+ frames and processed (\d+) frames.')
 
         r = self.result
 
@@ -165,43 +165,80 @@ class AmberCrdEntropist( Executor ):
             lines = open( f_out, 'r' ).readlines()
             lines.reverse()
             l = lines.pop()
-    
+
             while not r['nframes']:
                 r['nframes'] = r['nframes'] or self.__tryMatch( re_nsets, l )
                 l = lines.pop()
-                
+
             while not re_thermo.search(l):
                 l = lines.pop()
-    
+
             while not re_table.search(l):
                 r['T']    = r['T']     or self.__tryMatch( re_T, l )
                 r['mass'] = r['mass']  or self.__tryMatch( re_mass, l )
                 r['vibes']= r['vibes'] or self.__tryMatch( re_vibes,l )
                 l = lines.pop()
-    
+
             l = lines.pop()
             v = []
             while lines:
                 v += [ self.__tryMatch( re_value, l ) ]
                 l = lines.pop()
-    
+
             r['S_total'], r['S_trans'], r['S_rot'], r['S_vibes'] = tuple(v[:4])
             r['contributions'] = v[4:]
     
         except IndexError:
-            raise EntropistError, 'unexpected end of ptraj output file.'
+            raise EntropistError, 'unexpected end (or format) of ptraj output file.'
 
         return r
 
+#############
+## Unit tests
+
+import Biskit.test as BT
+import tempfile
+
+class Test( BT.BiskitTest ):
+   """Test AmberCrdEntropist"""
+
+   TAGS=[BT.EXE, BT.LONG]
+
+   def prepare(self):
+       root = T.testRoot() + '/amber/crdentropist/'
+       self.fcrd = root + 'ligand.crd'
+       self.fparm = root + 'ligand.prmtop'
+       self.fout = tempfile.mktemp('.out', 'cpptraj_')
+
+   def cleanUp(self):
+       T.tryRemove( self.fout )
+       
+   def test_AmberCrdEntropist(self):
+       """AmberCrdEntropist (low-level entropy analysis) test"""
+       
+       self.e = AmberCrdEntropist( self.fparm, self.fcrd, debug=self.DEBUG,
+                              verbose=self.VERBOSITY )
+       
+       self.e.run()
+
+## class DryTest( BT.BiskitTest ):
+##     """Test AmberCrdEntropist.parser"""
+
+##     def prepare(self):
+##         root = T.testRoot() + 'amber/crdentropist/'
+##         self.fcrd = root + 'ligand.crd'
+##         self.fparm = root + 'ligand.prmtop'
+##         self.fout = root + 'cpptraj.out'
+    
+##     def test_ptrajParseEntropy(self):
+        
+##         self.e = AmberCrdEntropist( self.fparm, self.fcrd, debug=self.DEBUG,
+##                                     verbose=self.VERBOSITY)
+        
+##         self.r = self.e.parsePtrajResult(self.fout)
+        
+
 if __name__ == '__main__':
 
-    print "Setting up"
-
-    f = T.testRoot() + '/Amber/AmberCrdEntropist/' 
-
-    e = AmberCrdEntropist( f + 'lig_traj.parm',
-                           f + 'lig_traj.crd', debug=0, verbose=1)
-
-    print "Running"
-
-    e.run()
+    BT.localTest(debug=True)
+ 
