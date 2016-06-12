@@ -30,6 +30,9 @@ pip install -e biskit
 ```
 Replace `git clone` by the appropriate `tar xvf *tgz` command to start from an official Biskit release bundle.
 
+*Note:* if not already available, this will automatically install numpy, scipy, and BioPython. It will *not* however install the biggles plotting package, which is not strictly required but highly recommended. Biggles is not available via `pip`. On Ubuntu, it can be installed with `sudo apt-get install python-pybiggles`. See http://biskit.pasteur.fr/install/short for step-by-step instructions on alternative installation methods.
+
+
 License
 -------
 
