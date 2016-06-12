@@ -305,14 +305,18 @@ class Test(BT.BiskitTest):
     
     def test_ColorSpectrum( self ):
         """ColorSpectrum test"""
-        import biggles as B
+        try:
+            import biggles as B
+        except:
+            B = 0
         
         c_grey    = ColorSpectrum( 'grey', 0, 100 )
         c_sausage = ColorSpectrum( 'sausage', 0, 100 )
         c_plasma  = ColorSpectrum( 'plasma', 0, 100 )
         c_plasma2 = ColorSpectrum( 'plasma2', 0, 100 )
 
-        self.p = B.FramedPlot()
+        if B:
+            self.p = B.FramedPlot()
 
 ##         old_spectrum = tools.colorSpectrum( 100 )
         
@@ -320,32 +324,36 @@ class Test(BT.BiskitTest):
         for i in range( -1, 100 ):
 
             x = (i, i+1 )
-            self.p.add( B.FillBelow( x, (1., 1.),
-                                     color = c_grey.color( i ) ) )
-            self.result += [ c_grey.color( i ) ]
-            
-            self.p.add( B.FillBelow( x, (0.75, 0.75),
-                                     color = c_sausage.color( i ) ) )
-            self.p.add( B.FillBelow( x, (0.5, 0.5),
-                                     color = c_plasma.color( i ) ) )
-            self.p.add( B.FillBelow( x, (0.25, 0.25),
-                                     color = c_plasma2.color( i ) ) )
+
+            if B:
+                self.result += [ c_grey.color( i ) ]
+    
+                self.p.add( B.FillBelow( x, (1., 1.),
+                                         color = c_grey.color( i ) ) )
+                
+                self.p.add( B.FillBelow( x, (0.75, 0.75),
+                                         color = c_sausage.color( i ) ) )
+                self.p.add( B.FillBelow( x, (0.5, 0.5),
+                                         color = c_plasma.color( i ) ) )
+                self.p.add( B.FillBelow( x, (0.25, 0.25),
+                                         color = c_plasma2.color( i ) ) )
 
 ##             self.p.add( B.FillBelow( x, (0., 0.),
 ##                                   color = old_spectrum[i] ))
 
-        self.p.add( B.Curve( (0,100), (1.,1.)) )
-        self.p.add( B.Curve( (0,100), (.75,.75)) )
-        self.p.add( B.Curve( (0,100), (.5,.5) ))
-        self.p.add( B.Curve( (0,100), (0.25, 0.25)) )
-        self.p.add( B.Curve( (0,100), (0.0, 0.0)) )
+        if B:
+            self.p.add( B.Curve( (0,100), (1.,1.)) )
+            self.p.add( B.Curve( (0,100), (.75,.75)) )
+            self.p.add( B.Curve( (0,100), (.5,.5) ))
+            self.p.add( B.Curve( (0,100), (0.25, 0.25)) )
+            self.p.add( B.Curve( (0,100), (0.0, 0.0)) )
+    
+            self.p.add( B.PlotLabel(  0.5 ,0.9, 'grey') )
+            self.p.add( B.PlotLabel(  0.5 ,0.65, 'sausage') )
+            self.p.add( B.PlotLabel(  0.5 ,0.4, 'plasma') )
+            self.p.add( B.PlotLabel(  0.5 ,0.15, 'plasma2') )
 
-        self.p.add( B.PlotLabel(  0.5 ,0.9, 'grey') )
-        self.p.add( B.PlotLabel(  0.5 ,0.65, 'sausage') )
-        self.p.add( B.PlotLabel(  0.5 ,0.4, 'plasma') )
-        self.p.add( B.PlotLabel(  0.5 ,0.15, 'plasma2') )
-
-        if self.local or self.VERBOSITY > 2:
+        if (self.local or self.VERBOSITY > 2) and B:
             self.p.show()
             
         self.assertEqual(self.result, self.EXPECTED)
