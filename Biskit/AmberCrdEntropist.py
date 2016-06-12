@@ -233,6 +233,7 @@ class DryTest( BT.BiskitTest ):
     def test_ptrajParseEntropy(self):
        
         self.e = AmberCrdEntropist( self.fparm, self.fcrd, debug=self.DEBUG,
+                                    validate=False,
                                     verbose=self.VERBOSITY)
        
         self.r = self.e.parsePtrajResult(self.fout)
