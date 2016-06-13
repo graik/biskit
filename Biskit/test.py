@@ -671,3 +671,6 @@ if __name__ == '__main__':
     l.report()
 
     print "DONE"
+    
+    if l.result.errors:
+        sys.exit(1)
