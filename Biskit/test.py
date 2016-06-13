@@ -672,5 +672,5 @@ if __name__ == '__main__':
 
     print "DONE"
     
-    if l.result.errors:
+    if l.result.errors or l.result.failures:
         sys.exit(1)
