@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/graik/biskit.svg?branch=master)](https://travis-ci.org/graik/biskit)
+
 Biskit
 ==========
 ___a software platform for structural bioinformatics___
