@@ -17,8 +17,8 @@
 ## You find a copy of the GNU General Public License in the file
 ## license.txt along with this program; if not, write to the Free
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-##
-##
+
+__version__ = '2.4.3'
 
 ## execute ~/.pythonrc.py if it exists
 import user
@@ -107,8 +107,8 @@ try:
 except Exception, why:
     EHandler.warning('Could not import all biskit modules:', trace=1 )
 
-try:
-    import biggles
-    del biggles
-except:
-    EHandler.warning('Could not import biggles module -- plotting is not available.')
+##try:
+##    import biggles
+##    del biggles
+##except:
+##    EHandler.warning('Could not import biggles module -- plotting is not available.')
