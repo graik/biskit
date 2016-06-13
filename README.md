@@ -36,4 +36,4 @@ Replace `git clone` by the appropriate `tar xvf *tgz` command to start from an o
 License
 -------
 
-Biskit is distributed under the GNU GPL version 3. See COPYING. Contact us, in case you prefer a different licensing model.
+Biskit is distributed under the GNU GPL version 3. See LICENSE.txt. Contact us, in case you prefer a different licensing model.
