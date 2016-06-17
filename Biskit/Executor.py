@@ -492,15 +492,15 @@ class Executor:
         
         if self.verbose:
             self.log.add('executing: %s' % cmd)
-            self.log.add('in folder: %s' % self.cwd ) 
-            self.log.add('input:  %r' % stdin )
-            self.log.add('output: %r' % stdout )
-            self.log.add('errors: %r' % stderr )
-            self.log.add('wrapped: %r'% self.exe.shell )
-            self.log.add('shell: %r'  % shellexe )
-            self.log.add('environment: %r' % self.environment() )
+            self.log.add('    in folder: %s' % self.cwd ) 
+            self.log.add('    input:     %r' % stdin )
+            self.log.add('    output:    %r' % stdout)
+            self.log.add('    errors:    %r' % stderr)
+            self.log.add('    wrapped:   %r' % self.exe.shell)
+            self.log.add('    shell:     %r' % shellexe)
+            self.log.add('    environment: %r' % self.environment())
             if self.exe.pipes and inp:
-                self.log.add('%i byte of input pipe' % len(str(inp)))
+                self.log.add('    %i byte of input pipe' % len(str(inp)))
 
         self.output, self.error = self.communicate( cmd, inp,
                             bufsize=-1, executable=shellexe, stdin=stdin,
