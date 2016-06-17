@@ -245,11 +245,11 @@ class PrettyTextTestResult( U.TextTestResult ):
             self.stream.write(desc.ljust(60,'.'))
             self.stream.write("... ")
             self.stream.flush()
-        self.startclock = time.clock()
+        self.startclock = time.time()
 
     def addSuccess(self, test):
         ## super(U.TextTestResult, self).addSuccess(test)
-        dt = time.clock() - self.startclock
+        dt = time.time() - self.startclock
         
         if self.showAll:
             if dt > 0.5:

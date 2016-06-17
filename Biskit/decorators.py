@@ -153,7 +153,7 @@ class Test(BT.BiskitTest):
 
         a = A()
 
-        t = time.clock()
+        t = time.time()
 
         result = 0
         for i in range( 10000 ):
@@ -162,7 +162,7 @@ class Test(BT.BiskitTest):
 
         
         if self.local:
-            print 'timing: ', time.clock() - t
+            print 'timing: ', time.time() - t
             globals().update( locals() )
                               
         self.assertEqual( result, 90000 )

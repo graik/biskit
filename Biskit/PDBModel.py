@@ -3790,12 +3790,12 @@ class Test(BT.BiskitTest):
 
     def test_removeRes(self):
         """PDBModel.removeRes test"""
-        t = time.clock()
+        t = time.time()
         self._m = self.m.clone()
         self._m.removeRes(['TIP3', 'HOH'])
         self.assertEqual( len(self._m), 1968)
         self.assertAlmostEqual( self._m.mass(), 21325.90004, 3 )
-        if self.local: print "removeRes: ", time.clock() - t
+        if self.local: print "removeRes: ", time.time() - t
 
     def test_chainMethods(self):
         """PDBModel chain methods test"""
