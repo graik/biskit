@@ -88,7 +88,7 @@ class Dssp( Executor ):
         self.f_out = tempfile.mktemp( '_dssp.out')
 
         Executor.__init__( self, 'dsspcmbi',
-                           args='-na %s'%self.f_pdb,
+                           args='-i %s'%self.f_pdb,
                            catch_err=1, **kw )
 
 
@@ -265,7 +265,7 @@ class Test(BT.BiskitTest):
         self.m = self.m.compress( self.m.maskProtein() )
 
         if self.local:  print 'Starting DSSP'
-        self.dssp = Dssp( self.m )
+        self.dssp = Dssp( self.m, verbose=self.local, debug=self.DEBUG )
 
         if self.local: print 'Running DSSP'
 
