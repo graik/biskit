@@ -138,10 +138,14 @@ class PDBDope:
 
         @raise ExeConfigError: if external application is missing
         """
-        dssp = Dssp( self.m )
+        prot_mask = self.m.maskProtein()
+        model = self.m.compress( prot_mask )
+        
+        dssp = Dssp( model )
         ss = dssp.run()
 
-        self.m.residues.set( 'secondary',  ss,
+        self.m.residues.set( 'secondary',  ss, 
+                             mask = self.m.atom2resMask(prot_mask),
                              comment='secondary structure from DSSP',
                              version= T.dateString() + ' ' + self.version() )
 
@@ -530,8 +534,18 @@ class LongTest( BT.BiskitTest ):
         self.d.addDelphi( scale=1.2 )
         
         self.assertAlmostEqual( self.M['delphi']['scharge'], 0.95, 1 )
+                
+
+    EXPECT_1RQ4 = '.EEEEE.SSHHHHHHHHHHHHHHHEEEEEEEE.SS.EEEEE..SS...EEEEEEE.SSTTT.....EEEEEESSS..EEEEEETTTTEEEE.GGGTT...TT.EEEE.SS.SSHHHHHHHHTS.STT.EE.HHHHHHHHHHHHT..SS...HHHHHHHHHHHHHTHHHHH.HHHHHHHHGGGT.TT...EE..HHHHHHHTTHHHHHHHGGG.SS.SEEEETTEEESSHHHHHTT..EE.......SS.SSSS..EEEETTEEEEHHHHHHH.....EEEEE.SSHHHHHHHHHHHHHHHEEEEEEEEETTEEEEEE...S...EEEEEEE.SSSSS.....EEEEEETTT..EEEEEETTTTEEEE.GGGTT...TT.EEEE.SS..SHHHHHHHS...TTT.EE.TTHHHHHHHHHHT..SS...HHHHHHHHHHHHHHHHHHH.HHHHHHHGGGSS.TT...EE..HHHHHHHHTHHHHHHHGGG.SS.SEEEETTEEE.SHHHHHTT..EE........S.STTSS.EEESSSEEEEHHHHHHH.......EEEEE.EEEEEE.TTS.EEEEESS.EEEE..HHHHHHHHHHHHHT..EEEE.S..STT.B..EEEE...EEEEE...EEEE.TTS.EEEEETTEEEEE..TTHHHHHHHHHHTT..EEEE.S..STT.B..EEEE...EEEEEEEEEEEE.TTS.EEEEETTEEEEE..TTHHHHHHHHHHHT.EEEEE.S..STT.B..EEEE...EEEEEEEEEEEE.TTS.EEEEETTEEEEE..TTHHHHHHHHHHTT.EEEEE.S..STT.B..EEEE...EEEEE.EEEEEE.SSS.EEEEETTEEEEE..HHHHHHHHHHHHHT..EEEE.S..STT.B..EEEE...EEEEEEEEEEEE.TTS.EEEEETTEEEEE..HHHHHHHHHHHHTT.EEEEE.S..STT.B..EEEE...EEEEEEEEEEEE.TTS.EEEEETTEEEEE..TTHHHHHHHHHHTT.EEEEE.S..STT.B..EEEE...EEEEE.EEEEEE.TTS.EEEEETTB..EE..TTHHHHHHHHHHHT..EEEE.SS.STT.B..EEEE.....EEE.EEEEEE.TTS.EEEEETTEEEEE..THHHHHHHHHHHHT..EEEE.S..STT.B..EEEE...EEEEE.EEEEEE.SSS.EEEEETTEEEEE..TTHHHHHHHHHTTT..EEEE.S..STT.B..EEEE.'
+    def test_addSecondaryNonFiltered(self):
+        from Biskit import PDBModel
+        m = PDBModel('1R4Q')
+        d = PDBDope(m)
+        d.addSecondaryStructure()
         
-        
+        r = m.compress(m.maskProtein())['secondary']
+        self.assertEqual(''.join(r), self.EXPECT_1RQ4 )
+    
 
 class OldTest( BT.BiskitTest ):
 
