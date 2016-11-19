@@ -197,7 +197,7 @@ class Dssp( Executor ):
         resDic = self.model.resList()
         i = 0
         j = 0
-        while i<len(ss) or j<len(resDic):
+        while i<len(ss) and j<len(resDic):
 
             complete = __completeBB( resDic[j] )
 ##            res_name = MU.singleAA( [resDic[j][0]['residue_name']] )[0]
@@ -255,6 +255,7 @@ class Test(BT.BiskitTest):
         self.f = T.testRoot()+"/com/1BGS.pdb"
 
 
+    EXPECTED =  '.....SHHHHHHHHHHHSS..TTEE.HHHHHHHT..GGGT.HHHHSTT.EEEEEEE..TT..S...TT..EEEEE.S..SSS..S.EEEEETT..EEEESSSSSS.EE...EEEEETTT..SHHHHHHHHHHHHT..TT..SSHHHHHHHHHHT..SSEEEEEE.HHHHHHHTTTTHHHHHHHHHHHHHHT..EEEEE.'
     def test_DSSP( self ):
         """DSSP test"""
 
@@ -277,8 +278,46 @@ class Test(BT.BiskitTest):
 
         self.assertEquals( self.result, self.EXPECTED)
 
+    def test_DSSP_2W3A( self ):
+        """DSSP test 2W3A"""
 
-    EXPECTED =  '.....SHHHHHHHHHHHSS..TTEE.HHHHHHHT..GGGT.HHHHSTT.EEEEEEE..TT..S...TT..EEEEE.S..SSS..S.EEEEETT..EEEESSSSSS.EE...EEEEETTT..SHHHHHHHHHHHHT..TT..SSHHHHHHHHHHT..SSEEEEEE.HHHHHHHTTTTHHHHHHHHHHHHHHT..EEEEE.'
+        from Biskit import PDBModel
+
+        if self.local: print 'Loading PDB...'
+        self.m = PDBModel('2W3A')
+
+        if self.local:  print 'Starting DSSP'
+        self.dssp = Dssp( self.m, verbose=self.local, debug=self.DEBUG )
+
+        if self.local: print 'Running DSSP'
+
+        self.result = self.dssp.run()
+
+        if self.local:
+            print "Sequence :", self.m.sequence()
+            print "Secondary:", self.result            
+
+
+    def test_DSSP_1R4Q( self ):
+        """DSSP test 2W3A"""
+
+        from Biskit import PDBModel
+
+        if self.local: print 'Loading PDB...'
+        self.m = PDBModel('1R4Q')
+        self.m = self.m.compress( self.m.maskProtein() )
+
+        if self.local:  print 'Starting DSSP'
+        self.dssp = Dssp( self.m, verbose=self.local, debug=self.DEBUG )
+
+        if self.local: print 'Running DSSP'
+
+        self.result = self.dssp.run()
+
+        if self.local:
+            print "Sequence :", self.m.sequence()
+            print "Secondary:", self.result            
+    
 
 if __name__ == '__main__':
 
