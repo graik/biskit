@@ -34,6 +34,7 @@ from Biskit import EHandler
 from ProfileCollection import ProfileCollection, ProfileError
 from PDBParserFactory import PDBParserFactory
 from PDBParseFile import PDBParseFile
+import BioUnit as BU
 import Biskit as B
 
 import Biskit.oldnumeric as N0
@@ -2245,11 +2246,11 @@ class PDBModel:
         r.source = self.source
 
         ## copy the biounit
-        try:
-            r.biounit = self.biounit.take(i)
-            r.biounit.model = r
-        except AttributeError:
-            pass
+##        try:
+##            r.biounit = self.biounit.take(i)
+##            r.biounit.model = r
+##        except AttributeError:
+##            pass
 
         return r
 
@@ -3708,7 +3709,8 @@ class PDBModel:
         @return: PDBModel; biologically relevant assembly
         """
         try:
-            r = self.biounit.makeMultimer(assembly)
+            biounit = BU.BioUnit(self, self.info['BIOMT'])
+            r = biounit.makeMultimer(assembly)
         except AttributeError:
             r = self
         return r
@@ -3719,7 +3721,8 @@ class PDBModel:
                  PDB header
         """
         try:
-            r = len(self.biounit.keys())
+            biounit = BU.BioUnit(self, self.info['BIOMT'])            
+            r = len(biounit.keys())
         except AttributeError:
             r = 0
         return r

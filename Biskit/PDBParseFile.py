@@ -149,11 +149,10 @@ class PDBParseFile( PDBParser ):
                 model.pdbCode = model.pdbCode or info.get('pdb_code', None) or \
                                 self.idFromName( model.fileName)
                 
-                ## make biounit from the dictionary we have parsed                
-                if 'BIOMT' in info:
-                    biomt = info['BIOMT']
-                    model.biounit = BU.BioUnit(model, biomt)
-                    del info['BIOMT']
+                ## ## make biounit from the dictionary we have parsed                              if 'BIOMT' in info:
+                ##     biomt = info['BIOMT']
+                ##     model.biounit = BU.BioUnit(model, biomt)
+                ##     del info['BIOMT']
                 
                 model.info.update( info )
                            
@@ -238,6 +237,8 @@ REMEDY: run the script fixAtomIndices.py
         
     def __parseBiomt( self, pdbFile, firstLine):
         """
+        Extract BIOMT (biological unit) information from REMARK 350 lines
+        Creates a 'BIOMT' dictionary.
         """
         line = firstLine
         biomtDict = {}

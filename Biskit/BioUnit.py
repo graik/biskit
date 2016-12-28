@@ -135,11 +135,12 @@ class Test(BT.BiskitTest):
         self.p = B.PDBParseFile.PDBParseFile()
         
         self.m = self.p.parse2new( T.testRoot('biounit/2V4E.pdb') )
+        biounit = BioUnit(self.m, self.m['BIOMT'])
         if self.local:
             self.m.report()
-            print 'unit has', len(self.m.biounit.keys()), 'multimers'
+            print 'unit has', len(biounit.keys()), 'multimers'
 
-        m2 = self.m.biounit.makeMultimer(0)
+        m2 = biounit.makeMultimer(0)
         if self.local:
             m2.report()
 
