@@ -197,7 +197,7 @@ class Dssp( Executor ):
         resDic = self.model.resList()
         i = 0
         j = 0
-        while i<len(ss) and j<len(resDic):
+        while i<len(ss) or j<len(resDic):
 
             complete = __completeBB( resDic[j] )
 ##            res_name = MU.singleAA( [resDic[j][0]['residue_name']] )[0]
