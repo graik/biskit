@@ -3697,12 +3697,19 @@ class PDBModel:
     def biomodel(self, assembly = 0):
         """
         Return the 'biologically relevant assembly' of this model
-        according to the information in the PDB's BIOMT record. This
-        removes redundant chains and performs symetry operations to
-        complete multimeric structures.  Some PDBs define several
-        alternative biological units: usually (0) the author-defined
-        one and (1) software-defined -- see L{lenBiounits}.
+        according to the information in the PDB's BIOMT record (captured in
+        info['BIOMT']). 
+        
+        This removes redundant chains and performs symmetry operations to
+        complete multimeric structures. Some PDBs define several alternative
+        biological units: usually (0) the author-defined one and (1)
+        software-defined -- see L{lenBiounits}.
 
+        Note: The BIOMT data are currently not updated during take/compress
+        calls which may change chain indices and content. This method is
+        therefore best run on an original PDB record before any other
+        modifications are performed.
+        
         @param assembly: assembly index (default: 0 .. author-determined unit)
         @type  assembly: int
 
@@ -3717,6 +3724,7 @@ class PDBModel:
 
     def lenBiounits (self):
         """
+        Number of biological assemblies defined in PDB BIOMT record, if any.
         @return: int; number of alternative biological assemblies defined in
                  PDB header
         """
