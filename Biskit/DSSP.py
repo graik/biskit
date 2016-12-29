@@ -253,71 +253,50 @@ class Test(BT.BiskitTest):
 
     def prepare(self):
         self.f = T.testRoot()+"/com/1BGS.pdb"
+        
+    def generic_test(self, pdb, expected=None, proteinonly=False):
+        """generic DSSP test"""
+
+        from Biskit import PDBModel
+
+        if self.local: print 'Loading PDB...'
+        self.m = PDBModel(pdb)
+        
+        if proteinonly:
+            self.m = self.m.compress( self.m.maskProtein() )
+
+        if self.local:  print 'Starting DSSP'
+        self.dssp = Dssp( self.m, verbose=self.local, debug=self.DEBUG )
+
+        if self.local: print 'Running DSSP'
+
+        self.result = self.dssp.run()
+
+        if self.local:
+            print "Sequence :", self.m.sequence()
+            print "Secondary:", self.result            
+        
+        if expected:
+            self.assertEquals( self.result, expected)        
 
 
     EXPECTED =  '.....SHHHHHHHHHHHSS..TTEE.HHHHHHHT..GGGT.HHHHSTT.EEEEEEE..TT..S...TT..EEEEE.S..SSS..S.EEEEETT..EEEESSSSSS.EE...EEEEETTT..SHHHHHHHHHHHHT..TT..SSHHHHHHHHHHT..SSEEEEEE.HHHHHHHTTTTHHHHHHHHHHHHHHT..EEEEE.'
     def test_DSSP( self ):
         """DSSP test"""
-
-        from Biskit import PDBModel
-
-        if self.local: print 'Loading PDB...'
-        self.m = PDBModel(self.f)
-        self.m = self.m.compress( self.m.maskProtein() )
-
-        if self.local:  print 'Starting DSSP'
-        self.dssp = Dssp( self.m, verbose=self.local, debug=self.DEBUG )
-
-        if self.local: print 'Running DSSP'
-
-        self.result = self.dssp.run()
-
-        if self.local:
-            print "Sequence :", self.m.sequence()
-            print "Secondary:", self.result            
-
-        self.assertEquals( self.result, self.EXPECTED)
+        self.generic_test(self.f, expected=self.EXPECTED, proteinonly=True)
 
     def test_DSSP_2W3A( self ):
         """DSSP test 2W3A"""
-
-        from Biskit import PDBModel
-
-        if self.local: print 'Loading PDB...'
-        self.m = PDBModel('2W3A')
-
-        if self.local:  print 'Starting DSSP'
-        self.dssp = Dssp( self.m, verbose=self.local, debug=self.DEBUG )
-
-        if self.local: print 'Running DSSP'
-
-        self.result = self.dssp.run()
-
-        if self.local:
-            print "Sequence :", self.m.sequence()
-            print "Secondary:", self.result            
+        self.generic_test('2W3A', proteinonly=True)
 
 
     def test_DSSP_1R4Q( self ):
-        """DSSP test 2W3A"""
-
-        from Biskit import PDBModel
-
-        if self.local: print 'Loading PDB...'
-        self.m = PDBModel('1R4Q')
-        self.m = self.m.compress( self.m.maskProtein() )
-
-        if self.local:  print 'Starting DSSP'
-        self.dssp = Dssp( self.m, verbose=self.local, debug=self.DEBUG )
-
-        if self.local: print 'Running DSSP'
-
-        self.result = self.dssp.run()
-
-        if self.local:
-            print "Sequence :", self.m.sequence()
-            print "Secondary:", self.result            
+        """DSSP test"""
+        self.generic_test('1R4Q', proteinonly=True)    
     
+
+    def test_DSSP_1AM7(self):
+        self.generic_test('1AM7')
 
 if __name__ == '__main__':
 
