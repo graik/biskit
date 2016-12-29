@@ -298,6 +298,9 @@ class Test(BT.BiskitTest):
     def test_DSSP_1AM7(self):
         self.generic_test('1AM7')
 
+    def test_DSSP_5FB8(self):
+        self.generic_test('5fb8')
+
 if __name__ == '__main__':
 
     BT.localTest()
