@@ -32,7 +32,6 @@ import Biskit.tools as T
 from Biskit.WhatIf import WhatIf 
 from Biskit.Hmmer import Hmmer
 from Biskit.DSSP import Dssp
-from Biskit.Fold_X import Fold_X
 from Biskit.SurfaceRacer import SurfaceRacer
 from Biskit.delphi import Delphi, DelphiError
 
@@ -241,15 +240,6 @@ class PDBDope:
         self.m.atoms.set( profName, contacts, mSurf, default=-1,
                           comment='atom density radius %3.1fA' % radius,
                           version= T.dateString() + ' ' + self.version() )
-
-    def addFoldX( self ):
-        """
-        Adds dict with fold-X energies to PDBModel's info dict.
-        See L{Biskit.Fold_X}
-        @raise ExeConfigError: if external application is missing
-        """
-        x = Fold_X( self.m )
-        self.m.info['foldX'] = x.run()
 
 
     def addSurfaceRacer( self, probe=1.4, vdw_set=1, probe_suffix=0, mask=None ):
