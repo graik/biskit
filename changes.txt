@@ -291,27 +291,6 @@ Up-to-date installation instructions can be found online:
 
 * http://biskit.pasteur.fr/install
 
-(Some older instructions are still kept in docs/.)
-
-The biskit python library (module) depends on other python libraries (numpy,
-ScientificPython, biggles) which in turn depend on a few additional
-libraries or programs (netcdf, gnuplot, plotutils). Some functions of 
-Biskit moreover rely on scipy and on biopython, although we try to
-keep this dependence optional.
-
-The complete list is given here:
-   http://biskit.pasteur.fr/install/short/
-
-You can now install Biskit by running:
-   python setup.py install
-in the root of the project's directory. Alternatively,
-you can simply copy or link the Biskit folder (the one containing
-__init__.py) into your $PYTHONPATH.
-
-We also provide rpm and debian packages for automatic resolution of
-dependencies. Please give them a try and report your success or
-failure!
-
 More detailed instructions for installing the different third-party
 packages can be found here:
    http://biskit.pasteur.fr/install/libraries
