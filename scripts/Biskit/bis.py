@@ -1,4 +1,9 @@
-#!/usr/bin/env python -i
+#!/bin/sh
+''''exec python -i -- "$0" ${1+"$@"} # '''
+
+## above shebang hack calls python interpreter with interactive flag
+## standard /usr/bin/env python -i doesn't get parsed in recent Linux 
+## see: http://stackoverflow.com/questions/3306518/cannot-pass-an-argument-to-python-with-usr-bin-env-python
 
 from Biskit.tools import *
 from Biskit import *
@@ -15,9 +20,15 @@ bispy [pickled_object or PDB_file]
 Opens an interactive python prompt with all Biskit/* modules and Biskit.tools
 functions imported into the default namespace. Tab-completion is enabled.
 
-A single argument can point either to a pickled python object which is then
-unpickled and put into a variable x, or can point to a PDB file which is then
-loaded into a PDBModel object x.
+A single argument can point to: 
+  - a pickled python object which is then unpickled and put into a variable x,
+  - or a PDB file which is then loaded into a PDBModel object x
+  - or a PDB ID to be fetched from the PDB database and loaded into PDBModel x
+
+For example, all the following should work:
+> bis.py mypickled_python.dic
+> bis.py mystructure.pdb
+> bis.py 3TGI
 """
 
 args = sys.argv
