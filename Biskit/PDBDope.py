@@ -29,7 +29,6 @@ import numpy as N
 
 import Biskit.tools as T
 
-from Biskit.WhatIf import WhatIf 
 from Biskit.Hmmer import Hmmer
 from Biskit.DSSP import Dssp
 from Biskit.SurfaceRacer import SurfaceRacer
@@ -61,48 +60,6 @@ class PDBDope:
         @rtype: PDBModel
         """
         return self.m
-
-
-    def addASA( self ):
-        """
-        Add profiles of Accessible Surface Area: 'relASA', 'ASA_total',
-        'ASA_sc', 'ASA_bb'. See L{Biskit.WhatIf}
-
-        @note: Using WhatIf to calculate relative accessabilities is not
-               nessesary any more. SurfaceRacer now also adds a profile
-               'relAS' (conataining relative solvent accessible surf) and
-               'relMS' (relative molecular surface).
-
-        @raise ProfileError: if WhatIf-returned atom/residue lists don't match.
-                             Usually that means, WhatIf didn't recognize some
-                             residue name
-        """
-        w = WhatIf( self.m )
-
-        atomRelAcc, resASA, resMask = w.run()
-
-##         normalAtoms = N0.logical_not( N0.logical_or(self.m.maskHetatm(),
-##                                                   self.m.maskSolvent() ) )
-
-        normalAtoms = self.m.maskProtein( standard=1 )
-
-        normalRes = self.m.atom2resMask( normalAtoms )
-
-        self.m.atoms.set( 'relASA', atomRelAcc, ## normalAtoms, 0,
-                          comment='relative accessible surface area in %',
-                          version= T.dateString() + ' ' + self.version() )
-
-        self.m.residues.set( 'ASA_total', resASA[:,0], normalRes, 0,
-                             comment='accessible surface area in A^2',
-                             version= T.dateString() + ' ' + self.version() )
-
-        self.m.residues.set( 'ASA_sc', resASA[:,1], normalRes, 0,
-                             comment='side chain accessible surface area in A^2',
-                             version= T.dateString() + ' ' + self.version() )
-
-        self.m.residues.set( 'ASA_bb', resASA[:,2], normalRes, 0,
-                             comment='back bone accessible surface area in A^2',
-                             version= T.dateString() + ' ' + self.version() )
 
 
     def addSurfaceMask( self, pname='relAS' ):
@@ -414,10 +371,6 @@ class Test(BT.BiskitTest):
 
         self.d = PDBDope( self.M )
 
-    def test_addFoldX( self ):
-        """PDBDope.addFoldX test"""
-        self.d.addFoldX()
-
     def test_addSurfaceRacer(self):
         """PDBDope.addSurfaceRacer/addSurfaceMask test"""
         if self.local: print "Adding SurfaceRacer curvature...",
@@ -536,24 +489,6 @@ class LongTest( BT.BiskitTest ):
         r = m.compress(m.maskProtein())['secondary']
         self.assertEqual(''.join(r), self.EXPECT_1RQ4 )
     
-
-class OldTest( BT.BiskitTest ):
-
-    TAGS = [ BT.EXE, BT.OLD ]
-
-    def prepare(self):
-        from Biskit import PDBModel
-        self.f = T.testRoot() + '/com/1BGS.pdb'
-
-        self.M = PDBModel( self.f )
-        self.M = self.M.compress( self.M.maskProtein() )
-
-        self.d = PDBDope( self.M )
-
-    def _test_addAsa(self):
-        """PDBDope.addAsa (Whatif, obsolete) test"""
-        self.d.addASA()
-
 
 if __name__ == '__main__':
 

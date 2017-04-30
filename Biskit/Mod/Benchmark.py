@@ -29,7 +29,6 @@ Modeling benchmark
 import os
 from Biskit.PDBModel import PDBModel
 from Biskit.ModelList import ModelList
-from Biskit.IcmCad import IcmCad as CAD
 
 import Biskit.tools as T
 import Biskit.oldnumeric as N0
@@ -281,27 +280,27 @@ class Benchmark:
             file.close()
 
 
-    def cad(self, reference, model):
-        """
-        Calculates the CAD Contact Area Difference between
-        the model and its reference structure and set a profile
-        for the model
+    ## def cad(self, reference, model):
+    ##     """
+    ##     Calculates the CAD Contact Area Difference between
+    ##     the model and its reference structure and set a profile
+    ##     for the model
 
-        @param reference: reference model
-        @type  reference: PDBModel
-        @param model: model
-        @type  model: PDBModel
-        """
-        reference = reference.compress(reference.maskProtein())
-        model = model.compress(model.maskProtein())
+    ##     @param reference: reference model
+    ##     @type  reference: PDBModel
+    ##     @param model: model
+    ##     @type  model: PDBModel
+    ##     """
+    ##     reference = reference.compress(reference.maskProtein())
+    ##     model = model.compress(model.maskProtein())
 
-        model_list = []
-        model_list.append(model)
+    ##     model_list = []
+    ##     model_list.append(model)
 
-        x = CAD(reference, model_list, debug=0, verbose=1)
-        r = x.run()
+    ##     x = CAD(reference, model_list, debug=0, verbose=1)
+    ##     r = x.run()
 
-        model.info["CAD"] = r
+    ##     model.info["CAD"] = r
 
 
     def write_PDBModels(self, pdb_list, output_file = None):

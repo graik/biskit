@@ -120,10 +120,6 @@ class Ramachandran:
                 if self.verbose: print "Adding SurfaceRacer profile...",
                 d.addSurfaceRacer()
                             
-            if self.profileName in ['relASA']:
-                if self.verbose: print "Adding WhatIf ASA...",
-                d.addASA()
-                        
             if self.profileName in ['density']:
                 if self.verbose: print "Adding surface density...",
                 d.addDensity()
@@ -134,10 +130,6 @@ class Ramachandran:
                 if self.verbose: print "Adding conservation data...",
                 d.addConservation()
                                                
-            if self.profileName in ['ASA_total', 'ASA_sc', 'ASA_bb']:
-                if self.verbose: print "Adding WhatIf ASA...",
-                d.addASA()
-      
         if self.verbose: print 'Done.'
 
         ## convert atom profiles to average residue profile

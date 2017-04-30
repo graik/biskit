@@ -69,7 +69,6 @@ try:
     from AmberParmBuilder import AmberParmBuilder
 
     from Hmmer import Hmmer
-    from WhatIf import WhatIf, WhatIf_Error
     from SurfaceRacer import SurfaceRacer, SurfaceRacer_Error
     from DSSP import Dssp, Dssp_Error
     from FuzzyCluster import FuzzyCluster
