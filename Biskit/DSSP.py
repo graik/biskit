@@ -130,7 +130,7 @@ class Dssp( Executor ):
 
         ## temporary pdb-file
         self.f_pdb = tempfile.mktemp( '_dssp.pdb')
-        self.f_out = tempfile.mktemp( '_dssp.out')
+#        self.f_out = tempfile.mktemp( '_dssp.out')
         
         ## will hold content of result file
         self.raw_result = []
@@ -169,20 +169,18 @@ class Dssp( Executor ):
                  a blank " " has been replaced by a dot "."
         @rtype: [str]
         """
-        ## check that the outfut file is there and seems valid
+        ## check that the outfut is there and seems valid
         try:
-            out_file = open( self.f_out )
-            lines = out_file.readlines()
-            out_file.close()
+            lines = self.output.split('\n')
         except:
             raise Dssp_Error,\
-                  'Dssp result file %s does not exist.'%self.f_out
+                  'Dssp result missing.'
         if len(lines) == 0:
             raise Dssp_Error,\
-                  'Dssp result file %s empty'%self.f_out
+                  'Dssp result empty'
         if len(lines) < 9:
             raise Dssp_Error,\
-                  'Dssp result file %s contains no secondary structure data'%self.f_out
+                  'Dssp result contains no secondary structure data'
         
         return lines
 

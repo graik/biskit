@@ -15,7 +15,7 @@ shell=0
 shellexe=
 
 ## communicate with process via STDIN and STDOUT
-pipes=0
+pipes=1
 
 ## Use new environment containing only variables given below
 replaceEnv=0
