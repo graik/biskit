@@ -335,6 +335,43 @@ class Test(BT.BiskitTest):
     def test_DSSP_3j4q(self):
         self.generic_test(T.testRoot('dssp') + '/3j4q.pdb')
 
+class TestLong(BT.BiskitTest):
+    """DSSP testing full list of trouble-makers"""
+
+    TAGS = [BT.EXE, BT.LONG]
+
+    def test_DSSP_alltroublemakers(self):
+        from Biskit import PDBModel
+        lst = '''1c48.pdb  3rlg.pdb  4gv5.pdb  4tsp.pdb
+1p9g.pdb  3v03.pdb  4i0n.pdb  4tsq.pdb
+1rd9.pdb  3v09.pdb  4idj.pdb  4wdc.pdb
+1rdp.pdb  3vwi.pdb  4iw1.pdb  4whn.pdb
+2anv.pdb  3w9p.pdb  4iya.pdb  4wvp.pdb
+2anx.pdb  3weu.pdb  4j0l.pdb  4wx3.pdb
+2f9r.pdb  3wev.pdb  4j2v.pdb  4wx5.pdb
+2j8f.pdb  3wmu.pdb  4jk4.pdb  4zbq.pdb
+2wc8.pdb  3wmv.pdb  4nzl.pdb  4zbr.pdb
+2wcb.pdb  4bct.pdb  4ot2.pdb  5abw.pdb
+2wce.pdb  4e99.pdb  4pho.pdb  5bpg.pdb
+2xrs.pdb  4emx.pdb  4phq.pdb  5cr6.pdb
+2xsc.pdb  4f5s.pdb  4po0.pdb  5dby.pdb
+3a57.pdb  4f5t.pdb  4q7g.pdb  5elc.pdb
+3hdf.pdb  4f5u.pdb  4rw3.pdb  5ele.pdb
+3kve.pdb  4f5v.pdb  4rw5.pdb  5elf.pdb
+3lu6.pdb  4fba.pdb  4tsl.pdb  5id7.pdb
+3lu8.pdb  4fzm.pdb  4tsn.pdb  5id9.pdb
+3mxg.pdb  4fzn.pdb  4tso.pdb'''.split()
+
+        for s in lst:
+            dssp = Dssp(PDBModel(s[:4]))
+            r = dssp.run()
+
+            if self.local:
+                print s, ':'
+                print r.sequence()
+                print ''.join( r.compress(r.maskProtein())['dssp'] )
+                print
+
 if __name__ == '__main__':
 
     BT.localTest()
