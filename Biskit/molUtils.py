@@ -499,7 +499,7 @@ def resType( resCode ):
     return result
 
 
-def singleAA(seq, xtable=None, nonstandard=True ):
+def singleAA(seq, xtable=None, nonstandard=True, unknown='?' ):
     """
     convert list with 3-letter AA code to list with 1-letter code
     
@@ -509,6 +509,8 @@ def singleAA(seq, xtable=None, nonstandard=True ):
     @type  xtable: dict
     @param nonstandard: support non-standard residue names (default True)
     @type  nonstandard: bool
+    @param unknown: letter to use for unknown residues [default: '?']
+    @type unknown: str
     
     @return: list with 1-letter code; C{ ['A','C','L','A'...]}
     @rtype: [str]
@@ -529,7 +531,7 @@ def singleAA(seq, xtable=None, nonstandard=True ):
             aa = aa.lower()
             result +=  [ table[aa] ]
         except:
-            result = result + ['?']
+            result = result + [unknown]
     return result
 
 

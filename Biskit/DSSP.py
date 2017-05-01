@@ -27,19 +27,52 @@ Calculates the secondary structure using DSSP.
 
 import tempfile
 import Biskit.oldnumeric as N0
+import numpy as N
+
 from Biskit import Executor, TemplateError
 import Biskit.tools as T
 import Biskit.molUtils as MU
 from Errors import BiskitError
+from Biskit import EHandler
+
+class ParseDSSPTable(object):
+    """Parse DSSP result table assuming fixed-width columns"""
+    
+    ## (<name>, <start>, <stop>, <conversion_function>)
+    fields = [('i',0,5,int), 
+              ('residue_number',5,10,int),('insertion_code', 10,11,None),
+              ('chain',11,12,None), 
+              ('residue',12,14,None),
+              ('ss',16,17,None), ('acc',35,39,int),
+              ('phi',103,109,float), ('psi',109,115,float),
+              ('x',115,122,float), ('y',122,129,float), ('z',129,136,float)]
+
+
+    def parse_line(self, l):
+        d = {}
+        try:
+            for f in self.fields:
+                name, start, end, conversion = f
+                if conversion is None:
+                    d[name] = l[start:end].strip()
+                else:
+                    d[name] = conversion( l[start:end].strip() )
+                    
+        except:
+            return {}
+            
+        return d
 
 class Dssp_Error( BiskitError ):
     pass
-
 
 class Dssp( Executor ):
     """
     Run Dssp
     ========
+    
+    Tested with mkdssp version 2.2.1
+    
     The DSSP program will define the secondary structure of a given
     structure. The secondary structure elements defined are::
 
@@ -56,6 +89,19 @@ class Dssp( Executor ):
     -------------
         >>> d = Dssp( model )
         >>> result = d.run()
+        >>> result['dssp']
+           ['.','.','E','E','E','.','H','H',...]
+        
+    Returns a copy of the input model with four new residue profiles:
+        - dssp -- the "summary" secondary structure code for each residue
+        - dssp_acc -- accessible surface area calculated by dssp
+        - dssp_phi -- PHI angle (as defined by IUPAC), if undefined: 360.0
+        - dssp_psi -- PSI angle (as defined by IUPAC), if undefined: 360.0
+    
+    Residues without DSSP data are marked as '.' in the 'dssp' profile.
+    
+    Note: additional residue profiles are "residue", "chain", "insertion_code"
+    which are used by DSSP to match result residue entries to the source model.
 
     References
     ----------
@@ -64,7 +110,7 @@ class Dssp( Executor ):
          structure: pattern recognition of hydrogen-bonded and geometrical
          features. Biopolymers Dec;22(12):2577-637. 
     """
-
+    
     def __init__( self, model, **kw ):
         """
         @param model: model analyze
@@ -81,11 +127,13 @@ class Dssp( Executor ):
           log      - Biskit.LogFile, program log (None->STOUT) (default: None)
         """
         self.model = model
-#        self.model = model.clone( deepcopy=1 )
 
         ## temporary pdb-file
         self.f_pdb = tempfile.mktemp( '_dssp.pdb')
         self.f_out = tempfile.mktemp( '_dssp.out')
+        
+        ## will hold content of result file
+        self.raw_result = []
 
         Executor.__init__( self, 'dsspcmbi',
                            args='-i %s'%self.f_pdb,
@@ -112,7 +160,7 @@ class Dssp( Executor ):
             T.tryRemove( self.f_pdb )
 
 
-    def parse_result( self ):
+    def parse_file( self ):
         """
         Parse the secondary structure from tha DSSP output file.
 
@@ -135,6 +183,10 @@ class Dssp( Executor ):
         if len(lines) < 9:
             raise Dssp_Error,\
                   'Dssp result file %s contains no secondary structure data'%self.f_out
+        
+        return lines
+
+    def parse_lines(self, lines):
 
         ## Collect secondary structure data. Note that:
         ##
@@ -169,67 +221,40 @@ class Dssp( Executor ):
         ##             87   16 B S           
         ##             88   17 B G  E
 
-        ## don't parse the header
-        for i in range( len(lines) ):
-            if lines[i][:12]=='  #  RESIDUE':
-                start = i+1
+        ## skip header (may be interesting to get total area and bonds though)
+        while lines and not lines[0][:12]=='  #  RESIDUE':
+            lines.pop(0)
+        lines.pop(0)
 
-        ## collect DSSP data
-        ss, seq, term = [], [], []
-        for i in range( start, len(lines) ):
-            ss   += [ lines[i][16:17] ]
-            term += [ lines[i][14:15] ]
-            seq  += [ lines[i][13:14] ]
+        table = ParseDSSPTable()
+        r = [ table.parse_line(l) for l in lines ]
+        r = [ res for res in r if res ]  ## filter out TER and invalid records
+        
+        m = self.model
+        len_res = m.lenResidues()
+        
+        m.residues.set('dssp', ['.']*len_res ,default='.')
+        m.residues.set('dssp_acc', N.zeros(len_res), default=0.0)
+        m.residues.set('dssp_phi', N.ones(len_res)*360.0, default=360.0 )
+        m.residues.set('dssp_psi', N.ones(len_res)*360.0, default=360.0 )
+        m.residues['residue'] = MU.singleAA( m.atom2resProfile('residue_name'),
+                                             unknown='X')
+        m.residues['insertion_code'] = m.atom2resProfile('insertion_code')
+        m.residues['chain'] = m.atom2resProfile('chain_id')
 
-        def __completeBB( res ):
-            """
-            Check that residue have all backbone atoms
-            CA, N, C and O or OXT
-            """
-            atoms = [ a['name'] for a in res ]
-            count = atoms.count('CA') + atoms.count('N') + \
-                  atoms.count('C') + atoms.count('O')
-            if count == 4:
-                return 1
-
-        secStruc = []
-
-        resDic = self.model.resList()
         i = 0
-        j = 0
-        while i<len(ss) or j<len(resDic):
-
-            complete = __completeBB( resDic[j] )
-##            res_name = MU.singleAA( [resDic[j][0]['residue_name']] )[0]
-
-            ## assign irregular if not complete residue, DSSP
-            ## skipps these residues
-            if not complete:
-                secStruc += ['.']
-                j += 1
-
-            ## termini, only in DSSP output
-            elif ( seq[i] == '!' ) and ( term[i] == '*' ):
+        for res in r:
+            while i < (len_res-1) and \
+                  not ( m.residues['residue'][i] == res['residue'] and\
+                        m.residues['chain'][i] == res['chain'] and\
+                        m.residues['insertion_code'][i] == res['insertion_code'] ):
                 i += 1
-
-            ## chain break, only in DSSP output
-            elif seq[i] == '!':
-                i += 1
-
-            ## normal data
-            elif seq[i] != '!':
-                ## replace ' ' with '.'
-                if ss[i] == ' ':
-                    secStruc += ['.']
-                else:
-                    secStruc += [ss[i]]
-                i += 1
-                j += 1
-
-        ## check that the entire sequence has a secondary structure assigned
-        assert len(secStruc) == self.model.lenResidues()
-
-        return ''.join(secStruc)        
+            m.residues['dssp'][i] = res['ss'] if res['ss'] else '.'
+            m.residues['dssp_acc'][i] = res['acc']
+            m.residues['dssp_phi'][i] = res['phi']
+            m.residues['dssp_psi'][i] = res['psi']
+            
+            i += 1
 
 
     def finish( self ):
@@ -237,8 +262,9 @@ class Dssp( Executor ):
         Overrides Executor method
         """
         Executor.finish( self )
-        self.result = self.parse_result( )
-
+        self.raw_result = self.parse_file()
+        self.parse_lines( self.raw_result )
+        self.result = self.model
 
 
 #############
@@ -270,7 +296,9 @@ class Test(BT.BiskitTest):
 
         if self.local: print 'Running DSSP'
 
-        self.result = self.dssp.run()
+        self.result = self.dssp.run()  ## returns modified PDBModel
+        self.result = self.result.compress( self.result.maskProtein() )
+        self.result = ''.join(self.result['dssp'])
 
         if self.local:
             print "Sequence :", self.m.sequence()
@@ -283,23 +311,29 @@ class Test(BT.BiskitTest):
     EXPECTED =  '.....SHHHHHHHHHHHSS..TTEE.HHHHHHHT..GGGT.HHHHSTT.EEEEEEE..TT..S...TT..EEEEE.S..SSS..S.EEEEETT..EEEESSSSSS.EE...EEEEETTT..SHHHHHHHHHHHHT..TT..SSHHHHHHHHHHT..SSEEEEEE.HHHHHHHTTTTHHHHHHHHHHHHHHT..EEEEE.'
     def test_DSSP( self ):
         """DSSP test"""
-        self.generic_test(self.f, expected=self.EXPECTED, proteinonly=True)
+        self.generic_test(self.f, expected=self.EXPECTED, proteinonly=False)
 
     def test_DSSP_2W3A( self ):
         """DSSP test 2W3A"""
-        self.generic_test('2W3A', proteinonly=True)
+        self.generic_test('2W3A', proteinonly=False)
 
+    def test_DSSP_3TGI( self ):
+        """DSSP test 3TGI"""
+        ## handling of residues with insertion code (184A, 186A, 221A)
+        self.generic_test('3TGI', proteinonly=False)
 
     def test_DSSP_1R4Q( self ):
         """DSSP test"""
-        self.generic_test('1R4Q', proteinonly=True)    
-    
+        self.generic_test('1R4Q', proteinonly=False)    
 
     def test_DSSP_1AM7(self):
         self.generic_test('1AM7')
 
     def test_DSSP_5FB8(self):
         self.generic_test('5fb8')
+        
+    def test_DSSP_3j4q(self):
+        self.generic_test(T.testRoot('dssp') + '/3j4q.pdb')
 
 if __name__ == '__main__':
 
