@@ -62,7 +62,7 @@ Options:
 
    -s      source input PDB or pickled PDBModel
    -p      profiles to be calculated:
-             fx   ... foldx energies from FoldX (not a real profile)
+##             fx   ... foldx energies from FoldX (not a real profile)
              surf ... surfrace accessibilities and curvature fom surfrace
              dens ... atomic densities
              cons ... sequence conservation from HMM
@@ -89,7 +89,7 @@ class ConvertError(Exception):
 
 
 def prepareSource( inFile, outFile, wat=1, sort=1,
-                   foldx=1, surf=1, dens=1, cons=1, dssp=1, delphi=0 ):
+                   surf=1, dens=1, cons=1, dssp=1, delphi=0 ):
     """
     Strip waters, add profiles and save as doped source model.
     """
@@ -109,8 +109,8 @@ def prepareSource( inFile, outFile, wat=1, sort=1,
 ##         doper.addSurfaceMask()
         doper.addSurfaceRacer( probe=1.4 )
 
-    if foldx:
-        doper.addFoldX()
+##    if foldx:
+##        doper.addFoldX()
 
     if dens:
         doper.addDensity()
@@ -168,8 +168,8 @@ def changeModel( inFile, prefix, sourceModel ):
         if 'density' in sourceModel.atoms.keys():
             doper.addDensity()
 
-        if 'foldX' in sourceModel.info.keys():
-            doper.addFoldX()
+##        if 'foldX' in sourceModel.info.keys():
+##            doper.addFoldX()
             
         if 'delphi' in sourceModel.info.keys():
             doper.addDelphi()
@@ -226,7 +226,7 @@ if sourceOut:
     source = prepareSource( sourceIn, sourceOut,
                             wat  =('wat'  not in options),
                             sort =('nosort' not in options),
-                            foldx=('fx'   in options['p']),
+##                            foldx=('fx'   in options['p']),
                             surf =('surf' in options['p']),
                             dens =('dens' in options['p']),
                             cons =('cons' in options['p']),
