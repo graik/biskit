@@ -408,7 +408,7 @@ class LocalPath( object ):
             seps = [ i for i in range( len(path) ) if path[i]==os.path.sep ]
         else:
             seps = [ i for i in range( len(path) ) \
-                     if path[i] in [os.path.sep, '/'] ]
+                     if path[i] in [os.path.sep, '/', ':'] ]
             
         seps += [ len( path ) ]
 
