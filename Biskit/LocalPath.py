@@ -141,7 +141,10 @@ class LocalPath( object ):
         @raise LocalPathError: if existing==1 and no existing path can be
                                constructed via environment variables
         """
-        result = string.join( [ f[0] for f in self.fragments ], '' )
+        if self.fragments:
+            result = os.path.join( *[ f[0] for f in self.fragments ] )
+        else:
+            result = ''
         result = T.absfile( result )
 
         if os.path.exists( result ):
@@ -222,8 +225,10 @@ class LocalPath( object ):
         @return: original path
         @rtype: str
         """
+        if not self.fragments:
+            return ''
         result = [ f[0] for f in self.fragments ]
-        return string.join( result, '' )
+        return os.path.join( *result )
 
 
     def set( self, v, checkEnv=1, minLen=3, maxSub=1,
@@ -467,7 +472,9 @@ class LocalPath( object ):
         @return: 1|0
         @rtype: int
         """
-        r = ( type( o ) == str and o.find('/') != -1 and len(o) >= minLen\
+        r = ( type( o ) == str \
+              and (o.find(os.path.sep) != -1 or o.find('/') != -1)\
+              and len(o) >= minLen\
               and o.find(':') == -1 )
         if r:
             try:
@@ -668,6 +675,7 @@ class Test(BT.BiskitTest):
         S.path += [ 'Example 4:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
         S.assertEqual( S.l.formatted(),
                        '{%s|$projectRoot}/Biskit/testdata/com' % T.projectRoot())
+        S.assertTrue( os.path.exists( S.l.local() ) )
 
         ## Example 5; rule out stray substitutions
         S.l.set_path( T.projectRoot() + '/tmp/com', maxSub=1, TMP='/tmp' )
