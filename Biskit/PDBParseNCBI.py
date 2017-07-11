@@ -131,7 +131,7 @@ class PDBParseNCBI( PDBParseModel ):
                                  'remote fetching of PDBs is not supported.')
 
 
-        handle = urllib.urlopen( rcsb_url% (id,id) )
+        handle = urllib.urlopen( rcsb_url% (id) )
 
         uhandle = File.UndoHandle(handle)
 
