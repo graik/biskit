@@ -480,8 +480,8 @@ class LocalPath( object ):
         """
         r = ( type( o ) == str \
               and (o.find(os.path.sep) != -1 or o.find('/') != -1)\
-              and len(o) >= minLen\
-              and o.find(':') == -1 )
+              and len(o) >= minLen )
+##              and o.find(':') == -1 )
         if r:
             try:
                 s = T.absfile( o )
