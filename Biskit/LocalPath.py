@@ -401,9 +401,15 @@ class LocalPath( object ):
 
     def __find_subpath( self, path, subpath ):
         """
-        
+        Return sub-path but only if enclosed by path separators.
+        Looks complicated for what it does...
         """
-        seps = [ i for i in range( len(path) ) if path[i]==os.path.sep ]
+        if os.path.sep == '/':
+            seps = [ i for i in range( len(path) ) if path[i]==os.path.sep ]
+        else:
+            seps = [ i for i in range( len(path) ) \
+                     if path[i] in [os.path.sep, '/'] ]
+            
         seps += [ len( path ) ]
 
         pos = path.find( subpath )
