@@ -1,0 +1,14 @@
+## run from current directory:
+## coverage biskit/test.py
+## coverage report
+
+[run]
+
+source = biskit
+
+## skip modules pulled in from third parties
+omit =
+     biskit/oldnumeric/*
+     biskit/scientificIO/*
+     biskit/gnuplot.py
+     biskit/difflib_old.py
