@@ -18,11 +18,11 @@ for l in lines:
 
         r[method] += 1
     except:
-        print 'could not match: ', l,
+        print('could not match: ', l, end=' ')
 
-print 'RESULT'
-print
-for method, count in r.items():
-    print "%15s: %3i" % (method, count)
+print('RESULT')
+print()
+for method, count in list(r.items()):
+    print("%15s: %3i" % (method, count))
 
-print 'found: ', sum([c for m,c in r.items()]), ' calls of ', len(r), ' different methods'
+print('found: ', sum([c for m,c in list(r.items())]), ' calls of ', len(r), ' different methods')

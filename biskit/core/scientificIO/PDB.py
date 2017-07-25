@@ -68,13 +68,11 @@ conventions as specified in the PDB format description.
 @undocumented: DummyChain
 """
 
-from __future__ import absolute_import
-
 ## see: https://www.python.org/dev/peps/pep-0366/
 ## allow relative imports when calling module as main script for testing
 if __name__ == "__main__" and __package__ is None:
-    import Biskit
-    __package__ = "Biskit.ScientificIO"
+    import biskit
+    __package__ = "biskit.scientificIO"
 
 from .TextFile import TextFile
 from .FortranFormat import FortranFormat, FortranLine
@@ -170,11 +168,11 @@ class PDBFile:
                           only when writing.
         @type subformat: C{str} or C{NoneType}
         """
-        if isinstance(file_or_filename, basestring):
+        if isinstance(file_or_filename, str):
             self.file = TextFile(file_or_filename, mode)
         else:
             self.file = file_or_filename
-        self.output = string.lower(mode[0]) == 'w'
+        self.output = str.lower(mode[0]) == 'w'
         self.export_filter = None
         if subformat is not None:
             export = export_filters.get(subformat, None)
@@ -212,50 +210,50 @@ class PDBFile:
             line = self.file.readline()
             if not line: return ('END','')
             if line[-1] == '\n': line = line[:-1]
-            line = string.strip(line)
+            line = str.strip(line)
             if line: break
-        line = string.ljust(line, 80)
-        type = string.strip(line[:6])
+        line = str.ljust(line, 80)
+        type = str.strip(line[:6])
         if type == 'ATOM' or type == 'HETATM':
             line = FortranLine(line, atom_format)
             data = {'serial_number': line[1],
                     'name': line[2],
-                    'alternate': string.strip(line[3]),
-                    'residue_name': string.strip(line[4]),
-                    'chain_id': string.strip(line[5]),
+                    'alternate': str.strip(line[3]),
+                    'residue_name': str.strip(line[4]),
+                    'chain_id': str.strip(line[5]),
                     'residue_number': line[6],
-                    'insertion_code': string.strip(line[7]),
+                    'insertion_code': str.strip(line[7]),
 ##                    'position': N.array(line[8:11]),
                     'position': line[8:11],
                     'occupancy': line[11],
                     'temperature_factor': line[12],
-                    'segment_id': string.strip(line[13]),
-                    'element': string.strip(line[14]),
-                    'charge': string.strip(line[15])}
+                    'segment_id': str.strip(line[13]),
+                    'element': str.strip(line[14]),
+                    'charge': str.strip(line[15])}
             return type, data
         elif type == 'ANISOU':
             line = FortranLine(line, anisou_format)
             data = {'serial_number': line[1],
                     'name': line[2],
-                    'alternate': string.strip(line[3]),
-                    'residue_name': string.strip(line[4]),
-                    'chain_id': string.strip(line[5]),
+                    'alternate': str.strip(line[3]),
+                    'residue_name': str.strip(line[4]),
+                    'chain_id': str.strip(line[5]),
                     'residue_number': line[6],
-                    'insertion_code': string.strip(line[7]),
+                    'insertion_code': str.strip(line[7]),
                     'u': 1.e-4* N.array( [[line[8], line[11], line[12]],
                                           [line[11], line[9] , line[13]],
                                           [line[12], line[13], line[10]]] ),
-                    'segment_id': string.strip(line[14]),
-                    'element': string.strip(line[15]),
-                    'charge': string.strip(line[16])}
+                    'segment_id': str.strip(line[14]),
+                    'element': str.strip(line[15]),
+                    'charge': str.strip(line[16])}
             return type, data
         elif type == 'TER':
             line = FortranLine(line, ter_format)
             data = {'serial_number': line[1],
-                    'residue_name': string.strip(line[2]),
-                    'chain_id': string.strip(line[3]),
+                    'residue_name': str.strip(line[2]),
+                    'chain_id': str.strip(line[3]),
                     'residue_number': line[4],
-                    'insertion_code': string.strip(line[5])}
+                    'insertion_code': str.strip(line[5])}
             return type, data
         elif type == 'CONECT':
             line = FortranLine(line, conect_format)
@@ -327,7 +325,7 @@ class PDBFile:
             line = line + [data.get('serial_number', 1),
                            data.get('name'),
                            data.get('alternate', ''),
-                           string.rjust(data.get('residue_name', ''), 3),
+                           str.rjust(data.get('residue_name', ''), 3),
                            data.get('chain_id', ''),
                            data.get('residue_number', 1),
                            data.get('insertion_code', ''),
@@ -335,7 +333,7 @@ class PDBFile:
                            data.get('occupancy', 0.),
                            data.get('temperature_factor', 0.),
                            data.get('segment_id', ''),
-                           string.rjust(data.get('element', ''), 2),
+                           str.rjust(data.get('element', ''), 2),
                            data.get('charge', '')]
         elif type == 'ANISOU':
             format = anisou_format
@@ -345,18 +343,18 @@ class PDBFile:
             line = line + [data.get('serial_number', 1),
                            data.get('name'),
                            data.get('alternate', ''),
-                           string.rjust(data.get('residue_name'), 3),
+                           str.rjust(data.get('residue_name'), 3),
                            data.get('chain_id', ''),
                            data.get('residue_number', 1),
                            data.get('insertion_code', '')] \
                         + u \
                         + [data.get('segment_id', ''),
-                           string.rjust(data.get('element', ''), 2),
+                           str.rjust(data.get('element', ''), 2),
                            data.get('charge', '')]
         elif type == 'TER':
             format = ter_format
             line = line + [data.get('serial_number', 1),
-                           string.rjust(data.get('residue_name'), 3),
+                           str.rjust(data.get('residue_name'), 3),
                            data.get('chain_id', ''),
                            data.get('residue_number', 1),
                            data.get('insertion_code', '')]
@@ -404,7 +402,7 @@ class PDBFile:
         @type text: C{str}
         """
         while text:
-            eol = string.find(text,'\n')
+            eol = str.find(text,'\n')
             if eol == -1:
                 eol = len(text)
             self.file.write('REMARK %s \n' % text[:eol])
@@ -434,7 +432,7 @@ class PDBFile:
             type = 'HETATM'
         else:
             type = 'ATOM'
-        name = string.upper(name)
+        name = str.upper(name)
         if element != '' and len(element) == 1 and name and name[0] == element and len(name) < 4:
             name = ' ' + name
         self.data['name'] = name
@@ -461,7 +459,7 @@ class PDBFile:
                          information in order to use different atom or
                          residue names in terminal residues.
         """
-        name  = string.upper(name)
+        name  = str.upper(name)
         if self.export_filter is not None:
             name, number = self.export_filter.processResidue(name, number,
                                                              terminus)
@@ -524,13 +522,16 @@ class PDBFile:
             self.open = 0
 
     def __del__(self):
-        self.close()
+        try:
+            self.close()
+        except:
+            pass
 
 ############
 ## TESTING
 ############
 
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test case"""
@@ -540,12 +541,12 @@ class Test(BT.BiskitTest):
         self.f_pdbcopy = tempfile.mktemp(suffix='_test_PDB_copy.pdb')
         
     def cleanUp(self):
-        import Biskit.tools as T
+        import biskit.tools as T
         T.tryRemove(self.f_pdbcopy)
 
     def test_PDB( self ):
         """PDB with Anisotropy read and write"""
-        import Biskit.tools as T
+        import biskit.tools as T
         import os.path as osp        
         
         fname = osp.join(T.testRoot(subfolder='rec'),'1A2P_rec_original.pdb')

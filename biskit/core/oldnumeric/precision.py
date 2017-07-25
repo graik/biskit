@@ -6,7 +6,7 @@ The character strings are still for "new" NumPy
 which is the only Incompatibility with Numeric
 
 """
-from __future__ import division, absolute_import, print_function
+
 
 __all__ = ['Character', 'Complex', 'Float',
            'PrecisionError', 'PyObject', 'Int', 'UInt',
@@ -24,7 +24,7 @@ def _get_precisions(typecodes):
     return lst
 
 def _fill_table(typecodes, table={}):
-    for key, value in typecodes.items():
+    for key, value in list(typecodes.items()):
         table[key] = _get_precisions(value)
     return table
 

@@ -1,7 +1,7 @@
 """Functions that already have the correct syntax or miscellaneous functions
 
 """
-from __future__ import division, absolute_import, print_function
+
 
 __all__ = ['sort', 'copy_reg', 'clip', 'rank',
            'sign', 'shape', 'types', 'allclose', 'size',
@@ -23,8 +23,8 @@ if sys.version_info[0] >= 3:
     import copyreg as copy_reg
     from io import BytesIO as StringIO
 else:
-    import copy_reg
-    from StringIO import StringIO
+    import copyreg
+    from io import StringIO
 
 from numpy import sort, clip, rank, sign, shape, putmask, allclose, size,\
      choose, swapaxes, array_str, array_repr, e, pi, put, \

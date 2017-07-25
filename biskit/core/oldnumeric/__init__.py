@@ -1,7 +1,7 @@
 """
 adapted from numpy.oldnumeric version 1.8.0 (dropped from numpy after that). 
 """
-from __future__ import division, absolute_import, print_function
+
 
 from numpy import *
 
