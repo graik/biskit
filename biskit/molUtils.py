@@ -25,11 +25,16 @@
 """
 Utilities for handling structures and sequences
 """
+## see: https://www.python.org/dev/peps/pep-0366/
+## allow relative imports when calling module as main script for testing
+if __name__ == "__main__" and __package__ is None:
+    import biskit
+    __package__ = "biskit"
 
-from Biskit import EHandler
-import tools as t
+from biskit import EHandler
+from biskit import tools as t
+from biskit.core import oldnumeric as N0
 
-import Biskit.oldnumeric as N0
 import copy
 import types
 
@@ -587,7 +592,7 @@ def cmpAtoms( a1, a2 ):
     if a2['name'] in target:
         i2 = target.index( a2['name'] )
 
-    return cmp(i1, i2)
+    return (i1 > i2) - (i1 < i2)
 
 
 def sortAtomsOfModel( model ):
@@ -613,19 +618,19 @@ def sortAtomsOfModel( model ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+from . import test as BT
         
 class Test(BT.BiskitTest):
     """Test case"""
 
     def test_molUtils( self ):
         """molUtils test"""
-        from Biskit import PDBModel
+        from biskit import PDBModel
 
         S = self
         
         ## load a structure
-        S.m = PDBModel( t.testRoot()+'/lig/1A19.pdb' )
+        S.m = PDBModel( t.testRoot('lig/1A19.pdb' ))
         S.model_1 = S.m.compress( S.m.maskProtein() )
 
         ## now sort in standard order
