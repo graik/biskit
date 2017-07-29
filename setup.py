@@ -76,9 +76,9 @@ long_description = \
 
 setup(
     name = "biskit",
-    version = "3.0.0.alpha",
+    version = "3.0.0a0",
     url = 'http://biskit.pasteur.fr',
-    download_url= 'https://github.com/graik/biskit/archive/v2.4.3.tar.gz',
+    download_url= 'https://github.com/graik/biskit/archive/v3.0.0.tar.gz',
     author = 'Raik Gruenberg, Johan Leckner and others',
     author_email = 'raik.gruenberg@crg.es',
     description = 'A Python platform for structural bioinformatics',
