@@ -19,5 +19,5 @@ script:
   coverage run biskit/test.py -e exe
 after_success:
   coveralls
-after_failure
+after_failure:
   coveralls
