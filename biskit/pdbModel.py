@@ -380,12 +380,16 @@ class PDBModel:
     def __str__( self ):
         return self.__repr__()
 
-    def report( self, prnt=True, plot=False ):
+    def report( self, prnt=True, plot=False, clipseq=60 ):
         """
         Print (or return) a brief description of this model.
 
-        @prnt: directly print report to STDOUT (default True)
-        @prnt: bool
+        @param prnt: directly print report to STDOUT (default True)
+        @type  prnt: bool
+        @param plot: show simple 2-D line plot using gnuplot [False]
+        @type  plot: bool
+        @param clipseq: clip chain sequences at this number of letters [60]
+        @type  clipseq: int
         @return: if prnt==True: None, else: formatted description of this model
         @rtype: None or str
         """
@@ -394,7 +398,7 @@ class PDBModel:
         for c in range( self.lenChains() ):
             m = self.takeChains( [c] )
             r += '\n\t* chain %-2i(%s): %s' % ( c, m['chain_id'][0],
-                                          T.clipStr( m.sequence(), 60 ) )
+                                          T.clipStr( m.sequence(), clipseq ) )
 
         r += '\n source: ' + repr( self.source )
         r += '\n %2i atom profiles:    %s' % ( len( self.atoms ), 
