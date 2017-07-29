@@ -9,10 +9,13 @@ python:
 # command to install dependencies
 install:
   - pip install -r requirements_extended.txt
+  - pip install coverage coveralls
   - python setup.py install
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y plotutils libplot-dev python-dev libblas-dev liblapack-dev gfortran gnuplot
 # command to run tests
-script: coverage run biskit/test.py -e exe
-after_success: coverage-badge -o coverage.svg
+script:
+  coverage run biskit/test.py -e exe
+after_success:
+  coveralls
