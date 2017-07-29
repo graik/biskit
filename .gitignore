@@ -1,4 +1,5 @@
 ## custom additions
+__pycache__
 venv
 *.wpu
 *.wpr
