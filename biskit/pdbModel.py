@@ -2923,6 +2923,7 @@ class PDBModel:
                 ## get distances above mean
                 cutoff = maxDist or median + z * sd
                 r = N0.nonzero( N0.greater( dist, cutoff ) )
+                print(("DEBUG: (cutoff %f)" % cutoff) + repr(N0.compress(N0.greater(dist, cutoff), dist)))
 
             if len(r) > 0:
                 

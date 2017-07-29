@@ -387,7 +387,6 @@ class PDBCleaner:
             
         r = r.concat( chains_after, newChain=not Cterm_is_break)
         
-        print( "DEBUG capACE: %i -> %i" % (len(c_start), r.lenChains( breaks=breaks )))
         if len(c_start) != r.lenChains( breaks=breaks ):
             raise CappingError('Capping ACE would mask a chain break. '+\
                   'This typically indicates a tight gap with high risk of '+\
