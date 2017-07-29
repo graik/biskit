@@ -11,7 +11,7 @@ install: pip install -r requirements_extended.txt
 install: python setup.py install
 before_install:
   - sudo apt-get -qq update
-  - sudo apt-get install -y plotutils libplot-dev python-dev
+  - sudo apt-get install -y plotutils libplot-dev python-dev libblas-dev liblapack-dev gfortran
 # command to run tests
 script: coverage python biskit/test.py
 after_success: coverage-badge -o coverage.svg
