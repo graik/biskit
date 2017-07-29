@@ -5,8 +5,8 @@
 ## standard /usr/bin/env python -i doesn't get parsed in recent Linux 
 ## see: http://stackoverflow.com/questions/3306518/cannot-pass-an-argument-to-python-with-usr-bin-env-python
 
-from Biskit.tools import *
-from Biskit import *
+from biskit.tools import *
+from biskit import *
 import sys
 
 ## activate tab-completion
@@ -14,7 +14,7 @@ import rlcompleter, readline
 readline.parse_and_bind('tab: complete')
 
 def help():
-    print """
+    print("""
 bispy [pickled_object or PDB_file]
 
 Opens an interactive python prompt with all Biskit/* modules and Biskit.tools
@@ -29,7 +29,7 @@ For example, all the following should work:
 > bis.py mypickled_python.dic
 > bis.py mystructure.pdb
 > bis.py 3TGI
-"""
+""")
 
 args = sys.argv
 
@@ -44,7 +44,7 @@ if len( args ) > 1:
         else:
             x = load( args[1] )
             
-        print "Loaded %s and put it into variable x." % args[1]
+        print("Loaded %s and put it into variable x." % args[1])
         
     except:
         errWriteln( lastError() )
