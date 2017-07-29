@@ -7,8 +7,9 @@ python:
   - "3.5"
   - "3.6"
 # command to install dependencies
-install: pip install -r requirements_extended.txt
-# install: python setup.py install
+install:
+  - pip install -r requirements_extended.txt
+  - python setup.py install
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y plotutils libplot-dev python-dev libblas-dev liblapack-dev gfortran
