@@ -25,7 +25,7 @@ Settings
 This module provides global settings as fields. Throughout Biskit a
 (environment-dependent) parameter such as, e.g., ssh_bin can be addressed as:
 
-  >>> import Biskit.settings as S
+  >>> import biskit.settings as S
   >>> bin = S.ssh_bin
 
 However, since a user should not be required to hack python modules,
@@ -33,14 +33,14 @@ ssh_bin is not actually defined in settings.py. Instead, the value is
 taken from C{~/.biskit/settings.cfg} -- which should have an entry
 like C{ssh_bin=/bin/ssh # comment}. If this entry (or the config file)
 is not found, settings.py uses the default value from
-C{biskit/Biskit/data/defaults/settings.cfg}.
+C{biskit/biskit/data/defaults/settings.cfg}.
 
 If missing, the user configuration file C{~/.biskit/settings.cfg} is
 created automatically during the startup of Biskit (i.e. for any
 import). The auto-generated file only contains parameters for which
 the default values don't seem to work (invalid paths or binaries).
 
-See L{Biskit.SettingsManager}
+See L{biskit.SettingsManager}
 
 Summary for Biskit users
 ------------------------
@@ -49,20 +49,20 @@ Summary for Biskit users
 Summary for Biskit developpers
 ------------------------------
   If you want to create a new user-adjustable parameter, do so in
-  C{biskit/Biskit/data/defaults/settings.cfg}.
+  C{biskit/biskit/data/defaults/settings.cfg}.
 
 Summary for all
 ---------------
   !Dont't touch C{settings.py}!
 """
-import Biskit as B
-import Biskit.tools as T
-import Biskit.SettingsManager as M
+import biskit as B
+import biskit.tools as T
+import biskit.SettingsManager as M
 
-import user, sys
+import sys, os
 
-__CFG_DEFAULT = T.dataRoot() + '/defaults/settings.cfg'
-__CFG_USER    = user.home + '/.biskit/settings.cfg'
+__CFG_DEFAULT = os.path.join( T.dataRoot(), 'defaults/settings.cfg' )
+__CFG_USER    = os.path.expanduser('~/.biskit/settings.cfg')
 
 ## BISKIT_PATH = T.projectRoot()  ## Hack to make test suite path independent
 
@@ -71,7 +71,7 @@ try:
 
     m.updateNamespace( locals() )
 
-except Exception, why:
+except Exception as why:
     B.EHandler.fatal( 'Error importing Biskit settings')
 
 ##
@@ -102,13 +102,13 @@ env.update(amber_env)
 ######################
 ## clean up name space
 
-del B, T, M, user, sys
+del B, T, M, sys
 del __CFG_DEFAULT, __CFG_USER, m
 
 
 ################
 ## empty test ##
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Mock test, settings is always executed anyway."""

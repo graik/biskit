@@ -24,8 +24,8 @@ Extract biologically relevant assembly.
 """
 import numpy as N
 
-import Biskit as B
-import Biskit.tools as T
+import biskit as B
+import biskit.tools as T
 
 class BioUnitError( B.BiskitError ):
     pass
@@ -64,18 +64,16 @@ class BioUnit:
         @return PDBModel, with the bio-molecule as specified in BIOMT
         """
         try:
-            biomol_id = biomol_id or self.biomol.keys()[0]
+            biomol_id = biomol_id or list(self.biomol.keys())[0]
             rt_matrices = self.biomol[biomol_id]
         except:
-            raise BioUnitError, \
-                  'This unit does not have biomolecule ' + `biomol_id`
+            raise BioUnitError('This unit does not have biomolecule ' + repr(biomol_id))
 
         try:
             atom_mask = self.model.res2atomMask ( self.model['biomol'] == biomol_id )
             chains = self.model.compress( atom_mask )
         except:
-            raise BioUnitError, \
-                  'Parent model does not have biomolecule ' + `biomol_id`
+            raise BioUnitError('Parent model does not have biomolecule ' + repr(biomol_id))
 
         monomers = [ chains.transform ( rt ) for rt in rt_matrices ]
         result = monomers[0].concat( *monomers[1:] )
@@ -85,7 +83,7 @@ class BioUnit:
         """
         @return string list, the ids for multimer rt matrices
         """
-        return self.biomol.keys()
+        return list(self.biomol.keys())
 
     def __len__(self):
         """Return number of biomolecules as length"""
@@ -115,13 +113,13 @@ class BioUnit:
         """
         r = self.__class__(self.model)
         k = max(self.keys())+1
-        r.biomol = dict ([(key,self[key]) for key in self.keys()] + [(key+k,bu[key]) for key in bu.keys()])
+        r.biomol = dict ([(key,self[key]) for key in self.keys()] + [(key+k,bu[key]) for key in list(bu.keys())])
         return r
 
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test case"""
@@ -130,15 +128,15 @@ class Test(BT.BiskitTest):
         """BioUnit test"""
 
         if self.local:
-            print 'Loading pdb file ..'
+            print('Loading pdb file ..')
         N.set_printoptions(threshold=N.nan)
-        self.p = B.PDBParseFile.PDBParseFile()
+        self.p = B.core.pdbparseFile.PDBParseFile()
         
         self.m = self.p.parse2new( T.testRoot('biounit/2V4E.pdb') )
         biounit = BioUnit(self.m, self.m['BIOMT'])
         if self.local:
             self.m.report()
-            print 'unit has', len(biounit.keys()), 'multimers'
+            print('unit has', len(list(biounit.keys())), 'multimers')
 
         m2 = biounit.makeMultimer(0)
         if self.local:

@@ -26,12 +26,17 @@ compareStructures() compares sequences of 2 structures and returns
 a residue mask for each of them. 
 """
 
-import Biskit.oldnumeric as N0
-import numpy as N
+## see: https://www.python.org/dev/peps/pep-0366/
+## allow relative imports when calling module as main script for testing
+if __name__ == "__main__" and __package__ is None:
+    import biskit
+    __package__ = "biskit"
 
-import Biskit.tools as T
-from Biskit.difflib_old import SequenceMatcher
-#from difflib import SequenceMatcher
+from .core import oldnumeric as N0
+from . import tools as T
+from .difflib_old import SequenceMatcher
+
+import numpy as N
 
 
 def getOpCodes( seq_1, seq_2 ):
@@ -221,8 +226,8 @@ def compareSequences( seqAA_1, seqAA_2 ):
     """
     seqAA_1 = list( seqAA_1 )
     seqAA_2 = list( seqAA_2 )
-    seqNr_1 = range( len( seqAA_1 ) )
-    seqNr_2 = range( len( seqAA_2 ) )
+    seqNr_1 = list(range( len( seqAA_1 )))  ## try removing list()
+    seqNr_2 = list(range( len( seqAA_2 )))
 
     # get mask
     mask_1 = N0.zeros( len( seqNr_1 ) )
@@ -281,7 +286,7 @@ def compareModels( model_1, model_2 ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test case"""
@@ -298,23 +303,23 @@ class Test(BT.BiskitTest):
         mask1, mask2 = compareModels( m[0], m[1] )
 
         if self.local:
-            print 'Reading and comparing two models'
+            print('Reading and comparing two models')
 
-            print '\nResidue masks to make the two maodels equal'
-            print 'mask1\n', mask1
-            print 'mask2\n', mask2            
+            print('\nResidue masks to make the two maodels equal')
+            print('mask1\n', mask1)
+            print('mask2\n', mask2)            
             globals().update( locals() )
 
-        self.assert_( N.all(mask1 == self.EXPECT[0] ) )
-        self.assert_( N.all(mask2 == self.EXPECT[1] ) )
+        self.assertTrue( N.all(mask1 == self.EXPECT[0] ) )
+        self.assertTrue( N.all(mask2 == self.EXPECT[1] ) )
         
     def test_sequenceRepeats(self):
         """match2seq sequence repeat test"""
         seq1 = 'ABCDEFG~~~~~~~~~~~~~~~'
         seq2 = '~~~~~'
         mask1, mask2 = compareSequences( seq1, seq2 )
-        self.assert_( N.all( mask1 == N0.zeros( len(seq1 ) )) )
-        self.assert_( N.all( mask2 == N0.zeros( len(seq2 ) )) )
+        self.assertTrue( N.all( mask1 == N0.zeros( len(seq1 ) )) )
+        self.assertTrue( N.all( mask2 == N0.zeros( len(seq2 ) )) )
 
 
     EXPECT =  N0.array([1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,

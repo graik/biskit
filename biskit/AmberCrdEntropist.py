@@ -27,10 +27,10 @@ import os.path as osp
 import re
 import tempfile
 
-import Biskit.tools as T
-## import Biskit.settings as settings
-from Biskit.Errors import BiskitError
-from Biskit.Executor import Executor
+import biskit.tools as T
+## import biskit.settings as settings
+from biskit import BiskitError
+from biskit.Executor import Executor
 
 class EntropistError( BiskitError ):
     pass
@@ -72,7 +72,7 @@ class AmberCrdEntropist( Executor ):
           node     - str, host for calculation (None->local) NOT TESTED
                           (default: None)
           nice     - int, nice level (default: 0)
-          log      - Biskit.LogFile, program log (None->STOUT) (default: None)
+          log      - biskit.LogFile, program log (None->STOUT) (default: None)
         """
         template = f_template or self.ptraj_script
 
@@ -189,14 +189,14 @@ class AmberCrdEntropist( Executor ):
             r['contributions'] = v[4:]
     
         except IndexError:
-            raise EntropistError, 'unexpected end (or format) of ptraj output file.'
+            raise EntropistError('unexpected end (or format) of ptraj output file.')
 
         return r
 
 #############
 ## Unit tests
 
-import Biskit.test as BT
+import biskit.test as BT
 import tempfile
 
 class Test( BT.BiskitTest ):

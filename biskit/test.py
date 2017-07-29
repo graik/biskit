@@ -89,7 +89,7 @@ import sys
 ## CONFIGURATION -- adapt the following values to your own Python package
 
 #: list all packages from which test cases are collected by default (-p)
-DEFAULT_PACKAGES = ['biskit']
+DEFAULT_PACKAGES = ['biskit', 'biskit.core']
 
 #: tests with the following tags are excluded by default (override with -e)
 DEFAULT_EXCLUDE  = ['old']
@@ -170,7 +170,7 @@ def stripFilename( filename ):
 class LogHandle:
     """
     Thin wrapper around an open file handle that adds a `add()` and `add_nobreak`
-    method to mirror Biskit.LogFile
+    method to mirror biskit.LogFile
     """
     def __init__(self, handle=None):
         """

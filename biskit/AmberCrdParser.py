@@ -24,19 +24,19 @@ Convert single amber crd into Trajectory object
 """
 
 import numpy as N
-import oldnumeric as N0
+import biskit.core.oldnumeric as N0
 
 import re
 import sys
 
-import tools as T
-from Trajectory import Trajectory
-from PDBModel import PDBModel
-from LogFile import StdLog
+import biskit.tools as T
+from biskit.Trajectory import Trajectory
+from biskit import PDBModel
+from biskit import StdLog
 
 def _use():
 
-    print """
+    print("""
 Convert single amber crd into Trajectory object
 
 amber2traj.py -i sim.crd -o traj_0.dat -r ref.pdb [-b -wat -hyd -rnres
@@ -49,7 +49,7 @@ amber2traj.py -i sim.crd -o traj_0.dat -r ref.pdb [-b -wat -hyd -rnres
     -code  PDB code of molecule (otherwise first 4 letters of ref file name)
 
     ref.pdb must have identical atom content as sim.crd
-    """
+    """)
     sys.exit( 0 )
 
 class ParseError( Exception ):
@@ -76,7 +76,7 @@ class AmberCrdParser:
         @param pdbCode: pdb code to be put into the model (default: None)
         @type  pdbCode: str
         @param log: LogFile instance [Biskit.StdLog]
-        @type  log: Biskit.LogFile
+        @type  log: biskit.LogFile
         @param verbose: print progress to log [0]
         @type  verbose: int
         """
@@ -100,7 +100,7 @@ class AmberCrdParser:
         self.xnumbers = re.compile('('+xspace+xnumber+')')
 
         ## pre-compute lines expected per frame
-        self.lines_per_frame = self.n * 3 / 10
+        self.lines_per_frame = self.n * 3 // 10
 
         if self.n % 10 != 0:  self.lines_per_frame += 1
         if self.box:          self.lines_per_frame += 1
@@ -162,7 +162,7 @@ class AmberCrdParser:
 
             i += 1
 
-        return N0.reshape( xyz, ( len(xyz) / 3, 3 ) ).astype(N0.Float32)
+        return N.reshape( xyz, ( len(xyz) // 3, 3 ) ).astype(N.float)
 
 
     def crd2traj( self ):
@@ -190,7 +190,7 @@ class AmberCrdParser:
                     self.log.write( '#' )
 
         except EOFError:
-            if self.verbose: self.log.add("Read %i frames." % i)
+            if self.verbose: self.log.write("Read %i frames.\n" % i)
 
         t = Trajectory( refpdb=self.ref )
 
@@ -201,13 +201,13 @@ class AmberCrdParser:
 
         return t
 
-import Biskit.test as BT
-import tempfile
+import biskit.test as BT
 
 class Test( BT.BiskitTest ):
     """Test AmberCrdParser"""
 
     def prepare(self):
+        import tempfile
         root = T.testRoot() + '/amber/'
         self.finp = root + 'sim.crd.gz'
         self.fref = root + '1HPT_0.pdb'
@@ -228,13 +228,13 @@ class Test( BT.BiskitTest ):
         self.t.removeAtoms(lambda a: a['element'] == 'H' )
 
         if self.local:
-            print "Dumping result to ", self.fout
+            print("Dumping result to ", self.fout)
 
         T.dump( self.t, T.absfile(self.fout) )
 
         if self.local:
-            print "Dumped Trajectory with %i frames and %i atoms." % \
-                  (len(self.t), self.t.lenAtoms() )
+            print("Dumped Trajectory with %i frames and %i atoms." % \
+                  (len(self.t), self.t.lenAtoms() ))
 
         self.assertEqual( len(self.t), 10 )
         self.assertEqual( self.t.lenAtoms(), 440 )

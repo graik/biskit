@@ -25,17 +25,17 @@
 Trajectory - Collection of coordinate frames of a molecule 
 """
 
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 
 ## superposition module from M. Habeck
-import rmsFit
+from biskit import rmsFit
 
-import tools as T
-import mathUtils as MU
-from Biskit.Errors import BiskitError
-from Biskit import EHandler
-from PDBModel import PDBModel, PDBError
-from ProfileCollection import ProfileCollection
+from biskit import tools as T
+from biskit import mathUtils as MU
+from biskit.Errors import BiskitError
+from biskit import EHandler
+from biskit import PDBModel, PDBError
+from biskit.ProfileCollection import ProfileCollection
 
 import string
 import re
@@ -172,18 +172,18 @@ class Trajectory:
             if isinstance( i , int):
                 return self.getPDBModel( i )
 
-            if type( i ) is types.SliceType:
+            if type( i ) is slice:
                 start = i.start or 0
                 stop  = i.stop  or self.lenFrames()
                 if stop > self.lenFrames():
                     stop = self.lenFrames()
                 step  = i.step  or 1
-                return self.takeFrames( range( start, stop, step ) )
+                return self.takeFrames( list(range( start, stop, step)) )
 
         except MemoryError:
-            raise TrajError, "out of memory, cannot extract frames %s" % str(i)
+            raise TrajError("out of memory, cannot extract frames %s" % str(i))
 
-        raise TrajError, "unsupported index or slice: %s" % str( i )
+        raise TrajError("unsupported index or slice: %s" % str( i ))
 
 
     def __len__( self ):
@@ -278,12 +278,12 @@ class Trajectory:
             if castAll or i==0:
                 atomCast, castRef = m.compareAtoms( self.ref )
 
-                if castRef != range( len( self.ref ) ):
+                if castRef != list(range( len( self.ref ))):
                     ## we can take away atoms from each frame but not from ref
                     raise TrajError("Reference PDB doesn't match %s."
                                     %m.fileName)
 
-                if N0.all( atomCast == range( len( m ) ) ):
+                if N0.all( atomCast == list(range( len( m ))) ):
                     atomCast = None   ## no casting necessary
                 else:
                     if self.verbose: T.errWrite(' casting ')
@@ -293,7 +293,7 @@ class Trajectory:
                 m = m.take( atomCast )
 
             ## additional check on each 100st frame
-            if i%100 == 0 and m.atomNames() <> refNames:
+            if i%100 == 0 and m.atomNames() != refNames:
                 raise TrajError("%s doesn't match reference pdb."%m.fileName )
 
             frameList.append( m.xyz )
@@ -366,7 +366,7 @@ class Trajectory:
             if self.pc is not None and traj[0].pc is not None:
                 r.pc['p'] = N0.concatenate( (self.pc['p'], traj[0].pc['p']),0)
                 r.pc['u'] = N0.concatenate( (self.pc['u'], traj[0].pc['u']),0)
-        except TypeError, why:
+        except TypeError as why:
             EHandler.error('cannot concat PC '+str(why) )
 
         r.profiles = self.profiles.concat( traj[0].profiles )
@@ -473,11 +473,11 @@ class Trajectory:
         r.frames = N0.take( self.frames, indices, 0 )
 
         ## semi-deep copy of reference model
-        r.setRef( self.ref.take( range( self.ref.lenAtoms() )) )
+        r.setRef( self.ref.take( list(range( self.ref.lenAtoms()))) )
 
         if self.frameNames is not None:
             r.frameNames = N0.take( self.frameNames, indices, 0 )
-            r.frameNames = map( ''.join, r.frameNames.tolist() )
+            r.frameNames = list(map( ''.join, r.frameNames.tolist() ))
 
         r.pc = self.__takePca( indices )
 
@@ -495,7 +495,7 @@ class Trajectory:
         @return: Trajectory (or sub-class), copy of this trajectory
         @rtype: Trajectory
         """
-        return self.takeFrames( range( self.lenFrames() ) )
+        return self.takeFrames( list(range( self.lenFrames())) )
 
 
     def compressFrames( self, mask ):
@@ -544,7 +544,7 @@ class Trajectory:
         @param indices: frame numbers
         @type  indices: [int]
         """
-        i = range( self.lenFrames() )
+        i = list(range( self.lenFrames()))
         i.remove( N0.array(indices) )
         self.keepFrames( i )
 
@@ -654,7 +654,7 @@ class Trajectory:
         """
         chainMap = self.ref.chainMap()
 
-        atomMask = map( lambda i, allowed=chainLst: i in allowed, chainMap)
+        atomMask = list(map( lambda i, allowed=chainLst: i in allowed, chainMap))
 
         return self.compressAtoms( atomMask, returnClass )
 
@@ -722,7 +722,7 @@ class Trajectory:
                 xyz_transformed = N0.dot( xyz, N0.transpose(r)) + t
 
                 d = N0.sqrt(N0.sum(N0.power( N0.compress(mask, xyz_transformed,0)\
-                                          - refxyz, 2), 1))
+                                             - refxyz, 2), 1))
 
 
                 rms += [ N0.sqrt( N0.average(d**2) ) ]
@@ -840,7 +840,7 @@ class Trajectory:
         """
 
         if frames is None:
-            frames = range( self.lenFrames() ) 
+            frames = list(range( self.lenFrames())) 
 
         ## open new file
         out = open(fname, 'w')
@@ -856,7 +856,7 @@ class Trajectory:
 
             out.write("MODEL%6i\n" % n)
             for line in pdb_temp:
-                if line[:3] <> 'END':       # filter out END
+                if line[:3] != 'END':       # filter out END
                     out.write(line)
             out.write("ENDMDL\n")
 
@@ -878,7 +878,7 @@ class Trajectory:
         @type  frames: [int]
         """
         if frames is None:
-            frames = range( self.lenFrames() )
+            frames = list(range( self.lenFrames()))
 
         template = " %7.3f" * 10 + '\n'
 
@@ -894,7 +894,7 @@ class Trajectory:
             f = N0.ravel( self.frames[ fi ] )
 
             if n_lines is None:
-                n_lines = n_lines or len( f ) / 10
+                n_lines = n_lines or len( f ) // 10
                 overhang= ( 0 != len( f ) % 10 )
                 i_lines = range( n_lines )
 
@@ -1174,7 +1174,7 @@ class Trajectory:
                                                fit_atoms_left, fit_atoms_right)
 
             try:
-                if not len( i_res ): raise PDBError, 'empty residue'
+                if not len( i_res ): raise PDBError('empty residue')
 
                 t_res = self.takeAtoms( i_res + i_border )
 
@@ -1288,7 +1288,7 @@ class Trajectory:
 ##        result = N0.compress( self.ref.maskCA(), atomFluctList)
 
         ## check dimension
-        if len( result ) <> self.ref.lenResidues():
+        if len( result ) != self.ref.lenResidues():
             raise TrajError(
                 "getResFluct(): Length of result list (%i) <>" % len(result)+
                 " number of residues (%i)." % self.ref.lenResidues() )
@@ -1336,8 +1336,8 @@ class Trajectory:
             l1 = self.ex_numbers.findall( f1 )
             l2 = self.ex_numbers.findall( f2 )
 
-            l1 = map( float, l1 )
-            l2 = map( float, l2 )
+            l1 = list(map( float, l1 ))
+            l2 = list(map( float, l2 ))
 
             if len( l1 ) > 0 and len( l2 ) > 0:
                 return self.__cmpLists( l1, l2 )
@@ -1350,21 +1350,22 @@ class Trajectory:
 
     def argsortFrames( self ):
         """
-       Prepare sorting list by file names. Assuming the file names contains
-       some numbers seperated by non-number characters. Sorting is done after
-       Nr1 then Nr2 then..
+        Prepare sorting list by file names. Assuming the file names contains
+        some numbers seperated by non-number characters. Sorting is done after
+        Nr1 then Nr2 then..
 
-       @return: list of frame sort order
-       @rtype: [int]
-       """
+        @return: list of frame sort order
+        @rtype: [int]
+        """
         names = self.frameNames
 
-        result = range(0, len(names) )
+        result = list(range(0, len(names)))
 
-        ## sort result but use items of names for the comparison
-        f_cmp = lambda i,j, ns=names: self.__cmpFileNames( ns[i], ns[j]) 
+        ## py 2.x: sort result but use items of names for the comparison
+        ## f_cmp = lambda i,j, ns=names: self.__cmpFileNames( ns[i], ns[j]) 
 
-        result.sort( f_cmp )
+        ##result.sort( f_cmp )
+        result.sort( key=names.__getitem__ )
 
         return result
 
@@ -1507,7 +1508,7 @@ class Trajectory:
         if frameMask is None: frameMask = N0.ones( len( self.frames ), N0.Int32 )
 
         if atomMask is None: atomMask = N0.ones(self.getRef().lenAtoms(),
-                                               N0.Int32)
+                                                N0.Int32)
 
         if fit:
             self.fit( atomMask )
@@ -1596,7 +1597,7 @@ class Trajectory:
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test Adaptive clustering"""

@@ -26,23 +26,23 @@ Run ptraj entropy analysis on Trajectory instance.
 """
 
 ##import numpy.oldnumeric as oldN
-import oldnumeric as N0
+import biskit.core.oldnumeric as N0
 
 import tempfile, os
 import random, time
 
-import Biskit.tools as t
-import Biskit.mathUtils as MU
+import biskit.tools as t
+import biskit.mathUtils as MU
 ## import Biskit.settings as settings
-from Biskit.Errors import BiskitError
-from Biskit.AmberCrdEntropist import AmberCrdEntropist, EntropistError
-from Biskit.AmberParmBuilder import AmberParmBuilder
-from Biskit.PDBModel import PDBModel
-from Biskit.Trajectory import Trajectory
-from Biskit.EnsembleTraj import EnsembleTraj
-from Biskit.LocalPath import LocalPath
-from Biskit.Dock.Complex import Complex
-from Biskit import EHandler
+from biskit.Errors import BiskitError
+from biskit.AmberCrdEntropist import AmberCrdEntropist, EntropistError
+from biskit.AmberParmBuilder import AmberParmBuilder
+from biskit import PDBModel
+from biskit.Trajectory import Trajectory
+from biskit.EnsembleTraj import EnsembleTraj
+from biskit.LocalPath import LocalPath
+from biskit.Dock.Complex import Complex
+from biskit import EHandler
 
 class AmberEntropist( AmberCrdEntropist ):
     """
@@ -140,7 +140,7 @@ class AmberEntropist( AmberCrdEntropist ):
           node     - str, host for calculation (None->local) NOT TESTED
                           (default: None)
           nice     - int, nice level (default: 0)
-          log      - Biskit.LogFile, program log (None->STOUT) (default: None)
+          log      - biskit.LogFile, program log (None->STOUT) (default: None)
         """
 ##         tempfile.tempdir = '/work'
 
@@ -356,7 +356,7 @@ class AmberEntropist( AmberCrdEntropist ):
         if isinstance( o, Trajectory ):
             return o.ref
 
-        raise EntropistError, 'unknown reference type'
+        raise EntropistError('unknown reference type')
 
 
     def prepareRef( self, fname ):
@@ -395,7 +395,7 @@ class AmberEntropist( AmberCrdEntropist ):
             ref.lig_model_transformed = None
             return ref
 
-        raise EntropistError, 'unknown reference type'
+        raise EntropistError('unknown reference type')
 
 
     def __add3( self, n_members, excluded, trippleIndex ):
@@ -474,7 +474,7 @@ class AmberEntropist( AmberCrdEntropist ):
         @rtype: EnsembleTraj OR (EnsembleTraj, EnsembleTraj )
         """
         if self.ex_n:
-            self.exclude = range( self.ex_n )
+            self.exclude = list(range( self.ex_n))
 
         if type( t ) is tuple and not type( self.exclude ) is tuple:
             self.exclude = ( self.exclude, self.exclude )
@@ -539,7 +539,7 @@ class AmberEntropist( AmberCrdEntropist ):
 
         ## check 2 trajectories were suplied
         if not type(t) is tuple and (self.shift or self.shuffle or self.split):
-            raise EntropistError,'split,shift,shuffle require -border.'
+            raise EntropistError('split,shift,shuffle require -border.')
 
         ## adapt reference to type of trajectory input 
         if ref and type(t) is tuple and not isinstance( ref, Complex ):
@@ -693,9 +693,9 @@ class AmberEntropist( AmberCrdEntropist ):
             return traj
 
         if not isinstance( traj, EnsembleTraj):
-            raise EntropistError, 'shift requires EnsembleTraj'
+            raise EntropistError('shift requires EnsembleTraj')
 
-        r = range( shift, traj.n_members ) + range( shift )
+        r = list(range( shift, traj.n_members)) + list(range( shift))
         if self.verbose:
             self.log.add('reorder member trajectories: %s...' % str( r ) )
 
@@ -706,7 +706,7 @@ class AmberEntropist( AmberCrdEntropist ):
         """
         reorder all frames at random
         """
-        r = range( len( traj ) )
+        r = list(range( len( traj )))
         random.shuffle( r )
         return traj.takeFrames( r )
 
@@ -788,13 +788,13 @@ class AmberEntropist( AmberCrdEntropist ):
 
         ## consistency check of result
         if self.result['nframes'] != self.nframes:
-            raise EntropistError, 'incorrect number of frames: %i instead %i'%\
-                  ( self.result['nframes'], self.nframes )
+            raise EntropistError('incorrect number of frames: %i instead %i'%\
+                  ( self.result['nframes'], self.nframes ))
         
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test class"""
@@ -808,7 +808,7 @@ class Test(BT.BiskitTest):
                                  verbose=self.local, debug=self.DEBUG,
                                  log=self.log)
         self.r = self.a.run()
-        self.assert_( abs(int(self.r['S_total']) - 398) < 2 )
+        self.assertTrue( abs(int(self.r['S_total']) - 398) < 2 )
         self.assertAlmostEqual( self.r['mass'], 3254, 0 )
         self.assertAlmostEqual( self.r['S_vibes'], 298, 0 )
         self.assertEqual( int(self.r['S_rot']), 50 )

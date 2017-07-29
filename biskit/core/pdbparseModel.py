@@ -26,11 +26,11 @@ Parse a in-memory PDBModel instance into a new PDBModel
 @see L{PDBModel}
 @see L{PDBParserFactory}
 """
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 
-import Biskit.tools as T
-import Biskit as B
-from PDBParser import PDBParser, PDBParserError
+import biskit.tools as T
+import biskit as B
+from biskit.core.pdbparser import PDBParser, PDBParserError
 
 
 class PDBParseModel( PDBParser ):
@@ -109,7 +109,7 @@ class PDBParseModel( PDBParser ):
                 if skipRes is not None:
                     model.removeRes( skipRes )
                                
-        except B.ProfileError, why:
+        except B.ProfileError as why:
             B.EHandler.warning("Cannot read/update profiles from source: %r"\
                              %why)
 
@@ -118,7 +118,7 @@ class PDBParseModel( PDBParser ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test"""
@@ -128,7 +128,7 @@ class Test(BT.BiskitTest):
 
         ## loading output file from X-plor
         if self.local:
-            print 'Loading pdb file ..'
+            print('Loading pdb file ..')
 
         self.p = PDBParseModel()
         self.m = self.p.parse2new( B.PDBModel(T.testRoot()+'/rec/1A2P.pdb') )

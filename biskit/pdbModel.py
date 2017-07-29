@@ -23,30 +23,33 @@
 Store and manipulate coordinates and atom information.
 """
 
-import tools as T
-import molUtils
-import mathUtils
-import match2seq
-import rmsFit
-from LocalPath import LocalPath
-from Errors import BiskitError
-from Biskit import EHandler
-from ProfileCollection import ProfileCollection, ProfileError
-from PDBParserFactory import PDBParserFactory
-from PDBParseFile import PDBParseFile
-import BioUnit as BU
-import Biskit as B
+import biskit.tools as T
+from biskit import molUtils
+from biskit import mathUtils
+from biskit import match2seq
+from biskit import rmsFit
+from biskit.LocalPath import LocalPath
+from biskit.Errors import BiskitError
+from biskit.ProfileCollection import ProfileCollection, ProfileError
+from biskit.core.pdbparserFactory import PDBParserFactory
+from biskit.core.pdbparseFile import PDBParseFile
+from biskit import BioUnit as BU
+from biskit.core import oldnumeric as N0
+from biskit.core.scientificIO import PDB as IO
+from biskit import EHandler
 
-import Biskit.oldnumeric as N0
+from biskit import tmalign
+
+import biskit as B
+
 import numpy as N
-
-import ScientificIO.PDB as IO
 
 import os, sys
 import copy
 import time
 import string
 import types
+import functools
 
 
 class PDBProfiles( ProfileCollection ):
@@ -119,11 +122,11 @@ class PDBProfiles( ProfileCollection ):
         try:
             r = ProfileCollection.get( self, name, default=default)
 
-        except ProfileError, e:
+        except ProfileError as e:
             if updateMissing:
                 r = None
             else:
-                raise ProfileError, e
+                raise ProfileError(e)
 
         if r is None and (update or updateMissing):
 
@@ -248,7 +251,7 @@ class PDBModel:
         #: to collect further informations
         self.info = { 'date':T.dateSortString() }
 
-        if source <> None:
+        if source != None:
             self.update( skipRes=skipRes, updateMissing=1, force=1,
                          headPatterns=headPatterns )
 
@@ -343,9 +346,8 @@ class PDBModel:
                 return self.atoms.set( k, v )
             if v is not None and len( v ) == self.lenResidues():
                 return self.residues.set( k, v )
-            raise ProfileError, \
-                  'Value cannot clearly be assigned to either atom or '+\
-                  'residue profiles'
+            raise ProfileError('Value cannot clearly be assigned to either atom or '+\
+                  'residue profiles')
 
         if type( k ) is tuple:
             key, infokey = k
@@ -355,7 +357,7 @@ class PDBModel:
             self.atoms[key, infokey] = v
             return
 
-        raise ProfileError, 'Cannot interpret %r as profile name or profile info record' % k
+        raise ProfileError('Cannot interpret %r as profile name or profile info record' % k)
 
 
     def __getslice__( self, *arg ):
@@ -396,17 +398,17 @@ class PDBModel:
 
         r += '\n source: ' + repr( self.source )
         r += '\n %2i atom profiles:    %s' % ( len( self.atoms ), 
-                                               T.clipStr( repr(self.atoms.keys()), 57 )) 
+                                               T.clipStr( repr(list(self.atoms.keys())), 57 )) 
         r += '\n %2i residue profiles: %s' % ( len( self.residues ),
-                                               T.clipStr( repr(self.residues.keys()), 57 ))
+                                               T.clipStr( repr(list(self.residues.keys())), 57 ))
         r += '\n %2i info records:     %s' % ( len( self.info ), 
-                                               T.clipStr( repr( self.info.keys() ), 57 ))
+                                               T.clipStr( repr( list(self.info.keys()) ), 57 ))
 
         if plot:
             self.plot()
 
         if prnt:
-            print r
+            print(r)
         else:
             return r
 
@@ -420,7 +422,7 @@ class PDBModel:
         @param hetatm: include hetero & solvent atoms (default False)
         @type  hetatm: bool
         """
-        from Biskit import gnuplot
+        from biskit import gnuplot
 
         m = self
         if not hetatm:
@@ -429,7 +431,7 @@ class PDBModel:
             m = self.compress( N0.logical_not( mask ) )
 
         chains = [ self.takeChains( [i] ) for i in range( m.lenChains())]
-        xy = [ zip( m.xyz[:,0], m.xyz[:,1] ) for m in chains ]
+        xy = [ list(zip( m.xyz[:,0], m.xyz[:,1] )) for m in chains ]
 
         gnuplot.plot( *xy )
 
@@ -538,7 +540,7 @@ class PDBModel:
             try:
                 del self.__resIndex, self.__chainIndex
             except:
-                print 'DEBUG ', T.lastError()
+                print('DEBUG ', T.lastError())
                 pass
 
         self.__maskCA = getattr( self, '__maskCA', None )
@@ -613,7 +615,7 @@ class PDBModel:
         """
         @param source: LocalPath OR PDBModel OR str
         """
-        if type( source ) == str and len( source ) <> 4:
+        if type( source ) == str and len( source ) != 4:
             self.source = LocalPath( source )
         else:
             self.source = source
@@ -983,7 +985,7 @@ class PDBModel:
         @return: [ {..} ], list of atom dictionaries
         @rtype: list of atom dictionaries
         """
-        numbers = map( str, range(10) )
+        numbers = list(map( str, list(range(10)) ))
 
         ## nucleic acid atom names have changed in parm10;
         if parm10:  ## this evidently is a bit of a hack. Should be revisited.
@@ -995,7 +997,7 @@ class PDBModel:
                 if a == 'H5T': return "HO5'"
                 if a == 'H3T': return "HO3'"
                 return a
-            self.atoms['name'] = map( __parm10rename, self.atoms['name'] )
+            self.atoms['name'] = list(map( __parm10rename, self.atoms['name'] ))
 
         resI = self.resIndex().tolist()
         resI = N0.concatenate( (resI, [len(self)] ) )
@@ -1072,7 +1074,7 @@ class PDBModel:
         try:
             f = IO.PDBFile( fname, mode='w' )
 
-            numbers = map( str, range(10) )
+            numbers = list(map( str, list(range(10)) ))
 
             if amber:
                 __resnames = copy.copy(self.atoms['residue_name'])
@@ -1161,7 +1163,7 @@ class PDBModel:
 
             T.dump( self, str(path) )
 
-        except IOError, err:
+        except IOError as err:
             raise PDBError("Can't open %s for writing." % T.absfile(str(path)))
 
 
@@ -1195,7 +1197,7 @@ class PDBModel:
         @rtype: array or list
         """
         try:
-            result = map( atomFunction, self.atoms.toDicts() )
+            result = list(map( atomFunction, self.atoms.toDicts() ))
         except:
 
             ## fall-back solution: assign 0 to all entries that raise
@@ -1239,7 +1241,7 @@ class PDBModel:
         """
 
         if type( cond ) is types.FunctionType:
-            return N0.array( map( cond, self.atoms[ key ] ) )
+            return N0.array( list(map( cond, self.atoms[ key ] )) )
 
         ## several allowed values given
         elif type( cond ) in [ list, tuple ]:
@@ -1391,7 +1393,7 @@ class PDBModel:
         if standard:
             d = molUtils.aaDicStandard
 
-        names = map( string.upper, d.keys() )
+        names = list(map( str.upper, list(d.keys()) ))
         return N0.array(
             [ n.upper() in names for n in self.atoms['residue_name'] ] )
 
@@ -1533,7 +1535,7 @@ class PDBModel:
         if isinstance( what , int):
             return self.mask( [what] )
 
-        raise PDBError, "PDBModel.mask(): Could not interpret condition "
+        raise PDBError("PDBModel.mask(): Could not interpret condition ")
 
 
     def index2map( self, index, len_i ):
@@ -1553,7 +1555,7 @@ class PDBModel:
         index = N0.concatenate( (index, [len_i]) )
         delta = index[1:] - index[:-1] 
         ## Numeric: delta = N0.take( index, range(1, len(index) ) ) - index[:-1]
-        return N0.repeat( range(len(delta)), delta.astype( N0.Int32) )
+        return N0.repeat( list(range(len(delta))), delta.astype( N0.Int32) )
 
 
     def map2index( self, imap ):
@@ -1621,7 +1623,7 @@ class PDBModel:
         if len(i)==0:
             return i, N0.array( [], int )
         if max( i ) >= len( index ) or min( i ) < 0:
-            raise PDBError, "invalid indices"
+            raise PDBError("invalid indices")
 
         ## last atom of each residue / chain
         stop = N0.concatenate( (index[1:], [len_i]) ) - 1
@@ -1730,7 +1732,7 @@ class PDBModel:
         @rtype: array of int
         """
         if max( indices ) > self.lenResidues() or min( indices ) < 0:
-            raise PDBError, "invalid residue indices"
+            raise PDBError("invalid residue indices")
 
         return self.extendIndex( indices, self.resIndex(), self.lenAtoms() )[0]
 
@@ -1799,7 +1801,7 @@ class PDBModel:
         @rtype: array of int
         """
         if max( N0.absolute(indices) ) > self.lenChains( breaks=breaks ):
-            raise PDBError, "invalid chain indices"
+            raise PDBError("invalid chain indices")
 
         return self.extendIndex( indices, self.chainIndex( breaks=breaks ),
                                  self.lenAtoms() )[0]
@@ -2391,9 +2393,8 @@ class PDBModel:
             chains = N0.array( chains, int )
             delta = N0.concatenate( (chains[1:], [chains[-1]+1]) ) - chains
             if not N.all( delta != 0 ):
-                raise PDBIndexError,\
-                   'Chain boundaries cannot be preserved for repeats.' +\
-                   "Use 'force=1' to override, then re-calculate chainIndex()."
+                raise PDBIndexError('Chain boundaries cannot be preserved for repeats.' +\
+                   "Use 'force=1' to override, then re-calculate chainIndex().")
             
         ## Give up on repeat treatement: 
         ## more important: the new model's chain index should NOT include breaks
@@ -2435,7 +2436,7 @@ class PDBModel:
             old_chains = mathUtils.nonredundant( old_chains )
             if '' in old_chains: old_chains.remove('')
 
-        letters = string.uppercase
+        letters = string.ascii_uppercase
         if first_id:
             letters = letters[ letters.index( first_id ): ]
         letters = mathUtils.difference( letters, old_chains )
@@ -2449,7 +2450,7 @@ class PDBModel:
                     ids[i] = letters[ chainMap[i] ]
 
         except IndexError:
-            raise PDBError, 'Too many chains, running out of letters.'
+            raise PDBError('Too many chains, running out of letters.')
 
 
     def renumberResidues( self, mask=None, start=1, addChainId=1 ):
@@ -2485,7 +2486,7 @@ class PDBModel:
         @return: integer range for lenght of this model
         @rtype: [ int ]
         """
-        return range( self.lenAtoms() )
+        return list(range( self.lenAtoms()))
 
 
     def lenAtoms( self, lookup=True ):
@@ -2825,7 +2826,7 @@ class PDBModel:
             r.sort()
 
         ## filter out chains consisting only of a single residue
-        if not singleRes:
+        if len(r)>0 and not singleRes:
 ##            r = self.__filterSingleResChains( r, ignore_resnumbers=breaks )
             r = self.__filterSingleResChains( r, ignore_resnumbers=False)
             
@@ -3179,7 +3180,7 @@ class PDBModel:
         else:
             m_this = self
 
-        tm = B.TMAlign( m_this, refModel )
+        tm = tmalign.TMAlign( m_this, refModel )
         r = tm.run()
 
         return tm.applyTransformation( self )
@@ -3244,7 +3245,7 @@ class PDBModel:
         try:
             M = [ molUtils.atomMasses[e] for e in self.atoms['element'] ]
 
-        except KeyError, why:
+        except KeyError as why:
             raise PDBError('Cannot find mass for '+str(why))
 
         return N0.array( M )
@@ -3302,13 +3303,19 @@ class PDBModel:
         """
         Prepare sorting atoms within residues according to comparison function.
 
-        @param cmpfunc: function( m.atoms[i], m.atoms[j] ) -> -1, 0, +1
+        @param cmpfunc: old style function(m.atoms[i], m.atoms[j]) -> -1, 0, +1
         @type  cmpfunc: function
+        
+        @param key: new style sort key function(m.atoms[i]) -> sortable
+        @type key: function
 
         @return: suggested position of each atom in re-sorted model 
                  ( e.g. [2,1,4,6,5,0,..] )
         @rtype: list of int
         """
+        ## cmp vanished in python 3.x (but still available in past.builtins)
+        cmp = lambda x, y: (x > y) - (x < y)
+        
         ## by default sort alphabetically by atom name
         cmpfunc = cmpfunc or ( lambda a1, a2: cmp(a1['name'],a2['name']) )
 
@@ -3318,16 +3325,19 @@ class PDBModel:
         ## get sort list for each residue
         for resAtoms in self.resList():
 
-            resIndex = range(0, len( resAtoms ) )
+            resIndex = list(range(0, len( resAtoms )))
 
             ## convert atom-based function into index-based function
             f_cmp = lambda i,j,atoms=resAtoms : cmpfunc( atoms[i], atoms[j] )
+            
+            ## convert py 2.x cmp to py 3.x key method
+            f_key = functools.cmp_to_key(f_cmp)
 
             ## get sortMap for this residue (numbering starts with 0)
-            resIndex.sort( f_cmp )
+            resIndex.sort( key=f_key )
 
             ## add first residue atom's position in self.atoms to each entry 
-            resIndex = map( lambda i, delta=pos: i + delta, resIndex )
+            resIndex = list(map( lambda i, delta=pos: i + delta, resIndex ))
 
             ## concatenate to result list
             result += resIndex
@@ -3366,9 +3376,13 @@ class PDBModel:
 
         @raise PDBError: if sorting changed atom number
         """
+        ## prepare sort functions (py 2.x / py 3.x)
+        cmp = lambda x, y: (x > y) - (x < y)
+        f_key = functools.cmp_to_key(lambda i,j, l=sortList: cmp(l[i],l[j]))
+        
         ## get new sort list that reverts the old one
-        backSortList = range(0, self.lenAtoms() )
-        backSortList.sort( lambda i,j, l=sortList: cmp(l[i],l[j]) )
+        backSortList = list(range(0, self.lenAtoms()))
+        backSortList.sort( key=f_key )
 
         ## get re-sorted PDBModel copy
         self.keep( backSortList )
@@ -3417,7 +3431,7 @@ class PDBModel:
         @return: 1|0, 1 if all key-value pairs of condition are matched in dic
         @rtype: 1|0
         """
-        for k,v in condition.items():
+        for k,v in list(condition.items()):
             if dic.get( k, None ) not in v:
                 return 0
         return 1
@@ -3435,7 +3449,7 @@ class PDBModel:
         @return: 1|0, 1 if any key-value pairs of condition are matched in dic
         @rtype: 1|0
         """
-        for k,v in condition.items():
+        for k,v in list(condition.items()):
             if dic.get( k, None ) in v:
                 return 1
         return 0
@@ -3730,7 +3744,7 @@ class PDBModel:
         """
         try:
             biounit = BU.BioUnit(self, self.info['BIOMT'])            
-            r = len(biounit.keys())
+            r = len(list(biounit.keys()))
         except AttributeError:
             r = 0
         return r
@@ -3771,7 +3785,7 @@ class PDBModel:
 ##  TESTING        
 #############
 
-import Biskit.test as BT
+import biskit.test as BT
 
 class _TestData(object):
     MODEL = None
@@ -3806,7 +3820,7 @@ class Test(BT.BiskitTest):
         self._m.removeRes(['TIP3', 'HOH'])
         self.assertEqual( len(self._m), 1968)
         self.assertAlmostEqual( self._m.mass(), 21325.90004, 3 )
-        if self.local: print "removeRes: ", time.time() - t
+        if self.local: print("removeRes: ", time.time() - t)
 
     def test_chainMethods(self):
         """PDBModel chain methods test"""
@@ -3821,25 +3835,25 @@ class Test(BT.BiskitTest):
 
         ## print some chain info
         if self.local:
-            print 'The molecule consists of %i chains'% self.m.lenChains()
-            print '\tChainId \tFirst atom'
+            print('The molecule consists of %i chains'% self.m.lenChains())
+            print('\tChainId \tFirst atom')
             for i in chainIdx:
-                print '\t%s \t\t%i'%(self._m.atoms['chain_id'][i], int(i))
+                print('\t%s \t\t%i'%(self._m.atoms['chain_id'][i], int(i)))
 
         ## iterate over all chains
         for c in range( 0, len( chainIdx ) ):
 
             if self.local:
-                print "chain ", c, " starts with ", 
-                print self._m.atoms['residue_name'][ chainIdx[c] ],
+                print("chain ", c, " starts with ", end=' ') 
+                print(self._m.atoms['residue_name'][ chainIdx[c] ], end=' ')
 
-                print " and has sequence: "
+                print(" and has sequence: ")
 
 
             ## mask out atoms of all other chains
             chainMask  = N0.equal( self._m.chainMap( breaks=1 ), c )
             if self.local:
-                print self._m.sequence( chainMask )
+                print(self._m.sequence( chainMask ))
 
         self.assertEqual( self._m.lenChains(), 4)
 
@@ -3847,7 +3861,7 @@ class Test(BT.BiskitTest):
     def test_sorting(self):
         """PDBModel sorting test"""
         if self.local:
-            print "sorting atoms alphabetically..."
+            print("sorting atoms alphabetically...")
         m2 = self.m.compress( self.m.maskProtein() )
         sort = m2.argsort()
         m2 = m2.sort( sort )
@@ -3879,12 +3893,12 @@ class Test(BT.BiskitTest):
     def test_chainSingleResidues( self ):
         """PDBModel single residue chain test"""
         self.m5 = B.PDBModel( T.testRoot() + '/amber/1HPT_0.pdb' )
-        self.assert_( self.m5.lenChains() < 10, 'single residue chains' )
+        self.assertTrue( self.m5.lenChains() < 10, 'single residue chains' )
 
 
     def test_rename(self):
         """PDBModel renameAmberRes tests"""
-        self.m3 = B.PDBModel( T.testRoot()+'/amber/1HPT_0dry.pdb')
+        self.m3 = B.PDBModel( T.testRoot()+'/amber/leap/1HPT_dry.pdb')
 
         n_cyx = self.m3.atoms['residue_name'].count('CYX')
         n_hid = self.m3.atoms['residue_name'].count('HID')
@@ -3942,12 +3956,12 @@ class Test(BT.BiskitTest):
 
         ## this should now trigger the reloading of fout2
         self.assertEqual( self._m2.atoms['name'], anames )
-        self.assert_( N.all( self._m2.getXyz()[0] == xyz0) )
+        self.assertTrue( N.all( self._m2.getXyz()[0] == xyz0) )
 
         ## after disconnection, slim() should not have any effect
         self._m2.disconnect()
         self._m2.slim()
-        self.assert_( self._m2.atoms.profiles['name'] is not None )
+        self.assertTrue( self._m2.atoms.profiles['name'] is not None )
 
     def test_mergeChains( self ):
         """PDBModel.mergeChains test"""
@@ -3956,8 +3970,8 @@ class Test(BT.BiskitTest):
         atm_numbers = m['serial_number']
         chain_ids   = m['chain_id']
 
-        m1 = m.takeResidues( range(3) )
-        m2 = m.takeResidues( range(3, m.lenResidues() ) )
+        m1 = m.takeResidues( list(range(3)) )
+        m2 = m.takeResidues( list(range(3, m.lenResidues())) )
 
         m2.renumberResidues()
         m2['chain_id'] = len(m2) * ['X']
@@ -3967,13 +3981,13 @@ class Test(BT.BiskitTest):
 
         self.r = m1.concat( m2 )
         r = self.r
-        self.assert_( r.lenChains() == m.lenChains() + 1 )
+        self.assertTrue( r.lenChains() == m.lenChains() + 1 )
 
         r.mergeChains( 0 )
         self.r = r
-        self.assert_( r.lenChains() == m.lenChains() )
-        self.assert_( N.all( N0.array(r['chain_id']) == chain_ids ) )
-        self.assert_( N.all( N0.array(r['residue_number']) == res_numbers ) )
+        self.assertTrue( r.lenChains() == m.lenChains() )
+        self.assertTrue( N.all( N0.array(r['chain_id']) == chain_ids ) )
+        self.assertTrue( N.all( N0.array(r['residue_number']) == res_numbers ) )
 
     def test_mergeResidues( self ):
         """PDBModel.mergeResidues test"""
@@ -3997,26 +4011,26 @@ class Test(BT.BiskitTest):
         self.assertEqual( self.m[10]['occupancy'], 1.0 )
         self.assertEqual( self.m['chain_id', 'changed'], 0 )
         self.assertEqual( len(self.m['chain_id'] ), len( self.m ) )
-        self.assert_( type( self.m['date']) is str )
+        self.assertTrue( type( self.m['date']) is str )
         self.m['resname'] = self.m.atom2resProfile('residue_name')
         self.assertEqual( len( self.m['resname'] ), self.m.lenResidues() )
 
         self.m.info['tested'] = False
         self.m['tested'] = True
-        self.assert_( self.m.info['tested'] )
+        self.assertTrue( self.m.info['tested'] )
 
         self.m['serial_number', 'default'] = 1
-        self.assert_( self.m.atoms['serial_number','default'] == 1 )
+        self.assertTrue( self.m.atoms['serial_number','default'] == 1 )
 
         self.m['resname', 'changed'] = 0
         self.assertFalse( self.m.residues.isChanged( 'resname' ) )
 
-        self.m['index'] = range( len( self.m) )
-        self.assert_( self.m['index'][-1] == len( self.m ) - 1 )
+        self.m['index'] = list(range( len( self.m)))
+        self.assertTrue( self.m['index'][-1] == len( self.m ) - 1 )
 
     def test_slice(self):
         """PDBModel.__slice__ test"""
-        self.assert_( len( self.m[0:100:20]  ) == 5 )
+        self.assertTrue( len( self.m[0:100:20]  ) == 5 )
 
     def test_various(self):
         """PDBModel various tests"""
@@ -4029,7 +4043,7 @@ class Test(BT.BiskitTest):
         m2 = PDBModel()
         ## extract first 100 atoms of each chain
         for i in range(m.lenChains()):
-            m2 = m2.concat( m.takeChains([i]).take( range(100) ) )
+            m2 = m2.concat( m.takeChains([i]).take( list(range(100)) ) )
 
         m3 = m2.takeChains( [2,3,0,1] )  ## re-order chains
 
@@ -4052,10 +4066,10 @@ class TestExe( BT.Test ):
         diff = r.centerOfMass() - ref.centerOfMass()
 
         if self.local:
-            print 'center of mass deviation: \n%r' % diff
+            print('center of mass deviation: \n%r' % diff)
 
         self.assertEqual( r.info['tm_rmsd'], 1.76 )
-        self.assert_( N.all( N0.absolute(diff) < 1 ),
+        self.assertTrue( N.all( N0.absolute(diff) < 1 ),
                       'superposition failed: %r' % diff)
 
 

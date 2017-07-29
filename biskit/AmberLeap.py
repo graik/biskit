@@ -26,8 +26,8 @@ Wrap the Amber tleap program.
 import tempfile
 import os.path as P
 
-from Biskit import Executor, TemplateError
-import Biskit.tools as T
+from biskit.Executor import Executor, TemplateError
+import biskit.tools as T
 
 
 class LeapError( Exception ):
@@ -113,7 +113,7 @@ class AmberLeap( Executor ):
           node     - str, host for calculation (None->local) NOT TESTED
                           (default: None)
           nice     - int, nice level (default: 0)
-          log      - Biskit.LogFile, program log (None->STOUT) (default: None)
+          log      - biskit.LogFile, program log (None->STOUT) (default: None)
         """
         # override some Executor defaults unless they are freshly given
         kw['catchout'] = kw.get('catchout',0)
@@ -173,9 +173,8 @@ class AmberLeap( Executor ):
         if P.exists( r ):
             return r
 
-        raise  LeapError,\
-                  'Could not find Forcefield definition %s. ' % ff +\
-                  'Check exe_tleap.dat or provide an explicit leaprc parameter!'
+        raise  LeapError('Could not find Forcefield definition %s. ' % ff +\
+                  'Check exe_tleap.dat or provide an explicit leaprc parameter!')
             
 
     def isfailed( self ):
@@ -183,9 +182,9 @@ class AmberLeap( Executor ):
 
 #############
 ## TESTING ##
-import Biskit.test as BT
+import biskit.test as BT
 import tempfile
-import Biskit.tools as T
+import biskit.tools as T
 
 class Test( BT.BiskitTest ):
     """Test AmberParmBuilder"""
@@ -220,7 +219,7 @@ class Test( BT.BiskitTest ):
     def test_AmberLeap_run( self ):
         """AmberLeap.run test"""
         self.x = AmberLeap( self.template,
-                            leaprc='ff03.r1',
+                            leaprc='protein.ff03.r1',
                             leap_out=self.flog,
                             fmod='', fprep='', ss_bonds='', box=12.5,
                             in_pdb=self.fpdb,

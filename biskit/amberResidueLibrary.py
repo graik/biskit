@@ -20,9 +20,8 @@
 Collect and index AmberResidueType instances from amber topology files.
 """
 
-from Biskit import PDBModel
-from Biskit import AmberPrepParser, StdLog
-import Biskit.tools as T
+from biskit import PDBModel, AmberPrepParser, StdLog
+import biskit.tools as T
 
 class AmberResidueLibraryError( Exception ):
     pass
@@ -75,7 +74,7 @@ class AmberResidueLibrary( object ):
                           (default all_*in in Biskit/data/amber/residues)
         @type  topofiles: [ str ]
         @param log: optional LogFile instance (default STDOUT)
-        @type  log: Biskit.LogFile
+        @type  log: biskit.LogFile
         @param verbose: add messages to log (default False)
         @type  verbose: bool
         """       
@@ -113,7 +112,7 @@ class AmberResidueLibrary( object ):
         fbase = T.stripFilename( topofile )
 
         if fbase in self.topoindex and not override:
-            raise AmberResidueLibraryError, 'duplicate topology '+fbase
+            raise AmberResidueLibraryError('duplicate topology '+fbase)
 
         if self.verbose:
             self.log.add('parsing %s...' % topofile )
@@ -129,9 +128,8 @@ class AmberResidueLibrary( object ):
             akey = restype.atomkey(compress=False)
             
             if akey in self.aindex and not override:
-                raise AmberResidueLibraryError, \
-                      'duplicate residue entry: %s -> %s' %\
-                      (resname, self.aindex[akey].code)
+                raise AmberResidueLibraryError('duplicate residue entry: %s -> %s' %\
+                      (resname, self.aindex[akey].code))
 
             self.aindex[ akey ] = restype
         
@@ -191,7 +189,7 @@ class AmberResidueLibrary( object ):
             if rescode in residues:
                 return residues[rescode]
 
-        raise KeyError, 'No residue type found for name '+str(rescode)
+        raise KeyError('No residue type found for name '+str(rescode))
         
     
     def __len__( self ):
@@ -210,18 +208,18 @@ class AmberResidueLibrary( object ):
  
         
     def topokeys( self ):
-        return self.topoindex.keys()
+        return list(self.topoindex.keys())
     
     def keys( self ):
-        return self.aindex.keys()
+        return list(self.aindex.keys())
     
     def values( self ):
-        return self.aindex.values()
+        return list(self.aindex.values())
     
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test class"""

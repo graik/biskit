@@ -24,11 +24,11 @@
 @see L{Biskit.PDBParsePickle}
 """
 
-from PDBParseFile   import PDBParseFile
-from PDBParseModel  import PDBParseModel
-from PDBParsePickle import PDBParsePickle
-from PDBParseNCBI   import PDBParseNCBI
-from PDBParser import PDBParserError
+from biskit.core.pdbparseFile   import PDBParseFile
+from biskit.core.pdbparseModel  import PDBParseModel
+from biskit.core.pdbparsePickle import PDBParsePickle
+from biskit.core.pdbparseNCBI   import PDBParseNCBI
+from biskit.core.pdbparser import PDBParserError
 
 class PDBParserFactory:
     """
@@ -65,12 +65,12 @@ class PDBParserFactory:
         if PDBParsePickle.supports( source ):
             return PDBParsePickle()
             
-        raise PDBParserError, 'Format of %r is not recognized.' % source
+        raise PDBParserError('Format of %r is not recognized.' % source)
 
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """nothing to test"""

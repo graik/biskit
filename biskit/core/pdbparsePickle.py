@@ -23,11 +23,11 @@
 """
 Parse a pickled PDBModel from disc into a new PDBModel instance 
 """
-import Biskit.tools as T
-import Biskit as B
+import biskit.tools as T
+import biskit as B
 
-from PDBParser import PDBParserError
-from PDBParseModel import PDBParseModel
+from biskit.core.pdbparser import PDBParserError
+from biskit.core.pdbparseModel import PDBParseModel
 
 class PDBParsePickle( PDBParseModel ):
     """
@@ -91,10 +91,10 @@ class PDBParsePickle( PDBParseModel ):
                     model, s, skipRes=skipRes, updateMissing=updateMissing,
                     force=force )
                               
-        except Exception, why:
-            print T.lastErrorTrace()
-            raise PDBParserError, "Cannot unpickle source model from %s, "\
-                   % str(source) + "Reason:\n" + str(why)
+        except Exception as why:
+            print(T.lastErrorTrace())
+            raise PDBParserError("Cannot unpickle source model from %s, "\
+                   % str(source) + "Reason:\n" + str(why))
 
         model.setSource( source )
 
@@ -102,7 +102,7 @@ class PDBParsePickle( PDBParseModel ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test case"""
@@ -110,14 +110,14 @@ class Test(BT.BiskitTest):
     def test_PDBParsePickle( self ):
         """PDBParsePickle test"""
 
-        import Biskit.oldnumeric as N0
+        import biskit.core.oldnumeric as N0
 
         ## loading output file from X-plor
         if self.local:
-            print 'Loading pickled model ..'
+            print('Loading pickled model ..')
 
         self.p = PDBParsePickle()
-        self.m = self.p.parse2new( T.testRoot()+'/rec/1A2P_dry.model')
+        self.m = self.p.parse2new( T.testRoot('rec/1A2P_dry.model'))
 
         self.assertAlmostEqual( N0.sum( self.m.centerOfMass() ),
                                 114.18037, 5)

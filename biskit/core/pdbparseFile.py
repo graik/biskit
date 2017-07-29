@@ -26,15 +26,15 @@ Parse a PDB file into a PDBModel.
 @see L{PDBModel}
 @see L{PDBParserFactory}
 """
-import Biskit.ScientificIO.PDB as IO
-import Biskit.oldnumeric as N0
+import biskit.core.scientificIO.PDB as IO
+import biskit.core.oldnumeric as N0
 import re
 
-import Biskit as B
-import Biskit.mathUtils as M
-import Biskit.tools as T
-import Biskit.BioUnit as BU
-from Biskit.PDBParser import PDBParser, PDBParserError
+import biskit as B
+import biskit.mathUtils as M
+import biskit.tools as T
+import biskit.BioUnit as BU
+from biskit.core.pdbparser import PDBParser, PDBParserError
 
 
 class PDBParseFile( PDBParser ):
@@ -127,7 +127,7 @@ class PDBParseFile( PDBParser ):
                 atoms, xyz, info = self.__collectAll( source, skipRes, 
                                                       headPatterns )
     
-                keys = M.union( atoms.keys(),  self.DEFAULTS.keys() )
+                keys = M.union( list(atoms.keys()),  list(self.DEFAULTS.keys()) )
     
                 for k in keys:
     
@@ -288,7 +288,7 @@ REMEDY: run the script fixAtomIndices.py
 
             try:
                 line = pdbFile.readLine()
-            except ValueError, what:
+            except ValueError as what:
                 self.log.add('Warning: Error parsing line %i of %s' % 
                              (i, T.stripFilename( fname )) )
                 self.log.add('\tError: '+str(what) )
@@ -344,13 +344,13 @@ REMEDY: run the script fixAtomIndices.py
         try:
             line, i = ('',''), 0
 
-            while line[0] <> 'END' and line[0] <> 'ENDMDL':
+            while line[0] != 'END' and line[0] != 'ENDMDL':
 
                 i += 1
                 if not skipLine:
                     try:
                         line = f.readLine()
-                    except ValueError, what:
+                    except ValueError as what:
                         self.log.add('Warning: Error parsing line %i of %s' %
                                      (i, T.stripFilename( fname )) )
                         self.log.add('\tError: '+str(what) )
@@ -425,7 +425,7 @@ REMEDY: run the script fixAtomIndices.py
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 import time
 
 def clock( s, ns=globals() ):
@@ -453,12 +453,12 @@ class Test(BT.BiskitTest):
 
         ## loading output file from X-plor
         if self.local:
-            print 'Loading pdb file ..'
+            print('Loading pdb file ..')
 
         self.p = PDBParseFile()
         self.m = self.p.parse2new( T.testRoot()+'biounit/2V4E.pdb')
         if self.local:
-            print (self.m.info)
+            print(self.m.info)
         self.m.report( prnt=self.local,
                                 plot=(self.local or self.VERBOSITY > 2) )
         self.m.biomodel(1)

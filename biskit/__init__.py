@@ -22,12 +22,16 @@ import logging
 
 ## public classes
 try:
+    ## default error handler
+    from biskit.ErrorHandler import ErrorHandler
+    EHandler = ErrorHandler()
+
 ##     from BisList import BisList, BisListError, ConditionError, AmbiguousMatch,\
 ##          ItemNotFound
 ##     from DictList import DictList
 
-##     from LogFile import LogFile, StdLog, ErrLog
-##     from Errors import BiskitError
+    from biskit.LogFile import LogFile, StdLog, ErrLog
+    from biskit.Errors import BiskitError
 
 ##     from ExeConfig import ExeConfig, ExeConfigError
 ##     from ExeConfigCache import ExeConfigCache
@@ -41,12 +45,12 @@ try:
 ##     from EDParser import EZDParser
 
 ##     from EnsembleTraj import EnsembleTraj
-##     from LocalPath import LocalPath, LocalPathError
+    from biskit.LocalPath import LocalPath, LocalPathError
 
 ##     from PCRModel import PCRModel
-##     from PDBModel import PDBModel, PDBProfiles, PDBError
+    from biskit.pdbModel import PDBModel, PDBProfiles, PDBError
 
-##     from ProfileCollection import ProfileCollection, ProfileError
+    from biskit.ProfileCollection import ProfileCollection, ProfileError
 ##     from ProfileMirror import ProfileMirror
     
 ##     from Pymoler import Pymoler
@@ -72,7 +76,7 @@ try:
 ##     from ModelList import ModelList
 ##     from CommandLine import CommandLine
     
-##     from amberResidues import AmberResidueType, AmberPrepParser
+    from biskit.amberResidues import AmberResidueType, AmberPrepParser
 ##     from amberResidueLibrary import AmberResidueLibrary,\
 ##                                     AmberResidueLibraryError
 ##     from atomCharger import AtomCharger
@@ -82,7 +86,7 @@ try:
 ##     from Ramachandran import Ramachandran
 
 ## ## experimental modules
-##     from residue import Residue
+    from biskit.residue import Residue
 
 ##     from Model import Model
 ##     from Polymer import Polymer
@@ -98,6 +102,7 @@ try:
 
 except Exception as why:
     logging.warning('Could not import all biskit modules: ' + repr(why))
+    raise
 
 ## clean up namespace
 del logging

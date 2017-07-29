@@ -71,9 +71,9 @@ def _plotData(data):
         for point in set:
             if is_sequence:
                 for coordinate in point:
-                    file.write(`coordinate` + ' ')
+                    file.write(repr(coordinate) + ' ')
             else:
-                file.write(`point`)
+                file.write(repr(point))
             file.write('\n')
         file.close()
         if is_sequence:
@@ -89,7 +89,7 @@ def _plotData(data):
         else:
             for i in range(n-1):
                 command = command + '"' + filename + \
-                        '"  using 1:' + `i+2` + ' notitle w l, '
+                        '"  using 1:' + repr(i+2) + ' notitle w l, '
     command = command[:-2] + '\n'
     return command, filelist
 
@@ -100,9 +100,9 @@ def _plotWithLabels(data):
     plotlist = []
     filelist = []
     if not type(data).__name__ == 'dictionary':
-        data = map(None, data, len(data)*[''])
+        data = zip(data, len(data)*[''])
     else:
-        data = data.items()
+        data = list(data.items())
     for set, key in data:
         filename = tempfile.mktemp()
         file = open(filename, 'w')
@@ -110,9 +110,9 @@ def _plotWithLabels(data):
         for point in set:
             if is_sequence:
                 for coordinate in point:
-                    file.write(`coordinate` + ' ')
+                    file.write(repr(coordinate) + ' ')
             else:
-                file.write(`point`)
+                file.write(repr(point))
             file.write('\n')
         file.close()
         if is_sequence:
@@ -128,7 +128,7 @@ def _plotWithLabels(data):
         else:
             for i in range(n-1):
                 command = command + '"' + filename + \
-                        '"  using 1:' + `i+2` + ' title "%s" w l, ' %key
+                        '"  using 1:' + repr(i+2) + ' title "%s" w l, ' %key
     command = command[:-2] + '\n'
     return command, filelist
 
@@ -149,9 +149,9 @@ def _barGraphPlotData(data):
         for point in set:
             if is_sequence:
                 for coordinate in point:
-                    file.write(`coordinate` + ' ')
+                    file.write(repr(coordinate) + ' ')
             else:
-                file.write(`point`)
+                file.write(repr(point))
             file.write('\n')
         file.close()
         if is_sequence:
@@ -167,7 +167,7 @@ def _barGraphPlotData(data):
         else:
             for i in range(n-1):
                 command = command + '"' + filename + \
-                        '"  using 1:' + `i+2` + 'notitle with boxes , '
+                        '"  using 1:' + repr(i+2) + 'notitle with boxes , '
     command = command[:-2] + '\n'
     #print command
     return command, filelist
@@ -186,9 +186,9 @@ def _scatterData(data, marker = 'points'):
         for point in set:
             if is_sequence:
                 for coordinate in point:
-                    file.write(`coordinate` + ' ')
+                    file.write(repr(coordinate) + ' ')
             else:
-                file.write(`point`)
+                file.write(repr(point))
             file.write('\n')
         file.close()
         if is_sequence:
@@ -205,7 +205,7 @@ def _scatterData(data, marker = 'points'):
         else:
             for i in range(n-1):
                 command = command + '"' + filename + \
-                        '"  using 1:' + `i+2` + ' notitle  with %s, ' \
+                        '"  using 1:' + repr(i+2) + ' notitle  with %s, ' \
                         %marker
     command = command[:-2] + '\n'
     return command, filelist
@@ -223,9 +223,9 @@ def _scatterData3D(data):
         for point in set:
             if is_sequence:
                 for coordinate in point:
-                    file.write(`coordinate` + ' ')
+                    file.write(repr(coordinate) + ' ')
             else:
-                file.write(`point`)
+                file.write(repr(point))
             file.write('\n')
         file.close()
         if is_sequence:
@@ -241,7 +241,7 @@ def _scatterData3D(data):
         else:
             for i in range(n-1):
                 command = command + '"' + filename + \
-                        '"  using 1:' + `i+2` + ' notitle  with points, '
+                        '"  using 1:' + repr(i+2) + ' notitle  with points, '
     command = command[:-2] + '\n'
     return command, filelist
 
@@ -280,7 +280,7 @@ def _parallelAxesPlotData(data, origin):
 # Execute a Gnuplot command
 #
 def _execute(command, filelist, keywords):
-    if keywords.has_key('file'):
+    if 'file' in keywords:
         filename = tempfile.mktemp()
         file = open(filename, 'w')
         file.write('set terminal postscript\n')
@@ -356,7 +356,7 @@ def parallelAxesPlot(data, **keywords):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test case"""
@@ -365,14 +365,14 @@ class Test(BT.BiskitTest):
         self.fout = tempfile.mktemp('ps','testgnuplot_')
 
     def cleanUp(self):
-        import Biskit.tools as T
+        import biskit.tools as T
         T.tryRemove( self.fout )
 
     def test_plot2ps(self):
         """gnuplot.plot to file test"""
         plot([1, 5, 3, 4], file = self.fout)
         if self.local:
-            print 'plot written to ', self.fout
+            print('plot written to ', self.fout)
 
     def test_scatter(self):
         """gnuplot.scatter test (interactive only)"""
@@ -387,7 +387,7 @@ class Test(BT.BiskitTest):
         # plot( zip( range(10), range(10) ) )
 
         # Two plots; each given by a 2d array
-        import Biskit.oldnumeric as N0
+        import biskit.core.oldnumeric as N0
         x = N0.arange(10)
         y1 = x**2
         y2 = (10-x)**2

@@ -20,7 +20,7 @@
 """
 Attempt at a residue view to connect to PDBModel
 """
-import Biskit.tools as T
+import biskit.tools as T
 
 import numpy as N
 import weakref 
@@ -227,7 +227,7 @@ class Residue(object):
         try:
             return int( l )
         except ValueError:
-            return string.letters.find( l.lower() )
+            return string.ascii_letters.find( l.lower() )
     
     def __getitem__( self, key ):
         """
@@ -262,10 +262,10 @@ class Residue(object):
                 
                 return m[ self.atom_index[ '%s_%i' % (name, alt) ] ]
 
-            except IndexError, why:
-                raise IndexError, 'atom not found: %r (%r)' % (name, alt)
+            except IndexError as why:
+                raise IndexError('atom not found: %r (%r)' % (name, alt))
         
-        raise IndexError, 'No profile or atom name matches key ' + str( key )
+        raise IndexError('No profile or atom name matches key ' + str( key ))
         
     def mass( self ):
         pass
@@ -380,7 +380,7 @@ class Residue(object):
             if c == 1:
                 alt.append( '' )
             else:
-                alt.append( string.letters[ c - len( pos ) ].upper() )
+                alt.append( string.ascii_letters[ c - len( pos ) ].upper() )
 
             pos.pop()  # remove one, discard
 
@@ -390,7 +390,7 @@ class Residue(object):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test"""
@@ -398,8 +398,8 @@ class Test(BT.BiskitTest):
     M = None
 
     def prepare( self ):
-        import Biskit as B
-        import Biskit.tools as T
+        import biskit as B
+        import biskit.tools as T
 
         self.M = self.M or T.load( T.testRoot() + '/lig/1A19_dry.model' )
     
@@ -414,7 +414,7 @@ class Test(BT.BiskitTest):
         r.reset()
         
         self.assertEqual( len( r.atom_index ), 28 )
-        self.assert_( 'CA_1' in r.atom_index )
+        self.assertTrue( 'CA_1' in r.atom_index )
 
     def test_invalidIndex( self ):
         m = self.M.clone()
@@ -423,17 +423,17 @@ class Test(BT.BiskitTest):
         
 if __name__ == '__main__':
 
-    from Biskit import *
-    import Biskit.tools as T
+    from biskit import *
+    import biskit.tools as T
     
     m = PDBModel( T.testRoot() + '/lig/1A19_dry.model'  )
     r = Residue( m, 0 )
     
-    print r.from_atom, r.to_atom
-    print r.chain
-    print r.segid
-    print r.xyz
-    print r.serial
+    print(r.from_atom, r.to_atom)
+    print(r.chain)
+    print(r.segid)
+    print(r.xyz)
+    print(r.serial)
     
     m.mergeResidues( 0 )
     r.reset()

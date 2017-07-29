@@ -25,17 +25,17 @@ Create Amber topology and coordinate file from PDB.
 """
 
 import os, tempfile, copy
-import Biskit.oldnumeric as N0
 
-import Biskit.tools as t
-import Biskit.settings as s
-import Biskit.mathUtils as MU
-from Biskit.LogFile import LogFile, StdLog
-from Biskit.PDBModel import PDBModel
-from Biskit.Errors import BiskitError
-from Biskit.PDBCleaner import PDBCleaner
-from Biskit.AmberLeap import AmberLeap
-from Biskit import Executor
+import biskit.core.oldnumeric as N0
+import biskit.tools as t
+import biskit.settings as s
+import biskit.mathUtils as MU
+from biskit.LogFile import LogFile, StdLog
+from biskit.Errors import BiskitError
+from biskit.PDBCleaner import PDBCleaner
+from biskit.AmberLeap import AmberLeap
+from biskit.Executor import Executor
+from biskit import PDBModel
 
 class AmberError( BiskitError ):
     pass
@@ -247,7 +247,7 @@ class AmberParmBuilder:
         output,error,status = x.run()
 
         if not os.path.exists( f_out ):
-            raise AmberError, 'ambpdb failed.'
+            raise AmberError('ambpdb failed.')
 
         return f_out
 
@@ -465,8 +465,8 @@ class AmberParmBuilder:
             if not self.keep_leap_pdb and not self.debug:
                 t.tryRemove( self.leap_pdb )
 
-        except IOError, why:
-            raise IOError, why
+        except IOError as why:
+            raise IOError(why)
 
 
     def __deleteAtoms( self, m, i_atoms ):
@@ -568,12 +568,12 @@ class AmberParmBuilder:
         iLeap, iRef = m_leap.compareAtoms( m_ref )
 
         ## check that ref model doesn't need any change
-        if iRef != range( len( m_ref ) ):
+        if iRef != list(range( len( m_ref ))):
             uLeap, uRef = m_leap.unequalAtoms( m_ref, iLeap, iRef )
             atms = m_ref.reportAtoms( uRef, n=6 )
-            raise AmberError, "Cannot create exact mirror of %s.\n" % tmp_in +\
+            raise AmberError("Cannot create exact mirror of %s.\n" % tmp_in +\
                   "Leap has renamed/deleted original atoms in %s:\n"% tmp_pdb+\
-                  atms
+                  atms)
 
         ## indices of atoms that were added by leap
         delStr = self.__deleteAtoms( m_leap,
@@ -591,9 +591,9 @@ class AmberParmBuilder:
 
 #############
 ## TESTING ##
-import Biskit.test as BT
+import biskit.test as BT
 import tempfile
-import Biskit.tools as T
+import biskit.tools as T
 
 class Test( BT.BiskitTest ):
     """Test AmberParmBuilder"""
@@ -601,9 +601,9 @@ class Test( BT.BiskitTest ):
     TAGS = [ BT.EXE ]
 
     def prepare(self):
-        root = T.testRoot() + '/amber/'
-        self.ref = PDBModel( T.testRoot() + '/amber/1HPT_0.pdb')
-        self.refdry = root + '1HPT_0dry.pdb'
+        root = T.testRoot('amber/leap/')
+        self.ref = PDBModel( T.testRoot('amber/leap/1HPT_solvated.pdb'))
+        self.refdry = root + '1HPT_dry.pdb'
 
         self.dryparm = tempfile.mktemp('.parm', 'dry_')
         self.drycrd  = tempfile.mktemp('.crd', 'dry_')
@@ -643,7 +643,7 @@ class Test( BT.BiskitTest ):
         self.m2 = PDBModel(self.refdry)
 
         eq = N0.array( self.m1.xyz == self.m2.xyz )
-        self.assert_( eq.all() )
+        self.assertTrue( eq.all() )
 
 
     def test_AmberParmSolvated( self ):

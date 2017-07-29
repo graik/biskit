@@ -20,14 +20,14 @@
 """
 Read Amber residue topology from Amber "off" libraries.
 """
-import cStringIO
+import io
 import numpy as N
 import os.path as osp
 import re
 
-import Biskit.tools as T
-import Biskit as B
-import Biskit.molUtils as M
+import biskit.tools as T
+import biskit as B
+import biskit.molUtils as M
  
 class AmberPrepError( Exception ):
     pass
@@ -163,14 +163,14 @@ class AmberPrepParser( object ):
         start = s.find('0.0')
         end = s.find( '\n\n', start + 10 )
 
-        io = cStringIO.StringIO( s[start:end] )
+        h = io.StringIO( s[start:end] )
         for i in range(4):
-            io.readline()
+            h.readline()
         
-        line = io.readline().strip()
+        line = h.readline().strip()
         while line:
             yield line
-            line = io.readline().strip()
+            line = h.readline().strip()
 
 
     def parseCharges( self, s ):
@@ -192,14 +192,14 @@ class AmberPrepParser( object ):
         """@param s: str, residue record
         """
         r = {}
-        io = cStringIO.StringIO( s )
-        line = io.readline().strip()
+        h = io.StringIO( s )
+        line = h.readline().strip()
         while not line:
-            line = io.readline().strip()
+            line = h.readline().strip()
 
         r['name'] = line
-        io.readline()
-        r['code'] = io.readline().split()[0]
+        h.readline()
+        r['code'] = h.readline().split()[0]
         
         atoms = {'serial_number': [], 'name':[], 'amber_type':[],
                  'xyz':[], 'partial_charge':[] }
@@ -223,16 +223,16 @@ class AmberPrepParser( object ):
             if len(q) != len( atoms['xyz'] ):
                 if r['name'] == 'HISTIDINE PLUS':
                     pass
-                raise AmberPrepChargeMissmatch, 'broken charge record in '+\
-                      r['code']
+                raise AmberPrepChargeMissmatch('broken charge record in '+\
+                      r['code'])
             atoms['partial_charge'] = q
         except IndexError:
             pass
-        except AmberPrepChargeMissmatch, why:
+        except AmberPrepChargeMissmatch as why:
             pass
 
         if atoms['partial_charge'] == []:
-            raise AmberPrepError, 'failed to parse charges for '+r['code']
+            raise AmberPrepError('failed to parse charges for '+r['code'])
 
         atoms['partial_charge'] = N.array( atoms['partial_charge'], N.float )
         atoms['xyz']    = N.array( atoms['xyz'], N.float )
@@ -281,7 +281,7 @@ class AmberPrepParser( object ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 import glob
 
 class Test(BT.BiskitTest):
@@ -294,28 +294,28 @@ class Test(BT.BiskitTest):
         files = [ osp.basename( f ) for f in files ]
         results = {}
         if self.local:
-            print
+            print()
         
         for f in files:
             if self.local:
-                print 'working on ', f
+                print('working on ', f)
             self.p = AmberPrepParser( f )
             self.r = [ r for r in self.p.residueTypes() ]
-            self.assert_( len(self.r) > 10 )
+            self.assertTrue( len(self.r) > 10 )
         
             if self.local:
-                print '\tparsed %i residue types from %s' % (len(self.r), f)
+                print('\tparsed %i residue types from %s' % (len(self.r), f))
             results[ f ] = self.r
         
         self.assertEqual( len(results['all_amino03.in']), 33 )
         
         dic = self.p.residueDict()
-        self.assert_( isinstance( dic.values()[0], AmberResidueType) )
+        self.assertTrue( isinstance( list(dic.values())[0], AmberResidueType) )
         
         self.results = results
         if self.local:
             for res in results['all_nuc02.in']:
-                print res
+                print(res)
                 
 
 if __name__ == '__main__':

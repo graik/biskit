@@ -22,19 +22,19 @@
 Collect settings for an external program from a configuration file.
 """
 
-import ConfigParser
-import user, os.path
+import configparser
+import os.path
 
-from Biskit.Errors import BiskitError
-from Biskit import EHandler
+from biskit.Errors import BiskitError
+from biskit import EHandler
 
-import Biskit.tools as T
+import biskit.tools as T
 
 
 class ExeConfigError( BiskitError ):
     pass
 
-class CaseSensitiveConfigParser( ConfigParser.SafeConfigParser ):
+class CaseSensitiveConfigParser( configparser.SafeConfigParser ):
     """
     Change ConfigParser so that it doesn't convert option names to lower case.
     """
@@ -111,7 +111,7 @@ class ExeConfig( object ):
     """
 
     ## static fields
-    PATH_CONF   = user.home + '/.biskit'
+    PATH_CONF   = os.path.expanduser('~/.biskit')
     PATH_CONF_DEFAULT = os.path.join( T.dataRoot(), 'defaults' )
     SECTION_BIN = 'BINARY'
     SECTION_ENV = 'ENVIRONMENT'
@@ -143,9 +143,8 @@ class ExeConfig( object ):
 
         if strict and not self.dat_found:
 
-            raise ExeConfigError,\
-                  'Could not find configuration file %s for program %s.'\
-                  % (self.dat, self.name)
+            raise ExeConfigError('Could not find configuration file %s for program %s.'\
+                  % (self.dat, self.name))
 
         self.conf = CaseSensitiveConfigParser()
         self.conf.read( self.dat )
@@ -192,10 +191,9 @@ class ExeConfig( object ):
                 if value is not '':
                     self.__dict__[ key ] = t( value )
 
-        except ConfigParser.NoSectionError:
+        except configparser.NoSectionError:
             if self.strict:
-                raise ExeConfigError,\
-                      'Could not find BINARY section in %s.' % self.dat
+                raise ExeConfigError('Could not find BINARY section in %s.' % self.dat)
 
         try:
             self.env = dict( self.conf.items( self.SECTION_ENV ) )
@@ -218,13 +216,13 @@ class ExeConfig( object ):
                      % (self.name, missing )
 
             if missing and self.strict:
-                raise ExeConfigError, report
+                raise ExeConfigError(report)
 
             if missing:
                 EHandler.warning( report )
 
-        except IOError, why:
-            raise ExeConfigError, str(why) + ' Check %s!' % self.dat
+        except IOError as why:
+            raise ExeConfigError(str(why) + ' Check %s!' % self.dat)
 
 
     def environment( self ):
@@ -238,7 +236,7 @@ class ExeConfig( object ):
         @raise ExeConfigError: if env was not yet checked by update_environment
         """
         if not self.env_checked:
-            raise ExeConfigError, 'Environment not yet checked, validate()!'
+            raise ExeConfigError('Environment not yet checked, validate()!')
 
         return self.env
 
@@ -282,7 +280,7 @@ class ExeConfig( object ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """ExeConfig test"""
@@ -294,9 +292,9 @@ class Test(BT.BiskitTest):
         x.validate()
 
         if self.local:
-            print x.bin
+            print(x.bin)
 
-        self.assertEquals( True, 'ls' in x.bin )
+        self.assertEqual( True, 'ls' in x.bin )
     
         
 if __name__ == '__main__':

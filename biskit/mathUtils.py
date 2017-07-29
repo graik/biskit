@@ -21,14 +21,19 @@
 ##
 ##
 
-
 """
 general purpose math methods
 """
 
-import Biskit.oldnumeric as N0
-import numpy as N
+## see: https://www.python.org/dev/peps/pep-0366/
+## allow relative imports when calling module as main script for testing
+if __name__ == "__main__" and __package__ is None:
+    import biskit
+    __package__ = "biskit"
 
+from biskit.core import oldnumeric as N0
+
+import numpy as N
 import random
 import numpy.random.mtrand as R
 import math, cmath
@@ -201,10 +206,10 @@ def pairwiseDistances(u, v):
     diag2 = N0.diagonal( N0.dot( v, N0.transpose(v) ) )
     dist = -N0.dot( v,N0.transpose(u) )\
          -N0.transpose( N0.dot( u, N0.transpose(v) ) )
-    dist = N0.transpose( N0.asarray( map( lambda column,a:column+a, \
-                                        N0.transpose(dist), diag1) ) )
+    dist = N0.transpose( N0.asarray( list(map( lambda column,a:column+a, \
+                                        N0.transpose(dist), diag1)) ) )
     return N0.transpose( N0.sqrt( N0.asarray(
-        map( lambda row,a: row+a, dist, diag2 ) ) ))
+        list(map( lambda row,a: row+a, dist, diag2 ) ) )))
 
 
 def randomMask( nOnes, length ):
@@ -358,7 +363,7 @@ def area(curve, start=0.0, stop=1.0 ):
     Numerically add up the area under the given curve.
     The curve is a 2-D array or list of tupples.
     The x-axis is the first column of this array (curve[:,0]).
-    (originally taken from Biskit.Statistics.ROCalyzer)
+    (originally taken from biskit.Statistics.ROCalyzer)
 
     @param curve: a list of x,y coordinates
     @type  curve: [ (y,x), ] or N0.array
@@ -689,7 +694,7 @@ def linfit( x, y ):
     """
     x, y = N0.array( x, N0.Float64), N0.array( y, N0.Float64)
     if len( x ) != len( y ):
-        raise Exception, 'linfit: x and y must have same length'
+        raise Exception('linfit: x and y must have same length')
 
     av_x = N0.average( x )
     av_y = N0.average( y )
@@ -947,7 +952,7 @@ def outliers( a, z=5, it=5 ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test case"""
@@ -965,7 +970,7 @@ class Test(BT.BiskitTest):
 
     def test_area(self):
         """mathUtils.area test"""
-        self.c = zip( N0.arange(0,1.01,0.1), N0.arange(0,1.01,0.1) )
+        self.c = list(zip( N0.arange(0,1.01,0.1), N0.arange(0,1.01,0.1) ))
         self.area = area( self.c )
         self.assertAlmostEqual( self.area, 0.5, 7 )
 

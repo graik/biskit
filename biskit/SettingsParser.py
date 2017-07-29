@@ -22,10 +22,10 @@ Parse a Biskit settings file.
 """
 
 import os
-import ConfigParser
+import configparser
 
-import Biskit as B
-import Biskit.tools as T
+import biskit as B
+import biskit.tools as T
 
 class SettingsError( Exception ):
     pass
@@ -49,7 +49,7 @@ class InvalidBinary( SettingsWarning ):
     pass
 
 
-class CaseSensitiveConfigParser( ConfigParser.SafeConfigParser ):
+class CaseSensitiveConfigParser( configparser.SafeConfigParser ):
     """
     Change ConfigParser so that it doesn't convert option names to lower case.
     """
@@ -85,9 +85,9 @@ class Setting:
             if not self.value is None:
                 self.value = vtype( self.value )
             self.vtype = vtype
-        except ValueError, e:
-            raise InvalidValue, '%s: cannot convert "%s" to %r.' %\
-                  (self.name,self.value,vtype)
+        except ValueError as e:
+            raise InvalidValue('%s: cannot convert "%s" to %r.' %\
+                  (self.name,self.value,vtype))
 
     def __repr__( self, tab='' ):
         error = ''
@@ -96,23 +96,24 @@ class Setting:
         comment = self.comment or ''
         if comment: comment = ' # '+comment
 
-        return '%s%s = %s%s(%s)%s%s' %\
+        return 'SettingsParser.Setting: %s%s = %s%s(%s)%s%s' %\
                (error, self.name, tab, self.vtype.__name__, str(self.value),\
                 tab, comment)
 
     def __str__( self ):
         return self.__repr__( tab='\t' )
 
-    def __cmp__( self, other ):
-        """
-        Compare Setting instances by their name.
-        @return: 1,0,-1
-        @rtype: int
-        """
+    def __lt__(self, other):
+        """Compare settings instances by their name"""
         if isinstance( other, self.__class__ ):
-            return cmp( self.name, other.name )
-
-        return cmp( self, other )
+            return self.name < other.name
+        return self < other
+    
+    def __eq__( self, other ):
+        """Compare settings instances by their name"""
+        if isinstance( other, self.__class__ ):
+            return self.name == other.name
+        return self == other
 
 
     def formatted( self ):
@@ -167,14 +168,14 @@ class SettingsParser(object):
         try:
             v = T.absfile( v )
             if not v or not os.path.exists( v ):
-                raise InvalidPath, 'invalid path %r' % v
+                raise InvalidPath('invalid path %r' % v)
 
             return v
 
-        except InvalidPath, e:
+        except InvalidPath as e:
             raise
-        except Exception, e:
-            raise InvalidPath, 'error during path validation: %r' % str(e)
+        except Exception as e:
+            raise InvalidPath('error during path validation: %r' % str(e))
 
 
     def __validBinary( self, v ):
@@ -189,11 +190,11 @@ class SettingsParser(object):
         """
         try:
             if not v:
-                raise IOError, 'empty path'
+                raise IOError('empty path')
 
             return T.absbinary( v )
 
-        except IOError, msg:
+        except IOError as msg:
             raise InvalidBinary( str(msg) )
 
 
@@ -226,11 +227,11 @@ class SettingsParser(object):
                 t = eval( s )
 
                 if not type(t) is type:
-                    raise TypeError, '%s is not a valid type' % s
+                    raise TypeError('%s is not a valid type' % s)
 
-            except Exception, e:
-                raise TypeError, 'Cannot extract type from %s: %r'\
-                      % option, e
+            except Exception as e:
+                raise TypeError('Cannot extract type from %s: %r'\
+                      % option).with_traceback(e)
 
         return t, o
 
@@ -270,7 +271,7 @@ class SettingsParser(object):
             if section == Setting.BIN:
                 r.value = self.__validBinary( r.value )
 
-        except SettingsWarning, e:           ## catch and record warnings
+        except SettingsWarning as e:           ## catch and record warnings
             r.error = str(e)
 
         return r
@@ -314,16 +315,16 @@ class SettingsParser(object):
             c = CaseSensitiveConfigParser()
 
             if c.read( self.f_ini ) != [ self.f_ini ]:
-                raise IOError, 'Settings file %s not found.' % self.f_ini
+                raise IOError('Settings file %s not found.' % self.f_ini)
 
             for section in c.sections():
 
                 self.result.update(
                     self.__processSection( c.items(section), section) )
 
-        except ConfigParser.Error, e:
-            raise InvalidFile, 'Error parsing settings file %s: ' %\
-                  self.f_ini + str(e)
+        except configparser.Error as e:
+            raise InvalidFile('Error parsing settings file %s: ' %\
+                  self.f_ini + str(e))
 
         return self.result
 
@@ -332,7 +333,7 @@ class SettingsParser(object):
         err = len( [ s for s in self.result.values() if s.error ] )
         r += ' -- %i entries, (!) %i errors' % (len( self.result ), err)
 
-        values = self.result.values()
+        values = list(self.result.values())
         values.sort()
 
         for v in values:
@@ -343,7 +344,7 @@ class SettingsParser(object):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test"""

@@ -22,7 +22,11 @@ Cache of ExeConfig instances
 """
 
 import threading
-from Biskit import ExeConfig
+from biskit.ExeConfig import ExeConfig
+from biskit import BiskitError
+
+class ExeConfigCacheError(BiskitError):
+    pass
 
 class ExeConfigCache:
     """
@@ -59,14 +63,17 @@ class ExeConfigCache:
         @rtype: ExeConfig
         """
 
-        ExeConfigCache.LOCK.acquire()
+        if not ExeConfigCache.LOCK.acquire(timeout=15):
+            raise ExeConfigCacheError('Failed to aquire singleton lock.')
 
-        if not name in ExeConfigCache.CACHE or reload:
-            ExeConfigCache.CACHE[ name ] = ExeConfig( name, **kw )
+        try:
+            if not name in ExeConfigCache.CACHE or reload:
+                ExeConfigCache.CACHE[ name ] = ExeConfig( name, **kw )
+    
+            r = ExeConfigCache.CACHE[ name ]
 
-        r = ExeConfigCache.CACHE[ name ]
-
-        ExeConfigCache.LOCK.release()
+        finally:
+            ExeConfigCache.LOCK.release()
 
         return r
 
@@ -76,8 +83,8 @@ class ExeConfigCache:
         """
         Empty the cache.
         """
-
-        ExeConfigCache.LOCK.acquire()
+        if not ExeConfigCache.LOCK.acquire(timeout=15):
+            raise ExeConfigCacheError('Failed to aquire singleton lock.')
 
         ExeConfigCache.CACHE = {}
 
@@ -98,7 +105,7 @@ class ExeConfigCache:
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test"""
@@ -110,9 +117,9 @@ class Test(BT.BiskitTest):
         self.x = ExeConfigCache.get( 'xplor' )
         
         if self.local:
-            print self.x
+            print(self.x)
 
-        self.assert_( self.x.dat_found )
+        self.assertTrue( self.x.dat_found )
         
 
 if __name__ == '__main__':

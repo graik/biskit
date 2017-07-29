@@ -27,13 +27,13 @@ Clean PDB-files so that they can be used for MD. This module is a
 (still partial) re-implementation of the vintage pdb2xplor script.
 """
 
-import Biskit.molUtils as MU
-import Biskit.mathUtils as M
-import Biskit.tools as t
-from Biskit.PDBModel import PDBModel
-from Biskit.LogFile import StdLog
+import biskit.molUtils as MU
+import biskit.mathUtils as M
+import biskit.tools as t
+from biskit import PDBModel
+from biskit.LogFile import StdLog
 
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 
 import copy
 
@@ -108,8 +108,8 @@ class PDBCleaner:
         """
         @param fpdb: pdb file OR PDBModel instance
         @type  fpdb: str OR Biskit.PDBModel
-        @param log: Biskit.LogFile object (default: STDOUT)
-        @type  log: Biskit.LogFile
+        @param log: biskit.LogFile object (default: STDOUT)
+        @type  log: biskit.LogFile
         @param verbose: log warnings and infos (default: True)
         @type  verbose: bool
         """
@@ -123,7 +123,7 @@ class PDBCleaner:
             self.log.add( msg )
         else:
             if force:
-                print msg
+                print(msg)
 
     def remove_multi_occupancies( self ):
         """
@@ -184,7 +184,7 @@ class PDBCleaner:
         @param keep: names of additional residues to keep
         @type keep:  [ str ]
         """
-        standard = MU.atomDic.keys() + keep
+        standard = list(MU.atomDic.keys()) + keep
 
         if amber:
             standard.extend( ['HID', 'HIE', 'HIP', 'CYX', 'NME', 'ACE'] )
@@ -377,7 +377,7 @@ class PDBCleaner:
 
         cap = m_ace.resModels()[0]
         serial = m_term['serial_number'][0] - len(cap)
-        cap['serial_number'] = range( serial, serial + len(cap) )
+        cap['serial_number'] = list(range( serial, serial + len(cap)))
 
         ## concat cap on chain
         m_chain = cap.concat( m_chain, newChain=False )
@@ -388,9 +388,9 @@ class PDBCleaner:
         r = r.concat( chains_after, newChain=not Cterm_is_break)
         
         if len(c_start) != r.lenChains( breaks=breaks ):
-            raise CappingError, 'Capping ACE would mask a chain break. '+\
+            raise CappingError('Capping ACE would mask a chain break. '+\
                   'This typically indicates a tight gap with high risk of '+\
-                  'clashes and other issues.'
+                  'clashes and other issues.')
 
         return r
 
@@ -452,7 +452,7 @@ class PDBCleaner:
         
         cap = m_nme.resModels()[-1]
         serial = m_term['serial_number'][-1]+1
-        cap['serial_number'] = range( serial, serial + len(cap) )
+        cap['serial_number'] = list(range( serial, serial + len(cap)))
 
         ## concat cap on chain
         m_chain = m_chain.concat( cap, newChain=False )
@@ -467,9 +467,9 @@ class PDBCleaner:
         r = r.concat( chains_after, newChain=not Cterm_is_break)
 
         if len(c_start) != r.lenChains( breaks=breaks ):
-            raise CappingError, 'Capping NME would mask a chain break. '+\
+            raise CappingError('Capping NME would mask a chain break. '+\
                   'This typically indicates a tight gap with high risk of '+\
-                  'clashes and other issues.'
+                  'clashes and other issues.')
         
         return r
 
@@ -645,9 +645,9 @@ class PDBCleaner:
             self.remove_non_standard_atoms()
 
 
-        except KeyboardInterrupt, why:
+        except KeyboardInterrupt as why:
             raise KeyboardInterrupt( why )
-        except Exception, why:
+        except Exception as why:
             self.logWrite('Error: '+t.lastErrorTrace())
             raise CleanerError( 'Error cleaning model: %r' % why )
 
@@ -658,13 +658,13 @@ class PDBCleaner:
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test class """
 
     def prepare(self):
-        from Biskit.LogFile import LogFile
+        from biskit.LogFile import LogFile
         import tempfile
 
 
@@ -698,7 +698,7 @@ class Test(BT.BiskitTest):
 
         self.c = PDBCleaner( self.model, log=self.log, verbose=self.local )       
         self.m2 = self.c.capTerminals( breaks=True )
-        self.assert_( self.m2.atomNames() == self.model.atomNames() )
+        self.assertTrue( self.m2.atomNames() == self.model.atomNames() )
         
         self.m3 = self.model.clone()
         self.m3.removeRes( [10,11,12,13,14,15] )

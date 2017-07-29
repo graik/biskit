@@ -25,13 +25,14 @@ Fetch a PDBModel from the remote or a local NCBI PDB database.
 @see L{PDBModel}
 @see L{PDBParserFactory}
 """
-import urllib, re, tempfile, os
+import urllib.request, urllib.parse, urllib.error, re, tempfile, os
+import codecs, io
 
-import Biskit.tools as T
-import Biskit.settings as settings
-import Biskit as B
-from PDBParser import PDBParser, PDBParserError
-from PDBParseModel import PDBParseModel
+import biskit.tools as T
+import biskit.settings as settings
+import biskit as B
+from biskit.core.pdbparser import PDBParser, PDBParserError
+from biskit.core.pdbparseModel import PDBParseModel
 
 
 class PDBParseNCBI( PDBParseModel ):
@@ -41,6 +42,10 @@ class PDBParseNCBI( PDBParseModel ):
 
     ## resolution assigned to NMR structures
     NMR_RESOLUTION = 3.5
+    
+    def __init__(self, log=None):
+        super().__init__(log=log)
+        self.encoding = 'utf-8'
 
     @staticmethod
     def supports( source ):
@@ -109,7 +114,7 @@ class PDBParseNCBI( PDBParseModel ):
         raise PDBParserError( "Couldn't find PDB file locally.")
 
 
-    def getRemotePDBHandle( self, id, rcsb_url=settings.rcsb_url ):
+    def getRemotePDBHandle( self, pdb_id, rcsb_url=settings.rcsb_url ):
         """
         Get the coordinate file remotely from the RCSB.
 
@@ -131,9 +136,10 @@ class PDBParseNCBI( PDBParseModel ):
                                  'remote fetching of PDBs is not supported.')
 
 
-        handle = urllib.urlopen( rcsb_url% (id) )
+        resource = urllib.request.urlopen( rcsb_url% pdb_id )
+        self.encoding = resource.headers.get_content_charset()
 
-        uhandle = File.UndoHandle(handle)
+        uhandle = File.UndoHandle(resource)
 
         if not uhandle.peekline():
             raise PDBParserError( "Couldn't retrieve ", rcsb_url )
@@ -161,13 +167,13 @@ class PDBParseNCBI( PDBParseModel ):
         if type( handle ) is str:
             if len(handle) < 5000:
                 raise PDBParserError( "Couldn't extract PDB Info." )
-            handle =  cStringIO.StringIO( handle )
+            handle =  io.StringIO( handle )
 
 ## if handle.peekline()[:6] != 'TITLE':
 ##     raise PDBParserError, 'Ressource does not seem to be a PDB:\n%r' %\
 ##     handle.peekline()
 
-        for l in handle:
+        for l in codecs.iterdecode(handle, self.encoding):
             lines += [ l ]
 
             res_match = res_match or self.ex_resolution.search( l )
@@ -176,7 +182,7 @@ class PDBParseNCBI( PDBParseModel ):
                 break
         
         if len(lines) < 10 and '<div>' in lines[0]:
-            raise PDBParserError, 'No PDB found with this ID.'
+            raise PDBParserError('No PDB found with this ID.')
 
         if res_match:
             if res_match.groups()[0] == 'NOT APPLICABLE':
@@ -184,7 +190,7 @@ class PDBParseNCBI( PDBParseModel ):
             else:
                 infos['resolution'] = float( res_match.groups()[0] )
         else:
-            raise PDBParserError, 'No resolution record found in PDB.'
+            raise PDBParserError('No resolution record found in PDB.')
 
         return lines, infos
 
@@ -238,16 +244,16 @@ class PDBParseNCBI( PDBParseModel ):
         """
         try:
             if force or updateMissing or self.needsUpdate( model ):
-
+    
                 s = self.fetchPDB( source )
-
+    
                 super( PDBParseNCBI, self ).update(
                     model, s, skipRes=skipRes, updateMissing=updateMissing,
                     force=force )
 
-        except Exception, why:
-            raise PDBParserError, "Cannot fetch PDB from %s, "\
-                  % str(source) + "Reason:\n" + str(why)
+        except Exception as why:
+            raise PDBParserError("Cannot fetch PDB from %s, "\
+                  % str(source) + "Reason:\n" + str(why))
 
         ## override source set by PDBParseModel
         model.source = source
@@ -256,7 +262,7 @@ class PDBParseNCBI( PDBParseModel ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test"""
@@ -266,18 +272,18 @@ class Test(BT.BiskitTest):
 
         ## loading output file from X-plor
         if self.local:
-            print 'Loading pdb file ..'
+            print('Loading pdb file ..')
 
         self.p = PDBParseNCBI()
         self.m = self.p.parse2new( '1A2P')
 
-        self.assert_( len(self.m) == 3042 )
+        self.assertTrue( len(self.m) == 3042 )
     
     def test_PDBParseNCBI_fail(self):
         """PDBParseNCBI wrong ID test"""
         ## loading output file from X-plor
         if self.local:
-            print 'Requesting non-existing ID ..'
+            print('Requesting non-existing ID ..')
         
         self.p = PDBParseNCBI()
         

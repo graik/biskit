@@ -60,7 +60,7 @@ class XplorInputError( BiskitError ):
 ##################
 ##  (FAKE) TESTING        
 ###################
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Error test"""

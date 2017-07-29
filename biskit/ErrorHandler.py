@@ -22,9 +22,9 @@
 Default Error Handler for Biskit classes.
 """
 
-import Biskit.tools as T
-from Biskit.LogFile import ErrLog
-from Biskit.Errors import HandledError, NormalError, FatalError
+import biskit.tools as T
+from biskit.LogFile import ErrLog
+from biskit.Errors import HandledError, NormalError, FatalError
 
 class ErrorHandler( object ):
     """
@@ -102,7 +102,7 @@ class ErrorHandler( object ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """ErrorHandler test"""
@@ -116,7 +116,7 @@ class Test(BT.BiskitTest):
 
     def test_ErrorHandler( self ):
         """ErrorHandler test"""
-        from Biskit.LogFile import LogFile
+        from biskit.LogFile import LogFile
 
         self.err_log = LogFile( self.f_out )
 
@@ -124,10 +124,10 @@ class Test(BT.BiskitTest):
         self.e.warning( 'A warning' )
 
         if self.local:
-            print 'An error log file was written to %s'%self.f_out
+            print('An error log file was written to %s'%self.f_out)
 
         lines = open(self.err_log.fname).readlines()
-        self.assertEquals(lines[-1],'Warning (ignored): A warning\n')
+        self.assertEqual(lines[-1],'Warning (ignored): A warning\n')
 
 if __name__ == '__main__':
 

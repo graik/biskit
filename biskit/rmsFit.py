@@ -24,8 +24,8 @@
 superimpose 2 structures iteratively
 """
 
-import Biskit.mathUtils as MU
-import Biskit.oldnumeric as N0
+from . import mathUtils as MU
+from biskit.core import oldnumeric as N0
 from numpy.linalg import svd
 
 ## def average(x):
@@ -168,21 +168,21 @@ def rowDistances( x, y ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+from . import test as BT
 
 class Test(BT.BiskitTest):
     """Test case"""
 
     def test_rmsFit( self ):
         """rmsFit test"""
-        import Biskit.tools as T
+        from . import tools as T
 
-        self.traj = T.load( T.testRoot() + '/lig_pcr_00/traj.dat' )
+        self.traj = T.load( T.testRoot('lig_pcr_00/traj.dat') )
 
         rt, rmsdLst = match( self.traj.ref.xyz, self.traj[-1].xyz)
 
         if self.local:
-            print 'RMSD: %.2f' % rmsdLst[0][1]
+            print('RMSD: %.2f' % rmsdLst[0][1])
 
         # return rotation matrix
         r = abs( N0.sum( N0.ravel( rt[0] )))

@@ -26,14 +26,14 @@
 Multi-copy trajectory
 """
 
-from Trajectory import Trajectory, TrajError
-from Biskit import EHandler
+from biskit.Trajectory import Trajectory, TrajError
+from biskit import EHandler
 
-import Biskit.mathUtils as M
+import biskit.mathUtils as M
 
 import types
-import Biskit.oldnumeric as N0
-import Biskit.tools as T
+import biskit.core.oldnumeric as N0
+import biskit.tools as T
 
 try:
     import biggles
@@ -104,8 +104,7 @@ class EnsembleTraj( Trajectory ):
 
         if self.n_members and self.frames is not None and \
                len( self ) % self.n_members != 0:
-            raise EnsembleTrajError,\
-                  'Member trajectories must have equal number of frames.'
+            raise EnsembleTrajError('Member trajectories must have equal number of frames.')
 
 
     def version( self ):
@@ -191,7 +190,7 @@ class EnsembleTraj( Trajectory ):
         @return: indices for members
         @rtype: [int]
         """
-        r = range( member, self.lenFrames(), self.n_members )
+        r = list(range( member, self.lenFrames(), self.n_members))
         if step != 1:
             r = N0.take( r, range( 0, len( r ), step ) ).tolist()
         return r
@@ -209,10 +208,10 @@ class EnsembleTraj( Trajectory ):
         """
         result = N0.zeros( self.lenFrames() )
 
-        if isinstance( member , types.IntType):
+        if isinstance( member , int):
             N0.put( result, self.memberIndices( member ), 1 )
 
-        if type( member ) == types.ListType:
+        if type( member ) == list:
             for m in member:
                 N0.put( result, self.memberIndices( m ), 1 )
 
@@ -283,9 +282,9 @@ class EnsembleTraj( Trajectory ):
             return result
 
         except TypeError:
-            raise EnsembleTrajError, 'takeMembers TypeError '+\
+            raise EnsembleTrajError('takeMembers TypeError '+\
                   str(mIndices)+\
-                  "\nlenFrames: %i; n_members: %i" %(len(self), self.n_members)
+                  "\nlenFrames: %i; n_members: %i" %(len(self), self.n_members))
 
 
     def concatEnsembles( self, *traj ):
@@ -309,8 +308,8 @@ class EnsembleTraj( Trajectory ):
         min_members = min( self.n_members, traj[0].n_members )
         min_frames = min( self.lenFrames(), traj[0].lenFrames() )
 
-        steps = self.lenFrames()/self.n_members + \
-                traj[0].lenFrames()/traj[0].n_members
+        steps = self.lenFrames()//self.n_members + \
+                traj[0].lenFrames()//traj[0].n_members
 
         def __everyOther( traj_0, traj_1, list_0, list_1, minMembers,
                           minFrames, loops ):
@@ -351,7 +350,7 @@ class EnsembleTraj( Trajectory ):
 
 #                r.pc['p'] = N0.concatenate( (self.pc['p'], traj[0].pc['p']),0)
 #                r.pc['u'] = N0.concatenate( (self.pc['u'], traj[0].pc['u']),0)
-        except TypeError, why:
+        except TypeError as why:
             EHandler.error('cannot concat PC '+str(why) )
 
 #        r.profiles = self.profiles.concat( traj[0].profiles )
@@ -391,7 +390,7 @@ class EnsembleTraj( Trajectory ):
         @param indices: trajectory (member) numbers
         @type  indices: [int]
         """
-        i = range( self.n_members )
+        i = list(range( self.n_members))
         i.remove( N0.array(indices) )
         self.keepMembers( i )
 
@@ -401,7 +400,7 @@ class EnsembleTraj( Trajectory ):
         Reset frame names to t_00_m_00 .. t_50_m_10.
         """
         n = self.n_members
-        steps = self.lenFrames() / n
+        steps = self.lenFrames() // n
 
         time_member = []
         for s in range( steps ):
@@ -462,9 +461,9 @@ class EnsembleTraj( Trajectory ):
         @rtype: biggles.FramedArray()   
         """
         if not biggles:
-            raise ImportError, 'biggles module could not be imported.'
+            raise ImportError('biggles module could not be imported.')
         
-        rows = self.n_members / 2 + self.n_members % 2
+        rows = self.n_members // 2 + self.n_members % 2
         page = biggles.FramedArray( rows , 2)
 
         biggles.configure('fontsize_min', 1)
@@ -486,19 +485,19 @@ class EnsembleTraj( Trajectory ):
                 if maxV is None or maxV < max( p ):
                     maxV = max(p)
 
-                page[i/2, i%2].add( biggles.Curve( range( len(p) ), list(p),
+                page[i//2, i%2].add( biggles.Curve( list(range( len(p))), list(p),
                                                    color=colors[j], **arg ) )
 
-                page[i/2, i%2].add( biggles.PlotLabel( 0.8, 0.8-j/8.0, name[j],
+                page[i//2, i%2].add( biggles.PlotLabel( 0.8, 0.8-j/8.0, name[j],
                                                        color=colors[j]) )
 
-            page[i/2, i%2].add( biggles.PlotLabel( 0.1, 0.9, 'Traj %i' % i))
+            page[i//2, i%2].add( biggles.PlotLabel( 0.1, 0.9, 'Traj %i' % i))
 
             i += 1
 
         if self.n_members % 2 != 0:
             line = biggles.Line( (0,minV), (len(p),maxV) )
-            page[ self.n_members/2, 1 ].add( line )
+            page[ self.n_members//2, 1 ].add( line )
 
         page.uniform_limits = 1
         page.xlabel = arg.get('xlabel',None)
@@ -617,7 +616,7 @@ class EnsembleTraj( Trajectory ):
 
         pm = [ p_all[ member : l : n ][:-last] for member in range( n ) ]
 
-        slopes = [ M.linfit( range( l/n - last ), p )[0] for p in pm ]
+        slopes = [ M.linfit( list(range( l//n - last)), p )[0] for p in pm ]
 
         mean, sd = N0.average( slopes ), M.SD( slopes )
 
@@ -627,7 +626,7 @@ class EnsembleTraj( Trajectory ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """EnsembleTraj test"""
@@ -674,7 +673,7 @@ class Test(BT.BiskitTest):
         self.o = self.t2.outliers( z=1.2, mask=self.tr.ref.maskCA(),
                               verbose=self.local )
         if self.local:
-            print self.o
+            print(self.o)
 
         self.t = self.t2.compressMembers( N0.logical_not( self.o ) )
 

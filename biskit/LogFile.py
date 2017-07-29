@@ -21,7 +21,7 @@
 Simple log file.
 """
 
-import Biskit.tools as T
+import biskit.tools as T
 import sys
 
 class LogFile:
@@ -138,7 +138,7 @@ class StdLog( LogFile ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
 
@@ -148,7 +148,7 @@ class Test(BT.BiskitTest):
 
     def cleanUp(self):
         if T.tryRemove( self.f_out ) and self.local:
-            print 'log file removed.'
+            print('log file removed.')
 
     def test_LogFile( self ):
         """LogFile test """
@@ -160,7 +160,7 @@ class Test(BT.BiskitTest):
         self.l.writeln('3')
 
         if self.local:
-            print 'log file written to %s'%self.f_out
+            print('log file written to %s'%self.f_out)
 
         lines = open(self.f_out).readlines()
         self.assertEqual( lines, ['1\n','23\n'] )

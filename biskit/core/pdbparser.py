@@ -29,8 +29,8 @@ cases, it should not be necessary to use it directly.
 @see L{Biskit.PDBParseModel}
 @see L{Biskit.PDBParsePickle}
 """
-from Biskit import StdLog, ErrLog
-import Biskit as B
+from biskit import StdLog, ErrLog
+import biskit as B
 
 class PDBParserError( Exception ):
     """Error while parsing a structure file or object"""
@@ -45,7 +45,7 @@ class PDBParser(object):
     def __init__( self, log=None ):
         """
         @param log: Log for warnings [default log to STDERR]
-        @type  log: Biskit.LogFile.LogFile
+        @type  log: biskit.LogFile.LogFile
 
         Override if needed. Call parent method in overriding class!
         """
@@ -67,7 +67,7 @@ class PDBParser(object):
                  implementation
         @rtype: bool
         """
-        raise NotImplementedError, 'issupported() is not implemented.'
+        raise NotImplementedError('issupported() is not implemented.')
 
 
     @staticmethod
@@ -84,7 +84,7 @@ class PDBParser(object):
         @return: short free text description of the supported format
         @rtype: str
         """
-        raise NotImplementedError, 'description() is not implemented.'
+        raise NotImplementedError('description() is not implemented.')
 
 
     def update( self, model, source, skipRes=None, updateMissing=0, force=0,
@@ -114,7 +114,7 @@ class PDBParser(object):
         @param headPatterns: [(putIntoKey, regex)] extract given REMARKS
         @type  headPatterns: [(str, str)]
         """
-        raise NotImplementedError, 'update() is not implemented.'
+        raise NotImplementedError('update() is not implemented.')
 
 
     def needsUpdate( self, model ):
@@ -160,7 +160,7 @@ class PDBParser(object):
 # Empty test #
 ##############
 
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     pass

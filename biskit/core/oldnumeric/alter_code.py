@@ -1,5 +1,5 @@
 import sys, re
-import biskit.oldnumeric as oldnumeric
+import biskit.core.oldnumeric as oldnumeric
 import numpy as N
 import sys
 import time
@@ -7,7 +7,7 @@ import time
 
 def replaceimport(l):
     if 'import' in l:
-        return l.replace('import numpy.oldnumeric as oldN', 'import biskit.oldnumeric as N0')
+        return l.replace('import numpy.oldnumeric as oldN', 'import biskit.core.oldnumeric as N0')
     return l
 
 def valid(method):

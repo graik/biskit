@@ -21,9 +21,9 @@
 Manage Biskit settings.
 """
 
-import Biskit as B
-import Biskit.tools as T
-import Biskit.SettingsParser as P
+import biskit as B
+import biskit.tools as T
+import biskit.SettingsParser as P
 
 import os
 
@@ -127,7 +127,7 @@ class SettingsManager:
 
             next = cfg_user.get( name, default )
 
-            if next.error > default.error:
+            if next.error and not default.error:
 
                 if self.verbose: B.EHandler.warning(\
                     'User setting %s is reset to default (%r),\n\treason: %s'\
@@ -153,7 +153,7 @@ class SettingsManager:
                 puser = P.SettingsParser( self.fuser )
                 cuser = puser.parse()
 
-            except IOError, e:
+            except IOError as e:
                 if self.verbose: B.EHandler.warning(
                     'Could not find file with user-defined settings in %s' \
                     % self.fuser, trace=0, error=0)
@@ -162,7 +162,7 @@ class SettingsManager:
 
             self.settings = self.__update( cdefault, cuser )
 
-        except P.SettingsError, e:
+        except P.SettingsError as e:
             B.EHandler.fatal( str(e) )
 
 
@@ -210,8 +210,8 @@ class SettingsManager:
 
             f.close()
 
-        except OSError, e:
-            raise WriteCfgError, e
+        except OSError as e:
+            raise WriteCfgError(e)
 
     def settings2dict( self ):
         """
@@ -248,7 +248,7 @@ class SettingsManager:
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test"""

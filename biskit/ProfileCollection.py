@@ -25,14 +25,16 @@ Manage profiles.
 """
 
 import numpy as N
-import tools as T
-import mathUtils as M
-from Biskit import EHandler
-from Biskit.hist import density
+import biskit.tools as T
+import biskit.mathUtils as M
+from biskit import EHandler
+from biskit.hist import density
 
 
 import copy
-from UserDict import DictMixin
+## manual replace UserDict: http://python3porting.com/problems.html#replacing-userdict
+##from UserDict import DictMixin
+from collections import MutableMapping as DictMixin
 import weakref
 
 try:
@@ -147,21 +149,28 @@ class CrossView( DictMixin ):
         assert self.alive, 'view on dead or changed profile collection'
 
         self.parent().profiles[ key ][self.index] = v
+        
+    def __delitem__(self, key):
+        raise ProfileError('Cannot delete profile key %s (or any other) from '\
+                           +' CrossView instance.' % key)
+    
+    def __len__(self):
+        return len(self.parent().profiles.keys())
 
     def keys( self ):
         assert self.alive, 'view on dead or changed profile collection'
 
         return self.parent().profiles.keys()
 
-    def has_key(self, key ):
-        assert self.alive, 'view on dead or changed profile collection'
-
-        return self.parent().profiles.has_key( key )
+##   def has_key(self, key ):
+##       assert self.alive, 'view on dead or changed profile collection'
+##
+##        return key in self.parent().profiles
 
     def __contains__( self, key ):
         assert self.alive, 'view on dead or changed profile collection'
 
-        return self.parent().profiles.has_key( key )
+        return key in self.parent().profiles
 
     def __iter__( self ):
         for k in self.parent().profiles.keys():
@@ -416,7 +425,7 @@ class ProfileCollection:
         @return: True or False
         @rtype: 1|0  
         """
-        return self.has_key( k )
+        return k in self.profiles
 
 
     def __iter__(self):
@@ -435,7 +444,7 @@ class ProfileCollection:
 
 
     def has_key( self, k ):
-        return self.profiles.has_key(k)
+        return k in self.profiles
 
 
     def values( self ):
@@ -595,7 +604,7 @@ class ProfileCollection:
                     return list( prof )
                 
                 p = self.__picklesave_array( N.array( prof ) )
-                if p.dtype.char not in ['O','c','S']: ## no char or object arrays!
+                if p.dtype.char not in ['O','c','S', 'U']: ## no char or object arrays!
                     return p
 
                 return list( prof )
@@ -615,15 +624,15 @@ class ProfileCollection:
                 
                 return self.__picklesave_array( N.array( prof ) )
 
-        except TypeError, why:
+        except TypeError as why:
             ## Numeric bug: N.array(['','','']) raises TypeError
             if asarray == 1 or asarray == 0:
                 return list( prof )
 
-            raise ProfileError, "Cannot create array from given list. %r"\
-                  % T.lastError()
+            raise ProfileError("Cannot create array from given list. %r"\
+                  % T.lastError())
 
-        raise ProfileError, "%r not allowed as value for asarray" % asarray
+        raise ProfileError("%r not allowed as value for asarray" % asarray)
 
 
     def expand( self, prof, mask, default ):
@@ -729,7 +738,7 @@ class ProfileCollection:
 
         ## new profiles are always changed=1, updated profiles are checked
         if not 'changed' in moreInfo:
-            if name in self.keys():
+            if name in list(self.keys()):
                 info['changed'] = self.infos[name]['changed'] or \
                                   not M.arrayEqual( self.profiles[name], prof )
             else:
@@ -781,7 +790,7 @@ class ProfileCollection:
         if type( name ) == tuple:
             result = self.getInfo( name[0] ).get( name[1], default )
 
-            if result is None and not self.getInfo( name[0] ).has_key(name[1]):
+            if result is None and name[1] not in self.getInfo( name[0] ):
                 raise ProfileError( 'No info value found for '+str(name[1]) )
 
             return result
@@ -790,7 +799,7 @@ class ProfileCollection:
         result = self.profiles.get( name, default )
 
         ## but tolerate profiles that are set to None -> return None
-        if result is None and not self.profiles.has_key(name):
+        if result is None and name not in self.profiles:
             raise ProfileError( 'No profile found with name '+str(name) )
 
         return result
@@ -872,7 +881,7 @@ class ProfileCollection:
                 result.setInfo( key, **copy.deepcopy(self.getInfo(key)) )
                 result.setInfo( key, changed=1 )
 
-        except Exception, why:
+        except Exception as why:
             raise ProfileError( "Can't take sub-profile %r: %r" % (key,why) )
 
         return result
@@ -968,7 +977,7 @@ class ProfileCollection:
 ##        if not next.keys():
 ##            return self.clone().concat( *profiles[1:] )
 ##                
-        allkeys = M.union( self.profiles.keys(), next.keys() )
+        allkeys = M.union( list(self.profiles.keys()), list(next.keys()) )
 
 ##        for k, p in self.profiles.items():
         for k in allkeys:
@@ -1102,9 +1111,8 @@ class ProfileCollection:
         if not allowEmpty and self.hasNoneProfile():
             for key, prof in self.profiles.items():
                 if not prof:
-                    raise ProfileError, \
-                          ('Trying to update %s profile but cannot find'\
-                           + ' it in source.') % key
+                    raise ProfileError(('Trying to update %s profile but cannot find'\
+                           + ' it in source.') % key)
 
 
     def isChanged( self, keys=None ):
@@ -1114,7 +1122,7 @@ class ProfileCollection:
         @return: True, if any of the profiles is tagged as 'changed'
         @rtype: bool
         """
-        keys = keys or self.keys()
+        keys = keys or list(self.keys())
         keys = T.toList( keys )  ## in case single str is given as argument 
 
         for k in keys:
@@ -1190,7 +1198,7 @@ class ProfileCollection:
         @raise ImportError: If biggles module could not be imported
         """
         if not biggles:
-            raise ImportError, 'module biggles could not be imported'
+            raise ImportError('module biggles could not be imported')
 
         plot = biggles.FramedPlot()
 
@@ -1201,10 +1209,10 @@ class ProfileCollection:
             p = N.array( self.get( name[i] ) )
 
             if p.dtype in ['O','c']:
-                raise TypeError, 'Cannot plot values of profile %s.' % name[i]
+                raise TypeError('Cannot plot values of profile %s.' % name[i])
 
             # Biggles with its old Numeric cannot handle numpy arrays
-            plot.add( biggles.Curve( range( len(p) ), list(p), color=colors[i],
+            plot.add( biggles.Curve( list(range( len(p))), list(p), color=colors[i],
                                      **arg ) )
 
             plot.add( biggles.PlotLabel( 0.8, 0.8-i/8.0, name[i],
@@ -1230,7 +1238,7 @@ class ProfileCollection:
         @raise ImportError: If biggles module could not be imported
         """
         if not biggles:
-            raise ImportError, 'module biggles could not be imported'
+            raise ImportError('module biggles could not be imported')
 
         plot = biggles.FramedArray( len(name),1 )
 
@@ -1248,7 +1256,7 @@ class ProfileCollection:
                 
             for j, key in enumerate(keys):
 
-                x = self.get( xkey, range(self.profLength()) )
+                x = self.get( xkey, list(range(self.profLength())) )
                 y = self[key]
                 
                 colors = [0] + T.colorSpectrum( len(keys) , '00FF00', 'FF00FF')
@@ -1274,7 +1282,7 @@ class ProfileCollection:
         @type  steps: bool
         """
         if not biggles:
-            raise ImportError, 'module biggles could not be imported'
+            raise ImportError('module biggles could not be imported')
 
         plot = biggles.FramedArray( len(name),1 )
 
@@ -1346,7 +1354,7 @@ class ProfileCollection:
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as  BT
         
 class Test(BT.BiskitTest):
     """Test"""
@@ -1357,33 +1365,33 @@ class Test(BT.BiskitTest):
 
         self.p = ProfileCollection()
 
-        self.p.set( 't1', range(10), comment='test 1', option='x' )
-        self.p.set( 't2', range(12,22), comment='second test', option='y' )
+        self.p.set( 't1', list(range(10)), comment='test 1', option='x' )
+        self.p.set( 't2', list(range(12,22)), comment='second test', option='y' )
 
         mask = N.zeros( 10 )
         mask[0:10:2] = 1
-        l = [ s for s in string.letters[:5] ] ## list of letters
+        l = [ s for s in string.ascii_letters[:5] ] ## list of letters
 
         self.p.set( 't3', l, comment='masked test', option='z',
                     mask=mask, default=99, asarray=0 )
 
         if self.local:
-            print '\nmasked profile: ', repr( self.p['t3'] )
+            print('\nmasked profile: ', repr( self.p['t3'] ))
 
-        self.p = self.p.take( range(0,10,2) )
+        self.p = self.p.take( list(range(0,10,2)) )
 
         if self.local:
-            print 'unmasked profile: ', repr( self.p['t3'] )
+            print('unmasked profile: ', repr( self.p['t3'] ))
 
         self.p2 = ProfileCollection()
         self.p2.set( 't1', self.p['t1'], comment='overridden', changed=1 )
-        self.p2.set( 't4', range(30, 35), comment='added' )
+        self.p2.set( 't4', list(range(30, 35)), comment='added' )
 
         self.r = self.p.concat( self.p, self.p )  ## concatenate 3 copies of p
 
         self.p.update( self.p2, stickyChanged=1 )
 
-        self.assert_( N.all( self.r['t1'] ==\
+        self.assertTrue( N.all( self.r['t1'] ==\
                       [0, 2, 4, 6, 8, 0, 2, 4, 6, 8, 0, 2, 4, 6, 8]))
     
 
@@ -1393,10 +1401,10 @@ class Test(BT.BiskitTest):
         import random
 
         self.p3 = ProfileCollection()
-        self.p3.set( 'letters', string.letters )
-        self.p3.set( 'numbers', range(len(string.letters)) )
+        self.p3.set( 'letters', string.ascii_letters )
+        self.p3.set( 'numbers', list(range(len(string.ascii_letters))) )
         self.p3.set( 'random', [ random.randint(0,10000)
-                                 for i in range(len(string.letters)) ] )
+                                 for i in range(len(string.ascii_letters)) ] )
 
         self.p3 = self.p3.concat( self.p3, self.p3, self.p3 )
         self.p3 = self.p3.concat( self.p3, self.p3, self.p3 )
@@ -1408,10 +1416,10 @@ class Test(BT.BiskitTest):
         empty = ProfileCollection()
         double = self.p3.concat( self.p3 )
         self.p5 = empty.concat( self.p3 )
-        self.assertEqual( self.p3['letters'], self.p5['letters'] )
+        self.assertTrue( N.all(self.p3['letters'] == self.p5['letters']) )
         
         self.p5 = self.p3.concat( empty, empty, self.p3 )
-        self.assertEqual( double['letters'], self.p5['letters'] )
+        self.assertTrue( N.all(double['letters'] == self.p5['letters']) )
     
     def test_concatempty(self):
         p0 = ProfileCollection()
@@ -1424,31 +1432,30 @@ class Test(BT.BiskitTest):
         import string
         
         self.p4 = ProfileCollection()
-        self.p4['letters'] = string.letters
+        self.p4['letters'] = string.ascii_letters
         
-        self.assert_( self.p4[0]['letters'] == 'a' )
+        self.assertTrue( self.p4[0]['letters'] == 'a' )
         views = self.p4.toCrossViews()
         
         letters = ''.join( [ v['letters'] for v in views ] )
-        self.assertEqual( letters, string.letters )
+        self.assertEqual( letters, string.ascii_letters )
         
         del self.p4
         
-        self.assert_( views[0].alive is False ) 
+        self.assertTrue( views[0].alive is False ) 
         
     def test_plots(self):
         """ProfileCollection.plot* test (only in interactive mode)"""
         import random
         self.p5 = ProfileCollection()
-        self.p5['range'] = range( 500 )
-        self.p5['gamma'] = [ N.random.gamma(2.0) for i in range(500) ]
-        self.p5['normal'] = [ N.random.normal(2.0) for i in range(500) ]
-        self.p5['poisson'] = [ N.random.poisson(5.) for i in range(500) ]
+        self.p5['range'] = list(range( 5000))
+        self.p5['gamma'] = [ N.random.gamma(3.0) for i in range(5000) ]
+        self.p5['normal'] = [ N.random.normal(3.0) for i in range(5000) ]
+        self.p5['poisson'] = [ N.random.poisson(5.) for i in range(5000) ]
 
-        if self.local:
-            
-            plot = self.p5.plotHistogram( 'gamma', ('normal','poisson'), 
-                                          bins=10, hist=1, xnormalize=True )
+        plot = self.p5.plotHistogram( 'gamma', ('normal','poisson'), 
+                                      bins=20, hist=1, xnormalize=True )
+        if self.local:            
             plot.show()
 
 

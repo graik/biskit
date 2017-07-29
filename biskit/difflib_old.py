@@ -1,9 +1,8 @@
-#! /usr/bin/env python2.2
 """
 Older version of difflib. Here due to compability problems.
 """
 
-from __future__ import generators
+
 
 """
 Module difflib -- helpers for computing deltas between objects.
@@ -289,8 +288,8 @@ class SequenceMatcher:
         # from the start.
         b = self.b
         self.b2j = b2j = {}
-        self.b2jhas = b2jhas = b2j.has_key
-        for i in xrange(len(b)):
+        self.b2jhas = b2jhas = b2j.__contains__
+        for i in range(len(b)):
             elt = b[i]
             if b2jhas(elt):
                 b2j[elt].append(i)
@@ -313,7 +312,7 @@ class SequenceMatcher:
         # lot of junk in the sequence, the number of *unique* junk
         # elements is probably small.  So the memory burden of keeping
         # this dict alive is likely trivial compared to the size of b2j.
-        self.isbjunk = junkdict.has_key
+        self.isbjunk = junkdict.__contains__
 
     def find_longest_match(self, alo, ahi, blo, bhi):
         """
@@ -379,7 +378,7 @@ class SequenceMatcher:
         # junk-free match ending with a[i-1] and b[j]
         j2len = {}
         nothing = []
-        for i in xrange(alo, ahi):
+        for i in range(alo, ahi):
             # look at all instances of a[i] in b; note that because
             # b2j has no junk keys, the loop is skipped if a[i] is junk
             j2lenget = j2len.get
@@ -605,9 +604,9 @@ def get_close_matches(word, possibilities, n=3, cutoff=0.6):
     """
 
     if not n >  0:
-        raise ValueError("n must be > 0: " + `n`)
+        raise ValueError("n must be > 0: " + repr(n))
     if not 0.0 <= cutoff <= 1.0:
-        raise ValueError("cutoff must be in [0.0, 1.0]: " + `cutoff`)
+        raise ValueError("cutoff must be in [0.0, 1.0]: " + repr(cutoff))
     result = []
     s = SequenceMatcher()
     s.set_seq2(word)
@@ -792,14 +791,14 @@ class Differ:
             elif tag == 'equal':
                 g = self._dump(' ', a, alo, ahi)
             else:
-                raise ValueError, 'unknown tag ' + `tag`
+                raise ValueError('unknown tag ' + repr(tag))
 
             for line in g:
                 yield line
 
     def _dump(self, tag, x, lo, hi):
         """Generate comparison results for a same-tagged range."""
-        for i in xrange(lo, hi):
+        for i in range(lo, hi):
             yield '%s %s' % (tag, x[i])
 
     def _plain_replace(self, a, alo, ahi, b, blo, bhi):
@@ -844,10 +843,10 @@ class Differ:
         # search for the pair that matches best without being identical
         # (identical lines must be junk lines, & we don't want to synch up
         # on junk -- unless we have to)
-        for j in xrange(blo, bhi):
+        for j in range(blo, bhi):
             bj = b[j]
             cruncher.set_seq2(bj)
-            for i in xrange(alo, ahi):
+            for i in range(alo, ahi):
                 ai = a[i]
                 if ai == bj:
                     if eqi is None:
@@ -903,7 +902,7 @@ class Differ:
                     atags += ' ' * la
                     btags += ' ' * lb
                 else:
-                    raise ValueError, 'unknown tag ' + `tag`
+                    raise ValueError('unknown tag ' + repr(tag))
             for line in self._qformat(aelt, belt, atags, btags):
                 yield line
         else:
@@ -977,6 +976,7 @@ class Differ:
 # was inserted after "private".  I can live with that <wink>.
 
 import re
+from functools import reduce
 
 def IS_LINE_JUNK(line, pat=re.compile(r"\s*#?\s*$").match):
     r"""
@@ -1075,7 +1075,7 @@ def restore(delta, which):
     try:
         tag = {1: "- ", 2: "+ "}[int(which)]
     except KeyError:
-        raise ValueError, ('unknown delta choice (must be 1 or 2): %r'
+        raise ValueError('unknown delta choice (must be 1 or 2): %r'
                            % which)
     prefixes = ("  ", tag)
     for line in delta:
@@ -1084,12 +1084,12 @@ def restore(delta, which):
 
 ################
 ## empty test ##
-import Biskit.test as BT
-
-class Test(BT.BiskitTest):
-    """Mock test"""
-    pass
-
+##from . import test as BT
+##
+##class Test(BT.BiskitTest):
+##    """Mock test"""
+##    pass
+##
 
 def _test():
     import doctest, difflib

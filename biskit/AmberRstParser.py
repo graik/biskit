@@ -25,12 +25,12 @@ Parse Amber restart files.
 """
 
 import re
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 import os.path
 
-from AmberCrdParser import ParseError
-from PDBModel import PDBModel
-import tools as T
+from biskit.AmberCrdParser import ParseError
+from biskit import PDBModel
+import biskit.tools as T
 
 class AmberRstParser:
     """Convert an Amber restart file to array, PDBModel or a Amber crd file.
@@ -111,7 +111,7 @@ class AmberRstParser:
                 raise ParseError("Can't interprete second line of "+self.frst)
 
             ## pre-compute lines expected per frame
-            self.lines_per_frame = self.n / 2
+            self.lines_per_frame = self.n // 2
             if self.n % 2 != 0:
                 self.lines_per_frame += 1
 
@@ -210,7 +210,7 @@ class AmberRstParser:
 
 ######################
 ### Module testing ###
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test AmberRstParser"""

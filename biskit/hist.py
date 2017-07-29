@@ -24,7 +24,7 @@
 create a histogram from data
 """
 
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 import numpy as N
 
 
@@ -105,7 +105,7 @@ def density(x, nBins, range = None, steps = 1, hist = 0):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test case"""
@@ -115,7 +115,7 @@ class Test(BT.BiskitTest):
         self.x = N0.arange( 4, 12, 1.2 )
         self.data = density( self.x, 3, hist=1 )
 
-        self.assert_( N.all( self.data == self.EXPECT) )
+        self.assertTrue( N.all( self.data == self.EXPECT) )
 
     EXPECT= N.array([[  4. ,   0. ],
                            [  4. ,   2. ],

@@ -22,14 +22,14 @@
 Class for calls to external programs.
 """
 
-import tempfile, os, time, subprocess
+import tempfile, os, time, subprocess, sys
 
-import Biskit.tools as t
-import Biskit.settings as s
-from Biskit.LogFile import StdLog
-from Biskit.Errors import BiskitError
-from Biskit.ExeConfigCache import ExeConfigCache
-import Biskit as B
+import biskit.tools as t
+import biskit.settings as s
+from biskit.LogFile import StdLog
+from biskit.Errors import BiskitError
+from biskit.ExeConfigCache import ExeConfigCache
+import biskit as B
 
 class RunError( BiskitError ):
     pass
@@ -295,7 +295,7 @@ class Executor:
                         if set to True: create a new tempdir within default 
         @type  tempdir: str | True
         @param log: execution log (None->STOUT) (default: None)
-        @type  log: Biskit.LogFile
+        @type  log: biskit.LogFile
         @param debug: keep all temporary files (default: 0)
         @type  debug: 0|1
         @param verbose: print progress messages to log (default: log != STDOUT)
@@ -442,12 +442,15 @@ class Executor:
 
             output, error = p.communicate( inp )
         
+            #convert byte string to actual string for Python 3.x compatibility
+            if output is not None: output = output.decode(sys.stdout.encoding)
+            if error is not None:  error  = error.decode(sys.stderr.encoding) 
+            
             self.returncode = p.returncode
 
-        except OSError, e:
-            raise RunError, \
-                  "Couldn't run or communicate with external program: %r"\
-                  % e.strerror
+        except OSError as e:
+            raise RunError("Couldn't run or communicate with external program: %r"\
+                  % e.strerror)
 
         return output, error
 
@@ -507,9 +510,9 @@ class Executor:
                             stdout=stdout, stderr=stderr,
                             shell=self.exe.shell,
                             env=self.environment(), cwd=self.cwd )
-
+        
         if self.exe.pipes and self.f_out:
-            open( self.f_out, 'w').writelines( self.output )
+            open( self.f_out, 'wt').writelines( self.output )
         if not self.exe.pipes and self.catch_err:
             self.error = open( self.f_err, 'r' ).readlines()
 
@@ -543,12 +546,12 @@ class Executor:
 
             self.postProcess()
 
-        except MemoryError, why:
+        except MemoryError as why:
             try:
                 self.fail()
             finally:
                 self.cleanup()
-            raise RunError, why
+            raise RunError(why)
 
         try:
             if self.isFailed():
@@ -685,11 +688,11 @@ class Executor:
                 inp = open( inp, 'r' ).read()
             return inp % self.__dict__
 
-        except KeyError, why:
+        except KeyError as why:
             s =  "Unknown option/place holder in template file."
             s += "\n  template file: " + str( self.template )
             s += "\n  Template asked for a option called " + str( why[0] )
-            raise TemplateError, s
+            raise TemplateError(s)
 
 
     def convertInput( self, inp):
@@ -742,18 +745,18 @@ class Executor:
 
             return self.convertInput( inp )
 
-        except IOError, why:
+        except IOError as why:
             s =  "Error while creating input file from template."
             s += "\n  template file: " + str( self.template )
             s += "\n  why: " + str( why )
             s += "\n  Error:\n  " + t.lastError()
-            raise TemplateError, s
+            raise TemplateError(s)
 
 
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Executor test"""
@@ -788,14 +791,14 @@ class Test(BT.BiskitTest):
         self.r = self.e.run()
 
         if self.local:
-            print 'Emacs was running for %.2f seconds'%self.e.runTime
+            print('Emacs was running for %.2f seconds'%self.e.runTime)
 
-        self.assert_( self.e.pid is not None )
+        self.assertTrue( self.e.pid is not None )
         
         if self.DEBUG:
             if self.verbose: self.log.add("DEBUGGING mode active")
         else:
-            self.assert_( not os.path.exists(self.e.tempdir),
+            self.assertTrue( not os.path.exists(self.e.tempdir),
                           'tempfolder not removed')
     
     def test_tempfiles(self):
@@ -804,11 +807,11 @@ class Test(BT.BiskitTest):
                            verbose=self.local, tempdir=True,
                            debug=False )
         self.e.prepare()
-        self.assert_( os.path.exists( self.e.tempdir ), 
+        self.assertTrue( os.path.exists( self.e.tempdir ), 
                       'cannot find temp. folder' )
         self.e.cleanup()
 
-        self.assert_( not os.path.exists( self.e.tempdir ),
+        self.assertTrue( not os.path.exists( self.e.tempdir ),
                       'tempfolder has not been removed.')
         
         

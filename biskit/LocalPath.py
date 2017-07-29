@@ -21,11 +21,16 @@
 """
 Path handling.
 """
+## see: https://www.python.org/dev/peps/pep-0366/
+## allow relative imports when calling module as main script for testing
+if __name__ == "__main__" and __package__ is None:
+    import biskit
+    __package__ = "biskit"
 
-import Biskit.tools as T
-import Biskit.settings as S
-from Biskit import EHandler
-from Biskit.Errors import BiskitError
+from . import tools as T
+from . import settings as S
+from biskit import EHandler
+from .Errors import BiskitError
 
 import os.path
 import string
@@ -45,14 +50,14 @@ class LocalPath( object ):
     Creating a LocalPath:
 
     Creating a LocalPath is simple. By default, LocalPath takes a
-    normal filename and browses the local Biskit.settings and run-time
+    normal filename and browses the local biskit.settings and run-time
     environment for variables that can replace part of that path.
     
     Variable values must be at least 3 char long and contain at least
     one '/' in order to avoid substitution of single letters or '/a'
     etc. $PYTHONPATH, $PATH and $PWD are ignored.
 
-    Variables from Biskit.settings (thus also .biskit/settings.cfg)
+    Variables from biskit.settings (thus also .biskit/settings.cfg)
     have priority over normal environment variables both during the
     construction of LocalPath instances and during the reconstruction
     of a locally valid path.
@@ -141,7 +146,10 @@ class LocalPath( object ):
         @raise LocalPathError: if existing==1 and no existing path can be
                                constructed via environment variables
         """
-        result = string.join( [ f[0] for f in self.fragments ], '' )
+        if self.fragments:
+            result = os.path.join( *[ f[0] for f in self.fragments ] )
+        else:
+            result = ''
         result = T.absfile( result )
 
         if os.path.exists( result ):
@@ -158,8 +166,8 @@ class LocalPath( object ):
         result = T.absfile( result )
 
         if existing and not os.path.exists( result ):
-            raise LocalPathError, "Can't construct existing path from %s."%\
-                  self.formatted()
+            raise LocalPathError("Can't construct existing path from %s."%\
+                  self.formatted())
 
         return result
 
@@ -222,8 +230,10 @@ class LocalPath( object ):
         @return: original path
         @rtype: str
         """
+        if not self.fragments:
+            return ''
         result = [ f[0] for f in self.fragments ]
-        return string.join( result, '' )
+        return os.path.join( *result )
 
 
     def set( self, v, checkEnv=1, minLen=3, maxSub=1,
@@ -259,7 +269,7 @@ class LocalPath( object ):
                                   maxSub=maxSub,
                                   resolveLinks=resolveLinks, **vars )
         
-        raise LocalPathError, 'incompatible value for LocalPath' + str(v)
+        raise LocalPathError('incompatible value for LocalPath' + str(v))
 
         self.__hash = None
         self.__cache = None
@@ -373,9 +383,9 @@ class LocalPath( object ):
         """
         try:
             return T.load( self.local( existing=1 ) )
-        except LocalPathError, why:
-            raise IOError, "Cannot find file %s (constructed from %s)" %\
-                  self.local(), str( self )
+        except LocalPathError as why:
+            raise IOError("Cannot find file %s (constructed from %s)" %\
+                  self.local()).with_traceback(str( self ))
 
 
     def dump( self, o ):
@@ -396,9 +406,15 @@ class LocalPath( object ):
 
     def __find_subpath( self, path, subpath ):
         """
-        
+        Return sub-path but only if enclosed by path separators.
+        Looks complicated for what it does...
         """
-        seps = [ i for i in range( len(path) ) if path[i]==os.path.sep ]
+        if os.path.sep == '/':
+            seps = [ i for i in range( len(path) ) if path[i]==os.path.sep ]
+        else:
+            seps = [ i for i in range( len(path) ) \
+                     if path[i] in [os.path.sep, '/', ':'] ]
+            
         seps += [ len( path ) ]
 
         pos = path.find( subpath )
@@ -449,7 +465,7 @@ class LocalPath( object ):
                         result += [ (abs, subst) ]
                 else:
                     result += [ (abs, subst ) ]
-        except OSError, why:
+        except OSError as why:
             EHandler.fatal("Substituting path fragments: \n" +
                                  str( fragments ) + '\nname: ' + str( name ) +
                                  '\nvalue:' + str( value ) )
@@ -467,8 +483,10 @@ class LocalPath( object ):
         @return: 1|0
         @rtype: int
         """
-        r = ( type( o ) == str and o.find('/') != -1 and len(o) >= minLen\
-              and o.find(':') == -1 )
+        r = ( type( o ) == str \
+              and (o.find(os.path.sep) != -1 or o.find('/') != -1)\
+              and len(o) >= minLen )
+##              and o.find(':') == -1 )
         if r:
             try:
                 s = T.absfile( o )
@@ -486,7 +504,7 @@ class LocalPath( object ):
         @rtype: [ (str,str) ]
         """
 
-        items = vars.items() + d.items()
+        items = list(vars.items()) + list(d.items())
         exclude = exclude
 
         items = [ (k,v) for (k,v) in items if self.__is_path(v) ]
@@ -628,7 +646,7 @@ class LocalPath( object ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+from . import test as BT
 
 class Test(BT.BiskitTest):
     """Test class"""
@@ -649,7 +667,7 @@ class Test(BT.BiskitTest):
             ('/home/Bis/johan','PRJ_INTERFACES'),
             ('/c11/com_wet/ref.com', None) )
         S.path += [ 'Example 1:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
-        S.assert_( 'johan' not in S.l.local() )
+        S.assertTrue( 'johan' not in S.l.local() )
 
         ## Example 2; create from path with custom variable
         S.l.set_path( '/home/Bis/raik/data/tb/interfaces/c11/com_wet/ref.com',
@@ -661,13 +679,14 @@ class Test(BT.BiskitTest):
         ## Example 3; create from non-existing path
         S.l.set_path( '/home/xyz/data/tb/interfaces/c11/com_wet/ref.com' )
         S.path += [ 'Example 3:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
-        S.assert_( S.l.formatted() == S.l.local() )
+        S.assertTrue( S.l.formatted() == S.l.local() )
 
         ## Example 4; create from existing path with automatic substitution
         S.l.set_path( T.testRoot() + '/com' )
         S.path += [ 'Example 4:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
         S.assertEqual( S.l.formatted(),
-                       '{%s|$projectRoot}/Biskit/testdata/com' % T.projectRoot())
+                       '{%s|$projectRoot}/biskit/testdata/com' % T.projectRoot())
+        S.assertTrue( os.path.exists( S.l.local() ) )
 
         ## Example 5; rule out stray substitutions
         S.l.set_path( T.projectRoot() + '/tmp/com', maxSub=1, TMP='/tmp' )
@@ -679,7 +698,7 @@ class Test(BT.BiskitTest):
 
         if S.local:
             for p in S.path:
-                print p
+                print(p)
       
 
 if __name__ == '__main__':

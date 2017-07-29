@@ -27,9 +27,9 @@ algorithm based on TM-score , Nucleic Acids Research, 2005 33: 2302-2309
 import tempfile, re
 import numpy as N
 
-from Biskit import Executor, TemplateError
+from biskit.Executor import Executor, TemplateError
 ## import Biskit.settings as S
-import Biskit.tools as T
+import biskit.tools as T
 
 class TMAlignError( Exception ):
     pass
@@ -89,7 +89,7 @@ class TMAlign( Executor ):
           node     - str, host for calculation (None->local) NOT TESTED
                           (default: None)
           nice     - int, nice level (default: 0)
-          log      - Biskit.LogFile, program log (None->STOUT) (default: None)
+          log      - biskit.LogFile, program log (None->STOUT) (default: None)
         """
         self.f_pdbin = tempfile.mktemp( '_tmalign_in.pdb' )
         self.f_pdbref= tempfile.mktemp( '_tmalign_ref.pdb' )
@@ -140,10 +140,10 @@ class TMAlign( Executor ):
             r = self.__translate_rt( N.array( (rt1, rt2, rt3), float ) )            
             return r
         
-        except IOError, why:
+        except IOError as why:
             raise TMAlignError('Cannot find matrix output file.')
 
-        except IndexError, why:
+        except IndexError as why:
             raise TMAlignError(
                 'Could not find rotation matrix in TMAlign output')
 
@@ -160,14 +160,14 @@ class TMAlign( Executor ):
         @raise TMAlignError: if no result
         """
         if  output.count('\n') < 7:
-            raise TMAlignError, 'no TM-Align result'
+            raise TMAlignError('no TM-Align result')
 
         r = {}
         try:
             r = self.re_info.search( output ).groupdict()
             r.update( self.re_score.search(output).groupdict() )
             r = { k : float(v) for k, v in r.items() }
-        except AttributeError, why:
+        except AttributeError as why:
             raise TMAlignError(
                 'Could not find score and rmsd values in TMAlign output')
 
@@ -190,7 +190,7 @@ class TMAlign( Executor ):
           'field `output` of this TMAlign instance (e.g. `print x.output`)!'
         self.log.add( s )
 
-        raise TMAlignError, s
+        raise TMAlignError(s)
 
     def finish( self ):
         """
@@ -223,7 +223,7 @@ class TMAlign( Executor ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test class"""
@@ -232,27 +232,27 @@ class Test(BT.BiskitTest):
 
     def test_tmalign( self ):
         """TMAlign test"""
-        from Biskit import PDBModel
+        from biskit import PDBModel
 
-        if self.local: print 'Loading PDB...'
+        if self.local: print('Loading PDB...')
 
         self.m1 = PDBModel( T.testRoot( 'tmalign/1huy_citrine.model' ) )
         self.m2 = PDBModel( T.testRoot('tmalign/1zgp_dsred_dimer.model' ) )
 
 
-        if self.local: print 'Starting TMAlign'
+        if self.local: print('Starting TMAlign')
         self.x = TMAlign( self.m1, self.m2, debug=self.DEBUG,
                           verbose=self.local )
 
         if self.local:
-            print 'Running'
+            print('Running')
 
         self.r = self.x.run()
 
         if self.local:
-            print "Result: "
+            print("Result: ")
             for key, value in self.r.items():
-                print '\t', key, ':\t', value
+                print('\t', key, ':\t', value)
 
         self.assertEqual( self.r['rmsd'], 1.76 )
 
@@ -262,7 +262,7 @@ class Test(BT.BiskitTest):
         ref = T.load( T.testRoot( 'tmalign/1zgp_dsred_dimer.model' ) )
         ref = ref.takeChains( [0] )
 
-        tm = TMAlign( m, ref )
+        tm = TMAlign( m, ref, debug=self.DEBUG, verbose=self.local )
         tm.run()
 
         self.maligned = tm.applyTransformation()
@@ -270,10 +270,10 @@ class Test(BT.BiskitTest):
         diff = self.maligned.centerOfMass() - ref.centerOfMass()
 
         if self.VERBOSITY > 2 or self.local:
-            print 'center of mass deviation: \n%r' % diff
+            print('center of mass deviation: \n%r' % diff)
             self.maligned.concat( ref ).plot()
 
-        self.assert_( N.all( N.absolute(diff) < 1 ),
+        self.assertTrue( N.all( N.absolute(diff) < 1 ),
                       'superposition failed: \n%r' % diff)
 
 

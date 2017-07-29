@@ -72,7 +72,7 @@ conventions as specified in the PDB format description.
 ## allow relative imports when calling module as main script for testing
 if __name__ == "__main__" and __package__ is None:
     import biskit
-    __package__ = "biskit.scientificIO"
+    __package__ = "biskit.core.scientificIO"
 
 from .TextFile import TextFile
 from .FortranFormat import FortranFormat, FortranLine
