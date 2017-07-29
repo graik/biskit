@@ -8,7 +8,7 @@ source = biskit
 
 ## skip modules pulled in from third parties
 omit =
-     biskit/oldnumeric/*
-     biskit/scientificIO/*
+     biskit/core/oldnumeric/*
+     biskit/core/scientificIO/*
      biskit/gnuplot.py
      biskit/difflib_old.py

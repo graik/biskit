@@ -2,3 +2,5 @@ numpy
 scipy
 biopython
 biggles # compilation requires python-dev/python3-dev; libplot-dev; plotutils
+coverage
+coverage-badge
