@@ -818,3 +818,8 @@ if __name__ == '__main__':
     l.report()
 
     print("DONE")
+    
+    ## Travis-CI and others expect non-0 return on any error
+    if l.result.wasSuccessful() and l.result.testsRun > 1:
+        sys.exit(0)
+    sys.exit(1)
