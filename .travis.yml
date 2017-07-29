@@ -9,7 +9,7 @@ python:
 # command to install dependencies
 install:
   - pip install -r requirements_extended.txt
-  - pip install coverage coveralls
+  - pip install coverage python-coveralls
   - python setup.py install
 before_install:
   - sudo apt-get -qq update

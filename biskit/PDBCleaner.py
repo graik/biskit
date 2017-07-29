@@ -420,8 +420,11 @@ class PDBCleaner:
             self.logWrite('Capping C-terminal of chain %i with NME.' % chain )
         m_nme   = PDBModel( self.F_nme_cap )
 
+        print( "DEBUG capNME: " )
         c_start = model.chainIndex( breaks=breaks )
         c_end = model.chainEndIndex( breaks=breaks)
+        print( "\t c_start: " + repr(c_start))
+
         Nterm_is_break = False
         Cterm_is_break = False
         if breaks:
@@ -466,7 +469,6 @@ class PDBCleaner:
         r = chains_before.concat( m_chain, newChain=not Nterm_is_break)
         r = r.concat( chains_after, newChain=not Cterm_is_break)
 
-        print( "DEBUG capNME: %i -> %i" % (len(c_start), r.lenChains( breaks=breaks )))
         if len(c_start) != r.lenChains( breaks=breaks ):
             raise CappingError('Capping NME would mask a chain break. '+\
                   'This typically indicates a tight gap with high risk of '+\
