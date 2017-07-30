@@ -316,7 +316,7 @@ class PDBCleaner:
 
         return N0.sum( mask )
 
-    def capACE( self, model, chain, breaks=True ):
+    def capACE( self, model, chain, breaks=True, checkgap=True ):
         """
         Cap N-terminal of given chain.
 
@@ -387,7 +387,7 @@ class PDBCleaner:
             
         r = r.concat( chains_after, newChain=not Cterm_is_break)
         
-        if len(c_start) != r.lenChains( breaks=breaks ):
+        if checkgap and len(c_start) != r.lenChains( breaks=breaks ):
             raise CappingError('Capping ACE would mask a chain break. '+\
                   'This typically indicates a tight gap with high risk of '+\
                   'clashes and other issues.')
@@ -395,7 +395,7 @@ class PDBCleaner:
         return r
 
 
-    def capNME( self, model, chain, breaks=True ):
+    def capNME( self, model, chain, breaks=True, checkgap=True ):
         """
         Cap C-terminal of given chain. 
 
@@ -420,10 +420,8 @@ class PDBCleaner:
             self.logWrite('Capping C-terminal of chain %i with NME.' % chain )
         m_nme   = PDBModel( self.F_nme_cap )
 
-        print( "DEBUG capNME: " )
         c_start = model.chainIndex( breaks=breaks )
         c_end = model.chainEndIndex( breaks=breaks)
-        print( "\t c_start: " + repr(c_start))
 
         Nterm_is_break = False
         Cterm_is_break = False
@@ -469,9 +467,7 @@ class PDBCleaner:
         r = chains_before.concat( m_chain, newChain=not Nterm_is_break)
         r = r.concat( chains_after, newChain=not Cterm_is_break)
 
-        print('---debug final model:\n' + r.report(prnt=False, clipseq=290) )
-
-        if len(c_start) != r.lenChains( breaks=breaks ):
+        if checkgap and len(c_start) != r.lenChains( breaks=breaks ):
             raise CappingError('Capping NME would mask a chain break. '+\
                   'This typically indicates a tight gap with high risk of '+\
                   'clashes and other issues.')
@@ -547,7 +543,8 @@ class PDBCleaner:
         chains = [ i for i in chains if maskProtein[ chainindex[i] ] ]
         return chains
 
-    def capTerminals( self, auto=False, breaks=False, capN=[], capC=[] ):
+    def capTerminals( self, auto=False, breaks=False, capN=[], capC=[],
+                      checkgap=True):
         """
         Add NME and ACE capping residues to chain breaks or normal N- and 
         C-terminals. Note: these capping residues contain hydrogen atoms.
@@ -602,14 +599,14 @@ class PDBCleaner:
         capC = self.filterProteinChains(m, capC, m.chainEndIndex(breaks=breaks))
 
         for i in capN:
-            m = self.capACE( m, i, breaks=breaks )
+            m = self.capACE( m, i, breaks=breaks, checkgap=checkgap )
             assert m.lenChains() == c_len, '%i != %i' % \
                    (m.lenChains(), c_len)
             assert len(m.chainBreaks(force=True)) == len(i_breaks)
             assert m['serial_number'].dtype == N0.Int32, 'serial_number not int'
 
         for i in capC:
-            m = self.capNME( m, i, breaks=breaks )
+            m = self.capNME( m, i, breaks=breaks, checkgap=checkgap )
             assert m.lenChains() == c_len
             assert len(m.chainBreaks(force=True)) == len(i_breaks)
         
@@ -727,17 +724,21 @@ class Test(BT.BiskitTest):
         """PDBCleaner.capTerminals extra challenge"""
         self.m2 = PDBModel( t.testRoot() + '/pdbclean/foldx_citche.pdb' )
         self.c = PDBCleaner( self.m2, verbose=self.local, log=self.log)
-##        self.assertRaises(CappingError, self.c.capTerminals, auto=True)
-        try:
-            m = self.c.capTerminals(auto=True)
-        except:
-            pass
+        self.assertRaises(CappingError, self.c.capTerminals, auto=True)
         if self.local:
             self.log.add('OK: CappingError has been raised indicating clash.' )
         
         self.assertEqual( len(self.m2.takeChains([1]).chainBreaks()), 1 )
         
+    def test_capping_internal(self):
+        self.m3 = PDBModel(t.testRoot('pdbclean/foldx_citche.pdb'))
+        self.m3 = self.m3.takeChains([1])  # pick second chain; has chain break
+        self.c3 = PDBCleaner(self.m3, verbose=self.local, log=self.log) 
         
+        m = self.c3.capACE(self.m3, 1, checkgap=False)
+        
+        self.assertEqual(m.lenChains(breaks=True) -1, 
+                         self.m3.lenChains(breaks=True))
         
 if __name__ == '__main__':
 

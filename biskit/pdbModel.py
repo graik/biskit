@@ -2710,7 +2710,7 @@ class PDBModel:
 
     def resEndIndex( self ):
         """
-        Get the position of the each residue's last atom.
+        Get the position of the each residue's last atom. Note
         @return: index of the last atom of each residue
         @rtype: list of int
         """
@@ -2928,23 +2928,20 @@ class PDBModel:
                 cutoff = maxDist or median + z * sd
                 r = N0.nonzero( N0.greater( dist, cutoff ) )
                 
-                print(("--debug: (cutoff %f)" % cutoff) + repr(N0.compress(N0.greater(dist, cutoff), dist)))
-                print( "\t\t indices:" + repr(N0.nonzero( N0.greater( dist, cutoff ) )) )
-
             if len(r) > 0:
                 
-                ## can probably be simplified with self.resEndIndex()
-                ri = self.resIndex()
-                ri_to_e = {}
-                for i in range( len(ri)-1 ):
-                    ri_to_e[ ri[i] ] = ri[ i+1 ]-1
-    
-                ## map back to the original atom indices
-                r = [ ri_to_e[ i_bb[ bb_ri[i] ] ] for i in r ]
+##                ## can probably be simplified with self.resEndIndex()
+##                ri = self.resIndex()
+##                ri_to_e = {}
+##                for i in range( len(ri)-1 ):
+##                    ri_to_e[ ri[i] ] = ri[ i+1 ]-1
+##    
+##                ## map back to the original atom indices
+##                r = [ ri_to_e[ i_bb[ bb_ri[i] ] ] for i in r ]
 
                 ## this replacement didn't work out (fails PDBCleaner testcase):
-                #re = self.resEndIndex()
-                #r = [ re[i] for i in r ]
+                re = self.resEndIndex()
+                r = [ re[i] for i in r ]
 
 
             if breaks_only:
