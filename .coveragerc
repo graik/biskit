@@ -12,3 +12,12 @@ omit =
      biskit/core/scientificIO/*
      biskit/gnuplot.py
      biskit/difflib_old.py
+
+
+[report]
+
+## skip certain methods and classes
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:
+    raise
