@@ -4055,7 +4055,7 @@ class Test(BT.BiskitTest):
 
 
 
-class TestExe( BT.Test ):
+class TestExe( BT.BiskitTest ):
     """PDBModel tests that rely on external applications"""
 
     TAGS = [BT.EXE]
@@ -4077,7 +4077,7 @@ class TestExe( BT.Test ):
                       'superposition failed: %r' % diff)
 
 
-def clock( s, ns=globals() ):
+def clock( s, ns=globals() ):  ## pragma: no cover
     import cProfile
 
     locals().update( ns )
