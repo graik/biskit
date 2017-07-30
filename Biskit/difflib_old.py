@@ -1,4 +1,3 @@
-#! /usr/bin/env python2.2
 """
 Older version of difflib. Here due to compability problems.
 """

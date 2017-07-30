@@ -423,6 +423,8 @@ class Test(BT.BiskitTest):
         
 if __name__ == '__main__':
 
+    BT.localTest()
+    
     from Biskit import *
     import Biskit.tools as T
     

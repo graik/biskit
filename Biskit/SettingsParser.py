@@ -96,7 +96,7 @@ class Setting:
         comment = self.comment or ''
         if comment: comment = ' # '+comment
 
-        return '%s%s = %s%s(%s)%s%s' %\
+        return 'SettingsParser.Setting: %s%s = %s%s(%s)%s%s' %\
                (error, self.name, tab, self.vtype.__name__, str(self.value),\
                 tab, comment)
 
