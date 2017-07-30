@@ -12,8 +12,6 @@ install:
   - pip install coverage coveralls
 #  - python setup.py install
   - export PYTHONPATH=$PYTHONPATH:`pwd`
-  - echo "NEW PYTHONPATH"
-  - echo $PYTHONPATH
 before_install:
   - sudo apt-get -qq update
   - sudo apt-get install -y plotutils libplot-dev python-dev libblas-dev liblapack-dev gfortran gnuplot
