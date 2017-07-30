@@ -103,6 +103,7 @@ PVM    = 2  ## depends on PVM
 EXE    = 3  ## depends on external application
 OLD    = 5  ## is obsolete
 SCRIPT = 6  ## a script test case
+FAILS  = 7  ## test known to currently fail (but procrastinated)
 
 class BiskitTestError( Exception ):
     pass

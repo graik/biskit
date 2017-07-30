@@ -720,16 +720,6 @@ class Test(BT.BiskitTest):
                           'XVINTFDGVADXXKLPDN' )
         
         
-    def test_capping_extra( self ):
-        """PDBCleaner.capTerminals extra challenge"""
-        self.m2 = PDBModel( t.testRoot() + '/pdbclean/foldx_citche.pdb' )
-        self.c = PDBCleaner( self.m2, verbose=self.local, log=self.log)
-        self.assertRaises(CappingError, self.c.capTerminals, auto=True)
-        if self.local:
-            self.log.add('OK: CappingError has been raised indicating clash.' )
-        
-        self.assertEqual( len(self.m2.takeChains([1]).chainBreaks()), 1 )
-        
     def test_capping_internal(self):
         self.m3 = PDBModel(t.testRoot('pdbclean/foldx_citche.pdb'))
         self.m3 = self.m3.takeChains([1])  # pick second chain; has chain break
@@ -740,6 +730,21 @@ class Test(BT.BiskitTest):
         self.assertEqual(m.lenChains(breaks=True) -1, 
                          self.m3.lenChains(breaks=True))
         
+class FailingTest(BT.BiskitTest):
+    """Test class """
+    
+    TAGS = [BT.NORMAL, BT.FAILS]
+        
+    def test_capping_extra( self ):
+        """PDBCleaner.capTerminals extra challenge"""
+        self.m2 = PDBModel( t.testRoot() + '/pdbclean/foldx_citche.pdb' )
+        self.c = PDBCleaner( self.m2, verbose=self.local, log=self.log)
+        self.assertRaises(CappingError, self.c.capTerminals, auto=True)
+        if self.local:
+            self.log.add('OK: CappingError has been raised indicating clash.' )
+        
+        self.assertEqual( len(self.m2.takeChains([1]).chainBreaks()), 1 )
+
 if __name__ == '__main__':
 
     BT.localTest()

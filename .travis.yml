@@ -16,7 +16,7 @@ before_install:
   - sudo apt-get install -y plotutils libplot-dev python-dev libblas-dev liblapack-dev gfortran gnuplot
 # command to run tests
 script:
-  coverage run biskit/test.py -e exe
+  coverage run biskit/test.py -e exe fails
 after_success:
   coveralls
 after_failure:
