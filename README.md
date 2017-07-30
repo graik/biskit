@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/graik/biskit.svg?branch=master)](https://travis-ci.org/graik/biskit)
+[![Build Status](https://travis-ci.org/graik/biskit.svg?branch=biskit3)](https://travis-ci.org/graik/biskit)
+[![Coverage Status](https://coveralls.io/repos/github/graik/biskit/badge.svg?branch=biskit3)](https://coveralls.io/github/graik/biskit?branch=biskit3)
 Biskit
 ==========
 ___a software platform for structural bioinformatics___
