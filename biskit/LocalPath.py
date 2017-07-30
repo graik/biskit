@@ -646,7 +646,7 @@ class LocalPath( object ):
 #############
 ##  TESTING        
 #############
-from . import test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test class"""
