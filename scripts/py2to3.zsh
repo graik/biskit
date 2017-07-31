@@ -3,11 +3,15 @@
 echo "USAGE: "
 echo "py2to3.zsh biskitModule.py"
 
-TARGETFOLDER=~/data/py/biskit3/biskit
-SOURCEFOLDER=~/data/py/biskit2/Biskit
+biskit3=~/data/py/biskit3/biskit
+Biskit2=~/data/py/biskit3/Biskit
+Biskit2Copy=~/data/py/biskit2/Biskit
 
-2to3-3.5 -n -W -o $TARGETFOLDER $SOURCEFOLDER/$1
+git mv $Biskit2/$1 $biskit3/$1
+git commit -m 'move Biskit -> biskit without modification'
 
-~/data/py/biskit3/scripts/replace_imports.py $TARGETFOLDER/$1 -replacefile
+2to3-3.5 -n -W $biskit3/$1
 
-meld $TARGETFOLDER/$1 $SOURCEFOLDER/$1
+~/data/py/biskit3/scripts/replace_imports.py $biskit3/$1 -replacefile
+
+meld $biskit3/$1 $Biskit2Copy/$1
