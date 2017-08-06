@@ -19,7 +19,7 @@ import os
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-#sys.path.insert(0, os.path.abspath('.'))
+sys.path.insert(0, os.path.abspath('../'))
 
 # -- General configuration ------------------------------------------------
 
@@ -30,10 +30,12 @@ import os
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx.ext.autodoc',
+    'sphinx.ext.autodoc',    ## API documentation features
     'sphinx.ext.coverage',
-    'sphinx.ext.pngmath',
+    'sphinx.ext.napoleon',   ## pre-process Google-style method docstrings
     'sphinx.ext.viewcode',
+    'sphinx.ext.autosummary', ## summary listing of methods and module content
+    'extensions.autoautosummary',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -41,8 +43,8 @@ templates_path = ['_templates']
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
-# source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
+# source_suffix = '.rst'
 
 # The encoding of source files.
 #source_encoding = 'utf-8-sig'
@@ -83,7 +85,7 @@ exclude_patterns = ['_build']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
-#default_role = None
+default_role = 'any'   ## enables easy cross-referencing by simple method name
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
 #add_function_parentheses = True
@@ -97,7 +99,9 @@ exclude_patterns = ['_build']
 #show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+## Note the sphinx_rtd_theme by default ignores this setting. Workaround:
+## https://github.com/snide/sphinx_rtd_theme/issues/166
+pygments_style = 'friendly'
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
@@ -113,7 +117,9 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'alabaster'
+## http://www.sphinx-doc.org/en/stable/theming.html#builtin-themes
+html_theme_options = {}
+html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -272,7 +278,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
     (master_doc, 'biskit', 'biskit Documentation',
-     author, 'biskit', 'One line description of project.',
+     author, 'biskit', 'A python structural bioinformatics platform.',
      'Miscellaneous'),
 ]
 
@@ -287,3 +293,11 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
+
+## custom additions
+autodoc_member_order = 'bysource'
+
+autosummary_generate = True
+
+def setup(app):
+    app.add_stylesheet('theme_overrides.css')

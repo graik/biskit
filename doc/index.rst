@@ -1,5 +1,5 @@
 .. biskit documentation master file, created by
-   sphinx-quickstart on Thu Aug  3 13:29:11 2017.
+   sphinx-quickstart on Sun Aug  6 17:31:17 2017.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
@@ -11,7 +11,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-
+   source/biskit
 
 Indices and tables
 ==================
