@@ -3,7 +3,7 @@
 
 .. currentmodule:: {{ module }}
 
-.. autoclass:: {{ name }}
+.. autoclass:: {{ objname }}
    :members:
    :special-members: __init__
 
@@ -28,8 +28,9 @@
       ~{{ name }}.{{ item }}
    {%- endfor %}
    {% endif %}
-   {{ underline }}
    {% endblock %}
-
-   .. rubric:: Method & Attribute Details
-                  
+      
+   .. raw:: html
+               
+      <hr>
+      <h2>{{name}} Method & Attribute Details</h2>

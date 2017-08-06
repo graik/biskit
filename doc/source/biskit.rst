@@ -12,7 +12,7 @@ Main Classes
    :template: autosummary/class_with_details.rst       
 
    PDBModel
-   ProfileCollection
+   ProfileCollection           
 
    
 Logging
