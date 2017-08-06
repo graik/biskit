@@ -1,18 +1,21 @@
-{{ fullname }}
+{{ name }}
 {{ underline }}
 
 .. currentmodule:: {{ module }}
 
-.. autoclass:: {{ objname }}
+.. autoclass:: {{ name }}
    :members:
+   :show-inheritance:
    :special-members: __init__
 
    {% block methods %}
 
    {% if methods %}
-   .. rubric:: Methods
+   .. rubric:: Methods Overview
 
    .. autosummary::
+      :nosignatures:
+   
    {% for item in methods %}
       ~{{ name }}.{{ item }}
    {%- endfor %}
@@ -21,7 +24,7 @@
 
    {% block attributes %}
    {% if attributes %}
-   .. rubric:: Attributes
+   .. rubric:: Attributes Overview
 
    .. autosummary::
    {% for item in attributes %}
