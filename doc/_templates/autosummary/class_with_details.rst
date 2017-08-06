@@ -32,8 +32,13 @@
    {%- endfor %}
    {% endif %}
    {% endblock %}
-      
+
+   {% block transition_to_details %}
+   {% if methods or attributes %}
    .. raw:: html
-               
+      
       <hr>
       <h2>{{name}} Method & Attribute Details</h2>
+
+   {% endif %}
+   {% endblock %}
