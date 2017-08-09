@@ -29,6 +29,7 @@ OLD_VALUES[4]='@rtype'
 OLD_VALUES[5]='L{\([^}]\+\)}'
 OLD_VALUES[6]='C{\(int\|float\|str\|list\|tuple\|dict\|bool\|None\|generator\|object\)}'
 OLD_VALUES[7]='@\(ivar\|cvar\|var\)'
+OLD_VALUES[8]='@raise'
 
 NEW_VALUES[0]=':type'
 NEW_VALUES[1]=':keyword'
@@ -38,6 +39,7 @@ NEW_VALUES[4]=':rtype'
 NEW_VALUES[5]=':class:`\1`'
 NEW_VALUES[6]='``\1``'
 NEW_VALUES[7]=':\1'
+NEW_VALUES[8]=':raise'
 
 for (( i = 0 ; i < ${#OLD_VALUES[@]} ; i++ ))
 do
