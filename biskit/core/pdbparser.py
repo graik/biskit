@@ -20,14 +20,12 @@
 """
 Parse a certain file / memory object into a PDBModel.
 
-This module provides helper classes for L{Biskit.PDBModel}. In most
+This module provides helper classes for :class:`Biskit.PDBModel`. In most
 cases, it should not be necessary to use it directly.
 
-@see L{Biskit.PDBModel}
-@see L{Biskit.PDBParserFactory}
-@see L{Biskit.PDBParseFile}
-@see L{Biskit.PDBParseModel}
-@see L{Biskit.PDBParsePickle}
+.. seealso:: `biskit.PDBModel`, `biskit.core.PDBParserFactory`,
+             `biskit.core.PDBParseFile`, `biskit.core.PDBParseModel`,
+             `biskit.core.PDBParsePickle`
 """
 from biskit import StdLog, ErrLog
 import biskit as B
@@ -44,8 +42,8 @@ class PDBParser(object):
 
     def __init__( self, log=None ):
         """
-        @param log: Log for warnings [default log to STDERR]
-        @type  log: biskit.LogFile.LogFile
+        :param log: Log for warnings [default log to STDERR]
+        :type  log: biskit.LogFile.LogFile
 
         Override if needed. Call parent method in overriding class!
         """
@@ -63,9 +61,9 @@ class PDBParser(object):
         >>> if PDBParser.supports('myfile.pdb'):
         >>>     ...
 
-        @return: True if the given source is supported by this parser
+        :return: True if the given source is supported by this parser
                  implementation
-        @rtype: bool
+        :rtype: bool
         """
         raise NotImplementedError('issupported() is not implemented.')
 
@@ -81,8 +79,8 @@ class PDBParser(object):
         >>> if PDBParser.description('myfile.pdb'):
         >>>     ...
 
-        @return: short free text description of the supported format
-        @rtype: str
+        :return: short free text description of the supported format
+        :rtype: str
         """
         raise NotImplementedError('description() is not implemented.')
 
@@ -102,17 +100,17 @@ class PDBParser(object):
         * However, profiles or coordinates or fields existing in the model
           must remain untouched.
 
-        @param model: existing model
-        @type  model: PDBModel
-        @param source: source PDB file or pickled PDBModel or PDBModel object
-        @type  source: str || file || PDBModel
-        @param skipRes: list residue names that should not be parsed
-        @type  skipRes: [ str ]
-        @param updateMissing: check source for additional profiles that are not
+        :param model: existing model
+        :type  model: PDBModel
+        :param source: source PDB file or pickled PDBModel or PDBModel object
+        :type  source: str || file || PDBModel
+        :param skipRes: list residue names that should not be parsed
+        :type  skipRes: [ str ]
+        :param updateMissing: check source for additional profiles that are not
                            yet known for the model [False]
-        @type  updateMissing: 1 || 0
-        @param headPatterns: [(putIntoKey, regex)] extract given REMARKS
-        @type  headPatterns: [(str, str)]
+        :type  updateMissing: 1 || 0
+        :param headPatterns: [(putIntoKey, regex)] extract given REMARKS
+        :type  headPatterns: [(str, str)]
         """
         raise NotImplementedError('update() is not implemented.')
 
@@ -123,10 +121,10 @@ class PDBParser(object):
         the source.
         Override to make it more restrictive.
 
-        @param model: model
-        @type  model: PDBModel
-        @return: true, if the model needs to be updated from its source
-        @rtype: bool
+        :param model: model
+        :type  model: PDBModel
+        :return: true, if the model needs to be updated from its source
+        :rtype: bool
         """
         return (model.xyz is None \
                 or model.atoms.hasNoneProfile()\
@@ -139,15 +137,15 @@ class PDBParser(object):
         """
         Create a new PDBModel from the source.
 
-        @param source: source PDB file or pickled PDBModel or PDBModel object
-        @type  source: str || file || PDBModel
-        @param disconnect: do *not* associate new model with the source [False]
-        @type  disconnect: bool
-        @param skipRes: list residues that should not be parsed
-        @type  skipRes: [ str ]
+        :param source: source PDB file or pickled PDBModel or PDBModel object
+        :type  source: str || file || PDBModel
+        :param disconnect: do *not* associate new model with the source [False]
+        :type  disconnect: bool
+        :param skipRes: list residues that should not be parsed
+        :type  skipRes: [ str ]
 
-        @return: new model (always of type PDBModel, regardless of source type)
-        @rtype: PDBModel
+        :return: new model (always of type PDBModel, regardless of source type)
+        :rtype: PDBModel
         """
         m = B.PDBModel()
         self.update( m, source, updateMissing=True, skipRes=skipRes)

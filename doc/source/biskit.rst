@@ -15,11 +15,53 @@ namespace.
    :template: autosummary/class_with_details.rst       
 
    PDBModel
-   ProfileCollection           
+   ProfileCollection   
+   PDBCleaner
+   Trajectory
+   EnsembleTraj
+   Residue
+   AmberResidueType
+   AmberPrepParser
    LogFile
    StdLog
    ErrLog
 
+Interaction with external programs
+----------------------------------
+
+.. autosummary::
+   :nosignatures:
+   :toctree: biskit
+   :template: autosummary/class_with_details.rst       
+
+    Executor
+    ExeConfig
+    ExeConfigCache
+    
+    AmberCrdEntropist
+    AmberCrdParser
+    AmberLeap
+    AmberParmBuilder
+    AmberRstParser
+    AmberResidueLibrary
+    
+    TMAlign
+    
+Supporting classes and modules
+------------------------------
+
+.. autosummary::
+   :nosignatures:
+   :toctree: biskit
+   :template: autosummary/class_with_details.rst
+   
+   BioUnit
+   LocalPath
+   SettingsManager
+   SettingsParser
+
+
+              
 Helper Modules
 --------------
 
@@ -39,7 +81,6 @@ Modules with utility and helper methods.
    match2seq           
    rmsFit
    
-   
 Errors
 -------
 
@@ -54,3 +95,6 @@ Errors that are raised by biskit classes.
    
    EHandler
    BiskitError
+   LocalPathError
+   PDBError
+   ProfileError

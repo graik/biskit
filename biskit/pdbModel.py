@@ -54,20 +54,20 @@ import functools
 
 class PDBProfiles( ProfileCollection ):
     """
-    A ProfileCollection that triggers an update() of its parent L{PDBModel}
+    A ProfileCollection that triggers an update() of its parent :class:`PDBModel`
     if an empty or (optionally) missing profile is requested.
 
-    @see L{ProfileCollection}
+    .. seealso:: `biskit.ProfileCollection`
     """
 
     def __init__(self, model=None, profiles=None, infos=None ):
         """
-        @param model: parent model of this ProfileCollection
-        @type  model: PDBModel
-        @param profiles: dictionary of existing profiles
-        @type  profiles: { 'name' : list/array }
-        @param infos:    dictionary of existing meta infos
-        @type  infos:    { 'name' : { 'date' : ... } }
+        :param model: parent model of this ProfileCollection
+        :type  model: PDBModel
+        :param profiles: dictionary of existing profiles
+        :type  profiles: { 'name' : list/array }
+        :param infos:    dictionary of existing meta infos
+        :type  infos:    { 'name' : { 'date' : ... } }
         """
         ProfileCollection.__init__( self, profiles=profiles, infos=infos )
         self.model = model
@@ -102,22 +102,22 @@ class PDBProfiles( ProfileCollection ):
         Or:
           get( (profKey, infoKey), [default] ) -> single value of metainfo dict
 
-        This method extends the standard L{ProfileCollection.get} by the
+        This method extends the standard :class:`ProfileCollection.get` by the
         ability to fetch empty (None) or missing profiles from a source
         file or model.
 
-        @param name: profile key or profile and info key
-        @type  name: str OR (str, str)
-        @param default: default result if no profile is found,
+        :param name: profile key or profile and info key
+        :type  name: str OR (str, str)
+        :param default: default result if no profile is found,
                         if None and no profile is found, attempt update
-        @type  default: any
-        @param update: update from source before returning empty profile [0]
-        @type  update: bool
-        @param updateMissing: update from source before reporting missing
+        :type  default: any
+        :param update: update from source before returning empty profile [0]
+        :type  update: bool
+        :param updateMissing: update from source before reporting missing
                               profile [0]
-        @type  updateMissing: bool
+        :type  updateMissing: bool
 
-        @raise ProfileError: if no profile is found with |name|
+        :raise ProfileError: if no profile is found with |name|
         """
         try:
             r = ProfileCollection.get( self, name, default=default)
@@ -168,7 +168,7 @@ class PDBModel:
     Store and manipulate coordinates and atom infos stemming from a PDB file.
     Coordinates are stored in the numpy array 'xyz'; the additional atom infos
     from the PDB (name, residue_name, and many more) are efficiently stored in
-    a L{PDBProfiles} instance 'atoms' which can be used to also associate
+    a :class:`PDBProfiles` instance 'atoms' which can be used to also associate
     arbitrary other data to the atoms. Moreover, a similar collection
     'residues' can hold data associated to residues (but is initially empty).
     A normal dictionary 'info' accepts any information about the whole model.
@@ -191,24 +191,25 @@ class PDBModel:
                   headPatterns=[] ):
         """
         Examples:
-        - PDBModel() creates an empty Model to which coordinates (field xyz)
+
+        - `PDBModel()` creates an empty Model to which coordinates (field xyz)
           and PDB records (atom profiles) have still to be added.
-        - PDBModel( file_name ) creates a complete model with coordinates
+        - `PDBModel( file_name )` creates a complete model with coordinates
           and PDB records from file_name (pdb, pdb.gz, or pickled PDBModel)
-        - PDBModel( PDBModel ) creates a copy of the given model
-        - PDBModel( PDBModel, noxyz=1 ) creates a copy without coordinates
+        - `PDBModel( PDBModel )` creates a copy of the given model
+        - `PDBModel( PDBModel, noxyz=1 )` creates a copy without coordinates
 
-        @param source: str, file name of pdb/pdb.gz file OR pickled PDBModel OR
+        :param source: str, file name of pdb/pdb.gz file OR pickled PDBModel OR
                       PDBModel, template structure to copy atoms/xyz field from
-        @type  source: str or PDBModel
-        @param pdbCode: PDB code, is extracted from file name otherwise
-        @type  pdbCode: str or None
-        @param noxyz: 0 (default) || 1, create without coordinates
-        @type  noxyz: 0||1
-        @param headPatterns: [(putIntoKey, regex)] extract given REMARK values
-        @type  headPatterns: [(str, str)]
+        :type  source: str or PDBModel
+        :param pdbCode: PDB code, is extracted from file name otherwise
+        :type  pdbCode: str or None
+        :param noxyz: 0 (default) || 1, create without coordinates
+        :type  noxyz: 0||1
+        :param headPatterns: [(putIntoKey, regex)] extract given REMARK values
+        :type  headPatterns: [(str, str)]
 
-        @raise PDBError: if file exists but can't be read
+        :raise PDBError: if file exists but can't be read
         """
         self.source = source
         if type( source ) is str and ( len(source) != 4 or \
@@ -295,12 +296,13 @@ class PDBModel:
     def __getitem__( self, k ):
         """
         Get atom profile or profile item or CrossView for one atom::
+        
           m['prof1']         <==>  m.atoms.get( 'prof1' )         
           m['prof1','info1'] <==>  m.atoms.get( 'prof1','info1' )
           m[10]              <==>  CrossView( m.atoms, 10 )
 
-        @return: profile OR meta infos thereof OR CrossView dict
-        @rtype: list OR array OR any OR CrossView
+        :return: profile OR meta infos thereof OR CrossView dict
+        :rtype: list OR array OR any OR CrossView
         """
         if type( k ) is str:
             if k in self.atoms:
@@ -321,18 +323,20 @@ class PDBModel:
     def __setitem__( self, k, v ):
         """
         Set atom profile or profile item (or meta info)::
-          m['prof1'] = range(10)    <==> m.atoms.set( 'prof1', range(10) )
-            OR                      <==> m.residues.set( 'prof1', range(10) )
+        
+          m['prof1'] = range(10)  
+          is same as        <==> m.atoms.set( 'prof1', range(10) )
+          OR                <==> m.residues.set( 'prof1', range(10) )
 
-          m['prof1','info1]='comment'
-                             <==> m.atoms.setInfo('prof1',info1='comment')
-            OR               <==> m.residues.setInfo('prof1',info1='comment')
+          m['prof1','info1'] = 'comment'
+          is same as        <==> m.atoms.setInfo('prof1',info1='comment')
+          OR                <==> m.residues.setInfo('prof1',info1='comment')
 
           m['version'] = '1.0.0'    <==> m.info['version'] = '1.0.0'
-            but only if 'version' already exists in m.info 
+          (but only if 'version' already exists in `m.info`) 
 
-        @return: item
-        @rtype: any        
+        :return: item
+        :rtype: any        
         """
         if type( k ) is str:
             if k in self.atoms:
@@ -384,14 +388,14 @@ class PDBModel:
         """
         Print (or return) a brief description of this model.
 
-        @param prnt: directly print report to STDOUT (default True)
-        @type  prnt: bool
-        @param plot: show simple 2-D line plot using gnuplot [False]
-        @type  plot: bool
-        @param clipseq: clip chain sequences at this number of letters [60]
-        @type  clipseq: int
-        @return: if prnt==True: None, else: formatted description of this model
-        @rtype: None or str
+        :param prnt: directly print report to STDOUT (default True)
+        :type  prnt: bool
+        :param plot: show simple 2-D line plot using gnuplot [False]
+        :type  plot: bool
+        :param clipseq: clip chain sequences at this number of letters [60]
+        :type  clipseq: int
+        :return: if prnt==True: None, else: formatted description of this model
+        :rtype: None or str
         """
         r = self.__repr__()
 
@@ -423,8 +427,8 @@ class PDBModel:
         colored by chain. This is obviously not publication-quality ;-). 
         Use the Biskit.Pymoler class for real visalization.
 
-        @param hetatm: include hetero & solvent atoms (default False)
-        @type  hetatm: bool
+        :param hetatm: include hetero & solvent atoms (default False)
+        :type  hetatm: bool
         """
         from biskit import gnuplot
 
@@ -572,16 +576,16 @@ class PDBModel:
         pickled PDBModel - but only if they are currently empty.
         The atomsChanged and xyzChanged flags are not changed.
 
-        @param skipRes: names of residues to skip if updating from PDB
-        @type  skipRes: list of str
-        @param updateMissing: 0(default): update only existing profiles
-        @type  updateMissing: 0|1
-        @param force: ignore invalid source (0) or report error (1)
-        @type  force: 0|1
-        @param headPatterns: [(putIntoKey, regex)] extract given REMARKS
-        @type  headPatterns: [(str, str)]
+        :param skipRes: names of residues to skip if updating from PDB
+        :type  skipRes: list of str
+        :param updateMissing: 0(default): update only existing profiles
+        :type  updateMissing: 0|1
+        :param force: ignore invalid source (0) or report error (1)
+        :type  force: 0|1
+        :param headPatterns: [(putIntoKey, regex)] extract given REMARKS
+        :type  headPatterns: [(str, str)]
 
-        @raise PDBError: if file can't be unpickled or read: 
+        :raise PDBError: if file can't be unpickled or read: 
         """
         source = self.validSource()
 
@@ -601,11 +605,11 @@ class PDBModel:
         """
         Replace coordinates.
 
-        @param xyz: Numpy array ( 3 x N_atoms ) of float
-        @type  xyz: array
+        :param xyz: Numpy array ( 3 x N_atoms ) of float
+        :type  xyz: array
 
-        @return: array( 3 x N_atoms ) or None, old coordinates
-        @rtype: array
+        :return: array( 3 x N_atoms ) or None, old coordinates
+        :rtype: array
         """
         old = self.xyz
         self.xyz = xyz
@@ -617,7 +621,7 @@ class PDBModel:
 
     def setSource( self, source ):
         """
-        @param source: LocalPath OR PDBModel OR str
+        :param source: LocalPath OR PDBModel OR str
         """
         if type( source ) == str and len( source ) != 4:
             self.source = LocalPath( source )
@@ -631,11 +635,11 @@ class PDBModel:
         Get coordinates, fetch from source PDB or pickled PDBModel,
         if necessary.
 
-        @param mask: atom mask
-        @type  mask: list of int OR array of 1||0
+        :param mask: atom mask
+        :type  mask: list of int OR array of 1||0
 
-        @return: xyz-coordinates, array( 3 x N_atoms, Float32 )
-        @rtype: array 
+        :return: xyz-coordinates, array( 3 x N_atoms, Float32 )
+        :rtype: array 
         """
         if self.xyz is None and self.validSource() is not None:
             self.update( force=1 )
@@ -656,11 +660,11 @@ class PDBModel:
         Note that the direct manipulation of individual profiles is more 
         efficient than the manipulation of CrossViews (on profiles)!
 
-        @param mask: atom mask
-        @type  mask: list of int OR array of 1||0
+        :param mask: atom mask
+        :type  mask: list of int OR array of 1||0
 
-        @return: list of CrossView dictionaries
-        @rtype: [ L{ProfileCollection.CrossView} ]
+        :return: list of CrossView dictionaries
+        :rtype: [ :class:`ProfileCollection.CrossView` ]
         """
         r = self.atoms.toCrossViews()
 
@@ -675,18 +679,18 @@ class PDBModel:
         Use::
            profile( name, updateMissing=0) -> atom or residue profile
 
-        @param name: name to access profile
-        @type  name: str        
-        @param default: default result if no profile is found, if None,
+        :param name: name to access profile
+        :type  name: str        
+        :param default: default result if no profile is found, if None,
         try to update from source and raise error [None]
-        @type  default: any
-        @param update: update from source before returning empty profile [True]
-        @type  update: bool
-        @param updateMissing: update from source before reporting missing
+        :type  default: any
+        :param update: update from source before returning empty profile [True]
+        :type  update: bool
+        :param updateMissing: update from source before reporting missing
                               profile [False]
-        @type  updateMissing: 0||1
+        :type  updateMissing: 0||1
 
-        @raise ProfileError: if neither atom- nor rProfiles contains |name|
+        :raise ProfileError: if neither atom- nor rProfiles contains |name|
         """
         if updateMissing and not name in self.atoms and \
            not name in self.residues:
@@ -708,18 +712,22 @@ class PDBModel:
 
     def profileInfo( self, name, updateMissing=0 ):
         """
-        Use::
+        Use:
+        
            profileInfo( name ) -> dict with infos about profile
 
-        @param name: name to access profile
-        @type  name: str       
-        @param updateMissing: update from source before reporting missing profile::
-                           Guaranteed infos: 'version'->str,
-                                             'comment'->str,
-                                             'changed'->1||0
-        @type  updateMissing: 0|1
+        :param name: name to access profile
+        :type  name: str       
+        :param updateMissing: update from source before reporting missing \
+               profile. Guaranteed infos are:
+                    
+                    - 'version' (str)
+                    - 'comment' (str)
+                    - 'changed' (1||0)
+                    
+        :type  updateMissing: 0|1
 
-        @raise ProfileError: if neither atom - nor rProfiles contains |name|
+        :raise ProfileError: if neither atom - nor rProfiles contains |name|
         """
         if updateMissing and not name in self.atoms and \
            not name in self.residues:
@@ -738,15 +746,16 @@ class PDBModel:
         """
         Remove residue or atom profile(s)
 
-        Use::
+        Use:
+        
            removeProfile( str_name [,name2, name3] ) -> 1|0,
 
-        @param names: name or list of residue or atom profiles
-        @type  names: str OR list of str
+        :param names: name or list of residue or atom profiles
+        :type  names: str OR list of str
 
-        @return: 1 if at least 1 profile has been deleted,
+        :return: 1 if at least 1 profile has been deleted,
                  0 if none has been found
-        @rtype: int
+        :rtype: int
         """
         r = 0
 
@@ -766,8 +775,8 @@ class PDBModel:
         Tell if xyz or atoms have been changed compared to source file or
         source object (which can be still in memory).
 
-        @return: xyz field has been changed with respect to source
-        @rtype: (1||0, 1||0)
+        :return: xyz field has been changed with respect to source
+        :rtype: (1||0, 1||0)
         """
         return self.xyzChanged
 
@@ -778,8 +787,8 @@ class PDBModel:
         source on disc. Same as xyzChanged() unless source is another not yet
         saved PDBModel instance that made changes relative to its own source.
 
-        @return: xyz has been changed
-        @rtype: bool
+        :return: xyz has been changed
+        :rtype: bool
         """
         if self.validSource() is None:
             return True
@@ -795,11 +804,11 @@ class PDBModel:
         """
         Check if profile has changed compared to source.
 
-        @return: 1, if profile |pname| can currently not be
+        :return: 1, if profile |pname| can currently not be
                  reconstructed from a source on disc.
-        @rtype: int
+        :rtype: int
 
-        @raise ProfileError: if there is no atom or res profile with pname
+        :raise ProfileError: if there is no atom or res profile with pname
         """
         if self.validSource() is None:
             return True
@@ -815,7 +824,7 @@ class PDBModel:
         """
         Remove profiles, that haven't been changed from a direct
         or indirect source on disc
-        B{AUTOMATICALLY CALLED BEFORE PICKLING and by deepcopy}
+        **AUTOMATICALLY CALLED BEFORE PICKLING and by deepcopy**
         """
         for key in self.residues:
 
@@ -833,8 +842,8 @@ class PDBModel:
         Remove xyz array and profiles if they haven't been changed and
         could hence be loaded from the source file (only if there is a source
         file...).
-        B{AUTOMATICALLY CALLED BEFORE PICKLING}
-        B{Currently also called by deepcopy (via __getstate__)}
+        **AUTOMATICALLY CALLED BEFORE PICKLING**
+        **Currently also called by deepcopy via getstate**
         """
         ## remove atoms/coordinates if they are unchanged from an existing
         ## source
@@ -857,8 +866,8 @@ class PDBModel:
         """
         Check for a valid source on disk.
 
-        @return:  str or PDBModel, None if this model has no valid source
-        @rtype: str or PDBModel or None
+        :return:  str or PDBModel, None if this model has no valid source
+        :rtype: str or PDBModel or None
         """
         if self.__validSource == 0:
 
@@ -882,10 +891,10 @@ class PDBModel:
         Name of pickled source or PDB file. If this model has another
         PDBModel as source, the request is passed on to this one.
 
-        @return: file name of pickled source or PDB file
-        @rtype: str
+        :return: file name of pickled source or PDB file
+        :rtype: str
 
-        @raise PDBError: if there is no valid source
+        :raise PDBError: if there is no valid source
         """
         s = self.validSource()
 
@@ -902,8 +911,10 @@ class PDBModel:
         """
         Disconnect this model from its source (if any).
 
-        @note: If this model has an (in-memory) PDBModel instance as source,
-        the entries of 'atoms' could still reference the same dictionaries.
+        .. note:: 
+        
+            If this model has an (in-memory) PDBModel instance as source,
+            the entries of 'atoms' could still reference the same dictionaries.
         """
         self.update()
 
@@ -926,8 +937,8 @@ class PDBModel:
         """
         Return pdb code of model.
 
-        @return: pdb code
-        @rtype: str
+        :return: pdb code
+        :rtype: str
         """
         return self.pdbCode
 
@@ -935,8 +946,8 @@ class PDBModel:
         """
         Set model pdb code.
 
-        @param code: new pdb code
-        @type  code: str
+        :param code: new pdb code
+        :type  code: str
         """
         self.pdbCode = code
 
@@ -945,15 +956,15 @@ class PDBModel:
         """
         Amino acid sequence in one letter code.
 
-        @param mask: atom mask, to apply before  (default None)
-        @type  mask: list or array
-        @param xtable: dict {str:str}, additional residue:single_letter mapping
+        :param mask: atom mask, to apply before  (default None)
+        :type  mask: list or array
+        :param xtable: dict {str:str}, additional residue:single_letter mapping
                        for non-standard residues (default molUtils.xxDic)
                        [currently not used]
-        @type  xtable: dict
+        :type  xtable: dict
 
-        @return: 1-letter-code AA sequence (based on first atom of each res).
-        @rtype: str
+        :return: 1-letter-code AA sequence (based on first atom of each res).
+        :rtype: str
         """
         firstAtm = self.resIndex()
         if mask is not None:
@@ -979,15 +990,15 @@ class PDBModel:
         files use 1HD2. By default, ambpdb produces 'standard' pdb atom names 
         but it can output the less ambiguous amber names with switch -aatm.
 
-        @param change: change this model's atoms directly (default:1)
-        @type  change: 1|0
-        @param aatm: use, for example, HG23 instead of 3HG2 (default:1)
-        @type  aatm: 1|0
-        @param parm10: adapt nucleic acid atom names to 2010 Amber forcefield
-        @type  parm10: 1|0
+        :param change: change this model's atoms directly (default:1)
+        :type  change: 1|0
+        :param aatm: use, for example, HG23 instead of 3HG2 (default:1)
+        :type  aatm: 1|0
+        :param parm10: adapt nucleic acid atom names to 2010 Amber forcefield
+        :type  parm10: 1|0
 
-        @return: [ {..} ], list of atom dictionaries
-        @rtype: list of atom dictionaries
+        :return: [ {..} ], list of atom dictionaries
+        :rtype: list of atom dictionaries
         """
         numbers = list(map( str, list(range(10)) ))
 
@@ -1050,30 +1061,32 @@ class PDBModel:
         """
         Save model as PDB file.
 
-        @param fname: name of new file
-        @type  fname: str
-        @param ter: Option of how to treat the terminal record::
-                    0, don't write any TER statements
-                    1, restore original TER statements (doesn't work,
-                         if preceeding atom has been deleted) [default]
-                    2, put TER between all detected chains
-                    3, as 2 but also detect and split discontinuous chains
-        @type  ter: 0, 1, 2 or 3
-        @param amber: amber formatted atom names
+        :param fname: name of new file
+        :type  fname: str
+        :param ter: Option of how to treat the terminal record:
+        
+                    * 0 - don't write any TER statements
+                    * 1 - restore original TER statements (doesn't work, \
+                          if preceeding atom has been deleted) [default]
+                    * 2 - put TER between all detected chains
+                    * 3 - as 2 but also detect and split discontinuous chains
+        
+        :type  ter: int
+        :param amber: amber formatted atom names
                       (implies ter=3, left=1, wrap=0) (default 0)
-        @type  amber: 1||0
-        @param original: revert atom names to the ones parsed in from PDB
+        :type  amber: 1||0
+        :param original: revert atom names to the ones parsed in from PDB
                          (default 0)
-        @type  original: 1||0
-        @param left: left-align atom names (as in amber pdbs)(default 0)
-        @type  left: 1||0
-        @param wrap: write e.g. 'NH12' as '2NH1' (default 0)
-        @type  wrap: 1||0
-        @param headlines: [( str, dict or str)], list of record / data tuples::
+        :type  original: 1||0
+        :param left: left-align atom names (as in amber pdbs)(default 0)
+        :type  left: 1||0
+        :param wrap: write e.g. 'NH12' as '2NH1' (default 0)
+        :type  wrap: 1||0
+        :param headlines: [( str, dict or str)], list of record / data tuples::
                           e.g. [ ('SEQRES', '  1 A 22  ALA GLY ALA'), ]
-        @type  headlines: list of tuples 
-        @param taillines: same as headlines but appended at the end of file
-        @type  taillines: list of tuples 
+        :type  headlines: list of tuples 
+        :param taillines: same as headlines but appended at the end of file
+        :type  taillines: list of tuples 
         """
         try:
             f = IO.PDBFile( fname, mode='w' )
@@ -1147,8 +1160,8 @@ class PDBModel:
         be reconstructed from the source of this model (if any).
         saveAs creates a 'new source' without further dependencies.
 
-        @param path: target file name
-        @type  path: str OR LocalPath instance
+        :param path: target file name
+        :type  path: str OR LocalPath instance
         """
         try:
             self.update()
@@ -1187,18 +1200,18 @@ class PDBModel:
 
           r = m.maskF( lambda a: a['name']=='CA' and a['residue_name']=='ALA' )
 
-        use:
+        use::
 
           r = m.maskFrom( 'name', 'CA' ) * m.maskFrom('residue_name', 'ALA')
 
-        @param atomFunction: function( dict_from_aProfiles.toDict() ),
+        :param atomFunction: function( dict_from_aProfiles.toDict() ),
                              true || false (Condition)
-        @type  atomFunction: 1||0
-        @param numpy: 1(default)||0, convert result to Numpy array of int
-        @type  numpy: int
+        :type  atomFunction: 1||0
+        :param numpy: 1(default)||0, convert result to Numpy array of int
+        :type  numpy: int
 
-        @return: Numpy array( [0,1,1,0,0,0,1,0,..], Int) or list
-        @rtype: array or list
+        :return: Numpy array( [0,1,1,0,0,0,1,0,..], Int) or list
+        :rtype: array or list
         """
         try:
             result = list(map( atomFunction, self.atoms.toDicts() ))
@@ -1226,22 +1239,23 @@ class PDBModel:
     def maskFrom( self, key, cond ):
         """
         Create an atom mask from the values of a specific profile.
-        Example, the following three statements are equivalent::
+        Example, the following three statements are equivalent:
 
           >>> mask = m.maskFrom( 'name', 'CA' )
           >>> mask = m.maskFrom( 'name', lambda a: a == 'CA' )
           >>> mask = N0.array( [ a == 'CA' for a in m.atoms['name'] ] )
 
-        People having numpy installed can also simply use::
+        However, the same can be also achieved with standard numpy operators:
+        
           >>> mask = numpy.array(m.atoms['name']) == 'CA'
 
-        @param key: the name of the profile to use
-        @type  key: str
-        @param cond: either a function accepting a single value or a value or
+        :param key: the name of the profile to use
+        :type  key: str
+        :param cond: either a function accepting a single value or a value or
                      an iterable of values (to allow several alternatives)
-        @type  cond: function OR any OR [ any ]
-        @return: array or list of indices where condition is met
-        @rtype : list or array of int
+        :type  cond: function OR any OR [ any ]
+        :return: array or list of indices where condition is met
+        :rtype: list or array of int
         """
 
         if type( cond ) is types.FunctionType:
@@ -1261,11 +1275,11 @@ class PDBModel:
         """
         Short cut for mask of all CA atoms.
 
-        @param force: force calculation even if cached mask is available
-        @type  force: 0||1
+        :param force: force calculation even if cached mask is available
+        :type  force: 0||1
 
-        @return: array( 1 x N_atoms ) of 0||1
-        @rtype: array
+        :return: array( 1 x N_atoms ) of 0||1
+        :rtype: array
         """
         if self.__maskCA is None or force:
             self.__maskCA = self.maskFrom( 'name', 'CA' )
@@ -1279,13 +1293,13 @@ class PDBModel:
         and DNA atom names. Any residues classified as solvent (water, ions)
         are filtered out.
 
-        @param force: force calculation even if cached mask is available
-        @type  force: 0||1
-        @param solvent: include solvent residues (default: false)
-        @type  solvent: 1||0
+        :param force: force calculation even if cached mask is available
+        :type  force: 0||1
+        :param solvent: include solvent residues (default: false)
+        :type  solvent: 1||0
 
-        @return: array( 1 x N_atoms ) of 0||1
-        @rtype: array
+        :return: array( 1 x N_atoms ) of 0||1
+        :rtype: array
         """
         if self.__maskBB is None or force or solvent:
             mask = self.maskFrom( 'name', ['CA', 'C', 'N', 'O', 'H','OXT',
@@ -1304,11 +1318,11 @@ class PDBModel:
         """
         Short cut for mask of all heavy atoms. ('element' <> H)
 
-        @param force: force calculation even if cached mask is available
-        @type  force: 0||1
+        :param force: force calculation even if cached mask is available
+        :type  force: 0||1
 
-        @return: array( 1 x N_atoms ) of 0||1
-        @rtype: array
+        :return: array( 1 x N_atoms ) of 0||1
+        :rtype: array
         """
         if self.__maskHeavy is None or force:
             self.__maskHeavy = self.maskFrom( 'element', lambda a: a != 'H' )
@@ -1319,8 +1333,8 @@ class PDBModel:
         """
         Short cut for mask of hydrogens. ('element' == H)
 
-        @return: array( 1 x N_atoms ) of 0||1
-        @rtype: array
+        :return: array( 1 x N_atoms ) of 0||1
+        :rtype: array
         """
         return N0.logical_not( self.maskHeavy() )
 
@@ -1329,8 +1343,8 @@ class PDBModel:
         """
         Short cut for mask of all CB I{and} CA of GLY.
 
-        @return: mask of all CB and CA of GLY
-        @rtype: array
+        :return: mask of all CB and CA of GLY
+        :rtype: array
         """
         f = lambda a: a['name'] == 'CB' or\
           a['residue_name'] == 'GLY' and a['name'] == 'CA' 
@@ -1342,8 +1356,8 @@ class PDBModel:
         """
         Short cut for mask of all CB I{and} CA of GLY.
 
-        @return: mask of all CB plus CA of GLY
-        @rtype: array
+        :return: mask of all CB plus CA of GLY
+        :rtype: array
         """
         m_cb = self.maskFrom( 'name', 'CB' )
         m_g  = self.maskFrom( 'residue_name', 'GLY' )
@@ -1356,8 +1370,8 @@ class PDBModel:
         """
         Short cut for mask of all atoms in residues named TIP3, HOH and  WAT
 
-        @return: array( 1 x N_atoms ) of 0||1
-        @rtype: array
+        :return: array( 1 x N_atoms ) of 0||1
+        :rtype: array
         """
         return self.maskFrom( 'residue_name', ['TIP3','HOH','WAT'] )
 
@@ -1366,8 +1380,8 @@ class PDBModel:
         Short cut for mask of all atoms in residues named
         TIP3, HOH, WAT, Na+, Cl-, CA, ZN
 
-        @return: array( 1 x N_atoms ) of 0||1
-        @rtype: array
+        :return: array( 1 x N_atoms ) of 0||1
+        :rtype: array
         """
         return self.maskFrom('residue_name', ['TIP3','HOH','WAT','Na+', 'Cl-',
                                               'CA', 'ZN'])
@@ -1376,8 +1390,8 @@ class PDBModel:
         """
         Short cut for mask of all HETATM 
 
-        @return: array( 1 x N_atoms ) of 0||1
-        @rtype: array
+        :return: array( 1 x N_atoms ) of 0||1
+        :rtype: array
         """
         return self.maskFrom( 'type', 'HETATM' )
 
@@ -1385,13 +1399,13 @@ class PDBModel:
         """
         Short cut for mask containing all atoms of amino acids.
 
-        @param standard: only standard residue names (not CYX, NME,..)
+        :param standard: only standard residue names (not CYX, NME,..)
                          (default 0)
-        @type  standard: 0|1
+        :type  standard: 0|1
 
-        @return: array( 1 x N_atoms ) of 0||1,
+        :return: array( 1 x N_atoms ) of 0||1,
                  mask of all protein atoms (based on residue name)
-        @rtype: array
+        :rtype: array
         """
         d = molUtils.aaDic
         if standard:
@@ -1406,8 +1420,8 @@ class PDBModel:
         """
         Short cut for mask of all atoms in DNA (based on residue name).
 
-        @return: array( 1 x N_atoms ) of 0||1
-        @rtype: array
+        :return: array( 1 x N_atoms ) of 0||1
+        :rtype: array
         """
         return self.maskFrom( 'residue_name', ['DA','DC','DG','DT'] )
 
@@ -1415,8 +1429,8 @@ class PDBModel:
         """
         Short cut for mask of all atoms in RNA (based on residue name).
 
-        @return: array( 1 x N_atoms ) of 0||1
-        @rtype: array
+        :return: array( 1 x N_atoms ) of 0||1
+        :rtype: array
         """
         return self.maskFrom( 'residue_name', ['A','C','G','U'] )
 
@@ -1425,8 +1439,8 @@ class PDBModel:
         Short cut for mask of all atoms in DNA or RNA
         (based on residue name).
 
-        @return: array( 1 x N_atoms ) of 0||1
-        @rtype: array
+        :return: array( 1 x N_atoms ) of 0||1
+        :rtype: array
         """
         return self.maskFrom( 'residue_name',
                               ['A','C','G','U','T','DA','DC','DG','DT'] )
@@ -1437,13 +1451,13 @@ class PDBModel:
         Corresponds to::
           >>> numpy.nonzero( m.maskFrom( key, cond) )
 
-        @param key: the name of the profile to use
-        @type  key: str
-        @param cond: either a function accepting a single value or a value or
+        :param key: the name of the profile to use
+        :type  key: str
+        :param cond: either a function accepting a single value or a value or
                      an iterable of values
-        @type  cond: function OR any OR [any]
-        @return: array of indices where condition is met
-        @rtype : array of int
+        :type  cond: function OR any OR [any]
+        :return: array of indices where condition is met
+        :rtype : array of int
         """
         return N0.nonzero( self.maskFrom( key, cond) )
 
@@ -1453,20 +1467,20 @@ class PDBModel:
         Get atom indices conforming condition. This is a convenience method
         to 'normalize' different kind of selections (masks, atom names,
         indices, functions) to indices as they are e.g. required by
-        L{PDBModel.take}. 
+        :class:`PDBModel.take`. 
 
-        @param what: Selection::
+        :param what: Selection::
              - function applied to each atom entry,
                 e.g. lambda a: a['residue_name']=='GLY'
              - list of str, allowed atom names
              - list of int, allowed atom indices OR mask with only 1 and 0
              - int, single allowed atom index
-        @type  what: function OR list of str or int OR int
+        :type  what: function OR list of str or int OR int
 
-        @return: N_atoms x 1 (0||1 )
-        @rtype: Numeric array
+        :return: N_atoms x 1 (0||1 )
+        :rtype: Numeric array
 
-        @raise PDBError: if what is neither of above
+        :raise PDBError: if what is neither of above
         """
         ## lambda funcion
         if type( what ) is types.FunctionType:
@@ -1498,21 +1512,21 @@ class PDBModel:
         """
         Get atom mask. This is a convenience method to 'normalize'
         different kind of selections (masks, atom names, indices,
-        functions) to a mask as it is e.g. required by L{PDBModel.compress}.
+        functions) to a mask as it is e.g. required by :class:`PDBModel.compress`.
 
-        @param what: Selection::
+        :param what: Selection::
                      - function applied to each atom entry,
                         e.g. lambda a: a['residue_name']=='GLY'
                      - list of str, allowed atom names
                      - list of int, allowed atom indices OR mask with
                        only 1 and 0
                      - int, single allowed atom index
-        @type  what: function OR list of str or int OR int
+        :type  what: function OR list of str or int OR int
 
-        @return: N_atoms x 1 (0||1 )
-        @rtype: Numeric array
+        :return: N_atoms x 1 (0||1 )
+        :rtype: Numeric array
 
-        @raise PDBError: if what is neither of above
+        :raise PDBError: if what is neither of above
         """
         ## lambda funcion
         if type( what ) == types.FunctionType:
@@ -1547,14 +1561,14 @@ class PDBModel:
         Create a map of len_i length, giving the residue(/chain) numer of
         each atom, from list of residue(/chain) starting positions.
 
-        @param index: list of starting positions, e.g. [0, 3, 8]
-        @type  index: [ int ] or array of int
-        @param len_i: length of target map, e.g. 10
-        @type  len_i: int
+        :param index: list of starting positions, e.g. [0, 3, 8]
+        :type  index: [ int ] or array of int
+        :param len_i: length of target map, e.g. 10
+        :type  len_i: int
 
-        @return: list mapping atom positions to residue(/chain) number,
+        :return: list mapping atom positions to residue(/chain) number,
                  e.g. [0,0,0, 1,1,1,1,1, 2,2] from above example
-        @rtype: array of int (and of len_i length)
+        :rtype: array of int (and of len_i length)
         """
         index = N0.concatenate( (index, [len_i]) )
         delta = index[1:] - index[:-1] 
@@ -1567,11 +1581,11 @@ class PDBModel:
         Identify the starting positions of each residue(/chain) from a map
         giving the residue(/chain) number of each atom.
 
-        @param imap: something like [0,0,0,1,1,1,1,1,2,2,2,...]
-        @type  imap: [ int ]
+        :param imap: something like [0,0,0,1,1,1,1,1,2,2,2,...]
+        :type  imap: [ int ]
 
-        @return: list of starting positions, e.g. [0, 3, 8, ...] in above ex.
-        @rtype: array of int
+        :return: list of starting positions, e.g. [0, 3, 8, ...] in above ex.
+        :rtype: array of int
         """
         try:
             imap = N0.concatenate( (imap, [imap[-1]] ) )
@@ -1590,15 +1604,15 @@ class PDBModel:
         Translate a mask that is defined,e.g., on residues(/chains) to a mask
         that is defined on atoms.
 
-        @param mask : mask marking positions in the list of residues or chains
-        @type  mask : [ bool ] or array of bool or of 1||0
-        @param index: starting positions of all residues or chains
-        @type  index: [ int ] or array of int
-        @param len_i: length of target mask
-        @type  len_i: int
+        :param mask : mask marking positions in the list of residues or chains
+        :type  mask : [ bool ] or array of bool or of 1||0
+        :param index: starting positions of all residues or chains
+        :type  index: [ int ] or array of int
+        :param len_i: length of target mask
+        :type  len_i: int
 
-        @return: mask that blows up the residue / chain mask to an atom mask
-        @rtype: array of bool
+        :return: mask that blows up the residue / chain mask to an atom mask
+        :rtype: array of bool
         """
         index = N0.concatenate( (index, [len_i]) )
         delta = index[1:] - index[:-1] 
@@ -1612,15 +1626,15 @@ class PDBModel:
         (/chains) to a list of atom positions AND also return the starting
         position of each residue (/chain) in the new sub-list of atoms.
 
-        @param i : positions in higher level list of residues or chains
-        @type  i : [ int ] or array of int
-        @param index: atomic starting positions of all residues or chains
-        @type  index: [ int ] or array of int
-        @param len_i: length of atom index (total number of atoms)
-        @type  len_i: int
+        :param i : positions in higher level list of residues or chains
+        :type  i : [ int ] or array of int
+        :param index: atomic starting positions of all residues or chains
+        :type  index: [ int ] or array of int
+        :param len_i: length of atom index (total number of atoms)
+        :type  len_i: int
 
-        @return: (ri, rindex) - atom positions & new index
-        @rtype:  array of int, array of int
+        :return: (ri, rindex) - atom positions & new index
+        :rtype:  array of int, array of int
         """
         ## catch invalid indices
         i = self.__convert_negative_indices( i, len( index ) )
@@ -1657,11 +1671,11 @@ class PDBModel:
         """
         Mask (set 0) residues for which all atoms are masked (0) in atomMask.
 
-        @param atomMask: list/array of int, 1 x N_atoms
-        @type  atomMask: list/array of int
+        :param atomMask: list/array of int, 1 x N_atoms
+        :type  atomMask: list/array of int
 
-        @return: 1 x N_residues (0||1 )
-        @rtype: array of int
+        :return: 1 x N_residues (0||1 )
+        :rtype: array of int
         """
         res_indices = self.atom2resIndices( N0.nonzero( atomMask) )
         r = N0.zeros( self.lenResidues() )
@@ -1677,11 +1691,11 @@ class PDBModel:
         returned in their old order, regardless of the order of input
         positions.
 
-        @param indices: list of atom indices
-        @type  indices: list of int
+        :param indices: list of atom indices
+        :type  indices: list of int
 
-        @return: indices of residues
-        @rtype: list of int
+        :return: indices of residues
+        :rtype: list of int
         """
         new_resmap = N0.take( self.resMap(), indices )
         resIndex   = self.map2index( new_resmap )
@@ -1693,19 +1707,19 @@ class PDBModel:
         """
         Convert residue mask to atom mask.
 
-        @param resMask: list/array of int, 1 x N_residues
-        @type  resMask: list/array of int
+        :param resMask: list/array of int, 1 x N_residues
+        :type  resMask: list/array of int
 
-        @return: 1 x N_atoms
-        @rtype: array of int
+        :return: 1 x N_atoms
+        :rtype: array of int
         """
         return self.extendMask( resMask, self.resIndex(), self.lenAtoms() )
 
     def __convert_negative_indices( self, indices, length ):
         """
         Replace negative indices by their positive equivalent.
-        @return: modified copy of indices (or unchanged indices itself)
-        @rtype: array of int
+        :return: modified copy of indices (or unchanged indices itself)
+        :rtype: array of int
         """
         if len(indices)==0 or min( indices ) >= 0:
             return indices
@@ -1729,11 +1743,11 @@ class PDBModel:
         """
         Convert residue indices to atom indices.
 
-        @param indices: list/array of residue indices
-        @type  indices: list/array of int
+        :param indices: list/array of residue indices
+        :type  indices: list/array of int
 
-        @return: array of atom positions
-        @rtype: array of int
+        :return: array of atom positions
+        :rtype: array of int
         """
         if max( indices ) > self.lenResidues() or min( indices ) < 0:
             raise PDBError("invalid residue indices")
@@ -1746,13 +1760,13 @@ class PDBModel:
         Convert atom indices to chain indices. Each chain is only
         returned once.
 
-        @param indices: list of atom indices
-        @type  indices: list of int
-        @param breaks: look for chain breaks in backbone coordinates (def. 0)
-        @type  breaks: 0||1
+        :param indices: list of atom indices
+        :type  indices: list of int
+        :param breaks: look for chain breaks in backbone coordinates (def. 0)
+        :type  breaks: 0||1
 
-        @return: chains any atom which is in indices
-        @rtype: list of int
+        :return: chains any atom which is in indices
+        :rtype: list of int
         """
         new_map = N0.take( self.chainMap( breaks=breaks ), indices )
         index   = self.map2index( new_map )
@@ -1766,11 +1780,11 @@ class PDBModel:
         Put another way: Mark all chains that contain any atom that is marked
         '1' in atomMask.
 
-        @param atomMask: list/array of int, 1 x N_atoms
-        @type  atomMask: list/array of int
+        :param atomMask: list/array of int, 1 x N_atoms
+        :type  atomMask: list/array of int
 
-        @return: 1 x N_residues (0||1 )
-        @rtype: array of int
+        :return: 1 x N_residues (0||1 )
+        :rtype: array of int
         """
         indices = self.atom2chainIndices( N0.nonzero( atomMask), breaks=breaks )
         r = N0.zeros( self.lenChains(breaks=breaks) )
@@ -1782,13 +1796,13 @@ class PDBModel:
         """
         Convert chain mask to atom mask.
 
-        @param chainMask: list/array of int, 1 x N_chains
-        @type  chainMask: list/array of int
-        @param breaks: look for chain breaks in backbone coordinates (def. 0)
-        @type  breaks: 0||1
+        :param chainMask: list/array of int, 1 x N_chains
+        :type  chainMask: list/array of int
+        :param breaks: look for chain breaks in backbone coordinates (def. 0)
+        :type  breaks: 0||1
 
-        @return: 1 x N_atoms
-        @rtype: array of int
+        :return: 1 x N_atoms
+        :rtype: array of int
         """
         return self.extendMask( chainMask, self.chainIndex( breaks=breaks ),
                                 self.lenAtoms() )
@@ -1798,11 +1812,11 @@ class PDBModel:
         """
         Convert chain indices into atom indices.
 
-        @param indices: list/array of chain indices
-        @type  indices: list/array of int
+        :param indices: list/array of chain indices
+        :type  indices: list/array of int
 
-        @return: array of atom positions, new chain index
-        @rtype: array of int
+        :return: array of atom positions, new chain index
+        :rtype: array of int
         """
         if max( N0.absolute(indices) ) > self.lenChains( breaks=breaks ):
             raise PDBError("invalid chain indices")
@@ -1816,12 +1830,12 @@ class PDBModel:
         Get an atom profile where each atom has the value its residue has
         in the residue profile.
 
-        @param p: name of existing residue profile OR ...
+        :param p: name of existing residue profile OR ...
                   [ any ], list of lenResidues() length
-        @type  p: str
+        :type  p: str
 
-        @return: [ any ] OR array, atom profile
-        @rtype: list or array
+        :return: [ any ] OR array, atom profile
+        :rtype: list or array
         """
         if type( p ) is str:
             p = self.residues.get( p )
@@ -1842,16 +1856,16 @@ class PDBModel:
         """
         Get a residue profile where each residue has the value that its first
         atom has in the atom profile.
-        @param p: name of existing atom profile OR ...
+        :param p: name of existing atom profile OR ...
                   [ any ], list of lenAtoms() length
-        @type  p: str
-        @param f: function to calculate single residue from many atom values 
+        :type  p: str
+        :param f: function to calculate single residue from many atom values 
                   f( [atom_value1, atom_value2,...] ) -> res_value
                   (default None, simply take value of first atom in each res.)
-        @type  f: func
+        :type  f: func
 
-        @return: [ any ] OR array, residue profile
-        @rtype: list or array
+        :return: [ any ] OR array, residue profile
+        :rtype: list or array
         """
         if type( p ) is str:
             p = self.atoms.get( p )
@@ -1873,15 +1887,15 @@ class PDBModel:
         """
         profile2mask( str_profname, [cutoff_min, cutoff_max=None])
 
-        @param cutoff_min: low value cutoff (all values >= cutoff_min)
-        @type  cutoff_min: float
-        @param cutoff_max: high value cutoff (all values < cutoff_max)
-        @type  cutoff_max: float
+        :param cutoff_min: low value cutoff (all values >= cutoff_min)
+        :type  cutoff_min: float
+        :param cutoff_max: high value cutoff (all values < cutoff_max)
+        :type  cutoff_max: float
 
-        @return: mask len( profile(profName) ) x 1||0
-        @rtype: array
+        :return: mask len( profile(profName) ) x 1||0
+        :rtype: array
 
-        @raise ProfileError: if no profile is found with name profName
+        :raise ProfileError: if no profile is found with name profName
         """
         if profName in self.atoms:
             return self.atoms.profile2mask( profName, cutoff_min, cutoff_max)
@@ -1891,17 +1905,17 @@ class PDBModel:
     def profile2atomMask( self, profName, cutoff_min=None, cutoff_max=None ):
         """
         profile2atomMask( str_profname, [cutoff_min, cutoff_max=None])
-        Same as L{profile2mask}, but converts residue mask to atom mask.
+        Same as :class:`profile2mask`, but converts residue mask to atom mask.
 
-        @param cutoff_min: low value cutoff
-        @type  cutoff_min: float
-        @param cutoff_max: high value cutoff
-        @type  cutoff_max: float
+        :param cutoff_min: low value cutoff
+        :type  cutoff_min: float
+        :param cutoff_max: high value cutoff
+        :type  cutoff_max: float
 
-        @return: mask N_atoms x 1|0
-        @rtype: array
+        :return: mask N_atoms x 1|0
+        :rtype: array
 
-        @raise ProfileError: if no profile is found with name profName
+        :raise ProfileError: if no profile is found with name profName
         """
         r = self.profile2mask( profName, cutoff_min, cutoff_max )
 
@@ -1914,11 +1928,11 @@ class PDBModel:
     def profile2resList( self, p ):
         """
         Group the profile values of each residue's atoms into a separate list.
-        @param p: name of existing atom profile OR ...
+        :param p: name of existing atom profile OR ...
                   [ any ], list of lenAtoms() length
 
-        @return: a list (one entry per residue) of lists (one entry per resatom)
-        @rtype: [ [ any ] ]
+        :return: a list (one entry per residue) of lists (one entry per resatom)
+        :rtype: [ [ any ] ]
         """
         if type( p ) is str:
             p = self.atoms.get( p )
@@ -1942,22 +1956,22 @@ class PDBModel:
         re-assigns PDB chain- and segment IDs as well as residue numbering
         to prepare for this situation.
 
-        @param c1   : first of the two chains to be merged
-        @type  c1   : int
-        @param id   : chain ID of the new chain (default: ID of first chain)
-        @type  id   : str
-        @param segid: ew chain's segid (default: SEGID of first chain)
-        @type  segid: str
-        @param renumberAtoms: rewrite PDB serial numbering of the adjacent
+        :param c1   : first of the two chains to be merged
+        :type  c1   : int
+        :param id   : chain ID of the new chain (default: ID of first chain)
+        :type  id   : str
+        :param segid: ew chain's segid (default: SEGID of first chain)
+        :type  segid: str
+        :param renumberAtoms: rewrite PDB serial numbering of the adjacent
                               chain to be consequtive to the last atom of the
                               first chain (default: False)
-        @type  renumberAtoms: bool
-        @param renumberResidues: shift PDB residue numbering so that the first
+        :type  renumberAtoms: bool
+        :param renumberResidues: shift PDB residue numbering so that the first
                                  residue of the adjacent chain follows the
                                  previous residue. Other than for atom
                                  numbering, later jumps in residue numbering
                                  are preserved. (default: True)
-        @type  renumberResidues: bool
+        :type  renumberResidues: bool
         """
         c1 = self.__convert_negative_indices( [c1], self.lenChains() )[0]
 
@@ -2018,10 +2032,10 @@ class PDBModel:
         """
         Merge two adjacent residues. Duplicate atoms are labelled with
         alternate codes 'A' (first occurrence) to 'B' or later.
-        @param r1: first of the two residues to be merged
-        @type  r1: int
-        @param name: name of the new residue (default: name of first residue)
-        @type  name: str
+        :param r1: first of the two residues to be merged
+        :type  r1: int
+        :param name: name of the new residue (default: name of first residue)
+        :type  name: str
         """
         r1 = self.__convert_negative_indices( [r1], self.lenResidues() )[0]
 
@@ -2089,14 +2103,14 @@ class PDBModel:
         are lost, so are profiles that are not available in all models.
         model0.concat( model1 [, model2, ..]) -> single PDBModel.
 
-        @param models:   models to concatenate
-        @type  models:   one or more PDBModel instances
-        @param newRes:   treat beginning of second model as new residue (True)
-        @type  newRes:   bool
-        @param newChain: treat beginning of second model as new chain (True)
-        @type  newChain: bool
+        :param models:   models to concatenate
+        :type  models:   one or more PDBModel instances
+        :param newRes:   treat beginning of second model as new residue (True)
+        :type  newRes:   bool
+        :param newChain: treat beginning of second model as new chain (True)
+        :type  newChain: bool
 
-        @note: info records of given models are lost.
+        Note: info records of given models are lost.
         """
         newRes  = kw.get('newRes', True)
         newChain= kw.get('newChain', True)
@@ -2156,7 +2170,7 @@ class PDBModel:
 ##              but also second and third chain.
 ##         Coordinates are not modified. removeChainBreaks( [0] ) doesn't make
 ##         sense.
-##         @param chains: [ int ], chain breaks
+##         :param chains: [ int ], chain breaks
 ##         """
 ##         if 0 in chains:
 ##             raise PDBError, 'cannot remove chain break 0'
@@ -2185,12 +2199,13 @@ class PDBModel:
     def take( self, i, rindex=None, cindex=None,
               *initArgs, **initKw ):
         """
-        Extract a PDBModel with a subset of atoms::
-          take( atomIndices ) -> PDBModel / sub-class.
+        Extract a PDBModel with a subset of atoms:
+        
+          take( atomIndices ) -> PDBModel
           
         All other PDBModel methods that extract portions of the model (e.g.
         compress, takeChains, takeResidues, keep, clone, remove) are ultimately
-        using take() at their core.
+        using `take()` at their core.
           
         Note:
         take employs fast numpy vector mapping methods to re-calculate
@@ -2202,21 +2217,23 @@ class PDBModel:
         a correct version of the new residue or chain index (which will then
         be used as is).
 
-        @param i: atomIndices, positions to take in the order to take
-        @type  i: list/array of int
+        :param i: atomIndices, positions to take in the order to take
+        :type  i: list/array of int
         
-        @param rindex: optional residue index for result model after extraction
-        @type  rindex: array of int
+        :param rindex: optional residue index for result model after extraction
+        :type  rindex: array of int
 
-        @param cindex: optional chain index for result model after extraction
-        @type  cindex: array of int
+        :param cindex: optional chain index for result model after extraction
+        :type  cindex: array of int
         
-        @param *initArgs: optional arguments for constructor of result model
-        @param **initKw : optional keyword arguments for constructure of result
-                          model
+        :param initArgs: any number of additional arguments for constructor of \
+                         result model
+        
+        :param initKw: any additional keyword arguments for constructure of \
+                        result model
 
-        @return: PDBModel / sub-class
-        @rtype: PDBModel
+        :return: new PDBModel or sub-class
+        :rtype: PDBModel
         """
         r = self.__class__( *initArgs, **initKw )
 
@@ -2267,8 +2284,8 @@ class PDBModel:
         Replace atoms,coordinates,profiles of this(!) model with sub-set.
         (in-place version of N0.take() )
 
-        @param i: atom positions to be kept
-        @type  i: list or array of int
+        :param i: atom positions to be kept
+        :type  i: list or array of int
         """
         if len(i)==self.lenAtoms() and max(i)<2:
             EHandler.warning('dont use PDBModel.keep() with mask.', trace=0) 
@@ -2294,9 +2311,9 @@ class PDBModel:
         """
         Clone PDBModel.
 
-        @return: PDBModel / subclass, copy of this model,
+        :return: PDBModel / subclass, copy of this model,
                  see comments to numpy.take()
-        @rtype: PDBModel
+        :rtype: PDBModel
         """
         return self.take( self.atomRange() )
 
@@ -2304,14 +2321,17 @@ class PDBModel:
     def compress( self, mask, *initArgs, **initKw ):
         """
         Compress PDBmodel using mask.
-        compress( mask ) -> PDBModel
+        
+            compress( mask ) -> PDBModel
 
-        @param mask: array( 1 x N_atoms of 1 or 0 )
-                     1 .. keep this atom
-        @type  mask: array
+        :param mask: array( 1 x N_atoms of 1 or 0 ):
+        
+                     * 1 .. keep this atom
+        
+        :type  mask: array
 
-        @return: compressed PDBModel using mask
-        @rtype: PDBModel
+        :return: compressed PDBModel using mask
+        :rtype: PDBModel
         """
         return self.take( N0.nonzero( mask ), *initArgs, **initKw )
 
@@ -2323,18 +2343,20 @@ class PDBModel:
         to apply the same change to another array of same dimension as
         the old(!) xyz and atoms.
 
-        @param what: Decription of what to remove::
+        :param what: Decription of what to remove:
+        
               - function( atom_dict ) -> 1 || 0    (1..remove) OR
               - list of int [4, 5, 6, 200, 201..], indices of atoms to remove
               - list of int [11111100001101011100..N_atoms], mask (1..remove)
               - int, remove atom with this index
-        @type  what: list of int or int
+        
+        :type  what: list of int or int
 
-        @return: array(1 x N_atoms_old) of 0||1, mask used to compress the
+        :return: array(1 x N_atoms_old) of 0||1, mask used to compress the
                  atoms and xyz arrays. 
-        @rtype: array
+        :rtype: array
 
-        @raise PDBError: if what is neither of above
+        :raise PDBError: if what is neither of above
         """
         mask = N0.logical_not( self.mask( what ) )
         self.keep( N0.nonzero(mask) )
@@ -2344,10 +2366,11 @@ class PDBModel:
     def takeResidues( self, i ):
         """
         Copy the given residues into a new model.
-        @param i: residue indices
-        @type  i: [ int ]
-        @return: PDBModel with given residues in given order
-        @rtype: PDBModel / subclass
+        
+        :param i: residue indices
+        :type  i: [ int ]
+        :return: PDBModel with given residues in given order
+        :rtype: PDBModel
         """
         ##i, index = self.res2atomIndices( i )
         i, index = self.extendIndex( i, self.resIndex(), self.lenAtoms() )
@@ -2374,17 +2397,17 @@ class PDBModel:
         This works because the new model will have back-jumps in residue 
         numbering.
 
-        @param chains: list of chains, e.g. [0,2] for first and third
-        @type  chains: list of int
-        @param breaks: split chains at chain breaks (default 0)
-        @type  breaks: 0|1
-        @param maxDist: (if breaks=1) chain break threshold in Angstrom
-        @type  maxDist: float
-        @param force: override check for chain repeats (only for breaks==1)
-        @type  force: bool
+        :param chains: list of chains, e.g. [0,2] for first and third
+        :type  chains: list of int
+        :param breaks: split chains at chain breaks (default 0)
+        :type  breaks: 0|1
+        :param maxDist: (if breaks=1) chain break threshold in Angstrom
+        :type  maxDist: float
+        :param force: override check for chain repeats (only for breaks==1)
+        :type  force: bool
 
-        @return: PDBModel consisting of the given chains in the given order
-        @rtype : PDBModel / subclass
+        :return: PDBModel consisting of the given chains in the given order
+        :rtype: PDBModel
         """
         ## i, index = self.chain2atomIndices( chains, breaks=breaks )
         i, index = self.extendIndex( chains, self.chainIndex( breaks=breaks ),
@@ -2425,12 +2448,12 @@ class PDBModel:
         """
         Assign consecutive chain identifiers A - Z to all atoms.
 
-        @param first_id: str (A - Z), first letter instead of 'A'
-        @type  first_id: str 
-        @param keep_old: don't override existing chain IDs (default 0)
-        @type  keep_old: 1|0
-        @param breaks: consider chain break as start of new chain (default 0)
-        @type  breaks: 1|0
+        :param first_id: str (A - Z), first letter instead of 'A'
+        :type  first_id: str 
+        :param keep_old: don't override existing chain IDs (default 0)
+        :type  keep_old: 1|0
+        :param breaks: consider chain break as start of new chain (default 0)
+        :type  breaks: 1|0
         """
         ids = self.atoms['chain_id']
 
@@ -2464,12 +2487,12 @@ class PDBModel:
         (among other things) is interpreted as end of chain by
         chainMap() and chainIndex() when a PDB file is loaded.
 
-        @param mask: [ 0||1 x N_atoms ] atom mask to apply BEFORE
-        @type  mask: list of int
-        @param start: starting number (default 1)
-        @type  start: int
-        @param addChainId: add chain IDs if they are missing
-        @type  addChainId: 1|0
+        :param mask: [ 0||1 x N_atoms ] atom mask to apply BEFORE
+        :type  mask: list of int
+        :param start: starting number (default 1)
+        :type  start: int
+        :param addChainId: add chain IDs if they are missing
+        :type  addChainId: 1|0
         """
         if addChainId:
             self.addChainId( keep_old=1, breaks=0 )
@@ -2487,8 +2510,9 @@ class PDBModel:
     def atomRange( self ):
         """
         >>> m.atomRange() == range( m.lenAtoms() )
-        @return: integer range for lenght of this model
-        @rtype: [ int ]
+        
+        :return: integer range for lenght of this model
+        :rtype: [ int ]
         """
         return list(range( self.lenAtoms()))
 
@@ -2497,8 +2521,8 @@ class PDBModel:
         """
         Number of atoms in model.
 
-        @return: number of atoms
-        @rtype: int
+        :return: number of atoms
+        :rtype: int
         """
         if not self.xyz is None:
             return len( self.xyz )
@@ -2518,8 +2542,8 @@ class PDBModel:
         """
         Number of residues in model.
 
-        @return: total number of residues
-        @rtype: int
+        :return: total number of residues
+        :rtype: int
         """
 ##         if self._resIndex is None:
 ##             return 0
@@ -2531,18 +2555,18 @@ class PDBModel:
         """
         Number of chains in model.
 
-        @param breaks: detect chain breaks from backbone atom distances (def 0)
-        @type  breaks: 0||1
-        @param maxDist: maximal distance between consequtive residues
+        :param breaks: detect chain breaks from backbone atom distances (def 0)
+        :type  breaks: 0||1
+        :param maxDist: maximal distance between consequtive residues
                         [ None ] .. defaults to twice the average distance
-        @type  maxDist: float
-        @param singleRes: allow chains consisting of single residues (def 0)
-        @type  singleRes: 1||0
-        @param solvent: also check solvent residues for "chain breaks" (def 0)
-        @type  solvent: 1||0
+        :type  maxDist: float
+        :param singleRes: allow chains consisting of single residues (def 0)
+        :type  singleRes: 1||0
+        :param solvent: also check solvent residues for "chain breaks" (def 0)
+        :type  solvent: 1||0
 
-        @return: total number of chains
-        @rtype: int
+        :return: total number of chains
+        :rtype: int
         """
         try:
             return len( self.chainIndex( breaks=breaks, maxDist=maxDist,
@@ -2556,14 +2580,19 @@ class PDBModel:
         Return list of lists of atom pseudo dictionaries per residue,
         which allows to iterate over residues and atoms of residues.
 
-        @param mask: [ 0||1 x N_atoms ] atom mask to apply BEFORE
-        @type  mask: 
+        :param mask: [ 0||1 x N_atoms ] atom mask to apply BEFORE
+        :type  mask: 
 
-        @return: A list of dictionaries::
-        [ [ CrossView{'name':'N', ' residue_name':'LEU', ..},          
-            CrossView{'name':'CA', 'residue_name':'LEU', ..} ],        
-          [ CrossView{'name':'CA', 'residue_name':'GLY', ..}, .. ] ]      
-        @rtype: list of list of CrossView    
+        :return: a list (one per residue) of lists (one per atom) of dictionaries
+            ::
+            
+                [ [ CrossView{'name':'N', ' residue_name':'LEU', ..},          
+                    CrossView{'name':'CA', 'residue_name':'LEU', ..} ],   
+                
+                  [ CrossView{'name':'CA', 'residue_name':'GLY', ..}, .. ] 
+                ]
+            
+        :rtype: [ [ `biskit.ProfileCollection.CrossView` ] ]    
         """
         ri = N0.concatenate( (self.resIndex( mask=mask ), [self.lenAtoms()] ) )
         resLen = len( ri ) - 1
@@ -2576,12 +2605,13 @@ class PDBModel:
 
     def resModels( self, i=None ):
         """
-        Creates a PDBModel per residue in PDBModel.
-        @param i: range of residue positions (default: all residues)
-        @type  i: [ int ] or array( int )
+        Creates one new PDBModel for each residue in the parent PDBModel.
+        
+        :param i: range of residue positions (default: all residues)
+        :type  i: [ int ] or array( int )
 
-        @return: list of PDBModels, one for each residue
-        @rtype: list of PDBModels
+        :return: list of PDBModels, one for each residue
+        :rtype: [ `PDBModel` ]
         """
         ri = self.resIndex()
         re = self.resEndIndex()
@@ -2598,13 +2628,13 @@ class PDBModel:
         Generate list to map from any atom to its ORIGINAL(!) PDB
         residue number.
 
-        @param mask: [00111101011100111...] consider atom: yes or no
+        :param mask: [00111101011100111...] consider atom: yes or no
                      len(mask) == N_atoms
-        @type  mask: list of int (1||0)
+        :type  mask: list of int (1||0)
 
-        @return: list all [000111111333344444..] with residue number
+        :return: list all [000111111333344444..] with residue number
                  for each atom
-        @rtype: list of int
+        :rtype: list of int
         """
         ## by default take all atoms
         if mask is None: mask = N0.ones( self.lenAtoms() , N0.Int )
@@ -2617,8 +2647,8 @@ class PDBModel:
         """
         Determine residue borders.
 
-        @return: starting position of each residue
-        @rtype:  list of int
+        :return: starting position of each residue
+        :rtype:  list of int
         """
         result = []
 
@@ -2660,16 +2690,16 @@ class PDBModel:
         """
         Get the position of the each residue's first atom.
 
-        @param force: re-calculate even if cached result is available (def 0)
-        @type  force: 1||0
-        @param cache: cache the result if new (def 1)
-        @type  cache: 1||0
-        @param mask: atom mask to apply before (i.e. result indices refer to
+        :param force: re-calculate even if cached result is available (def 0)
+        :type  force: 1||0
+        :param cache: cache the result if new (def 1)
+        :type  cache: 1||0
+        :param mask: atom mask to apply before (i.e. result indices refer to \
                      compressed model)
-        @type  mask: list of int (1||0)
+        :type  mask: list of int (1||0)
 
-        @return: index of the first atom of each residue
-        @rtype: list of int
+        :return: index of the first atom of each residue
+        :rtype: list of int
         """
 
         if self._resIndex is not None and not force and mask is None:
@@ -2695,24 +2725,25 @@ class PDBModel:
         'residue_number' or the 'residue_name' record changes between 2
         atoms.
 
-        See L{resList()} for an example of how to use the residue map.
+        See :class:`resList()` for an example of how to use the residue map.
 
-        @param force: recalculate map even if cached one is available (def 0)
-        @type  force: 0||1
-        @param cache: cache new map (def 1)
-        @type  cache: 0||1
+        :param force: recalculate map even if cached one is available (def 0)
+        :type  force: 0||1
+        :param cache: cache new map (def 1)
+        :type  cache: 0||1
 
-        @return: array [00011111122223333..], residue index for each atom
-        @rtype:  list of int
+        :return: array [00011111122223333..], residue index for each atom
+        :rtype:  list of int
         """
         return self.index2map( self.resIndex( force=force,cache=cache ),
                                self.lenAtoms() )
 
     def resEndIndex( self ):
         """
-        Get the position of the each residue's last atom. Note
-        @return: index of the last atom of each residue
-        @rtype: list of int
+        Get the position of the each residue's last atom.
+        
+        :return: index of the last atom of each residue
+        :rtype: list of int
         """
         r = self.resIndex()
         return N0.concatenate( (r[1:], [self.lenAtoms()]) ) - 1 
@@ -2754,8 +2785,9 @@ class PDBModel:
         Join chains containing single residues with identical name into
         one chain. Typically required for waters or ions if they are
         separated by TER or picked up by the chain break detection
-        @param check_resnumbers: (def 1)
-        @type  check_resnumbers: 1||0
+        
+        :param check_resnumbers: (def 1)
+        :type  check_resnumbers: 1||0
         """
         # residue name of first atom of each chain
         res_names = N0.take( self.atoms['residue_name'], chainindex )
@@ -2790,27 +2822,27 @@ class PDBModel:
         """
         Get indices of first atom of each chain.
 
-        @param breaks: split chains at chain breaks (def 0)
-        @type  breaks: 1||0
-        @param maxDist: (if breaks=1) chain break threshold in Angstrom
-        @type  maxDist: float
-        @param force  : re-analyze residue numbering, chain and segids to
+        :param breaks: split chains at chain breaks (def 0)
+        :type  breaks: 1||0
+        :param maxDist: (if breaks=1) chain break threshold in Angstrom
+        :type  maxDist: float
+        :param force: re-analyze residue numbering, chain and segids to
                         find chain boundaries, use with care! (def 0)
-        @type  force  : 1||0
-        @param cache  : cache new index even if it was derrived from
+        :type  force: 1||0
+        :param cache: cache new index even if it was derrived from
                         non-default parameters (def 0)
-                        Note: a simple m.chainIndex() will always cache
-        @type  cache  : 1||0
-        @param singleRes: allow chains consisting of single residues (def 0)
+                        **Note:** a simple m.chainIndex() will always cache
+        :type  cache: 1||0
+        :param singleRes: allow chains consisting of single residues (def 0)
                           Otherwise group consecutive residues with identical
                           name into one chain.
-        @type  singleRes: 1||0
-        @param solvent: also check solvent residues for "chain breaks" 
+        :type  singleRes: 1||0
+        :param solvent: also check solvent residues for "chain breaks" 
                         (default: false)
-        @type  solvent: 1||0
+        :type  solvent: 1||0
 
-        @return: array (1 x N_chains) of int
-        @rtype: list of int
+        :return: array (1 x N_chains) of int
+        :rtype: list of int
         """
         ## fast track
         if not (breaks or force or maxDist or solvent) \
@@ -2843,8 +2875,9 @@ class PDBModel:
     def chainEndIndex( self, breaks=0, solvent=0 ):
         """
         Get the position of the each residue's last atom.
-        @return: index of the last atom of each residue
-        @rtype: list of int
+        
+        :return: index of the last atom of each residue
+        :rtype: list of int
         """
         r = self.chainIndex( breaks=breaks, solvent=solvent )
         return N0.concatenate( (r[1:], [self.lenAtoms()]) ) - 1 
@@ -2856,13 +2889,13 @@ class PDBModel:
         the chain_id or segment_id changes, the residue numbering jumps back or
         a TER record was found.
 
-        @param breaks: split chains at chain breaks (def 0)
-        @type  breaks: 1||0
-        @param maxDist: (if breaks=1) chain break threshold in Angstrom
-        @type  maxDist: float
+        :param breaks: split chains at chain breaks (def 0)
+        :type  breaks: 1||0
+        :param maxDist: (if breaks=1) chain break threshold in Angstrom
+        :type  maxDist: float
 
-        @return: array 1 x N_atoms of int, e.g. [000000011111111111122222...]
-        @rtype: list of int
+        :return: array 1 x N_atoms of int, e.g. [000000011111111111122222...]
+        :rtype: list of int
         """
         return self.index2map( self.chainIndex( breaks=breaks, maxDist=maxDist ),
                                self.lenAtoms() )
@@ -2880,20 +2913,20 @@ class PDBModel:
         deviations (default 10) above the median. This heuristics can be
         overriden by specifiying a hard distance cutoff (maxDist).
 
-        @param breaks_only: don't report ends of regular chains (def 1)
-        @type  breaks_only: 1|0
-        @param maxDist: maximal distance between consequtive residues
+        :param breaks_only: don't report ends of regular chains (def 1)
+        :type  breaks_only: 1|0
+        :param maxDist: maximal distance between consequtive residues
                         [ None ] .. defaults median + z * standard dev.
-        @type  maxDist: float
-        @param z      : z-score for outlier distances between residues (def 6.)
-        @type  z      : float
-        @param solvent: also check selected solvent residues (buggy!) (def 0)
-        @type  solvent: 1||0
-        @param force: force re-calculation, do not use cached positions (def 0)
-        @type  force: 1||0
+        :type  maxDist: float
+        :param z      : z-score for outlier distances between residues (def 6.)
+        :type  z      : float
+        :param solvent: also check selected solvent residues (buggy!) (def 0)
+        :type  solvent: 1||0
+        :param force: force re-calculation, do not use cached positions (def 0)
+        :type  force: 1||0
 
-        @return: atom indices of last atom **before** a probable chain break
-        @rtype: list of int
+        :return: atom indices of last atom **before** a probable chain break
+        :rtype: list of int
         """
         if self.__chainBreaks is not None and not force and \
            maxDist is None and breaks_only and not solvent and z==6.:
@@ -2958,8 +2991,8 @@ class PDBModel:
         """
         Remove all atoms with a certain residue name.
 
-        @param what: indices or name(s) of residue to be removed
-        @type  what: str OR [ str ] OR int OR [ int ]
+        :param what: indices or name(s) of residue to be removed
+        :type  what: str OR [ str ] OR int OR [ int ]
         """
         if not isinstance( what, list ) or isinstance( what, N.ndarray):
             what = T.toList( what )
@@ -2977,21 +3010,21 @@ class PDBModel:
         """
         Rmsd between two PDBModels.
 
-        @param other: other model to compare this one with
-        @type  other: PDBModel
-        @param mask: atom mask for rmsd calculation
-        @type  mask: list of int
-        @param mask_fit: atom mask for superposition (default: same as mask)
-        @type  mask_fit: list of int
-        @param fit: superimpose first (default 1)
-        @type  fit: 1||0
-        @param n_it: number of fit iterations::
+        :param other: other model to compare this one with
+        :type  other: PDBModel
+        :param mask: atom mask for rmsd calculation
+        :type  mask: list of int
+        :param mask_fit: atom mask for superposition (default: same as mask)
+        :type  mask_fit: list of int
+        :param fit: superimpose first (default 1)
+        :type  fit: 1||0
+        :param n_it: number of fit iterations::
                        1 - classic single fit (default)
                        0 - until convergence, kicking out outliers on the way
-        @type  n_it: int
+        :type  n_it: int
 
-        @return: rms in Angstrom
-        @rtype: float
+        :return: rms in Angstrom
+        :rtype: float
         """
         x, y = self.getXyz(), other.getXyz()
 
@@ -3027,25 +3060,25 @@ class PDBModel:
         Get the transformation matrix which least-square fits this model
         onto the other model.
 
-        @param refModel: reference PDBModel
-        @type  refModel: PDBModel
-        @param mask: atom mask for superposition
-        @type  mask: list of int
-        @param n_it: number of fit iterations::
+        :param refModel: reference PDBModel
+        :type  refModel: PDBModel
+        :param mask: atom mask for superposition
+        :type  mask: list of int
+        :param n_it: number of fit iterations::
                        1 - classic single fit (default)
                        0 - until convergence
-        @type  n_it: int        
-        @param z: number of standard deviations for outlier definition
+        :type  n_it: int        
+        :param z: number of standard deviations for outlier definition
                   (default 2)
-        @type  z: float
-        @param eps_rmsd: tolerance in rmsd (default 0.5)
-        @type  eps_rmsd: float
-        @param eps_stdv: tolerance in standard deviations (default 0.05)
-        @type  eps_stdv: float
-        @param profname: name of new atom profile getting outlier flag
-        @type  profname: str
-        @return: array(3 x 3), array(3 x 1) - rotation and translation matrices
-        @rtype: array, array
+        :type  z: float
+        :param eps_rmsd: tolerance in rmsd (default 0.5)
+        :type  eps_rmsd: float
+        :param eps_stdv: tolerance in standard deviations (default 0.05)
+        :type  eps_stdv: float
+        :param profname: name of new atom profile getting outlier flag
+        :type  profname: str
+        :return: array(3 x 3), array(3 x 1) - rotation and translation matrices
+        :rtype: array, array
         """
         x, y = refModel.getXyz(), self.getXyz()
 
@@ -3074,12 +3107,12 @@ class PDBModel:
         """
         Transform coordinates of PDBModel.
 
-        @param rt: rotational and translation array:
+        :param rt: rotational and translation array:
                    array( 4 x 4 ) OR array(3 x 3), array(3 x 1)
-        @type  rt: array OR array, array
+        :type  rt: array OR array, array
 
-        @return: PDBModel with transformed coordinates
-        @rtype: PDBModel
+        :return: PDBModel with transformed coordinates
+        :rtype: PDBModel
         """
         ## got result tuple from transformation() without unpacking
         if len( rt ) == 1 and type( rt[0] ) is tuple:
@@ -3103,26 +3136,26 @@ class PDBModel:
         """
         Least-square fit this model onto refMode
 
-        @param refModel: reference PDBModel
-        @type  refModel: PDBModel
-        @param mask: atom mask for superposition
-        @type  mask: list of int (1||0)
-        @param n_it: number of fit iterations::
+        :param refModel: reference PDBModel
+        :type  refModel: PDBModel
+        :param mask: atom mask for superposition
+        :type  mask: list of int (1||0)
+        :param n_it: number of fit iterations::
                        1 - classic single fit (default)
                        0 - until convergence
-        @type  n_it: int        
-        @param z: number of standard deviations for outlier definition
+        :type  n_it: int        
+        :param z: number of standard deviations for outlier definition
                   (default 2)
-        @type  z: float
-        @param eps_rmsd: tolerance in rmsd (default 0.5)
-        @type  eps_rmsd: float
-        @param eps_stdv: tolerance in standard deviations (default 0.05)
-        @type  eps_stdv: float
-        @param profname: name of new atom profile containing outlier flag
-        @type  profname: str
+        :type  z: float
+        :param eps_rmsd: tolerance in rmsd (default 0.5)
+        :type  eps_rmsd: float
+        :param eps_stdv: tolerance in standard deviations (default 0.05)
+        :type  eps_stdv: float
+        :param profname: name of new atom profile containing outlier flag
+        :type  profname: str
 
-        @return: PDBModel with transformed coordinates
-        @rtype: PDBModel
+        :return: PDBModel with transformed coordinates
+        :rtype: PDBModel
         """
         return self.transform(
             self.transformation( refModel, mask, n_it, eps_rmsd=eps_rmsd,
@@ -3134,13 +3167,13 @@ class PDBModel:
         Superimpose this model onto a ref. model with similar atom content.
         magicFit( refModel [, mask ] ) -> PDBModel (or subclass )
 
-        @param refModel: reference PDBModel
-        @type  refModel: PDBModel
-        @param mask: atom mask to use for the fit
-        @type  mask: list of int (1||0)
+        :param refModel: reference PDBModel
+        :type  refModel: PDBModel
+        :param mask: atom mask to use for the fit
+        :type  mask: list of int (1||0)
 
-        @return: fitted PDBModel or sub-class
-        @rtype: PDBModel
+        :return: fitted PDBModel or sub-class
+        :rtype: PDBModel
         """
         if mask is not None:
             m_this = self.compress( mask )
@@ -3163,21 +3196,23 @@ class PDBModel:
         """
         Structure-align this model onto a reference model using the external
         TM-Align program (which needs to be installed).
+        
         structureFit( refModel [, mask] ) -> PDBModel (or subclass)
 
         The result model has additional TM-Align statistics in its info record:
         r = m.structureFit( ref )
         r.info['tm_score'] -> TM-Align score
         the other keys are: 'tm_rmsd', 'tm_len', 'tm_id'
-        @see: Biskit.TMAlign
+        
+        .. seealso:: `biskit.TMAlign`
 
-        @param refModel: reference PDBModel
-        @type  refModel: PDBModel
-        @param mask: atom mask to use for the fit
-        @type  mask: list of int (1||0)
+        :param refModel: reference PDBModel
+        :type  refModel: PDBModel
+        :param mask: atom mask to use for the fit
+        :type  mask: list of int (1||0)
 
-        @return: fitted PDBModel or sub-class
-        @rtype: PDBModel
+        :return: fitted PDBModel or sub-class
+        :rtype: PDBModel
         """
         if mask is not None:
             m_this = self.compress( mask )
@@ -3194,11 +3229,11 @@ class PDBModel:
         """
         Get model with centered coordinates.
 
-        @param mask: atom mask applied before calculating the center
-        @type  mask: list of int (1||0)
+        :param mask: atom mask applied before calculating the center
+        :type  mask: list of int (1||0)
 
-        @return: model with centered coordinates
-        @rtype: PDBModel
+        :return: model with centered coordinates
+        :rtype: PDBModel
         """
         r = self.clone()
         if mask is None: mask = N0.ones( len(self) )
@@ -3214,11 +3249,11 @@ class PDBModel:
         """
         Geometric centar of model.
 
-        @param mask: atom mask applied before calculating the center
-        @type  mask: list of int (1||0)
+        :param mask: atom mask applied before calculating the center
+        :type  mask: list of int (1||0)
 
-        @return: xyz coordinates of center
-        @rtype: (float, float, float)
+        :return: xyz coordinates of center
+        :rtype: (float, float, float)
         """
         if mask is None:
             return N0.average( self.getXyz() )
@@ -3230,8 +3265,8 @@ class PDBModel:
         """
         Center of mass of PDBModel.
 
-        @return: array(Float32)
-        @rtype: (float, float, float)
+        :return: array(Float32)
+        :rtype: (float, float, float)
         """
         M = self.masses()
         return mathUtils.wMean( self.getXyz(), M )
@@ -3241,10 +3276,10 @@ class PDBModel:
         """
         Collect the molecular weight of all atoms in PDBModel.
 
-        @return: 1-D array with mass of every atom in 1/12 of C12 mass.
-        @rtype: array of floats
+        :return: 1-D array with mass of every atom in 1/12 of C12 mass.
+        :rtype: array of floats
 
-        @raise PDBError: if the model contains elements of unknown mass
+        :raise PDBError: if the model contains elements of unknown mass
         """
         try:
             M = [ molUtils.atomMasses[e] for e in self.atoms['element'] ]
@@ -3259,10 +3294,10 @@ class PDBModel:
         """
         Molecular weight of PDBModel.
 
-        @return: total mass in 1/12 of C12 mass
-        @rtype: float
+        :return: total mass in 1/12 of C12 mass
+        :rtype: float
 
-        @raise PDBError: if the model contains elements of unknown mass
+        :raise PDBError: if the model contains elements of unknown mass
         """
         return N0.sum( self.masses() )
 
@@ -3273,13 +3308,13 @@ class PDBModel:
         residue are set to the highest value of any atom in that residue.
         (after applying mask)
 
-        @param atomValues: values per atom
-        @type  atomValues: list 
-        @param mask: atom mask
-        @type  mask: list of int (1||0)
+        :param atomValues: values per atom
+        :type  atomValues: list 
+        :param mask: atom mask
+        :type  mask: list of int (1||0)
 
-        @return: array with values set to the maximal intra-residue value
-        @rtype: array of float
+        :return: array with values set to the maximal intra-residue value
+        :rtype: array of float
         """
         if mask is None:
             mask = N0.ones( len(atomValues) )
@@ -3307,15 +3342,15 @@ class PDBModel:
         """
         Prepare sorting atoms within residues according to comparison function.
 
-        @param cmpfunc: old style function(m.atoms[i], m.atoms[j]) -> -1, 0, +1
-        @type  cmpfunc: function
+        :param cmpfunc: old style function(m.atoms[i], m.atoms[j]) -> -1, 0, +1
+        :type  cmpfunc: function
         
-        @param key: new style sort key function(m.atoms[i]) -> sortable
-        @type key: function
+        :param key: new style sort key function(m.atoms[i]) -> sortable
+        :type key: function
 
-        @return: suggested position of each atom in re-sorted model 
+        :return: suggested position of each atom in re-sorted model 
                  ( e.g. [2,1,4,6,5,0,..] )
-        @rtype: list of int
+        :rtype: list of int
         """
         ## cmp vanished in python 3.x (but still available in past.builtins)
         cmp = lambda x, y: (x > y) - (x < y)
@@ -3355,11 +3390,11 @@ class PDBModel:
         """
         Apply a given sort list to the atoms of this model.
 
-        @param sortArg: comparison function
-        @type  sortArg: function
+        :param sortArg: comparison function
+        :type  sortArg: function
 
-        @return: copy of this model with re-sorted atoms (see numpy.take() )
-        @rtype: PDBModel
+        :return: copy of this model with re-sorted atoms (see numpy.take() )
+        :rtype: PDBModel
         """
         sortArg = sortArg or self.argsort()
 
@@ -3372,13 +3407,13 @@ class PDBModel:
         """
         Undo a previous sorting on the model itself (no copy).
 
-        @param sortList: sort list used for previous sorting.
-        @type  sortList: list of int
+        :param sortList: sort list used for previous sorting.
+        :type  sortList: list of int
 
-        @return: the (back)sort list used ( to undo the undo...)
-        @rtype: list of int
+        :return: the (back)sort list used ( to undo the undo...)
+        :rtype: list of int
 
-        @raise PDBError: if sorting changed atom number
+        :raise PDBError: if sorting changed atom number
         """
         ## prepare sort functions (py 2.x / py 3.x)
         cmp = lambda x, y: (x > y) - (x < y)
@@ -3398,13 +3433,13 @@ class PDBModel:
         """
         Return a list of atom names from start to stop RESIDUE index
 
-        @param start: index of first residue 
-        @type  start: int
-        @param stop: index of last residue
-        @type  stop: int
+        :param start: index of first residue 
+        :type  start: int
+        :param stop: index of last residue
+        :type  stop: int
 
-        @return: ['C','CA','CB' .... ]
-        @rtype: list of str
+        :return: ['C','CA','CB' .... ]
+        :rtype: list of str
         """
         ## By default return list of all atoms
         start = start or 0
@@ -3425,15 +3460,15 @@ class PDBModel:
 
     def __testDict_and( self, dic, condition ):
         """
-        Test if B{all} key-value pairs of condition are matched in dic
+        Test if **all** key-value pairs of condition are matched in dic
 
-        @param condition: {..}, key-value pairs to be matched
-        @type  condition: dictionary
-        @param dic: {..}, dictionary to be tested
-        @type  dic: dictionary
+        :param condition: {..}, key-value pairs to be matched
+        :type  condition: dictionary
+        :param dic: {..}, dictionary to be tested
+        :type  dic: dictionary
 
-        @return: 1|0, 1 if all key-value pairs of condition are matched in dic
-        @rtype: 1|0
+        :return: 1|0, 1 if all key-value pairs of condition are matched in dic
+        :rtype: 1|0
         """
         for k,v in list(condition.items()):
             if dic.get( k, None ) not in v:
@@ -3443,15 +3478,15 @@ class PDBModel:
 
     def __testDict_or( self, dic, condition ):
         """
-        Test if B{any} key-value pairs of condition are matched in dic
+        Test if **any** key-value pairs of condition are matched in dic
 
-        @param condition: {..}, key-value pairs to be matched
-        @type  condition: dictionary
-        @param dic: {..}, dictionary to be tested
-        @type  dic: dictionary
+        :param condition: {..}, key-value pairs to be matched
+        :type  condition: dictionary
+        :param dic: {..}, dictionary to be tested
+        :type  dic: dictionary
 
-        @return: 1|0, 1 if any key-value pairs of condition are matched in dic
-        @rtype: 1|0
+        :return: 1|0, 1 if any key-value pairs of condition are matched in dic
+        :rtype: 1|0
         """
         for k,v in list(condition.items()):
             if dic.get( k, None ) in v:
@@ -3464,14 +3499,14 @@ class PDBModel:
         Get atom positions that match a combination of key=values.
         E.g. filter( chain_id='A', name=['CA','CB'] ) -> index
 
-        @param mode: 0 combine with AND (default), 1 combine with OR
-        @type  mode: 0||1
-        @param kw: combination of atom dictionary keys and
+        :param mode: 0 combine with AND (default), 1 combine with OR
+        :type  mode: 0||1
+        :param kw: combination of atom dictionary keys and
                    values/list of values that will be used to filter
-        @type  kw: filter options, see example
+        :type  kw: filter options, see example
 
-        @return: sort list
-        @rtype: list of int
+        :return: sort list
+        :rtype: list of int
         """
         ## cache to minimize function lookup
         atoms = self.atoms.toDicts()
@@ -3492,14 +3527,14 @@ class PDBModel:
         Extract atoms that match a combination of key=values.
         E.g. filter( chain_id='A', name=['CA','CB'] ) -> PDBModel
 
-        @param mode: 0 combine with AND (default), 1 combine with OR
-        @type  mode: 0||1
-        @param kw: combination of atom dictionary keys and
+        :param mode: 0 combine with AND (default), 1 combine with OR
+        :type  mode: 0||1
+        :param kw: combination of atom dictionary keys and
                    values/list of values that will be used to filter
-        @type  kw: filter options, see example
+        :type  kw: filter options, see example
 
-        @return: filterd PDBModel
-        @rtype: PDBModel
+        :return: filterd PDBModel
+        :rtype: PDBModel
         """
         return self.take( self.filterIndex( mode=mode, **kw ) )
 
@@ -3509,15 +3544,15 @@ class PDBModel:
         Compares the residue and atom sequence in the given range.
         Coordinates are not checked, other profiles are not checked.
 
-        @param start: index of first residue 
-        @type  start: int
-        @param stop: index of last residue
-        @type  stop: int 
+        :param start: index of first residue 
+        :type  start: int
+        :param stop: index of last residue
+        :type  stop: int 
 
-        @return: [ 1||0, 1||0 ],
+        :return: [ 1||0, 1||0 ],
                  first position sequence identity 0|1,
                  second positio atom identity 0|1
-        @rtype: list if int
+        :rtype: list if int
         """
         ## By default compare all residues
         start = start or 0
@@ -3549,8 +3584,8 @@ class PDBModel:
          >>> m1 = m1.take( i1 ); m2 = m2.take( i2 )
          >>> m1.atomNames() == m2.atomNames()  ## m2 has again same atom order
 
-        @return: indices, indices_ref
-        @rtype: ([int], [int])
+        :return: indices, indices_ref
+        :rtype: ([int], [int])
         """
         ## compare sequences
         seqMask, seqMask_ref = match2seq.compareModels(self, ref)
@@ -3609,17 +3644,17 @@ class PDBModel:
         
         (not speed-optimized)
         
-        @param ref: reference model to compare to
-        @type  ref: PDBModel
-        @param i   : pre-computed positions that are equal in this model
+        :param ref: reference model to compare to
+        :type  ref: PDBModel
+        :param i:   pre-computed positions that are equal in this model \
                      (first value returned by compareAtoms() )
-        @type  i   : array( int ) or [ int ]
-        @param iref: pre-computed positions that are equal in ref model
+        :type  i:   array( int ) or [ int ]
+        :param iref: pre-computed positions that are equal in ref model \
                      (first value returned by compareAtoms() )
-        @type  i   : array( int ) or [ int ]
+        :type  i:    array( int ) or [ int ]
         
-        @return: missmatching atoms of self, missmatching atoms of ref
-        @rtype: array(int), array(int)
+        :return: missmatching atoms of self, missmatching atoms of ref
+        :rtype: array(int), array(int)
         """
         if i is None or iref is None:
             i, iref = self.compareAtoms( ref )
@@ -3634,10 +3669,10 @@ class PDBModel:
 
     def reportAtoms( self, i=None, n=None ):
         """
-        @param i: optional list of atom positions to report (default: all)
-        @type i : [ int ]
-        @return: formatted string with atom and residue names similar to PDB
-        @rtype: str
+        :param i: optional list of atom positions to report (default: all)
+        :type i:  [ int ]
+        :return: formatted string with atom and residue names similar to PDB
+        :rtype:  str
         """
         m = self
         n = n or len(m)
@@ -3659,13 +3694,13 @@ class PDBModel:
         Look how well a given chain matches a continuous stretch of residues
         in ref.
 
-        @param chain: chain index
-        @type  chain: int
-        @param ref: reference PDBModel
-        @type  ref: PDBModel
+        :param chain: chain index
+        :type  chain: int
+        :param ref: reference PDBModel
+        :type  ref: PDBModel
 
-        @return: average relative length of matching chain fragments
-        @rtype: float
+        :return: average relative length of matching chain fragments
+        :rtype: float
         """
         m = self.takeChains([chain])
         
@@ -3689,15 +3724,15 @@ class PDBModel:
         Use takeChains() to create two models with identical chain content and
         order from the result of this function.
 
-        @param ref: reference PDBModel
-        @type  ref: PDBModel
-        @param breaks: look for chain breaks in backbone coordinates
-        @type  breaks: 1||0
-        @param fractLimit: 
-        @type  fractLimit: float
+        :param ref: reference PDBModel
+        :type  ref: PDBModel
+        :param breaks: look for chain breaks in backbone coordinates
+        :type  breaks: 1||0
+        :param fractLimit: 
+        :type  fractLimit: float
 
-        @return: chainIndices, chainIndices_ref
-        @rtype: ([int], [int])
+        :return: chainIndices, chainIndices_ref
+        :rtype: ([int], [int])
         """
         i, i_ref = self.compareAtoms( ref )
 
@@ -3721,17 +3756,17 @@ class PDBModel:
         This removes redundant chains and performs symmetry operations to
         complete multimeric structures. Some PDBs define several alternative
         biological units: usually (0) the author-defined one and (1)
-        software-defined -- see L{lenBiounits}.
+        software-defined -- see :class:`lenBiounits`.
 
         Note: The BIOMT data are currently not updated during take/compress
         calls which may change chain indices and content. This method is
         therefore best run on an original PDB record before any other
         modifications are performed.
         
-        @param assembly: assembly index (default: 0 .. author-determined unit)
-        @type  assembly: int
+        :param assembly: assembly index (default: 0 .. author-determined unit)
+        :type  assembly: int
 
-        @return: PDBModel; biologically relevant assembly
+        :return: PDBModel; biologically relevant assembly
         """
         try:
             biounit = BU.BioUnit(self, self.info['BIOMT'])
@@ -3743,8 +3778,10 @@ class PDBModel:
     def lenBiounits (self):
         """
         Number of biological assemblies defined in PDB BIOMT record, if any.
-        @return: int; number of alternative biological assemblies defined in
+        
+        :return: number of alternative biological assemblies defined in
                  PDB header
+        :rtype: int
         """
         try:
             biounit = BU.BioUnit(self, self.info['BIOMT'])            
@@ -3759,10 +3796,10 @@ class PDBModel:
         of the order in which atoms appear within residues. Atom names are
         simply sorted alphabetically within residues and then concatenated.
         
-        @param compress: compress key with zlib (default: true)
-        @type  compress: bool
-        @return: key formed from sorted atom content of model
-        @rtype: str
+        :param compress: compress key with zlib (default: true)
+        :type  compress: bool
+        :return: key formed from sorted atom content of model
+        :rtype: str
         """
         import zlib
         rindex = N0.concatenate( (self.resIndex(), [len(self)] ) )

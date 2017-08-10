@@ -20,18 +20,18 @@ module where we could execute it directly from emacs (or with python
 are less easy to execute stand-alone and intermediate variables remain
 hidden within the test instance. 
 
-The L{localTest}() method removes this hurdle and runs the test code of a
+The :class:`localTest`() method removes this hurdle and runs the test code of a
 single module as if it would be executed directly in __main__. Simply putting
 the localTest() function without parameters into the __main__ section of your
 module is enough. Your Test.test_* methods should assign intermediate and
-final results to self.|something| variables -- L{localTest} will then push all
+final results to self.|something| variables -- :class:`localTest` will then push all
 self.* fields into the global namespace for interactive debugging.
 
 To get started, every module in your package should contain one or more classes
-derrived from L{BiskitTest} (conventionally called C{Test}) that
-each contains one or more test_* functions. L{BiskitTestLoader} then
+derrived from :class:`BiskitTest` (conventionally called C{Test}) that
+each contains one or more test_* functions. :class:`BiskitTestLoader` then
 automatically extracts all BiskitTest child classes from the whole
-package and bundles them into a L{FilteredTestSuite}. Note, BiskitTest is 
+package and bundles them into a :class:`FilteredTestSuite`. Note, BiskitTest is 
 derrived from the standard unittest.TestCase -- refer to the Python 
 documentation for details on test writing.
 
@@ -120,15 +120,15 @@ def absfile( filename, resolveLinks=1 ):
       - resolve links
       - add working directory to unbound files ('ab.txt'->'/home/raik/ab.txt')
 
-    @param filename: name of file
-    @type  filename: str
-    @param resolveLinks: eliminate any symbolic links (default: 1)
-    @type  resolveLinks: 1|0
+    :param filename: name of file
+    :type  filename: str
+    :param resolveLinks: eliminate any symbolic links (default: 1)
+    :type  resolveLinks: 1|0
     
-    @return: absolute path or filename
-    @rtype: string
+    :return: absolute path or filename
+    :rtype: string
 
-    @raise IOError: if a ~user part does not translate to an existing path
+    :raise IOError: if a ~user part does not translate to an existing path
     """
     if not filename:
         return filename
@@ -145,7 +145,7 @@ def absfile( filename, resolveLinks=1 ):
 def packageRoot():
     """
     The folder containing the parent python package.
-    @return: str, absolute path of the root of current project
+    :return: str, absolute path of the root of current project
     """
     f = absfile(__file__)
     return absfile( os.path.join( os.path.split( f )[0], '..') )
@@ -153,8 +153,8 @@ def packageRoot():
 def stripFilename( filename ):
     """
     Return filename without path and without ending.
-    @param filename: str, name of file
-    @return: str, base filename
+    :param filename: str, name of file
+    :return: str, base filename
     """
     name = os.path.basename( filename )      # remove path
     try:
@@ -175,7 +175,7 @@ class LogHandle:
     """
     def __init__(self, handle=None):
         """
-        @param handle: stream or file handle open for writing
+        :param handle: stream or file handle open for writing
         """
         self.handle = handle or sys.stdout
         self.name = handle.name
@@ -223,14 +223,14 @@ class BiskitTest( U.TestCase):
       with 'test_' is treated as a separate test). The doc string of a
       test_* method becomes the id reported by the TextTestRunner.
 
-      L{prepare} should be overriden for the definition of permanent
-      input and temporary output files. L{cleanUp} should be overriden
+      :class:`prepare` should be overriden for the definition of permanent
+      input and temporary output files. :class:`cleanUp` should be overriden
       for clean up actions and to remove temporary files (use
-      L{Biskit.tools.tryRemove}). L{cleanUp} is not called if
-      BiskitTest is set into debugging mode (see L{BiskitTest.DEBUG}).
+      :class:`Biskit.tools.tryRemove`). :class:`cleanUp` is not called if
+      BiskitTest is set into debugging mode (see :class:`BiskitTest.DEBUG`).
 
-      The L{TAGS} field should be overriden to reflect any special categories
-      of the test case (L{LONG}, L{PVM}, L{EXE} or L{OLD}).
+      The :class:`TAGS` field should be overriden to reflect any special categories
+      of the test case (:class:`LONG`, :class:`PVM`, :class:`EXE` or :class:`OLD`).
     """
     #: categories for which this test case qualifies (class-wide)
     TAGS  = [ NORMAL ]
@@ -302,12 +302,12 @@ class FilteredTestSuite( U.TestSuite ):
 
     def __init__( self, tests=(), allowed=[], forbidden=[] ):
         """
-        @param tests: iterable of TestCases
-        @type  tests: ( BiskitTest, )
-        @param allowed: list of allowed tags
-        @type  allowed: [ int ]
-        @param forbidden : list of forbidden tags
-        @type  forbidden : [ int ]
+        :param tests: iterable of TestCases
+        :type  tests: ( BiskitTest, )
+        :param allowed: list of allowed tags
+        :type  allowed: [ int ]
+        :param forbidden : list of forbidden tags
+        :type  forbidden : [ int ]
         """
         self._allowed   = allowed
         self._forbidden = forbidden
@@ -318,8 +318,8 @@ class FilteredTestSuite( U.TestSuite ):
         """
         Add test case if it is matching the allowed and disallowed
         groups.
-        @param test: test case
-        @type  test: BiskitTest
+        :param test: test case
+        :type  test: BiskitTest
         """
         assert isTestInstance( test ), \
                'FilteredTestSuite only accepts BiskitTest instances not %r' \
@@ -396,14 +396,14 @@ class BiskitTestLoader( object ):
     def __init__( self, log=sys.stdout,
                   allowed=[], forbidden=[], verbosity=2, debug=False ):
         """
-        @param log: log output target [default: STDOUT]
-        @type  log: open file handle
-        @param allowed: tags required for test to be considered, default: []
-        @type  allowed: [ int ]
-        @param forbidden: tags leading to the exclusion of test, default: []
-        @type  forbidden: [ int ]
-        @param verbosity: verbosity level for unittest.TextTestRunner
-        @type  verbosity: int
+        :param log: log output target [default: STDOUT]
+        :type  log: open file handle
+        :param allowed: tags required for test to be considered, default: []
+        :type  allowed: [ int ]
+        :param forbidden: tags leading to the exclusion of test, default: []
+        :type  forbidden: [ int ]
+        :param verbosity: verbosity level for unittest.TextTestRunner
+        :type  verbosity: int
         """
 
         self.allowed  = allowed
@@ -422,15 +422,15 @@ class BiskitTestLoader( object ):
         Import all python files of a package as modules. Sub-packages
         are ignored and have to be collected separately.
 
-        @param path:  single search path for a package
-        @type  path:  str
-        @param module: name of the python package
-        @type  module: str
+        :param path:  single search path for a package
+        :type  path:  str
+        :param module: name of the python package
+        :type  module: str
 
-        @return: list of imported python modules, see also __import__
-        @rtype : [ module ]
+        :return: list of imported python modules, see also __import__
+        :rtype : [ module ]
 
-        @raise ImportError: if a python file cannot be imported
+        :raise ImportError: if a python file cannot be imported
         """
         module_folder = module.replace('.', os.path.sep)
         
@@ -456,8 +456,8 @@ class BiskitTestLoader( object ):
         """
         Extract all test cases from a list of python modules and add them to
         the internal test suite.
-        @param modules: list of modules to be checked for BiskitTest classes
-        @type  modules: [ module ]
+        :param modules: list of modules to be checked for BiskitTest classes
+        :type  modules: [ module ]
         """
         for m in modules:
             tested = 0
@@ -479,10 +479,10 @@ class BiskitTestLoader( object ):
     def collectTests( self, path=packageRoot(), module='' ):
         """
         Add all BiskitTests found in a given module to the internal test suite.
-        @param path:  single search path for a package
-        @type  path:  str
-        @param module: name of the python package
-        @type  module: str
+        :param path:  single search path for a package
+        :type  path:  str
+        :param module: name of the python package
+        :type  module: str
         """
         modules = self.modulesFromPath( path=path, module=module )
         self.addTestsFromModules( modules )
@@ -532,8 +532,8 @@ class BiskitTestLoader( object ):
 
     def run( self, dry=False ):
         """
-        @param dry: do not actually run the test but just set it up [False]
-        @type  dry: bool
+        :param dry: do not actually run the test but just set it up [False]
+        :type  dry: bool
         """
         ## push global settings into test classes
         for testclass in self.suite:
@@ -553,8 +553,8 @@ class BiskitTestLoader( object ):
 def getOuterNamespace():
     """
     Fetch the namespace of the module/script running as __main__.
-    @return: the namespace of the outermost calling stack frame
-    @rtype: dict
+    :return: the namespace of the outermost calling stack frame
+    :rtype: dict
     """
     import inspect
 
@@ -570,9 +570,9 @@ def getOuterNamespace():
 
 def extractTestCases( namespace ):
     """
-    @return: all BisktTest child classes found in given namespace
-    @rtype: [ class ]
-    @raise BiskitTestError: if there is no BiskitTest child
+    :return: all BisktTest child classes found in given namespace
+    :rtype: [ class ]
+    :raise BiskitTestError: if there is no BiskitTest child
     """
     r =[]
 
@@ -598,17 +598,17 @@ def localTest( testclass=None, verbosity=BiskitTest.VERBOSITY,
     put into the calling namespace as variable 'self', so that test code
     fragments referring to it can be executed interactively.
     
-    @param testclass: BiskitTest-derived class [default: first one found]
-    @type  testclass: class
-    @param verbosity: verbosity level of TextTestRunner
-    @type  verbosity: int
-    @param debug: don't delete temporary files (skipp cleanUp) [0]
-    @type  debug: int
+    :param testclass: BiskitTest-derived class [default: first one found]
+    :type  testclass: class
+    :param verbosity: verbosity level of TextTestRunner
+    :type  verbosity: int
+    :param debug: don't delete temporary files (skipp cleanUp) [0]
+    :type  debug: int
 
-    @return: the test result object
-    @rtype:  unittest.TestResult
+    :return: the test result object
+    :rtype:  unittest.TestResult
 
-    @raise BiskitTestError: if there is no BiskitTest-derived class defined
+    :raise BiskitTestError: if there is no BiskitTest-derived class defined
     """
     ## get calling namespace
     outer = getOuterNamespace()
@@ -697,16 +697,16 @@ def get_cmdDict(lst_cmd, dic_default):
     The key value pairs in lst_cmd replace key value pairs in the
     -x file and in dic_default.
     
-    @param lst_cmd: list with the command line options::
+    :param lst_cmd: list with the command line options::
                     e.g. ['-pdb', 'in1.pdb', 'in2.pdb', '-o', 'out.dat']
-    @type  lst_cmd: [str]
-    @param dic_default: dictionary with default options::
+    :type  lst_cmd: [str]
+    :param dic_default: dictionary with default options::
                         e.g. {'psf':'in.psf'}
-    @type  dic_default: {str : str}
+    :type  dic_default: {str : str}
 
-    @return: command dictionary::
+    :return: command dictionary::
              ala {'pdb':['in1.pdb', 'in2.pdb'], 'psf':'in.psf', 'o':'out.dat'}
-    @rtype: {<option> : <value>}
+    :rtype: {<option> : <value>}
     """
     dic_cmd = {}                     # return value
     try:

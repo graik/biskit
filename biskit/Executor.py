@@ -49,23 +49,20 @@ class Executor:
     completion and collects the output file or string, and cleans up
     temporary files.
 
-    There are two ways of using Executor
-    ====================================
+    **There are two ways of using Executor**
     
-      1. (recommended) Create a subclass of Executor for a certain program
+      1. (recommended) Create a subclass of Executor for a certain program \
           call. Methods to override would be:
 
-           - __init__  ... to set your own default values
-                           (call parent __init__!)
-           - prepare   ... called BEFORE program execution
-           - finish    ... called AFTER successful program execution
-           - isfailed  ... to detect the success status after program execution
-           - fail      ... called if execution fails
-           - cleanup   ... called AFTER everything else
-                           (call parent cleanup!)
+           - `__init__`  ... to set your own default values (call parent __init__!)
+           - `prepare`   ... called BEFORE program execution
+           - `finish`    ... called AFTER successful program execution
+           - `isfailed`  ... to detect the success status after program execution
+           - `fail`      ... called if execution fails
+           - `cleanup`   ... called AFTER everything else (call parent cleanup!)
            
           Additionally, you should provide a simple program configuration file
-          in biskit/Biskit/data/defaults/. See L{Biskit.ExeConfig} for
+          in biskit/Biskit/data/defaults/. See :class:`biskit.ExeConfig` for
           details and examples!
 
       2.  Use Executor directly.
@@ -82,8 +79,9 @@ class Executor:
           search path.
 
 
-    Templates
-    =========
+    **Templates**
+    
+    
       Templates are files or strings that contain place holders like,
       for example::
 
@@ -96,7 +94,7 @@ class Executor:
 
       >>> x = Executor( 'ls', template='in.template', f_in='in.dat')
 
-      ... will then pass the following input to the ls program::
+      This will then pass the following input to the ls program::
     
           file_in=in.dat
           file_out=/tmp/tmp1HYOvO
@@ -106,7 +104,7 @@ class Executor:
           file_in=%(f_in)s
           seed=%(seed)i
     
-      ...because Executor doesn't have a 'seed' field. You could provide
+      because Executor doesn't have a 'seed' field. You could provide
       one by overwriting Executor.__init__. Alternatively, you can
       provide seed as a keyword to the original Executor.__init__:
 
@@ -116,13 +114,13 @@ class Executor:
       into the object's name space and passes them on to the template.
 
 
-    Communicating Input
-    ===================
+    **Communicating Input**
+    
 
     Programs often expect scripts, commands or additional parameters
     from StdIn or from input files. Executor tries to support many
     scenarios -- which one is chosen mainly depends on the
-    L{ExeConfig} `pipes` setting in exe_<program>.dat and on the
+    :class:`ExeConfig` `pipes` setting in exe_<program>.dat and on the
     `template` parameter given to Executor.__init__.  (Note: Executor
     loads the ExeConfig instance for the given program into its
     `self.exe` field.)
@@ -130,7 +128,7 @@ class Executor:
     Here is an overview over the different scenarios and how to
     activate them:
 
-      1. B{ no input (default behaviour)}
+      1. **no input (default behaviour)**
 
         The program only needs command line parameters
 
@@ -138,8 +136,7 @@ class Executor:
 
           - template is None
 
-      2. B{ input pipe from STDIN
-        (== ``myprogram | 'some input string'``) }
+      2. **input pipe from STDIN** (`myprogram | 'some input string'`)
 
         Condition:
 
@@ -167,8 +164,7 @@ class Executor:
                   all, f_in usual points to a *non-existing* file that
                   will receive the completed input file.)
 
-      3. B{ input from file
-        (== ``myprogram < input_file``) }
+      3. **input from file** (`myprogram < input_file`)
 
         Condition:
 
@@ -190,8 +186,7 @@ class Executor:
                  Same as 3.1, except that the template is not read
                  from disc but directly taken from memory (see 2.2).
 
-      4. B{ input file passed as argument to the program
-        (== ``myprogram input_file``) }
+      4. **input file passed as argument to the program** (`myprogram input_file`)
 
         Condition:
 
@@ -225,21 +220,21 @@ class Executor:
 
                  It would then be up to you to provide the correct
                  input file in `/tmp/input.in`. You could override the
-                 L{prepare()} hook method for creating it.
+                 :class:`prepare()` hook method for creating it.
 
         There are other ways of doing the same thing.
 
 
-    Look at L{generateInp()} to see what is actually going on. 
+    Look at `generateInp()` to see what is actually going on. 
 
 
-    References
-    ==========
+    **References**
+    
 
-      - See also L{Biskit.IcmCad} and L{Biskit.Xplorer} for examples of
+      - See :class:`biskit.IcmCad` and :class:`Biskit.Xplorer` for examples of \
          how to overwrite and use Executor.
 
-      - See also L{Biskit.ExeConfig} for a description of program
+      - See :class:`biskit.ExeConfig` for a description of program \
          configuration.
     """
 
@@ -259,54 +254,54 @@ class Executor:
         default, this setting is taken from the configuration file which
         defaults to the current working directory.
 
-        @param name: program name (configured in .biskit/exe_name.dat)
-        @type  name: str
-        @param args: command line arguments
-        @type  args: str
-        @param template: template for input file -- this can be the template
+        :param name: program name (configured in .biskit/exe_name.dat)
+        :type  name: str
+        :param args: command line arguments
+        :type  args: str
+        :param template: template for input file -- this can be the template
                          itself or the path to a file containing it
                          (default: None)
-        @type  template: str
-        @param f_in: target for completed input file (default: None, discard)
-        @type  f_in: str
-        @param f_out: target file for program output (default: None, discard)
-        @type  f_out: str
-        @param f_err: target file for error messages (default: None, discard)
-        @type  f_err: str
-        @param strict: strict check of environment and configuration file
+        :type  template: str
+        :param f_in: target for completed input file (default: None, discard)
+        :type  f_in: str
+        :param f_out: target file for program output (default: None, discard)
+        :type  f_out: str
+        :param f_err: target file for error messages (default: None, discard)
+        :type  f_err: str
+        :param strict: strict check of environment and configuration file
                        (default: 1)
-        @type  strict: 1|0
-        @param catch_out: catch output in file (f_out or temporary)
+        :type  strict: 1|0
+        :param catch_out: catch output in file (f_out or temporary)
                           (default: 1)
-        @type  catch_out: 1|0
-        @param catch_err: catch errors in file (f_out or temporary)
+        :type  catch_out: 1|0
+        :param catch_err: catch errors in file (f_out or temporary)
                           (default: 1)
-        @type  catch_err: 1|0
-        @param push_inp: push input file to process via stdin ('< f_in') [1]
-        @type  push_inp: 1|0
-        @param node: host for calculation (None->no ssh) (default: None)
-        @type  node: str
-        @param nice: nice level (default: 0)
-        @type  nice: int
-        @param cwd: working directory, overwrites ExeConfig.cwd (default: None)
-        @type  cwd: str
-        @param tempdir: folder for temporary files, will be created if not
+        :type  catch_err: 1|0
+        :param push_inp: push input file to process via stdin ('< f_in') [1]
+        :type  push_inp: 1|0
+        :param node: host for calculation (None->no ssh) (default: None)
+        :type  node: str
+        :param nice: nice level (default: 0)
+        :type  nice: int
+        :param cwd: working directory, overwrites ExeConfig.cwd (default: None)
+        :type  cwd: str
+        :param tempdir: folder for temporary files, will be created if not
                         existing (default: None ... use system default)
                         if set to True: create a new tempdir within default 
-        @type  tempdir: str | True
-        @param log: execution log (None->STOUT) (default: None)
-        @type  log: biskit.LogFile
-        @param debug: keep all temporary files (default: 0)
-        @type  debug: 0|1
-        @param verbose: print progress messages to log (default: log != STDOUT)
-        @type  verbose: 0|1
-        @param validate: validate binary and environment immedeatly (1=default)
+        :type  tempdir: str | True
+        :param log: execution log (None->STOUT) (default: None)
+        :type  log: biskit.LogFile
+        :param debug: keep all temporary files (default: 0)
+        :type  debug: 0|1
+        :param verbose: print progress messages to log (default: log != STDOUT)
+        :type  verbose: 0|1
+        :param validate: validate binary and environment immedeatly (1=default)
                          or only before execution (0)
-        @type validate: 1|0 
-        @param kw: key=value pairs with values for template file or string
-        @type  kw: key=value
+        :type validate: 1|0 
+        :param kw: key=value pairs with values for template file or string
+        :type  kw: key=value
         
-        @raise ExeConfigError: if environment is not fit for running
+        :raise ExeConfigError: if environment is not fit for running
                                the program
         """
         self.exe = ExeConfigCache.get( name, strict=strict )
@@ -371,8 +366,8 @@ class Executor:
 
     def version( self ):
         """Version of class (at creation).
-        @return: version
-        @rtype: str
+        :return: version
+        :rtype: str
         """       
         return 'Executor $Revision$'
 
@@ -381,10 +376,17 @@ class Executor:
         """
         Create a new unique file name for a temporary folder or return the 
         system-wide existing tempfolder.
-        @param tempdir: folder for temporary files, will be created if not
-                        existing (default: None ... use system default)
-                        if set to True: create a new tempdir within default 
-        @type  tempdir: str | True
+        
+        :param tempdir: parent folder for temporary files
+                        
+                        - default: None ... use system default (no sub-folder)
+                        - if set to True: suggest a new tempdir name within default
+                        - if set to any string: return str unchanged
+                        
+        :type  tempdir: str | bool | None
+        
+        :return: path name
+        :rtype: str
         """
         if tempdir is True:
             return tempfile.mktemp( '', 
@@ -403,32 +405,32 @@ class Executor:
         This method should work for pretty much any purpose but may fail for
         very long pipes (more than 100000 lines).
         
-        @param inp: (for pipes) input sequence
-        @type  inp: str
-        @param cmd: command
-        @type  cmd: str
-        @param bufsize: see subprocess.Popen() (default: -1)
-        @type  bufsize: int
-        @param executable: see subprocess.Popen() (default: None)
-        @type  executable: str
-        @param stdin: subprocess.PIPE or file handle or None (default: None)
-        @type  stdin: int|file|None
-        @param stdout: subprocess.PIPE or file handle or None (default: None)
-        @type  stdout: int|file|None
-        @param stderr: subprocess.PIPE or file handle or None (default: None)
-        @type  stderr: int|file|None
-        @param shell: wrap process in shell; see subprocess.Popen()
+        :param inp: (for pipes) input sequence
+        :type  inp: str
+        :param cmd: command
+        :type  cmd: str
+        :param bufsize: see subprocess.Popen() (default: -1)
+        :type  bufsize: int
+        :param executable: see subprocess.Popen() (default: None)
+        :type  executable: str
+        :param stdin: subprocess.PIPE or file handle or None (default: None)
+        :type  stdin: int|file|None
+        :param stdout: subprocess.PIPE or file handle or None (default: None)
+        :type  stdout: int|file|None
+        :param stderr: subprocess.PIPE or file handle or None (default: None)
+        :type  stderr: int|file|None
+        :param shell: wrap process in shell; see subprocess.Popen()
                       (default: 0, use exe_*.dat configuration) 
-        @type  shell: 1|0
-        @param env: environment variables (default: None, use exe_*.dat config)
-        @type  env: {str:str}
-        @param cwd: working directory (default: None, means self.cwd)
-        @type  cwd: str
+        :type  shell: 1|0
+        :param env: environment variables (default: None, use exe_*.dat config)
+        :type  env: {str:str}
+        :param cwd: working directory (default: None, means self.cwd)
+        :type  cwd: str
         
-        @return: output and error output
-        @rtype: str, str
+        :return: output and error output
+        :rtype: str, str
         
-        @raise RunError: if OSError occurs during Popen or Popen.communicate
+        :raise RunError: if OSError occurs during Popen or Popen.communicate
         """
         try:
             p = subprocess.Popen( cmd.split(),
@@ -458,15 +460,15 @@ class Executor:
     def execute( self, inp=None ):
         """
         Run external command and block until it is finished.
-        Called by L{ run() }.
+        Called by :class:` run() `.
         
-        @param inp: input to be communicated via STDIN pipe (default: None)
-        @type  inp: str
+        :param inp: input to be communicated via STDIN pipe (default: None)
+        :type  inp: str
 
-        @return: execution time in seconds
-        @rtype: int
+        :return: execution time in seconds
+        :rtype: int
         
-        @raise RunError: see communicate()
+        :raise RunError: see communicate()
         """
         self.exe.validate() ##Check that binary and env variables are available
         
@@ -524,18 +526,18 @@ class Executor:
     def run( self, inp_mirror=None ):
         """
         Run the callculation. This calls (in that order):
-          - L{ prepare() },
-          - L{ execute() },
-          - L{ postProcess() },
-          - L{ finish() } OR L{ fail() },
-          - L{ cleanup() }
+          - :class:` prepare() `,
+          - :class:` execute() `,
+          - :class:` postProcess() `,
+          - :class:` finish() ` OR :class:` fail() `,
+          - :class:` cleanup() `
         
-        @param inp_mirror: file name for formatted copy of inp file
+        :param inp_mirror: file name for formatted copy of inp file
                            (default: None) [not implemented]
-        @type  inp_mirror: str
+        :type  inp_mirror: str
 
-        @return: calculation result
-        @rtype: any
+        :return: calculation result
+        :rtype: any
         """
         try:
             self.prepare()
@@ -569,8 +571,8 @@ class Executor:
         Compose command string from binary, arguments, nice, and node.
         Override (perhaps).
         
-        @return: the command to execute
-        @rtype: str
+        :return: the command to execute
+        :rtype: str
         """
         exe = t.absbinary( self.exe.bin )
 
@@ -595,8 +597,8 @@ class Executor:
         """
         Setup the environment for the process. Override if needed.
         
-        @return: environment dictionary
-        @rtype: dict OR None
+        :return: environment dictionary
+        :rtype: dict OR None
         """
         if not self.exe.replaceEnv:
             return None
@@ -676,10 +678,10 @@ class Executor:
         """
         Create complete input string from template with place holders.
         
-        @return: input
-        @rtype: str
+        :return: input
+        :rtype: str
         
-        @raise TemplateError: if unknown option/place holder in template file
+        :raise TemplateError: if unknown option/place holder in template file
         """
         inp = self.template
 
@@ -699,11 +701,11 @@ class Executor:
         """
         Convert the input to a format used by the selected execution method.
         
-        @param inp: path to existing input file or string with input
-        @type  inp: str
+        :param inp: path to existing input file or string with input
+        :type  inp: str
         
-        @return: input string if self.exe.pipes; file name otherwise
-        @rtype: str
+        :return: input string if self.exe.pipes; file name otherwise
+        :rtype: str
         """
         if self.exe.pipes:
 
@@ -732,10 +734,10 @@ class Executor:
         Prepare the program input (file or string) from a template (if
         any, file or string).
 
-        @return: input file name OR (if pipes=1) content of input file OR None
-        @rtype: str
+        :return: input file name OR (if pipes=1) content of input file OR None
+        :rtype: str
         
-        @raise TemplateError: if error while creating template file
+        :raise TemplateError: if error while creating template file
         """
         try:
             inp = None

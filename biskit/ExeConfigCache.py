@@ -50,17 +50,17 @@ class ExeConfigCache:
         """
         Get the ExeConfig instance for the given program.
         
-        @param name: program name
-        @type  name: str
-        @param reload: force new instance (re-read configuration file)
+        :param name: program name
+        :type  name: str
+        :param reload: force new instance (re-read configuration file)
                        (default: 0)
-        @type  reload: 0|1
-        @param kw: options for L{ Biskit.ExeConfig() }; no effect for
+        :type  reload: 0|1
+        :param kw: options for :class:` Biskit.ExeConfig() `; no effect for
                    cached entries unless reload=1
-        @type  kw: key=value
+        :type  kw: key=value
         
-        @return: ExeConfig object
-        @rtype: ExeConfig
+        :return: ExeConfig object
+        :rtype: ExeConfig
         """
 
         if not ExeConfigCache.LOCK.acquire(timeout=15):
@@ -96,8 +96,8 @@ class ExeConfigCache:
         """
         Number of entries in the cache.
         
-        @return: length of cache
-        @rtype: int
+        :return: length of cache
+        :rtype: int
         """
         return len( ExeConfigCache.CACHE )
 

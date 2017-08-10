@@ -43,10 +43,10 @@ class TextFile:
 
     def __init__(self, filename, mode = 'r'):
         """
-        @param filename: file name or URL
-        @type filename: C{str}
-        @param mode: file access mode: 'r' (read), 'w' (write), or 'a' (append)
-        @type mode: C{str}
+        :param filename: file name or URL
+        :type filename: ``str``
+        :param mode: file access mode: 'r' (read), 'w' (write), or 'a' (append)
+        :type mode: ``str``
         """
         self.file = None
         if str.find(filename, ':/') > 1: # URL

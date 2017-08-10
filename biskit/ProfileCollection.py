@@ -97,10 +97,10 @@ class CrossView( DictMixin ):
       
       However, excessive use of CrossViews can deliver a blow to your
       program's performance. Iterating over a whole ProfileCollection
-      in form of CrossViews (L{ProfileCollection.iterCrossViews}) is
+      in form of CrossViews (:class:`ProfileCollection.iterCrossViews`) is
       about a factor 100 slower than direct iteration over the
       elements of a single profile (array or list). Alternatively,
-      L{ProfileCollection.iterDicts} yields normal disconnected
+      :class:`ProfileCollection.iterDicts` yields normal disconnected
       dictionaries. It is in itself not much faster (30%) than
       iterCrossViews but subsequent work with the dictionaries is, at
       least, 10 times more efficient.
@@ -115,7 +115,7 @@ class CrossView( DictMixin ):
       reference to the collection's _viewSignal field is used to sense
       other changes -- overriding this field signals the killing
       (alive=False) of all CrossViews pointing to this collection, see
-      L{ProfileCollection.killViews}.
+      :class:`ProfileCollection.killViews`.
     """
 
     def _cease( self, ref ):
@@ -127,10 +127,10 @@ class CrossView( DictMixin ):
 
     def __init__( self, parent, index ):
         """
-        @param parent: ProfileCollection
-        @type  parent: ProfileCollection
-        @param index: position in profile collection
-        @type  index: int
+        :param parent: ProfileCollection
+        :type  parent: ProfileCollection
+        :param index: position in profile collection
+        :type  index: int
         """
         self.parent = weakref.ref( parent, self._cease )
         self.index  = index
@@ -184,8 +184,8 @@ class CrossView( DictMixin ):
         ProfileCollection, values are the corresponding values at the
         position for wich this CrossView was created.
 
-        @return: key:value pairs
-        @rtype: iterator over [ ( str, any ) ]
+        :return: key:value pairs
+        :rtype: iterator over [ ( str, any ) ]
         """
         for k in self.parent().profiles.keys():
             assert self.alive, 'view on dead or changed profile collection'
@@ -197,8 +197,8 @@ class CrossView( DictMixin ):
         Convert this CrossView into a standard dictionary that is detached
         from the underlying ProfileCollection.
 
-        @return: dict with values indexed by parent ProfileCollection's keys
-        @rtype: dict
+        :return: dict with values indexed by parent ProfileCollection's keys
+        :rtype: dict
         """
         keys = self.parent().profiles.keys()
 
@@ -263,7 +263,7 @@ class ProfileCollection:
     ==========
 
       ProfileCollections can also be viewed from the side (along columns) --
-      L{CrossView}s provide a virtual dictionary with the values of all
+      :class:`CrossView`s provide a virtual dictionary with the values of all
       profiles at a certain position. Changes to the dictionary will change
       the value in the underlying profile and vice versa, for example::
 
@@ -288,12 +288,12 @@ class ProfileCollection:
       it. CrossViews become invalid if their parent collection is
       garbage collected or re-ordered.
 
-      B{Note}: The creation of many CrossViews hampers performance.
-      We provide a L{ProfileCollection.iterCrossView}
+      **Note**: The creation of many CrossViews hampers performance.
+      We provide a :class:`ProfileCollection.iterCrossView`
       iterator to loop over these pseudo dictionaries for convenience --
       direct iteration over the elements of a profile (array or list)
       is about 100 times faster. If you need to repeatedly read from
-      many dictionaries, consider using L{ProfileCollection.toDicts}
+      many dictionaries, consider using :class:`ProfileCollection.toDicts`
       and cache the resulting normal (disconnected) dictionaries::
       
         cache = p.toDicts() # 'list( p.iterDicts() )' is equivalent but slower
@@ -308,7 +308,7 @@ class ProfileCollection:
       pickled objects between 32 and 64 bit machines. With the transition
       to numpy, this may not be needed any longer.
 
-      See also: L{ProfileCollection.__picklesave_array}
+      See also: :class:`ProfileCollection.__picklesave_array`
     """
 
     __CrossView = CrossView
@@ -320,7 +320,7 @@ class ProfileCollection:
 
         self.initVersion = self.version()
 
-        #: re-create this field to invalidate CrossViews! (see L{killViews()})
+        #: re-create this field to invalidate CrossViews! (see :class:`killViews()`)
         self._viewSignal = _ViewSignal()
 
 
@@ -328,8 +328,8 @@ class ProfileCollection:
         """
         Class version.
         
-        @return: class version number
-        @rtype: str
+        :return: class version number
+        :rtype: str
         """
         return 'ProfileCollection $Revision$'
 
@@ -359,8 +359,8 @@ class ProfileCollection:
           p['prof1','info1'] <==>  p.get( 'prof1','info1' )
           p[10]              <==>  CrossView( p, 10 )
 
-        @return: profile OR meta infos thereof OR CrossView dict
-        @rtype: list OR array OR any OR CrossView
+        :return: profile OR meta infos thereof OR CrossView dict
+        :rtype: list OR array OR any OR CrossView
         """
         if isinstance(k, int):
             return CrossView( self, k )
@@ -377,8 +377,8 @@ class ProfileCollection:
           p['prof1'] = range(10)      <==> p.set( 'prof1', range(10) )      
           p['prof1','info1']='comment' <==> p.setInfo('prof1',info1='comment')
 
-        @return: item
-        @rtype: any        
+        :return: item
+        :rtype: any        
         """
         if type(k) == tuple:
             return self.setInfo( k[0], **{k[1]:v} )
@@ -411,8 +411,8 @@ class ProfileCollection:
     
     def __len__( self ):
         """
-        @return: number of profiles in the collection
-        @rtype: int        
+        :return: number of profiles in the collection
+        :rtype: int        
         """
         return len( self.profiles )
 
@@ -422,8 +422,8 @@ class ProfileCollection:
         Check if profile contains key::
           k in self  <==>  p.has_key( k ) 
 
-        @return: True or False
-        @rtype: 1|0  
+        :return: True or False
+        :rtype: 1|0  
         """
         return k in self.profiles
 
@@ -433,8 +433,8 @@ class ProfileCollection:
         Iterate over profile::
           for k in self  <==>  for k in p.keys()
         
-        @return: list of items
-        @rtype: list
+        :return: list of items
+        :rtype: list
         """
         return iter(self.profiles)
 
@@ -452,8 +452,8 @@ class ProfileCollection:
         Get list of all profiles (arrays or lists of values)::
           p.values() -> [ [any], [any], ... ]
 
-        @return: list of lists or arrays
-        @rtype: [ list/array ]       
+        :return: list of lists or arrays
+        :rtype: [ list/array ]       
         """
         return [ self.get( key ) for key in self.keys() ]
 
@@ -463,7 +463,7 @@ class ProfileCollection:
         waiting to be updated from a source ProfileCollection.
         This method is written such that it is *not* triggering the 
         updating mechanism.
-        @return bool
+        :return bool
         """
         for v in self.profiles.values():
             if v is None:
@@ -476,8 +476,8 @@ class ProfileCollection:
         Get list of tuples of profile names and profiles::
           p.items() -> [ (key1, [any]), (key2, [any]), ..) ]
 
-        @return: list of tuples of profile names and profiles
-        @rtype: [ ( str, list/array ) ]       
+        :return: list of tuples of profile names and profiles
+        :rtype: [ ( str, list/array ) ]       
         """
         return [ (key, self.get(key)) for key in self.keys() ]
 
@@ -493,18 +493,18 @@ class ProfileCollection:
 
     def iterCrossViews(self):
         """
-        Iterate over values of all profiles as L{CrossView} 'dictionaries'
+        Iterate over values of all profiles as :class:`CrossView` 'dictionaries'
         indexed by profile name, for example:
           >>> for atom in p.iterCrossViews():
           ...     print atom['name'], atom['residue_name']
 
         The CrossViews remain connected to the profiles and can be
         used to change values in many profiles simultaneously.
-        Consider using the somewhat faster L{ProfileCollection.iterDicts}
+        Consider using the somewhat faster :class:`ProfileCollection.iterDicts`
         if this is not needed and speed is critical.
 
-        @return: CrossView instances behaving like dictionaries
-        @rtype: iterator over [ CrossView ]
+        :return: CrossView instances behaving like dictionaries
+        :rtype: iterator over [ CrossView ]
         """
         for i in range( self.profLength() ):
             yield self.__CrossView(self, i)
@@ -517,8 +517,8 @@ class ProfileCollection:
           >>> for atom in p.iterCrossViews():
           ...     print atom['name'], atom['residue_name']
 
-        @return: dictionaries
-        @rtype: iterator over { 'key1':v1, 'key2':v2 }
+        :return: dictionaries
+        :rtype: iterator over { 'key1':v1, 'key2':v2 }
         """
 
         keys = self.keys()
@@ -531,15 +531,15 @@ class ProfileCollection:
 
     def toCrossViews(self):
         """
-        @return: list of CrossView pseudo dictionaries
-        @rtype: [ CrossView ]
+        :return: list of CrossView pseudo dictionaries
+        :rtype: [ CrossView ]
         """
         return [self.__CrossView(self, i) for i in range(self.profLength()) ]
 
     def toDicts(self):
         """
-        @return: (copies of) values of all profiles as normal dictionaries
-        @rtype: [ dict ]
+        :return: (copies of) values of all profiles as normal dictionaries
+        :rtype: [ dict ]
         """
         keys = self.keys()
         profs= zip( *[ self.get( k ) for k in keys ] )
@@ -558,11 +558,11 @@ class ProfileCollection:
         platform-dependent default type, it is safer to assign an
         explicit Float32, or Int32.
 
-        @param prof: the profile array to recast
-        @type  prof: numpy.array
+        :param prof: the profile array to recast
+        :type  prof: numpy.array
 
-        @return: recast array or unchanged original
-        @rtype:  Numpy.array
+        :return: recast array or unchanged original
+        :rtype:  Numpy.array
         """
         if prof.dtype.char in ['i','l']:
             return prof.astype( 'i' )
@@ -579,15 +579,15 @@ class ProfileCollection:
         
         Beware: empty lists will be upgraded to empty Float arrays.
 
-        @param prof: profile
-        @type  prof: list OR array
-        @param asarray: 1.. autodetect type, 0.. force list, 2.. force array
-        @type  asarray: 2|1|0
+        :param prof: profile
+        :type  prof: list OR array
+        :param asarray: 1.. autodetect type, 0.. force list, 2.. force array
+        :type  asarray: 2|1|0
         
-        @return: profile
-        @rtype: list OR array
+        :return: profile
+        :rtype: list OR array
         
-        @raise ProfileError:
+        :raise ProfileError:
         """
         try:
 
@@ -639,15 +639,15 @@ class ProfileCollection:
         """
         Expand profile to have a value also for masked positions.
 
-        @param prof: input profile
-        @type  prof: list OR array
-        @param mask: atom mask
-        @type  mask: [int]
-        @param default: default value
-        @type  default: any
+        :param prof: input profile
+        :type  prof: list OR array
+        :param mask: atom mask
+        :type  mask: [int]
+        :param default: default value
+        :type  default: any
         
-        @return: profile
-        @rtype: list OR array
+        :return: profile
+        :rtype: list OR array
         """
         if mask is not None:
 
@@ -675,27 +675,27 @@ class ProfileCollection:
         records 'version', 'changed' and 'isarray' are always modified but can
         be overridden by key=value pairs to this function.
         
-        @param name: profile name (i.e. key)
-        @type  name: str
-        @param prof: list of values OR None
-        @type  prof: [any] OR None
-        @param mask: list 1 x N_items of 0|1, if there are less values than
+        :param name: profile name (i.e. key)
+        :type  name: str
+        :param prof: list of values OR None
+        :type  prof: [any] OR None
+        :param mask: list 1 x N_items of 0|1, if there are less values than
                       items, provide mask with 0 for missing values,
                       N.sum(mask)==N_items
-        @type  mask: [int]
-        @param default: value for items masked.
+        :type  mask: [int]
+        :param default: value for items masked.
                         (default: None for lists, 0 for arrays]
-        @type  default: any
-        @param asarray: store as list (0), as array (2) or store numbers as
+        :type  default: any
+        :param asarray: store as list (0), as array (2) or store numbers as
                         array but everything else as list (1) (default: 1)
-        @type  asarray: 0|1|2
-        @param comment: goes into info[name]['comment']
-        @type  comment: str
-        @param moreInfo: additional key-value pairs for info[name]
-        @type  moreInfo: key=value
+        :type  asarray: 0|1|2
+        :param comment: goes into info[name]['comment']
+        :type  comment: str
+        :param moreInfo: additional key-value pairs for info[name]
+        :type  moreInfo: key=value
         
-        @raise ProfileError: if length of prof != length of other profiles
-        @raise ProfileError: if mask is given but N.sum(mask) != len(prof)
+        :raise ProfileError: if length of prof != length of other profiles
+        :raise ProfileError: if mask is given but N.sum(mask) != len(prof)
         """
         if prof is None:
             self.profiles[ name ] = None
@@ -754,7 +754,7 @@ class ProfileCollection:
         Add/Override infos about a given profile::
           e.g. setInfo('relASA', comment='new', params={'bin':'whatif'})
         
-        @raise  ProfileError: if no profile is found with |name|
+        :raise  ProfileError: if no profile is found with |name|
         """
         self.getInfo( name ).update( args )
 
@@ -763,10 +763,10 @@ class ProfileCollection:
         """
         setMany( dict, [infoDict] ) Add/Override many profiles
 
-        @param profileDict: dict with name:profile pairs
-        @type  profileDict: dict
-        @param infos: info dicts for each profile, indexed by name
-        @type  infos: dict of dict
+        :param profileDict: dict with name:profile pairs
+        :type  profileDict: dict
+        :param infos: info dicts for each profile, indexed by name
+        :type  infos: dict of dict
         """
         for key, value in profileDict.items():
             self.set( key, value, **infos.get( key,{} ) )
@@ -775,16 +775,16 @@ class ProfileCollection:
     def get( self, name, default=None ):
         """
         get( profKey, [default] ) -> list of values 
-        B{OR} 
+        **OR** 
         get( (profKey, infoKey), [default] ) -> single value of info dict
         
-        @param name: profile key or profile and info key
-        @type  name: str OR (str, str)
-        @param default: default result if no profile is found,
+        :param name: profile key or profile and info key
+        :type  name: str OR (str, str)
+        :param default: default result if no profile is found,
                         if None and no profile is found, raise exception
-        @type  default: any
+        :type  default: any
         
-        @raise ProfileError: if no profile is found with |name|
+        :raise ProfileError: if no profile is found with |name|
         """
         ## get an info value
         if type( name ) == tuple:
@@ -812,13 +812,13 @@ class ProfileCollection:
            
         Guaranteed infos: 'version'->str, 'comment'->str, 'changed'->1|0
 
-        @param name: profile name
-        @type  name: str
+        :param name: profile name
+        :type  name: str
 
-        @return: dict with infos about profile
-        @rtype: dict
+        :return: dict with infos about profile
+        :rtype: dict
         
-        @raise ProfileError: if no profile is found with |name|
+        :raise ProfileError: if no profile is found with |name|
         """
         result = self.infos.get( name, None )
 
@@ -832,15 +832,15 @@ class ProfileCollection:
         """
         Convert profile into a mask based on the max and min cutoff values.
         
-        @param profName: profile name
-        @type  profName: str
-        @param cutoff_min: lower limit
-        @type  cutoff_min: float
-        @param cutoff_max: upper limit
-        @type  cutoff_max: float
+        :param profName: profile name
+        :type  profName: str
+        :param cutoff_min: lower limit
+        :type  cutoff_min: float
+        :param cutoff_max: upper limit
+        :type  cutoff_max: float
         
-        @return: mask len( get(profName) ) x 1|0
-        @rtype: [1|0]
+        :return: mask len( get(profName) ) x 1|0
+        :rtype: [1|0]
         """
         p = self.get( profName )
 
@@ -858,13 +858,13 @@ class ProfileCollection:
         Any additional parameters are passed to the constructor of the
         new instance.
 
-        @param indices: list of indices
-        @type  indices: [int]
+        :param indices: list of indices
+        :type  indices: [int]
 
-        @return: new profile from indices
-        @rtype: ProfileCollection (or sub-class)
+        :return: new profile from indices
+        :rtype: ProfileCollection (or sub-class)
         
-        @raise ProfileError: if take error
+        :raise ProfileError: if take error
         """
         result = self.__class__( *initArgs, **initKw )
 
@@ -892,23 +892,23 @@ class ProfileCollection:
         Extract using a mask::
           p.compress( mask ) <==> p.take( N.nonzero( mask ) )
 
-        @param cond: mask with 1 for the positions to keep
-        @type  cond: array or list of int 
+        :param cond: mask with 1 for the positions to keep
+        :type  cond: array or list of int 
         """
         return self.take( N.flatnonzero( cond ) )
 
 
     def remove( self, *key ):
         """
-        Remove profile B{OR} info values of profile::
+        Remove profile **OR** info values of profile::
           remove( profKey ) -> 1|0, 1 if complete entry has been removed
           remove( profKey, infoKey ) -> 1|0, 1 if single info value was removed
 
-        @param key: profile name OR name, infoKey
-        @type  key: str OR str, str
+        :param key: profile name OR name, infoKey
+        :type  key: str OR str, str
         
-        @return: sucess status
-        @rtype: 1|0
+        :return: sucess status
+        :rtype: 1|0
         """
         try:
             if len( key ) == 2:
@@ -947,11 +947,11 @@ class ProfileCollection:
           p0.concat( p1 [, p2, ..]) -> single ProfileCollection with the
           same number of profiles as p0 but with the length of p0+p1+p2..
 
-        @param profiles: profile(s) to concatenate
-        @type  profiles: ProfileCollection(s)
+        :param profiles: profile(s) to concatenate
+        :type  profiles: ProfileCollection(s)
         
-        @return: concatenated profile(s)  
-        @rtype: ProfileCollection / subclass
+        :return: concatenated profile(s)  
+        :rtype: ProfileCollection / subclass
         """
         ## end recursion (no more arguments)
         if len( profiles ) == 0:
@@ -1041,17 +1041,17 @@ class ProfileCollection:
             p2 = p2.compress( [0,1,0,1,0,1,0,1,0,1] )
             p1.update( p2 )
           
-        @param other: profile
-        @type  other: ProfileCollection
-        @param stickyChanged: mark all profiles 'changed' that are marked
+        :param other: profile
+        :type  other: ProfileCollection
+        :param stickyChanged: mark all profiles 'changed' that are marked
                               'changed' in the other collection (default: 1)
-        @type  stickyChanged: 0|1
-        @param mask: 1 x N_atoms array of 0|1, if the other collection has less
+        :type  stickyChanged: 0|1
+        :param mask: 1 x N_atoms array of 0|1, if the other collection has less
                      atoms than this one, mark those positions with 0 that are
                      only existing in this collection 
                      (N.sum(mask)==self.profLength())
-        @type  mask: [int]
-        @param mask: N.array of 0 or 1, 
+        :type  mask: [int]
+        :param mask: N.array of 0 or 1, 
         """
         for key, prof in other.items():
 
@@ -1081,18 +1081,18 @@ class ProfileCollection:
         to |setChanged| (default 0), regardless whether or not the profile is
         marked 'changed' in the source collection.
         
-        @param source: profile
-        @type  source: ProfileCollection
-        @param copyMissing: copy missing profiles that exist in source
+        :param source: profile
+        :type  source: ProfileCollection
+        :param copyMissing: copy missing profiles that exist in source
                             (default: 1)
-        @type  copyMissing: 0|1
-        @param allowEmpty: still tolerate zero-length profiles after update
+        :type  copyMissing: 0|1
+        :param allowEmpty: still tolerate zero-length profiles after update
                            (default: 0)
-        @type  allowEmpty: 0|1
-        @param setChanged: label profiles copied from source as 'changed' [0]
-        @type  setChanged: 0|1
+        :type  allowEmpty: 0|1
+        :param setChanged: label profiles copied from source as 'changed' [0]
+        :type  setChanged: 0|1
         
-        @raise ProfileError: if allowEmpty is 0 and some empty profiles
+        :raise ProfileError: if allowEmpty is 0 and some empty profiles
                              cannot be found in source
         """
         for key, prof in source.items():
@@ -1117,10 +1117,10 @@ class ProfileCollection:
 
     def isChanged( self, keys=None ):
         """
-        @param keys: only check these profiles (default: None -> means all)
-        @type  keys: [ str ] OR str
-        @return: True, if any of the profiles is tagged as 'changed'
-        @rtype: bool
+        :param keys: only check these profiles (default: None -> means all)
+        :type  keys: [ str ] OR str
+        :return: True, if any of the profiles is tagged as 'changed'
+        :rtype: bool
         """
         keys = keys or list(self.keys())
         keys = T.toList( keys )  ## in case single str is given as argument 
@@ -1137,8 +1137,8 @@ class ProfileCollection:
         Clone (deepcopy) profiles::
           clone() -> ProfileCollection (or sub-class)
 
-        @return: profile
-        @rtype: ProfileCollection          
+        :return: profile
+        :rtype: ProfileCollection          
         """
         r = self.__class__(profiles=copy.deepcopy(self.profiles),
                            infos=copy.deepcopy(self.infos))
@@ -1167,11 +1167,11 @@ class ProfileCollection:
         Length of profile::
           profLength() -> int; length of first non-None profile or default (0)
         
-        @param default: value to return if all profiles are set to None
-        @type  default: any
+        :param default: value to return if all profiles are set to None
+        :type  default: any
           
-        @return: length of first non-None profile or 0
-        @rtype: int     
+        :return: length of first non-None profile or 0
+        :rtype: int     
         """
         for k, p in self.profiles.items():
 
@@ -1186,16 +1186,16 @@ class ProfileCollection:
         Plot one or more profiles using Biggles::
           plot( name1, [name2, ..],[arg1=x, arg2=y]) -> biggles.FramedPlot
         
-        @param name: one or more profile names
-        @type  name: str
-        @param arg: key=value pairs for Biggles.Curve() function
-        @type  arg: 
-        @raise TypeError: if profile contains non-number items
+        :param name: one or more profile names
+        :type  name: str
+        :param arg: key=value pairs for Biggles.Curve() function
+        :type  arg: 
+        :raise TypeError: if profile contains non-number items
 
-        @return: plot, view using plot.show() 
-        @rtype: biggles.FramedPlot
+        :return: plot, view using plot.show() 
+        :rtype: biggles.FramedPlot
 
-        @raise ImportError: If biggles module could not be imported
+        :raise ImportError: If biggles module could not be imported
         """
         if not biggles:
             raise ImportError('module biggles could not be imported')
@@ -1224,18 +1224,18 @@ class ProfileCollection:
     def plotArray( self, *name, **arg ):
         """
         Plot several profiles as a panel of separate plots.
-        @param *name: one or more profile names or tuples of profile names
-        @type  *name: str or (str, str,...)
-        @param xkey: profile to be used as x-axis (default: None)
-        @type  xkey: str
-        @param arg: key=value pairs for Biggles.Curve() function
-        @type  arg: 
+        :param *name: one or more profile names or tuples of profile names
+        :type  *name: str or (str, str,...)
+        :param xkey: profile to be used as x-axis (default: None)
+        :type  xkey: str
+        :param arg: key=value pairs for Biggles.Curve() function
+        :type  arg: 
 
-        @return: plot, view using plot.show() 
-        @rtype: biggles.FramedPlot
+        :return: plot, view using plot.show() 
+        :rtype: biggles.FramedPlot
 
-        @raise TypeError: if profile contains non-number items
-        @raise ImportError: If biggles module could not be imported
+        :raise TypeError: if profile contains non-number items
+        :raise ImportError: If biggles module could not be imported
         """
         if not biggles:
             raise ImportError('module biggles could not be imported')
@@ -1270,16 +1270,16 @@ class ProfileCollection:
     
     def plotHistogram( self, *name, **arg ):
         """
-        @param bins: number of bins (10)
-        @type  bins: int
-        @param ynormalize: normalize histograms to area 1.0 (False)
-        @type  ynormalize: bool
-        @param xnormalize: adapt bin range to min and max of all profiles (True)
-        @type  xnormalize: bool
-        @param xrange: min and max of bin range (None)
-        @type  xrange: (float, float)
-        @param steps: draw histogram steps (True)
-        @type  steps: bool
+        :param bins: number of bins (10)
+        :type  bins: int
+        :param ynormalize: normalize histograms to area 1.0 (False)
+        :type  ynormalize: bool
+        :param xnormalize: adapt bin range to min and max of all profiles (True)
+        :type  xnormalize: bool
+        :param xrange: min and max of bin range (None)
+        :type  xrange: (float, float)
+        :param steps: draw histogram steps (True)
+        :type  steps: bool
         """
         if not biggles:
             raise ImportError('module biggles could not be imported')
@@ -1339,8 +1339,8 @@ class ProfileCollection:
 
     def __repr__( self ):
         """
-        @return: string representation within interactive python interpreter.
-        @rtype: str
+        :return: string representation within interactive python interpreter.
+        :rtype: str
         """
         s = "ProfileCollection: %i profiles of length %i\n" % \
             (len( self ), self.profLength() )

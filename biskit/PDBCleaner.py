@@ -106,12 +106,12 @@ class PDBCleaner:
 
     def __init__( self, fpdb, log=None, verbose=True ):
         """
-        @param fpdb: pdb file OR PDBModel instance
-        @type  fpdb: str OR Biskit.PDBModel
-        @param log: biskit.LogFile object (default: STDOUT)
-        @type  log: biskit.LogFile
-        @param verbose: log warnings and infos (default: True)
-        @type  verbose: bool
+        :param fpdb: pdb file OR PDBModel instance
+        :type  fpdb: str OR Biskit.PDBModel
+        :param log: biskit.LogFile object (default: STDOUT)
+        :type  log: biskit.LogFile
+        :param verbose: log warnings and infos (default: True)
+        :type  verbose: bool
         """
         self.model = PDBModel( fpdb )
         self.log = log or StdLog()
@@ -177,12 +177,12 @@ class PDBCleaner:
     def replace_non_standard_AA( self, amber=0, keep=[] ):
         """
         Replace amino acids with none standard names with standard
-        amino acids according to L{MU.nonStandardAA}
+        amino acids according to :class:`MU.nonStandardAA`
         
-        @param amber: don't rename HID, HIE, HIP, CYX, NME, ACE [0]
-        @type  amber: 1||0
-        @param keep: names of additional residues to keep
-        @type keep:  [ str ]
+        :param amber: don't rename HID, HIE, HIP, CYX, NME, ACE [0]
+        :type  amber: 1||0
+        :param keep: names of additional residues to keep
+        :type keep:  [ str ]
         """
         standard = list(MU.atomDic.keys()) + keep
 
@@ -224,15 +224,15 @@ class PDBCleaner:
 
     def __standard_res( self, resname, amber=0 ):
         """
-        Check if resname is a standard residue (according to L{MU.atomDic})
+        Check if resname is a standard residue (according to :class:`MU.atomDic`)
         if not return the closest standard residue (according to
-        L{MU.nonStandardAA}).
+        :class:`MU.nonStandardAA`).
         
-        @param resname: 3-letter residue name
-        @type  resname: str
+        :param resname: 3-letter residue name
+        :type  resname: str
         
-        @return: name of closest standard residue or resname itself
-        @rtype: str
+        :return: name of closest standard residue or resname itself
+        :rtype: str
         """
         if resname in MU.atomDic:
             return resname
@@ -247,11 +247,11 @@ class PDBCleaner:
         """
         First missing standard atom triggers removal of standard atoms that
         follow in the standard order. All non-standard atoms are removed too.
-        Data about standard atoms are taken from L{MU.atomDic} and symomym
-        atom name is defined in L{MU.atomSynonyms}.
+        Data about standard atoms are taken from :class:`MU.atomDic` and symomym
+        atom name is defined in :class:`MU.atomSynonyms`.
         
-        @return: number of atoms removed
-        @rtype: int
+        :return: number of atoms removed
+        :rtype: int
         """
         mask = []
         
@@ -327,15 +327,15 @@ class PDBCleaner:
         Please use the wrapping method capTerminals() for more convenient 
         handling of the index.
 
-        @param model: model
-        @type  model: PDBMode
-        @param chain: index of chain to be capped
-        @type  chain: int
-        @param breaks: consider chain breaks when identifying chain boundaries
-        @type  breaks: bool
+        :param model: model
+        :type  model: PDBMode
+        :param chain: index of chain to be capped
+        :type  chain: int
+        :param breaks: consider chain breaks when identifying chain boundaries
+        :type  breaks: bool
         
-        @return: model with added NME capping
-        @rtype : PDBModel
+        :return: model with added NME capping
+        :rtype : PDBModel
         """
         if self.verbose:
             self.logWrite('Capping N-terminal of chain %i with ACE' % chain )
@@ -406,15 +406,15 @@ class PDBCleaner:
         Please use the wrapping method capTerminals() for more convenient 
         handling of the index.
 
-        @param model: model
-        @type  model: PDBMode
-        @param chain: index of chain to be capped
-        @type  chain: int
-        @param breaks: consider chain breaks when identifying chain boundaries
-        @type  breaks: bool
+        :param model: model
+        :type  model: PDBMode
+        :param chain: index of chain to be capped
+        :type  chain: int
+        :param breaks: consider chain breaks when identifying chain boundaries
+        :type  breaks: bool
         
-        @return: model with added NME capping residue
-        @rtype : PDBModel
+        :return: model with added NME capping residue
+        :rtype : PDBModel
         """
         if self.verbose:
             self.logWrite('Capping C-terminal of chain %i with NME.' % chain )
@@ -509,10 +509,10 @@ class PDBCleaner:
         * unresolved C-terminal: a protein residue that does not contain either
                                OXT or OT or OT1 or OT2 atoms
                                
-        @param model: PDBModel
+        :param model: PDBModel
         
-        @return: chains with unresolved N-term, with unresolved C-term
-        @rtype : ([int], [int])
+        :return: chains with unresolved N-term, with unresolved C-term
+        :rtype : ([int], [int])
         """
         c_first = model.chainIndex()
         c_last  = model.chainEndIndex()
@@ -567,16 +567,16 @@ class PDBCleaner:
         
         Note: this operation *replaces* the internal model.
         
-        @param auto: put ACE and NME capping residue on chain breaks
+        :param auto: put ACE and NME capping residue on chain breaks
                      and on suspected false N- and C-termini (default: False)
-        @type  auto: bool
-        @param breaks: switch on chain break detection before interpreting
+        :type  auto: bool
+        :param breaks: switch on chain break detection before interpreting
                        capN and capC
-        @type  breaks: False
-        @param capN: indices of chains that should get ACE cap (default: [])
-        @type  capN: [int]
-        @param capC: indices of chains that should get NME cap (default: [])
-        @type  capC: [int]
+        :type  breaks: False
+        :param capN: indices of chains that should get ACE cap (default: [])
+        :type  capN: [int]
+        :param capC: indices of chains that should get NME cap (default: [])
+        :type  capC: [int]
         """
         m = self.model
         c_len = m.lenChains()
@@ -620,17 +620,17 @@ class PDBCleaner:
         Remove Hetatoms, waters. Replace non-standard names.
         Remove non-standard atoms.
         
-        @param keep_hetatoms: option
-        @type  keep_hetatoms: 0||1
-        @param amber: don't rename amber residue names (HIE, HID, CYX,..)
-        @type  amber: 0||1
-        @param keep_xaa: names of non-standard residues to be kept
-        @type  keep_xaa: [ str ]
+        :param keep_hetatoms: option
+        :type  keep_hetatoms: 0||1
+        :param amber: don't rename amber residue names (HIE, HID, CYX,..)
+        :type  amber: 0||1
+        :param keep_xaa: names of non-standard residues to be kept
+        :type  keep_xaa: [ str ]
         
-        @return: PDBModel (reference to internal)
-        @rtype: PDBModel
+        :return: PDBModel (reference to internal)
+        :rtype: PDBModel
         
-        @raise CleanerError: if something doesn't go as expected ...
+        :raise CleanerError: if something doesn't go as expected ...
         """
         try:
             if not keep_hetatoms:

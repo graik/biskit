@@ -64,21 +64,21 @@ class AmberCrdParser:
     def __init__( self, fcrd, fref, box=0, rnAmber=0, pdbCode=None,
                   log=StdLog(), verbose=0 ):
         """
-        @param fcrd: path to input coordinate file
-        @type  fcrd: str
-        @param fref: PDB or pickled PDBModel with same atom content and order
-        @type  fref: str
-        @param box: expect line with box info at the end of each frame
+        :param fcrd: path to input coordinate file
+        :type  fcrd: str
+        :param fref: PDB or pickled PDBModel with same atom content and order
+        :type  fref: str
+        :param box: expect line with box info at the end of each frame
                     (default: 0)
-        @type  box: 1|0
-        @param rnAmber: rename amber style residues into standard (default: 0)
-        @type  rnAmber: 1|0
-        @param pdbCode: pdb code to be put into the model (default: None)
-        @type  pdbCode: str
-        @param log: LogFile instance [Biskit.StdLog]
-        @type  log: biskit.LogFile
-        @param verbose: print progress to log [0]
-        @type  verbose: int
+        :type  box: 1|0
+        :param rnAmber: rename amber style residues into standard (default: 0)
+        :type  rnAmber: 1|0
+        :param pdbCode: pdb code to be put into the model (default: None)
+        :type  pdbCode: str
+        :param log: LogFile instance [Biskit.StdLog]
+        :type  log: biskit.LogFile
+        :param verbose: print progress to log [0]
+        :type  verbose: int
         """
         self.fcrd = T.absfile( fcrd )
         self.crd  = T.gzopen( self.fcrd )
@@ -114,11 +114,11 @@ class AmberCrdParser:
         """
         convert a line from crd/vel file to list of float numbers
         
-        @param l: line
-        @type  l: str
+        :param l: line
+        :type  l: str
         
-        @return: list of floats
-        @rtype: [float]
+        :return: list of floats
+        :rtype: [float]
         """
         match = self.xnumbers.findall( l )
 
@@ -129,8 +129,8 @@ class AmberCrdParser:
         """
         extract next 10 coordinates from crd file
 
-        @return: coordinates
-        @rtype: [float]    
+        :return: coordinates
+        :rtype: [float]    
         """
         l = self.crd.readline()
         if l == '':
@@ -143,8 +143,8 @@ class AmberCrdParser:
         """
         Collect next complete coordinate frame
 
-        @return: coordinate frame
-        @rtype: array
+        :return: coordinate frame
+        :rtype: array
         """
 
         i = 0
@@ -169,8 +169,8 @@ class AmberCrdParser:
         """
         Convert coordinates into a Trajectory object.
 
-        @return: trajectory object
-        @rtype: Trajectory
+        :return: trajectory object
+        :rtype: Trajectory
         """
         ## skip first empty line
         self.crd.readline()

@@ -83,16 +83,16 @@ class FortranLine:
     
     def __init__(self, line, format, length = 80):
         """
-        @param line: either a sequence of Python objects, or a string
+        :param line: either a sequence of Python objects, or a string
                      formatted according to Fortran rules
 
-        @param format: either a Fortran-style format string, or a
-                       L{FortranFormat} object. A FortranFormat should
+        :param format: either a Fortran-style format string, or a
+                       :class:`FortranFormat` object. A FortranFormat should
                        be used when the same format string is used repeatedly,
                        because then the rather slow parsing of the string
                        is performed only once.
 
-        @param length: the length of the Fortran record. This is relevant
+        :param length: the length of the Fortran record. This is relevant
                        only when data is a string; this string is then
                        extended by spaces to have the indicated length.
                        The default value of 80 is almost always correct.
@@ -115,40 +115,40 @@ class FortranLine:
 
     def __len__(self):
         """
-        @returns: the number of data elements in the record
-        @rtype: C{int}
+        :returns: the number of data elements in the record
+        :rtype: ``int``
         """
         return len(self.data)
 
     def __getitem__(self, i):
         """
-        @param i: index
-        @type i: C{int}
-        @returns: the ith data element
+        :param i: index
+        :type i: ``int``
+        :returns: the ith data element
         """
         return self.data[i]
 
     def __getslice__(self, i, j):
         """
-        @param i: start index
-        @type i: C{int}
-        @param j: end index
-        @type j: C{int}
-        @returns: a list containing the ith to jth data elements
+        :param i: start index
+        :type i: ``int``
+        :param j: end index
+        :type j: ``int``
+        :returns: a list containing the ith to jth data elements
         """
         return self.data[i:j]
 
     def __str__(self):
         """
-        @returns: a Fortran-formatted text representation of the data record
-        @rtype: C{str}
+        :returns: a Fortran-formatted text representation of the data record
+        :rtype: ``str``
         """
         return self.text
 
     def isBlank(self):
         """
-        @returns: C{True} if the line contains only whitespace
-        @rtype: C{bool}
+        :returns: C{True} if the line contains only whitespace
+        :rtype: ``bool``
         """
         return len(str.strip(self.text)) == 0
 
@@ -247,9 +247,9 @@ class FortranFormat:
 
     def __init__(self, format, nested = False):
         """
-        @param format: a Fortran format specification
-        @type format: C{str}
-        @param nested: I{for internal use}
+        :param format: a Fortran format specification
+        :type format: ``str``
+        :param nested: I{for internal use}
         """
         fields = []
         format = str.strip(format)

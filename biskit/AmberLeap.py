@@ -74,8 +74,7 @@ class AmberLeap( Executor ):
     and so on. It would be better to move this functionality directly
     into AmberLeap.
 
-    @see: L{Executor}
-    @see: L{AmberParmBuilder}
+    .. seealso:: `biskit.Executor`, `biskit.AmberParmBuilder`
     """
 
     LEAPRC = 'leaprc.'             #: default leaprc file name
@@ -86,27 +85,27 @@ class AmberLeap( Executor ):
                   leaprc=None,
                   **kw ):
         """
-        @param template: template for leap input file (file or string)
-        @type  template: str
-        @param leaprc: forcefield code (leaprc file ending, e.g. 'ff99')
+        :param template: template for leap input file (file or string)
+        :type  template: str
+        :param leaprc: forcefield code (leaprc file ending, e.g. 'ff99')
                        OR leaprc file name (e.g, 'leaprc.f99')
                        OR leaprc path witin $AMBERHOME
                        OR leaprc path
                        default: take value from exe_tleap.dat
-        @type  leaprc: str
-        @param f_in:   complete leap input file -- existing or not, to be kept
+        :type  leaprc: str
+        :param f_in:   complete leap input file -- existing or not, to be kept
                        (default: create from template and then discard)
-        @type  f_in:   str
-        @param f_out:  file for leap log output (default: discard)
-        @type  f_out:  str
+        :type  f_in:   str
+        :param f_out:  file for leap log output (default: discard)
+        :type  f_out:  str
 
-        @param out_parm: parm output file name (default: 'top.parm')
-        @type  out_parm: str
-        @param out_crd : coordinate output file name (default '0.crd' )
-        @type  out_crd : str
+        :param out_parm: parm output file name (default: 'top.parm')
+        :type  out_parm: str
+        :param out_crd : coordinate output file name (default '0.crd' )
+        :type  out_crd : str
         
-        @param kw: additional key=value parameters for Executor:
-        @type  kw: key=value pairs
+        :param kw: additional key=value parameters for Executor:
+        :type  kw: key=value pairs
         ::
           debug    - 0|1, keep all temporary files (default: 0)
           verbose  - 0|1, print progress messages to log (log != STDOUT)
@@ -134,14 +133,14 @@ class AmberLeap( Executor ):
         Guess full path to an existing leaprc file name or fragment of it.
         We first take the file as is, then look in AMBERHOME, then look
         in AMBERHOME/dat/leap/cmd.
-        @param ff: forcefield code (leaprc file ending, e.g. 'ff99', 'ff01')
+        :param ff: forcefield code (leaprc file ending, e.g. 'ff99', 'ff01')
                    OR leaprc file name (e.g, 'leaprc.f99')
                    OR leaprc path witin $AMBERHOME
                    OR leaprc path
-        @type  ff: str
-        @return: full path to an existing leaprc file
-        @rtype: str
-        @raise: LeapError, if no existing file can be found
+        :type  ff: str
+        :return: full path to an existing leaprc file
+        :rtype: str
+        :raise: LeapError, if no existing file can be found
         """
         if P.exists( T.absfile(ff) ):
             return T.absfile(ff)

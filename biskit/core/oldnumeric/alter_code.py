@@ -22,7 +22,7 @@ def report_problem(l):
         print('Error [%-15s]: ' % m, l, end=' ')
 
 def processline(l):
-    """@return (str, int) - processed input line, number of replacements"""
+    """:return (str, int) - processed input line, number of replacements"""
     
     l = replaceimport(l)
     

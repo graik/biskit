@@ -49,8 +49,8 @@ def errWriteln(s):
     """
     print s to standard error with line feed.
     
-    @param s: string
-    @type  s: str
+    :param s: string
+    :type  s: str
     """
     sys.stderr.write(s+'\n')
     sys.stderr.flush()
@@ -60,8 +60,8 @@ def errWrite(s):
     """
     print s to standard error.
 
-    @param s: string
-    @type  s: str    
+    :param s: string
+    :type  s: str    
     """
     sys.stderr.write(s)
     sys.stderr.flush()
@@ -71,8 +71,8 @@ def flushPrint(s):
     """
     print s without line break and flush standard out.
 
-    @param s: string
-    @type  s: str    
+    :param s: string
+    :type  s: str    
     """
     sys.stdout.write(s)
     sys.stdout.flush()
@@ -82,8 +82,8 @@ def lastError():
     """
     Collect type and line of last exception.
     
-    @return: '<ExceptionType> in line <lineNumber>:<Exception arguments>'
-    @rtype: String
+    :return: '<ExceptionType> in line <lineNumber>:<Exception arguments>'
+    :rtype: String
     """
     try:
         trace = sys.exc_info()[2]
@@ -120,10 +120,10 @@ def dictAdd( dic, key, value, forceList=False ):
     """
     Add value to dic, create list, if dic has already value in key.
 
-    @param key: dictionary key
-    @type  key: str
-    @param value: value
-    @type  value: any
+    :param key: dictionary key
+    :type  key: str
+    :param value: value
+    :type  value: any
     """
     if key in dic:
         old = dic[key]
@@ -149,15 +149,15 @@ def absfile( filename, resolveLinks=1 ):
       - resolve links
       - add working directory to unbound files ('ab.txt'->'/home/raik/ab.txt')
 
-    @param filename: name of file
-    @type  filename: str
-    @param resolveLinks: eliminate any symbolic links (default: 1)
-    @type  resolveLinks: 1|0
+    :param filename: name of file
+    :type  filename: str
+    :param resolveLinks: eliminate any symbolic links (default: 1)
+    :type  resolveLinks: 1|0
     
-    @return: absolute path or filename
-    @rtype: string
+    :return: absolute path or filename
+    :rtype: string
 
-    @raise ToolsError: if a ~user part does not translate to an existing path
+    :raise ToolsError: if a ~user part does not translate to an existing path
     """
     if not filename:
         return filename
@@ -177,19 +177,19 @@ def homefile( filename, otherUser=1, ownCopy=1 ):
     Relativize a file name to ~ or, if it is in another user's home,
     to ~otheruser or, if it is in nobody's home, to / .
     
-    L{splithome()} is used to also guess home directories of other users.
+    :class:`splithome()` is used to also guess home directories of other users.
     
-    @param filename: name of file
-    @type  filename: str
-    @param otherUser: look also in other user's home directories (default 1)
-    @type  otherUser: 1|0
-    @param ownCopy: replace alien path by path into own home directory if
+    :param filename: name of file
+    :type  filename: str
+    :param otherUser: look also in other user's home directories (default 1)
+    :type  otherUser: 1|0
+    :param ownCopy: replace alien path by path into own home directory if
                     possible, e.g. ~other/data/x is replaced
                     by ~/data/x if there is such a file. (default 1) Careful!
-    @type  ownCopy: 1|0
+    :type  ownCopy: 1|0
                 
-    @return: path or filename
-    @rtype: str
+    :return: path or filename
+    :rtype: str
     """
     f = absfile( filename )
     my_home = osp.expanduser('~')
@@ -217,11 +217,11 @@ def splithome( filename ):
     are folders belonging to the same folder as the current user's home. I.e.
     the method tries also to guess home directories of other users.
 
-    @param filename: name of file
-    @type  filename: str
+    :param filename: name of file
+    :type  filename: str
     
-    @return: home folder of some user, remaining path relative to home
-    @rtype: (str, str)
+    :return: home folder of some user, remaining path relative to home
+    :rtype: (str, str)
     """
     home = osp.expanduser( '~' )
     home_base = osp.split( home )[0]
@@ -259,13 +259,14 @@ def __commonpath(l1, l2, common=[]):
 def relpath(p1, p2):
     """
     Translate p2 into a path relative to p1.
-    @param p1: base path
-    @type p1 : str
-    @param p2: target path
-    @type p2 : str
+    
+    :param p1: base path
+    :type p1: str
+    :param p2: target path
+    :type p2: str
 
-    @return: relative path p1 -> p2
-    @rtype: str
+    :return: relative path p1 -> p2
+    :rtype: str
     """
     if not p1 or not p2:
         return p2
@@ -281,11 +282,11 @@ def stripSuffix( filename ):
     """
     Return file name without ending.
 
-    @param filename: name of file
-    @type  filename: str
+    :param filename: name of file
+    :type  filename: str
     
-    @return: filename or path without suffix
-    @rtype: str
+    :return: filename or path without suffix
+    :rtype: str
     """
     try:
         if filename.find('.') != -1:
@@ -300,11 +301,11 @@ def stripFilename( filename ):
     """
     Return filename without path and without ending.
 
-    @param filename: name of file
-    @type  filename: str
+    :param filename: name of file
+    :type  filename: str
     
-    @return: base filename
-    @rtype: str
+    :return: base filename
+    :rtype: str
     """
     name = osp.basename( filename )      # remove path
     try:
@@ -320,11 +321,11 @@ def fileLength( filename ):
     """
     Count number of lines in a file.
 
-    @param filename: name of file
-    @type  filename: str
+    :param filename: name of file
+    :type  filename: str
     
-    @return: number of lines
-    @rtype: int
+    :return: number of lines
+    :rtype: int
     """
     p1 = subprocess.Popen( ['cat',filename], stdout=subprocess.PIPE )
     p2 = subprocess.Popen( ["wc", "-l"], stdin=p1.stdout,
@@ -337,8 +338,8 @@ def tempDir():
     Get folder for temporary files - either from environment settings
     or '/tmp'
 
-    @return: directort for temporary files
-    @rtype: str    
+    :return: directort for temporary files
+    :rtype: str    
     """
     if tempfile.tempdir is not None:
         return  tempfile.tempdir
@@ -350,11 +351,11 @@ def file2dic( filename ):
     """
     Construct dictionary from file with key - value pairs (one per line).
 
-    @param filename: name of file
-    @type  filename: str
+    :param filename: name of file
+    :type  filename: str
     
-    @raise ToolsError: if file can't be parsed into dictionary
-    @raise IOError: if file can't be opened
+    :raise ToolsError: if file can't be parsed into dictionary
+    :raise IOError: if file can't be opened
     """
     try:
         line = None
@@ -393,16 +394,16 @@ def get_cmdDict(lst_cmd, dic_default):
     -x file and in dic_default.
     
 
-    @param lst_cmd: list with the command line options::
+    :param lst_cmd: list with the command line options::
                     e.g. ['-pdb', 'in1.pdb', 'in2.pdb', '-o', 'out.dat']
-    @type  lst_cmd: [str]
-    @param dic_default: dictionary with default options::
+    :type  lst_cmd: [str]
+    :param dic_default: dictionary with default options::
                         e.g. {'psf':'in.psf'}
-    @type  dic_default: {str : str}
+    :type  dic_default: {str : str}
 
-    @return: command dictionary::
+    :return: command dictionary::
              ala {'pdb':['in1.pdb', 'in2.pdb'], 'psf':'in.psf', 'o':'out.dat'}
-    @rtype: {<option> : <value>}
+    :rtype: {<option> : <value>}
     """
     dic_cmd = {}                     # create return dictionary
     try:
@@ -452,7 +453,7 @@ def get_cmdDict(lst_cmd, dic_default):
 
 def cmdDict( defaultDic={} ):
     """
-    Convenience implementation of L{get_cmdDict}. Take command line options
+    Convenience implementation of :class:`get_cmdDict`. Take command line options
     from sys.argv[1:] and convert them into dictionary.
     Example::
       '-o out.dat -in 1.pdb 2.pdb 3.pdb -d' will be converted to
@@ -460,11 +461,11 @@ def cmdDict( defaultDic={} ):
       
     Option C{ -x |file_name| } is interpreted as file with additional options.
     
-    @param defaultDic: dic with default values.
-    @type  defaultDic: dic
+    :param defaultDic: dic with default values.
+    :type  defaultDic: dic
 
-    @return: command dictionary
-    @rtype: dic
+    :return: command dictionary
+    :rtype: dic
     """
     return get_cmdDict( sys.argv[1:], defaultDic )
 
@@ -475,17 +476,18 @@ def dump(this, filename, gzip = 0, mode = 'wb'):
       dump(this, filename, gzip = 0)
       Supports also '~' or '~user'.
 
-    @note : Peter Schmidtke : gzip fixed, works now
-    @author: Wolfgang Rieping
+    Note: Peter Schmidtke : gzip fixed, works now
+    
+    Written by Wolfgang Rieping.
 
-    @param this: object to dump
-    @type  this: any
-    @param filename: name of file
-    @type  filename: str
-    @param gzip: gzip dumped object (default 0)
-    @type  gzip: 1|0
-    @param mode: file handle mode (default w)
-    @type  mode: str
+    :param this: object to dump
+    :type  this: any
+    :param filename: name of file
+    :type  filename: str
+    :param gzip: gzip dumped object (default 0)
+    :type  gzip: 1|0
+    :param mode: file handle mode (default w)
+    :type  mode: str
     """
     import biskit as B
     
@@ -520,20 +522,21 @@ def load(filename, gzip=0, encoding='ASCII'):
     """
     Load dumped object from file.
 
-    @note : Peter Schmidtke : gzip fixed, works now
-    @author: Wolfgang Rieping
+    Note: Peter Schmidtke : gzip fixed, works now
+    
+    Written by Wolfgang Rieping.
 
-    @param filename: name of file
-    @type  filename: str
-    @param gzip: unzip dumped object (default 0)
-    @type  gzip: 1|0
-    @param encoding: optional encoding for pickle.load ['ASCII']
-    @type encoding: str
+    :param filename: name of file
+    :type  filename: str
+    :param gzip: unzip dumped object (default 0)
+    :type  gzip: 1|0
+    :param encoding: optional encoding for pickle.load ['ASCII']
+    :type encoding: str
 
-    @return: loaded object
-    @rtype: any
+    :return: loaded object
+    :rtype: any
 
-    @raise cPickle.UnpicklingError, if the pickle format is not recognized
+    :raise cPickle.UnpicklingError, if the pickle format is not recognized
     """
     filename = osp.expanduser(filename)
 
@@ -573,8 +576,8 @@ def Load( filename, gzip=0 ):
 
 def packageRoot():
     """
-    @return: absolute folder of the biskit python package.
-    @rtype: str
+    :return: absolute folder of the biskit python package.
+    :rtype: str
     """
     import biskit
     return absfile( osp.split(biskit.__file__)[0] )
@@ -584,17 +587,17 @@ def projectRoot():
     Root of biskit project. That's the folder **containing** the biskit python
     package (the parent folder of `packageRoot`).
     
-    @return: absolute path of the root (parent) folder of current project::
+    :return: absolute path of the root (parent) folder of current project::
              i.e. '/home/raik/py/biskitproject'
-    @rtype: string
+    :rtype: string
     """
     return absfile(osp.join( packageRoot(), '..' ))
 
 def dataRoot():
     """
     Root of Biskit data directory (formerly 'biskit/Biskit/data').
-    @return: absolute path
-    @rtype: string    
+    :return: absolute path
+    :rtype: string    
     """
     return osp.join( packageRoot(), 'data' )
 
@@ -602,10 +605,10 @@ def testRoot( subfolder='' ):
     """
     Root of Biskit test directory.
     
-    @param subfolder: str, optional sub-folder of test data folder
+    :param subfolder: str, optional sub-folder of test data folder
 
-    @return: absolute path
-    @rtype: string    
+    :return: absolute path
+    :rtype: string    
     """
     if subfolder and subfolder[0] == os.sep:
         subfolder = subfolder[1:]
@@ -616,13 +619,13 @@ def isBinary( f ):
     """
     Check if file is a binary.
     
-    @param f: path to existing file
-    @type  f: str
+    :param f: path to existing file
+    :type  f: str
 
-    @return: condition
-    @rtype: 1|0
+    :return: condition
+    :rtype: 1|0
     
-    @raise OSError: if file doesn't exist
+    :raise OSError: if file doesn't exist
     """
     return os.access( f, os.X_OK )
 
@@ -631,11 +634,11 @@ def binExists( f ):
     """
     Check if binary with file name f exists.
     
-    @param f: binary file name
-    @type  f: str
+    :param f: binary file name
+    :type  f: str
     
-    @return: True if binary file f is found in PATH and is executable
-    @rtype: 1|0
+    :return: True if binary file f is found in PATH and is executable
+    :rtype: 1|0
     """
     if osp.exists( f ):
         return isBinary( f )
@@ -654,13 +657,13 @@ def absbinary( f ):
     """
     Absolute path of binary.
     
-    @param f: binary file name
-    @type  f: str
+    :param f: binary file name
+    :type  f: str
     
-    @return: full path to existing binary
-    @rtype: str
+    :return: full path to existing binary
+    :rtype: str
     
-    @raise IOError: if an executable binary is not found in PATH
+    :raise IOError: if an executable binary is not found in PATH
     """
     if osp.exists( f ) and isBinary( f ):
         return f
@@ -679,11 +682,11 @@ def platformFolder( f ):
     """
     Get a platform-specific subfolder of f for platform-dependent imports.
     
-    @param f: parent folder
-    @type  f: str
+    :param f: parent folder
+    :type  f: str
 
-    @return: path
-    @rtype: str
+    :return: path
+    :rtype: str
     """
     import platform as P
 
@@ -701,11 +704,11 @@ def sortString( s ):
     Sort the letters of a string::
       sortString( str ) -> str with sorted letters
       
-    @param s: string to be sorted
-    @type  s: str
+    :param s: string to be sorted
+    :type  s: str
     
-    @return: sorted string
-    @rtype: str  
+    :return: sorted string
+    :rtype: str  
     """
     l = list(s)
     l.sort()
@@ -717,11 +720,11 @@ def string2Fname( s ):
     Remove forbidden character from string so that it can be used as a
     filename.
 
-    @param s: string
-    @type  s: str
+    :param s: string
+    :type  s: str
 
-    @return: cleaned string
-    @rtype: str     
+    :return: cleaned string
+    :rtype: str     
     """
     forbidden = ['*', '?', '|', '/', ' ']
     replaceme = ['-', '-', '-', '-', '_']
@@ -734,11 +737,11 @@ def toIntList( o ):
     """
     Convert single value or list of values into list of integers.
     
-    @param o: value or list
-    @type  o: int or [int]
+    :param o: value or list
+    :type  o: int or [int]
 
-    @return: list of integer
-    @rtype: [int]
+    :return: list of integer
+    :rtype: [int]
     """
     if type( o ) != type( [] ):
         o = [ o ]
@@ -750,11 +753,11 @@ def toIntArray( o ):
     """
     Convert single value or list of values to numpy array of int.
     
-    @param o: value or list
-    @type  o: int or [int]
+    :param o: value or list
+    :type  o: int or [int]
 
-    @return: array of integer
-    @rtype: N0.array('i')    
+    :return: array of integer
+    :rtype: N0.array('i')    
     """
     if type( o ) == list or type( o ) == type( N0.array([])):
         return N0.array( map( int, o ) )
@@ -767,11 +770,11 @@ def toList( o ):
     Make a list::
       toList(o) -> [o], or o,  if o is already a list
     
-    @param o: value(s)
-    @type  o: any or [any]
+    :param o: value(s)
+    :type  o: any or [any]
 
-    @return: list
-    @rtype: [any]
+    :return: list
+    :rtype: [any]
     """
     if type( o ) != type( [] ):
         return [ o ]
@@ -783,11 +786,11 @@ def toStr( o ):
     Make a string from a list or interger.
     Stripping of any flanking witespaces.  
     
-    @param o: value(s)
-    @type  o: any or [any]
+    :param o: value(s)
+    :type  o: any or [any]
 
-    @return: list
-    @rtype: [any]
+    :return: list
+    :rtype: [any]
     """
     if type( o ) == type( 1 ):
         return str(o)
@@ -806,13 +809,13 @@ def toInt( o, default=None ):
     Convert to intereg if possible::
       toInt(o) -> int, int(o) or default if o is impossible to convert.
 
-    @param o: value
-    @type  o: any
-    @param default: value to return if conversion is impossible (default: None)
-    @type  default: any
+    :param o: value
+    :type  o: any
+    :param default: value to return if conversion is impossible (default: None)
+    :type  default: any
     
-    @return: integer OR None 
-    @rtype: int OR None     
+    :return: integer OR None 
+    :rtype: int OR None     
     """
     if o is None or o == '':
         return default
@@ -825,10 +828,10 @@ def toInt( o, default=None ):
 def hex2int( shex ):
     """
     Convert hex-code string into float number.
-    @param s: hex-code, e.g. 'FF0B99'
-    @type  s: str
-    @return: float
-    @rtype: float
+    :param s: hex-code, e.g. 'FF0B99'
+    :type  s: str
+    :return: float
+    :rtype: float
     """
     shex = shex.replace('0x','')
 
@@ -851,15 +854,15 @@ def colorSpectrum( nColors, firstColor='FF0000', lastColor='FF00FF' ):
      free spectrum red FF0000 to green 00FF00
      bound spectrum cyan 00FFFF to magenta FF00FF
 
-    @param nColors: number of colors to create
-    @type  nColors: int
-    @param firstColor: first color in hex format (default: FF0000)
-    @type  firstColor: str
-    @param lastColor: last color in hex format (default: FF00FF)
-    @type  lastColor: str
+    :param nColors: number of colors to create
+    :type  nColors: int
+    :param firstColor: first color in hex format (default: FF0000)
+    :type  firstColor: str
+    :param lastColor: last color in hex format (default: FF00FF)
+    :type  lastColor: str
     
-    @return: list of colors
-    @rtype: [int]
+    :return: list of colors
+    :rtype: [int]
     """
     spec = []
     cmd = dataRoot() + '/spectrum.pl ' +str(nColors) +\
@@ -883,15 +886,15 @@ def hexColors( nColors, firstColor='FF0000', lastColor='FF00FF' ):
      free spectrum red FF0000 to green 00FF00
      bound spectrum cyan 00FFFF to magenta FF00FF
      
-    @param nColors: number of colors to create
-    @type  nColors: int
-    @param firstColor: first color in hex format (default: FF0000)
-    @type  firstColor: str
-    @param lastColor: last color in hex format (default: FF00FF)
-    @type  lastColor: str
+    :param nColors: number of colors to create
+    :type  nColors: int
+    :param firstColor: first color in hex format (default: FF0000)
+    :type  firstColor: str
+    :param lastColor: last color in hex format (default: FF00FF)
+    :type  lastColor: str
 
-    @return: list of  hex colors
-    @rtype: [ str ]
+    :return: list of  hex colors
+    :rtype: [ str ]
     """
     spec = []
     cmd = dataRoot() + '/spectrum.pl ' +str(nColors) +\
@@ -912,11 +915,11 @@ def rgb2hex( rgbColor ):
     convert rgb color into 8 bit hex rgb color::
       [ 1.0, 0.0, 1.0, ] -> 'FF00FF'
 
-    @param rgbColor: RGB-color e.g. [ 1.0, 0.0, 1.0, ]
-    @type rgbColor : [float]
+    :param rgbColor: RGB-color e.g. [ 1.0, 0.0, 1.0, ]
+    :type rgbColor : [float]
     
-    @return: hex colors
-    @rtype: str 
+    :return: hex colors
+    :rtype: str 
     """
     hexRgb = ''
     for i in range(0,3):        
@@ -935,13 +938,13 @@ def hex2rgb( hexColor, str=0 ):
     convert 8 bit hex rgb color into  rgb color  ::
        'FF00FF' -> [ 1.0, 0.0, 1.0, ] 
 
-    @param hexColor: HEX-color e.g. 'FF00FF'
-    @type  hexColor: str
-    @param str: return rgb colors as a tring (i.e for PyMol)
-    @type  str: 1|0
+    :param hexColor: HEX-color e.g. 'FF00FF'
+    :type  hexColor: str
+    :param str: return rgb colors as a tring (i.e for PyMol)
+    :type  str: 1|0
     
-    @return: rgb colors
-    @rtype: [float]
+    :return: rgb colors
+    :rtype: [float]
     """
     rgb = []
     if hexColor[:2] == '0x':
@@ -960,8 +963,8 @@ def hex2rgb( hexColor, str=0 ):
 
 def dateString():
     """
-    @return: DD/MM/YYYY
-    @rtype: str
+    :return: DD/MM/YYYY
+    :rtype: str
     """
     t = localtime()
     return '%02i/%02i/%i' % (t[2],t[1],t[0] )
@@ -969,8 +972,8 @@ def dateString():
 
 def dateSortString():
     """
-    @return: YYYY/MM/DD:hh:mm.ss.ms
-    @rtype: 
+    :return: YYYY/MM/DD:hh:mm.ss.ms
+    :rtype: 
     """
     t = localtime()
     return "%i/%02i/%02i:%02i.%02i.%02i" % (t[0],t[1],t[2],t[3],t[4],t[5])
@@ -981,17 +984,17 @@ def tryRemove(f, verbose=0, tree=0, wildcard=0 ):
     Remove file or folder::
      remove(f [,verbose=0, tree=0]), remove if possible, otherwise do nothing
 
-    @param f: file path
-    @type  f: str
-    @param verbose: report failure (default 0)
-    @type  verbose: 0|1
-    @param tree: remove whole folder (default 0)
-    @type  tree: 0|1
-    @param wildcard: filename contains wildcards (default 0)
-    @type  wildcard: 0|1
+    :param f: file path
+    :type  f: str
+    :param verbose: report failure (default 0)
+    :type  verbose: 0|1
+    :param tree: remove whole folder (default 0)
+    :type  tree: 0|1
+    :param wildcard: filename contains wildcards (default 0)
+    :type  wildcard: 0|1
 
-    @return: 1 if file was removed
-    @rtype: 1|0
+    :return: 1 if file was removed
+    :rtype: 1|0
     """
     try:
         if osp.isdir(f):
@@ -1014,13 +1017,13 @@ def tryRemove(f, verbose=0, tree=0, wildcard=0 ):
 def backup( fname, suffix='~' ):
     """
     Create backup of file if it already exists.
-    @param fname: file name
-    @type  fname: str
-    @param suffix: suffix to add to backup file name ['~']
-    @type  suffix: str
+    :param fname: file name
+    :type  fname: str
+    :param suffix: suffix to add to backup file name ['~']
+    :type  suffix: str
 
-    @return: True if backup was created, False otherwise
-    @rtype: bool
+    :return: True if backup was created, False otherwise
+    :rtype: bool
     """
     fname = absfile( fname )
     
@@ -1034,14 +1037,14 @@ def ensure( v, t, allowed=[], forbidden=[] ):
     """
     Check type of a variable
     
-    @param v: variable to test
-    @type  v: variable
-    @param t: required type
-    @type  t: str
-    @param allowed: list of additional values allowed for v {default: []}
-    @type  allowed: [str]
+    :param v: variable to test
+    :type  v: variable
+    :param t: required type
+    :type  t: str
+    :param allowed: list of additional values allowed for v {default: []}
+    :type  allowed: [str]
     
-    @raise TypeError: if invalid
+    :raise TypeError: if invalid
     """
     if allowed:
         allowed = toList( allowed )
@@ -1060,15 +1063,15 @@ def clipStr( s, length, suffix='..', expandtabs=1 ):
     Shorten string from end and replace the last characters with suffix::
       clipStr( str, length ) -> str, with len( str ) <= length
 
-    @param s: original string
-    @type  s: str
-    @param length: desired length
-    @type  length: int
-    @param suffix: suffix (default: ..)
-    @type  suffix: str
+    :param s: original string
+    :type  s: str
+    :param length: desired length
+    :type  length: int
+    :param suffix: suffix (default: ..)
+    :type  suffix: str
     
-    @return: shortend string
-    @rtype: str
+    :return: shortend string
+    :rtype: str
     """
     if expandtabs:
         s = s.expandtabs()
@@ -1083,10 +1086,10 @@ def info( item, short=1 ):
     ::
       info( item, short=1) -> Print useful information about item.
 
-    @param item: query item
-    @type  item: item
-    @param short: short version (default: 1)
-    @type  short: 1|0
+    :param item: query item
+    :type  item: item
+    :param short: short version (default: 1)
+    :type  short: 1|0
     """
     ## quick and dirty ##
     if hasattr(item, '__name__'):
@@ -1147,15 +1150,15 @@ def tryImport( module, cls, old_as=None, namespace=None ):
     Try to import a class from a module. If that fails, 'import' a
     default class of the same name that raises an exception when used.
     
-    @param module: name of the module
-    @type  module: str
-    @param cls  : name of the class
-    @type  cls  : str
-    @param namespace: namespace for the import [default: globals() ]
-    @type  namespace: dict
+    :param module: name of the module
+    :type  module: str
+    :param cls  : name of the class
+    :type  cls  : str
+    :param namespace: namespace for the import [default: globals() ]
+    :type  namespace: dict
     
-    @return: True if import succeeded, False otherwise
-    @rtype: bool
+    :return: True if import succeeded, False otherwise
+    :rtype: bool
     """
     old_as = old_as or cls
     g = namespace or globals()
@@ -1181,13 +1184,13 @@ def tryImportModule( module, old_as=None, namespace=None ):
 
     >>> tryImportModule( 'numpy', namespace=globals() )
     
-    @param module: name of the module
-    @type  module: str
-    @param namespace: namespace for the import [default: globals() ]
-    @type  namespace: dict
+    :param module: name of the module
+    :type  module: str
+    :param namespace: namespace for the import [default: globals() ]
+    :type  namespace: dict
     
-    @return: True if import succeeded, False otherwise
-    @rtype: bool
+    :return: True if import succeeded, False otherwise
+    :rtype: bool
     """
     old_as = old_as or module
     g = namespace or globals()
@@ -1207,13 +1210,13 @@ def tryImportModule( module, old_as=None, namespace=None ):
 def gzopen( fname, mode='rt' ):
     """
     Open a normal or a gzipped file.
-    @param fname: file name (can contain ~, .. etc.)
-    @type  fname: str
-    @param mode: read/write mode ['r']
-    @type  mode: str
+    :param fname: file name (can contain ~, .. etc.)
+    :type  fname: str
+    :param mode: read/write mode ['r']
+    :type  mode: str
     
-    @return: file handle
-    @rtype: file or GZipFile
+    :return: file handle
+    :rtype: file or GZipFile
     """
     fname = absfile( fname )
 
@@ -1226,8 +1229,8 @@ def gzopen( fname, mode='rt' ):
 def profile( s ):
     """
     Profile the given code fragment and report time-consuming method calls.
-    @param s: python code fragment, example: 'm = PDBModel("3tgi")'
-    @type  s: str
+    :param s: python code fragment, example: 'm = PDBModel("3tgi")'
+    :type  s: str
     """    
     try:
         import cProfile as profile

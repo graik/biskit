@@ -96,19 +96,19 @@ class LocalPath( object ):
         by environment variables. ~ and ../../ will be expanded both in
         the given path and in the environment variables.
         
-        @param path: path(s)
-        @type  path: [ (str, str) ] OR str
-        @param checkEnv: look for substitution values among environment
+        :param path: path(s)
+        :type  path: [ (str, str) ] OR str
+        :param checkEnv: look for substitution values among environment
                          variables (default 1)
-        @type  checkEnv: 1|0
-        @param absolute: normalize file name [1]
-        @type  absolute: 1|0
-        @param resolveLinks: resolve symbolic links [0]
-        @type  resolveLinks: 1|0
-        @param maxSub: maximal number of substitutions [1]
-        @type  maxSub: int
-        @param vars: additional param=value pairs with suggested substitutors
-        @type  vars: param=value
+        :type  checkEnv: 1|0
+        :param absolute: normalize file name [1]
+        :type  absolute: 1|0
+        :param resolveLinks: resolve symbolic links [0]
+        :type  resolveLinks: 1|0
+        :param maxSub: maximal number of substitutions [1]
+        :type  maxSub: int
+        :param vars: additional param=value pairs with suggested substitutors
+        :type  vars: param=value
         """
 
         self.fragments = [] ## list of tuples (absolut,variable_name)
@@ -137,13 +137,13 @@ class LocalPath( object ):
         all substitutions for which environment variables exist.
         This function is time consuming (absfile - os.realpath is the culprit).
                          
-        @param existing: don't return a non-existing path                
-        @type  existing: 0|1
+        :param existing: don't return a non-existing path                
+        :type  existing: 0|1
         
-        @return: valid absolute path in current environment
-        @rtype: str
+        :return: valid absolute path in current environment
+        :rtype: str
         
-        @raise LocalPathError: if existing==1 and no existing path can be
+        :raise LocalPathError: if existing==1 and no existing path can be
                                constructed via environment variables
         """
         if self.fragments:
@@ -179,17 +179,17 @@ class LocalPath( object ):
         all substitutions for which environment variables exist.
         This function is time consuming (absfile - os.realpath is the culprit).
                          
-        @param existing: don't return a non-existing path [0]
-        @type  existing: 0|1
+        :param existing: don't return a non-existing path [0]
+        :type  existing: 0|1
 
-        @param force: override cached value [0]
-        @type  force: 0|1
+        :param force: override cached value [0]
+        :type  force: 0|1
         
-        @return: valid absolute (not necessarily existing) path in current
+        :return: valid absolute (not necessarily existing) path in current
                  environment
-        @rtype: str
+        :rtype: str
         
-        @raise LocalPathError: if existing==1 and no existing path can be
+        :raise LocalPathError: if existing==1 and no existing path can be
                                constructed via environment variables
         """
 
@@ -209,8 +209,8 @@ class LocalPath( object ):
         Get a string representation that describes the original path and all
         possible substitutions by environment variables.
         
-        @return: formated path e.g. C{ '{/home/raik|$USER}/data/x.txt' }
-        @rtype: str
+        :return: formated path e.g. C{ '{/home/raik|$USER}/data/x.txt' }
+        :rtype: str
         """
         r = ""
         for absolut,var in self.fragments:
@@ -227,8 +227,8 @@ class LocalPath( object ):
         exists or if there are no environment variables for any of the
         substitutions.
         
-        @return: original path
-        @rtype: str
+        :return: original path
+        :rtype: str
         """
         if not self.fragments:
             return ''
@@ -242,21 +242,21 @@ class LocalPath( object ):
         Assign a new file name. checkEnv, minLen, resolve*, maxSub are
         only considered for path name input.
         
-        @param v: fragment tuples or path or custom-formatted string
-        @type  v: [ (str,str) ] OR str
-        @param checkEnv: look for possible substitutions in environment [1]
+        :param v: fragment tuples or path or custom-formatted string
+        :type  v: [ (str,str) ] OR str
+        :param checkEnv: look for possible substitutions in environment [1]
               (iggnored if v is already formatted like '{/x/y|$xy}/z.txt' )
-        @type  checkEnv: 0|1
-        @param minLen: mininal length of environment variables to consider [3]
-        @type  minLen: int
-        @param absolute: normalize file name [1]
-        @type  absolute: 1|0
-        @param resolveLinks: resolve symbolic links [0]
-        @type  resolveLinks: 1|0
-        @param maxSub: maximal number of substitutions [1]
-        @type  maxSub: int
-        @param vars: additional param=value pairs with suggested substitutors
-        @type  vars: param=value
+        :type  checkEnv: 0|1
+        :param minLen: mininal length of environment variables to consider [3]
+        :type  minLen: int
+        :param absolute: normalize file name [1]
+        :type  absolute: 1|0
+        :param resolveLinks: resolve symbolic links [0]
+        :type  resolveLinks: 1|0
+        :param maxSub: maximal number of substitutions [1]
+        :type  maxSub: int
+        :param vars: additional param=value pairs with suggested substitutors
+        :type  vars: param=value
         """
         if type( v ) == list:
             return self.set_fragments( v )
@@ -281,8 +281,8 @@ class LocalPath( object ):
         environment variable substitutions. Fragments that can not be
         substituted are given as (str, None).
         
-        @param fragments: list of fragment tuples
-        @type  fragments: [ (str, str), (str, None), .. ]
+        :param fragments: list of fragment tuples
+        :type  fragments: [ (str, str), (str, None), .. ]
         """
         self.fragments = fragments
         self.__hash = None
@@ -293,10 +293,10 @@ class LocalPath( object ):
         """
         Set a new path and its substitutable parts from a formatted string.
         
-        @param s: formatted like {/home/raik|$USER}/data/test.txt
-        @type  s: str
+        :param s: formatted like {/home/raik|$USER}/data/test.txt
+        :type  s: str
 
-        @raise PathError: formatted input is not yet implemented
+        :raise PathError: formatted input is not yet implemented
         """
         fragments = []
         pos = 0
@@ -326,18 +326,18 @@ class LocalPath( object ):
         Set a new path and try to identify settings/environment
         variables that could substitute parts of it.
         
-        @param fname: relative or absolute file name
-        @type  fname: str
-        @param minLen: minimal length of string o to be counted as path
-        @type  minLen: int
-        @param absolute: normalize file name [1]
-        @type  absolute: 1|0
-        @param resolveLinks: resolve symbolic links [0]
-        @type  resolveLinks: 1|0
-        @param maxSub: maximal number of substitutions [1]
-        @type  maxSub: int
-        @param vars: additional param=value pairs with suggested substitutors
-        @type  vars: param=value
+        :param fname: relative or absolute file name
+        :type  fname: str
+        :param minLen: minimal length of string o to be counted as path
+        :type  minLen: int
+        :param absolute: normalize file name [1]
+        :type  absolute: 1|0
+        :param resolveLinks: resolve symbolic links [0]
+        :type  resolveLinks: 1|0
+        :param maxSub: maximal number of substitutions [1]
+        :type  maxSub: int
+        :param vars: additional param=value pairs with suggested substitutors
+        :type  vars: param=value
         """
         env_items =  self.get_substitution_pairs( minLen=minLen, vars=vars )
 
@@ -366,8 +366,8 @@ class LocalPath( object ):
         """
         Check if path exists
         
-        @return: 1 if if current path exists
-        @rtype: 1|0
+        :return: 1 if if current path exists
+        :rtype: 1|0
         """
         return os.path.exists( self.local() )
 
@@ -376,10 +376,10 @@ class LocalPath( object ):
         """
         Try to unpickle an object from the currently valid path.
         
-        @return: unpickled object 
-        @rtype: any
+        :return: unpickled object 
+        :rtype: any
         
-        @raise IOError: if file can not be found
+        :raise IOError: if file can not be found
         """
         try:
             return T.load( self.local( existing=1 ) )
@@ -392,8 +392,8 @@ class LocalPath( object ):
         """
         Try to pickle an object to the currently valid path.
         
-        @return: the absolute path to which o was pickled
-        @rtype: str
+        :return: the absolute path to which o was pickled
+        :rtype: str
         """
         try:
             f = self.local()
@@ -430,15 +430,15 @@ class LocalPath( object ):
         Look in all not yet substituted fragments for parts that can be
         substituted by value and, if successful, create a new fragment
         
-        @param fragments: fragment tuples
-        @type  fragments: [ (str, str) ]
-        @param name: substitution variable name
-        @type  name: str
-        @param value: susbtitution value in current environment
-        @type  value: str
+        :param fragments: fragment tuples
+        :type  fragments: [ (str, str) ]
+        :param name: substitution variable name
+        :type  name: str
+        :param value: susbtitution value in current environment
+        :type  value: str
         
-        @return: fragment tuples
-        @rtype: [ (str, str) ]
+        :return: fragment tuples
+        :rtype: [ (str, str) ]
         """
         result = []
 
@@ -477,11 +477,11 @@ class LocalPath( object ):
         """
         Check whether an object is a path string (existing or not).
         
-        @param minLen: minimal length of string o to be counted as path
-        @type  minLen: int
+        :param minLen: minimal length of string o to be counted as path
+        :type  minLen: int
         
-        @return: 1|0
-        @rtype: int
+        :return: 1|0
+        :rtype: int
         """
         r = ( type( o ) == str \
               and (o.find(os.path.sep) != -1 or o.find('/') != -1)\
@@ -498,10 +498,10 @@ class LocalPath( object ):
 
     def __path_vars( self, d, minLen=3, vars={}, exclude=[] ):
         """
-        @see L{__paths_in_settings} and L{__paths_in_env}
+        :return: [ (variable name, path) ] sorted by length of value
+        :rtype: [ (str,str) ]
 
-        @return: [ (variable name, path) ] sorted by length of value
-        @rtype: [ (str,str) ]
+        .. seealso:: `__paths_in_settings` and `__paths_in_env`
         """
 
         items = list(vars.items()) + list(d.items())
@@ -522,14 +522,14 @@ class LocalPath( object ):
         """
         Get all setting variables looking like a path, sorted by length
 
-        @param minLen: minimal path length [3]
-        @type  minLen: int
-        @param vars: alternative param=value pairs to consider
+        :param minLen: minimal path length [3]
+        :type  minLen: int
+        :param vars: alternative param=value pairs to consider
                      instead of environment
-        @type  vars: param=value
+        :type  vars: param=value
         
-        @return: [ (variable name, value) ] sorted by length of value
-        @rtype: [ (str,str) ]
+        :return: [ (variable name, value) ] sorted by length of value
+        :rtype: [ (str,str) ]
         """
         return self.__path_vars( S.__dict__, minLen=minLen, vars=vars,
                                  exclude=(exclude + self.exclude_vars ) )
@@ -539,14 +539,14 @@ class LocalPath( object ):
         """
         Get all environment variables with at least one '/' sorted by length.
 
-        @param minLen: minimal path length [3]
-        @type  minLen: int
-        @param vars: alternative param=value pairs to consider
+        :param minLen: minimal path length [3]
+        :type  minLen: int
+        :param vars: alternative param=value pairs to consider
                      instead of environment
-        @type  vars: param=value
+        :type  vars: param=value
         
-        @return: [ (variable name, value) ] sorted by length of value
-        @rtype: [ (str,str) ]
+        :return: [ (variable name, value) ] sorted by length of value
+        :rtype: [ (str,str) ]
         """
         return self.__path_vars( os.environ, minLen=minLen, vars=vars,
                                  exclude=(exclude + self.exclude_vars ) )
@@ -556,14 +556,14 @@ class LocalPath( object ):
         """
         Get all variable/value pairs that are available for path substitutions.
 
-        @param minLen: minimal path length [3]
-        @type  minLen: int
-        @param vars: additional param=value pairs to consider
-        @type  vars: param=value
+        :param minLen: minimal path length [3]
+        :type  minLen: int
+        :param vars: additional param=value pairs to consider
+        :type  vars: param=value
         
-        @return: [ (variable name, value) ] sorted by priority
+        :return: [ (variable name, value) ] sorted by priority
                  (mostly length of value)
-        @rtype: [ (str,str) ]
+        :rtype: [ (str,str) ]
         """
         r = self.__paths_in_settings(minLen=minLen,vars=vars, exclude=exclude )
         r +=self.__paths_in_env(     minLen=minLen,vars=vars, exclude=exclude )
@@ -577,16 +577,16 @@ class LocalPath( object ):
 
     def __str__( self ):
         """
-        @return: Same as local(). string representation for print and str()
-        @rtype: str
+        :return: Same as local(). string representation for print and str()
+        :rtype: str
         """
         return self.local()
 
 
     def __repr__( self ):
         """
-        @return: formatted output (Python representation)
-        @rtype: str
+        :return: formatted output (Python representation)
+        :rtype: str
         """
         return "LocalPath[ %s ]" % self.formatted()
 
@@ -595,8 +595,8 @@ class LocalPath( object ):
         """
         Time costly when repeated many times.
         
-        @return: length of file name in current environment
-        @rtype: int
+        :return: length of file name in current environment
+        :rtype: int
         """
         return len( self.local() )
 
@@ -633,8 +633,8 @@ class LocalPath( object ):
         the objects cannot be used as keys in dictionaries (needed for Complex-
         ModelRegistry).
         
-        @return: int
-        @rtype: 
+        :return: int
+        :rtype: 
         """
         if self.__hash is None:
             self.__hash = self.formatted().__hash__()

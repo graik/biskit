@@ -18,10 +18,8 @@
 ##
 ##
 """
-@see L{Biskit.PDBParser}
-@see L{Biskit.PDBParseFile}
-@see L{Biskit.PDBParseModel}
-@see L{Biskit.PDBParsePickle}
+.. seealso:: `biskit.core.PDBParser`,`biskit.core.PDBParseFile`,
+             `biskit.core.PDBParseModel`, `biskit.core.PDBParsePickle`
 """
 
 from biskit.core.pdbparseFile   import PDBParseFile
@@ -44,13 +42,13 @@ class PDBParserFactory:
 
            p = ParserFactory.getParser( 'myfile.pdb' )
 
-        @param source: structure source (PDB file, PDBModel, pickled model)
-        @type source: str | LocalPath | PDBModel
+        :param source: structure source (PDB file, PDBModel, pickled model)
+        :type source: str | LocalPath | PDBModel
 
-        @return: a parser that should be able to handle the given source
-        @rtype: PDBParser (child)
+        :return: a parser that should be able to handle the given source
+        :rtype: PDBParser (child)
 
-        @raise PDBError: if no compatible parser is found
+        :raise PDBError: if no compatible parser is found
         """
 
         if PDBParseFile.supports( source ):

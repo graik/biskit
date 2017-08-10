@@ -433,8 +433,8 @@ atomMasses = { 'H':1.00797, 'C':12.01115, 'N':14.0067,
 
 def allAACodes():
     """
-    @return: list of all single AA codes, including B, Z, X
-    @rtype: [str]
+    :return: list of all single AA codes, including B, Z, X
+    :rtype: [str]
     """
     result = []
     for aa in aaDic.values():
@@ -446,8 +446,8 @@ def allAACodes():
 
 def allAA():
     """
-    @return: list of all 20 'exact' single AA codes.
-    @rtype: [str]
+    :return: list of all 20 'exact' single AA codes.
+    :rtype: [str]
     """
     result = allAACodes()
 
@@ -462,12 +462,12 @@ def elementType( eLetter ):
     Classify an atom as polar or unpolar::
       atomType( eLetter ) -> list of types this element belongs to
 
-    @param eLetter: atom name
-    @type  eLetter: str
+    :param eLetter: atom name
+    :type  eLetter: str
     
-    @return: return 'p' for polar, 'u' for unpolar and None if not
+    :return: return 'p' for polar, 'u' for unpolar and None if not
              in classified
-    @rtype: p|u OR None
+    :rtype: p|u OR None
     """
     types = {'p' : ['N','O','H','Cl'],  ## polar
              'u' : ['C','S'] }          ## unpolar
@@ -482,11 +482,11 @@ def resType( resCode ):
     """
     Classify residues as aromatic (a), charged (c) or polar (p).
 
-    @param resCode: amino acid code
-    @type  resCode: str
+    :param resCode: amino acid code
+    :type  resCode: str
     
-    @return: list of types this residue belongs to...
-    @rtype: a|c|p OR None
+    :return: list of types this residue belongs to...
+    :rtype: a|c|p OR None
     """
     types = {'a' : ['F','Y','W','H'],     ## aromatic
              'c' : ['E','D','L','R','H'], ## charged
@@ -508,17 +508,17 @@ def singleAA(seq, xtable=None, nonstandard=True, unknown='?' ):
     """
     convert list with 3-letter AA code to list with 1-letter code
     
-    @param seq: amino acid sequence in 3-letter code
-    @type  seq: [str]
-    @param xtable: dictionary with additional str:single_char mapping
-    @type  xtable: dict
-    @param nonstandard: support non-standard residue names (default True)
-    @type  nonstandard: bool
-    @param unknown: letter to use for unknown residues [default: '?']
-    @type unknown: str
+    :param seq: amino acid sequence in 3-letter code
+    :type  seq: [str]
+    :param xtable: dictionary with additional str:single_char mapping
+    :type  xtable: dict
+    :param nonstandard: support non-standard residue names (default True)
+    :type  nonstandard: bool
+    :param unknown: letter to use for unknown residues [default: '?']
+    :type unknown: str
     
-    @return: list with 1-letter code; C{ ['A','C','L','A'...]}
-    @rtype: [str]
+    :return: list with 1-letter code; C{ ['A','C','L','A'...]}
+    :rtype: [str]
     """
     result = []             # will hold 1-letter list
 
@@ -544,11 +544,11 @@ def single2longAA( seq ):
     """
     Convert string of 1-letter AA code into list of 3-letter AA codes.
     
-    @param seq: amino acid sequence in 1-letter code
-    @type  seq: str
+    :param seq: amino acid sequence in 1-letter code
+    :type  seq: str
     
-    @return: list with the amino acids in 3-letter code
-    @rtype: [str]
+    :return: list with the amino acids in 3-letter code
+    :rtype: [str]
     """
     ## invert AA dict
     invTab = {}
@@ -571,15 +571,15 @@ def single2longAA( seq ):
 def cmpAtoms( a1, a2 ):
     """
     Comparison function for bringing atoms into standard order
-    within residues as defined by L{atomDic}.
+    within residues as defined by :class:`atomDic`.
     
-    @param a1: atom dictionary
-    @type  a1: CrossView or equivalent dictionary
-    @param a2: atom dictionary
-    @type  a2: CrossView or equivalent dictionary
+    :param a1: atom dictionary
+    :type  a1: CrossView or equivalent dictionary
+    :param a2: atom dictionary
+    :type  a2: CrossView or equivalent dictionary
     
-    @return: int or list of matching positions
-    @rtype: [-1|0|1]   
+    :return: int or list of matching positions
+    :rtype: [-1|0|1]   
     """
     ## get standard order within residues
     target = atomDic[ a1['residue_name'] ]
@@ -597,13 +597,13 @@ def cmpAtoms( a1, a2 ):
 
 def sortAtomsOfModel( model ):
     """
-    Sort atoms within residues into the standard order defined in L{atomDic}.
+    Sort atoms within residues into the standard order defined in :class:`atomDic`.
     
-    @param model: model to sort
-    @type  model: PDBModel
+    :param model: model to sort
+    :type  model: PDBModel
 
-    @return: model with sorted atoms
-    @rtype: PDBModel
+    :return: model with sorted atoms
+    :rtype: PDBModel
     """
     ## make a copy
     model = model.take( model.atomRange() )

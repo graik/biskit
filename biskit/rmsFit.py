@@ -43,13 +43,13 @@ def findTransformation(x, y):
     Match two arrays by rotation and translation. Returns the
     rotation matrix and the translation vector.
 
-    @param x: first set of coordinates
-    @type  x: array('f')
-    @param y: second set of coordinates
-    @type  y: array('f')
+    :param x: first set of coordinates
+    :type  x: array('f')
+    :param y: second set of coordinates
+    :type  y: array('f')
 
-    @return: rotation matrix (3x3) and translation vector (1x3)
-    @rtype:  array, array
+    :return: rotation matrix (3x3) and translation vector (1x3)
+    :rtype:  array, array
     """
     ## center configurations
     x_av = N0.average(x)
@@ -75,19 +75,19 @@ def match(x, y, n_iterations=1, z=2, eps_rmsd=0.5, eps_stdv=0.05):
     Matches two arrays onto each other, while iteratively removing outliers.
     Superimposed array y would be C{ N0.dot(y, N0.transpose(r)) + t }.
 
-    @param n_iterations: number of calculations::
+    :param n_iterations: number of calculations::
                            1 .. no iteration 
                            0 .. until convergence
-    @type  n_iterations: 1|0
-    @param z: number of standard deviations for outlier definition (default: 2)
-    @type  z: float
-    @param eps_rmsd: tolerance in rmsd (default: 0.5)
-    @type  eps_rmsd: float
-    @param eps_stdv: tolerance in standard deviations (default: 0.05)
-    @type  eps_stdv: float
+    :type  n_iterations: 1|0
+    :param z: number of standard deviations for outlier definition (default: 2)
+    :type  z: float
+    :param eps_rmsd: tolerance in rmsd (default: 0.5)
+    :type  eps_rmsd: float
+    :param eps_stdv: tolerance in standard deviations (default: 0.05)
+    :type  eps_stdv: float
 
-    @return: (r,t), [ [percent_considered, rmsd_for_it, outliers] ]
-    @rtype: (array, array), [float, float, int]
+    :return: (r,t), [ [percent_considered, rmsd_for_it, outliers] ]
+    :rtype: (array, array), [float, float, int]
     """
     iter_trace = []
 
@@ -146,13 +146,13 @@ def rowDistances( x, y ):
     Calculate the distances between the items of two arrays (of same shape)
     after least-squares superpositioning.
 
-    @param x: first set of coordinates
-    @type  x: array('f')
-    @param y: second set of coordinates
-    @type  y: array('f')  
+    :param x: first set of coordinates
+    :type  x: array('f')
+    :param y: second set of coordinates
+    :type  y: array('f')  
 
-    @return: array( len(x), 'f' ), distance between x[i] and y[i] for all i
-    @rtype: array
+    :return: array( len(x), 'f' ), distance between x[i] and y[i] for all i
+    :rtype: array
     """
     ## find transformation for best match
     r, t = findTransformation(x, y)

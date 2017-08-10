@@ -60,17 +60,17 @@ class ColorSpectrum:
         """
         Create a new palette of given type and value range.
         
-        @param palette: palette type (grey, sausage, plasma, plasma2)
+        :param palette: palette type (grey, sausage, plasma, plasma2)
                         (default: plasma2)
-        @type  palette: str
-        @param vmin: smallest value covered by the color range (default: 0.)
-        @type  vmin: float
-        @param vmax: largest value covered by the color range (default: 1.)
-        @type  vmax: float
-        @param default: default color for values below the palette range
-        @type  default: int (color code, default=0xffff)
+        :type  palette: str
+        :param vmin: smallest value covered by the color range (default: 0.)
+        :type  vmin: float
+        :param vmax: largest value covered by the color range (default: 1.)
+        :type  vmax: float
+        :param default: default color for values below the palette range
+        :type  default: int (color code, default=0xffff)
 
-        @raise ColorError: if palette unknown
+        :raise ColorError: if palette unknown
         """
 
         try:
@@ -92,15 +92,15 @@ class ColorSpectrum:
         """
         Create color.
         
-        @param red: rgb color, 0-255
-        @type  red: int
-        @param green: rgb color, 0-255
-        @type  green: int
-        @param blue: rgb color, 0-255
-        @type  blue: int
+        :param red: rgb color, 0-255
+        :type  red: int
+        :param green: rgb color, 0-255
+        :type  green: int
+        :param blue: rgb color, 0-255
+        :type  blue: int
 
-        @return: color
-        @rtype: int
+        :return: color
+        :rtype: int
         """
         return ((red << 16) + (green << 8) + blue)        
 
@@ -109,11 +109,11 @@ class ColorSpectrum:
         """
         Normalize values
 
-        @param value: normalization value
-        @type  value: float
+        :param value: normalization value
+        :type  value: float
 
-        @return: normalized color
-        @rtype: int 
+        :return: normalized color
+        :rtype: int 
         """
         if self.vmax == self.vmin:
             return self.col_max
@@ -124,10 +124,10 @@ class ColorSpectrum:
         """
         Translate a single value into a color.
         
-        @param value: value to be translated into color
-        @type  value: float
-        @return: color code for value
-        @rtype: int
+        :param value: value to be translated into color
+        :type  value: float
+        :return: color code for value
+        :rtype: int
         """
         if value < self.vmin:
             return self.default_color
@@ -141,14 +141,14 @@ class ColorSpectrum:
         """
         Translate a list of values into a list of colors.
         
-        @param values: values to be translated into colors
-        @type  values: [float]
-        @param resetLimits: re-define color range on max and min of values
+        :param values: values to be translated into colors
+        :type  values: [float]
+        :param resetLimits: re-define color range on max and min of values
                             (default: 1)
-        @type  resetLimits: 1|0
+        :type  resetLimits: 1|0
         
-        @return: color codes
-        @rtype: [int]
+        :return: color codes
+        :rtype: [int]
         """
         if resetLimits:
             self.vmax = max( values ) * 1.
@@ -159,14 +159,14 @@ class ColorSpectrum:
 
     def color_array( self, a, resetLimits=1 ):
         """
-        @param a: array of float
-        @type  a: array of float
-        @param resetLimits: re-define color range on max and min of values
+        :param a: array of float
+        :type  a: array of float
+        :param resetLimits: re-define color range on max and min of values
                             (default: 1)
-        @type  resetLimits: 1|0
+        :type  resetLimits: 1|0
         
-        @return: matrix of color codes with same dimensions as a
-        @rtype: array of float
+        :return: matrix of color codes with same dimensions as a
+        :rtype: array of float
         """
         s = N0.shape( a )
         v = N0.ravel( a )
@@ -180,8 +180,8 @@ class ColorSpectrum:
 
     def legend( self ):
         """
-        @return: color mapping for each color
-        @rtype: [ (float,int) ], value
+        :return: color mapping for each color
+        :rtype: [ (float,int) ], value
         """
         r = []
         step = (self.vmax - self.vmin) // self.col_max
@@ -280,12 +280,12 @@ class ColorSpectrum:
 def colorRange( nColors, palette='plasma2' ):
     """Quick access to a range of colors.
 
-    @param nColors: number of colors needed
-    @type  nColors: int
-    @param palette: type of color spectrum
-    @type  palette: str
-    @return: a range of color values
-    @rtype: [ int ]
+    :param nColors: number of colors needed
+    :type  nColors: int
+    :param palette: type of color spectrum
+    :type  palette: str
+    :return: a range of color values
+    :rtype: [ int ]
     """
     c = ColorSpectrum( palette=palette, vmin=0, vmax=1. )
 

@@ -47,11 +47,11 @@ def traj2ensemble( traj, members=10 ):
     alphabetically by their frame name. This must lead to a sorting first by
     time step and then by member.
 
-    @param members: number of member trajectories in EnsembleTraj (default: 10)
-    @type  members: int
+    :param members: number of member trajectories in EnsembleTraj (default: 10)
+    :type  members: int
     
-    @return: converted trajectory
-    @rtype: EnsembleTraj
+    :return: converted trajectory
+    :rtype: EnsembleTraj
     """
     result = EnsembleTraj( n_members=members )
 
@@ -82,16 +82,16 @@ class EnsembleTraj( Trajectory ):
         frame_2_2 sorts before frame_10_10, i.e. we attempt to interprete
         numbers contained in the frame name strings.
 
-        @param pdbs: file names of all conformations OR PDBModels
-        @type  pdbs: [ str ] OR [ PDBModel ]
-        @param refpdb: file name of reference pdb
-        @type  refpdb: str
-        @param n_members: number or tjajectories in the ensemble
-        @type  n_members: int
-        @param kw: optional key=value pairs, see L{Biskit.Trajectory}.
-        @type  kw: key=value
+        :param pdbs: file names of all conformations OR PDBModels
+        :type  pdbs: [ str ] OR [ PDBModel ]
+        :param refpdb: file name of reference pdb
+        :type  refpdb: str
+        :param n_members: number or tjajectories in the ensemble
+        :type  n_members: int
+        :param kw: optional key=value pairs, see :class:`Biskit.Trajectory`.
+        :type  kw: key=value
 
-        @raise EnsembleTrajError: if member trajectories don't have
+        :raise EnsembleTrajError: if member trajectories don't have
                                   equal number of frame
         """
 
@@ -111,8 +111,8 @@ class EnsembleTraj( Trajectory ):
         """
         Version of class.
         
-        @return: version
-        @rtype: str
+        :return: version
+        :rtype: str
         """
         return Trajectory.version(self) + '; EnsembleTraj $Revision$'
 
@@ -122,10 +122,10 @@ class EnsembleTraj( Trajectory ):
         Replace content of this trajectory by content of given traj.
         No deep-copying, only references are taken.
 
-        @param traj: trajectory
-        @type  traj: trajectory
+        :param traj: trajectory
+        :type  traj: trajectory
         
-        @note: Overrides Trajectory method.
+        Note: Overrides Trajectory method.
         """
         Trajectory.replaceContent( self, traj )
         self.n_members = traj.n_members
@@ -135,12 +135,12 @@ class EnsembleTraj( Trajectory ):
         """
         Keep only each step'th frame from trajectory with 10 ensemble members.
         
-        @param step: 1..keep all frames, 2..skip first and every second, ..
+        :param step: 1..keep all frames, 2..skip first and every second, ..
                      (default: 1)
-        @type  step: int
+        :type  step: int
         
-        @return: reduced EnsembleTraj
-        @rtype: EnsembleTraj
+        :return: reduced EnsembleTraj
+        :rtype: EnsembleTraj
         """
         T.ensure( step, int, forbidden=[0] )
 
@@ -162,13 +162,13 @@ class EnsembleTraj( Trajectory ):
         
         @todo: cast member Trajectories back to normal Trajectory object
         
-        @param step: leave out each step-1 frame (for each ensemble member)
+        :param step: leave out each step-1 frame (for each ensemble member)
                      (default: 1)
-        @type  step: int
+        :type  step: int
 
-        @return: [EnsembleTraj]
+        :return: [EnsembleTraj]
                  i.e. [ traj_member1, traj_member2, .. traj_member10 ]
-        @rtype: [trajectory]
+        :rtype: [trajectory]
         """
         ## set of 10 trajectories, one for each ensemble member
         tm = [self.takeFrames( range(i, self.lenFrames(),self.n_members*step ))
@@ -182,13 +182,13 @@ class EnsembleTraj( Trajectory ):
         List of frame indices for this member::
           memberIndices( int_member, [int_step] )
 
-        @param member: member trajectory
-        @type  member: int
-        @param step: return only every i'th frame (default: 1)
-        @type  step: int
+        :param member: member trajectory
+        :type  member: int
+        :param step: return only every i'th frame (default: 1)
+        :type  step: int
 
-        @return: indices for members
-        @rtype: [int]
+        :return: indices for members
+        :rtype: [int]
         """
         r = list(range( member, self.lenFrames(), self.n_members))
         if step != 1:
@@ -200,11 +200,11 @@ class EnsembleTraj( Trajectory ):
         """
         Get mask for all frames belonging to a given ensemble member.
         
-        @param member: member index starting with 0
-        @type  member: int
+        :param member: member index starting with 0
+        :type  member: int
         
-        @return: member mask, N0.array( N_frames x 1) of 1||0
-        @rtype: [1|0]
+        :return: member mask, N0.array( N_frames x 1) of 1||0
+        :rtype: [1|0]
         """
         result = N0.zeros( self.lenFrames() )
 
@@ -222,11 +222,11 @@ class EnsembleTraj( Trajectory ):
         """
         Return a copy of the trajectory containing only the specified frames.
         
-        @param indices: positions to take
-        @type  indices: [int]
+        :param indices: positions to take
+        :type  indices: [int]
         
-        @return: copy of this Trajectory (fewer frames, semi-deep copy of ref)
-        @rtype: Trajectory
+        :return: copy of this Trajectory (fewer frames, semi-deep copy of ref)
+        :rtype: Trajectory
         """
         r = Trajectory.takeFrames( self, indices )
 
@@ -239,11 +239,11 @@ class EnsembleTraj( Trajectory ):
         Take all frames belonging to member::
           takeMember( int ) -> EnsembleTraj, single member trajectory
 
-        @param i: member trajectory
-        @type  i: int
+        :param i: member trajectory
+        :type  i: int
 
-        @return: trajectory containing member i
-        @rtype: Trajectory        
+        :return: trajectory containing member i
+        :rtype: Trajectory        
         """
         r = self.takeFrames( self.memberIndices( i ) )
         r.n_members = 1
@@ -255,11 +255,11 @@ class EnsembleTraj( Trajectory ):
         Take all frames belonging to the members in mIndices::
           takeMembers( mIndices ) -> EnsembleTraj with frames of given members
         
-        @param mIndices: list of member indices
-        @type  mIndices: [int] OR array('i')
+        :param mIndices: list of member indices
+        :type  mIndices: [int] OR array('i')
         
-        @return: EnsembleTraj with specified members
-        @rtype: EnsembleTraj
+        :return: EnsembleTraj with specified members
+        :rtype: EnsembleTraj
         
         @todo: return self.__class__ instead of EnsembleTraj
         """
@@ -292,11 +292,11 @@ class EnsembleTraj( Trajectory ):
         Concatenate this with other trajectories in a zig zac manner,
         resulting in an ensembleTraj with additional members.
         The ref model of the new Trajectory is a 'semi-deep' copy of this
-        trajectorie's model.(see L{PDBModel.take()} )::
+        trajectorie's model.(see :class:`PDBModel.take()` )::
           concat( traj [, traj2, traj3, ..] ) -> Trajectory
         
-        @param traj: with identical atoms as this one
-        @type  traj: one or more EnsembleTrajectory
+        :param traj: with identical atoms as this one
+        :type  traj: one or more EnsembleTrajectory
 
         @todo: fix so that pc, and profiles are not lost
         """
@@ -363,11 +363,11 @@ class EnsembleTraj( Trajectory ):
         """
         Apply mask to member trajectories.
         
-        @param mask: positions in trajectory list to keep or remove
-        @type  mask: [1|0]
+        :param mask: positions in trajectory list to keep or remove
+        :type  mask: [1|0]
         
-        @return: compressed EnsembleTraj 
-        @rtype: EnsembleTraj
+        :return: compressed EnsembleTraj 
+        :rtype: EnsembleTraj
         """
         return self.takeMembers( N0.nonzero( mask ) )
 
@@ -376,8 +376,8 @@ class EnsembleTraj( Trajectory ):
         """
         in-place version of takeMembers. keepMembers( indices ) -> None
         
-        @param indices: member numbers
-        @type  indices: [int]        
+        :param indices: member numbers
+        :type  indices: [int]        
         """
         r = self.takeMembers( indices )
         self.replaceContent( r )
@@ -387,8 +387,8 @@ class EnsembleTraj( Trajectory ):
         """
         Remove given member trajectories from this ensemble.
         
-        @param indices: trajectory (member) numbers
-        @type  indices: [int]
+        :param indices: trajectory (member) numbers
+        :type  indices: [int]
         """
         i = list(range( self.n_members))
         i.remove( N0.array(indices) )
@@ -417,17 +417,17 @@ class EnsembleTraj( Trajectory ):
         member). Default is ascending order (first frame is first time step
         of member 0).
         
-        @param inverse_time: descending time order (last frame first)
+        :param inverse_time: descending time order (last frame first)
                              (default: 0)
-        @type  inverse_time: 1|0
-        @param inverse_member: descending member order (last member first)
+        :type  inverse_time: 1|0
+        :param inverse_member: descending member order (last member first)
                                (default: 0)
-        @type  inverse_member: 1|0
-        @param step: take only every step frame (default: 1)
-        @type  step: int
+        :type  inverse_member: 1|0
+        :param step: take only every step frame (default: 1)
+        :type  step: int
         
-        @return: length is N_frames (only if step is 1 )
-        @rtype: [int]
+        :return: length is N_frames (only if step is 1 )
+        :rtype: [int]
         """
         r = []
 
@@ -452,13 +452,13 @@ class EnsembleTraj( Trajectory ):
           plotMemberProfiles( name1, [name2, .. ],[ arg1=x,..])
             -> biggles.Table
 
-        @param name: profile name(s)
-        @type  name: str
-        @param arg: pairs for biggles.Curve() and/or xlabel=..,ylabel=..
-        @type  arg: key=value
+        :param name: profile name(s)
+        :type  name: str
+        :param arg: pairs for biggles.Curve() and/or xlabel=..,ylabel=..
+        :type  arg: key=value
 
-        @return: biggles plot object
-        @rtype: biggles.FramedArray()   
+        :return: biggles plot object
+        :rtype: biggles.FramedArray()   
         """
         if not biggles:
             raise ImportError('biggles module could not be imported.')
@@ -512,23 +512,23 @@ class EnsembleTraj( Trajectory ):
         RMSD-fit each member trajectory seperately onto one of its frames
         or its average structure.
     
-        @param refIndex: index of reference frame within member traj.
+        :param refIndex: index of reference frame within member traj.
                          If None -> fit to average coordinates
                          (if refModel is None)
-        @type  refIndex: int OR None
-        @param refModel: fit to this structure (default: None)
-        @type  refModel: PDBModel
-        @param mask: atoms to consider (default: None, all heavy)
-        @type  mask: [1|0] OR None
-        @param n_it: number of fit iterations, kicking out outliers
+        :type  refIndex: int OR None
+        :param refModel: fit to this structure (default: None)
+        :type  refModel: PDBModel
+        :param mask: atoms to consider (default: None, all heavy)
+        :type  mask: [1|0] OR None
+        :param n_it: number of fit iterations, kicking out outliers
                      on the way (default: 1)::
                        1 -> classic single fit,
                        0 -> until convergence
-        @type  n_it: 1|0
-        @param prof: save rms per frame in profile of this name (default: rms)
-        @type  prof: str
-        @param profInfos: description key-value pairs for profile
-        @type  profInfos: key=value
+        :type  n_it: 1|0
+        :param prof: save rms per frame in profile of this name (default: rms)
+        :type  prof: str
+        :param profInfos: description key-value pairs for profile
+        :type  profInfos: key=value
         """
         ml = self.memberList()
 
@@ -555,10 +555,10 @@ class EnsembleTraj( Trajectory ):
         RMSD-fit the average of each member trajectory (i.e. the trajectory
         en block) onto the overall average (default) or a given structure.
         
-        @param ref: reference structure (default: average structure)
-        @type  ref: PDBModel
-        @param mask: atoms to consider (default: None, all heavy)
-        @type  mask: [1|0] OR None
+        :param ref: reference structure (default: average structure)
+        :type  ref: PDBModel
+        :param mask: atoms to consider (default: None, all heavy)
+        :type  mask: [1|0] OR None
         """
         ref = ref or self.avgModel()
 
@@ -586,20 +586,20 @@ class EnsembleTraj( Trajectory ):
         which the slope of this rms profile is z standard deviations below the
         mean of all members.
         
-        @param z: z-value threshold
-        @type  z: float
-        @param mask: atom mask used (default: ref.maskCA())
-        @type  mask: [int]
-        @param prof: name of pre-calculated profile to use
+        :param z: z-value threshold
+        :type  z: float
+        :param mask: atom mask used (default: ref.maskCA())
+        :type  mask: [int]
+        :param prof: name of pre-calculated profile to use
                      (default: 'rmsCA_last')
-        @type  prof: str
-        @param last: skip |last| last frames from linear regression
-        @type  last: int
-        @param step: frame offset
-        @type  step: int
+        :type  prof: str
+        :param last: skip |last| last frames from linear regression
+        :type  last: int
+        :param step: frame offset
+        :type  step: int
         
-        @return: member mask of outlier trajectories
-        @rtype: [0|1]
+        :return: member mask of outlier trajectories
+        :rtype: [0|1]
         """
         if mask is None: mask = self.ref.maskCA()
 

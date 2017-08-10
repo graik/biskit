@@ -77,9 +77,9 @@ class Setting:
     def typeCast( self, vtype ):
         """
         Recast value to a new type. Value None remains unchanged.
-        @param vtype: new type for value
-        @type  vtype: type
-        @raise InvalidValue: if current value is incompatible with vtype
+        :param vtype: new type for value
+        :type  vtype: type
+        :raise InvalidValue: if current value is incompatible with vtype
         """
         try:
             if not self.value is None:
@@ -118,8 +118,8 @@ class Setting:
 
     def formatted( self ):
         """
-        @return: parameter formatted for setting file
-        @rtype: str
+        :return: parameter formatted for setting file
+        :rtype: str
         """
         comment = ''
         error = ''
@@ -157,13 +157,13 @@ class SettingsParser(object):
 
     def __validPath( self, v ):
         """
-        @param v: potential path name
-        @type  v: str
+        :param v: potential path name
+        :type  v: str
 
-        @return: validated absolute Path
-        @rtype : str
+        :return: validated absolute Path
+        :rtype : str
 
-        @raise InvalidPath: if path is not found
+        :raise InvalidPath: if path is not found
         """
         try:
             v = T.absfile( v )
@@ -180,13 +180,13 @@ class SettingsParser(object):
 
     def __validBinary( self, v ):
         """
-        @param v: potential binary path
-        @type  v: str
+        :param v: potential binary path
+        :type  v: str
 
-        @return: validated absolute path to existing binary
-        @rtype : str
+        :return: validated absolute path to existing binary
+        :rtype : str
 
-        @raise InvalidBinary: if path is not found
+        :raise InvalidBinary: if path is not found
         """
         try:
             if not v:
@@ -202,15 +202,15 @@ class SettingsParser(object):
         """
         Extract type from option name.
 
-        @param option: name of parameter
-        @type  option: str
-        @param default: default type [str]
-        @type  default: type
+        :param option: name of parameter
+        :type  option: str
+        :param default: default type [str]
+        :type  default: type
 
-        @return: type, stripped option name (e.g. 'int_var1' -> int, 'var1')
-        @rtype: type, str
+        :return: type, stripped option name (e.g. 'int_var1' -> int, 'var1')
+        :rtype: type, str
 
-        @raise TypeError: if type cannot be interpreted
+        :raise TypeError: if type cannot be interpreted
         """
         t = default
         o = option
@@ -238,19 +238,19 @@ class SettingsParser(object):
 
     def __process( self, option, value, section=Setting.NORMAL ):
         """
-        @param option: option name
-        @type  option: str
+        :param option: option name
+        :type  option: str
 
-        @param value: option value
-        @type  value: str
+        :param value: option value
+        :type  value: str
 
-        @param section: which section are we working on
-        @type  section: str
+        :param section: which section are we working on
+        :type  section: str
 
-        @return: new setting
-        @rtype: Setting
+        :return: new setting
+        :rtype: Setting
 
-        @raise SettingsError: InvalidType or Value
+        :raise SettingsError: InvalidType or Value
         """
         r = Setting( section=section )
 
@@ -279,14 +279,14 @@ class SettingsParser(object):
 
     def __processSection( self, items, section=Setting.NORMAL, verbose=False ):
         """
-        @param items: section comming from ConfigParser
-        @type  items: [ ( str, str ) ]
+        :param items: section comming from ConfigParser
+        :type  items: [ ( str, str ) ]
 
-        @param section: which config section are we working on?
-        @type  section: str
+        :param section: which config section are we working on?
+        :type  section: str
 
-        @return: validated path values
-        @rtype : dict, {str: Setting}
+        :return: validated path values
+        :rtype : dict, {str: Setting}
         """
         r = {}
 
@@ -304,11 +304,11 @@ class SettingsParser(object):
 
     def parse( self ):
         """
-        @return: dict of type-cast params contained in fini
-        @rtype: dict, {str: Setting}
+        :return: dict of type-cast params contained in fini
+        :rtype: dict, {str: Setting}
 
-        @raise IOError: if the settings file does not exist
-        @raise SettingsError: (InvalidFile, InvalidValue, InvalidType)
+        :raise IOError: if the settings file does not exist
+        :raise SettingsError: (InvalidFile, InvalidValue, InvalidType)
         """
         try:
             ## read from file

@@ -18,9 +18,8 @@
 ##
 """
 Extract biologically relevant assembly.
-@author: Alexander Gryzlov
-@see L{Biskit.PDBParseFile}
-@see L{Biskit.PDBModel}
+.. codeauthor:: Alexander Gryzlov
+.. seealso:: `biskit.PDBParseFile`, `biskit.PDBModel`
 """
 import numpy as N
 
@@ -37,8 +36,8 @@ class BioUnit:
     
     def __init__( self, model, biomt_dict = None ):
         """
-        @param model: parent PDBModel
-        @type  model: Biskit.PDBModel
+        :param model: parent PDBModel
+        :type  model: Biskit.PDBModel
         """
         self.model = model
         if biomt_dict is not None:
@@ -59,9 +58,9 @@ class BioUnit:
         
     def makeMultimer (self, biomol_id=None):
         """
-        @param biomol_id: ID of the biomolecule
-        @type  biomol_id: int
-        @return PDBModel, with the bio-molecule as specified in BIOMT
+        :param biomol_id: ID of the biomolecule
+        :type  biomol_id: int
+        :return PDBModel, with the bio-molecule as specified in BIOMT
         """
         try:
             biomol_id = biomol_id or list(self.biomol.keys())[0]
@@ -81,7 +80,7 @@ class BioUnit:
 
     def keys(self):
         """
-        @return string list, the ids for multimer rt matrices
+        :return string list, the ids for multimer rt matrices
         """
         return list(self.biomol.keys())
 
@@ -96,8 +95,8 @@ class BioUnit:
     def take(self, i):
         """
         Get a new BioUnit instance with only those biomolecule records for which there are still atoms
-        @param i: list of atom indices
-        @type  i: list
+        :param i: list of atom indices
+        :type  i: list
         """
         r = self.__class__(self.model)
         residue_i = self.model.atom2resIndices(i)
@@ -108,8 +107,8 @@ class BioUnit:
     def append(self, bu):
         """
         Glue two BioUnits together -> new BioUnit
-        @param bu: BioUnit to append
-        @type  bu: Biskit.BioUnit
+        :param bu: BioUnit to append
+        :type  bu: Biskit.BioUnit
         """
         r = self.__class__(self.model)
         k = max(self.keys())+1

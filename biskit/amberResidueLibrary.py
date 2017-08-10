@@ -46,17 +46,17 @@ class AmberResidueLibrary( object ):
     (Biskit.reduce). 
 
     Atom names need to conform to Amber conventions -- 
-    this can be ensured with \L{PDBModel.xplor2amber()}.
+    this can be ensured with `PDBModel.xplor2amber()`.
  
     Use
     ===
     
     >>> model = PDBModel('mystructure.pdb')
     >>> residue = model.resModels()[0]
-    
+    >>>
     >>> lib = AmberResidueLibrary()
     >>> refres = lib[ residue ]
-
+    >>>
     >>> ## or alternatively:
     >>> refres = lib['all_amino03', 'ALA']
     
@@ -70,13 +70,13 @@ class AmberResidueLibrary( object ):
 
     def __init__(self, topofiles=F_RESTYPES, log=None, verbose=False):
         """
-        @param topofiles: list of topology file names 
-                          (default all_*in in Biskit/data/amber/residues)
-        @type  topofiles: [ str ]
-        @param log: optional LogFile instance (default STDOUT)
-        @type  log: biskit.LogFile
-        @param verbose: add messages to log (default False)
-        @type  verbose: bool
+        :param topofiles: list of topology file names \
+                          (default `all_*in` in `Biskit/data/amber/residues`)
+        :type  topofiles: [ str ]
+        :param log: optional LogFile instance (default STDOUT)
+        :type  log: biskit.LogFile
+        :param verbose: add messages to log (default False)
+        :type  verbose: bool
         """       
         self.aindex = {}  ## residue types indexed by atom key
         self.topoindex = {} ## residue types indexed by topo and resname
@@ -92,20 +92,20 @@ class AmberResidueLibrary( object ):
         """
         Include an additional topology (off) library in the collection.
         
-        @param topofile: file name of topology, either full path or
+        :param topofile: file name of topology, either full path or
                          simple file name which will then be looked for in 
                          Biskit/data/amber/residues.
-        @type  topofile: str
+        :type  topofile: str
         
-        @param override: override topologies or residue entries with same name
+        :param override: override topologies or residue entries with same name
                          (default False)
-        @type  override: False
+        :type  override: False
         
-        @return: dictionary of all residue types parsed from topofile indexed
+        :return: dictionary of all residue types parsed from topofile indexed
                  by three-letter residue name
-        @rtype : {str : AmberResidueType}
+        :rtype : {str : AmberResidueType}
         
-        @raise: AmberResidueLibraryError if override==False and a topology or
+        :raise: AmberResidueLibraryError if override==False and a topology or
                 a residue with identical atom content have already been 
                 registered.
         """
@@ -139,10 +139,11 @@ class AmberResidueLibrary( object ):
     def atomkey( self, residue ):
         """
         Create a string key encoding the atom content of residue.
-        @param residue: model or AmberResidue
-        @type  residue: PDBModel or AmberResidue
-        @return: key formed from alphabetically sorted atom content of residue
-        @rtype: str
+        
+        :param residue: model or AmberResidue
+        :type  residue: PDBModel or AmberResidue
+        :return: key formed from alphabetically sorted atom content of residue
+        :rtype: str
         """
         return residue.atomkey(compress=False)
   
@@ -150,11 +151,12 @@ class AmberResidueLibrary( object ):
     def byAtoms(self, akey, default=None ):
         """
         Identify a matching reference residue by atom content.
-        @param akey: atomkey or PDBModel with a single residue
-        @type  akey: str or PDBModel
+        
+        :param akey: atomkey or PDBModel with a single residue
+        :type  akey: str or PDBModel
 
-        @return: matching reference residue OR None
-        @rtype: AmberResidueType
+        :return: matching reference residue OR None
+        :rtype: AmberResidueType
         """
         if isinstance( akey, PDBModel ):
             akey = akey.atomkey(compress=False)
@@ -171,15 +173,15 @@ class AmberResidueLibrary( object ):
         
         Note: residue 3 letter names are all UPPERCASE.
         
-        @param rescode: three-letter name of residue to look up
-        @type  rescode: str
-        @param topo: optional (file) name of topology (@see L{topokeys()} )
-        @type  topo: str
+        :param rescode: three-letter name of residue to look up
+        :type  rescode: str
+        :param topo: optional (file) name of topology (see also: `topokeys()` )
+        :type  topo: str
 
-        @return: matching reference residue
-        @rtype: AmberResidueType
+        :return: matching reference residue
+        :rtype: AmberResidueType
         
-        @raise: KeyError if the topology or residue name are not found
+        :raise: KeyError if the topology or residue name are not found
         """
         if topo:
             fbase = T.stripFilename( topo )
@@ -197,8 +199,10 @@ class AmberResidueLibrary( object ):
     
     def __getitem__( self, key ):
         """
-        reslib[ PDBModel ] -> ResidueType for matching residue
-        reslib[ str(atomkey) ] -> ResidueType with same atom key
+        Examples: 
+        
+            - `reslib[ PDBModel ]` -> `ResidueType` for matching residue
+            - `reslib[ str(atomkey) ]` -> `ResidueType` with same atom key
         """
         if type(key) is str:
             return self.aindex[key]

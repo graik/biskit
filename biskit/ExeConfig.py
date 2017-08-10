@@ -99,7 +99,7 @@ class ExeConfig( object ):
       - pipes ...    paste input via STDIN, collect output at STDOUT
 
     Missing options are reset to their default value; See
-    L{ ExeConfig.reset() }.  All entries in section BINARY are put into the
+    :class:` ExeConfig.reset() `.  All entries in section BINARY are put into the
     name space of the ExeConfig object. That means an ExeConfig object x
     created from the above file can be used as follows:
 
@@ -118,14 +118,14 @@ class ExeConfig( object ):
 
     def __init__( self, name, strict=1 ):
         """
-        @param name: unique name of the program
-        @type  name: str
-        @param strict: insist on a config file exe_name.dat
+        :param name: unique name of the program
+        :type  name: str
+        :param strict: insist on a config file exe_name.dat
                        and do not tolerate missing environment variables
                        (default: 1)
-        @type  strict: 0|1
+        :type  strict: 0|1
         
-        @raise ExeConfigError: if strict==1 and config file incomplete/missing
+        :raise ExeConfigError: if strict==1 and config file incomplete/missing
         """
         self.name = name    #: identifier
         #: path to configuration file
@@ -174,7 +174,7 @@ class ExeConfig( object ):
         Load settings from associated configuration file (if available).
         Is automatically called at creation.
         
-        @raise ExeConfigError: if section [BINARY] was not found in the file
+        :raise ExeConfigError: if section [BINARY] was not found in the file
         """
         ## get parameters from config file if available; type-cast values 
         try:
@@ -205,7 +205,7 @@ class ExeConfig( object ):
         """
         Validate the path to the binary.
         
-        @raise ExeConfigError: if environment is not fit for running
+        :raise ExeConfigError: if environment is not fit for running
                                the program
         """
         try:
@@ -229,11 +229,11 @@ class ExeConfig( object ):
         """
         Get needed environment variables.
         
-        @return: dictionary with environment for subprocess.Popen;
+        :return: dictionary with environment for subprocess.Popen;
                  empty, if no environment was specified
-        @rtype: {str:str} OR None
+        :rtype: {str:str} OR None
 
-        @raise ExeConfigError: if env was not yet checked by update_environment
+        :raise ExeConfigError: if env was not yet checked by update_environment
         """
         if not self.env_checked:
             raise ExeConfigError('Environment not yet checked, validate()!')
@@ -245,8 +245,8 @@ class ExeConfig( object ):
         """
         Check for missing environment settings.
         
-        @return: names of required but missing environment variables
-        @rtype: [str]
+        :return: names of required but missing environment variables
+        :rtype: [str]
         """
         missing = []
 

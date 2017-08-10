@@ -40,7 +40,7 @@ created automatically during the startup of Biskit (i.e. for any
 import). The auto-generated file only contains parameters for which
 the default values don't seem to work (invalid paths or binaries).
 
-See L{biskit.SettingsManager}
+See :class:`biskit.SettingsManager`
 
 Summary for Biskit users
 ------------------------

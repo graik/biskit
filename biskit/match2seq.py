@@ -44,15 +44,15 @@ def getOpCodes( seq_1, seq_2 ):
     Compares two sequences and returns a list with the information
     needed to convert the first one sequence into the second.
 
-    @param seq_1: list of single letters
-    @type seq_1: [ str ]
-    @param seq_2: list of single letters
-    @type seq_2: [ str ]
+    :param seq_1: list of single letters
+    :type seq_1: [ str ]
+    :param seq_2: list of single letters
+    :type seq_2: [ str ]
     
-    @return: Optimization code from difflib::
+    :return: Optimization code from difflib::
              [('delete', 0, 1, 0, 0), ('equal', 1, 4, 0, 3),
               ('insert', 4, 4, 3, 4), ('equal', 4, 180, 4, 180)]
-    @rtype: [tuples]
+    :rtype: [tuples]
     """
     seqDiff = SequenceMatcher( None, ''.join(seq_1) , ''.join(seq_2) )
     seqDiff = seqDiff.get_opcodes()
@@ -66,15 +66,15 @@ def getSkipLists( seqDiff ):
     from sequence 1 (delete code) and sequence 2 (insert code).
     Returns deletion codes in the format (start_pos, length).
 
-    @param seqDiff: opcodes
-    @type  seqDiff: [tuples]
+    :param seqDiff: opcodes
+    :type  seqDiff: [tuples]
 
-    @return: Lists of tuples containing regions of the sequences that
+    :return: Lists of tuples containing regions of the sequences that
              should be deteted. Example::
                strucDel_1 = [(0, 1), (180, 4)]
                strucDel_2 = [(3, 1), (207, 4)]
              
-    @rtype: [tuple], [tuple]
+    :rtype: [tuple], [tuple]
     """
     strucDel_2 = []
     strucDel_1 = []
@@ -101,14 +101,14 @@ def getEqualLists( seqDiff ):
     Extract information about regions in the sequences that are equal.
     Returns deletion codes in the format (start_pos, length).
 
-    @param seqDiff: opcodes
-    @type  seqDiff: [tuples]
+    :param seqDiff: opcodes
+    :type  seqDiff: [tuples]
 
-    @return: Lists of tuples containing regions of the sequences that
+    :return: Lists of tuples containing regions of the sequences that
              are equal. Example::
                strucEqual_1 = [(0, 216)]
                strucEqual_2 = [(0, 216)]
-    @rtype: [tuple], [tuple] 
+    :rtype: [tuple], [tuple] 
     """
     strucEqual_1 = []
     strucEqual_2 = []
@@ -162,15 +162,15 @@ def expandRepeats( s, start, size ):
     should be deleted in the longer string. So the most conservative approach
     is to remove the whole ambiguous fragment.
     
-    @param s: input string
-    @type  s: str
-    @param start: start position of text fragment
-    @type  start: int
-    @param size: size of text fragment
-    @type  size: int
+    :param s: input string
+    :type  s: str
+    :param start: start position of text fragment
+    :type  start: int
+    :param size: size of text fragment
+    :type  size: int
     
-    @return: start and size of expanded fragment
-    @rtype: (int, int)
+    :return: start and size of expanded fragment
+    :rtype: (int, int)
     """
     end = start + size
     left = [  expandRepeatsLeft(s,start,end,l) for l in range(size+1) ]
@@ -188,17 +188,17 @@ def getEqual( seqAA, seqNr, equalList ):
     to the OpCodes. This should not be nessesary but might be usefull
     to skip 'replace' OpCode.
 
-    @param seqAA: list with the amino acid sequence in one letter code
-    @type  seqAA: [str]
-    @param seqNr: list with the amino acid postitons
-    @type  seqNr: [int]
-    @param equalList: Lists of tuples containing regions of the sequences that
+    :param seqAA: list with the amino acid sequence in one letter code
+    :type  seqAA: [str]
+    :param seqNr: list with the amino acid postitons
+    :type  seqNr: [int]
+    :param equalList: Lists of tuples containing regions of the sequences that
                       are equal
-    @type  equalList: [tuple], [tuple]
+    :type  equalList: [tuple], [tuple]
 
   
-    @return: lists of amino acids and positions where equal
-    @rtype: [str], [int]  
+    :return: lists of amino acids and positions where equal
+    :rtype: [str], [int]  
     """
     equalSeqAA = []
     equalSeqNr = []
@@ -267,14 +267,14 @@ def compareModels( model_1, model_2 ):
     returns two equal sequence lists (new_seqAA_1 and new_seqAA_2 should
     be identical) and the corresponding residue position lists.
 
-    @param model_1: model
-    @type  model_1: PDBModel
-    @param model_2: model
-    @type  model_2: PDBModel
+    :param model_1: model
+    :type  model_1: PDBModel
+    :param model_2: model
+    :type  model_2: PDBModel
 
-    @return: tuple of atom masks for model_1 and model_2::
+    :return: tuple of atom masks for model_1 and model_2::
               e.g. ( [0001011101111111], [1110000111110111] )
-    @rtype: ([1|0...],[1|0...])
+    :rtype: ([1|0...],[1|0...])
     """
     # get sequence AA and Nr strings
     seqAA_1 = model_1.sequence()

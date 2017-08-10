@@ -23,8 +23,7 @@
 """
 Parse a PDB file into a PDBModel.
 
-@see L{PDBModel}
-@see L{PDBParserFactory}
+.. seealso:: `biskit.PDBModel` `biskit.PDBParserFactory`
 """
 import biskit.core.scientificIO.PDB as IO
 import biskit.core.oldnumeric as N0
@@ -57,9 +56,9 @@ class PDBParseFile( PDBParser ):
         >>> if PDBParser.supports('myfile.pdb'):
         >>>     ...
 
-        @return: True if the given source is supported by this parser
+        :return: True if the given source is supported by this parser
                  implementation
-        @rtype: bool
+        :rtype: bool
         """
         return (type(source) is str or isinstance(source, B.LocalPath)) and \
             (source[-4:].upper() == '.PDB' or
@@ -75,8 +74,8 @@ class PDBParseFile( PDBParser ):
         >>> if PDBParser.description('myfile.pdb'):
         >>>     ...
 
-        @return: short free text description of the supported format
-        @rtype: str
+        :return: short free text description of the supported format
+        :rtype: str
         """
         return 'PDB file'
 
@@ -84,10 +83,10 @@ class PDBParseFile( PDBParser ):
     def idFromName( self, fname ):
         """
         Extract PDB code from file name.
-        @param fname: file name
-        @type  fname: str
-        @return: first 4 letters of filename if available
-        @rtype: str
+        :param fname: file name
+        :type  fname: str
+        :return: first 4 letters of filename if available
+        :rtype: str
         """
         name = T.stripFilename( fname )
 
@@ -106,18 +105,18 @@ class PDBParseFile( PDBParser ):
         The same holds for coordinates (xyzChanged=0).
         However, existing profiles or coordinates or fields remain untouched.
 
-        @param model: existing model
-        @type  model: PDBModel
-        @param source: source PDB file
-        @type  source: str
-        @param skipRes: list residue names that should not be parsed
-        @type  skipRes: [ str ]
-        @param updateMissing: ignored
-        @type  updateMissing: 1|0
-        @param headPatterns: [(putIntoKey, regex)] extract given REMARKS
-        @type  headPatterns: [(str, str)]
+        :param model: existing model
+        :type  model: PDBModel
+        :param source: source PDB file
+        :type  source: str
+        :param skipRes: list residue names that should not be parsed
+        :type  skipRes: [ str ]
+        :param updateMissing: ignored
+        :type  updateMissing: 1|0
+        :param headPatterns: [(putIntoKey, regex)] extract given REMARKS
+        :type  headPatterns: [(str, str)]
 
-        @raise PDBParserError - if something is wrong with the source file
+        :raise PDBParserError - if something is wrong with the source file
         """
 
         try:
@@ -174,8 +173,8 @@ class PDBParseFile( PDBParser ):
         The error message recieved is quite cryptic - this function
         is here to give a more comprehensible message.
         
-        @param source: file that failed to be parsed
-        @type  source: str
+        :param source: file that failed to be parsed
+        :type  source: str
         """
         import re
         f = open( source, 'r' )
@@ -198,11 +197,11 @@ REMEDY: run the script fixAtomIndices.py
         """
         Return first letter in a string (e.g. atom mane)
 
-        @param aName: atom name
-        @type  aName: str
+        :param aName: atom name
+        :type  aName: str
 
-        @return: first letter (i.e. not a number) from a string.
-        @rtype: letter
+        :return: first letter (i.e. not a number) from a string.
+        :rtype: letter
         """
         try:
             i = int( aName[0] )
@@ -314,14 +313,14 @@ REMEDY: run the script fixAtomIndices.py
             - empty 'element' entries are filled with the first non-number
               letter from the atom 'name'
 
-        @param fname: name of pdb file
-        @type  fname: str
-        @param skipRes: list with residue names that should be skipped
-        @type  skipRes: list of str
+        :param fname: name of pdb file
+        :type  fname: str
+        :param skipRes: list with residue names that should be skipped
+        :type  skipRes: list of str
 
-        @return: tuple of (1) dictionary of profiles
+        :return: tuple of (1) dictionary of profiles
                  and (2) xyz array N x 3
-        @rtype: ( list, array )
+        :rtype: ( list, array )
         """
         xyz   = []
 

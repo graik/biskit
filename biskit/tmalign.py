@@ -48,23 +48,26 @@ class TMAlign( Executor ):
     TMAlign takes two PDBModel instances as input and returns a dictionary 
     'result' with the following keys:
 
-    'rt'    ... rotation /translation matrix to superposition model on refmodel
-                (numpy.array of float)
-    'score' ... TM-Align score (float)
-    'rmsd'  ... RMSD calculated by TM-Align (float)
-    'len'   ... length (in residues) of the structure alignment (float)
-    'id'    ... sequence identity based on the structure alignment (float)
+    - `rt`  ... rotation /translation matrix to superposition model on refmodel\
+                (numpy.array of float), see `PDBModel.transform`
+    - `score` ... TM-Align score (float)
+    - `rmsd`  ... RMSD calculated by TM-Align (float)
+    - `len`   ... length (in residues) of the structure alignment (float)
+    - `id`    ... sequence identity based on the structure alignment (float)
 
     Optionally, TMAlign can also apply the transformation to the input
     (or any other) structure:
 
     >>> model_transformed = tm.applyTransformation(model)
 
-    The TM result values (score, rmsd, etc) are added to model_transformed.info. 
+    The TM result values (score, rmsd, etc) are added to `model_transformed.info`. 
 
-    @note: the alignment itself is currently not parsed in. Adapt parse_tmalign
-           if you want to recover this information, too.
-    @note: Command configuration: biskit/Biskit/data/defaults/exe_tmalign.dat
+    .. note:: 
+    
+        The alignment itself is currently not parsed in. Adapt parse_tmalign
+        if you want to recover this information, too.
+        
+        Command configuration: `biskit/Biskit/data/defaults/exe_tmalign.dat`
     """
     _f = '\s+([-0-9]+\.[0-9]+)'
     re_rt1 = re.compile('\s*1' + _f + _f + _f + _f)
@@ -76,20 +79,20 @@ class TMAlign( Executor ):
 
     def __init__( self, model, refmodel, **kw ):
         """
-        @param model: structure to be aligned to reference
-        @type  model: PDBModel
-        @param refmodel: reference structure
-        @type  refmodel: PDBModel
+        :param model: structure to be aligned to reference
+        :type  model: PDBModel
+        :param refmodel: reference structure
+        :type  refmodel: PDBModel
 
-        @param kw: additional key=value parameters for Executor:
-        @type  kw: key=value pairs
-        ::
-          debug    - 0|1, keep all temporary files (default: 0)
-          verbose  - 0|1, print progress messages to log (log != STDOUT)
-          node     - str, host for calculation (None->local) NOT TESTED
-                          (default: None)
-          nice     - int, nice level (default: 0)
-          log      - biskit.LogFile, program log (None->STOUT) (default: None)
+        :param kw: additional key=value parameters are passed on to \
+            `Executor.__init__`. For example:
+            ::
+                debug    - 0|1, keep all temporary files (default: 0)
+                verbose  - 0|1, print progress messages to log (log != STDOUT)
+                node     - str, host for calculation (None->local) NOT TESTED
+                                (default: None)
+                nice     - int, nice level (default: 0)
+                log      - biskit.LogFile, program log (None->STOUT) (default: None)
         """
         self.f_pdbin = tempfile.mktemp( '_tmalign_in.pdb' )
         self.f_pdbref= tempfile.mktemp( '_tmalign_ref.pdb' )
@@ -151,13 +154,14 @@ class TMAlign( Executor ):
     def parse_tmalign( self, output ):
         """
         Parse TM-Align output
-        @param output: STDOUT result of TM-Align run
-        @type  output: [str]
+        
+        :param output: STDOUT result of TM-Align run
+        :type  output: [str]
 
-        @return: rotation/translation matrix
-        @rtype: N.array
+        :return: rotation/translation matrix
+        :rtype: N.array
 
-        @raise TMAlignError: if no result
+        :raise TMAlignError: if no result
         """
         if  output.count('\n') < 7:
             raise TMAlignError('no TM-Align result')
@@ -203,9 +207,11 @@ class TMAlign( Executor ):
     def applyTransformation( self, model=None ):
         """
         Apply transformation from structure alignment to given model.
-        @param model: PDBModel, external model (default: input model)
-        @return: transformed PDBModel
-        @rtype: PDBModel
+        
+        :param model: external model (default: input model)
+        :type model: PDBModel
+        :return: transformed PDBModel
+        :rtype: PDBModel
         """
         model = model or self.model
         assert self.result, 'call TMAlign.run() first!'

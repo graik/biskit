@@ -49,26 +49,28 @@ class AmberResidueType( B.PDBModel ):
     and normalize actual residues parsed from PDB files.
     
     Currently, AmberResidueTypes can only be created from Amber prep library
-    files. @seeAlso \L{Biskit.AmberPrepParser}
+    files.
     
     An alternative method would be to create AmberResidueTypes from some 
     standard PDB file::
     
         >>> m = PDBModel('standard_aa.pdb')
         >>> standard_res = [ AmberResidueType( res ) for res in m.resModels() ]
+    
+    .. seealso:: `biskit.AmberPrepParser`
     """
     
     def __init__(self, name=None, code=None, letter=None, source=None  ):
         """
-        @param name: full residue name (converted to lower letters)
-        @type  name: str
-        @param code: three-letter residue code (converted to upper letters)
-        @type  code: str
-        @param letter: single-letter residue code (converted to upper letter)
-        @type  letter: str
-        @param source: pdb file, model or structure of residue from which to 
+        :param name: full residue name (converted to lower letters)
+        :type  name: str
+        :param code: three-letter residue code (converted to upper letters)
+        :type  code: str
+        :param letter: single-letter residue code (converted to upper letter)
+        :type  letter: str
+        :param source: pdb file, model or structure of residue from which to 
                        extract all the other data
-        @type  source: PDBModel or str
+        :type  source: PDBModel or str
         """
         
         self.name = name      ## 'alanine'
@@ -131,11 +133,11 @@ class AmberPrepParser( object ):
     
     def __init__(self, f_in=None ):
         """
-        @param f_in: amber "off" or "prep" file with residue definitions
+        :param f_in: amber "off" or "prep" file with residue definitions
                      if not existing, we will look for a file with this name
                      in the Biskit data folder (data/amber/residues)
                      (default: 'all_amino03.in')
-        @type  f_in: str
+        :type  f_in: str
         """
         f_in = f_in or self.F_DEFAULT
         if not osp.exists( T.absfile( f_in ) ):
@@ -158,7 +160,7 @@ class AmberPrepParser( object ):
             
     
     def atomLines( self, s ):
-        """@param s: str, atom block
+        """:param s: str, atom block
         """
         start = s.find('0.0')
         end = s.find( '\n\n', start + 10 )
@@ -189,7 +191,7 @@ class AmberPrepParser( object ):
 
     
     def parseResidue( self, s ):
-        """@param s: str, residue record
+        """:param s: str, residue record
         """
         r = {}
         h = io.StringIO( s )
@@ -271,7 +273,7 @@ class AmberPrepParser( object ):
         
     def residueDict( self ):
         """
-        @return: dict, residue types indexed by 3-letter residue code,
+        :return: dict, residue types indexed by 3-letter residue code,
                  example: {'ala':[AmberResidueType ALA], 'cys':[...}
         """
         r = dict( [(res.code,res) for res in self.residueTypes()] )

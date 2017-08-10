@@ -22,8 +22,7 @@
 """
 Fetch a PDBModel from the remote or a local NCBI PDB database.
 
-@see L{PDBModel}
-@see L{PDBParserFactory}
+.. seealso:: `biskit.PDBModel`, `biskit.core.PDBParserFactory`
 """
 import urllib.request, urllib.parse, urllib.error, re, tempfile, os
 import codecs, io
@@ -56,8 +55,8 @@ class PDBParseNCBI( PDBParseModel ):
         >>> if ParsePDBModel.supports( model ):
         >>>     ...
 
-        @return: True if the given source is supported by this parser
-        @rtype: bool
+        :return: True if the given source is supported by this parser
+        :rtype: bool
         """
         r = isinstance( source, str )
         return r and len(source) == 4
@@ -71,8 +70,8 @@ class PDBParseNCBI( PDBParseModel ):
         >>> if ParsePDBModel.description():
         >>>     ...
 
-        @return: short free text description of the supported format
-        @rtype: str
+        :return: short free text description of the supported format
+        :rtype: str
         """
         return 'fetch PDB entry from NCBI'
 
@@ -80,16 +79,16 @@ class PDBParseNCBI( PDBParseModel ):
         """
         Get the coordinate file from a local pdb database.
 
-        @param id: pdb code, 4 characters
-        @type  id: str
-        @param db_path: path to local pdb database
-                        (default: L{settings.pdb_path})
-        @type  db_path: str
+        :param id: pdb code, 4 characters
+        :type  id: str
+        :param db_path: path to local pdb database
+                        (default: :class:`settings.pdb_path`)
+        :type  db_path: str
 
-        @return: the requested pdb file as a file handle
-        @rtype: open file handle
+        :return: the requested pdb file as a file handle
+        :rtype: open file handle
 
-        @raise PDBParserError: if couldn't find PDB file
+        :raise PDBParserError: if couldn't find PDB file
         """
         id = str.lower( id )
         filenames = [os.path.join( db_path, '%s.pdb' % id),
@@ -118,16 +117,16 @@ class PDBParseNCBI( PDBParseModel ):
         """
         Get the coordinate file remotely from the RCSB.
 
-        @param id: pdb code, 4 characters
-        @type  id: str
-        @param rcsb_url: template url for pdb download
-                         (default: L{settings.rcsb_url})
-        @type  rcsb_url: str
+        :param id: pdb code, 4 characters
+        :type  id: str
+        :param rcsb_url: template url for pdb download
+                         (default: :class:`settings.rcsb_url`)
+        :type  rcsb_url: str
 
-        @return: the requested pdb file as a file handle
-        @rtype: open file handle
+        :return: the requested pdb file as a file handle
+        :rtype: open file handle
 
-        @raise PDBParserError: if couldn't retrieve PDB file
+        :raise PDBParserError: if couldn't retrieve PDB file
         """
         try:
             from Bio import File
@@ -151,14 +150,14 @@ class PDBParseNCBI( PDBParseModel ):
         """
         Parse PDB from file/socket or string handle into memory.
 
-        @param handle: fresh open file/socket handle to PDB ressource or string
-        @type  handle: open file-like object or str
-        @param first_model_only: only take first of many NMR models [True]
-        @type  first_model_only: bool
+        :param handle: fresh open file/socket handle to PDB ressource or string
+        :type  handle: open file-like object or str
+        :param first_model_only: only take first of many NMR models [True]
+        :type  first_model_only: bool
 
-        @return: pdb file as list of strings, dictionary with resolution
-        @rtype: [str], {'resolution':float }
-        @raise PDBParserError: if passed in string is too short
+        :return: pdb file as list of strings, dictionary with resolution
+        :rtype: [str], {'resolution':float }
+        :raise PDBParserError: if passed in string is too short
         """
         lines = []
         res_match = None
@@ -233,14 +232,14 @@ class PDBParseNCBI( PDBParseModel ):
         The same holds for coordinates (xyzChanged=0).
         However, existing profiles or coordinates or fields remain untouched.
 
-        @param model: existing model
-        @type  model: PDBModel
-        @param source: PDB code
-        @type  source: str
-        @param skipRes: list residue names that should not be parsed
-        @type  skipRes: [ str ]
-        @param updateMissing: check source for additional profiles [0] 
-        @type  updateMissing: 1|0
+        :param model: existing model
+        :type  model: PDBModel
+        :param source: PDB code
+        :type  source: str
+        :param skipRes: list residue names that should not be parsed
+        :type  skipRes: [ str ]
+        :param updateMissing: check source for additional profiles [0] 
+        :type  updateMissing: 1|0
         """
         try:
             if force or updateMissing or self.needsUpdate( model ):

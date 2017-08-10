@@ -100,7 +100,7 @@ class BisList:
     def getValue( self, i, key, default=None ): # abstract
         """
         Get the value of a dictionary entry of a list item.
-        B{Override!}
+        B{Override}
 
         @param i: position in collection
         @type  i: int
@@ -171,7 +171,7 @@ class BisList:
     def extend( self, other ): # abstract
         """
         Add all items of other to (the end of) this instance.
-        B{Override!}
+        B{Override}
 
         @param other: other instance
         @type  other: instance        
@@ -182,7 +182,7 @@ class BisList:
     def append( self, v ): # abstract
         """
         Append a single item to the end of this list.
-        B{Override!}
+        B{Override}
 
         @param v: any (left to the implementing class)
         @type  v: any
@@ -219,7 +219,7 @@ class BisList:
     def take( self, indices, deepcopy=0 ): # abstract
         """
         Extract certain items in a certain order.
-        B{Override!}
+        B{Override}
 
         @param indices: positions
         @type  indices: [ int ]

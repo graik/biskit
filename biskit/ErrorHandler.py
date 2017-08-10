@@ -33,8 +33,8 @@ class ErrorHandler( object ):
 
     def __init__( self, log=None ):
         """
-        @param log: target of error messages, None->StdErr (default: None)
-        @type  log: LogFile
+        :param log: target of error messages, None->StdErr (default: None)
+        :type  log: LogFile
         """
         self.log = log or ErrLog()
 
@@ -43,10 +43,10 @@ class ErrorHandler( object ):
         """
         Handle a fatal error (likely a bug), stop program execution.
 
-        @param message: message to be given to user
-        @type  message: str
+        :param message: message to be given to user
+        :type  message: str
 
-        @raise FatalError: 
+        :raise FatalError: 
         """
         s = '\nFatal Error: '+str(message)
         s += '\n\t' + T.lastError() + '\n'
@@ -61,10 +61,10 @@ class ErrorHandler( object ):
         Handle a normal error (like non-existing file) that is not
         necessarily a bug.
 
-        @param message: message to be given to user
-        @type  message: str
+        :param message: message to be given to user
+        :type  message: str
 
-        @raise NormalError: 
+        :raise NormalError: 
         """
         s = '\nError: '+str(message)
         s += '\n\t' + T.lastError()
@@ -78,12 +78,12 @@ class ErrorHandler( object ):
         """
         Issue a warning. No exception is raised.
 
-        @param message: message to be given to user
-        @type  message: str
-        @param error: report Exception with line (default: 1)
-        @type  error: 1||0
-        @param trace: report full back trace to exception (default: 0)
-        @type  trace: 1||0
+        :param message: message to be given to user
+        :type  message: str
+        :param error: report Exception with line (default: 1)
+        :type  error: 1||0
+        :param trace: report full back trace to exception (default: 0)
+        :type  trace: 1||0
         """
         s = '\nWarning (ignored): '+str(message)
         try:

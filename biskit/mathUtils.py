@@ -46,11 +46,11 @@ def accumulate( a ):
     cumulative sum of C{ a[0], a[0]+a[1], a[0]+a[1]+[a2], ... }
     normalized by C{ N0.sum( a ) }
 
-    @param a: array('f') or float
-    @type  a: array
+    :param a: array('f') or float
+    :type  a: array
 
-    @return: float
-    @rtype: float
+    :return: float
+    :rtype: float
     """
     return N0.add.accumulate( a ) / N0.sum( a )
 
@@ -59,13 +59,13 @@ def variance(x, avg = None):
     """
     Variance, S{sigma}^2
 
-    @param x: data
-    @type  x: array('f') or float
-    @param avg: use this average, otherwise calculated from x
-    @type  avg: float OR None
+    :param x: data
+    :type  x: array('f') or float
+    :param avg: use this average, otherwise calculated from x
+    :type  avg: float OR None
 
-    @return: float
-    @rtype: float    
+    :return: float
+    :rtype: float    
     """
     if avg is None:
         avg = N0.average(x)
@@ -80,13 +80,13 @@ def SD(x, avg = None):
     """
     Standard deviation, S{sigma}
 
-    @param x: data
-    @type  x: array('f') or float
-    @param avg: use this average, otherwise calculated from x
-    @type  avg: float OR None
+    :param x: data
+    :type  x: array('f') or float
+    :param avg: use this average, otherwise calculated from x
+    :type  avg: float OR None
 
-    @return: float
-    @rtype: float        
+    :return: float
+    :rtype: float        
     """
     return N0.sqrt(variance(x, avg))
 
@@ -95,13 +95,13 @@ def wMean(x, w=None):
     """
     Weighted mean: Mean of data (x) weighted by (w).
 
-    @param x: X-D array with numbers
-    @type  x: array
-    @param w: 1-D array of same length as x with weight factors
-    @type  w: array
+    :param x: X-D array with numbers
+    :type  x: array
+    :param w: 1-D array of same length as x with weight factors
+    :type  w: array
 
-    @return: array('f') or float
-    @rtype: array('f') or float
+    :return: array('f') or float
+    :rtype: array('f') or float
     """
     if w is None:
         wx = x
@@ -115,13 +115,13 @@ def wVar(x, w):
     """
     Variance of weighted (w) data (x).
 
-    @param x: X-D array with numbers
-    @type  x: array
-    @param w: 1-D array of same length as x with weight factors
-    @type  w: array
+    :param x: X-D array with numbers
+    :type  x: array
+    :param w: 1-D array of same length as x with weight factors
+    :type  w: array
 
-    @return: array('f') or float
-    @rtype: array('f') or float    
+    :return: array('f') or float
+    :rtype: array('f') or float    
     """
     wm = wMean(x,w)
     return ( N0.sum(w) / ( (N0.sum(w)**2-N0.sum(w**2)) ) ) * N0.sum(w*(x-wm)**2)
@@ -131,13 +131,13 @@ def wSD(x, w):
     """
     Standard deviation of weighted data.
 
-    @param x: X-D array with numbers
-    @type  x: array
-    @param w: 1-D array of same length as x with weight factors
-    @type  w: array
+    :param x: X-D array with numbers
+    :type  x: array
+    :param w: 1-D array of same length as x with weight factors
+    :type  w: array
 
-    @return: array('f') or float
-    @rtype: array('f') or float     
+    :return: array('f') or float
+    :rtype: array('f') or float     
     """
     return N0.sqrt( wVar(x, w) )
 
@@ -147,11 +147,11 @@ def aboveDiagonal( pw_m ):
     Collect all the values above the diagonal in a square
     matrix.
 
-    @param pw_m: symmetric square matrix
-    @type  pw_m: 2-D array
+    :param pw_m: symmetric square matrix
+    :type  pw_m: 2-D array
 
-    @return: raveled list of 'unique' values without diagonal
-    @rtype: list
+    :return: raveled list of 'unique' values without diagonal
+    :rtype: list
     """
     r = []
     for i in range( 0, len( pw_m ) ):
@@ -167,13 +167,13 @@ def arrayEqual( a, b ):
     """
     Compare 2 arrays or lists of numbers for equality.
 
-    @param a: first array (multi-dimensional is supported)
-    @type  a: array / list
-    @param b: second array (multi-dimensional is supported)
-    @type  b: array / list
+    :param a: first array (multi-dimensional is supported)
+    :type  a: array / list
+    :param b: second array (multi-dimensional is supported)
+    :type  b: array / list
 
-    @return: 1 if array/list a equals array/list b
-    @rtype: 1|0
+    :return: 1 if array/list a equals array/list b
+    :rtype: 1|0
     """
     if a is None or b is None:
         return a is b
@@ -194,13 +194,13 @@ def pairwiseDistances(u, v):
     """
     Pairwise distances between two arrays.
 
-    @param u: first array 
-    @type  u: array
-    @param v: second array 
-    @type  v: array
+    :param u: first array 
+    :type  u: array
+    :param v: second array 
+    :type  v: array
 
-    @return: array( len(u) x len(v) ) of double
-    @rtype: array
+    :return: array( len(u) x len(v) ) of double
+    :rtype: array
     """
     diag1 = N0.diagonal( N0.dot( u, N0.transpose(u) ) )
     diag2 = N0.diagonal( N0.dot( v, N0.transpose(v) ) )
@@ -216,13 +216,13 @@ def randomMask( nOnes, length ):
     """
     Create random array of given lenght and number of ones.
 
-    @param nOnes: number of ones
-    @type  nOnes: int
-    @param length: lenght of array
-    @type  length: int
+    :param nOnes: number of ones
+    :type  nOnes: int
+    :param length: lenght of array
+    :type  length: int
 
-    @return: array with ones and zeros
-    @rtype: array( 1|0 )
+    :return: array with ones and zeros
+    :rtype: array( 1|0 )
     """
     r = N0.zeros( length )
     pos = []
@@ -244,17 +244,17 @@ def random2DArray( matrix, ranNr=1, mask=None):
     """
     Create randomized 2D array containing ones and zeros.
 
-    @param matrix: matrix to randomize
-    @type  matrix: 2D array
-    @param mask: mask OR None (default: None)
-    @type  mask: list(1|0)
-    @param ranNr: number of matricies to add up (default: 1)
-    @type  ranNr: integer
+    :param matrix: matrix to randomize
+    :type  matrix: 2D array
+    :param mask: mask OR None (default: None)
+    :type  mask: list(1|0)
+    :param ranNr: number of matricies to add up (default: 1)
+    :type  ranNr: integer
 
-    @return: 2D array or |ranNr| added contact matricies
-    @rtype:2D array
+    :return: 2D array or |ranNr| added contact matricies
+    :rtype:2D array
 
-    @raise MathUtilError: if mask does not fit matrix
+    :raise MathUtilError: if mask does not fit matrix
     """
     ## get shape of matrix
     a,b = N0.shape( matrix )
@@ -308,17 +308,17 @@ def runningAverage( x, interval=2, preserve_boundaries=0 ):
     """
     Running average (smoothing) over a given data window.
 
-    @param x: data
-    @type  x: list of int/float
-    @param interval: window size C{ (-(interval-1)/2 to +(interval-1)/2) }
+    :param x: data
+    :type  x: list of int/float
+    :param interval: window size C{ (-(interval-1)/2 to +(interval-1)/2) }
                      (default: 2)
-    @type  interval: int
-    @param preserve_boundaries: shrink window at edges to keep original
+    :type  interval: int
+    :param preserve_boundaries: shrink window at edges to keep original
                                 start and end value (default: 0)
-    @type  preserve_boundaries: 0|1
+    :type  preserve_boundaries: 0|1
 
-    @return: list of floats
-    @rtype: [ float ]
+    :return: list of floats
+    :rtype: [ float ]
     """
 
     if interval == 0:
@@ -365,14 +365,14 @@ def area(curve, start=0.0, stop=1.0 ):
     The x-axis is the first column of this array (curve[:,0]).
     (originally taken from biskit.Statistics.ROCalyzer)
 
-    @param curve: a list of x,y coordinates
-    @type  curve: [ (y,x), ] or N0.array
-    @param start: lower boundary (in x) (default: 0.0)
-    @type  start: float
-    @param stop: upper boundary (in x) (default: 1.0)
-    @type  stop: float
-    @return: the area underneath the curve between start and stop.
-    @rtype: float
+    :param curve: a list of x,y coordinates
+    :type  curve: [ (y,x), ] or N0.array
+    :param start: lower boundary (in x) (default: 0.0)
+    :type  start: float
+    :param stop: upper boundary (in x) (default: 1.0)
+    :type  stop: float
+    :return: the area underneath the curve between start and stop.
+    :rtype: float
     """
     ## convert and swap axes
     curve = N0.array( curve )
@@ -407,13 +407,13 @@ def area(curve, start=0.0, stop=1.0 ):
 def packBinaryMatrix( cm ):
     """
     Compress sparse array of 0 and ones to list of one-positions
-    (space saving function, upack with L{unpackBinaryMatrix}).
+    (space saving function, upack with :class:`unpackBinaryMatrix`).
 
-    @param cm: X by Y array of int
-    @type  cm: 2D array 
+    :param cm: X by Y array of int
+    :type  cm: 2D array 
 
-    @return: {'shape':(X,Y), 'nonzero':[int] }
-    @rtype: dict
+    :return: {'shape':(X,Y), 'nonzero':[int] }
+    :rtype: dict
     """
     if cm is None or type( cm ) == dict:
         return cm
@@ -427,15 +427,15 @@ def packBinaryMatrix( cm ):
 
 def unpackBinaryMatrix( pcm, raveled=0 ):
     """
-    Uncompress array of 0 and 1 that was compressed with L{packBinaryMatrix}.
+    Uncompress array of 0 and 1 that was compressed with :class:`packBinaryMatrix`.
 
-    @param pcm: {'shape':(X,Y,..), 'nonzero':[int]}
-    @type  pcm: dict
-    @param raveled: return raveled (default: 0)
-    @type  raveled: 1|0
+    :param pcm: {'shape':(X,Y,..), 'nonzero':[int]}
+    :type  pcm: dict
+    :param raveled: return raveled (default: 0)
+    :type  raveled: 1|0
 
-    @return: N0.array(X by Y by ..) of int
-    @rtype: 2D array
+    :return: N0.array(X by Y by ..) of int
+    :rtype: 2D array
     """
     if type( pcm ) != dict:
         return pcm
@@ -455,15 +455,15 @@ def unpackBinaryMatrix( pcm, raveled=0 ):
 def matrixToList( cm ):
     """
     Convert matrix into standard python list remembering the dimensions.
-    Unpack with L{listToMatrix}.
+    Unpack with :class:`listToMatrix`.
 
-    @note: Not used right now.
+    Note: Not used right now.
 
-    @param cm: array of int
-    @type  cm: 2D array
+    :param cm: array of int
+    :type  cm: 2D array
 
-    @return: {'shape':(int,..), 'lst':[..] }
-    @rtype: dict
+    :return: {'shape':(int,..), 'lst':[..] }
+    :rtype: dict
     """
     if cm is None or type( cm ) == dict:
         return cm
@@ -477,15 +477,15 @@ def matrixToList( cm ):
 
 def listToMatrix( lcm ):
     """
-    Convert result of L{matrixToList} back into Numeric array
+    Convert result of :class:`matrixToList` back into Numeric array
 
-    @note: Not used right now.
+    Note: Not used right now.
 
-    @param lcm: {'shape':(int,..), 'lst':[..] }
-    @type  lcm: dict    
+    :param lcm: {'shape':(int,..), 'lst':[..] }
+    :type  lcm: dict    
 
-    @return: array
-    @rtype: 
+    :return: array
+    :rtype: 
     """
     if type( lcm ) != dict:
         return lcm
@@ -501,17 +501,17 @@ def eulerRotation(alpha, beta, gamma):
       2. rotation about x-axis by angle beta
       3. rotation about z-axis by angle gamma
 
-    @author: Michael Habeck
+    Written by Michael Habeck.
 
-    @param alpha: euler angle S{alpha}
-    @type  alpha: float
-    @param beta: euler angle S{beta}
-    @type  beta: float
-    @param gamma: euler angle S{gamma}
-    @type  gamma: float
+    :param alpha: euler angle S{alpha}
+    :type  alpha: float
+    :param beta: euler angle S{beta}
+    :type  beta: float
+    :param gamma: euler angle S{gamma}
+    :type  gamma: float
 
-    @return: 3 x 3 array of float
-    @rtype: array
+    :return: 3 x 3 array of float
+    :rtype: array
     """
     cos_alpha = N0.cos(alpha); sin_alpha = N0.sin(alpha)
     cos_beta  = N0.cos(beta);  sin_beta  = N0.sin(beta)
@@ -538,10 +538,10 @@ def randomRotation():
     """
     Get random rotation matrix.
 
-    @author: Michael Habeck
+    Written by Michael Habeck.
 
-    @return: 3 x 3 array of float
-    @rtype: array
+    :return: 3 x 3 array of float
+    :rtype: array
     """
     alpha = R.random_sample() * 2 * N0.pi
     gamma = R.random_sample() * 2 * N0.pi
@@ -555,16 +555,16 @@ def intersection( a, b, optimize=1 ):
     Intersection of the two lists (i.e. all values common to both two lists).
     C{ intersection( [any], [any] ) -> [any] }
 
-    @param a: first list
-    @type  a: [any]
-    @param b: second list
-    @type  b: [any]
-    @param optimize: result is sorted like the shorter of the two lists
+    :param a: first list
+    :type  a: [any]
+    :param b: second list
+    :type  b: [any]
+    :param optimize: result is sorted like the shorter of the two lists
                      (default: 1)
-    @type  optimize: 1|0
+    :type  optimize: 1|0
 
-    @return: list
-    @rtype: [any]
+    :return: list
+    :rtype: [any]
     """
     if optimize and len(a) > len(b):
         a, b = b, a
@@ -577,11 +577,11 @@ def nonredundant( l ):
     All members of a list without duplicates
     C{ noredundant( [any] ) -> [any] }
 
-    @param l: list
-    @type  l: [any]
+    :param l: list
+    :type  l: [any]
 
-    @return: list
-    @rtype: [any]    
+    :return: list
+    :rtype: [any]    
     """
     r = []
     for x in l:
@@ -595,13 +595,13 @@ def union( a, b ):
     Union of two lists (without duplicates)
     C{ union( [any], [any] ) -> [any] }
 
-    @param a: first list
-    @type  a: [any]
-    @param b: second list
-    @type  b: [any]
+    :param a: first list
+    :type  a: [any]
+    :param b: second list
+    :type  b: [any]
 
-    @return: list
-    @rtype: [any]    
+    :return: list
+    :rtype: [any]    
     """
     if type( a ) is N0.arraytype:
         a = a.tolist()
@@ -616,13 +616,13 @@ def difference( a, b ):
     All members of a that are not in b
     C{ difference([any], [any]) -> [any] }
 
-    @param a: first list
-    @type  a: [any]
-    @param b: second list
-    @type  b: [any]
+    :param a: first list
+    :type  a: [any]
+    :param b: second list
+    :type  b: [any]
 
-    @return: list
-    @rtype: [any]    
+    :return: list
+    :rtype: [any]    
     """
     return [ x for x in a if x not in b ]
 
@@ -632,15 +632,15 @@ def removeFromList( l, v, all=1 ):
     Remove all or first occurrence(s) of v from l.
     C{ removeFromList( l, v, [all=1] ) }
 
-    @param l: list
-    @type  l: [ any ]
-    @param v: remove these values
-    @type  v: any or [ any ]
-    @param all: remove all occurrences (1) or only first one (0) (default: 1)
-    @type  all: 0|1
+    :param l: list
+    :type  l: [ any ]
+    :param v: remove these values
+    :type  v: any or [ any ]
+    :param all: remove all occurrences (1) or only first one (0) (default: 1)
+    :type  all: 0|1
 
-    @return: list
-    @rtype: [any]     
+    :return: list
+    :rtype: [any]     
     """
     if type( v ) != type( [] ):
         v = [ v ]
@@ -658,15 +658,15 @@ def randomRange( start, stop, n ):
     Creates a set of n unique integers randomly distributed between
     start and stop. 
 
-    @param start: minimal index
-    @type  start: int
-    @param stop: 1+maximal index
-    @type  stop: int
-    @param n: number of indices
-    @type  n: int
+    :param start: minimal index
+    :type  start: int
+    :param stop: 1+maximal index
+    :type  stop: int
+    :param n: number of indices
+    :type  n: int
 
-    @return: set of unique integers evenly distributed between start and stop
-    @rtype: [int]
+    :return: set of unique integers evenly distributed between start and stop
+    :rtype: [int]
     """
     r = []
     while len( r ) < n:
@@ -682,15 +682,15 @@ def linfit( x, y ):
     Calculate linear least-square fit to the points given by x and y.
     see U{http://mathworld.wolfram.com/LeastSquaresFitting.html}
 
-    @param x: x-data
-    @type  x: [ float ]
-    @param y: y-data
-    @type  y: [ float ]
+    :param x: x-data
+    :type  x: [ float ]
+    :param y: y-data
+    :type  y: [ float ]
 
-    @return: m, n, r^2 (slope, intersection, corr. coefficient)
-    @rtype: float, float, float
+    :return: m, n, r^2 (slope, intersection, corr. coefficient)
+    :rtype: float, float, float
 
-    @raise BiskitError: if x and y have different number of elements
+    :raise BiskitError: if x and y have different number of elements
     """
     x, y = N0.array( x, N0.Float64), N0.array( y, N0.Float64)
     if len( x ) != len( y ):
@@ -718,11 +718,11 @@ def cartesianToPolar( xyz ):
     Convert cartesian coordinate array to polar coordinate array: 
     C{ x,y,z -> r, S{theta}, S{phi} }
 
-    @param xyz: array of cartesian coordinates (x, y, z)
-    @type  xyz: array
+    :param xyz: array of cartesian coordinates (x, y, z)
+    :type  xyz: array
 
-    @return: array of polar coordinates (r, theta, phi)
-    @rtype: array
+    :return: array of polar coordinates (r, theta, phi)
+    :rtype: array
     """
     r = N0.sqrt( N0.sum( xyz**2, 1 ) )
     p = N0.arccos( xyz[:,2] / r )
@@ -741,11 +741,11 @@ def polarToCartesian( rtp ):
     Convert polar coordinate array to cartesian coordinate array: 
     C{ r, S{theta}, S{phi} -> x,y,z }
 
-    @param rtp: array of cartesian coordinates (r, theta, phi)
-    @type  rtp: array
+    :param rtp: array of cartesian coordinates (r, theta, phi)
+    :type  rtp: array
 
-    @return: array of cartesian coordinates (x, y, z)
-    @rtype: array
+    :return: array of cartesian coordinates (x, y, z)
+    :rtype: array
     """
     x = rtp[:,0] * N0.cos( rtp[:,1] ) * N0.sin( rtp[:,2] )
     y = rtp[:,0] * N0.sin( rtp[:,1] ) * N0.sin( rtp[:,2] )
@@ -759,17 +759,17 @@ def projectOnSphere( xyz, radius=None, center=None ):
     Project the coordinates xyz on a sphere with a given radius around
     a given center.
 
-    @param xyz: cartesian coordinates
-    @type  xyz: array N x 3 of float
-    @param radius: radius of target sphere, if not provided the maximal
+    :param xyz: cartesian coordinates
+    :type  xyz: array N x 3 of float
+    :param radius: radius of target sphere, if not provided the maximal
                    distance to center will be used (default: None)
-    @type  radius: float
-    @param center: center of the sphere, if not given the average of xyz
+    :type  radius: float
+    :param center: center of the sphere, if not given the average of xyz
                    will be assigned to the center (default: None)
-    @type  center: array 0 x 3 of float
+    :type  center: array 0 x 3 of float
 
-    @return: array of cartesian coordinates (x, y, z)
-    @rtype: array    
+    :return: array of cartesian coordinates (x, y, z)
+    :rtype: array    
     """
     if center is None:
         center = N0.average( xyz )
@@ -794,14 +794,14 @@ def rotateAxis(theta, vector):
 
     >>> m=rotateAxis(pi, N0.array([1,0,0]))
 
-    @type theta: float
-    @param theta: the rotation angle
+    :type theta: float
+    :param theta: the rotation angle
 
 
-    @type vector: L{Vector}
-    @param vector: the rotation axis
+    :type vector: :class:`Vector`
+    :param vector: the rotation axis
 
-    @return: The rotation matrix, a 3x3 Numeric array.
+    :return: The rotation matrix, a 3x3 Numeric array.
     """
     vector = vector / N0.linalg.norm(vector)
     x,y,z=vector
@@ -914,15 +914,15 @@ def outliers( a, z=5, it=5 ):
     Iterative detection of outliers in a set of numeric values.
     Requirement: len(a) > 0; outlier detection is only performed if len(a)>2
     
-    @param a: array or list of values
-    @type  a: [ float ]
-    @param z: z-score threshold for iterative refinement of median and SD
-    @type  z: float
-    @param it: maximum number of iterations
-    @type  it: int
+    :param a: array or list of values
+    :type  a: [ float ]
+    :param z: z-score threshold for iterative refinement of median and SD
+    :type  z: float
+    :param it: maximum number of iterations
+    :type  it: int
     
-    @return: outlier mask, median and standard deviation of last iteration
-    @rtype: N0.array( int ), float, float
+    :return: outlier mask, median and standard deviation of last iteration
+    :rtype: N0.array( int ), float, float
     """
     assert( len(a) > 0 )
     mask = N0.ones( len(a) )

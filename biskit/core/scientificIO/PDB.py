@@ -121,8 +121,8 @@ def defineAminoAcidResidue(symbol):
     Make the parser recognize a particular residue type as an amino
     acid residue
     
-    @param symbol: the three-letter code for an amino acid
-    @type symbol: C{str}
+    :param symbol: the three-letter code for an amino acid
+    :type symbol: ``str``
     """
     symbol = symbol.upper()
     if symbol not in amino_acids:
@@ -133,8 +133,8 @@ def defineNucleicAcidResidue(symbol):
     Make the parser recognize a particular residue type as an nucleic
     acid residue
     
-    @param symbol: the one-letter code for a nucleic acid
-    @type symbol: C{str}
+    :param symbol: the one-letter code for a nucleic acid
+    :type symbol: ``str``
     """
     symbol = symbol.upper()
     if symbol not in nucleic_acids:
@@ -152,21 +152,21 @@ class PDBFile:
     X{PDB} file with access at the record level
 
     The low-level file access is handled by the module
-    L{ScientificIO.TextFile}, therefore compressed files and URLs
+    :class:`ScientificIO.TextFile`, therefore compressed files and URLs
     (for reading) can be used as well.
     """
 
     def __init__(self, file_or_filename, mode = 'r', subformat = None):
         """
-        @param file_or_filename: the name of the PDB file, or a file object
-        @type file_or_filename: C{str} or C{file}
-        @param mode: the file access mode, 'r' (read) or 'w' (write)
-        @type mode: C{str}
-        @param subformat: indicates a specific dialect of the PDB format.
+        :param file_or_filename: the name of the PDB file, or a file object
+        :type file_or_filename: ``str`` or C{file}
+        :param mode: the file access mode, 'r' (read) or 'w' (write)
+        :type mode: ``str``
+        :param subformat: indicates a specific dialect of the PDB format.
                           Subformats are defined in
-                          L{ScientificIO.PDBExportFilters}; they are used
+                          :class:`ScientificIO.PDBExportFilters`; they are used
                           only when writing.
-        @type subformat: C{str} or C{NoneType}
+        :type subformat: ``str`` or C{NoneType}
         """
         if isinstance(file_or_filename, str):
             self.file = TextFile(file_or_filename, mode)
@@ -203,8 +203,8 @@ class PDBFile:
         space. For unsupported record types, the second tuple element
         is a string containing the remaining part of the record.
 
-        @returns: the contents of one PDB record
-        @rtype: C{tuple}
+        :returns: the contents of one PDB record
+        :rtype: ``tuple``
         """
         while 1:
             line = self.file.readline()
@@ -309,10 +309,10 @@ class PDBFile:
         provided for non-essential information, so the data dictionary
         need not contain all entries.
 
-        @param type: PDB record type
-        @type type: C{str}
-        @param data: PDB record data
-        @type data: C{tuple}
+        :param type: PDB record type
+        :type type: ``str``
+        :param data: PDB record data
+        :type data: ``tuple``
         """
         if self.export_filter is not None:
             type, data = self.export_filter.processLine(type, data)
@@ -398,8 +398,8 @@ class PDBFile:
         Each line of the text is prefixed with 'REMARK' and written
         to the file.
 
-        @param text: the comment contents
-        @type text: C{str}
+        :param text: the comment contents
+        :type text: ``str``
         """
         while text:
             eol = str.find(text,'\n')
@@ -413,20 +413,20 @@ class PDBFile:
         """
         Write an ATOM or HETATM record using the information supplied.
         The residue and chain information is taken from the last calls to
-        the methods L{nextResidue} and L{nextChain}.
+        the methods :class:`nextResidue` and :class:`nextChain`.
 
-        @param name: the atom name
-        @type name: C{str}
-        @param position: the atom position
-        @type position: L{numpy.ndarray}
-        @param occupancy: the occupancy
-        @type occupancy: C{float}
-        @param temperature_factor: the temperature factor (B-factor)
-        @type temperature_factor: C{float}
-        @param element: the chemical element
-        @type element: C{str}
-        @param alternate: the alternate location character
-        @type element: C{str}
+        :param name: the atom name
+        :type name: ``str``
+        :param position: the atom position
+        :type position: :class:`numpy.ndarray`
+        :param occupancy: the occupancy
+        :type occupancy: ``float``
+        :param temperature_factor: the temperature factor (B-factor)
+        :type temperature_factor: ``float``
+        :param element: the chemical element
+        :type element: ``str``
+        :param alternate: the alternate location character
+        :type element: ``str``
         """
         if self.het_flag:
             type = 'HETATM'
@@ -447,14 +447,14 @@ class PDBFile:
     def nextResidue(self, name, number = None, terminus = None):
         """
         Signal the beginning of a new residue, starting with the
-        next call to L{writeAtom}.
+        next call to :class:`writeAtom`.
 
-        @param name: the residue name
-        @type name: C{str}
-        @param number: the residue number. If C{None}, the residues
+        :param name: the residue name
+        :type name: ``str``
+        :param number: the residue number. If ``None``, the residues
                        will be numbered sequentially, starting from 1.
-        @type number: C{int} or C{NoneType}
-        @param terminus: C{None}, "C", or "N". This information
+        :type number: ``int`` or C{NoneType}
+        :param terminus: ``None``, "C", or "N". This information
                          is passed to export filters that can use this
                          information in order to use different atom or
                          residue names in terminal residues.
@@ -481,11 +481,11 @@ class PDBFile:
         """
         Signal the beginning of a new chain.
 
-        @param chain_id: a chain identifier. If C{None}, consecutive letters
+        :param chain_id: a chain identifier. If ``None``, consecutive letters
                          from the alphabet are used.
-        @type chain_id: C{str} or C{NoneType}
-        @param segment_id: a chain identifier
-        @type segment_id: C{str}
+        :type chain_id: ``str`` or C{NoneType}
+        :param segment_id: a chain identifier
+        :type segment_id: ``str``
         """
         if chain_id is None:
             self.chain_number = (self.chain_number + 1) % len(self._chain_ids)
@@ -512,7 +512,7 @@ class PDBFile:
         
     def close(self):
         """
-        Close the file. This method B{must} be called for write mode
+        Close the file. This method **must** be called for write mode
         because otherwise the file will be incomplete.
         """
         if self.open:

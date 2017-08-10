@@ -55,8 +55,8 @@ class TrajProfiles( ProfileCollection ):
         """
         Version of class.
 
-        @return: version
-        @rtype: str
+        :return: version
+        :rtype: str
         """
         return 'Trajectory $Revision$'
 
@@ -83,16 +83,16 @@ class Trajectory:
         same re-ordering / removing is applied to all of them. Set castAll
         to 1, in order to check each PDB seperately.
 
-        @param pdbs: file names of all conformations OR PDBModels
-        @type  pdbs: [ str ] OR [ PDBModel ]
-        @param refpdb: file name of reference pdb
-        @type  refpdb: str
-        @param rmwat: skip all TIP3, HOH, Cl-, Na+ from all files (default: 1)
-        @type  rmwat: 0|1
-        @param castAll: re-analyze atom content of each frame (default: 0)
-        @type  castAll: 0|1
-        @param verbose: verbosity level (default: 1)
-        @type  verbose: 1|0
+        :param pdbs: file names of all conformations OR PDBModels
+        :type  pdbs: [ str ] OR [ PDBModel ]
+        :param refpdb: file name of reference pdb
+        :type  refpdb: str
+        :param rmwat: skip all TIP3, HOH, Cl-, Na+ from all files (default: 1)
+        :type  rmwat: 0|1
+        :param castAll: re-analyze atom content of each frame (default: 0)
+        :type  castAll: 0|1
+        :param verbose: verbosity level (default: 1)
+        :type  verbose: 1|0
         """
         self.ref = None
         self.frames = None
@@ -115,8 +115,8 @@ class Trajectory:
         """
         Version of class.
 
-        @return: version
-        @rtype: str
+        :return: version
+        :rtype: str
         """
         return 'Trajectory $Revision$'
 
@@ -125,14 +125,14 @@ class Trajectory:
         """
         Initiate and create necessary variables.
 
-        @param pdbs: file names of all conformations OR PDBModels
-        @type  pdbs: [ str ] OR [ PDBModel ]
-        @param refpdb: file name of reference pdb
-        @type  refpdb: str
-        @param rmwat: skip all TIP3, HOH, Cl-, Na+ from all files (default: 1)
-        @type  rmwat: 0|1
-        @param castAll: re-analyze atom content of each frame (default: 0)
-        @type  castAll: 0|1
+        :param pdbs: file names of all conformations OR PDBModels
+        :type  pdbs: [ str ] OR [ PDBModel ]
+        :param refpdb: file name of reference pdb
+        :type  refpdb: str
+        :param rmwat: skip all TIP3, HOH, Cl-, Na+ from all files (default: 1)
+        :type  rmwat: 0|1
+        :param castAll: re-analyze atom content of each frame (default: 0)
+        :type  castAll: 0|1
         """
 
         ## get Structure object for reference
@@ -160,13 +160,13 @@ class Trajectory:
         """
         Get a single frame and facilitete slicing of tajectories. 
 
-        @param i: index OR SliceTyp
-        @type  i: int OR [int]
+        :param i: index OR SliceTyp
+        :type  i: int OR [int]
 
-        @return: model OR trajectory
-        @rtype: PDBModel OR Trajectory  
+        :return: model OR trajectory
+        :rtype: PDBModel OR Trajectory  
 
-        @raise TrajError: if out of memory OR invalid index
+        :raise TrajError: if out of memory OR invalid index
         """
         try:
             if isinstance( i , int):
@@ -190,8 +190,8 @@ class Trajectory:
         """
         Number of frames in the trajectory.
 
-        @return: length
-        @rtype: int
+        :return: length
+        :rtype: int
         """
         return self.lenFrames()
 
@@ -238,9 +238,9 @@ class Trajectory:
         Returna a PDBModel with coordinates that are the average of
         all frames.
 
-        @return: PDBModel with average structure of trajectory (no fitting!) 
+        :return: PDBModel with average structure of trajectory (no fitting!) 
                  this trajectory's ref is the source of result model
-        @rtype: PDBModel
+        :rtype: PDBModel
         """
         result = PDBModel( self.getRef(), noxyz=1 )
         result.setXyz( N0.average( self.frames ) )
@@ -252,14 +252,14 @@ class Trajectory:
         """
         Read coordinates from list of pdb files.
 
-        @param pdbs: list of file names
-        @type  pdbs: [str]
-        @param castAll: analyze atom content of each frame for casting
+        :param pdbs: list of file names
+        :type  pdbs: [str]
+        :param castAll: analyze atom content of each frame for casting
                         (default: 0)
-        @type  castAll: 0|1
+        :type  castAll: 0|1
 
-        @return: frames x (N x 3) Numpy array (of float)
-        @rtype: array
+        :return: frames x (N x 3) Numpy array (of float)
+        :rtype: array
         """
         frameList = []
         i = 0
@@ -310,8 +310,8 @@ class Trajectory:
 
     def getRef( self ):
         """
-        @return: reference PDBModel
-        @rtype: PDBModel
+        :return: reference PDBModel
+        :rtype: PDBModel
         """
         return self.ref
 
@@ -320,11 +320,11 @@ class Trajectory:
         """
         Assign new reference model.
 
-        @param refModel: PDBModel with same number of atoms as in the frames.
-        @type  refModel: PDBModel
+        :param refModel: PDBModel with same number of atoms as in the frames.
+        :type  refModel: PDBModel
 
-        @return: old reference PDBModel
-        @rtype: PDBModel
+        :return: old reference PDBModel
+        :rtype: PDBModel
         """
         if (self.ref and refModel.equals( self.ref ) != [1,1] ) or \
            (self.frames is not None and refModel.lenAtoms() != len( self.frames[0] ) ):
@@ -341,14 +341,14 @@ class Trajectory:
         """
         Concatenate this with other trajectories. The ref model of the
         new Trajectory is a 'semi-deep' copy of this trajectorie's model.
-        (see L{PDBModel.take()} )::
+        (see :class:`PDBModel.take()` )::
            concat( traj [, traj2, traj3, ..] ) -> Trajectory 
 
-        @param traj: one or more Trajectory with identical atoms as this one
-        @type  traj: Trajectories
+        :param traj: one or more Trajectory with identical atoms as this one
+        :type  traj: Trajectories
 
-        @return: concatenated trajecties
-        @rtype: Trajectory
+        :return: concatenated trajecties
+        :rtype: Trajectory
         """
         if len( traj ) == 0:
             return self
@@ -380,14 +380,14 @@ class Trajectory:
         Concatenate 2 trajectories of same (frame) length 'horizontally', i.e.
         for each frame the coordinates of one are appended to the coordinates
         of the other. The ref model of the new trajectory is a 'semi-deep' copy
-        of this trajectory's model (see L{PDBModel.take()} )::
+        of this trajectory's model (see :class:`PDBModel.take()` )::
           concatAtoms( traj1 [traj2, traj3..]) -> Trajectory
 
-        @param traj: one or more Trajectory of the same number of frames
-        @type  traj: Trajectories
+        :param traj: one or more Trajectory of the same number of frames
+        :type  traj: Trajectories
 
-        @return: trajectory with concatenated atoms
-        @rtype: Trajectory        
+        :return: trajectory with concatenated atoms
+        :rtype: Trajectory        
         """
         if len( traj ) == 0:
             return self
@@ -406,16 +406,16 @@ class Trajectory:
 
     def lenFrames( self ):
         """
-        @return: number of frames in trajectory
-        @rtype: int
+        :return: number of frames in trajectory
+        :rtype: int
         """
         return len( self.frames )
 
 
     def lenAtoms( self ):
         """
-        @return: number of atoms in frames
-        @rtype: int
+        :return: number of atoms in frames
+        :rtype: int
         """
         return N0.shape( self.frames )[1]
 
@@ -424,15 +424,15 @@ class Trajectory:
         """
         Get atom mask.
 
-        @param what: Create the mask using::
+        :param what: Create the mask using::
                       - funct( self.ref.atoms[i] ) -> int
                       - list int ( indices )
                       - mask
                       - list of str (atom names)
-        @type  what: any
+        :type  what: any
 
-        @return: list of 1|0  1 x N_atoms
-        @rtype: list[1|0]
+        :return: list of 1|0  1 x N_atoms
+        :rtype: list[1|0]
         """
         return self.getRef().mask( what )
 
@@ -442,11 +442,11 @@ class Trajectory:
         A list with residue numbers mapped to each position. i.e.
         C{ [00001111222222222333..] }
 
-        @param force: calculate even if it already been calculated
-        @type  force: 1|0
+        :param force: calculate even if it already been calculated
+        :type  force: 1|0
 
-        @return: list of int
-        @rtype:  [int]
+        :return: list of int
+        :rtype:  [int]
         """
         if not self.resIndex or not force:
             self.resIndex = self.getRef().resMap()
@@ -458,11 +458,11 @@ class Trajectory:
         """
         Return a copy of the trajectory containing only the specified frames.
 
-        @param indices: positions to take
-        @type  indices: [int]
+        :param indices: positions to take
+        :type  indices: [int]
 
-        @return: copy of this Trajectory (fewer frames, semi-deep copy of ref)
-        @rtype: Trajectory
+        :return: copy of this Trajectory (fewer frames, semi-deep copy of ref)
+        :rtype: Trajectory
         """
         ## remove out-of-bound indices
         indices = N0.compress( N0.less( indices, len( self.frames) ), indices )
@@ -492,8 +492,8 @@ class Trajectory:
         """
         Copy trajectory.
 
-        @return: Trajectory (or sub-class), copy of this trajectory
-        @rtype: Trajectory
+        :return: Trajectory (or sub-class), copy of this trajectory
+        :rtype: Trajectory
         """
         return self.takeFrames( list(range( self.lenFrames())) )
 
@@ -502,11 +502,11 @@ class Trajectory:
         """
         Compress trajectory with a frame mask. 
 
-        @param mask: frame mask, 1 x N_frames
-        @type  mask: [1|0]
+        :param mask: frame mask, 1 x N_frames
+        :type  mask: [1|0]
 
-        @return: copy of this Trajectory (fewer frames, semi-deep copy of ref)
-        @rtype: Trajectory
+        :return: copy of this Trajectory (fewer frames, semi-deep copy of ref)
+        :rtype: Trajectory
         """
         return self.takeFrames( N0.nonzero( mask ) )
 
@@ -516,8 +516,8 @@ class Trajectory:
         Replace content of this trajectory by content of given traj.
         No deep-copying, only references are taken.
 
-        @param traj: trajectory
-        @type  traj: trajectory
+        :param traj: trajectory
+        :type  traj: trajectory
         """
         self.frames = traj.frames
         self.ref = traj.ref
@@ -528,10 +528,10 @@ class Trajectory:
 
     def keepFrames( self, indices ):
         """
-        in-place version of L{takeFrames}. keepFrames( indices ) -> None
+        in-place version of :class:`takeFrames`. keepFrames( indices ) -> None
 
-        @param indices: frame numbers
-        @type  indices: [int]
+        :param indices: frame numbers
+        :type  indices: [int]
         """
         r = self.takeFrames( indices )
         self.replaceContent( r )
@@ -541,8 +541,8 @@ class Trajectory:
         """
         Remove given frames from this trajectory object.
 
-        @param indices: frame numbers
-        @type  indices: [int]
+        :param indices: frame numbers
+        :type  indices: [int]
         """
         i = list(range( self.lenFrames()))
         i.remove( N0.array(indices) )
@@ -554,13 +554,13 @@ class Trajectory:
         Take atoms from frames::
           takeAtoms( indices, type=None ) -> copy of Trajectory
 
-        @param indices: list of atom indices
-        @type  indices: [int]
-        @param returnClass: default: None, same class as this object
-        @type  returnClass: class OR None
+        :param indices: list of atom indices
+        :type  indices: [int]
+        :param returnClass: default: None, same class as this object
+        :type  returnClass: class OR None
 
-        @return: copy of this Trajectory (with fewer atoms)
-        @rtype: Trajectory        
+        :return: copy of this Trajectory (with fewer atoms)
+        :rtype: Trajectory        
         """
 
         returnClass = returnClass or self.__class__
@@ -588,24 +588,24 @@ class Trajectory:
         """
         Get copy of this trajectory with only atoms marked 1 in aMask.
 
-        @param aMask: atom mask [10011100101111...],
+        :param aMask: atom mask [10011100101111...],
                       lst 1 x N_atoms of 1(keep) or 0
-        @type  aMask: [1|0]
-        @param returnClass: default: None, same class as this object
-        @type  returnClass: class
+        :type  aMask: [1|0]
+        :param returnClass: default: None, same class as this object
+        :type  returnClass: class
 
-        @return: copy of Trajectory with fewer atoms
-        @rtype: Trajectory
+        :return: copy of Trajectory with fewer atoms
+        :rtype: Trajectory
         """
         return self.takeAtoms( N0.nonzero( aMask ), returnClass )
 
 
     def keepAtoms( self, indices ):
         """
-        in-place version of L{takeAtoms}. keepAtoms( indices ) -> None
+        in-place version of :class:`takeAtoms`. keepAtoms( indices ) -> None
 
-        @param indices: atom numbers
-        @type  indices: [int]
+        :param indices: atom numbers
+        :type  indices: [int]
         """
         r = self.takeAtoms( indices )
         self.replaceContent( r )
@@ -616,21 +616,21 @@ class Trajectory:
         Remove atoms from all frames of trajectory and from reference
         structure.
 
-        @param what: Specify what atoms to remove::
+        :param what: Specify what atoms to remove::
                       - function( atom_dict ) -> 1 || 0    or (1..remove)
                       - list of int [4, 5, 6, 200, 201..], indices of atoms
                           to remove
                       - list of int [11111100001101011100..N_atoms], mask
                           (1..remove)
                       - int, remove atom with this index
-        @type  what: any
+        :type  what: any
 
 
-        @return: N0.array(1 x N_atoms_old) of 0||1, mask used to compress the
+        :return: N0.array(1 x N_atoms_old) of 0||1, mask used to compress the
                  atoms and xyz arrays. This mask can be used to apply the
                  same change to another array of same dimension as the
                  old(!) xyz and atoms.
-        @rtype: array
+        :rtype: array
         """
         ## pass what on to PDBModel, collect resulting mask
         mask = N0.logical_not( self.atomMask( what ) )
@@ -644,13 +644,13 @@ class Trajectory:
         """
         Extract some chains from complete Trajectory.
 
-        @param chainLst: chains to isolate
-        @type  chainLst: [int]
-        @param returnClass: default: None, same class as this object
-        @type  returnClass: class
+        :param chainLst: chains to isolate
+        :type  chainLst: [int]
+        :param returnClass: default: None, same class as this object
+        :type  returnClass: class
 
-        @return: Trajectory  with only those chains
-        @rtype: Trajectory
+        :return: Trajectory  with only those chains
+        :rtype: Trajectory
         """
         chainMap = self.ref.chainMap()
 
@@ -667,23 +667,23 @@ class Trajectory:
         for the fit is put into a profile called |prof|_considered
         (i.e. by default 'rms_considered').
 
-        @param mask: atom mask, atoms to consider default: [all]
-        @type  mask: [1|0]
-        @param ref: use as reference, default: None, average Structure
-        @type  ref: PDBModel
-        @param n_it: number of fit iterations, kicking out outliers on the way
+        :param mask: atom mask, atoms to consider default: [all]
+        :type  mask: [1|0]
+        :param ref: use as reference, default: None, average Structure
+        :type  ref: PDBModel
+        :param n_it: number of fit iterations, kicking out outliers on the way
                      1 -> classic single fit, 0 -> until convergence
                      (default: 1)
-        @type  n_it: int
-        @param prof: save rms per frame in profile of this name, ['rms']
-        @type  prof: str
-        @param verbose: print progress info to STDERR (default: 1)
-        @type  verbose: 1|0
-        @param fit: transform frames after match, otherwise just calc rms
+        :type  n_it: int
+        :param prof: save rms per frame in profile of this name, ['rms']
+        :type  prof: str
+        :param verbose: print progress info to STDERR (default: 1)
+        :type  verbose: 1|0
+        :param fit: transform frames after match, otherwise just calc rms
                     (default: 1)          
-        @type  fit: 1|0
-        @param profInfos: additional key=value pairs for rms profile info []
-        @type profInfos: key=value
+        :type  fit: 1|0
+        :param profInfos: additional key=value pairs for rms profile info []
+        :type profInfos: key=value
         """
         if ref is None:
             refxyz = N0.average( self.frames, 0 )
@@ -748,8 +748,8 @@ class Trajectory:
         """
         Apply given transformation to all frames (in place).
 
-        @param rt: rotation translation matrix
-        @type  rt: array( 4 x 4 ) OR array(3 x 3), array(3 x 1)
+        :param rt: rotation translation matrix
+        :type  rt: array( 4 x 4 ) OR array(3 x 3), array(3 x 1)
         """
         if len(rt) == 2:
             r, t = rt[0], rt[1]
@@ -774,13 +774,13 @@ class Trajectory:
         transform the average of all frames onto the reference. To be used
         with parallell trajectories.
 
-        @param refModel: Reference model (default: None)
-        @type  refModel: PDBModel       
-        @param mask: atom mask to apply before fitting
+        :param refModel: Reference model (default: None)
+        :type  refModel: PDBModel       
+        :param mask: atom mask to apply before fitting
                      (default: None, all atoms)
-        @type  mask: [1|0]
-        @param conv: convergence cutoff creterion (default: 1e-6)
-        @type  conv: float
+        :type  mask: [1|0]
+        :param conv: convergence cutoff creterion (default: 1e-6)
+        :type  conv: float
         """
         self.fit( ref=self.ref )
 
@@ -818,10 +818,10 @@ class Trajectory:
         """
         Write (possibly transformed) coordinates back to pdb.
 
-        @param index: frame index in trajectory
-        @type  index: int
-        @param fname: name of new file
-        @type  fname: str 
+        :param index: frame index in trajectory
+        :type  index: int
+        :param fname: name of new file
+        :type  fname: str 
         """
         try:
             self.getPDBModel( index ).writePdb( fname )
@@ -833,10 +833,10 @@ class Trajectory:
         """
         Write coordinates to an NMR-style MODEL/ENDMDL pdb file.
 
-        @param fname: name of new file
-        @type  fname: str
-        @param frames: frame indices (default: None, all)
-        @type  frames: [int]
+        :param fname: name of new file
+        :type  fname: str
+        :param frames: frame indices (default: None, all)
+        :type  frames: [int]
         """
 
         if frames is None:
@@ -872,10 +872,10 @@ class Trajectory:
         """
         Write frames to Amber crd file (w/o box info).
 
-        @param fname: output file name
-        @type  fname: str
-        @param frames: frame indices (default: all)
-        @type  frames: [int]
+        :param fname: output file name
+        :type  fname: str
+        :param frames: frame indices (default: all)
+        :type  frames: [int]
         """
         if frames is None:
             frames = list(range( self.lenFrames()))
@@ -913,11 +913,11 @@ class Trajectory:
         """
         Get PDBModel object for a particular frame of the trajectory.
 
-        @param index: frame index
-        @type  index: int
+        :param index: frame index
+        :type  index: int
 
-        @return: model
-        @rtype: PDBModel
+        :return: model
+        :rtype: PDBModel
         """
         s = PDBModel( self.ref, noxyz=1 )
         s.setXyz( self.frames[ index ] )
@@ -929,26 +929,26 @@ class Trajectory:
         """
         Add/override profile.
 
-        @param name: profile name
-        @type  name: str
-        @param prof: list of values
-        @type  prof: [any]
+        :param name: profile name
+        :type  name: str
+        :param prof: list of values
+        :type  prof: [any]
 
-        @param mask: list 1 x N_items of 0|1, if there are less values
+        :param mask: list 1 x N_items of 0|1, if there are less values
                      than items, provide mask for missing values,
                      N0.sum(mask)==N_items
-        @type  mask: [0|1]
-        @param default: value for items masked.
-        @type  default: any
-        @param asarray: store as list (0), as array (2) or store numbers as
+        :type  mask: [0|1]
+        :param default: value for items masked.
+        :type  default: any
+        :param asarray: store as list (0), as array (2) or store numbers as
                         array but everything else as list (1) (default: 1)
-        @type  asarray: 0|1|2
-        @param comment: goes into info[name]['comment']
-        @type  comment: str
-        @param moreInfo: additional key-value pairs for info[name]
-        @type  moreInfo:
+        :type  asarray: 0|1|2
+        :param comment: goes into info[name]['comment']
+        :type  comment: str
+        :param moreInfo: additional key-value pairs for info[name]
+        :type  moreInfo:
 
-        @raise ProfileError: if length of prof != N_residues
+        :raise ProfileError: if length of prof != N_residues
         """
         self.profiles.set( name, prof, mask, default, asarray=asarray,
                            comment=comment, **moreInfo )
@@ -959,12 +959,12 @@ class Trajectory:
         Get the values of a profile::
           get( name ) -> list of values
 
-        @param name: profile name
-        @type  name: str
-        @param default: default result if no profile is found
-        @type  default: any
+        :param name: profile name
+        :type  name: str
+        :param default: default result if no profile is found
+        :type  default: any
 
-        @raise ProfileError: if no profile is found with |name|
+        :raise ProfileError: if no profile is found with |name|
         """
         return self.profiles.get( name, default )
 
@@ -975,10 +975,10 @@ class Trajectory:
           profileInfo( name ) -> dict with infos about profile
         Guaranteed infos: 'version'->str, 'comment'->str, 'changed'->1|0
 
-        @param name: profile name
-        @type  name: str
+        :param name: profile name
+        :type  name: str
 
-        @raise ProfileError: if no profile is found with |name|
+        :raise ProfileError: if no profile is found with |name|
         """
         return self.profiles.getInfo( name )
 
@@ -988,10 +988,10 @@ class Trajectory:
         Add/Override infos about a given profile::
           e.g. setInfo('relASA', comment='new', params={'bin':'whatif'})
 
-        @param name: profile name
-        @type  name: str
+        :param name: profile name
+        :type  name: str
 
-        @raise ProfileError: if no profile is found with |name|
+        :raise ProfileError: if no profile is found with |name|
         """
         self.profiles.setInfo( name, **args )
 
@@ -1000,15 +1000,15 @@ class Trajectory:
         """
         Create a mask from a profile with optional cutoff values.
 
-        @param profName: profile name
-        @type  profName: str
-        @param cutoff_min: lower cutoff value (default: None)
-        @type  cutoff_min: float
-        @param cutoff_max: upper cutoff value (default: None)
-        @type  cutoff_max: float
+        :param profName: profile name
+        :type  profName: str
+        :param cutoff_min: lower cutoff value (default: None)
+        :type  cutoff_min: float
+        :param cutoff_max: upper cutoff value (default: None)
+        :type  cutoff_max: float
 
-        @return: mask lenFrames x 1|0
-        @rtype: [1|0]
+        :return: mask lenFrames x 1|0
+        :rtype: [1|0]
         """
         return self.profiles.profile2mask( profName, cutoff_min, cutoff_max )
 
@@ -1019,11 +1019,11 @@ class Trajectory:
         with biggles.FramedPlot.show()::
           plotProfile(name1, [name2, ..],[arg1=x, arg2=y])->biggles.FramedPlot
 
-        @param name: profile name
-        @type  name: str
+        :param name: profile name
+        :type  name: str
 
-        @return: plot object
-        @rtype: biggles.FramedPlot
+        :return: plot object
+        :rtype: biggles.FramedPlot
         """
         return self.profiles.plot( *name, **args )
 
@@ -1032,10 +1032,10 @@ class Trajectory:
         """
         Calculate rmsd between each 2 coordinate frames.
 
-        @param aMask: atom mask
-        @type  aMask: [1|0]
-        @return: frames x frames array of float
-        @rtype: array
+        :param aMask: atom mask
+        :type  aMask: [1|0]
+        :return: frames x frames array of float
+        :rtype: array
         """
         frames = self.frames
 
@@ -1063,12 +1063,12 @@ class Trajectory:
         Get RMS of each atom from it's average position in trajectory.
         The frames should be superimposed (fit() ) to a reference.
 
-        @param mask: N x 1 list/Numpy array of 0|1, (N=atoms),
+        :param mask: N x 1 list/Numpy array of 0|1, (N=atoms),
                      atoms to be considered.
-        @type  mask: [1|0]
+        :type  mask: [1|0]
 
-        @return: Numpy array ( N_unmasked x 1 ) of float.
-        @rtype: array
+        :return: Numpy array ( N_unmasked x 1 ) of float.
+        :rtype: array
         """
         frames = self.frames
         if mask is not None:
@@ -1086,20 +1086,20 @@ class Trajectory:
         Get indices of all atoms of a residue and some atoms of its
         neighboring residues (if they belong to the same chain).
 
-        @param res: residue index
-        @type  res: int
-        @param n_neighbores: number of residues to include right and left
-        @type  n_neighbores: int
-        @param right_allowed: array 1 x N_atoms of 1|0, possible neighbore
+        :param res: residue index
+        :type  res: int
+        :param n_neighbores: number of residues to include right and left
+        :type  n_neighbores: int
+        :param right_allowed: array 1 x N_atoms of 1|0, possible neighbore
                               atoms
-        @type  right_allowed: array
-        @param left_allowed: array 1 x N_atoms of 1|0, possible neighbore atoms
-        @type  left_allowed: array 
-        @param rchainMap: array 1 x N_residues of int, chain id of each res
-        @type  rchainMap: array
+        :type  right_allowed: array
+        :param left_allowed: array 1 x N_atoms of 1|0, possible neighbore atoms
+        :type  left_allowed: array 
+        :param rchainMap: array 1 x N_residues of int, chain id of each res
+        :type  rchainMap: array
 
-        @return: atoms of res, atoms of neighbores
-        @rtype: [ int ], [ int ]
+        :return: atoms of res, atoms of neighbores
+        :rtype: [ int ], [ int ]
         """
         ## some defaults.. time-consuming..
         if rchainMap is None:
@@ -1140,18 +1140,18 @@ class Trajectory:
         fitting of each residue to the reference backbone coordinates of itself
         and selected atoms of neighboring residues to the right and left.
 
-        @param mask: N_atoms x 1 array of 0||1, atoms for which fluctuation
+        :param mask: N_atoms x 1 array of 0||1, atoms for which fluctuation
                      should be calculated
-        @type  mask: array
-        @param border_res: number of neighboring residues to use for fitting
-        @type  border_res: int
-        @param left_atoms: atoms (names) to use from these neighbore residues
-        @type  left_atoms: [str]
-        @param right_atoms: atoms (names) to use from these neighbore residues
-        @type  right_atoms: [str]
+        :type  mask: array
+        :param border_res: number of neighboring residues to use for fitting
+        :type  border_res: int
+        :param left_atoms: atoms (names) to use from these neighbore residues
+        :type  left_atoms: [str]
+        :param right_atoms: atoms (names) to use from these neighbore residues
+        :type  right_atoms: [str]
 
-        @return: Numpy array ( N_unmasked x 1 ) of float
-        @rtype: array
+        :return: Numpy array ( N_unmasked x 1 ) of float
+        :rtype: array
         """
         if mask is None:
             mask = N0.ones( len( self.frames[0] ), N0.Int32 )
@@ -1210,13 +1210,13 @@ class Trajectory:
         residue are set to the highest value of any atom in that residue.
         (after applying mask)
 
-        @param atomValues: list 1 x N, values per atom
-        @type  atomValues: [ float ]
-        @param mask: list 1 x N, 0|1, 'master' atoms of each residue
-        @type  mask: [1|0]
+        :param atomValues: list 1 x N, values per atom
+        :type  atomValues: [ float ]
+        :param mask: list 1 x N, 0|1, 'master' atoms of each residue
+        :type  mask: [1|0]
 
-        @return: Numpy array 1 x N of float
-        @rtype: array
+        :return: Numpy array 1 x N of float
+        :rtype: array
         """
         if mask is None:
             mask = N0.ones( len( self.frames[0] ), N0.Int32 )
@@ -1245,12 +1245,12 @@ class Trajectory:
         Set value of all atoms of each residue to fluctuation of
         its gamma atom ( CG, SG, OG ).
 
-        @param fluctList: 1x N, precalculated list of values or
+        :param fluctList: 1x N, precalculated list of values or
                           None (will be calculated new)
-        @type  fluctList: [float]
+        :type  fluctList: [float]
 
-        @return: Numpy array 1 x N of float
-        @rtype: [float]
+        :return: Numpy array 1 x N of float
+        :rtype: [float]
         """
         if fluctList is None:
             fluctList = self.getFluct_local()
@@ -1268,13 +1268,13 @@ class Trajectory:
         Convert list of atomic fluctuations to list of residue
         fluctuation.
 
-        @param atomFluctList: array 1 x N_atoms of float
-        @type  atomFluctList: [float]
+        :param atomFluctList: array 1 x N_atoms of float
+        :type  atomFluctList: [float]
 
-        @return: array 1 x N_residues of float
-        @rtype: [float]
+        :return: array 1 x N_residues of float
+        :rtype: [float]
 
-        @raise TrajError: if result length <> N_residues: 
+        :raise TrajError: if result length <> N_residues: 
         """
         if atomFluctList is None:
             atomFluctList = self.getFluct_global()
@@ -1300,13 +1300,13 @@ class Trajectory:
         """
         Compare to lists by their first, then second, etc item.
 
-        @param l1: list
-        @type  l1: [float]
-        @param l2: list
-        @type  l2: [float]
+        :param l1: list
+        :type  l1: [float]
+        :param l2: list
+        :type  l2: [float]
 
-        @return:  result of comparison (-1 == l1[i] < l2[i])
-        @rtype: [-1|0|1]
+        :return:  result of comparison (-1 == l1[i] < l2[i])
+        :rtype: [-1|0|1]
         """
         result = cmp( l1[0], l2[0] )
 
@@ -1319,17 +1319,17 @@ class Trajectory:
     def __cmpFileNames( self, f1, f2 ):
         """
         Compare 2 file names by the numbers contained in them using the
-        regular expression L{ex_numbers} (or as strings, if no numbers are
+        regular expression :class:`ex_numbers` (or as strings, if no numbers are
         found)::
            f1, f2 - strings, e.g. 'frame_1_188.pdb'
 
-        @param f1: file name
-        @type  f1: str
-        @param f2: file name
-        @type  f2: str
+        :param f1: file name
+        :type  f1: str
+        :param f2: file name
+        :type  f2: str
 
-        @return: result of comparison (-1 == f1 < f2)
-        @rtype: -1|0|+1
+        :return: result of comparison (-1 == f1 < f2)
+        :rtype: -1|0|+1
         """
         try:
             ## extract list of numbers from file names
@@ -1354,8 +1354,8 @@ class Trajectory:
         some numbers seperated by non-number characters. Sorting is done after
         Nr1 then Nr2 then..
 
-        @return: list of frame sort order
-        @rtype: [int]
+        :return: list of frame sort order
+        :rtype: [int]
         """
         names = self.frameNames
 
@@ -1375,10 +1375,10 @@ class Trajectory:
         Apply to a trajectory object to sort the frames and names according
         to the sortList.
 
-        @param sortList: list to sort after (default: None)
-        @type  sortList: [int]
+        :param sortList: list to sort after (default: None)
+        :type  sortList: [int]
 
-        @raise TrajError: if sortList doesn't fit number of frames or names
+        :raise TrajError: if sortList doesn't fit number of frames or names
         """
         if sortList is None:
             sortList = self.argsortFrames()
@@ -1393,14 +1393,14 @@ class Trajectory:
 
     def sortAtoms( self, f_cmp=None ):
         """
-        Sorts atoms B{WITHIN} residues in reference and all frames.
+        Sorts atoms **WITHIN** residues in reference and all frames.
 
-        @param f_cmp: atom comparison function
+        :param f_cmp: atom comparison function
                       C{ f_cmp( atoms[i], atoms[j]) -> -1|0|+1 }
                       (default: alphabetic ordering by atom['name'] )
-        @type  f_cmp: function
+        :type  f_cmp: function
 
-        @raise PDBModelError: if sorting has changed number of atoms in
+        :raise PDBModelError: if sorting has changed number of atoms in
                               reference
         """
         ## Get the atom sort list from the reference structure
@@ -1413,11 +1413,11 @@ class Trajectory:
         """
         extract PCA results for certain frames.
 
-        @param indices: frame indecies
-        @type  indices: [int]
+        :param indices: frame indecies
+        :type  indices: [int]
 
-        @return: list of pca values
-        @rtype: [float]        
+        :return: list of pca values
+        :rtype: [float]        
         """
         result = copy.deepcopy( getattr(self, 'pc', None ))
 
@@ -1437,11 +1437,11 @@ class Trajectory:
         """
         Compress PCA results using a frame mask.
 
-        @param fMask: frame mask
-        @type  fMask: [1|0]
+        :param fMask: frame mask
+        :type  fMask: [1|0]
 
-        @return: list of pca values
-        @rtype: [float]        
+        :return: list of pca values
+        :rtype: [float]        
         """
         return self.__takePca( N0.nonzero( fMask ) )
 
@@ -1450,19 +1450,19 @@ class Trajectory:
         """
         Get the results form a principal component analysis.
 
-        @param aMask: 1 x N_atoms of 1|0, atom mask, default: last one used
-        @type  aMask: [1|0]
-        @param fMask: 1 x N_frames of 1|0, frame mask, default: all
-        @type  fMask: [1|0]
-        @param fit: fit to average structure before doing the PC analysis
+        :param aMask: 1 x N_atoms of 1|0, atom mask, default: last one used
+        :type  aMask: [1|0]
+        :param fMask: 1 x N_frames of 1|0, frame mask, default: all
+        :type  fMask: [1|0]
+        :param fit: fit to average structure before doing the PC analysis
                     (default: 1)
-        @type  fit: 1|0
+        :type  fit: 1|0
 
-        @return: Dictionary with results from the PC analysis::
+        :return: Dictionary with results from the PC analysis::
                    dic {'p': projection of each frame in PC space,
                         'e': list of eigen values,
                         'fit':.., 'aMask':.., 'fMask':.. parameters used}
-        @rtype: dict
+        :rtype: dict
         """
         if aMask is None:
             aMask = N0.ones( self.getRef().lenAtoms(), N0.Int32 )
@@ -1494,16 +1494,16 @@ class Trajectory:
         """
         Calculate principal components of trajectory frames.
 
-        @param atomMask: 1 x N_atoms, [111001110..] atoms to consider
+        :param atomMask: 1 x N_atoms, [111001110..] atoms to consider
                          (default: all)
-        @type  atomMask: [1|0]
-        @param frameMask: 1 x N_frames, [001111..] frames to consider
+        :type  atomMask: [1|0]
+        :param frameMask: 1 x N_frames, [001111..] frames to consider
                           (default all )
-        @type  frameMask: [1|0]
+        :type  frameMask: [1|0]
 
-        @return: (N_frames x N_frames), (1 x N_frames),
+        :return: (N_frames x N_frames), (1 x N_frames),
                  projection of each frame in PC space, eigenvalue of each PC
-        @rtype: array, array, array
+        :rtype: array, array, array
         """
         if frameMask is None: frameMask = N0.ones( len( self.frames ), N0.Int32 )
 
@@ -1534,20 +1534,20 @@ class Trajectory:
         Morph between the two extreme values of a single principal
         component.
 
-        @param ev: EigenVector to visualize
-        @type  ev: int
-        @param steps: number of intermediate frames
-        @type  steps: int
-        @param factor: exageration factor (default: 1 = No exageration)
-        @type  factor: float
-        @param ref: take other eigenvecors from this frame (default: 1)
-        @type  ref: int
-        @param morph: morph between min and max (1) or take real values (0)
+        :param ev: EigenVector to visualize
+        :type  ev: int
+        :param steps: number of intermediate frames
+        :type  steps: int
+        :param factor: exageration factor (default: 1 = No exageration)
+        :type  factor: float
+        :param ref: take other eigenvecors from this frame (default: 1)
+        :type  ref: int
+        :param morph: morph between min and max (1) or take real values (0)
                       (default: 1)
-        @type  morph: 1|0
+        :type  morph: 1|0
 
-        @return: Trajectory with frames visualizing the morphing.
-        @rtype: Trajectory
+        :return: Trajectory with frames visualizing the morphing.
+        :rtype: Trajectory
         """
         fit = 1
         if self.pc is not None:

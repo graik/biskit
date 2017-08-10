@@ -33,18 +33,18 @@ try:
     from biskit.LogFile import LogFile, StdLog, ErrLog
     from biskit.Errors import BiskitError
 
-##     from ExeConfig import ExeConfig, ExeConfigError
-##     from ExeConfigCache import ExeConfigCache
-##     from Executor import Executor, TemplateError
+    from biskit.ExeConfig import ExeConfig, ExeConfigError
+    from biskit.ExeConfigCache import ExeConfigCache
+    from biskit.Executor import Executor, TemplateError
 
-##     from AmberCrdParser import AmberCrdParser, ParseError
-##     from AmberRstParser import AmberRstParser
-##     from PDBCleaner import PDBCleaner, CleanerError
+##    from biskit.AmberCrdParser import AmberCrdParser, ParseError
+##    from biskit.AmberRstParser import AmberRstParser
+##    from biskit.PDBCleaner import PDBCleaner, CleanerError
 ##     from Blast2Seq import Blast2Seq
 
 ##     from EDParser import EZDParser
 
-##     from EnsembleTraj import EnsembleTraj
+##    from biskit.EnsembleTraj import EnsembleTraj
     from biskit.LocalPath import LocalPath, LocalPathError
 
 ##     from PCRModel import PCRModel
@@ -56,29 +56,29 @@ try:
 ##     from Pymoler import Pymoler
 
 ##     from TrajCluster import TrajCluster
-##     from Trajectory import Trajectory, TrajError, TrajProfiles
+##    from biskit.Trajectory import Trajectory, TrajError, TrajProfiles
 ##     from XplorInput import XplorInput, XplorInputError
 ##     from Xplorer import Xplorer, XplorerError, RunError
 ##     from ColorSpectrum import ColorSpectrum
 ##     from MatrixPlot import MatrixPlot
 
-##     from AmberLeap import AmberLeap
-##     from AmberParmBuilder import AmberParmBuilder
+    from biskit.AmberLeap import AmberLeap
+    from biskit.AmberParmBuilder import AmberParmBuilder
 
 ##     from Hmmer import Hmmer
 ##     from SurfaceRacer import SurfaceRacer, SurfaceRacer_Error
 ##     from DSSP import Dssp, Dssp_Error
 ##     from FuzzyCluster import FuzzyCluster
 
-##     from tmalign import TMAlign
+    from biskit.tmalign import TMAlign
 ##     from reduce import Reduce
 
 ##     from ModelList import ModelList
 ##     from CommandLine import CommandLine
     
     from biskit.amberResidues import AmberResidueType, AmberPrepParser
-##     from amberResidueLibrary import AmberResidueLibrary,\
-##                                     AmberResidueLibraryError
+    from biskit.amberResidueLibrary import AmberResidueLibrary,\
+                                           AmberResidueLibraryError
 ##     from atomCharger import AtomCharger
 ##     from delphi import Delphi, DelphiError
 

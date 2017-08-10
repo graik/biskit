@@ -51,21 +51,21 @@ class AmberCrdEntropist( Executor ):
     def __init__( self, f_parm, f_crd, f_template=None,
                   s=0, e=None, step=1, **kw ):
         """
-        @param f_parm: path to amber topology file
-        @type  f_parm: str
-        @param f_crd: path to amber trajectory file
-        @type  f_crd: str
-        @param f_template: alternative ptraj input template (default: None)
-        @type  f_template: str 
-        @param s: start frame (default: 0, first)
-        @type  s: int
-        @param e: end frame (default: None, last)
-        @type  e: int
-        @param step: frame offset (default: 1, no offset )
-        @type  step: int
+        :param f_parm: path to amber topology file
+        :type  f_parm: str
+        :param f_crd: path to amber trajectory file
+        :type  f_crd: str
+        :param f_template: alternative ptraj input template (default: None)
+        :type  f_template: str 
+        :param s: start frame (default: 0, first)
+        :type  s: int
+        :param e: end frame (default: None, last)
+        :type  e: int
+        :param step: frame offset (default: 1, no offset )
+        :type  step: int
 
-        @param kw: additional key=value parameters for Executor:
-        @type  kw: key=value pairs
+        :param kw: additional key=value parameters for Executor:
+        :type  kw: key=value pairs
         ::
           debug    - 0|1, keep all temporary files (default: 0)
           verbose  - 0|1, print progress messages to log (log != STDOUT)
@@ -97,8 +97,8 @@ class AmberCrdEntropist( Executor ):
         """
         Version of class.
         
-        @return: version
-        @rtype: str
+        :return: version
+        :rtype: str
         """
         return 'AmberCrdEntropist $Revision: 1086 $'
 
@@ -107,8 +107,8 @@ class AmberCrdEntropist( Executor ):
         """
         Build the command string.
         
-        @return: command
-        @rtype: str
+        :return: command
+        :rtype: str
         """        
         return "%s %s %s" % (self.exe.bin, self.f_parm, self.f_in)
 
@@ -142,13 +142,13 @@ class AmberCrdEntropist( Executor ):
         """
         Extract results from ptraj.
         
-        @param f_out: result of ptraj run
-        @type  f_out: str
+        :param f_out: result of ptraj run
+        :type  f_out: str
 
-        @return: extracted prtaj result
-        @rtype: dict
+        :return: extracted prtaj result
+        :rtype: dict
 
-        @raise EntropistError: if unexpected end of ptraj output file
+        :raise EntropistError: if unexpected end of ptraj output file
         """
         ## regular expressions for parsing of ptraj output
         re_thermo= re.compile('- Thermochemistry -')

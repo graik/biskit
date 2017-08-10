@@ -33,10 +33,10 @@ class LogFile:
 
     def __init__(self, fname, mode='w'):
         """
-        @param fname: name of log file
-        @type  fname: str
-        @param mode: mode (default: w)
-        @type  mode: str
+        :param fname: name of log file
+        :type  fname: str
+        :param mode: mode (default: w)
+        :type  mode: str
         """
         self.fname = T.absfile( fname )
         self.mode  = mode
@@ -47,8 +47,8 @@ class LogFile:
         """
         Open file only when needed for first time.
 
-        @return: open file handle
-        @rtype: object
+        :return: open file handle
+        :rtype: object
         """
         if self._f is None:
             self._f = open( self.fname, self.mode )
@@ -58,15 +58,15 @@ class LogFile:
 
     def write(self, s):
         """Synonym for add_nobreak.
-        @param s: line
-        @type  s: str
+        :param s: line
+        :type  s: str
         """
         self.add_nobreak( s )
 
     def writeln(self, s):
         """Synonym for add.
-        @param s: line
-        @type  s: str
+        :param s: line
+        :type  s: str
         """
         self.add(s)
 
@@ -74,8 +74,8 @@ class LogFile:
         """
         Add new line to logfile and flush
 
-        @param s: line
-        @type  s: str        
+        :param s: line
+        :type  s: str        
         """
         if not type(s) is list:
             s = [ s ]
@@ -91,8 +91,8 @@ class LogFile:
         """
         Add new line without creating a linebreak to logfile and flush
 
-        @param s: line
-        @type  s: str
+        :param s: line
+        :type  s: str
         """
         self.f().write(s)
         self.f().flush()

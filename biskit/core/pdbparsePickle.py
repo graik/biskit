@@ -43,9 +43,9 @@ class PDBParsePickle( PDBParseModel ):
         >>> if ParsePDBModel.supports( model ):
         >>>     ...
         
-        @return: True if the given source is supported by this parser
+        :return: True if the given source is supported by this parser
                  implementation (equivalent to isinstance( source, PDBModel) )
-        @rtype: bool
+        :rtype: bool
         """
         return (type(source) is str) or isinstance(source, B.LocalPath)
 
@@ -58,8 +58,8 @@ class PDBParsePickle( PDBParseModel ):
         >>> if ParsePDBModel.description():
         >>>     ...
 
-        @return: short free text description of the supported format
-        @rtype: str
+        :return: short free text description of the supported format
+        :rtype: str
         """
         return 'pickled PDBModel (file)'
         
@@ -73,14 +73,14 @@ class PDBParsePickle( PDBParseModel ):
         The same holds for coordinates (xyzChanged=0).
         However, existing profiles or coordinates or fields remain untouched.
 
-        @param model: existing model
-        @type  model: PDBModel
-        @param source: source PDB file or pickled PDBModel or PDBModel object
-        @type  source: str || file || PDBModel
-        @param skipRes: list residue names that should not be parsed
-        @type  skipRes: [ str ]
-        @param updateMissing: check source for additional profiles [0] 
-        @type  updateMissing: 1|0
+        :param model: existing model
+        :type  model: PDBModel
+        :param source: source PDB file or pickled PDBModel or PDBModel object
+        :type  source: str || file || PDBModel
+        :param skipRes: list residue names that should not be parsed
+        :type  skipRes: [ str ]
+        :param updateMissing: check source for additional profiles [0] 
+        :type  updateMissing: 1|0
         """
         try:
             if force or updateMissing or self.needsUpdate( model ):

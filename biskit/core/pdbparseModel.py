@@ -23,8 +23,7 @@
 """
 Parse a in-memory PDBModel instance into a new PDBModel
 
-@see L{PDBModel}
-@see L{PDBParserFactory}
+.. seealso:: `biskit.PDBModel`, `biskit.core.PDBParserFactory`
 """
 import biskit.core.oldnumeric as N0
 
@@ -44,9 +43,9 @@ class PDBParseModel( PDBParser ):
         >>> if ParsePDBModel.supports( model ):
         >>>     ...
         
-        @return: True if the given source is supported by this parser
+        :return: True if the given source is supported by this parser
                  implementation (equivalent to isinstance( source, PDBModel) )
-        @rtype: bool
+        :rtype: bool
         """
         return isinstance( source, B.PDBModel )
 
@@ -59,8 +58,8 @@ class PDBParseModel( PDBParser ):
         >>> if ParsePDBModel.description():
         >>>     ...
 
-        @return: short free text description of the supported format
-        @rtype: str
+        :return: short free text description of the supported format
+        :rtype: str
         """
         return 'in-memory instances of PDBModel'
         
@@ -74,14 +73,14 @@ class PDBParseModel( PDBParser ):
         The same holds for coordinates (xyzChanged=0).
         However, existing profiles or coordinates or fields remain untouched.
 
-        @param model: existing model
-        @type  model: PDBModel
-        @param source: PDBModel object
-        @type  source: str | file | PDBModel
-        @param skipRes: list residue names that should not be parsed
-        @type  skipRes: [ str ]
-        @param updateMissing: check source for additional profiles [0] 
-        @type  updateMissing: 1|0
+        :param model: existing model
+        :type  model: PDBModel
+        :param source: PDBModel object
+        :type  source: str | file | PDBModel
+        :param skipRes: list residue names that should not be parsed
+        :type  skipRes: [ str ]
+        :param updateMissing: check source for additional profiles [0] 
+        :type  updateMissing: 1|0
         """
         try:
             ## atoms and/or coordinates need to be updated from PDB

@@ -41,8 +41,8 @@ class AmberRstParser:
 
     def __init__( self, frst ):
         """
-        @param frst: input restart file
-        @type  frst: str
+        :param frst: input restart file
+        :type  frst: str
         """
         self.frst = T.absfile( frst )
         self.crd  = open( self.frst )
@@ -68,8 +68,8 @@ class AmberRstParser:
     def __nextLine( self ):
         """Extract next line of coordinates from crd file
 
-        @return: coordinates
-        @rtype: [float]    
+        :return: coordinates
+        :rtype: [float]    
         """
         l = self.crd.readline()
         if l == '':
@@ -82,8 +82,8 @@ class AmberRstParser:
     def __frame( self ):
         """Collect next complete coordinate frame
 
-        @return: coordinate frame
-        @rtype: array
+        :return: coordinate frame
+        :rtype: array
         """
         self.xyz = [ self.__nextLine() for i in range(self.lines_per_frame) ]
 
@@ -93,10 +93,10 @@ class AmberRstParser:
     def getXyz( self ):
         """Get coordinate array.
 
-        @return: coordinates, N0.array( N x 3, 'f')
-        @rtype: array
+        :return: coordinates, N0.array( N x 3, 'f')
+        :rtype: array
 
-        @raise ParseError: if can't interprete second line
+        :raise ParseError: if can't interprete second line
         """
         if not self.xyz:
 
@@ -124,13 +124,13 @@ class AmberRstParser:
         """
         Get model.
 
-        @param ref: reference with same number and order of atoms
-        @type  ref: PDBModel
-        @param rnAmber: rename Amber to standard residues (HIE, HID, HIP, CYX)
-        @type  rnAmber: 1|0
+        :param ref: reference with same number and order of atoms
+        :type  ref: PDBModel
+        :param rnAmber: rename Amber to standard residues (HIE, HID, HIP, CYX)
+        :type  rnAmber: 1|0
 
-        @return: PDBModel
-        @rtype: PDBModel
+        :return: PDBModel
+        :rtype: PDBModel
         """
         if not self.xyz:
             self.getXyz()
@@ -147,8 +147,8 @@ class AmberRstParser:
         """
         Return the first line of Amber crd.
 
-        @return: first line of Amber crd formatted coordinate block
-        @rtype: str
+        :return: first line of Amber crd formatted coordinate block
+        :rtype: str
         """
         if not self.xyz:
             self.getXyz()
@@ -165,12 +165,12 @@ class AmberRstParser:
         Write/Append Amber-formatted block of coordinates to a file.
         If a file handle is given, the file will not be closed.
 
-        @param fcrd: file to write to
-        @type  fcrd: str or file object
-        @param append: append to existing file (default: 1)
-        @type  append: 0|1
-        @param lastAtom: skip all atoms beyond this one (default: None)
-        @type  lastAtom: int
+        :param fcrd: file to write to
+        :type  fcrd: str or file object
+        :param append: append to existing file (default: 1)
+        :type  append: 0|1
+        :param lastAtom: skip all atoms beyond this one (default: None)
+        :type  lastAtom: int
         """
         if not self.xyz:
             self.getXyz()

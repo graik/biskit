@@ -58,77 +58,77 @@ class AmberEntropist( AmberCrdEntropist ):
                   fit_s=None, fit_e=None, memsave=1,
                   **kw ):
         """
-        @param traj: path to 1 or 2 pickled Trajectory instances
+        :param traj: path to 1 or 2 pickled Trajectory instances
                      (2 separated by '+', e.g. 'rec.traj+lig.traj')
-        @type  traj: str
-        @param parm: try using existing parm file & keep it [create+discard]
-        @type  parm: str
-        @param crd: target file for amber crd & keep it (default: discard)
-        @type  crd: str
-        @param ref: superimpose onto this structure
-        @type  ref: str|PDBModel|Complex
-        @param cast: equalize atom content against ref (if given) (default: 1)
-        @type  cast: 0|1
+        :type  traj: str
+        :param parm: try using existing parm file & keep it [create+discard]
+        :type  parm: str
+        :param crd: target file for amber crd & keep it (default: discard)
+        :type  crd: str
+        :param ref: superimpose onto this structure
+        :type  ref: str|PDBModel|Complex
+        :param cast: equalize atom content against ref (if given) (default: 1)
+        :type  cast: 0|1
 
-        @param chains: extract chains from traj (default: None, all chains)
-        @type  chains: [int]
-        @param border: 1st chain of 2nd molecule; required for split, shift,
+        :param chains: extract chains from traj (default: None, all chains)
+        :type  chains: [int]
+        :param border: 1st chain of 2nd molecule; required for split, shift,
                        shuffle if traj is not already a tuple of trajectories
-        @type  border: int
-        @param split: split trajectory after *border* and fit the two halfs
+        :type  border: int
+        :param split: split trajectory after *border* and fit the two halfs
                       separately (default: 0)
-        @type  split: 1|0
-        @param shift: recombine rec and lig member trajectories, should
+        :type  split: 1|0
+        :param shift: recombine rec and lig member trajectories, should
                       disrupt correlations between rec and lig, requires
                       *chains* or 2 traj files to identify rec (default: 0)
-        @type  shift: int
-        @param shuffle: shuffle the order of frames for one trajectory half,
+        :type  shift: int
+        :param shuffle: shuffle the order of frames for one trajectory half,
                         requires *border* or 2 traj files to identify rec
-        @type  shuffle: 0|1
-        @param s: start frame of complete traj (default: 0)
-        @type  s: int
-        @param e: stop frame of complete traj (default: None)
-        @type  e: int
-        @param ss: start frame of single member trajectories (only works
+        :type  shuffle: 0|1
+        :param s: start frame of complete traj (default: 0)
+        :type  s: int
+        :param e: stop frame of complete traj (default: None)
+        :type  e: int
+        :param ss: start frame of single member trajectories (only works
                    with EnsembleTraj; overrides s,e) (default: 0)
-        @type  ss: int
-        @param se: stop frame of single member trajectories (only works
+        :type  ss: int
+        :param se: stop frame of single member trajectories (only works
                    with EnsembleTraj; overrides s,e) (default: None)
-        @type  se: int                 
-        @param step: frame offset (default: 1, no offset)
-        @type  step: int
-        @param thin: use only randomly distributed fraction of frames
+        :type  se: int                 
+        :param step: frame offset (default: 1, no offset)
+        :type  step: int
+        :param thin: use only randomly distributed fraction of frames
                      (default: all)
-        @type  thin: float
-        @param atoms: atom names to consider (default: all)
-        @type  atoms: [str]
-        @param heavy: remove hydrogens (default: 0)
-        @type  heavy: 1|0
-        @param protein: remove all non-protein atoms (default: don't)
-        @type  protein: 1|0
-        @param solvent: retain solvent and ions (default: 0)
-        @type  solvent: 1|0
-        @param ex: exclude member trajectories
-        @type  ex: [int] OR ([int],[int])
-        @param ex_n: exclude last n members  OR...                
-        @type  ex_n: int
-        @param ex3: exclude *ex3*rd tripple of trajectories  (default: 0)
+        :type  thin: float
+        :param atoms: atom names to consider (default: all)
+        :type  atoms: [str]
+        :param heavy: remove hydrogens (default: 0)
+        :type  heavy: 1|0
+        :param protein: remove all non-protein atoms (default: don't)
+        :type  protein: 1|0
+        :param solvent: retain solvent and ions (default: 0)
+        :type  solvent: 1|0
+        :param ex: exclude member trajectories
+        :type  ex: [int] OR ([int],[int])
+        :param ex_n: exclude last n members  OR...                
+        :type  ex_n: int
+        :param ex3: exclude *ex3*rd tripple of trajectories  (default: 0)
                     (index starts with 1! 0 to exclude nothing) OR....
-        @type  ex3: int
-        @param ex1: exclude *ex1*-th member remaining after applying *ex*
+        :type  ex3: int
+        :param ex1: exclude *ex1*-th member remaining after applying *ex*
                     (default: None)(index starts with 1! 0 to exclude nothing)
-        @type  ex1: int
-        @param fit_s: fit to average of different frame slice 
-        @type  fit_s: int|None
-        @param fit_e: fit to average of different frame slice 
-        @type  fit_e: int|None
-        @param memsave: delete internal trajectory after writing crd
+        :type  ex1: int
+        :param fit_s: fit to average of different frame slice 
+        :type  fit_s: int|None
+        :param fit_e: fit to average of different frame slice 
+        :type  fit_e: int|None
+        :param memsave: delete internal trajectory after writing crd
                         (default: 1)
-        @type  memsave: 1|0
+        :type  memsave: 1|0
 
-        @param kw: additional key=value parameters for AmberCrdEntropist
+        :param kw: additional key=value parameters for AmberCrdEntropist
                    and Executor:
-        @type  kw: key=value pairs
+        :type  kw: key=value pairs
         ::
           ... parameters for AmberCrdEntropist
           f_template - str, alternative ptraj input template
@@ -243,14 +243,14 @@ class AmberEntropist( AmberCrdEntropist ):
         Fit trajectory until convergence onto it's own average and then
         transform the average of all frames onto the reference.
         
-        @param traj: trajectory in which to fit frames
-        @type  traj: Trajectory  
-        @param refModel: reference PDBModel
-        @type  refModel: PDBModel
-        @param mask: atom mask for superposition (default: all)
-        @type  mask: [1|0]
-        @param conv: convergence criteria (default: 1e-6)
-        @type  conv: float
+        :param traj: trajectory in which to fit frames
+        :type  traj: Trajectory  
+        :param refModel: reference PDBModel
+        :type  refModel: PDBModel
+        :param mask: atom mask for superposition (default: all)
+        :type  mask: [1|0]
+        :param conv: convergence criteria (default: 1e-6)
+        :type  conv: float
         """
         self.fit_e = self.fit_e or len( traj )
         self.fit_s = self.fit_s or 0
@@ -298,11 +298,11 @@ class AmberEntropist( AmberCrdEntropist ):
         Split file name::
           split(traj1.dat+traj2.dat) -> (traj1.dat, traj2.dat)
         
-        @param f: file name
-        @type  f: str
+        :param f: file name
+        :type  f: str
 
-        @return: split filename
-        @rtype: str, str
+        :return: split filename
+        :rtype: str, str
         """
         if f.find("+") != -1 :
             split = f.find("+")
@@ -317,11 +317,11 @@ class AmberEntropist( AmberCrdEntropist ):
         """
         Remove non protein atoms and H if needed.
 
-        @param m: model to clean
-        @type  m: PDBModel
+        :param m: model to clean
+        :type  m: PDBModel
 
-        @return: cleaned model
-        @rtype: PDBModel      
+        :return: cleaned model
+        :rtype: PDBModel      
         """
         if self.protein:            
             m.keep( N0.nonzero( m.maskProtein() ) )
@@ -334,13 +334,13 @@ class AmberEntropist( AmberCrdEntropist ):
         """
         Load PDBModel directly or extract it from Trajectory.
         
-        @param f: file name of PDB file, pickled PDBModel, or Trajectory
-        @type  f: str
+        :param f: file name of PDB file, pickled PDBModel, or Trajectory
+        :type  f: str
         
-        @return: model
-        @rtype: PDBModel
+        :return: model
+        :rtype: PDBModel
         
-        @raise IOError: if file does not exist
+        :raise IOError: if file does not exist
         """
         p = LocalPath( f )
 
@@ -363,13 +363,13 @@ class AmberEntropist( AmberCrdEntropist ):
         """
         Prepare reference model.
         
-        @param fname: file name 
-        @type  fname: str
+        :param fname: file name 
+        :type  fname: str
 
-        @return: reference structure
-        @rtype: PDBModel|Complex        
+        :return: reference structure
+        :rtype: PDBModel|Complex        
 
-        @raise EntropistError: if unknown reference type
+        :raise EntropistError: if unknown reference type
         """
         if not fname:
             return None
@@ -405,15 +405,15 @@ class AmberEntropist( AmberCrdEntropist ):
         minimal overlap. For 10 trajectories (*n_members*=10), the
         first 3 tripples will be (1,2,3), (4,5,6), (7,8,9).
 
-        @param n_members: number of member trajectories
-        @type  n_members: int
-        @param excluded: excluded member trajectories
-        @type  excluded: [ int ]
-        @param trippleIndex: 
-        @type  trippleIndex: int
+        :param n_members: number of member trajectories
+        :type  n_members: int
+        :param excluded: excluded member trajectories
+        :type  excluded: [ int ]
+        :param trippleIndex: 
+        :type  trippleIndex: int
 
-        @return: the indices of all excluded member trajectories
-        @rtype: [ int ]
+        :return: the indices of all excluded member trajectories
+        :rtype: [ int ]
         """
         remaining = MU.difference( range( n_members ), excluded )
         tripple = self.tripples( remaining, trippleIndex+1 )[-1]
@@ -424,15 +424,15 @@ class AmberEntropist( AmberCrdEntropist ):
         """
         Add one number from range( n_members ) to list of excluded indices
 
-        @param n_members: number of member trajectories
-        @type  n_members: int
-        @param excluded: excluded member trajectories
-        @type  excluded: [ int ]
-        @param index: 
-        @type  index: int
+        :param n_members: number of member trajectories
+        :type  n_members: int
+        :param excluded: excluded member trajectories
+        :type  excluded: [ int ]
+        :param index: 
+        :type  index: int
 
-        @return: the indices of all excluded member trajectories
-        @rtype: [ int ]
+        :return: the indices of all excluded member trajectories
+        :rtype: [ int ]
         """
         remaining = MU.difference( range( n_members ), excluded )
         new_i = remaining[index]
@@ -442,13 +442,13 @@ class AmberEntropist( AmberCrdEntropist ):
     def __exclude( self, traj, exclude ):
         """
         Exclude members from a (set of) Trajectory.
-        @param traj: input trajectory
-        @type traj: EnsembleTraj
-        @param exclude: set of indices to be excluded
-        @type exclude: [ int ]
+        :param traj: input trajectory
+        :type traj: EnsembleTraj
+        :param exclude: set of indices to be excluded
+        :type exclude: [ int ]
 
-        @return: 
-        @rtype: EnsembleTraj
+        :return: 
+        :rtype: EnsembleTraj
         """
         if exclude is None or len( exclude ) == 0:
             return traj
@@ -467,11 +467,11 @@ class AmberEntropist( AmberCrdEntropist ):
         outliers or for error estimation (depending on the parameters
         passed to AmberEntropist). 
 
-        @param t: one or two ensembles of trajectories
-        @type t: EnsembleTraj OR (EnsembleTraj, EnsembleTraj )
+        :param t: one or two ensembles of trajectories
+        :type t: EnsembleTraj OR (EnsembleTraj, EnsembleTraj )
 
-        @return: t with some member trajectories excluded, if needed
-        @rtype: EnsembleTraj OR (EnsembleTraj, EnsembleTraj )
+        :return: t with some member trajectories excluded, if needed
+        :rtype: EnsembleTraj OR (EnsembleTraj, EnsembleTraj )
         """
         if self.ex_n:
             self.exclude = list(range( self.ex_n))
@@ -513,15 +513,15 @@ class AmberEntropist( AmberCrdEntropist ):
         """
         Prepare trajectory for Amber.
 
-        @param fname: path to EnsembleTraj OR ( EnsembleTraj, EnsembleTraj )
-        @type  fname: str OR (str,str)
-        @param ref: reference structure
-        @type  ref: EnsembleTraj
-        @param cast: cast to reference (same atom content) (default: 1)
-        @type  cast: 1|0
+        :param fname: path to EnsembleTraj OR ( EnsembleTraj, EnsembleTraj )
+        :type  fname: str OR (str,str)
+        :param ref: reference structure
+        :type  ref: EnsembleTraj
+        :param cast: cast to reference (same atom content) (default: 1)
+        :type  cast: 1|0
 
-        @return: split, fitted or shuffled, etc. trajectory instance
-        @rtype: EnsembleTraj OR (EnsembleTraj, EnsembleTraj )
+        :return: split, fitted or shuffled, etc. trajectory instance
+        :rtype: EnsembleTraj OR (EnsembleTraj, EnsembleTraj )
         """
         ## Load 1 or 2
         if self.__splitFilenames( fname ):
@@ -596,11 +596,11 @@ class AmberEntropist( AmberCrdEntropist ):
         """
         wait with unpickling until another Entropist has finished.
 
-        @param fname: file name
-        @type  fname: str
+        :param fname: file name
+        :type  fname: str
 
-        @return: trajectroy
-        @rtype: Trajectroy
+        :return: trajectroy
+        :rtype: Trajectroy
         """
         flock = fname + '__locked'
 

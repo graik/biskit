@@ -142,8 +142,8 @@ class Residue(object):
  
     def __init__( self, model=None, index=None, terminal=False ):
         """
-        @param model: PDBModel, parent model of this residue
-        @param index: int, position of this residue in model's residue index
+        :param model: PDBModel, parent model of this residue
+        :param index: int, position of this residue in model's residue index
         """
         self.model = weakref.ref( model ) if model else returnNone
         self.i = index or 0
@@ -165,8 +165,8 @@ class Residue(object):
         If the same atom name occurs twice or more (due to alternate positions),
         the second and third occurrence are indexed as 'name_1' and 'name_2'
         respectively.
-        @return: dict connecting atom names to their position within residue
-        @rtype:  {str:int}
+        :return: dict connecting atom names to their position within residue
+        :rtype:  {str:int}
         """
         if self._atom_index is None:
 
@@ -341,7 +341,7 @@ class Residue(object):
     
     def standardAtoms(self):
         """
-        @return: [str], list of standard atom names in standard order
+        :return: [str], list of standard atom names in standard order
         """
         assert self.ref is not None, 'no reference residue defined'
         return self.ref.atomNames()

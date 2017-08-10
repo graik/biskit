@@ -41,14 +41,14 @@ class SettingsManager:
                                                /
                 user.cfg---[SettingsParser]---/
 
-    See L{P.SettingsParser}
-    See L{B.settings}
+    See :class:`P.SettingsParser`
+    See :class:`B.settings`
 
     The default configurations should be located in:
 
-    * C{biskit/Biskit/data/defaults/settings.cfg}      --> L{B.settings}
-    * C{biskit/Biskit/data/defaults/settings_Mod.cfg}  --> L{B.Mod.settings}
-    * C{biskit/Biskit/data/defaults/settings_Dock.cfg} --> L{B.Dock.settings}
+    * C{biskit/Biskit/data/defaults/settings.cfg}      --> :class:`B.settings`
+    * C{biskit/Biskit/data/defaults/settings_Mod.cfg}  --> :class:`B.Mod.settings`
+    * C{biskit/Biskit/data/defaults/settings_Dock.cfg} --> :class:`B.Dock.settings`
 
     The user configurations are expected in files of the same name in
     C{~/.biskit/}.
@@ -92,14 +92,14 @@ class SettingsManager:
 
     def __init__( self, fdefault, fuser, createmissing=False, verbose=1 ):
         """
-        @param fdefault: default configuration file
-        @type  fdedault: str
-        @param fuser: user configuration file
-        @type  fuser: str
-        @param createmissing: create user config file if missing
-        @type  createmissing: bool
-        @param verbose: verbosity level (default: 1)
-        @type  verbose: 1|0
+        :param fdefault: default configuration file
+        :type  fdedault: str
+        :param fuser: user configuration file
+        :type  fuser: str
+        :param createmissing: create user config file if missing
+        :type  createmissing: bool
+        :param verbose: verbosity level (default: 1)
+        :type  verbose: 1|0
         """
         self.verbose = verbose
         self.fdefault = fdefault
@@ -113,13 +113,13 @@ class SettingsManager:
         """
         Override default settings by valid (or equally invalid) user settings.
 
-        @param cfg_default: settings read in from default file
-        @type  cfg_default: dict {'str':SettingsParser.Setting}
-        @param cfg_user   : settings read in from user config file
-        @type  cfg_user   : dict {'str':SettingsParser.Setting}
+        :param cfg_default: settings read in from default file
+        :type  cfg_default: dict {'str':SettingsParser.Setting}
+        :param cfg_user   : settings read in from user config file
+        :type  cfg_user   : dict {'str':SettingsParser.Setting}
 
-        @return: configuration with valid user settings overriding default ones
-        @rtype: dict {'str':SettingsParser.Setting}
+        :return: configuration with valid user settings overriding default ones
+        :rtype: dict {'str':SettingsParser.Setting}
         """
         r = {}
 
@@ -216,8 +216,8 @@ class SettingsManager:
     def settings2dict( self ):
         """
         Create dictionary from settings.
-        @return: dictionary of parameter names (keys) and values
-        @rtype: dict {str : any}
+        :return: dictionary of parameter names (keys) and values
+        :rtype: dict {str : any}
         """
         return dict( [ (s.name, s.value) for s in self.settings.values() ] )
 
@@ -229,8 +229,8 @@ class SettingsManager:
         3. Create missing user configuration file if createmissing=True
         4. Insert parameters into the given namespace
 
-        @param ns: namespace of a module ( obtained with locals() )
-        @type  ns: dict {str:any}
+        :param ns: namespace of a module ( obtained with locals() )
+        :type  ns: dict {str:any}
         """
         self.collectSettings()
 
