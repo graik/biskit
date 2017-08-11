@@ -49,7 +49,7 @@ try:
 ##     from PCRModel import PCRModel
     from biskit.pdbModel import PDBModel, PDBProfiles, PDBError
 
-    from biskit.ProfileCollection import ProfileCollection, ProfileError
+    from biskit.profileCollection import ProfileCollection, ProfileError
 ##     from ProfileMirror import ProfileMirror
     
 ##     from Pymoler import Pymoler

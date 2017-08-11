@@ -30,7 +30,7 @@ from biskit import match2seq
 from biskit import rmsFit
 from biskit.core.localpath import LocalPath
 from biskit.Errors import BiskitError
-from biskit.ProfileCollection import ProfileCollection, ProfileError
+from biskit.profileCollection import ProfileCollection, ProfileError
 from biskit.core.pdbparserFactory import PDBParserFactory
 from biskit.core.pdbparseFile import PDBParseFile
 from biskit import BioUnit as BU
