@@ -27,10 +27,10 @@ if __name__ == "__main__" and __package__ is None:
     import biskit
     __package__ = "biskit"
 
-from . import tools as T
-from . import settings as S
+from .. import tools as T
+from .. import settings as S
 from biskit import EHandler
-from .Errors import BiskitError
+from biskit.Errors import BiskitError
 
 import os.path
 import string

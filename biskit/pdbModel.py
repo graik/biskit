@@ -28,7 +28,7 @@ from biskit import molUtils
 from biskit import mathUtils
 from biskit import match2seq
 from biskit import rmsFit
-from biskit.LocalPath import LocalPath
+from biskit.core.localpath import LocalPath
 from biskit.Errors import BiskitError
 from biskit.ProfileCollection import ProfileCollection, ProfileError
 from biskit.core.pdbparserFactory import PDBParserFactory

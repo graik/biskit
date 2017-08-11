@@ -45,7 +45,6 @@ try:
 ##     from EDParser import EZDParser
 
 ##    from biskit.EnsembleTraj import EnsembleTraj
-    from biskit.LocalPath import LocalPath, LocalPathError
 
 ##     from PCRModel import PCRModel
     from biskit.pdbModel import PDBModel, PDBProfiles, PDBError
@@ -106,3 +105,6 @@ except Exception as why:
 
 ## clean up namespace
 del logging
+
+## facilitate access to core module classes
+import biskit.core.localpath as LocalPath

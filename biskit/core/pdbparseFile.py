@@ -34,6 +34,7 @@ import biskit.mathUtils as M
 import biskit.tools as T
 import biskit.BioUnit as BU
 from biskit.core.pdbparser import PDBParser, PDBParserError
+from biskit.core.localpath import LocalPath
 
 
 class PDBParseFile( PDBParser ):
@@ -60,7 +61,7 @@ class PDBParseFile( PDBParser ):
                  implementation
         :rtype: bool
         """
-        return (type(source) is str or isinstance(source, B.LocalPath)) and \
+        return (type(source) is str or isinstance(source, LocalPath)) and \
             (source[-4:].upper() == '.PDB' or
              source[-7:].upper() == '.PDB.GZ')
 

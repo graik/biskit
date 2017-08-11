@@ -28,6 +28,7 @@ import biskit as B
 
 from biskit.core.pdbparser import PDBParserError
 from biskit.core.pdbparseModel import PDBParseModel
+from biskit.core.localpath import LocalPath
 
 class PDBParsePickle( PDBParseModel ):
     """
@@ -47,7 +48,7 @@ class PDBParsePickle( PDBParseModel ):
                  implementation (equivalent to isinstance( source, PDBModel) )
         :rtype: bool
         """
-        return (type(source) is str) or isinstance(source, B.LocalPath)
+        return (type(source) is str) or isinstance(source, LocalPath)
 
     @staticmethod
     def description():
@@ -92,7 +93,6 @@ class PDBParsePickle( PDBParseModel ):
                     force=force )
                               
         except Exception as why:
-            print(T.lastErrorTrace())
             raise PDBParserError("Cannot unpickle source model from %s, "\
                    % str(source) + "Reason:\n" + str(why))
 

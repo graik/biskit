@@ -56,8 +56,8 @@ Summary for all
   !Dont't touch C{settings.py}!
 """
 import biskit as B
-import biskit.tools as T
-import biskit.SettingsManager as M
+from . import tools as T
+from .core import settingsManager as M
 
 import sys, os
 

@@ -25,7 +25,7 @@ import os
 import configparser
 
 import biskit as B
-import biskit.tools as T
+from .. import tools as T
 
 class SettingsError( Exception ):
     pass

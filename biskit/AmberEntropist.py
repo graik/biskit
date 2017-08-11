@@ -40,7 +40,7 @@ from biskit.AmberParmBuilder import AmberParmBuilder
 from biskit import PDBModel
 from biskit.Trajectory import Trajectory
 from biskit.EnsembleTraj import EnsembleTraj
-from biskit.LocalPath import LocalPath
+from biskit.core.localpath import LocalPath
 from biskit.Dock.Complex import Complex
 from biskit import EHandler
 

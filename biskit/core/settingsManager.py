@@ -22,8 +22,8 @@ Manage Biskit settings.
 """
 
 import biskit as B
-import biskit.tools as T
-import biskit.SettingsParser as P
+from .. import tools as T
+from . import settingsParser as P
 
 import os
 
