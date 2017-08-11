@@ -32,7 +32,7 @@ import re
 import biskit as B
 import biskit.mathUtils as M
 import biskit.tools as T
-import biskit.BioUnit as BU
+import biskit.biounit as BU
 from biskit.core.pdbparser import PDBParser, PDBParserError
 from biskit.core.localpath import LocalPath
 

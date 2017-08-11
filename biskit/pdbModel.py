@@ -33,7 +33,7 @@ from biskit.Errors import BiskitError
 from biskit.profileCollection import ProfileCollection, ProfileError
 from biskit.core.pdbparserFactory import PDBParserFactory
 from biskit.core.pdbparseFile import PDBParseFile
-from biskit import BioUnit as BU
+from biskit import biounit as BU
 from biskit.core import oldnumeric as N0
 from biskit.core.scientificIO import PDB as IO
 from biskit import EHandler

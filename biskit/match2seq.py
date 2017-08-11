@@ -34,7 +34,7 @@ if __name__ == "__main__" and __package__ is None:
 
 from .core import oldnumeric as N0
 from . import tools as T
-from .difflib_old import SequenceMatcher
+from .core.difflib_old import SequenceMatcher
 
 import numpy as N
 
