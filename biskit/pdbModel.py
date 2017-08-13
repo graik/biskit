@@ -38,6 +38,8 @@ from biskit.core import oldnumeric as N0
 from biskit.core.scientificIO import PDB as IO
 from biskit import EHandler
 
+from biskit.future import Residue
+
 import biskit as B
 
 import numpy as N
@@ -2091,7 +2093,7 @@ class PDBModel:
                                                   self._chainIndex[i+1:] )
 
         ## mark duplicate atoms in the 'alternate' field of the new residue
-        r = B.Residue( self, r1 )
+        r = Residue( self, r1 )
         r.labelDuplicateAtoms()
 
 
@@ -4038,7 +4040,7 @@ class Test(BT.BiskitTest):
         len_r = m.lenResidues()
         len_a = m.lenAtoms()
 
-        r_gly = B.Residue( m, gg_position )
+        r_gly = Residue( m, gg_position )
 
         m.mergeResidues( gg_position )
         r_gly.reset()

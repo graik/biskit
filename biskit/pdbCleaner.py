@@ -665,7 +665,7 @@ class Test(BT.BiskitTest):
     """Test class """
 
     def prepare(self):
-        from biskit.LogFile import LogFile
+        from biskit import LogFile
         import tempfile
 
 
