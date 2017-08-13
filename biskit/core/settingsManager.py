@@ -22,6 +22,11 @@ Manage Biskit settings.
 """
 
 import biskit as B
+
+## allow relative imports when calling module as script for testing (pep-0366)
+if __name__ == "__main__" and __package__ is None:
+    import biskit.core; __package__ = "biskit.core"
+
 from .. import tools as T
 from . import settingsParser as P
 
