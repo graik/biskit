@@ -633,9 +633,13 @@ class Executor:
     def cleanup( self ):
         """
         Clean up after external program has finished (failed or not).
+        
         Note: a temporary folder, if it has been created, is only deleted if
-        it empty.
-        Override, but call in (preferably at the end of) child method!
+        it is empty.
+        
+        Override, but call in child method! Preferably, Executor.cleanup should
+        be called at the end of the overriding method so that the now empty
+        working directory can also be removed.
         """
         if not self.keep_out and not self.debug and self.f_out:
             t.tryRemove( self.f_out )
