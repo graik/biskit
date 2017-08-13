@@ -20,7 +20,6 @@
 ##
 ##
 
-
 """
 Run ptraj entropy analysis on Trajectory instance.
 """
@@ -35,14 +34,18 @@ import biskit.tools as t
 import biskit.mathUtils as MU
 ## import Biskit.settings as settings
 from biskit.errors import BiskitError
-from .amberCrdEntropist import AmberCrdEntropist, EntropistError
-from .amberParmBuilder import AmberParmBuilder
-from biskit import PDBModel
+from biskit import PDBModel, EHandler, LocalPath
+from biskit.dock.Complex import Complex
+
+## allow relative imports when calling module by itself for testing (pep-0366)
+if __name__ == "__main__" and __package__ is None:
+    import biskit.md; __package__ = "biskit.md"
+
 from .trajectory import Trajectory
 from .ensembleTraj import EnsembleTraj
-from biskit.core.localpath import LocalPath
-from biskit.dock.Complex import Complex
-from biskit import EHandler
+from .amberCrdEntropist import AmberCrdEntropist, EntropistError
+from .amberParmBuilder import AmberParmBuilder
+
 
 class AmberEntropist( AmberCrdEntropist ):
     """

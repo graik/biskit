@@ -30,9 +30,13 @@ import re
 import sys
 
 import biskit.tools as T
+from biskit import PDBModel, StdLog
+
+## allow relative imports when calling module by itself for testing (pep-0366)
+if __name__ == "__main__" and __package__ is None:
+    import biskit.md; __package__ = "biskit.md"
+    
 from .trajectory import Trajectory
-from biskit import PDBModel
-from biskit import StdLog
 
 def _use():
 

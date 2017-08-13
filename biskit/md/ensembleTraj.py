@@ -20,20 +20,22 @@
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 ##
 ##
-
-
 """
 Multi-copy trajectory
 """
 
-from biskit.trajectory import Trajectory, TrajError
-from biskit import EHandler
-
-import biskit.mathUtils as M
-
 import types
+
+from biskit import EHandler
 import biskit.core.oldnumeric as N0
+import biskit.mathUtils as M
 import biskit.tools as T
+
+## allow relative imports when calling module by itself for testing (pep-0366)
+if __name__ == "__main__" and __package__ is None:
+    import biskit.md; __package__ = "biskit.md"
+
+from .trajectory import Trajectory, TrajError
 
 try:
     import biggles

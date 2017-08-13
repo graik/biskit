@@ -30,11 +30,16 @@ import biskit.core.oldnumeric as N0
 import biskit.tools as t
 import biskit.settings as s
 import biskit.mathUtils as MU
-from biskit.logFile import LogFile, StdLog
 from biskit.errors import BiskitError
-from .amberLeap import AmberLeap
+from biskit import PDBCleaner, PDBModel, LogFile, StdLog
 from biskit.exe import Executor
-from biskit import PDBCleaner, PDBModel
+
+## allow relative imports when calling module by itself for testing (pep-0366)
+if __name__ == "__main__" and __package__ is None:
+    import biskit.md; __package__ = "biskit.md"
+
+from .amberLeap import AmberLeap
+
 
 class AmberError( BiskitError ):
     pass

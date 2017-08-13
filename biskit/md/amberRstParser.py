@@ -25,12 +25,17 @@ Parse Amber restart files.
 """
 
 import re
-import biskit.core.oldnumeric as N0
 import os.path
 
-from biskit.AmberCrdParser import ParseError
+import biskit.core.oldnumeric as N0
 from biskit import PDBModel
 import biskit.tools as T
+
+## allow relative imports when calling module by itself for testing (pep-0366)
+if __name__ == "__main__" and __package__ is None:
+    import biskit.md; __package__ = "biskit.md"
+
+from .amberCrdParser import ParseError
 
 class AmberRstParser:
     """Convert an Amber restart file to array, PDBModel or a Amber crd file.

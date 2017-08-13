@@ -35,7 +35,6 @@ try:
 
 ##    from biskit.AmberCrdParser import AmberCrdParser, ParseError
 ##    from biskit.AmberRstParser import AmberRstParser
-##    from biskit.PDBCleaner import PDBCleaner, CleanerError
 ##     from Blast2Seq import Blast2Seq
 
 ##     from EDParser import EZDParser
@@ -46,6 +45,8 @@ try:
     from biskit.profileCollection import ProfileCollection, ProfileError
 ##     from ProfileMirror import ProfileMirror
     
+    from biskit.pdbCleaner import PDBCleaner, CleanerError
+
 ##     from ModelList import ModelList
 ##     from CommandLine import CommandLine
     
