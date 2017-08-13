@@ -178,6 +178,13 @@ class AmberLeap( Executor ):
 
     def isfailed( self ):
         return not os.path.exists( self.out_parm )
+    
+    def cleanup(self):
+        if not self.debug:
+            T.tryRemove( P.join(self.cwd or '', 'leap.log'))
+        
+        super().cleanup()
+
 
 #############
 ## TESTING ##
@@ -198,6 +205,7 @@ class Test( BT.BiskitTest ):
         self.template = T.dataRoot() + '/amber/leap/solvate_box.leap'
         
     def cleanUp(self):
+        import os.path as osp
         T.tryRemove( self.fparm )
         T.tryRemove( self.flog )
         
