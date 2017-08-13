@@ -21,7 +21,7 @@
 Cache of ExeConfig instances
 """
 
-## allow relative imports when calling module as main script for testing https://www.python.org/dev/peps/pep-0366/
+## allow relative imports when calling module by itself for testing (pep-0366)
 if __name__ == "__main__" and __package__ is None:
     import biskit.exe; __package__ = "biskit.exe"
 
