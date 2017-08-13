@@ -30,7 +30,7 @@ if __name__ == "__main__" and __package__ is None:
 from .. import tools as T
 from .. import settings as S
 from biskit import EHandler
-from biskit.Errors import BiskitError
+from biskit.errors import BiskitError
 
 import os.path
 import string

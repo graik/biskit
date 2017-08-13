@@ -23,19 +23,15 @@ import logging
 ## public classes
 try:
     ## default error handler
-    from biskit.ErrorHandler import ErrorHandler
+    from biskit.errorHandler import ErrorHandler
     EHandler = ErrorHandler()
 
 ##     from BisList import BisList, BisListError, ConditionError, AmbiguousMatch,\
 ##          ItemNotFound
 ##     from DictList import DictList
 
-    from biskit.LogFile import LogFile, StdLog, ErrLog
-    from biskit.Errors import BiskitError
-
-    from biskit.ExeConfig import ExeConfig, ExeConfigError
-    from biskit.ExeConfigCache import ExeConfigCache
-    from biskit.Executor import Executor, TemplateError
+    from biskit.logFile import LogFile, StdLog, ErrLog
+    from biskit.errors import BiskitError
 
 ##    from biskit.AmberCrdParser import AmberCrdParser, ParseError
 ##    from biskit.AmberRstParser import AmberRstParser
@@ -44,52 +40,25 @@ try:
 
 ##     from EDParser import EZDParser
 
-##    from biskit.EnsembleTraj import EnsembleTraj
-
 ##     from PCRModel import PCRModel
     from biskit.pdbModel import PDBModel, PDBProfiles, PDBError
 
     from biskit.profileCollection import ProfileCollection, ProfileError
 ##     from ProfileMirror import ProfileMirror
     
-##     from Pymoler import Pymoler
-
-##     from TrajCluster import TrajCluster
-##    from biskit.Trajectory import Trajectory, TrajError, TrajProfiles
-##     from XplorInput import XplorInput, XplorInputError
-##     from Xplorer import Xplorer, XplorerError, RunError
-##     from ColorSpectrum import ColorSpectrum
-##     from MatrixPlot import MatrixPlot
-
-    from biskit.AmberLeap import AmberLeap
-    from biskit.AmberParmBuilder import AmberParmBuilder
-
-##     from Hmmer import Hmmer
-##     from SurfaceRacer import SurfaceRacer, SurfaceRacer_Error
-##     from DSSP import Dssp, Dssp_Error
-##     from FuzzyCluster import FuzzyCluster
-
-    from biskit.tmalign import TMAlign
-##     from reduce import Reduce
-
 ##     from ModelList import ModelList
 ##     from CommandLine import CommandLine
     
     from biskit.amberResidues import AmberResidueType, AmberPrepParser
     from biskit.amberResidueLibrary import AmberResidueLibrary,\
                                            AmberResidueLibraryError
+    
 ##     from atomCharger import AtomCharger
-##     from delphi import Delphi, DelphiError
+    
 
+    from biskit.colorspectrum import ColorSpectrum, ColorError
 ##     from PDBDope import PDBDope
 ##     from Ramachandran import Ramachandran
-
-## ## experimental modules
-    from biskit.residue import Residue
-
-##     from Model import Model
-##     from Polymer import Polymer
-##     from Polymer import Feature
     
 ## ## PVM-dependent modules
 

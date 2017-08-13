@@ -27,7 +27,7 @@ algorithm based on TM-score , Nucleic Acids Research, 2005 33: 2302-2309
 import tempfile, re
 import numpy as N
 
-from biskit.Executor import Executor, TemplateError
+from .executor import Executor, TemplateError
 ## import Biskit.settings as S
 import biskit.tools as T
 

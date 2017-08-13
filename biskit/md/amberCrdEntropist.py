@@ -30,7 +30,7 @@ import tempfile
 import biskit.tools as T
 ## import biskit.settings as settings
 from biskit import BiskitError
-from biskit.Executor import Executor
+from biskit.exe import Executor
 
 class EntropistError( BiskitError ):
     pass

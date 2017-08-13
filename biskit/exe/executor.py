@@ -22,14 +22,19 @@
 Class for calls to external programs.
 """
 
+## allow relative imports when calling module as main script for testing https://www.python.org/dev/peps/pep-0366/
+if __name__ == "__main__" and __package__ is None:
+    import biskit.exe; __package__ = "biskit.exe"
+
 import tempfile, os, time, subprocess, sys
 
 import biskit.tools as t
 import biskit.settings as s
-from biskit.LogFile import StdLog
-from biskit.Errors import BiskitError
-from biskit.ExeConfigCache import ExeConfigCache
+from biskit import StdLog
+from biskit.errors import BiskitError
 import biskit as B
+
+from .exeConfigCache import ExeConfigCache
 
 class RunError( BiskitError ):
     pass

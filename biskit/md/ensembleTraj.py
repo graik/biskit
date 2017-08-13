@@ -26,7 +26,7 @@
 Multi-copy trajectory
 """
 
-from biskit.Trajectory import Trajectory, TrajError
+from biskit.trajectory import Trajectory, TrajError
 from biskit import EHandler
 
 import biskit.mathUtils as M

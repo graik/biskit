@@ -25,7 +25,7 @@ Collect settings for an external program from a configuration file.
 import configparser
 import os.path
 
-from biskit.Errors import BiskitError
+from biskit.errors import BiskitError
 from biskit import EHandler
 
 import biskit.tools as T

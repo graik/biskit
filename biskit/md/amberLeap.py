@@ -26,7 +26,7 @@ Wrap the Amber tleap program.
 import tempfile
 import os.path as P
 
-from biskit.Executor import Executor, TemplateError
+from biskit.exe import Executor, TemplateError
 import biskit.tools as T
 
 

@@ -30,12 +30,11 @@ import biskit.core.oldnumeric as N0
 import biskit.tools as t
 import biskit.settings as s
 import biskit.mathUtils as MU
-from biskit.LogFile import LogFile, StdLog
-from biskit.Errors import BiskitError
-from biskit.PDBCleaner import PDBCleaner
-from biskit.AmberLeap import AmberLeap
-from biskit.Executor import Executor
-from biskit import PDBModel
+from biskit.logFile import LogFile, StdLog
+from biskit.errors import BiskitError
+from .amberLeap import AmberLeap
+from biskit.exe import Executor
+from biskit import PDBCleaner, PDBModel
 
 class AmberError( BiskitError ):
     pass

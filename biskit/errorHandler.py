@@ -23,8 +23,8 @@ Default Error Handler for Biskit classes.
 """
 
 import biskit.tools as T
-from biskit.LogFile import ErrLog
-from biskit.Errors import HandledError, NormalError, FatalError
+from biskit.logFile import ErrLog
+from biskit.errors import HandledError, NormalError, FatalError
 
 class ErrorHandler( object ):
     """
@@ -116,7 +116,7 @@ class Test(BT.BiskitTest):
 
     def test_ErrorHandler( self ):
         """ErrorHandler test"""
-        from biskit.LogFile import LogFile
+        from biskit import LogFile
 
         self.err_log = LogFile( self.f_out )
 

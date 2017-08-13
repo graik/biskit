@@ -30,8 +30,7 @@ Clean PDB-files so that they can be used for MD. This module is a
 import biskit.molUtils as MU
 import biskit.mathUtils as M
 import biskit.tools as t
-from biskit import PDBModel
-from biskit.LogFile import StdLog
+from biskit import PDBModel, StdLog
 
 import biskit.core.oldnumeric as N0
 

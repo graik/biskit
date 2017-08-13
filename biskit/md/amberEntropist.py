@@ -34,14 +34,14 @@ import random, time
 import biskit.tools as t
 import biskit.mathUtils as MU
 ## import Biskit.settings as settings
-from biskit.Errors import BiskitError
-from biskit.AmberCrdEntropist import AmberCrdEntropist, EntropistError
-from biskit.AmberParmBuilder import AmberParmBuilder
+from biskit.errors import BiskitError
+from .amberCrdEntropist import AmberCrdEntropist, EntropistError
+from .amberParmBuilder import AmberParmBuilder
 from biskit import PDBModel
-from biskit.Trajectory import Trajectory
-from biskit.EnsembleTraj import EnsembleTraj
+from .trajectory import Trajectory
+from .ensembleTraj import EnsembleTraj
 from biskit.core.localpath import LocalPath
-from biskit.Dock.Complex import Complex
+from biskit.dock.Complex import Complex
 from biskit import EHandler
 
 class AmberEntropist( AmberCrdEntropist ):

@@ -21,9 +21,14 @@
 Cache of ExeConfig instances
 """
 
+## allow relative imports when calling module as main script for testing https://www.python.org/dev/peps/pep-0366/
+if __name__ == "__main__" and __package__ is None:
+    import biskit.exe; __package__ = "biskit.exe"
+
 import threading
-from biskit.ExeConfig import ExeConfig
 from biskit import BiskitError
+
+from .exeConfig import ExeConfig
 
 class ExeConfigCacheError(BiskitError):
     pass

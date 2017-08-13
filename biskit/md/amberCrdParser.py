@@ -30,7 +30,7 @@ import re
 import sys
 
 import biskit.tools as T
-from biskit.Trajectory import Trajectory
+from .trajectory import Trajectory
 from biskit import PDBModel
 from biskit import StdLog
 
