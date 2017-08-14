@@ -24,20 +24,20 @@
 """
 Analyze a structure using  Prosa2003.
 """
+## allow relative imports when calling module as main script for testing https://www.python.org/dev/peps/pep-0366/
+if __name__ == "__main__" and __package__ is None:
+    import biskit.exe; __package__ = "biskit.exe"
 
 import os.path
-import string
-import Biskit.oldnumeric as N0
-import tempfile
-
-import Biskit.tools as T
-
-from Biskit import Executor
-from Biskit import  TemplateError
-## import Biskit.settings as S
-from Biskit.Errors import BiskitError
 import time
 import subprocess
+import tempfile
+
+import biskit.core.oldnumeric as N0
+import biskit.tools as T
+from biskit.errors import BiskitError
+
+from .executor import Executor, TemplateError
 
 class Prosa2003_Error( BiskitError ):
     pass
@@ -210,11 +210,11 @@ exit\n
                                        %(self.exe.bin, self.f_in, self.f_out),
                                        shell=True)
             if retcode < 0:
-                raise Prosa2003_Error, "Child was terminated by signal" \
-                      + str(retcode)
+                raise Prosa2003_Error("Child was terminated by signal" \
+                      + str(retcode))
 
-        except Prosa2003_Error, why:
-            raise Prosa2003_Error, "Execution of Prosa2003 failed: " + str(why)
+        except Prosa2003_Error as why:
+            raise Prosa2003_Error("Execution of Prosa2003 failed: " + str(why))
 
         return time.time() - start_time
 
@@ -284,15 +284,15 @@ exit\n
         try:
             lines = open( prosaout ).readlines()
             if not lines:
-                raise IOError, 'File %s is empty'%( prosaout )
-        except IOError, why:
-            raise IOError, "Couldn't read Prosa result: " + str( why ) \
-                  + '\n Check the Prosa license!'
+                raise IOError('File %s is empty'%( prosaout ))
+        except IOError as why:
+            raise IOError("Couldn't read Prosa result: " + str( why ) \
+                  + '\n Check the Prosa license!')
 
         ## comment lines starts with '#'
         for i in range( len(lines) ):
             if lines[i][0] != '#':
-                nr, pair, surf, tot = string.split( lines[i])
+                nr, pair, surf, tot = str.split( lines[i])
                 prosa_pair += [ float( pair ) ]
                 prosa_surf += [ float( surf ) ]
                 prosa_tot += [ float( tot ) ]
@@ -343,7 +343,7 @@ exit\n
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test"""
@@ -352,7 +352,7 @@ class Test(BT.BiskitTest):
 
     def test_Prosa2003(self):
         """Prosa2003 test"""
-        from Biskit import PDBModel
+        from biskit import PDBModel
         
         ## Loading PDB...
         self.ml = PDBModel( T.testRoot()+'/lig/1A19.pdb' )
@@ -370,9 +370,9 @@ class Test(BT.BiskitTest):
         self.result = self.prosa.prosaEnergy()
 
         if self.local:
-            print "Result: ", self.result
+            print("Result: ", self.result)
 
-        self.assert_( N0.sum(self.result - [ -94.568,  -64.903, -159.463 ] ) \
+        self.assertTrue( N0.sum(self.result - [ -94.568,  -64.903, -159.463 ] ) \
                       < 0.0000001 )
 
         
