@@ -40,6 +40,8 @@ class XplorerError( BiskitError ):
 class Xplorer(Executor):
     """
     Prepare and run a xplor job.
+    
+    Last tested with Xplor-NIH 2.45
 
     @see: L{Executor} for detailed documentation!
 
