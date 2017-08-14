@@ -19,14 +19,18 @@
 """
 Display Structures with Pymol
 """
+## allow relative imports when calling module by itself for testing (pep-0366)
+if __name__ == "__main__" and __package__ is None:
+    import biskit.exe; __package__ = "biskit.exe"
 
-
-from PDBModel import PDBModel
-import tools as T
 import os
 import tempfile
-import settings
-from Biskit import Executor, TemplateError
+
+import biskit.tools as T
+import biskit.settings as settings
+from biskit import PDBModel
+
+from .executor import Executor, TemplateError
 
 
 ## ================= single Pymol model ===========================
@@ -99,7 +103,7 @@ class PymolModel:
 
             self.struct[ key ] = self.struct.res2atomProfile( values )
         except:
-            print T.lastError()
+            print(T.lastError())
 
 
     def writeIfNeeded( self ):
@@ -230,7 +234,7 @@ class Pymoler( Executor ):
                 modName = self._getFreeModName( 'models', 0 )
 
         ## create new empty list
-        if not self.dic.has_key( modName ):
+        if modName not in self.dic:
             self.dic[ modName ] = []
 
         ## create model object for each file and append it to dic
@@ -272,9 +276,9 @@ class Pymoler( Executor ):
         @return: name composed of base+suffix
         @rtype: str
         """
-        if self.dic.has_key( base ):
+        if base in self.dic:
 
-            if self.dic.has_key( base + str(index) ):
+            if base + str(index) in self.dic:
 
                 return self._getFreeModName( base, index + 1 )
 
@@ -332,20 +336,20 @@ class Pymoler( Executor ):
         # check for invalid selections
         for sel in selDic.keys():
             if sel not in keyList:
-                print 'Invalid selection in ' + str(selDic)
+                print('Invalid selection in ' + str(selDic))
 
         # element
-        if selDic.has_key(keyList[5]):
+        if keyList[5] in selDic:
             selection = '( elem ' + str(selDic[keyList[5]]) + ' )'
 
         # expression
-        elif selDic.has_key(keyList[6]):
+        elif keyList[6] in selDic:
             selection = '( ' + str(selDic[keyList[6]]) + ' )'
 
         # create selection from selDic
         else:
             for key in keyList:
-                if not selDic.has_key(key):
+                if key not in selDic:
                     selDic[key]=''
             selection = '( /' + str(selDic['model']) + \
                         '/' + str(selDic['segment']) + \
@@ -366,7 +370,7 @@ class Pymoler( Executor ):
 
                 n = model.writeIfNeeded()
                 
-                if self.verbose: print n
+                if self.verbose: print(n)
 
 
     def deletePdbs(self):
@@ -526,9 +530,9 @@ class Pymoler( Executor ):
                 if not os.path.isdir( script ):
                     self.add( 'run ' + settings.pymol_scripts + script )
                     if self.verbose:
-                        print 'Adding %s script as a PyMol command'%script
+                        print('Adding %s script as a PyMol command'%script)
         else:
-            print '\n\nWARNING: No external PyMol scripts added\n\n'
+            print('\n\nWARNING: No external PyMol scripts added\n\n')
 
 
 ##      # MAKE default SELECTIONS
@@ -567,7 +571,7 @@ class Pymoler( Executor ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test"""
@@ -593,7 +597,7 @@ class Test(BT.BiskitTest):
             
         self.pm.run() ## old style call "pm.show()" also works
     
-        self.assert_( self.pm.pid is not None )
+        self.assertTrue( self.pm.pid is not None )
         
 if __name__ == '__main__':
 
