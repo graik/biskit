@@ -9,8 +9,9 @@ from .exeConfigCache import ExeConfigCache
 from .executor import Executor, TemplateError
 
 from .tmalign import TMAlign
+from .dssp import Dssp, Dssp_Error
 
-##     from Pymoler import Pymoler
+from .pymoler import Pymoler
 
 ##     from XplorInput import XplorInput, XplorInputError
 ##     from Xplorer import Xplorer, XplorerError, RunError
@@ -18,7 +19,6 @@ from .tmalign import TMAlign
 
 ##     from Hmmer import Hmmer
 ##     from SurfaceRacer import SurfaceRacer, SurfaceRacer_Error
-##     from DSSP import Dssp, Dssp_Error
 
 ##     from reduce import Reduce
 ##     from delphi import Delphi, DelphiError

@@ -25,15 +25,20 @@
 Calculates the secondary structure using DSSP.
 """
 
+## allow relative imports when calling module by itself for testing (pep-0366)
+if __name__ == "__main__" and __package__ is None:
+    import biskit.exe; __package__ = "biskit.exe"
+
 import tempfile
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 import numpy as N
 
-from Biskit import Executor, TemplateError
-import Biskit.tools as T
-import Biskit.molUtils as MU
-from Errors import BiskitError
-from Biskit import EHandler
+import biskit.tools as T
+import biskit.molUtils as MU
+from biskit.errors import BiskitError
+from biskit import EHandler
+
+from .executor import Executor, TemplateError
 
 class ParseDSSPTable(object):
     """Parse DSSP result table assuming fixed-width columns"""
@@ -146,7 +151,7 @@ class Dssp( Executor ):
         """
         self.model = self.model.compress( self.model.maskHeavy() )
         if self.model.lenAtoms() == N0.sum(self.model.maskCA):
-            raise Dssp_Error, 'The structure you want to calculate the secondary structure for seems to be a carbon alpha trace. Terminating'
+            raise Dssp_Error('The structure you want to calculate the secondary structure for seems to be a carbon alpha trace. Terminating')
         self.model.writePdb( self.f_pdb )
 
 
@@ -173,14 +178,11 @@ class Dssp( Executor ):
         try:
             lines = self.output.split('\n')
         except:
-            raise Dssp_Error,\
-                  'Dssp result missing.'
+            raise Dssp_Error('Dssp result missing.')
         if len(lines) == 0:
-            raise Dssp_Error,\
-                  'Dssp result empty'
+            raise Dssp_Error('Dssp result empty')
         if len(lines) < 9:
-            raise Dssp_Error,\
-                  'Dssp result contains no secondary structure data'
+            raise Dssp_Error('Dssp result contains no secondary structure data')
         
         return lines
 
@@ -269,7 +271,7 @@ class Dssp( Executor ):
 ##  TESTING        
 #############
 
-import Biskit.test as BT
+import biskit.test as BT
 class Test(BT.BiskitTest):
     """DSSP test"""
 
@@ -281,29 +283,29 @@ class Test(BT.BiskitTest):
     def generic_test(self, pdb, expected=None, proteinonly=False):
         """generic DSSP test"""
 
-        from Biskit import PDBModel
+        from biskit import PDBModel
 
-        if self.local: print 'Loading PDB...'
+        if self.local: print('Loading PDB...')
         self.m = PDBModel(pdb)
         
         if proteinonly:
             self.m = self.m.compress( self.m.maskProtein() )
 
-        if self.local:  print 'Starting DSSP'
+        if self.local:  print('Starting DSSP')
         self.dssp = Dssp( self.m, verbose=self.local, debug=self.DEBUG )
 
-        if self.local: print 'Running DSSP'
+        if self.local: print('Running DSSP')
 
         self.result = self.dssp.run()  ## returns modified PDBModel
         self.result = self.result.compress( self.result.maskProtein() )
         self.result = ''.join(self.result['dssp'])
 
         if self.local:
-            print "Sequence :", self.m.sequence()
-            print "Secondary:", self.result            
+            print("Sequence :", self.m.sequence())
+            print("Secondary:", self.result)            
         
         if expected:
-            self.assertEquals( self.result, expected)        
+            self.assertEqual( self.result, expected)        
 
 
     EXPECTED =  '.....SHHHHHHHHHHHSS..TTEE.HHHHHHHT..GGGT.HHHHSTT.EEEEEEE..TT..S...TT..EEEEE.S..SSS..S.EEEEETT..EEEESSSSSS.EE...EEEEETTT..SHHHHHHHHHHHHT..TT..SSHHHHHHHHHHT..SSEEEEEE.HHHHHHHTTTTHHHHHHHHHHHHHHT..EEEEE.'
@@ -339,7 +341,7 @@ class TestLong(BT.BiskitTest):
     TAGS = [BT.EXE, BT.LONG]
 
     def test_DSSP_alltroublemakers(self):
-        from Biskit import PDBModel
+        from biskit import PDBModel
         lst = '''1c48.pdb  3rlg.pdb  4gv5.pdb  4tsp.pdb
 1p9g.pdb  3v03.pdb  4i0n.pdb  4tsq.pdb
 1rd9.pdb  3v09.pdb  4idj.pdb  4wdc.pdb
@@ -365,10 +367,10 @@ class TestLong(BT.BiskitTest):
             r = dssp.run()
 
             if self.local:
-                print s, ':'
-                print r.sequence()
-                print ''.join( r.compress(r.maskProtein())['dssp'] )
-                print
+                print(s, ':')
+                print(r.sequence())
+                print(''.join( r.compress(r.maskProtein())['dssp'] ))
+                print()
 
 if __name__ == '__main__':
 
