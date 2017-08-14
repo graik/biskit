@@ -19,18 +19,22 @@
 """
 Wrapper for Delphi -- Poisson-Boltzman electrostatic potential calculation.
 """
+## allow relative imports when calling module by itself for testing (pep-0366)
+if __name__ == "__main__" and __package__ is None:
+    import biskit.exe; __package__ = "biskit.exe"
 
 import tempfile, os
 import numpy as N
 import re
 
-from Biskit import Executor, PDBModel
-from Biskit.reduce import Reduce
-from Biskit.atomCharger import AtomCharger
-from Biskit.amberResidueLibrary import AmberResidueLibrary
-from Biskit.amberResidues import AmberPrepParser
-import Biskit.tools as T
-import Biskit.mathUtils as U
+import biskit.tools as T
+import biskit.mathUtils as U
+
+from biskit import PDBModel, AmberResidueLibrary, AmberPrepParser, AtomCharger
+
+from .executor import Executor
+from .reduce import Reduce
+
 
 class DelphiError( Exception ):
     pass
@@ -116,7 +120,7 @@ class PDB2DelphiCharges( object ):
                  name
         """
         if len( akeydict ) == 1:
-            return self.res2delphi( akeydict.values()[0][0] )
+            return self.res2delphi( list(akeydict.values())[0][0] )
         
         ## determine which of several residues is used most
         keyres = [ (len(reslist), reslist) for reslist in akeydict.values() ]
@@ -487,11 +491,10 @@ class Delphi( Executor ):
             if not os.path.exists( target ):
                 os.symlink( f_radii, target )
 
-        except OSError, error:
-            raise DelphiError, \
-                  'Error preparing temporary folder for Delphi\n'+\
+        except OSError as error:
+            raise DelphiError('Error preparing temporary folder for Delphi\n'+\
                   'Error: %r\n' % error +\
-                  'folder: %r\n' % self.cwd
+                  'folder: %r\n' % self.cwd)
         
 
     def __prepareCharges(self, f_out ):
@@ -529,9 +532,9 @@ class Delphi( Executor ):
                             '%(serial_number)4i %(name)-4s %(residue_name)3s %(residue_number)3i %(chain_id)s'\
                             % a)
 
-        except IOError, why: 
-            raise IOError, 'Error creating custom delphi charge file '+f_out+\
-                  '( '+str(why)+' )'
+        except IOError as why: 
+            raise IOError('Error creating custom delphi charge file '+f_out+\
+                  '( '+str(why)+' )')
 
     
     def prepare( self ):
@@ -597,7 +600,7 @@ class Delphi( Executor ):
         else:
             self.log.add( 'There does not seem to be any DelPhi output.')
 
-        raise DelphiError, s
+        raise DelphiError(s)
 
     def postProcess( self ):
         """
@@ -643,7 +646,7 @@ class Delphi( Executor ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 import tempfile
 
 class Test(BT.BiskitTest):
@@ -665,24 +668,24 @@ class Test(BT.BiskitTest):
     
     def test_delphi( self ):
         """Delphi test"""
-        if self.local: print 'Loading PDB...'
+        if self.local: print('Loading PDB...')
 
         self.m1 = self.MODEL or PDBModel( T.testRoot( 'lig/1A19_dry.model' ) )
         Test.MODEL = self.m1
         self.m1.addChainFromSegid()
 
-        if self.local: print 'Starting Delphi'
+        if self.local: print('Starting Delphi')
         self.x = Delphi( self.m1, scale=1.2, debug=self.DEBUG,
                          verbose=self.local, f_map=self.fmap )
 
         if self.local:
-            print 'Running'
+            print('Running')
 
         self.r = self.x.run()
 
         if self.local:
-            print "Result: "
-            print self.r
+            print("Result: ")
+            print(self.r)
             
         expect_delphi_v5 = {'scharge': 1.427, 'egrid': 9091., 
                             'ecoul': -9870, 'eself': -20420, 'erxn': -666.7}
@@ -693,14 +696,14 @@ class Test(BT.BiskitTest):
         expect = expect_delphi_v6
 
         if self.local:
-            print "verifying results... "
-            print "Note: numeric values can differ on different hardware."
+            print("verifying results... ")
+            print("Note: numeric values can differ on different hardware.")
         
-        for k, v in expect.items():
+        for k, v in list(expect.items()):
             self.assertAlmostEqual( expect[k], self.r[k], -1 )
         
-        self.assert_(os.path.exists( self.fmap ), 'Potential map not found' )
-        self.assert_(os.path.getsize( self.fmap) > 1000, 'empty potential map')
+        self.assertTrue(os.path.exists( self.fmap ), 'Potential map not found' )
+        self.assertTrue(os.path.getsize( self.fmap) > 1000, 'empty potential map')
 
 
     def test_delphiCharges2( self ):
@@ -737,7 +740,7 @@ class Test(BT.BiskitTest):
             T.errWriteln( 'writing delphi charge file to %s' % self.fcrg )
         self.dc.tofile( self.fcrg )
         
-        self.assert_( os.path.exists( self.fcrg ) )
+        self.assertTrue( os.path.exists( self.fcrg ) )
         
         
 

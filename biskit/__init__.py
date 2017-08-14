@@ -54,7 +54,7 @@ try:
     from biskit.amberResidueLibrary import AmberResidueLibrary,\
                                            AmberResidueLibraryError
     
-##     from atomCharger import AtomCharger
+    from .atomCharger import AtomCharger
     
 
     from biskit.colorspectrum import ColorSpectrum, ColorError

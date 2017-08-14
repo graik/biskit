@@ -14,10 +14,9 @@ from .dssp import Dssp, Dssp_Error
 from .pymoler import Pymoler
 
 from .xplorer import Xplorer, XplorerError, RunError
-##     from MatrixPlot import MatrixPlot
 
 ##     from Hmmer import Hmmer
 from .surfaceRacer import SurfaceRacer, SurfaceRacer_Error
 
 from .reduce import Reduce
-##     from delphi import Delphi, DelphiError
+from .delphi import Delphi, DelphiError
