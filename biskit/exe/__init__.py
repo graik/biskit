@@ -20,5 +20,5 @@ from .pymoler import Pymoler
 ##     from Hmmer import Hmmer
 from .surfaceRacer import SurfaceRacer, SurfaceRacer_Error
 
-##     from reduce import Reduce
+from .reduce import Reduce
 ##     from delphi import Delphi, DelphiError

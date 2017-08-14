@@ -18,15 +18,18 @@
 
 """
 Wrapper for structure protonation program reduce
-
-Application: 
 """
+## allow relative imports when calling module as main script for testing https://www.python.org/dev/peps/pep-0366/
+if __name__ == "__main__" and __package__ is None:
+    import biskit.exe; __package__ = "biskit.exe"
 
 import tempfile
 import numpy as N
 
-from Biskit import Executor, PDBModel, PDBCleaner
-import Biskit.tools as T
+from biskit import PDBModel, PDBCleaner
+import biskit.tools as T
+
+from .executor import Executor
 
 class ReduceError( Exception ):
     pass
@@ -167,7 +170,7 @@ class Reduce( Executor ):
           'field `output` of this Reduce instance (e.g. `print x.output`)!'
         self.log.add( s )
 
-        raise ReduceError, s
+        raise ReduceError(s)
 
     def merge( self, inmodel=None ):
         """
@@ -207,7 +210,7 @@ class Reduce( Executor ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test class"""
@@ -219,9 +222,11 @@ class Test(BT.BiskitTest):
         if self.local: self.log.add('Loading PDB...')
 
         self.m1 = PDBModel( T.testRoot( 'lig/1A19_dry.model' ) )
-        self.m2 = T.load( T.testRoot( 'com/ref.complex' ) )
-        self.m2 = self.m2.model()
-
+        
+        rec = T.load( T.testRoot('com/rec.model'))
+        lig = T.load( T.testRoot('com/lig.model'))
+        
+        self.m2 = rec.concat(lig)
 
         if self.local: self.log.add('Starting Reduce')
         self.x = Reduce( self.m1, debug=self.DEBUG,
