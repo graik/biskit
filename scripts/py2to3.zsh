@@ -1,17 +1,15 @@
 !#/usr/bin/env zsh
 
 echo "USAGE: "
-echo "py2to3.zsh biskitModule.py"
+echo "py2to3.zsh sourceModule.py destModule.py"
+echo "run from biskit3 root folder, assumes biskit2 folder"
+echo "available for diff one level up (../biskit2/)"
 
-biskit3=~/data/py/biskit3/biskit
-Biskit2=~/data/py/biskit3/Biskit
-Biskit2Copy=~/data/py/biskit2/Biskit
-
-git mv $Biskit2/$1 $biskit3/$1
+git mv $1 $2
 git commit -m 'move Biskit -> biskit without modification'
 
-2to3-3.5 -n -W $biskit3/$1
+2to3-3.5 -n -W $2
 
-~/data/py/biskit3/scripts/replace_imports.py $biskit3/$1 -replacefile
+~/data/py/biskit3/scripts/replace_imports.py $2 -replacefile
 
-meld $biskit3/$1 $Biskit2Copy/$1
+meld $2 ../biskit2/$1
