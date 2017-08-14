@@ -4,7 +4,7 @@ if __name__ == "__main__" and __package__ is None:
     import biskit.md; __package__ = "biskit.md"
 
 from .trajectory import Trajectory, TrajError, TrajProfiles
-from .ensembleTraj import EnsembleTraj
+from .ensembleTraj import EnsembleTraj, traj2ensemble
 
 from .amberLeap import AmberLeap
 from .amberParmBuilder import AmberParmBuilder
