@@ -33,8 +33,6 @@ try:
     from biskit.logFile import LogFile, StdLog, ErrLog
     from biskit.errors import BiskitError
 
-##    from biskit.AmberCrdParser import AmberCrdParser, ParseError
-##    from biskit.AmberRstParser import AmberRstParser
 ##     from Blast2Seq import Blast2Seq
 
 ##     from EDParser import EZDParser
@@ -58,7 +56,7 @@ try:
     
 
     from biskit.colorspectrum import ColorSpectrum, ColorError
-##     from PDBDope import PDBDope
+    from .pdbDope import PDBDope
 ##     from Ramachandran import Ramachandran
     
     from .colorspectrum import ColorSpectrum, ColorError, colorRange

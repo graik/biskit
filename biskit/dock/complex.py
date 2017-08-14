@@ -23,18 +23,17 @@
 collect and manage information about a docking result
 """
 
-from Biskit import PCRModel, PDBModel, PDBDope, molUtils, mathUtils, StdLog, EHandler
-## from Biskit import ProsaII
-from Biskit.Prosa2003 import Prosa2003
-
-import Biskit.tools as t
-
-import Biskit.oldnumeric as N0
-
 from copy import deepcopy, copy
 from numpy import ndarray as arraytype
 
 from difflib import SequenceMatcher
+
+import biskit.core.oldnumeric as N0
+from biskit import PDBModel, molUtils, mathUtils, StdLog, EHandler
+import biskit.tools as t
+
+from biskit import PDBDope
+from biskit.exe import Prosa2003
 
 class ComplexError(Exception):
     pass
@@ -142,7 +141,7 @@ class Complex:
         @return: list of keys
         @rtype: [str]
         """
-        return self.info.keys()
+        return list(self.info.keys())
 
 
     def has_key( self, k ):
@@ -155,7 +154,7 @@ class Complex:
         @return: dict has key
         @rtype: 1|0
         """
-        return self.info.has_key( k )
+        return k in self.info
 
 
     def values( self, keys=[], default=None ):
@@ -172,7 +171,7 @@ class Complex:
         @rtype: [any]
         """
         if not keys:
-            return self.info.values()
+            return list(self.info.values())
         return [ self.get( k, default ) for k in keys ]
 
 
@@ -1366,11 +1365,11 @@ class Complex:
         diag1= N0.diagonal(N0.dot(u,N0.transpose(u)))
         diag2= N0.diagonal(N0.dot(v,N0.transpose(v)))
         dist= -N0.dot(v,N0.transpose(u))-N0.transpose(N0.dot(u,N0.transpose(v)))
-        dist= N0.transpose(N0.asarray(map(lambda column,a:column+a, \
-                                   N0.transpose(dist), diag1)))
+        dist= N0.transpose(N0.asarray(list(map(lambda column,a:column+a, \
+                                   N0.transpose(dist), diag1))))
 
         return N0.transpose(N0.sqrt(N0.asarray(
-            map(lambda row,a: row+a, dist, diag2))))
+            list(map(lambda row,a: row+a, dist, diag2)))))
 
 
     ## obsolete
@@ -1399,13 +1398,14 @@ class Complex:
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test case"""
 
     def test_Complex(self):
         """Dock.Complex test"""
+        from biskit import PCRModel
 
         lig = PCRModel( t.testRoot() + "/com/1BGS.psf",
                         t.testRoot() + "/com/lig.model")
@@ -1435,7 +1435,7 @@ class Test(BT.BiskitTest):
             pass
 
         if self.local:           
-            from Biskit import Pymoler
+            from biskit.exe import Pymoler
 
             self.pm = Pymoler()
             self.pm.addPdb( c.rec(), 'rec' )
