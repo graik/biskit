@@ -24,15 +24,15 @@
 Calculate and add various properties to PDBModel
 """
 
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 import numpy as N
 
-import Biskit.tools as T
+import biskit.tools as T
 
-from Biskit.Hmmer import Hmmer
-from Biskit.DSSP import Dssp
-from Biskit.SurfaceRacer import SurfaceRacer
-from Biskit.delphi import Delphi, DelphiError
+## from biskit.exe.hmmer import Hmmer
+from biskit.exe.dssp import Dssp
+from biskit.exe.surfaceRacer import SurfaceRacer
+from biskit.exe.delphi import Delphi, DelphiError
 
 
 class PDBDope:
@@ -289,7 +289,7 @@ class PDBDope:
         @return: Intervor instance
         @rtype: Biskit.Dock.Intervor
         """
-        from Biskit.Dock.Intervor import Intervor
+        from biskit.dock.Intervor import Intervor
 
         x = Intervor( self.m, cr=cr, cl=cl, mode=mode, breaks=breaks, **kw)
         x.run()
@@ -355,7 +355,7 @@ class PDBDope:
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test class """
@@ -365,32 +365,32 @@ class Test(BT.BiskitTest):
     M     = None #: cache processed PDB between tests
 
     def prepare(self):
-        from Biskit import PDBModel
+        from biskit import PDBModel
         self.f = T.testRoot() + '/com/1BGS.pdb'
 
         if not Test.M:
-            if self.local: print "Loading PDB...",
+            if self.local: print("Loading PDB...", end=' ')
             Test.M = PDBModel( self.f )
             Test.M = self.M.compress( Test.M.maskProtein() )
 
-            if self.local: print "Done"
+            if self.local: print("Done")
 
         self.d = PDBDope( self.M )
 
     def test_addSurfaceRacer(self):
         """PDBDope.addSurfaceRacer/addSurfaceMask test"""
-        if self.local: print "Adding SurfaceRacer curvature...",
+        if self.local: print("Adding SurfaceRacer curvature...", end=' ')
         self.d.addSurfaceRacer( probe=1.4 )
-        if self.local: print 'Done.'
+        if self.local: print('Done.')
 
-        if self.local: print "Adding surface mask...",
+        if self.local: print("Adding surface mask...", end=' ')
         self.d.addSurfaceMask()
-        if self.local: print 'Done.'
+        if self.local: print('Done.')
         
     def test_surfaceRacerBug(self):
         """PDBDope.addSurfaceRacer mask handling bugfix"""
         import os
-        from Biskit import PDBModel
+        from biskit import PDBModel
         m = PDBModel(os.path.join(T.testRoot(),'lig/1A19.pdb'))
         d = PDBDope(m)
         d.addSurfaceRacer()
@@ -411,33 +411,33 @@ class Test(BT.BiskitTest):
 
     def test_model(self):
         """PDBDope test final model"""
-        from Biskit import PDBModel
+        from biskit import PDBModel
 
         if self.local:
-            print '\nData added to info record of model (key -- value):'
-            for k in self.d.m.info.keys():
-                print '%s -- %s'%(k, self.d.m.info[k])
+            print('\nData added to info record of model (key -- value):')
+            for k in list(self.d.m.info.keys()):
+                print('%s -- %s'%(k, self.d.m.info[k]))
 
-            print '\nAdded atom profiles:'
-            print self.M.atoms
+            print('\nAdded atom profiles:')
+            print(self.M.atoms)
 
-            print '\nAdded residue  profiles:'
-            print self.M.residues
+            print('\nAdded residue  profiles:')
+            print(self.M.residues)
 
             ## check that nothing has changed
-            print '\nChecking that models are unchanged by doping ...'
+            print('\nChecking that models are unchanged by doping ...')
 
         m_ref = PDBModel( self.f )
         m_ref = m_ref.compress( m_ref.maskProtein() )
-        for k in m_ref.atoms.keys():
+        for k in list(m_ref.atoms.keys()):
             #ref = [ m_ref.atoms[i][k] for i in m_ref.atomRange() ]
             #mod = [ self.M.atoms[i][k] for i in self.M.atomRange() ]
-            self.assert_( N.all( m_ref[k] == self.M[k]) )
+            self.assertTrue( N.all( m_ref[k] == self.M[k]) )
 
         ## display in Pymol
         if self.local:
-            print "Starting PyMol..."
-            from Biskit.Pymoler import Pymoler
+            print("Starting PyMol...")
+            from biskit.exe.pymoler import Pymoler
 
             pm = Pymoler()
             pm.addPdb( self.M, 'm' )
@@ -450,7 +450,7 @@ class LongTest( BT.BiskitTest ):
 
 
     def prepare(self):
-        from Biskit import PDBModel
+        from biskit import PDBModel
         self.f = T.testRoot() + '/com/1BGS.pdb'
 
         self.M = PDBModel( self.f )
@@ -460,14 +460,14 @@ class LongTest( BT.BiskitTest ):
 
     def test_conservation(self):
         """PDBDope.addConservation (Hmmer) test"""
-        if self.local: print "Adding conservation data...",
+        if self.local: print("Adding conservation data...", end=' ')
         self.d.addConservation()
-        if self.local: print 'Done.'
+        if self.local: print('Done.')
 
         ## display in Pymol
         if self.local:
-            print "Starting PyMol..."
-            from Biskit.Pymoler import Pymoler
+            print("Starting PyMol...")
+            from biskit.exe.pymoler import Pymoler
 
             pm = Pymoler()
             pm.addPdb( self.M, 'm' )
@@ -488,7 +488,7 @@ class LongTest( BT.BiskitTest ):
     ## EXPECT_1RQ4 = '.EEEEE.SSHHHHHHHHHHHHHHHEEEEEEEE.SS.EEEEE..SS...EEEEEEE.SSTTT.....EEEEEESSS..EEEEEETTTTEEEE.GGGTT...TT.EEEE.SS.SSHHHHHHHHTS.STT.EE.HHHHHHHHHHHHT..SS...HHHHHHHHHHHHHTHHHHH.HHHHHHHHGGGT.TT...EE..HHHHHHHTTHHHHHHHGGG.SS.SEEEETTEEESSHHHHHTT..EE.......SS.SSSS..EEEETTEEEEHHHHHHH.....EEEEE.SSHHHHHHHHHHHHHHHEEEEEEEEETTEEEEEE...S...EEEEEEE.SSSSS.....EEEEEETTT..EEEEEETTTTEEEE.GGGTT...TT.EEEE.SS..SHHHHHHHS...TTT.EE.TTHHHHHHHHHHT..SS...HHHHHHHHHHHHHHHHHHH.HHHHHHHGGGSS.TT...EE..HHHHHHHHTHHHHHHHGGG.SS.SEEEETTEEE.SHHHHHTT..EE........S.STTSS.EEESSSEEEEHHHHHHH.......EEEEE.EEEEEE.TTS.EEEEESS.EEEE..HHHHHHHHHHHHHT..EEEE.S..STT.B..EEEE...EEEEE...EEEE.TTS.EEEEETTEEEEE..TTHHHHHHHHHHTT..EEEE.S..STT.B..EEEE...EEEEEEEEEEEE.TTS.EEEEETTEEEEE..TTHHHHHHHHHHHT.EEEEE.S..STT.B..EEEE...EEEEEEEEEEEE.TTS.EEEEETTEEEEE..TTHHHHHHHHHHTT.EEEEE.S..STT.B..EEEE...EEEEE.EEEEEE.SSS.EEEEETTEEEEE..HHHHHHHHHHHHHT..EEEE.S..STT.B..EEEE...EEEEEEEEEEEE.TTS.EEEEETTEEEEE..HHHHHHHHHHHHTT.EEEEE.S..STT.B..EEEE...EEEEEEEEEEEE.TTS.EEEEETTEEEEE..TTHHHHHHHHHHTT.EEEEE.S..STT.B..EEEE...EEEEE.EEEEEE.TTS.EEEEETTB..EE..TTHHHHHHHHHHHT..EEEE.SS.STT.B..EEEE.....EEE.EEEEEE.TTS.EEEEETTEEEEE..THHHHHHHHHHHHT..EEEE.S..STT.B..EEEE...EEEEE.EEEEEE.SSS.EEEEETTEEEEE..TTHHHHHHHHHTTT..EEEE.S..STT.B..EEEE.'
     EXPECT_1RQ4 = '.EEEEE.SSHHHHHHHHHHHHHHHEEEEEEEE.SS.EEEEE..SS...EEEEEEE.SSTTT.....EEEEEESSS..EEEEEETTTTEEEE.GGGTT...TT.EEEE.SS.SSHHHHHHHHTS.STT.EE.HHHHHHHHHHHHT..SS...HHHHHHHHHHHIIIIIHHH.HHHHHHHHGGGT.TT...EE..HHHHHHHTTHHHHHHHGGG.SS.SEEEETTEEESSHHHHHTT..EE.......SS.SSSS..EEEETTEEEEHHHHHHH.....EEEEE.SSHHHHHHHHHHHHHHHEEEEEEEEETTEEEEEE...S...EEEEEEE.SSSSS.....EEEEEETTT..EEEEEETTTTEEEE.GGGTT...TT.EEEE.SS..SHHHHHHHS...TTT.EE.TTHHHHHHHHHHT..SS...HHHHHHHHHHHIIIIIHHH.HHHHHHHGGGSS.TT...EE..HHHHHHHHTHHHHHHHGGG.SS.SEEEETTEEE.SHHHHHTT..EE........S.STTSS.EEESSSEEEEHHHHHHH.......EEEEE.EEEEEE.TTS.EEEEESS.EEEE..HHHHHHHHHHHHHT..EEEE.S..STT.B..EEEE...EEEEE...EEEE.TTS.EEEEETTEEEEE..TTHHHHHHHHHHTT..EEEE.S..STT.B..EEEE...EEEEEEEEEEEE.TTS.EEEEETTEEEEE..TTHHHHHHHHHHHT.EEEEE.S..STT.B..EEEE...EEEEEEEEEEEE.TTS.EEEEETTEEEEE..TTHHHHHHHHHHTT.EEEEE.S..STT.B..EEEE...EEEEE.EEEEEE.SSS.EEEEETTEEEEE..HHHHHHHHHHHHHT..EEEE.S..STT.B..EEEE...EEEEEEEEEEEE.TTS.EEEEETTEEEEE..HHHHHHHHHHHHTT.EEEEE.S..STT.B..EEEE...EEEEEEEEEEEE.TTS.EEEEETTEEEEE..TTHHHHHHHHHHTT.EEEEE.S..STT.B..EEEE...EEEEE.EEEEEE.TTS.EEEEETTB..EE..TTHHHHHHHHHHHT..EEEE.SS.STT.B..EEEE.....EEE.EEEEEE.TTS.EEEEETTEEEEE..THHHHHHHHHHHHT..EEEE.S..STT.B..EEEE...EEEEE.EEEEEE.SSS.EEEEETTEEEEE..TTHHHHHHHHHTTT..EEEE.S..STT.B..EEEE.'
     def test_addSecondaryNonFiltered(self):
-        from Biskit import PDBModel
+        from biskit import PDBModel
         m = PDBModel('1R4Q')
         d = PDBDope(m)
         d.addSecondaryStructure()
