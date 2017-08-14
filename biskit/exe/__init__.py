@@ -18,7 +18,7 @@ from .pymoler import Pymoler
 ##     from MatrixPlot import MatrixPlot
 
 ##     from Hmmer import Hmmer
-##     from SurfaceRacer import SurfaceRacer, SurfaceRacer_Error
+from .surfaceRacer import SurfaceRacer, SurfaceRacer_Error
 
 ##     from reduce import Reduce
 ##     from delphi import Delphi, DelphiError

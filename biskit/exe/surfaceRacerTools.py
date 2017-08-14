@@ -24,7 +24,7 @@
 Reference data for SurfaceRacer.
 """
 
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 
 ## dictionary with average accessabilities in 500 random
 ## GLY-XX-GLY peptides calculated with SurfaceRacer using
@@ -395,8 +395,7 @@ def relExposure( model, absSurf, key='AS', clip=1 ):
     @rtype: [float]
     """
     if not key=='MS' and not key=='AS':
-        raise Exception,\
-              'Incorrect key for relative exposiure: %s '%key
+        raise Exception('Incorrect key for relative exposiure: %s '%key)
 
     rel = []
     i=0
@@ -515,15 +514,15 @@ def __bulk( a, rel, absSurf, key, i ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test case"""
 
     def test_surfaceRacerTools(self):
         """surfaceRacerTools test"""
-        from Biskit import PDBModel
-        import Biskit.tools as T
+        from biskit import PDBModel
+        import biskit.tools as T
         
         ## load a structure
         self.m = PDBModel( T.testRoot()+'/lig/1A19.pdb' )

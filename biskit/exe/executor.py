@@ -442,7 +442,9 @@ class Executor:
                                   bufsize=bufsize, executable=executable,
                                   stdin=stdin, stdout=stdout, stderr=stderr,
                                   shell=shell or self.exe.shell,
-                                  env=env or self.environment(), 
+                                  env=env or self.environment(),
+                                  ## python 3.x: enforce textmode on all pipes:
+                                  universal_newlines=True, 
                                   cwd=cwd or self.cwd )
 
             self.pid = p.pid
@@ -450,8 +452,8 @@ class Executor:
             output, error = p.communicate( inp )
         
             #convert byte string to actual string for Python 3.x compatibility
-            if output is not None: output = output.decode(sys.stdout.encoding)
-            if error is not None:  error  = error.decode(sys.stderr.encoding) 
+##            if output is not None: output = output.decode(sys.stdout.encoding)
+##            if error is not None:  error  = error.decode(sys.stderr.encoding) 
             
             self.returncode = p.returncode
 

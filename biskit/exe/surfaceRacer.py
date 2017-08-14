@@ -22,17 +22,21 @@
 """
 Calculates accessible, molecular surface areas and average curvature.
 """
+## allow relative imports when calling module by itself for testing (pep-0366)
+if __name__ == "__main__" and __package__ is None:
+    import biskit.exe; __package__ = "biskit.exe"
 
 import tempfile
 import os.path
 import string
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 
-from Biskit import Executor, TemplateError, EHandler
-import Biskit.settings as S
-import Biskit.tools as T
+from biskit import EHandler
+import biskit.settings as S
+import biskit.tools as T
 
-import Biskit.surfaceRacerTools as SRT
+from .executor import Executor, TemplateError
+from . import surfaceRacerTools as SRT
 
 class SurfaceRacer_Error( Exception ):
     pass
@@ -218,13 +222,12 @@ class SurfaceRacer( Executor ):
 
             return folder + '/'
 
-        except OSError, error:
-            raise SurfaceRacer_Error, \
-                  'Error preparing temporary folder for SurfaceRacer\n'+\
+        except OSError as error:
+            raise SurfaceRacer_Error('Error preparing temporary folder for SurfaceRacer\n'+\
                   'Error: %r\n' % error +\
                   'folder: %r\n' % folder +\
                   'binary: %r\n' % self.exe.bin +\
-                  'binary link: %r' % binlnk 
+                  'binary link: %r' % binlnk) 
 
 
 
@@ -247,8 +250,7 @@ class SurfaceRacer( Executor ):
         if sum(model.maskHeavy()) == model.lenAtoms():
             model.writePdb( f_pdb_out, wrap=1, left=0 )
         else:
-            raise SurfaceRacer_Error, \
-                  'The pdb file that was to be written as input for SurfaceRacer contains none heavy atoms.'
+            raise SurfaceRacer_Error('The pdb file that was to be written as input for SurfaceRacer contains none heavy atoms.')
 
 
     def cleanup( self ):
@@ -284,12 +286,10 @@ class SurfaceRacer( Executor ):
             lines = out_file.readlines()
             out_file.close()
         except:
-            raise SurfaceRacer_Error,\
-                  'SurfaceRacer result file %s does not exist. You have probably encountered a very rare SurfaceRacer round off error that have caused the program to terminate. The simplest remedy to this problem is to increase the probe radii with a very small number, for example from %.3f to %.3f.'%(self.f_out_name, self.probe,self.probe+0.001  )
+            raise SurfaceRacer_Error('SurfaceRacer result file %s does not exist. You have probably encountered a very rare SurfaceRacer round off error that have caused the program to terminate. The simplest remedy to this problem is to increase the probe radii with a very small number, for example from %.3f to %.3f.'%(self.f_out_name, self.probe,self.probe+0.001  ))
 
         if  len(lines) == 0:
-            raise SurfaceRacer_Error,\
-                  'SurfaceRacer result file %s empty'%self.f_out_name
+            raise SurfaceRacer_Error('SurfaceRacer result file %s empty'%self.f_out_name)
 
         ## don't parse cavity information, find first occurance or 'CAVITY'
         end = len(lines)
@@ -298,9 +298,9 @@ class SurfaceRacer( Executor ):
                 end = i
 
         for i in range( end ):
-            curv += [ float( string.strip( lines[i][-11:-1] ) ) ]
-            ms   += [ float( string.strip( lines[i][-17:-11] ) ) ]
-            asa  += [ float( string.strip( lines[i][-24:-17] ) ) ]
+            curv += [ float( str.strip( lines[i][-11:-1] ) ) ]
+            ms   += [ float( str.strip( lines[i][-17:-11] ) ) ]
+            asa  += [ float( str.strip( lines[i][-24:-17] ) ) ]
 
         result = {'curvature':N0.array(curv),
                   'MS':N0.array(ms),
@@ -337,7 +337,7 @@ class SurfaceRacer( Executor ):
         mask += N0.less( profile, lowerLimit )
 
         for i in  N0.nonzero(mask):
-            print 'WARNING! Profile value %.2f set to O\n'%profile[i]
+            print('WARNING! Profile value %.2f set to O\n'%profile[i])
             profile[i] = 0
 
         return profile
@@ -360,8 +360,7 @@ class SurfaceRacer( Executor ):
         @rtype: [float]
         """
         if not key=='MS' and not key=='AS':
-            raise SurfaceRacer_Error,\
-                  'Incorrect key for relative exposiure: %s '%key
+            raise SurfaceRacer_Error('Incorrect key for relative exposiure: %s '%key)
 
         self.result['rel'+key ] = SRT.relExposure( self.model,
                                                    self.result[key],
@@ -398,7 +397,7 @@ class SurfaceRacer( Executor ):
                 EHandler.warning("No relative accessabilities calculated "+\
                                  "when using a prob radius other than 1.4 A"+\
                                  " or not using the Richards vdw radii set.")
-        except KeyError, what:
+        except KeyError as what:
             EHandler.warning("Missing standard accessibilities for some "+\
                              "atoms. No relative accesibilities calculated.")
             if 'relMS' in self.result: del self.result['relMS']
@@ -424,7 +423,7 @@ class SurfaceRacer( Executor ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test"""
@@ -434,21 +433,21 @@ class Test(BT.BiskitTest):
     def test_SurfaceRacer(self):
         """SurfaceRacer test"""
 
-        from Biskit import PDBModel
-        import Biskit.mathUtils as MA
+        from biskit import PDBModel
+        import biskit.mathUtils as MA
         import numpy as N
 
-        if self.local: print 'Loading PDB...'
-        f = T.testRoot()+'/lig/1A19.pdb'
+        if self.local: print('Loading PDB...')
+        f = T.testRoot('/lig/1A19.pdb')
         m = PDBModel(f)
         m = m.compress( m.maskProtein() )
 
-        if self.local: print 'Starting SurfaceRacer'
+        if self.local: print('Starting SurfaceRacer')
 
         self.x = SurfaceRacer( m, 1.4, vdw_set=1, debug=self.DEBUG, verbose=0 )
 
         if self.local:
-            print 'Running ...'
+            print('Running ...')
 
         self.r = self.x.run()
 
@@ -456,12 +455,12 @@ class Test(BT.BiskitTest):
         ms= self.r['MS']
 
         if self.local:
-            print "Curvature: weighted mean %.6f and standard deviation %.3f"\
-                  %(MA.wMean(c,ms), MA.wSD(c,ms))
+            print("Curvature: weighted mean %.6f and standard deviation %.3f"\
+                  %(MA.wMean(c,ms), MA.wSD(c,ms)))
 
-            print 'Relative MS of atoms 10 to 20:',self.r['relMS'][10:20]
+            print('Relative MS of atoms 10 to 20:',self.r['relMS'][10:20])
 
-            print 'Relative AS of atoms 10 to 20:',self.r['relAS'][10:20]
+            print('Relative AS of atoms 10 to 20:',self.r['relAS'][10:20])
 
         self.e = ( N0.sum(self.r['relMS'][10:20]), N0.sum(self.r['relAS'][10:20]),
               N0.sum(self.r['curvature'][10:20]) )
