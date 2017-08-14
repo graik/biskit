@@ -881,7 +881,7 @@ class Trajectory:
         template = " %7.3f" * 10 + '\n'
 
         ## open new file
-        out = open( T.absfile(fname), 'w')
+        out = open( T.absfile(fname), 'wt')
         __write = out.write  ## cache function address for speed
 
         __write('\n')

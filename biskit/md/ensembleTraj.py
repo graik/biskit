@@ -585,8 +585,8 @@ class EnsembleTraj( Trajectory ):
         """
         Identify outlier trajectories. First we calculate the CA-RMS of every
         |step|th frame to the last frame. Outliers are member trajectories for
-        which the slope of this rms profile is z standard deviations below the
-        mean of all members.
+        which the **slope** of this rms profile is z standard deviations below
+        the mean of all members.
         
         :param z: z-value threshold
         :type  z: float
