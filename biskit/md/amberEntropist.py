@@ -35,7 +35,7 @@ import biskit.mathUtils as MU
 ## import Biskit.settings as settings
 from biskit.errors import BiskitError
 from biskit import PDBModel, EHandler, LocalPath
-from biskit.dock.Complex import Complex
+from biskit.dock import Complex
 
 ## allow relative imports when calling module by itself for testing (pep-0366)
 if __name__ == "__main__" and __package__ is None:
@@ -806,7 +806,7 @@ class Test(BT.BiskitTest):
     
     def test_amberEntropist( self ):
         """AmberEntropist test"""
-        import Biskit.tools as T
+        import biskit.tools as T
         self.a = AmberEntropist( T.testRoot() + '/amber/entropy/com_fake.etraj',
                                  verbose=self.local, debug=self.DEBUG,
                                  log=self.log)
