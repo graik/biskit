@@ -23,10 +23,10 @@
 Plot a 2D matrix (up to 100 x 100)
 """
 
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
+import biskit.tools as T
 
-from Biskit import ColorSpectrum, EHandler
-import Biskit.tools as T
+from biskit import ColorSpectrum, EHandler
 
 T.tryImport( 'biggles', 'FramedPlot', namespace=globals() )
 try:
@@ -45,7 +45,7 @@ class Legend(FramedPlot):
         @type  values: [(float, int)]
         """
         if not biggles:
-            raise ImportError, 'biggles module could not be imported.'
+            raise ImportError('biggles module could not be imported.')
 
         FramedPlot.__init__(self)
 
@@ -54,9 +54,9 @@ class Legend(FramedPlot):
         self.frame.draw_spine = 1
 
         n_values = 4 ## number of labeled ticks in legend
-        step = len(values) / (n_values - 1) + 1
+        step = len(values) // (n_values - 1) + 1
 
-        indices = range(0, len(values), step)
+        indices = list(range(0, len(values), step))
         indices.append(len(values) - 1)
 
         labels = ['%.1f' % values[i, 0] for i in indices]
@@ -111,7 +111,7 @@ class MatrixPlot(FramedPlot):
         @rtype: biggles.FramedPlot
         """
         if not biggles:
-            raise ImportError, 'biggles module could not be imported.'
+            raise ImportError('biggles module could not be imported.')
 
         FramedPlot.__init__(self)
 
@@ -185,15 +185,15 @@ class MatrixPlot(FramedPlot):
         @return: smaller array
         @rtype: N0.array
         """
-        r = N0.take( a, range( 0, len(a), step ), axis=0 )
-        r = N0.take( r, range( 0, len(r[0]), step ), axis=1 )
+        r = N0.take( a, list(range( 0, len(a), step)), axis=0 )
+        r = N0.take( r, list(range( 0, len(r[0]), step)), axis=1 )
         return r
 
 
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test class """
@@ -213,7 +213,7 @@ class Test(BT.BiskitTest):
         if self.local or self.VERBOSITY > 2:
             self.p.show()
 
-        self.assert_( self.p is not None )
+        self.assertTrue( self.p is not None )
 
 
 

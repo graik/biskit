@@ -39,8 +39,8 @@ try:
 
 ##     from EDParser import EZDParser
 
-##     from PCRModel import PCRModel
     from biskit.pdbModel import PDBModel, PDBProfiles, PDBError
+    from biskit.pcrModel import PCRModel
 
     from biskit.profileCollection import ProfileCollection, ProfileError
 ##     from ProfileMirror import ProfileMirror
@@ -60,6 +60,9 @@ try:
     from biskit.colorspectrum import ColorSpectrum, ColorError
 ##     from PDBDope import PDBDope
 ##     from Ramachandran import Ramachandran
+    
+    from .colorspectrum import ColorSpectrum, ColorError, colorRange
+    from .matrixPlot import MatrixPlot
     
 ## ## PVM-dependent modules
 
