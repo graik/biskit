@@ -13,8 +13,7 @@ from .dssp import Dssp, Dssp_Error
 
 from .pymoler import Pymoler
 
-##     from XplorInput import XplorInput, XplorInputError
-##     from Xplorer import Xplorer, XplorerError, RunError
+from .xplorer import Xplorer, XplorerError, RunError
 ##     from MatrixPlot import MatrixPlot
 
 ##     from Hmmer import Hmmer

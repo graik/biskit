@@ -20,15 +20,19 @@
 """
 Interface to Xplor
 """
+## allow relative imports when calling module as main script for testing https://www.python.org/dev/peps/pep-0366/
+if __name__ == "__main__" and __package__ is None:
+    import biskit.exe; __package__ = "biskit.exe"
 
 import tempfile
 from time import time
 import os
 
-import settings
-import Biskit.tools as T
-from Biskit.Errors import BiskitError
-from Biskit.Executor import Executor, RunError
+import biskit.settings as settings
+import biskit.tools as T
+from biskit.errors import BiskitError
+
+from .executor import Executor, RunError
 
 class XplorerError( BiskitError ):
     pass
@@ -115,7 +119,7 @@ class Xplorer(Executor):
         except:
             pass
 
-        raise RunError, 'Xplor terminated with an error:\n' + s
+        raise RunError('Xplor terminated with an error:\n' + s)
 
 
     def saveXLog( self, fname ):
@@ -139,7 +143,7 @@ class Xplorer(Executor):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test"""
@@ -214,12 +218,12 @@ stop
         self.x.run()
 
         if self.local:
-            print """
+            print("""
 The minimized structure and the X-Plor log file
 have been written to %s and %s, respectively
-            """ % (pdb_out, log_out)
+            """ % (pdb_out, log_out))
 
-            print """See x.logLines for the complete xplor log file!"""
+            print("""See x.logLines for the complete xplor log file!""")
         
 
     def cleanUp(self):
