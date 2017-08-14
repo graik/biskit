@@ -12,6 +12,7 @@ t = p.crd2traj()
 t.frameNames = T.load('raw/traj_framenames.list')
 
 te = traj2ensemble(t, members=10)
+te.fit(fit=0)  ## re-calculate profile 'rms' (all-atom fit to average structure)
 
 T.dump(te, 'traj.dat')
 
