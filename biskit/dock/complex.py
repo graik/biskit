@@ -25,7 +25,6 @@ collect and manage information about a docking result
 
 from copy import deepcopy, copy
 from numpy import ndarray as arraytype
-
 from difflib import SequenceMatcher
 
 import biskit.core.oldnumeric as N0
