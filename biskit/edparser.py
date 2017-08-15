@@ -22,8 +22,9 @@
 import re,numpy as npy
 import sys,os
 from math import *
-from LocalPath import LocalPath
-import tools
+
+from biskit.core.localpath import LocalPath
+import biskit.tools as tools
 
 
 class EZDParser:
@@ -216,7 +217,7 @@ class EZDParser:
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test class"""
@@ -231,23 +232,23 @@ class Test(BT.BiskitTest):
         """EZDParser test"""
 
         if self.local:
-            print "parsing ...",
+            print("parsing ...", end=' ')
         self.p = self.p or EZDParser( self.f )
 
         if self.local:
-            print "Done"
+            print("Done")
 
         self.origin = self.p.getCartesianOrigin()
         target = [ -38.92757372, -115.8054999 ,  -36.27633333]
 
         ## compare result with expected result but allow for numeric deviations
-        self.assert_( npy.sum(self.origin - target) < 1e-8 )
+        self.assertTrue( npy.sum(self.origin - target) < 1e-8 )
 
         self.grid = self.p.getCartesianPositionGrid()
-        self.assertEquals( npy.shape( self.grid ), (129, 105, 104, 4) )
+        self.assertEqual( npy.shape( self.grid ), (129, 105, 104, 4) )
 
         self.i = self.p.getIdxFromCart( [10, 10, 10] )
-        self.assert_( npy.all( self.i == [  82.,  212.,   80.] ) )
+        self.assertTrue( npy.all( self.i == [  82.,  212.,   80.] ) )
 
 
 

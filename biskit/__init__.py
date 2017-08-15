@@ -48,14 +48,13 @@ try:
 ##     from ModelList import ModelList
 ##     from CommandLine import CommandLine
     
-    from biskit.amberResidues import AmberResidueType, AmberPrepParser
-    from biskit.amberResidueLibrary import AmberResidueLibrary,\
+    from .amberResidues import AmberResidueType, AmberPrepParser
+    from .amberResidueLibrary import AmberResidueLibrary,\
                                            AmberResidueLibraryError
     
     from .atomCharger import AtomCharger
     
 
-    from biskit.colorspectrum import ColorSpectrum, ColorError
     from .pdbDope import PDBDope
 ##     from Ramachandran import Ramachandran
     
