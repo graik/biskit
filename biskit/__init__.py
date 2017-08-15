@@ -61,6 +61,8 @@ try:
     from .colorspectrum import ColorSpectrum, ColorError, colorRange
     from .matrixPlot import MatrixPlot
     
+    from .core.localpath import LocalPath, LocalPathError
+    
 ## ## PVM-dependent modules
 
 ##     from QualMaster import QualMaster
