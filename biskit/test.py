@@ -188,7 +188,7 @@ class LogHandle:
         self.handle.write(s+'\n')
         
     def add(self, s):
-        self.handle.writeln(s)
+        self.writeln(s)
         self.handle.flush()
         
     def add_nobreak(self,s):
