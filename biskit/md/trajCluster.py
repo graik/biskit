@@ -25,15 +25,20 @@
 Cluster the members of a trajectory.
 """
 
-import Biskit.oldnumeric as N0
-import tools as T
-
-from mathUtils import aboveDiagonal, SD
-from FuzzyCluster import FuzzyCluster
-import rmsFit
 import types
 
-from Errors import BiskitError
+import biskit.core.oldnumeric as N0
+import biskit.tools as T
+import biskit.rmsFit as rmsFit
+from biskit.mathUtils import aboveDiagonal, SD
+from biskit.errors import BiskitError
+
+## allow relative imports when calling module by itself for testing (pep-0366)
+if __name__ == "__main__" and __package__ is None:
+    import biskit.md; __package__ = "biskit.md"
+
+from .fuzzyCluster import FuzzyCluster
+
 
 class ClusterError( BiskitError ):
     pass
@@ -67,7 +72,7 @@ class TrajCluster:
         Apply current atom mask and return list of raveled frames.
         """
         t = self.traj.compressAtoms( self.aMask )
-        return N0.array( map( N0.ravel, t.frames ) )
+        return N0.array( list(map( N0.ravel, t.frames )) )
 
 
     def cluster( self, n_clusters, weight=1.13, converged=1e-11,
@@ -156,7 +161,7 @@ class TrajCluster:
                     T.flushPrint('Current cluster setting %i, current average cluster rmsd %.2f\n'%( clst, N0.average( rmsLst ) ))
 
             if pos[1]-pos[0]<= 0 or pos[0]<min_clst or pos[1]>max_clst:
-                raise ClusterError, "Error determining number of clusters"
+                raise ClusterError("Error determining number of clusters")
 
 
     def memberships( self ):
@@ -177,7 +182,7 @@ class TrajCluster:
         @rtype: [float]
         """
         msm = self.memberships()
-        return map( lambda x: max( msm[:,x]), range(0, self.traj.lenFrames() ))
+        return [max( msm[:,x]) for x in range(0, self.traj.lenFrames() )]
 
 
     def centers( self ):
@@ -358,14 +363,14 @@ class TrajCluster:
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test Adaptive clustering"""
 
     def test_TrajCluster(self):
         """TrajCluster test"""
-        from Biskit.EnsembleTraj import traj2ensemble
+        from biskit.md import traj2ensemble
 
         traj = T.load( T.testRoot()+'/lig_pcr_00/traj.dat')
 
@@ -388,11 +393,11 @@ class Test(BT.BiskitTest):
         if self.local:
             member_frames = self.tc.memberFrames()
 
-            print 'There are %i clusters where the members are:'%n_clusters
+            print('There are %i clusters where the members are:'%n_clusters)
             for i in range(n_clusters):
-                print 'Cluster %i (%i members): %s'%( i+1,
+                print('Cluster %i (%i members): %s'%( i+1,
                                                       len(member_frames[i]),
-                                                      member_frames[i] )
+                                                      member_frames[i] ))
 
 
 if __name__ == '__main__':

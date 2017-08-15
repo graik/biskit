@@ -32,9 +32,9 @@ Reference::
   PROTEINS: Structure, Function and Genetics 14:249-264 1992
 """
 
-import Biskit.oldnumeric as N0
-import Biskit.mathUtils as MU
-import tools
+import biskit.core.oldnumeric as N0
+import biskit.mathUtils as MU
+import biskit.tools as tools
 
 import numpy.random.mtrand as R # seed, random / converted from oldnumeric/random_array
 
@@ -237,14 +237,14 @@ class FuzzyCluster:
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """FuzzyCluster test"""    
 
     def test_FuzzyCluster( self):
         """FuzzyCluster test"""
-        import gnuplot as G
+        import biskit.gnuplot as G
 
         x1 = R.random_sample((500,2))
         x2 = R.random_sample((500,2)) + 1
@@ -258,7 +258,7 @@ class Test(BT.BiskitTest):
                                      verbose=self.local)
 
         if self.local:
-            print "cluster centers are displayed in green"
+            print("cluster centers are displayed in green")
             G.scatter( self.x, self.centers )
 
         self.assertEqual( N0.shape(self.centers), (5, 2) )

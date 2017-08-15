@@ -13,6 +13,6 @@ from .amberRstParser import AmberRstParser
 
 from .amberCrdEntropist import AmberCrdEntropist, EntropistError
 
-##     from TrajCluster import TrajCluster
-##     from FuzzyCluster import FuzzyCluster
+from .fuzzyCluster import FuzzyCluster
+from .trajCluster import TrajCluster
 
