@@ -1,5 +1,5 @@
-import Biskit.tools as T
-import Biskit as B
+import biskit.tools as T
+import biskit as B
 import numpy as N
 
 com = T.load( 'com.traj' )

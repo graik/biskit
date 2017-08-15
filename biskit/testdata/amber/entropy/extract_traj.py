@@ -1,4 +1,4 @@
-import Biskit.tools as T
+import biskit.tools as T
 
 t = T.load( 'com_fake.etraj' )
 
