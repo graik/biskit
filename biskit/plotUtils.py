@@ -536,7 +536,7 @@ def prepare_plot( xlabel='', ylabel='', yrange=None, xrange=None,
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test case"""
