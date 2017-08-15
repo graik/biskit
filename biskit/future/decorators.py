@@ -49,8 +49,10 @@ def accept( *required, **optional ):
             req = required
 
             ## for methods of classes, expect 'self' at first position
-            if f.func_code.co_varnames[0] == 'self':
-                req = ( types.InstanceType, ) + req
+            if f.__code__.co_varnames[0] == 'self':
+                ## replaced types.InstanceType as of 
+                ## http://bugs.python.org/issue8206
+                req = ( getattr(types, 'InstanceType', object), ) + req
 
             ## check obligatory arguments
             for (type, given) in zip( req, args ):
@@ -71,7 +73,7 @@ def accept( *required, **optional ):
 
             return f( *args, **kwds )
 
-        new_f.func_name = f.func_name
+        new_f.__name__ = f.__name__
         return new_f
 
     return wrapper
@@ -126,7 +128,7 @@ def synchronized( f ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test case"""
@@ -134,7 +136,7 @@ class Test(BT.BiskitTest):
     def test_decorators( self ):
         """decorators test"""
         import time
-        from Biskit import PDBModel
+        from biskit import PDBModel
 
         class A:
 
@@ -148,7 +150,7 @@ class Test(BT.BiskitTest):
 
             @synchronized
             def report( self, j, i=1, **arg ):
-                print self.id
+                print(self.id)
 
 
         a = A()
@@ -162,7 +164,7 @@ class Test(BT.BiskitTest):
 
         
         if self.local:
-            print 'timing: ', time.time() - t
+            print('timing: ', time.time() - t)
             globals().update( locals() )
                               
         self.assertEqual( result, 90000 )
