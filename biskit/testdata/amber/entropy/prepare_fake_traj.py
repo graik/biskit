@@ -1,8 +1,17 @@
-import biskit.tools as T
-import biskit as B
 import numpy as N
 
-com = T.load( 'com.traj' )
+import biskit.tools as T
+import biskit as B
+
+from biskit.md import AmberCrdParser, EnsembleTraj, traj2ensemble
+
+
+p = AmberCrdParser('rpa_com.crd', '0_com.pdb', box=1 )
+
+## create standard trajectory object
+com = p.crd2traj()
+
+##com = T.load( 'com.traj' )
 
 # re-order frames into 4 parallel trajectories
 frames = N.zeros( len(com), int )
@@ -10,7 +19,7 @@ frames = N.zeros( len(com), int )
 for i in range( 11 ):
     N.put( frames, range(i*4,i*4+4), N.arange(i,44,11) )
 
-etraj = B.EnsembleTraj( n_members=4 )
+etraj = EnsembleTraj( n_members=4 )
 etraj.frames = com.takeFrames( frames ).frames
 etraj.ref = com.ref
 etraj.resetFrameNames()

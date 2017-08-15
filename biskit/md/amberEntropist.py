@@ -807,7 +807,7 @@ class Test(BT.BiskitTest):
     def test_amberEntropist( self ):
         """AmberEntropist test"""
         import biskit.tools as T
-        self.a = AmberEntropist( T.testRoot() + '/amber/entropy/com_fake.etraj',
+        self.a = AmberEntropist( T.testRoot('/amber/entropy/com_fake.etraj'),
                                  verbose=self.local, debug=self.DEBUG,
                                  log=self.log)
         self.r = self.a.run()
