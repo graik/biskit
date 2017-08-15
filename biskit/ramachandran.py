@@ -21,14 +21,13 @@ Display a Ramachandran plot for a list of PDBModels with
 the same atom contents.
 """
 
-from Biskit import ColorSpectrum as CS
-from Biskit.MatrixPlot import Legend
-from Biskit.PDBDope import PDBDope 
-from Biskit import EHandler
+from biskit import ColorSpectrum as CS
+from biskit import PDBDope, EHandler 
+from biskit.matrixPlot import Legend
 
-import Biskit.tools as T
+import biskit.tools as T
 
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 
 try:
     import biggles
@@ -51,7 +50,7 @@ class Ramachandran:
         @type  verbose: 1|0
         """
         if not biggles:
-            raise ImportError, 'biggles module could not be imported.'
+            raise ImportError('biggles module could not be imported.')
 
         if type(models) != type([]):
             models = [ models ]
@@ -111,26 +110,26 @@ class Ramachandran:
         @param m: PDBModel to calculate data for
         @type  m: PDBModel
         """
-        if self.verbose: print "Initiating PDBDope..."
+        if self.verbose: print("Initiating PDBDope...")
         d = PDBDope( m )
                 
         if not self.profileName in m.atoms.keys():
             
             if self.profileName in ['MS', 'AS', 'curvature', 'relAS', 'relMS']:
-                if self.verbose: print "Adding SurfaceRacer profile...",
+                if self.verbose: print("Adding SurfaceRacer profile...", end=' ')
                 d.addSurfaceRacer()
                             
             if self.profileName in ['density']:
-                if self.verbose: print "Adding surface density...",
+                if self.verbose: print("Adding surface density...", end=' ')
                 d.addDensity()
                                      
         if not self.profileName in m.residues.keys():
                     
             if self.profileName in ['cons_abs', 'cons_max', 'cons_ent']:
-                if self.verbose: print "Adding conservation data...",
+                if self.verbose: print("Adding conservation data...", end=' ')
                 d.addConservation()
                                                
-        if self.verbose: print 'Done.'
+        if self.verbose: print('Done.')
 
         ## convert atom profiles to average residue profile
         if self.profileName in m.atoms.keys():
@@ -139,8 +138,8 @@ class Ramachandran:
             resIdx =  m.resIndex().tolist()
             resIdx += [ m.lenAtoms()]
             for i in range(len(resIdx)-1):
-                prof += [ N0.average( N0.take(aProfile, range(resIdx[i],
-                                                            resIdx[i+1]) ) )]
+                prof += [ N0.average( N0.take(aProfile, list(range(resIdx[i],
+                                                            resIdx[i+1])) ) )]
         else:
             prof = m.profile( self.profileName )
 
@@ -277,8 +276,7 @@ class Ramachandran:
         @rtype: [ biggles.Point ]
         """
         bg = []
-        mat = biggles.read_matrix( T.dataRoot() +
-                                   '/biggles/ramachandran_bg.dat')
+        mat = N0.loadtxt( T.dataRoot() + '/biggles/ramachandran_bg.dat')
         x, y = N0.shape(mat)
         for i in range(x):
             for j in range(y):
@@ -327,7 +325,7 @@ class Ramachandran:
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test"""
