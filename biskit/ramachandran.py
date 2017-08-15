@@ -332,24 +332,28 @@ class Test(BT.BiskitTest):
 
     def test_Ramachandran(self):
         """Ramachandran test"""
-        self.traj = T.load( T.testRoot()+'/lig_pcr_00/traj.dat' )
+        import numpy as N
+        
+        self.traj = T.load( T.testRoot('/lig_pcr_00/traj.dat') )
 
         self.traj.ref.atoms.set('mass', self.traj.ref.masses() ) 
 
-        self.mdl = [ self.traj[0], self.traj[11] ]
-        self.mdl = [ md.compress( md.maskProtein() ) for md in self.mdl ]
+        self.mdls = [ self.traj[0], self.traj[11] ]
+        self.mdls = [ m.compress( m.maskProtein() ) for m in self.mdls ]
 
-        self.rama = Ramachandran( self.mdl , name='test', profileName='mass',
+        self.rama = Ramachandran( self.mdls , name='test', profileName='mass',
                                   verbose=self.local)
 
-        self.psi = N0.array( self.rama.psi )
+        self.psi = N.array( self.rama.psi )
 
         if self.local:
             self.rama.show()
             
-        r = N0.sum( N0.compress( N0.logical_not(N0.equal(self.psi, None)),
-                               self.psi ) )
-        self.assertAlmostEqual( r, -11717.909796797909, 2 )
+        ## remove NaN or None
+        self.psi = N.compress( N.logical_not(N.equal(self.psi, None)),self.psi)
+        r = round( N.sum( N.round(N.array(self.psi, float), 3) ), 2)
+        
+        self.assertAlmostEqual( r, -11718.22, 2 )
 
  
 if __name__ == '__main__':
