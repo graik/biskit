@@ -10,8 +10,8 @@ source = biskit
 omit =
      biskit/core/oldnumeric/*
      biskit/core/scientificIO/*
+     biskit/core/difflib_old.py
      biskit/gnuplot.py
-     biskit/difflib_old.py
 
 
 [report]
