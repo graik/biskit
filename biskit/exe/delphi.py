@@ -26,6 +26,7 @@ if __name__ == "__main__" and __package__ is None:
 import tempfile, os
 import numpy as N
 import re
+import operator
 
 import biskit.tools as T
 import biskit.mathUtils as U
@@ -124,7 +125,7 @@ class PDB2DelphiCharges( object ):
         
         ## determine which of several residues is used most
         keyres = [ (len(reslist), reslist) for reslist in akeydict.values() ]
-        keyres.sort()
+        keyres.sort(key=operator.itemgetter(0))  ## force sorting by 1st item only
         keyres.reverse()
 
         ## one record w/o number and chain id for all residues with these atoms

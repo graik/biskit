@@ -23,14 +23,14 @@ Delphi-based protocol for electrostatic component of free energy of binding.
 import numpy as N
 import copy
 
-from Biskit import PDBModel
-from Biskit import Delphi, DelphiError
-from Biskit import StdLog
-from Biskit import Reduce, AtomCharger
-from Biskit.Dock import Complex
+from biskit import PDBModel
+from biskit import StdLog
+from biskit import AtomCharger
+from biskit.exe import Delphi, DelphiError, Reduce
+from biskit.dock import Complex
 
-import Biskit.tools as T
-import Biskit.mathUtils as U
+import biskit.tools as T
+import biskit.mathUtils as U
 
 class DelphiBindingEnergy( object ):
     """
@@ -416,7 +416,7 @@ class DelphiBindingEnergy( object ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test class"""
@@ -431,7 +431,7 @@ class Test(BT.BiskitTest):
         self.r = self.dG.run()
 
 ##        self.assertAlmostEqual( self.r['dG_kt'], 21., 0 )
-        self.assert_( abs(self.r['dG_kt'] - 24.6) < 4 )
+        self.assertTrue( abs(self.r['dG_kt'] - 24.6) < 4 )
 
         if self.local:
             self.log.add(
