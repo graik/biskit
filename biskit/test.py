@@ -90,7 +90,7 @@ import sys
 
 #: list all packages from which test cases are collected by default (-p)
 DEFAULT_PACKAGES = ['biskit', 'biskit.core', 'biskit.exe', 'biskit.md',
-                    'biskit.future']
+                    'biskit.dock', 'biskit.future']
 
 #: tests with the following tags are excluded by default (override with -e)
 DEFAULT_EXCLUDE  = ['old']
