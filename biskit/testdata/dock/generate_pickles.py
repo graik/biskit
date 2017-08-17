@@ -3,19 +3,17 @@ import biskit.tools as T
 import biskit.dock.hexparser as H
 
 ## generate PDBModel and model dictionary pickles for receptor and ligand
-rec = B.PDBModel('rec/1A2P_clean.pdb')
+rec = B.PCRModel(source='rec/1A2P_clean.pdb', fPsf='1A2P.psf', pdbCode='1A2P')
 rec.saveAs('rec/1A2P.model')
-recpsf = B.PCRModel(source=rec, fPsf='1A2P.psf', pdbCode='1A2P')
 
-rec_dic = {1: recpsf}
+rec_dic = {1: rec}
 T.dump(rec_dic, 'rec/1A2P_model.dic')
 
 
-lig = B.PDBModel('lig/1A19_clean.pdb')
+lig = B.PCRModel(source='lig/1A19_clean.pdb', fPsf='1A19.psf', pdbCode='1A19')
 lig.saveAs('lig/1A19.model')
-ligpsf = B.PCRModel(source=lig, fPsf='1A19.psf', pdbCode='1A19')
 
-lig_dic = {1: ligpsf}
+lig_dic = {1: lig}
 T.dump(lig_dic, 'lig/1A19_model.dic')
 
 ## generate complex list from Hex docking result for this rec and lig
