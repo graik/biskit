@@ -19,7 +19,7 @@
 ##
 
 """
-PDBModel with attached Xplor topology (PSF).
+PDBModel with attached Xplor topology (PSF) -- @todo: rename to XplorModel
 """
 
 ## PCRModel:
