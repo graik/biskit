@@ -27,16 +27,20 @@
 List of Complex objects.
 """
 
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 import types
 import random
 
-import Biskit.tools as t
-from Biskit import PDBError, EHandler
-from Biskit.Errors import BiskitError
+import biskit.tools as t
+from biskit import PDBError, EHandler
+from biskit.errors import BiskitError
 
-from Biskit.Dock.Complex import Complex
-from Biskit.Dock.ComplexModelRegistry import ComplexModelRegistry
+## allow relative imports when calling module by itself for testing (pep-0366)
+if __name__ == "__main__" and __package__ is None:
+    import biskit.dock; __package__ = "biskit.dock"
+
+from .complex import Complex
+from .complexModelRegistry import ComplexModelRegistry
 
 try:
     import biggles
@@ -649,7 +653,7 @@ class ComplexList( list ):
         @rtype: biggles.FramedPlot()
         """
         if not biggles:
-            raise ImportError, 'biggles module could not be imported.'
+            raise ImportError('biggles module could not be imported.')
         
         plot = biggles.FramedPlot()
 
@@ -691,7 +695,7 @@ class ComplexList( list ):
         @rtype: biggles.FramedArray        
         """
         if not biggles:
-            raise ImportError, 'biggles module could not be imported.'
+            raise ImportError('biggles module could not be imported.')
         
         plot = biggles.FramedArray( len(ykey),1 )
 
@@ -720,7 +724,7 @@ class ComplexList( list ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test case"""
@@ -732,7 +736,7 @@ class Test(BT.BiskitTest):
         ## number of clusters among the 100 best (lowest rmsd) solutions
         self.cl_sorted = self.cl.sortBy( 'rms' )
         self.hex_clst = self.cl_sorted.valuesOf( 'hex_clst',
-                                                 indices=range(100),
+                                                 indices=list(range(100)),
                                                  unique=1 )
 
         if self.local:

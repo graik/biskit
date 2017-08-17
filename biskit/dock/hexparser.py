@@ -24,13 +24,15 @@
 """
 Parse output file from hex docking run.
 """
-import Biskit.oldnumeric as N0
-
 import re
-from Biskit.Dock import Complex, ComplexList
 
-from Biskit import PCRModel
-import Biskit.tools as t
+import biskit.core.oldnumeric as N0
+import biskit.tools as t
+from biskit import PCRModel
+
+from biskit.dock.complex import Complex
+from biskit.dock.complexList import ComplexList
+
 
 class HexParser:
     """
@@ -139,7 +141,7 @@ class HexParser:
                         ## create 4 by 4 Numeric array from 4 by 4 list
                         matrix = N0.array(matrix, N0.Float32)
             except AttributeError:
-                print "HexParser.nextComplex(): ",t.lastError()
+                print("HexParser.nextComplex(): ",t.lastError())
 
         ## Create new complex taking PCR models from dictionary
         c = Complex( self.rec_models[ i['model1'] ],
@@ -181,7 +183,7 @@ class HexParser:
         complexes = ComplexList()
         c = self.nextComplex()
 
-        while (c <> None):
+        while (c != None):
             complexes.append(c)
             c = self.nextComplex( ) ## look for next cluster
 
@@ -191,7 +193,7 @@ class HexParser:
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test case"""
@@ -208,14 +210,14 @@ class Test(BT.BiskitTest):
         c_lst = self.h.parseHex()
 
         if self.local:
-            print c_lst[1].info
+            print(c_lst[1].info)
 
             globals().update( locals() )
 
 
-        self.assertEqual( c_lst[1].info.keys(),
-                          ['soln', 'rms', 'hex_clst', 'hex_eshape',
-                           'model2', 'model1', 'hex_etotal', 'date'] )
+        self.assertSetEqual( set(c_lst[1].info.keys()),
+                             set(['soln', 'rms', 'hex_clst', 'hex_eshape',
+                                  'model2', 'model1', 'hex_etotal', 'date']) )
 
 if __name__ == '__main__':
 

@@ -24,9 +24,9 @@ try:
     from .complex import Complex
 ##    from ComplexEvolving import ComplexEvolving
 ##    from ComplexEvolvingList import ComplexEvolvingList
-##    from ComplexList import ComplexList
+    from .complexList import ComplexList
+    from .complexModelRegistry import ComplexModelRegistry
 ##    from ComplexTraj import ComplexTraj
-##    from ComplexModelRegistry import ComplexModelRegistry
 ##    from ComplexRandomizer import ComplexRandomizer
 ##    from Docker import Docker
 ##    from FixedList import FixedList

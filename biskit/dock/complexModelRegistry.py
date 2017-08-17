@@ -22,11 +22,15 @@
 This is a helper class for ComplexList.
 """
 
-from Biskit.Dock import Complex
-from Biskit.Errors import BiskitError
-from Biskit import LocalPath, PDBModel
+from biskit.errors import BiskitError
+from biskit import LocalPath, PDBModel
+import biskit.tools as T
 
-import Biskit.tools as T
+## allow relative imports when calling module by itself for testing (pep-0366)
+if __name__ == "__main__" and __package__ is None:
+    import biskit.dock; __package__ = "biskit.dock"
+
+from .complex import Complex
 
 class RegistryError( BiskitError ):
     pass
@@ -209,7 +213,7 @@ class ComplexModelRegistry:
         @return: list of models
         @rtype: [PDBModel]       
         """              
-        return self.rec_f2model.values()
+        return list(self.rec_f2model.values())
 
 
     def ligModels( self ):
@@ -219,7 +223,7 @@ class ComplexModelRegistry:
         @return: list of models
         @rtype: [PDBModel]       
         """                 
-        return self.lig_f2model.values()
+        return list(self.lig_f2model.values())
 
 
 ##     def getSubRegistry( self, cl ):
@@ -289,7 +293,7 @@ class ComplexModelRegistry:
 
             return f2com[ f ]
 
-        except KeyError, why:
+        except KeyError as why:
             raise RegistryError( "Model with source '%r' is unknown" % f )
 
 
@@ -357,14 +361,14 @@ class ComplexModelRegistry:
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test case"""
 
     def test_ComplexModelRegistry(self):
         """Dock.ComplexModelRegistry test"""
-        from Biskit.Dock import ComplexList
+        from biskit.dock import ComplexList
         
         self.cl = T.load( T.testRoot() +'/dock/hex/complexes.cl' )
         self.cl = self.cl.toList()
