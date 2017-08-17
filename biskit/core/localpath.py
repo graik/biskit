@@ -21,12 +21,9 @@
 """
 Path handling.
 """
-## allow relative imports when calling module as script for testing (pep-0366)
-if __name__ == "__main__" and __package__ is None:
-    import biskit.core; __package__ = "biskit.core"
 
-from .. import tools as T
-from .. import settings as S
+import biskit.tools as T
+import biskit.settings as S
 from biskit import EHandler
 from biskit.errors import BiskitError
 

@@ -61,7 +61,7 @@ try:
     from .colorspectrum import ColorSpectrum, ColorError, colorRange
     from .matrixPlot import MatrixPlot
     
-    from .core.localpath import LocalPath, LocalPathError
+    from biskit.core.localpath import LocalPath, LocalPathError
     
 ## ## PVM-dependent modules
 
@@ -69,7 +69,6 @@ try:
 ##     from StructureMaster import StructMaster
 ##     from StructureSlave import StructureSlave
 ##     from TrajFlexMaster import TrajFlexMaster, FlexError
-    pass
 
 except Exception as why:
     logging.warning('Could not import all biskit modules: ' + repr(why))
@@ -77,6 +76,3 @@ except Exception as why:
 
 ## clean up namespace
 del logging
-
-## facilitate access to core module classes
-import biskit.core.localpath as LocalPath
