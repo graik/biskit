@@ -22,11 +22,16 @@ and DelPhi; interfaces to further software can be added
 easily. Moreover, Biskit simplifies the parallelisation of
 calculations via PVM (Parallel Virtual Machine).
 
+Python 3 Migration
+-------------------
+
+This is the Python 3 branch of Biskit. Migration is ongoing but the core functionalities and many of the wrappers have been migrated. The new version is found in (lower case) ```biskit```. All the modules that have **not** yet been migrated are in the old ```Biskit``` folder. After installation, the new Python 3 Biskit is imported with ```import biskit```.
+
 Short Installation Instructions
 --------------------------------
 
 ```sh
-git clone https://github.com/graik/biskit.git biskit
+git clone https://github.com/graik/biskit.git biskit -b biskit3
 pip install -r biskit/requirements.txt
 pip install -e biskit
 ```
