@@ -73,7 +73,7 @@ class Reduce( Executor ):
                   autocap=False, capN=[], capC=[],
                   **kw ):
         """
-        @param model: structure to be aligned to reference
+        @param model: input structure
         @type  model: PDBModel
         @param tempdir: create dedicated temporary folder (default: None)
                         see Executor
