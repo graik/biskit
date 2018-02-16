@@ -24,6 +24,10 @@ Reference: Y. Zhang, J. Skolnick, TM-align: A protein structure alignment
 algorithm based on TM-score , Nucleic Acids Research, 2005 33: 2302-2309
 """
 
+## allow relative imports when calling module by itself for testing (pep-0366)
+if __name__ == "__main__" and __package__ is None:
+    import biskit.exe; __package__ = "biskit.exe"
+
 import tempfile, re
 import numpy as N
 
