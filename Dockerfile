@@ -4,13 +4,12 @@ ADD . /app
 WORKDIR /app
 
 RUN apt-get -qq update && apt-get install -y \
-         plotutils \
-         libplot-dev \
-##         python3-dev \
-         libblas-dev \
-         liblapack-dev \
          gfortran \
          gnuplot \
+         libblas-dev \
+         liblapack-dev \
+         libplot-dev \
+         plotutils \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install -r requirements.txt
