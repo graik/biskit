@@ -1,8 +1,5 @@
 FROM python:3.6
 
-ADD . /app
-WORKDIR /app
-
 RUN apt-get -qq update && apt-get install -y \
          gfortran \
          gnuplot \
@@ -12,12 +9,11 @@ RUN apt-get -qq update && apt-get install -y \
          plotutils \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install -r requirements.txt
+## don't use -r requirements.txt here because we have not ADDed file yet
+RUN pip install numpy scipy biopython
 
 ## biggles compilation cannot see numpy when invoked in same pip command
 RUN pip install biggles
-
-ENV PYTHONPATH $PYTHONPATH:`pwd`
 
 ## install TM-Align
 RUN cd /tmp && wget http://zhanglab.ccmb.med.umich.edu/TM-align/TMalign.gz \
@@ -29,8 +25,8 @@ RUN cd /tmp && wget http://zhanglab.ccmb.med.umich.edu/TM-align/TMalign.gz \
 RUN apt-get -qq update && apt-get install -y \
          dssp \
          pymol \
-         unzip \  # required for surfrace installation
-         libstdc++5 \ # old libc version required for surfrace binary
+         unzip \ 
+         libstdc++5 \ 
     && rm -rf /var/lib/apt/lists/*
 
 ## install SurfaceRacer
@@ -42,5 +38,22 @@ RUN cd /tmp \
     && chmod +x /usr/local/bin/surfrace \
     && rm -rf surface_racer*
 
-CMD ["python", "biskit/test.py", "-e", "exe"]
+## install reduce
+RUN cd /tmp \
+    && wget "http://kinemage.biochem.duke.edu/php/downlode.php?filename=/downloads/software/reduce31/reduce.3.23.130521.linuxi386.gz" \
+    && mv downlode*gz reduce.gz \
+    && gzip -d reduce.gz \
+    && chmod +x reduce \
+    && mv reduce /usr/local/bin/ 
+
+## Everything following ADD is not cached by Docker
+ADD . /app
+WORKDIR /app
+
+## duplicate, just in case requirements was updated without updating Dockerfile
+RUN pip install -r requirements_extended.txt
+
+ENV PYTHONPATH $PYTHONPATH:`pwd`
+
+CMD ["python", "biskit/test.py"]
 
