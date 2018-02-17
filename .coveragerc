@@ -1,5 +1,5 @@
 ## run from current directory:
-## coverage biskit/test.py
+## coverage run biskit/test.py
 ## coverage report
 
 [run]
