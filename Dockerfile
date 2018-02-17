@@ -38,14 +38,6 @@ RUN cd /tmp \
     && chmod +x /usr/local/bin/surfrace \
     && rm -rf surface_racer*
 
-## install reduce
-RUN cd /tmp \
-    && wget "http://kinemage.biochem.duke.edu/php/downlode.php?filename=/downloads/software/reduce31/reduce.3.23.130521.linuxi386.gz" \
-    && mv downlode*gz reduce.gz \
-    && gzip -d reduce.gz \
-    && chmod +x reduce \
-    && mv reduce /usr/local/bin/ 
-
 ## install AmberTools 17
 RUN cd /tmp \
     && wget http://ambermd.org/downloads/install_ambertools.sh \
