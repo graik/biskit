@@ -338,7 +338,7 @@ class Test(BT.BiskitTest):
 class TestLong(BT.BiskitTest):
     """DSSP testing full list of trouble-makers"""
 
-    TAGS = [BT.EXE, BT.LONG]
+    TAGS = [BT.EXE, BT.LONG, BT.EXTRA]
 
     def test_DSSP_alltroublemakers(self):
         from biskit import PDBModel

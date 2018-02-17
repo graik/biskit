@@ -93,7 +93,7 @@ DEFAULT_PACKAGES = ['biskit', 'biskit.core', 'biskit.exe', 'biskit.md',
                     'biskit.dock', 'biskit.future']
 
 #: tests with the following tags are excluded by default (override with -e)
-DEFAULT_EXCLUDE  = ['old']
+DEFAULT_EXCLUDE  = ['old', 'extra']
 
 ## END OF CONFIGURATION
 
@@ -102,6 +102,7 @@ NORMAL = 0  ## standard test case
 LONG   = 1  ## long running test case
 PVM    = 2  ## depends on PVM
 EXE    = 3  ## depends on external application
+EXTRA  = 4  ## tests not routinely run
 OLD    = 5  ## is obsolete
 SCRIPT = 6  ## a script test case
 FAILS  = 7  ## test known to currently fail (but procrastinated)
