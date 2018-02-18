@@ -458,7 +458,8 @@ class LongTest( BT.BiskitTest ):
 
         self.d = PDBDope( self.M )
 
-    def test_conservation(self):
+    ## test de-activated as we don't have a running Hmmer module any longer
+    def __test_conservation(self):
         """PDBDope.addConservation (Hmmer) test"""
         if self.local: print("Adding conservation data...", end=' ')
         self.d.addConservation()

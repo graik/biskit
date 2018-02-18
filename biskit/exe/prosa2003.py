@@ -348,7 +348,7 @@ import biskit.test as BT
 class Test(BT.BiskitTest):
     """Test"""
 
-    TAGS = [ BT.EXE ]
+    TAGS = [ BT.EXE, BT.OLD ]
 
     def test_Prosa2003(self):
         """Prosa2003 test"""
