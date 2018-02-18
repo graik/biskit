@@ -48,12 +48,15 @@ ENV AMBERHOME /opt/amber17
 ENV PATH $PATH:$AMBERHOME/bin
 
 ## Everything following ADD is not cached by Docker
+## -> the following RUN commands have to be re-executed with every build
 ADD . /app
 WORKDIR /app
 
 ## Now install programs that require registration or cannot be automatically
 ## downloaded for other reasons
 ## download manually and put copies into the `downloads` folder
+
+## Try installing Delphi from downloads copy
 RUN if test -e downloads/DelPhi_Linux_SP_F95.tar.gz; then \
        mv downloads/DelPhi_Linux_SP_F95.tar.gz /tmp; \
        cd /tmp ; \
@@ -61,11 +64,27 @@ RUN if test -e downloads/DelPhi_Linux_SP_F95.tar.gz; then \
        mv DelPhi*/ /opt/delphi_sp ; \
        ln -s /opt/delphi_sp/executable/delphi95 /usr/local/bin/delphi ; \
        cd /app ; \
+       rm /tmp/DelPhi_Linux_* ; \
        echo "Delphi installed from downloads copy."; \
     else \
        echo "Delphi not found in downloads"; \
     fi
 
+## Try installing XPLOR-NIH from downloads copy
+RUN if  test -e downloads/xplor-nih-????-db.tar.gz \
+      && test -e downloads/xplor-nih-????-Linux_x86_64.tar.gz; then \
+        cd /opt ; \
+        tar zxvf /app/downloads/xplor-nih-????-db.tar.gz; \
+        tar zxvf /app/downloads/xplor-nih-????-Linux_x86_64.tar.gz; \
+        cd xplor-nih*; \
+        ./configure -symlinks /usr/local/bin; \
+        rm /app/downloads/xplor-nih-????-db.tar.gz; \
+        rm /app/downloads/xplor-nih-????-Linux_x86_64.tar.gz; \
+        cd /app ; \
+        echo "XPlor NIH installed from downloads copy."; \
+    else \
+        echo "XPlor NIH not found in downloads."; \
+    fi 
 
 ## duplicate, just in case requirements was updated without updating Dockerfile
 RUN pip install -r requirements_extended.txt
