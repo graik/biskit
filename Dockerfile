@@ -60,7 +60,7 @@ WORKDIR /app
 RUN if test -e downloads/DelPhi_Linux_SP_F95.tar.gz; then \
        mv downloads/DelPhi_Linux_SP_F95.tar.gz /tmp; \
        cd /tmp ; \
-       tar xvfz DelPhi_Linux_SP_F95.tar.gz ; \
+       tar xfz DelPhi_Linux_SP_F95.tar.gz ; \
        mv DelPhi*/ /opt/delphi_sp ; \
        ln -s /opt/delphi_sp/executable/delphi95 /usr/local/bin/delphi ; \
        cd /app ; \
@@ -74,8 +74,8 @@ RUN if test -e downloads/DelPhi_Linux_SP_F95.tar.gz; then \
 RUN if  test -e downloads/xplor-nih-????-db.tar.gz \
       && test -e downloads/xplor-nih-????-Linux_x86_64.tar.gz; then \
         cd /opt ; \
-        tar zxvf /app/downloads/xplor-nih-????-db.tar.gz; \
-        tar zxvf /app/downloads/xplor-nih-????-Linux_x86_64.tar.gz; \
+        tar zxf /app/downloads/xplor-nih-????-db.tar.gz; \
+        tar zxf /app/downloads/xplor-nih-????-Linux_x86_64.tar.gz; \
         cd xplor-nih*; \
         ./configure -symlinks /usr/local/bin; \
         rm /app/downloads/xplor-nih-????-db.tar.gz; \
