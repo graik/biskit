@@ -80,6 +80,8 @@ RUN if  test -e downloads/xplor-nih-????-db.tar.gz \
         ./configure -symlinks /usr/local/bin; \
         rm /app/downloads/xplor-nih-????-db.tar.gz; \
         rm /app/downloads/xplor-nih-????-Linux_x86_64.tar.gz; \
+        ## try to minimize xplorer installation
+        rm -r python deprecated eginput tcl test; \ 
         cd /app ; \
         echo "XPlor NIH installed from downloads copy."; \
     else \
