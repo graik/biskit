@@ -1,6 +1,5 @@
 venv
 __pycache__
-venv
 *.wpu
 *.wpr
 *sqlite3
@@ -8,3 +7,4 @@ staticfiles
 .env
 dev_uploads
 *.db
+.git

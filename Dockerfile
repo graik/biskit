@@ -1,7 +1,8 @@
 FROM python:3.6
 
 ## dependencies for Biskit and Biggles
-RUN apt-get -qq update && apt-get install -y \
+RUN apt-get -qq update \
+    && apt-get install -y --no-install-recommends \
          gfortran \
          gnuplot \
          libblas-dev \
@@ -11,9 +12,9 @@ RUN apt-get -qq update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 ## don't use -r requirements.txt here because we have not ADDed file yet
-RUN pip install numpy scipy biopython \
+RUN pip install --no-cache numpy scipy biopython \
 ## biggles compilation cannot see numpy when invoked in same pip command
-    && pip install biggles
+    && pip --no-cache install biggles
 
 ## install TM-Align
 RUN cd /tmp && wget http://zhanglab.ccmb.med.umich.edu/TM-align/TMalign.gz \
@@ -22,7 +23,8 @@ RUN cd /tmp && wget http://zhanglab.ccmb.med.umich.edu/TM-align/TMalign.gz \
     && mv TMalign /usr/local/bin/
 
 ## install DSSP, Pymol, surfrace dependencies
-RUN apt-get -qq update && apt-get install -y \
+RUN apt-get -qq update \
+    && apt-get install -y --no-install-recommends \
          dssp \
          pymol \
          unzip \ 
@@ -89,7 +91,7 @@ RUN if  test -e downloads/xplor-nih-????-db.tar.gz \
     fi 
 
 ## duplicate, just in case requirements was updated without updating Dockerfile
-RUN pip install -r requirements_extended.txt
+RUN pip install --no-cache -r requirements_extended.txt
 
 ENV PYTHONPATH $PYTHONPATH:`pwd`
 
