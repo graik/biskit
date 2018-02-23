@@ -684,10 +684,10 @@ class Test(BT.BiskitTest):
         S.assertTrue( os.path.exists( S.l.local() ) )
 
         ## Example 5; rule out stray substitutions
-        S.l.set_path( T.projectRoot() + '/tmp/com', maxSub=1, TMP='/tmp' )
+        S.l.set_path( T.projectRoot()+ '/xy/com', maxSub=1, TMP='/xy')
         S.path += [ 'Example 5:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
         S.assertEqual( S.l.formatted(),
-                       '{%s|$projectRoot}/tmp/com'% T.projectRoot())
+                       '{%s|$projectRoot}/xy/com'% T.projectRoot())
 
         self.assertEqual( S.l.fragments[0][1], 'projectRoot' )
 
