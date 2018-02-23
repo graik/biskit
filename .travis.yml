@@ -10,6 +10,7 @@ services:
 # command to install dependencies
 before_install:
   - docker build -t graik/biskit .
+  - ln -s . /app
 
 install:
   - pip install coverage coveralls
