@@ -16,11 +16,7 @@ install:
   
 # command to run tests
 script:
-  docker run -e TRAVIS_JOB_ID="$TRAVIS_JOB_ID" \
-             -e TRAVIS_BRANCH="$TRAVIS_BRANCH" \
-             -v "$PWD:/app" \
-             -t graik/biskit \
-             coverage run biskit/test.py -e fails old extra
+  docker run -v "$PWD:/app" -t graik/biskit coverage run biskit/test.py -e fails old extra
 after_success:
   coveralls
 after_failure:
