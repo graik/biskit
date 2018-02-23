@@ -11,6 +11,6 @@ before_install:
 script:
   docker run -t graik/biskit coverage run biskit/test.py -e fails old extra
 after_success:
-  coveralls
+  docker cp graik/biskit:.coverage .
 after_failure:
-  coveralls
+  docker cp graik/biskit:.coverage .
