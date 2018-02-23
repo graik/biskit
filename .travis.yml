@@ -11,7 +11,7 @@ before_install:
   
 # command to run tests
 script:
-  docker run -t graik/biskit coverage run biskit/test.py -e exe fails
+  docker run -t graik/biskit coverage run biskit/test.py -e fails old extra
 after_success:
   coveralls
 after_failure:
