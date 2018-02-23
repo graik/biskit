@@ -10,7 +10,6 @@ services:
 # command to install dependencies
 before_install:
   - docker build -t graik/biskit .
-  - ln -s . /app
 
 install:
   - pip install coverage coveralls
@@ -18,7 +17,13 @@ install:
 # command to run tests
 script:
   docker run -v "$PWD:/app" -t graik/biskit coverage run biskit/test.py -e fails old extra
+
 after_success:
-  coveralls
+  ## replace absolute /app/biskit/ path in coverage result
+  ## by `pwd`/biskit
+  - sed 's@/app/@'"$PWD"'/@g' .coverage
+  - coveralls
+
 after_failure:
-  coveralls
+  - sed 's@/app/@'"$PWD"'/@g' .coverage
+  - coveralls
