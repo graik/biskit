@@ -21,7 +21,7 @@ script:
 after_success:
   ## replace absolute /app/biskit/ path in coverage result
   ## by `pwd`/biskit
-  - sed 's@/app/@'"$PWD"'/@g' .coverage
+  - sed -i 's@/app/@'"$PWD"'/@g' .coverage
   - coveralls
 
 after_failure:
