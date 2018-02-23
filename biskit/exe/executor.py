@@ -784,17 +784,17 @@ class Test(BT.BiskitTest):
         t.tryRemove(self.fout)
     
     def test_Executor( self ):
-        """Executor test (run emacs ~/.biskit/settings.cfg)"""
+        """Executor test (run python -c 'print(sys.version)')"""
         ExeConfigCache.reset()
 
-        self.x = ExeConfigCache.get( 'emacs', strict=0 )
+        self.x = ExeConfigCache.get( 'python', strict=0 )
         self.x.pipes = 1
 
-        args = '.biskit/settings.cfg'
+        args = '-c import sys; print(sys.version)'
         if not self.local:
             args = '-kill ' + args
 
-        self.e = Executor( 'emacs', args=args, strict=0,
+        self.e = Executor( 'python', args=args, strict=0,
                            f_in=None,
                            f_out=self.fout,
                            verbose=self.local, cwd=t.absfile('~'),
@@ -804,7 +804,7 @@ class Test(BT.BiskitTest):
         self.r = self.e.run()
 
         if self.local:
-            print('Emacs was running for %.2f seconds'%self.e.runTime)
+            print('Python process was running for %.2f seconds'%self.e.runTime)
 
         self.assertTrue( self.e.pid is not None )
         
@@ -816,7 +816,8 @@ class Test(BT.BiskitTest):
     
     def test_tempfiles(self):
         """Executor test temporary file creation and removal"""
-        self.e = Executor( 'emacs', args='-kill', f_out=self.fout, 
+        self.e = Executor( 'python', args='-c \'print("Hallo")\'', 
+                           f_out=self.fout, 
                            verbose=self.local, tempdir=True,
                            debug=False )
         self.e.prepare()
