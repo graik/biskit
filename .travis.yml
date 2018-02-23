@@ -25,5 +25,5 @@ after_success:
   - coveralls
 
 after_failure:
-  - sed 's@/app/@'"$PWD"'/@g' .coverage
+  - sed -i 's@/app/@'"$PWD"'/@g' .coverage
   - coveralls
