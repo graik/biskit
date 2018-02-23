@@ -12,6 +12,8 @@ omit =
      biskit/core/scientificIO/*
      biskit/core/difflib_old.py
      biskit/gnuplot.py
+## skip deprecated modules
+     biskit/exe/prosa2003.py
 
 
 [report]
