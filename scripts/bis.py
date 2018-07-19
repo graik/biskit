@@ -1,5 +1,5 @@
 #!/bin/sh
-''''exec python -i -- "$0" ${1+"$@"} # '''
+''''exec python3 -i -- "$0" ${1+"$@"} # '''
 
 ## above shebang hack calls python interpreter with interactive flag
 ## standard /usr/bin/env python -i doesn't get parsed in recent Linux 
