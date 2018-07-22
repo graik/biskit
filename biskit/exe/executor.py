@@ -244,9 +244,9 @@ class Executor:
     """
 
     def __init__( self, name, args='', template=None, f_in=None, f_out=None,
-                  f_err=None, strict=1, catch_out=1, push_inp=1, catch_err=0,
+                  f_err=None, strict=True, catch_out=1, push_inp=1, catch_err=0,
                   node=None, nice=0, cwd=None, tempdir=None, log=None, debug=0,
-                  verbose=None, validate=1, **kw ):
+                  verbose=None, validate=1, execonfigpath=None, **kw ):
 
         """
         Create Executor. *name* must point to an existing program configuration
@@ -274,8 +274,10 @@ class Executor:
         :param f_err: target file for error messages (default: None, discard)
         :type  f_err: str
         :param strict: strict check of environment and configuration file
-                       (default: 1)
-        :type  strict: 1|0
+                       (default: True)
+        :type  strict: bool
+        :param execonfigpath: alternative paths for finding configuration file
+        :type  execonfigpath: [str]
         :param catch_out: catch output in file (f_out or temporary)
                           (default: 1)
         :type  catch_out: 1|0
@@ -309,7 +311,8 @@ class Executor:
         :raise ExeConfigError: if environment is not fit for running
                                the program
         """
-        self.exe = ExeConfigCache.get( name, strict=strict )
+        self.exe = ExeConfigCache.get( name, strict=strict, 
+                                       configpath=execonfigpath )
         if validate:
             self.exe.validate()
         
