@@ -41,7 +41,7 @@ class AmberResidueType( B.PDBModel ):
     
     In addition to the normal PDBModel things, this class defines three
     additional fields:
-        * name   ... the full long residue name (str), e.g. 'Alanine'
+        * name   ... the full long residue name (str), e.g. 'alanine'
         * code   ... the three-letter name used in PDB files (str), e.g. 'ALA'
         * letter ... the single-letter residue code (str), e.g. 'A'
         
