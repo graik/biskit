@@ -128,7 +128,7 @@ class Test(BT.BiskitTest):
         if self.local:
             print(self.x)
 
-        self.assertTrue( os.path.exists(self.x) )
+        self.assertTrue( os.path.exists(self.x.dat) )
         
 
 if __name__ == '__main__':
