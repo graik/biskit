@@ -31,6 +31,7 @@ import threading
 
 def accept( *required, **optional ):
     """
+    Deprecated -- use type annotations and mypy instead.
     Decorator function that enforces type checking on arguments of a method.
 
     Example::
