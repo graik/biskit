@@ -121,13 +121,14 @@ class Test(BT.BiskitTest):
     
     def test_ExeConfigCache( self):
         """ExeConfigCache test """
+        import os.path
 
         self.x = ExeConfigCache.get( 'xplor' )
         
         if self.local:
             print(self.x)
 
-        self.assertTrue( self.x.dat_found )
+        self.assertTrue( os.path.exists(self.x) )
         
 
 if __name__ == '__main__':

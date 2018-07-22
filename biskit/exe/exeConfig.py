@@ -30,7 +30,6 @@ from biskit import EHandler
 
 import biskit.tools as T
 
-
 class ExeConfigError( BiskitError ):
     pass
 
@@ -110,9 +109,10 @@ class ExeConfig( object ):
       >>> the emacs editor
     """
 
-    ## static fields
-    CONF_PATH = [ os.path.expanduser('~/.biskit'), 
-                  os.path.join( T.dataRoot(), 'defaults' ) ]
+    ## default search path for exe_...config files
+    CONFIG_PATH = [ os.path.expanduser('~/.biskit'), 
+                    os.path.join( T.dataRoot(), 'defaults' ) ]
+
     SECTION_BIN = 'BINARY'
     SECTION_ENV = 'ENVIRONMENT'
 
@@ -135,14 +135,19 @@ class ExeConfig( object ):
         self.strict = strict
         self.dat = ''       #: configuration file path
         
-        configpath = configpath or self.CONF_PATH
+        searchpath = configpath or self.CONFIG_PATH #: [str]
+        p = searchpath.copy()  # don't empty out original CONFIG_PATH with pop() !
+        if len(p) < 1:
+            raise ExeConfigError('Path(s) for exe config files missing.')
            
-        while not os.path.exists(self.dat) and configpath:
-            self.dat = os.path.join( configpath.pop(0), 'exe_%s.dat' % name )
+        while p and not os.path.exists(self.dat):
+            self.dat = os.path.join( p.pop(0), 'exe_%s.dat' % name )
 
         if self.strict and not os.path.exists(self.dat) :
-            raise ExeConfigError('Could not find configuration file %s for program %s.'\
-                  % (self.dat, self.name))
+            raise ExeConfigError(
+                'Could not find configuration file %s for program %s.\n'\
+                %(self.dat, self.name) +\
+                'Searching in: %r'% searchpath)
         
         self.env_checked = 0 ## environment was verified
 
@@ -221,8 +226,9 @@ class ExeConfig( object ):
             if missing:
                 EHandler.warning( report )
 
-        except IOError as why:
-            raise ExeConfigError(str(why) + ' Check %s!' % self.dat)
+        except IOError as e:
+            ## re-raise but silence reporting of IOError in stack trace
+            raise ExeConfigError(str(e) + ' Check %s!' % self.dat) from None  
 
 
     def environment( self ):

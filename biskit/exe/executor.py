@@ -246,7 +246,7 @@ class Executor:
     def __init__( self, name, args='', template=None, f_in=None, f_out=None,
                   f_err=None, strict=True, catch_out=1, push_inp=1, catch_err=0,
                   node=None, nice=0, cwd=None, tempdir=None, log=None, debug=0,
-                  verbose=None, validate=1, execonfigpath=None, **kw ):
+                  verbose=None, validate=1, configpath=None, **kw ):
 
         """
         Create Executor. *name* must point to an existing program configuration
@@ -276,8 +276,8 @@ class Executor:
         :param strict: strict check of environment and configuration file
                        (default: True)
         :type  strict: bool
-        :param execonfigpath: alternative paths for finding configuration file
-        :type  execonfigpath: [str]
+        :param configpath: alternative paths for finding configuration file
+        :type  configpath: [str]
         :param catch_out: catch output in file (f_out or temporary)
                           (default: 1)
         :type  catch_out: 1|0
@@ -312,7 +312,7 @@ class Executor:
                                the program
         """
         self.exe = ExeConfigCache.get( name, strict=strict, 
-                                       configpath=execonfigpath )
+                                       configpath=configpath )
         if validate:
             self.exe.validate()
         
