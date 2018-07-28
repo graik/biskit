@@ -24,9 +24,9 @@ organise, sort, and filter list of dictionaries or similar objects
 
 import random
 
-import Biskit.tools as t
-from Biskit import EHandler, BisList, ConditionError, AmbiguousMatch,\
-     ItemNotFound, BisListError
+import biskit.tools as t
+from biskit import EHandler, BisList, ConditionError, AmbiguousMatch, ItemNotFound
+from biskit.errors import BiskitError
 
 class DictList( BisList, list ):
     """
@@ -104,7 +104,7 @@ class DictList( BisList, list ):
         @return: list of keys
         @rtype: [ any ],
         """
-        return item.keys()
+        return list(item.keys())
 
 
     def getValue( self, i, key, default=None ):
@@ -173,7 +173,7 @@ class DictList( BisList, list ):
 
         if not isinstance( lst, self.__class__ ):
 
-            if indices is None: indices = range( len(self), len(self)+len(lst) )
+            if indices is None: indices = list(range( len(self), len(self)+len(lst)))
 
             lst = [self._processNewItem(v, i) for v,i in zip( lst, indices )]
 
@@ -273,7 +273,7 @@ class DictList( BisList, list ):
         @return: indices in random order.
         @rtype: [ int ]
         """
-        r = range( len( self ) )
+        r = list(range( len( self )))
         random.shuffle( r )
         return r
 
@@ -282,7 +282,7 @@ class DictList( BisList, list ):
 ##  TESTING        
 #############
 
-import Biskit.test as BT
+import biskit.test as BT
 import string
 
 class Test(BT.BiskitTest):
@@ -307,7 +307,7 @@ class Test(BT.BiskitTest):
 
         for i in range( 50 ):
             d = {'random':random.random(),
-                 'name':string.letters[random.randint(0,50)] }
+                 'name':string.ascii_letters[random.randint(0,50)] }
             self.l2 += [ d ]
 
         self.p = None
