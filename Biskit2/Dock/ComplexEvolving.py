@@ -21,7 +21,7 @@
 """
 Complex that keeps track of its previous versions (conformations).
 """
-
+import numpy as N
 import Biskit.tools as t
 import Biskit.mathUtils as MU
 from Biskit import EHandler
@@ -147,7 +147,7 @@ class ComplexEvolving( ProtComplex ):
 
             return self.getComplex(i).info[key]
 
-        if isinstance(k, int):
+        if isinstance(k, (int, N.integer)):
 
             return self.getComplex( k )
 

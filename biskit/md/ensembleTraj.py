@@ -210,7 +210,7 @@ class EnsembleTraj( Trajectory ):
         """
         result = N0.zeros( self.lenFrames() )
 
-        if isinstance( member , int):
+        if isinstance( member, (int, N0.integer)):
             N0.put( result, self.memberIndices( member ), 1 )
 
         if type( member ) == list:
