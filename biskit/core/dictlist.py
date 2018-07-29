@@ -25,8 +25,14 @@ organise, sort, and filter list of dictionaries or similar objects
 import random
 
 import biskit.tools as t
-from biskit import EHandler, BisList, ConditionError, AmbiguousMatch, ItemNotFound
+from biskit import EHandler
 from biskit.errors import BiskitError
+
+## allow relative imports when calling module by itself for testing (pep-0366)
+if __name__ == "__main__" and __package__ is None:
+    import biskit.dock; __package__ = "biskit.core"
+
+from .bislist import BisList, ConditionError, AmbiguousMatch, ItemNotFound
 
 class DictList( BisList, list ):
     """
@@ -283,7 +289,6 @@ class DictList( BisList, list ):
 #############
 
 import biskit.test as BT
-import string
 
 class Test(BT.BiskitTest):
     """Test DictList """
@@ -302,6 +307,7 @@ class Test(BT.BiskitTest):
 
     def test_plotArray( self ):
         """BisList.plotArray test"""
+        import string
 
         self.l2 = DictList()
 

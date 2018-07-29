@@ -29,10 +29,6 @@ try:
     from biskit.logFile import LogFile, StdLog, ErrLog
     from biskit.errors import BiskitError
 
-    from .bislist import BisList, BisListError, ConditionError, AmbiguousMatch,\
-     ItemNotFound
-    from .dictlist import DictList
-
 ##     from Blast2Seq import Blast2Seq
 
 ##     from EDParser import EZDParser
@@ -62,6 +58,8 @@ try:
     from .matrixPlot import MatrixPlot
     
     from biskit.core.localpath import LocalPath, LocalPathError
+    from biskit.core.dictlist import DictList
+
     
 ## ## PVM-dependent modules
 

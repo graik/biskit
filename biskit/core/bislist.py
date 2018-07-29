@@ -23,6 +23,8 @@
 """
 organise, sort, and filter collection of dictionaries or similar objects
 S{->} abstract base class (aka interface)
+
+Currently only used as base for DictList.
 """
 
 import biskit.core.oldnumeric as N0
