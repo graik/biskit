@@ -19,8 +19,7 @@ the rapid integration of external programs and new algorithms into
 complex structural bioinformatics workflows. Calculations are thus
 often delegated to established programs like Xplor, Amber, Hex, Prosa,
 and DelPhi; interfaces to further software can be added
-easily. Moreover, Biskit simplifies the parallelisation of
-calculations via PVM (Parallel Virtual Machine).
+easily. 
 
 Python 3 Migration
 -------------------
@@ -32,14 +31,46 @@ Short Installation Instructions
 
 ```sh
 git clone https://github.com/graik/biskit.git biskit -b biskit3
-pip install -r biskit/requirements.txt
-pip install -e biskit
+pip3 install -r biskit/requirements.txt
+pip3 install -e biskit
 ```
 Replace `git clone` by the appropriate `tar xvf *tgz` command to start from an official Biskit release bundle.
 
-*Note:* if not already available, this will automatically install numpy, scipy, and BioPython. It will *not* however install the biggles plotting package, which is not strictly required but highly recommended. `pip install biggles` now works but compilation depends on third-party libraries (plotutils, python-dev, libplot-dev). On Ubuntu / Debian, a pre-compiled biggles can instead also be installed with `sudo apt-get install python-pybiggles` (currently only for Python 2.x). 
+If not already available, this will install numpy, scipy, and BioPython. It will *not* however install the biggles plotting package, which is not strictly required but highly recommended.
 
-See http://biskit.pasteur.fr/install/short for step-by-step instructions on alternative installation methods.
+___Install plotting libraries___
+
+(1) biggles
+
+    biggles is the main plotting library used by biskit, several unittests depend on it
+ 
+ on Debian / Ubuntu:
+   ```sh
+   sudo apt-get install libplot-dev plotutils
+   pip install biggles
+   ```
+ 
+ on Mac OSX:
+   * install Quartz (https://www.xquartz.org/)
+   ```sh
+   brew install plotutils --with-x11 # homebrew
+   pip install biggles
+   ```
+
+(2) gnuplot
+
+    the biskit.gnuplot wrapper offers no-frills quick and dirty line and scatter plots (plot(), scatter()); 
+    especially useful for rapid interactive inspection of data
+  
+  on Debian / Ubuntu:
+    ``sh
+    sudo apt-get install gnuplot
+    ``
+  
+  on Mac OS-X:
+    ``sh
+    brew install gnuplot --with-X11  ## requires Quartz
+    ``
 
 License
 -------
