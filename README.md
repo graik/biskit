@@ -29,9 +29,9 @@ This is the Python 3 branch of Biskit. Migration is ongoing but the core functio
 Short Installation Instructions
 --------------------------------
 
-___1. Install (plotting) dependencies___
+___**1. Install (plotting) dependencies**___
 
-The biskit library itself does not strictly need these and you can also safely install them later. However, biggles (https://biggles-plot.github.io/) is an excellent plotting library with a relatively intuitive syntax that is used throughout biskit and several unittests depend on it. gnuplot is wrapped by `biskit.gnuplot` and offers super-convenient quick and dirty line, scatter and histogram plots for rapid interactive data inspection. 
+The biskit library itself does not strictly need these and you can also safely install them later. However, **biggles** (https://biggles-plot.github.io/) is an excellent plotting library with a relatively intuitive syntax that is used throughout biskit and several unittests depend on it. **gnuplot** is wrapped by `biskit.gnuplot` and offers super-convenient quick and dirty line, scatter and histogram plots for rapid interactive data inspection. 
 
 On Debian / Ubuntu:
   *  ```sh
@@ -48,7 +48,8 @@ On Mac OS-X:
      pip install biggles
      ```
 
-___2. Install biskit___
+
+___**2. Install biskit**___
 
 ```sh
 git clone https://github.com/graik/biskit.git biskit -b biskit3
