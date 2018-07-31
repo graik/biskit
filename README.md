@@ -43,12 +43,15 @@ On Debian / Ubuntu:
 On Mac OS-X:
 
   * install Quartz (https://www.xquartz.org/)
-    
-  * ```brew install plotutils --with-x11  # using homebrew```
+  * ```sh
+    brew install plotutils --with-x11  # using homebrew
+    ```
 
-Then simply:
+Then (all systems):
 
-  * ```pip install biggles```
+  * ```
+    pip install biggles
+    ```
 
 ___2. Install biskit___
 
