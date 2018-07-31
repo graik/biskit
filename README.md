@@ -61,17 +61,9 @@ ___Install plotting libraries___
 (2) **gnuplot** -- the `biskit.gnuplot` wrapper offers no-frills quick and dirty line and scatter plots (`plot()`, `scatter()`); 
   especially useful for rapid interactive inspection of data
   
-  on Debian / Ubuntu:
+  on Debian / Ubuntu: `sudo apt-get install gnuplot`
   
-    ```sh
-    sudo apt-get install gnuplot
-    ```
-  
-  on Mac OS-X:
-  
-    ```sh
-    brew install gnuplot --with-X11  ## requires Quartz
-    ```
+  on Mac OS-X: `brew install gnuplot --with-X11` (requires Quartz)
 
 License
 -------
