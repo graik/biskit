@@ -1,4 +1,4 @@
-Biskit
+biskit
 ==========
 ___a software platform for structural bioinformatics___
 
@@ -40,37 +40,38 @@ If not already available, this will install numpy, scipy, and BioPython. It will
 
 ___Install plotting libraries___
 
-(1) biggles
-
-    biggles is the main plotting library used by biskit, several unittests depend on it
+(1) **biggles** -- the main plotting library used by biskit, several unittests depend on it
  
- on Debian / Ubuntu:
+  on Debian / Ubuntu:
+
    ```sh
    sudo apt-get install libplot-dev plotutils
    pip install biggles
    ```
  
- on Mac OSX:
+  on Mac OSX:
+
    * install Quartz (https://www.xquartz.org/)
+    
    ```sh
    brew install plotutils --with-x11 # homebrew
    pip install biggles
    ```
 
-(2) gnuplot
-
-    the biskit.gnuplot wrapper offers no-frills quick and dirty line and scatter plots (plot(), scatter()); 
-    especially useful for rapid interactive inspection of data
+(2) **gnuplot** -- the `biskit.gnuplot` wrapper offers no-frills quick and dirty line and scatter plots (`plot()`, `scatter()`); 
+  especially useful for rapid interactive inspection of data
   
   on Debian / Ubuntu:
-    ``sh
+  
+    ```sh
     sudo apt-get install gnuplot
-    ``
+    ```
   
   on Mac OS-X:
-    ``sh
+  
+    ```sh
     brew install gnuplot --with-X11  ## requires Quartz
-    ``
+    ```
 
 License
 -------
