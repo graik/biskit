@@ -31,7 +31,7 @@ Short Installation Instructions
 
 ___1. Install (plotting) dependencies___
 
-The biskit library itself does not strictly need these and you can also safely install them later. However, we recommend to have biggles and gnuplot dependencies installed. biggles (https://biggles-plot.github.io/)  is the main plotting library used by biskit and several unittests depend on it. gnuplot is wrapped by `biskit.gnuplot` and offers no-frills quick and dirty line and scatter plots for rapid interactive data inspection. 
+The biskit library itself does not strictly need these and you can also safely install them later. However, biggles (https://biggles-plot.github.io/) is an excellent plotting library with a relatively intuitive syntax that is used throughout biskit and several unittests depend on it. gnuplot is wrapped by `biskit.gnuplot` and offers super-convenient quick and dirty line, scatter and histogram plots for rapid interactive data inspection. 
 
 On Debian / Ubuntu:
 
@@ -43,15 +43,15 @@ On Debian / Ubuntu:
 On Mac OS-X:
 
   * install Quartz (https://www.xquartz.org/)
-  * ```sh
-    brew install plotutils --with-x11  # using homebrew
-    ```
+  *  ```sh
+     brew install plotutils --with-x11  # using homebrew
+     ```
 
 Then (all systems):
 
-  * ```
-    pip install biggles
-    ```
+  *  ```
+     pip install biggles
+     ```
 
 ___2. Install biskit___
 
