@@ -72,48 +72,14 @@ Now run the biskit test suite, *except* those tests that require external progra
  
    ```sh
 ~> python3 /usr/local/lib/python3.7/site-packages/biskit/test.py -e exe old fails
-collecting  'biskit'
-collecting  'biskit.core'
-collecting  'biskit.exe'
-collecting  'biskit.md'
-collecting  'biskit.dock'
-collecting  'biskit.future'
-amberResidueLibrary.Test.test_amberResidueLibrary  ............ ok
-amberResidues.Test.test_amberPrepParser  ...................... ok
-atomCharger.Test.test_atomcharger  ............................ ok  [ 0.56s]
-biounit.Test.test_BioUnit  .................................... ok  [ 0.57s]
-[... long list of further test results ...]
-future.residue.Test.test_invalidIndex  ........................ ok
-
-----------------------------------------------------------------------
-Ran 91 tests in 30.048s
-
-OK
-
-The test log file has been saved to: '<stdout>'
-
-Test Coverage:
-=============
-
-2 out of 70 modules had no test case:
-	 biskit .   wlc
-	 biskit .   core .   difflib_old
-
-SUMMARY:
-=======
-
-A total of 91 tests from 68 modules were run.
-   - 91 passed
-   - 0 failed
-DONE
    ```
 Once you have installed third-party software such as Pymol, Delphi, Xplor-NIH, DSSP, surfaceRacer, etc, you can re-run the test without the -e exe option. If you want to test individual biskit wrappers for a given program, simply call the wrapping python module which will execute this particular test. For example, if you have just installed Pymol, you can now run the biskit.exe.pymoler test case to ensure biskit and Pymol are properly working together:
 
-    ```sh
+   ```sh
    ~> python3 /usr/local/lib/python3.7/site-packages/biskit/exe/pymoler.py
-    ```
+   ```
     
-This should open a Pymoler window with a short MD movie.
+This should open a Pymoler window with a short MD movie and will, generally, give you a much more detailed test output.
 
 
 License
