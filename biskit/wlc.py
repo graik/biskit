@@ -1,5 +1,5 @@
 import numpy as N
-import Biskit.gnuplot as G
+import biskit.gnuplot as G
 
 class WormLikeChain:
     
@@ -70,13 +70,7 @@ class WormLikeChain:
     def praa( self, naa, r ):
         c = naa * self.caa 
         return self.pr( c, r )
-    
-    def E( self, d ):
-        """
-        d - float, distance in A between fluorophores
-        """
-        R0 = 50
-    
+        
 wlc = WormLikeChain()
 rc = [ (n, wlc.raa(n)) for n in range( 1, 40) ]
 G.plot( rc )

@@ -1,6 +1,11 @@
 import math
-import mathUtils as MU
 import numpy as N
+
+## allow relative imports when calling module by itself for testing (pep-0366)
+if __name__ == "__main__" and __package__ is None:
+    import biskit; __package__ = "biskit"
+
+from . import mathUtils as MU
 
 
 class WormLikeChainModel:
@@ -118,7 +123,7 @@ class WormLikeChainModel:
 ##############
 ## Test
 ##############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """ Test cases for Polyfret"""
