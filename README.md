@@ -29,7 +29,7 @@ This is the Python 3 branch of Biskit. Migration is ongoing but the core functio
 Short Installation Instructions
 --------------------------------
 
-___**1. Install (plotting) dependencies**___
+___1. Install (plotting) dependencies___
 
 The biskit library itself does not strictly need these and you can also safely install them later. However, **biggles** (https://biggles-plot.github.io/) is an excellent plotting library with a relatively intuitive syntax that is used throughout biskit and several unittests depend on it. **gnuplot** is wrapped by `biskit.gnuplot` and offers super-convenient quick and dirty line, scatter and histogram plots for rapid interactive data inspection. 
 
@@ -49,7 +49,7 @@ On Mac OS-X:
      ```
 
 
-___**2. Install biskit**___
+___2. Install biskit___
 
 ```sh
 git clone https://github.com/graik/biskit.git biskit -b biskit3
@@ -57,6 +57,64 @@ pip install -r biskit/requirements.txt
 pip install -e biskit
 ```
 If not already available, this will also install numpy, scipy, and BioPython. Replace `git clone` by the appropriate `tar xvf *tgz` command to start from an official Biskit release bundle.
+
+___3. Test your installation___
+
+Biskit comes with a unittest suite that can be run using the `test.py` script that is part of the library. First you have to figure out where your biskit installation went. Typically it will be in something like `/usr/local/lib/python3.7/site-packages/biskit`. If you have no idea, open a python interpreter and ... :
+
+   ```python
+   >>> import biskit
+   >>> biskit.__path__
+   ['/usr/local/lib/python3.7/site-packages/biskit']
+   ```
+   
+Now run the biskit test suite, *except* those tests that require external programs (`-e exe`) or are tagged as `old` or `fails`:
+ 
+   ```sh
+~> python3 /usr/local/lib/python3.7/site-packages/biskit/test.py -e exe old fails
+collecting  'biskit'
+collecting  'biskit.core'
+collecting  'biskit.exe'
+collecting  'biskit.md'
+collecting  'biskit.dock'
+collecting  'biskit.future'
+amberResidueLibrary.Test.test_amberResidueLibrary  ............ ok
+amberResidues.Test.test_amberPrepParser  ...................... ok
+atomCharger.Test.test_atomcharger  ............................ ok  [ 0.56s]
+biounit.Test.test_BioUnit  .................................... ok  [ 0.57s]
+[... long list of further test results ...]
+future.residue.Test.test_invalidIndex  ........................ ok
+
+----------------------------------------------------------------------
+Ran 91 tests in 30.048s
+
+OK
+
+The test log file has been saved to: '<stdout>'
+
+Test Coverage:
+=============
+
+2 out of 70 modules had no test case:
+	 biskit .   wlc
+	 biskit .   core .   difflib_old
+
+SUMMARY:
+=======
+
+A total of 91 tests from 68 modules were run.
+   - 91 passed
+   - 0 failed
+DONE
+   ```
+Once you have installed third-party software such as Pymol, Delphi, Xplor-NIH, DSSP, surfaceRacer, etc, you can re-run the test without the -e exe option. If you want to test individual biskit wrappers for a given program, simply call the wrapping python module which will execute this particular test. For example, if you have just installed Pymol, you can now run the biskit.exe.pymoler test case to ensure biskit and Pymol are properly working together:
+
+    ```sh
+   ~> python3 /usr/local/lib/python3.7/site-packages/biskit/exe/pymoler.py
+    ```
+    
+This should open a Pymoler window with a short MD movie.
+
 
 License
 -------
