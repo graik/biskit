@@ -29,41 +29,35 @@ This is the Python 3 branch of Biskit. Migration is ongoing but the core functio
 Short Installation Instructions
 --------------------------------
 
+___1. Install (plotting) dependencies___
+
+The biskit library itself does not strictly need these and you can also safely install them later. However, we recommend to have biggles and gnuplot dependencies installed. biggles (https://biggles-plot.github.io/)  is the main plotting library used by biskit and several unittests depend on it. gnuplot is wrapped by `biskit.gnuplot` and offers no-frills quick and dirty line and scatter plots for rapid interactive data inspection. 
+
+On Debian / Ubuntu:
+
+  *  ```sh
+     sudo apt-get install libplot-dev plotutils  ## needed for biggles compilation
+     sudo apt-get install gnuplot ## program required by biskit.gnuplot
+     ```
+
+On Mac OS-X:
+
+  * install Quartz (https://www.xquartz.org/)
+    
+  * ```brew install plotutils --with-x11  # using homebrew```
+
+Then simply:
+
+  * ```pip install biggles```
+
+___2. Install biskit___
+
 ```sh
 git clone https://github.com/graik/biskit.git biskit -b biskit3
-pip3 install -r biskit/requirements.txt
-pip3 install -e biskit
+pip install -r biskit/requirements.txt
+pip install -e biskit
 ```
-Replace `git clone` by the appropriate `tar xvf *tgz` command to start from an official Biskit release bundle.
-
-If not already available, this will install numpy, scipy, and BioPython. It will *not* however install the biggles plotting package, which is not strictly required but highly recommended.
-
-___Install plotting libraries___
-
-(1) **biggles** -- the main plotting library used by biskit, several unittests depend on it
- 
-  on Debian / Ubuntu:
-
-   ```sh
-   sudo apt-get install libplot-dev plotutils
-   pip install biggles
-   ```
- 
-  on Mac OSX:
-
-   * install Quartz (https://www.xquartz.org/)
-    
-   ```sh
-   brew install plotutils --with-x11 # homebrew
-   pip install biggles
-   ```
-
-(2) **gnuplot** -- the `biskit.gnuplot` wrapper offers no-frills quick and dirty line and scatter plots (`plot()`, `scatter()`); 
-  especially useful for rapid interactive inspection of data
-  
-  on Debian / Ubuntu: `sudo apt-get install gnuplot`
-  
-  on Mac OS-X: `brew install gnuplot --with-X11` (requires Quartz)
+If not already available, this will also install numpy, scipy, and BioPython. Replace `git clone` by the appropriate `tar xvf *tgz` command to start from an official Biskit release bundle.
 
 License
 -------
