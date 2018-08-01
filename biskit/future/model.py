@@ -21,9 +21,9 @@
 import copy
 import numpy as N
 
-import Biskit as B
-import Biskit.tools as T
-import Biskit.molUtils as MU
+import biskit as B
+import biskit.tools as T
+import biskit.molUtils as MU
 
 def index2map( index, len_i ):
     """
@@ -41,7 +41,7 @@ def index2map( index, len_i ):
     """
     index = N.concatenate( (index, [len_i]) )
     delta = index[1:] - index[:-1] 
-    return N.repeat( range(len(delta)), delta)
+    return N.repeat( list(range(len(delta))), delta)
 
 
 def map2index( imap ):
@@ -174,9 +174,8 @@ class Model( object ):
                 return self.chains.set( k, v )
             if k in self.info:
                 self.info[ k ] = v
-            raise ProfileError, \
-                  'Value cannot clearly be assigned to either atom or '+\
-                  'residue or chain profiles'
+            raise ProfileError('Value cannot clearly be assigned to either atom or '\
+                  + 'residue or chain profiles')
                 
         if type( k ) is tuple:
             key, infokey = k
@@ -189,8 +188,7 @@ class Model( object ):
             self.chains[key, infokey] = v
             return
         
-        raise ProfileError, \
-            'Cannot interpret %r as profile name or profile info record' % k
+        raise ProfileError('Cannot interpret %r as profile name or profile info record' % k)
 
     
     def __getslice__( self, *arg ):
