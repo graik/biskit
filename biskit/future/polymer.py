@@ -21,13 +21,14 @@
 import copy
 import numpy as N
 
-import Biskit as B
-import Biskit.tools as T
-import Biskit.molUtils as MU
+import biskit as B
+import biskit.tools as T
+import biskit.molUtils as MU
 
-from Model import Model
+from biskit.future.model import Model
+from biskit.future.profilemirror import ProfileMirror
 
-class Feature(object):
+class Feature:
     """
     A Feature is adding information like, e.g., a structure to part of a 
     Polymer and provides a specialized view on this part of the Polymer.
@@ -81,7 +82,7 @@ class Feature(object):
         self.model = model
         self.map   = N.array( map2model, 'i' )
         
-        self.atoms = B.ProfileMirror( self.model.atoms, self.map )
+        self.atoms = ProfileMirror( self.model.atoms, self.map )
 
         if add2model:
             self.model.addFeature( self )
@@ -267,14 +268,11 @@ class Polymer( Model ):
         self.features = []
         
         if sequences:
-            self.addSequences( sequences )
+            self.addSequences( *sequences )
             
         self.__version__ = self.version()
 
     
-    def version( self ):
-        return 'Polymer $Revision$'
-
     def __newChain( self ):
         """
         Prepare adding a new chain/molecule to this model.
@@ -421,21 +419,21 @@ if __name__ == '__main__':
     
     m = Polymer('ACAGPL','SS')
 
-    f_ = Feature( m, range( 1, len(m), 2 ) )
+    f_ = Feature(m, list(range( 1, len(m), 2)) )
 
-    m_ = m.take( range( 1, len(m), 2 ) )
+    m_ = m.take(range( 1, len(m), 2)) 
     
     m2 = m.concat( m )
     
     assert m2.features[0].atoms['name'] == m2.features[1].atoms['name']
     
-    m3 = m2.take( range( 0, 52, 2 ) )
+    m3 = m2.take(range( 0, 52, 2))
     
     views = m.atoms[:]
     views2 = m2.atoms[:]
     views3 = m3.atoms[:]
     
-    views = m2.atoms.take( range( 0, 52, 2 ) ).toDicts()
+    views = m2.atoms.take(range( 0, 52, 2)).toDicts()
     assert views == m3.atoms[:]
 
     
