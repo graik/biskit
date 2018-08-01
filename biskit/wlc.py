@@ -209,7 +209,7 @@ import biskit.test as BT
 class Test(BT.BiskitTest):
 
     def test_WLC_dist2contour(self):
-        """WLC test cases"""
+        """WLC distance to contour length"""
         p = 4.;lc = 5280.; x = 0.75*5280 
 
         wlc = WormLikeChain(p=p)
@@ -221,16 +221,34 @@ class Test(BT.BiskitTest):
 
         self.assertEqual(lc2[0] - lc <2.,True)
         self.assertEqual(lc3[1] - lc <2.,True)
+    
+    def test_WLC_contour2dist(self):
+        """WLC contour length to distance"""
+        import biskit.gnuplot as G
+
+        wlc = WormLikeChain()
+        rc = [ (n, wlc.raa(n)) for n in range( 1, 40) ]
+        
+        if self.local:
+            G.plot(rc) # plot most likely distance vs. length of chain in aa
+            
+        self.assertAlmostEqual(rc[12][1], 20.10, places=1)
+    
+    def test_WLC_contour2prob(self):
+        """WLC contour length to probability"""
+        import biskit.gnuplot as G
+        
+        wlc = WormLikeChain()
+        pc = [ (r, wlc.praa(14,r)) for r in range( 1, 100) ]
+        
+        if self.local:
+            G.plot( pc ) # plot probability vs. distance for 14aa long chain
+
+        dpc = dict(pc)
+        best = N.argmax(list(dpc.values()))
+        self.assertEqual(best, 15)
+
 
 if __name__ == '__main__':
 
     BT.localTest()
-
-    
-        
-##wlc = WormLikeChain()
-##rc = [ (n, wlc.raa(n)) for n in range( 1, 40) ]
-##G.plot( rc )
-##
-##pc = [ (r, wlc.praa(14,r)) for r in range( 1, 100) ]
-##G.plot( pc )
