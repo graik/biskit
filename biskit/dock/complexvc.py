@@ -22,11 +22,10 @@
 Complex that keeps track of its previous versions (conformations).
 """
 import numpy as N
-import Biskit.tools as t
-import Biskit.mathUtils as MU
-from Biskit import EHandler
-from Complex import Complex as ProtComplex
-from ComplexList import ComplexList
+import biskit.mathUtils as MU
+from biskit import EHandler
+from biskit.dock import Complex as ProtComplex
+from biskit.dock import ComplexList
 
 
 class ComplexEvolving( ProtComplex ):
@@ -48,7 +47,7 @@ class ComplexEvolving( ProtComplex ):
         """
         Create a new ComplexEvolving from a previous Complex or ComplexEvolving
         and a new set of receptor, ligand conformation and transformation.
-        
+
         @param rec_model: PDBModel/PCRModel, receptor conformation
         @type  rec_model: PDBModel
         @param lig_model: PDBModel/PCRModel, ligand conformation
@@ -84,7 +83,7 @@ class ComplexEvolving( ProtComplex ):
     def version( self ):
         """
         Version of class.
-        
+
         @return: version of class
         @rtype: str
         """
@@ -111,13 +110,13 @@ class ComplexEvolving( ProtComplex ):
         version. By default the info dictionary remains connected but
         other fields don't. I.e. replacing rec_model in the copy does
         not affect the original complex.
-        
+
         @param i: index in complex history, -1 returns toComplex()
         @type  i: int
         @param copy: copy info dictionary in case of i==-1 (changes in
                      c.getComplex( -1 ).info will not appear in c.info [0]
         @type  copy: 1|0
-        
+
         @return: complex
         @rtype: Dock.Complex
         """
@@ -157,12 +156,12 @@ class ComplexEvolving( ProtComplex ):
     def __syncModel( self, new_model, old_model ):
         """
         Connect new rec or lig model to old one, to minimize storage.
-        
+
         @param new_model: PDBModel / PCRModel
         @type  new_model: PDBModel
         @param old_model: PDBModel / PCRModel
         @type  old_model: PDBModel
-        
+
         @return: PDBModel / PCRModel, new model that only keeps
                  changes relative to old, the old model becomes the
                  source of the new, if possible
@@ -224,10 +223,10 @@ class ComplexEvolving( ProtComplex ):
     def toComplex( self, copy=0 ):
         """
         Copy of latest version as a normal Complex.
-        
+
         @param copy: also disconnect info dict (default: 0)
         @type  copy: 1|0
-        
+
         @return: Complex
         @rtype: Complex
         """
@@ -242,12 +241,12 @@ class ComplexEvolving( ProtComplex ):
     def valuesOf( self, infoKey, default=None ):
         """
         Get info values from all versions of this complex (oldest first).
-        
+
         @param infoKey: info dic key
         @type  infoKey: str
         @param default: default value, if key is not present
         @type  default: any
-        
+
         @return: list of values
         @rtype: [any]
         """
@@ -258,18 +257,17 @@ class ComplexEvolving( ProtComplex ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
-        
+import biskit.test as BT
+
 class Test(BT.BiskitTest):
     """Test case"""
 
     def test_ComplexEvolving(self):
         """Dock.ComplexEvolving test"""
         import time
+        import biskit.tools as T
 
-        from Biskit.Dock import ComplexEvolving
-
-        c = t.load( t.testRoot() + '/com/ref.complex' )
+        c = T.load( T.testRoot() + '/com/ref.complex' )
 
         self.ce= ComplexEvolving( c.rec_model, c.lig(), c,
                                   info={'comment':'test'} )
@@ -281,39 +279,17 @@ class Test(BT.BiskitTest):
                                     info={'comment':'test2'})
 
         if self.local:
-            print '\nGenerations: '
+            print('\nFound %i versions of the complex: ' % len(self.ce2))
             for x in self.ce2:
-                print x['date']
+                print('\t* ' + x['date'])
 
-            print 'Comments: ', self.ce2.valuesOf('comment')
-             
+            print('Comments: ', self.ce2.valuesOf('comment'))
+
         self.assertEqual( self.ce2.valuesOf('comment'),
                           [None, 'test', 'test2'])
 
 
 if __name__ == '__main__':
-    
-    import time
 
-    from Biskit.Dock import ComplexEvolving
+    BT.localTest()
 
-    c = t.load( t.testRoot() + '/com/ref.complex' )
-
-    ce= ComplexEvolving( c.rec_model, c.lig(), c,
-                              info={'comment':'test'} )
-
-    time.sleep( 2 )
-
-    lig = ce.lig().transform( MU.randomRotation(), [0,0,0] )
-    ce2 = ComplexEvolving( ce.rec_model, lig, ce,
-                                info={'comment':'test2'})
-
-    print '\nGenerations: '
-    for x in ce2:
-        print x['date']
-
-    print 'Comments: ', ce2.valuesOf('comment')
-         
-
-    #BT.localTest()
-   
