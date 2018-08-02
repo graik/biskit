@@ -24,12 +24,13 @@
 Trajectory of two proteins.
 """
 
-from Biskit import Trajectory, TrajError, EnsembleTraj, hist
-from Complex import Complex as ProteinComplex
+from biskit.md import Trajectory, TrajError, EnsembleTraj
+from biskit import hist
+from biskit.dock import Complex as ProteinComplex
 
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 
-import Biskit.gnuplot as gnuplot
+import biskit.gnuplot as gnuplot
 
 
 class ComplexTrajError( TrajError ):
@@ -79,7 +80,7 @@ class ComplexTraj( EnsembleTraj ):
             else:
                 self.cr = N0.sort( recChains ).tolist()
 
-            self.cl = range( 0, self.getRef().lenChains() )
+            self.cl = list(range( 0, self.getRef().lenChains()))
             for c in self.cr:
                 self.cl.remove(c)
 
@@ -316,7 +317,7 @@ class ComplexTraj( EnsembleTraj ):
         @raise ComplexTrajError: if gnuplot program is not installed
         """
         if not gnuplot.installed:
-            raise ComplexTrajError, 'gnuplot program is not installed'
+            raise ComplexTrajError('gnuplot program is not installed')
         r = self.averageContacts( step, cutoff )
         r = N0.ravel( r )
         r = N0.compress( r, r )
@@ -327,7 +328,7 @@ class ComplexTraj( EnsembleTraj ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test case"""
@@ -337,7 +338,7 @@ class Test(BT.BiskitTest):
     def test_ComplexTraj(self):
         """Dock.ComplexTraj test"""
 
-        import Biskit.tools as T
+        import biskit.tools as T
 
         ## there is no complex trajectory in the test folder so will have
         ## to create a fake trajectory with a complex
@@ -357,20 +358,20 @@ class Test(BT.BiskitTest):
         t.ref.chainIndex( force=1, cache=1 )
         t.cl = [1,2]
 
-        r = N0.concatenate((range(1093,1191), range(0,1093), range(1191,1968)))
+        r = N0.concatenate((list(range(1093,1191)), list(range(0,1093)), list(range(1191,1968))))
 
         tt = t.takeAtoms( r )
 
         contactMat = tt.atomContacts( 1 )
         
         if self.local:
-            print 'Receptor chains: %s    Ligand chains: %s'%(t.cr, t.cl)
+            print('Receptor chains: %s    Ligand chains: %s'%(t.cr, t.cl))
             
         self.assertEqual( N0.sum(N0.ravel(contactMat)), 308 )
 
 if __name__ == '__main__':
 
-    #import Biskit.tools as T
+    #import biskit.tools as T
 
     ### there is no complex trajectory in the test folder so will have
     ### to create a fake trajectory with a complex

@@ -26,8 +26,8 @@ try:
     from .complexModelRegistry import ComplexModelRegistry, RegistryError
     from .complexvc import ComplexVC
     from .complexvcList import ComplexVCList
-##    from ComplexTraj import ComplexTraj
-    from .complexrandomizer import ComplexRandomizer
+    from .complextraj import ComplexTraj, ComplexTrajError
+    from .complexrandomizer import ComplexRandomizer, ComplexMinimizer
 ##    from Docker import Docker
 ##    from FixedList import FixedList
 ##    from HexParser import HexParser
