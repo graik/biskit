@@ -48,9 +48,9 @@ class ComplexVC( ProtComplex ):
         Create a new ComplexVC from a previous Complex or ComplexVC
         and a new set of receptor, ligand conformation and transformation.
 
-        @param rec_model: PDBModel/PCRModel, receptor conformation
+        @param rec_model: PDBModel/XplorModel, receptor conformation
         @type  rec_model: PDBModel
-        @param lig_model: PDBModel/PCRModel, ligand conformation
+        @param lig_model: PDBModel/XplorModel, ligand conformation
         @type  lig_model: PDBModel
         @param com_0: Complex /ComplexVC, previous version(s) of this com
         @type  com_0: Complex OR ComplexVC
@@ -157,12 +157,12 @@ class ComplexVC( ProtComplex ):
         """
         Connect new rec or lig model to old one, to minimize storage.
 
-        @param new_model: PDBModel / PCRModel
+        @param new_model: PDBModel / XplorModel
         @type  new_model: PDBModel
-        @param old_model: PDBModel / PCRModel
+        @param old_model: PDBModel / XplorModel
         @type  old_model: PDBModel
 
-        @return: PDBModel / PCRModel, new model that only keeps
+        @return: PDBModel / XplorModel, new model that only keeps
                  changes relative to old, the old model becomes the
                  source of the new, if possible
         @rtype: PDBModel
@@ -177,7 +177,7 @@ class ComplexVC( ProtComplex ):
         ## create result model that only keeps difference of new and old
         if old_model.equals( new_model ) == [1,1]:
 
-            ## stays compatible with PCRModel.__init__ and PDBModel.__init
+            ## stays compatible with XplorModel.__init__ and PDBModel.__init
             r = old_model.__class__( source=old_model )
 
             r.setXyz( new_model.getXyz() )

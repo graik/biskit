@@ -3,14 +3,14 @@ import biskit.tools as T
 import biskit.dock.hexparser as H
 
 ## generate PDBModel and model dictionary pickles for receptor and ligand
-rec = B.PCRModel(source='rec/1A2P_clean.pdb', fPsf='1A2P.psf', pdbCode='1A2P')
+rec = B.XplorModel(source='rec/1A2P_clean.pdb', fPsf='1A2P.psf', pdbCode='1A2P')
 rec.saveAs('rec/1A2P.model')
 
 rec_dic = {1: rec}
 T.dump(rec_dic, 'rec/1A2P_model.dic')
 
 
-lig = B.PCRModel(source='lig/1A19_clean.pdb', fPsf='1A19.psf', pdbCode='1A19')
+lig = B.XplorModel(source='lig/1A19_clean.pdb', fPsf='1A19.psf', pdbCode='1A19')
 lig.saveAs('lig/1A19.model')
 
 lig_dic = {1: lig}

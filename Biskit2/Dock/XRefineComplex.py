@@ -20,7 +20,7 @@
 """work in progress!"""
 
 from Biskit import Xplorer, XplorerError
-from Biskit import PDBModel, PCRModel
+from Biskit import PDBModel, XplorModel
 import Biskit.tools as t
 from Biskit.Dock.ComplexVC import ComplexVC
 

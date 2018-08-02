@@ -50,7 +50,7 @@ multidock.py -rdic |rec_model.dic| -ldic |lig_model.dic|
              -out |outfolder| -e |excludeHost1 excludeHost2..| mac |1 or 0|
              -rid |A A ..| -lid |B| -soln |int|]
 
-             rdic, ldic  .. dict with PCRModels indexed by 1 .. n (rec, lig)
+             rdic, ldic  .. dict with XplorModels indexed by 1 .. n (rec, lig)
              rpdb, lpdb  .. HEX-formatted PDB with same models (rec, lig)
              com         .. HEX-formatted PDB with reference complex
              out .. folder for results (created), may contain %s for date

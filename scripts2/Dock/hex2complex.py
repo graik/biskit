@@ -153,7 +153,7 @@ def plot( complex_lst ):
 def main( o ):
     """@param o: options dictionary"""
 
-    ## load pickeled model dictionaries with PCRModels indexed by hex model
+    ## load pickeled model dictionaries with XplorModels indexed by hex model
     ## number
     rec_lst = load( o['rec'] )
     lig_lst = load( o['lig'] )

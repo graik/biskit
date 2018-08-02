@@ -34,7 +34,7 @@ try:
 ##     from EDParser import EZDParser
 
     from biskit.pdbModel import PDBModel, PDBProfiles, PDBError
-    from biskit.pcrModel import PCRModel
+    from biskit.XplorModel import XplorModel
 
     from biskit.profileCollection import ProfileCollection, ProfileError
 ##     from ProfileMirror import ProfileMirror

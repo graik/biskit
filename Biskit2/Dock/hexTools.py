@@ -59,7 +59,7 @@ def createHexPdb( modelDic, fout=None ):
     Write pdb for hex with models separated by MODEL%i/ENDMODEL
 
     @param modelDic: dictionary mapping an integer to each model
-    @type  modelDic: dict {int:PCRModel}
+    @type  modelDic: dict {int:XplorModel}
     @param fout: output name, default is pdbCode + _hex.pdb
     @type  fout: str
 

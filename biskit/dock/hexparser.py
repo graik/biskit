@@ -28,7 +28,7 @@ import re
 
 import biskit.core.oldnumeric as N0
 import biskit.tools as t
-from biskit import PCRModel
+from biskit import XplorModel
 
 from biskit.dock.complex import Complex
 from biskit.dock.complexList import ComplexList
@@ -39,7 +39,7 @@ class HexParser:
     Parse hex result file and extract Complex objects into a dictionary
     indexed by the hex solution number.
     The hex file is only closed when this object is discarded.
-    The HexParser is created with a dictionary containing PCRModel objects
+    The HexParser is created with a dictionary containing XplorModel objects
     for ligand and receptor indexed by hex model number.
     """
 
@@ -47,10 +47,10 @@ class HexParser:
         """
         @param hexFile: name of hex output file
         @type  hexFile: string
-        @param rec_dic: map between model number and PCRModel
-                        { 1 : model1, 2 : model2,..} types: { int : PCRModel}
+        @param rec_dic: map between model number and XplorModel
+                        { 1 : model1, 2 : model2,..} types: { int : XplorModel}
         @type  rec_dic: {int:model}
-        @param lig_dic: same as rec_dic but for ligand PCRModels
+        @param lig_dic: same as rec_dic but for ligand XplorModels
         @type  lig_dic: {int:model}
         @param forceModel: force parser to accept model numbers
         @type  forceModel: int, int

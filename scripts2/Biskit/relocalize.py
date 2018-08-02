@@ -23,7 +23,7 @@
 ##       path
 
 import Biskit.tools as tools
-from Biskit import PDBModel, PCRModel, LocalPath
+from Biskit import PDBModel, XplorModel, LocalPath
 from Biskit.Dock import Complex
 
 import os, sys
@@ -84,7 +84,7 @@ for f in files:
         o = tools.load( f )
         result = 0
 
-        if o.__class__ in [ PCRModel, PDBModel ]:
+        if o.__class__ in [ XplorModel, PDBModel ]:
             result = localizeModel( o, repl, f )
 
         else:

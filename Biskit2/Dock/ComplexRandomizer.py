@@ -32,7 +32,7 @@ import Biskit.molUtils as mol
 import Biskit.tools as t
 import numpy.random.mtrand as R
 import Biskit.oldnumeric as N0
-from Biskit import Xplorer, PCRModel
+from Biskit import Xplorer, XplorModel
 
 import tempfile
 
@@ -44,9 +44,9 @@ class ComplexRandomizer:
     def __init__( self, mrec, mlig, rec_out=None, lig_out=None, debug=0 ):
         """
         @param mrec: receptor model
-        @type  mrec: PCRModel
+        @type  mrec: XplorModel
         @param mlig: ligand model
-        @type  mlig: PCRModel
+        @type  mlig: XplorModel
         @param rec_out: rec output(default: None)
         @type  rec_out: str
         @param lig_out: lig output (default: None)
@@ -244,8 +244,8 @@ class ComplexMinimizer( Xplorer ):
         """
         When done, write result to disc.
         """
-        self.rec = PCRModel( self.com.rec_model.getPsfFile(), self.rec_out )
-        self.lig = PCRModel( self.com.lig_model.getPsfFile(), self.lig_out )
+        self.rec = XplorModel( self.com.rec_model.getPsfFile(), self.rec_out )
+        self.lig = XplorModel( self.com.lig_model.getPsfFile(), self.lig_out )
 
 
 
@@ -286,8 +286,8 @@ class Test(BT.BiskitTest):
         rec_psf = t.testRoot() + '/rec/1A2P.psf' 
         lig_psf = t.testRoot() + '/lig/1A19.psf' 
 
-        rec = PCRModel( rec_psf, rec_pdb )
-        lig = PCRModel( lig_psf, lig_pdb )
+        rec = XplorModel( rec_psf, rec_pdb )
+        lig = XplorModel( lig_psf, lig_pdb )
 
         if self.local:
             print "Initializing Randomizer..."
