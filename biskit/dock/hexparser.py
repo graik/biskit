@@ -60,7 +60,7 @@ class HexParser:
         self.lig_models = lig_dic
         self.forceModel = forceModel
         ## pattern for analyzing single line of type "Value: -1.23":
-        self.ex_line = re.compile("^(\S+):\s*([-0-9\.\s]*)")
+        self.ex_line = re.compile("^(\S+):\s*(nan|[-0-9\.\s]*)")
         ## pattern to find one line of transformation matrix
         self.ex_matrix = re.compile("([-0-9]+\.[0-9]+e[-+0-9]+)")
 
@@ -127,6 +127,8 @@ class HexParser:
                         i['hex_etotal'] = float(m[1])
                     elif m[0] == 'Eshape':
                         i['hex_eshape'] = float(m[1])
+                    elif m[0] == 'Eair':
+                        i['hex_eair'] = float(m[1])
                     elif m[0] == 'LigandMatrix':
                         ## get all numbers of matrix as list of strings
                         strings = self.ex_matrix.findall( l )
@@ -204,7 +206,7 @@ class Test(BT.BiskitTest):
         rec_dic = t.load( t.testRoot() + "/dock/rec/1A2P_model.dic" )
         lig_dic = t.load( t.testRoot() + "/dock/lig/1A19_model.dic" )
 
-        self.h = HexParser( t.testRoot() + "/dock/hex/1A2P-1A19_hex.out",
+        self.h = HexParser( t.testRoot() + "/dock/hex/1A2P-1A19_hex8.out",
                             rec_dic, lig_dic)
 
         c_lst = self.h.parseHex()
@@ -217,7 +219,8 @@ class Test(BT.BiskitTest):
 
         self.assertSetEqual( set(c_lst[1].info.keys()),
                              set(['soln', 'rms', 'hex_clst', 'hex_eshape',
-                                  'model2', 'model1', 'hex_etotal', 'date']) )
+                                  'model2', 'model1', 'hex_etotal', 'hex_eair',
+                                  'date']) )
 
 if __name__ == '__main__':
 

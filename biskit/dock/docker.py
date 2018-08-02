@@ -566,7 +566,7 @@ class TestCore(BT.BiskitTest):
         # dock rec 1 vs. lig 2 on localhost
         fmac1, fout = self.d.createHexInp( 1, 1 )
         if run:
-            self.d.runHex( fmac1, log=1, ncpu=4, host='localhost' )
+            self.d.runHex( fmac1, log=1, ncpu=6, host='localhost' )
 
             self.d.waitForLastHex()
 
