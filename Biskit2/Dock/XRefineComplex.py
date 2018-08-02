@@ -22,7 +22,7 @@
 from Biskit import Xplorer, XplorerError
 from Biskit import PDBModel, PCRModel
 import Biskit.tools as t
-from Biskit.Dock.ComplexEvolving import ComplexEvolving
+from Biskit.Dock.ComplexVC import ComplexVC
 
 import tempfile
 import os
@@ -204,7 +204,7 @@ class XRefineComplex( Xplorer ):
         lig = self.cloneAtoms( self.com.lig(), PDBModel(source=self.lig_out) )
 
         if len( rec ) and len( lig ):
-            self.result = ComplexEvolving( rec, lig, self.com,
+            self.result = ComplexVC( rec, lig, self.com,
                                            info={'comment':'refined 1'} )
 
             self.result['refine_energies'] = self.readEnergies()

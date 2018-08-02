@@ -28,7 +28,7 @@ from biskit.dock import Complex as ProtComplex
 from biskit.dock import ComplexList
 
 
-class ComplexEvolving( ProtComplex ):
+class ComplexVC( ProtComplex ):
     """
     Complex that keeps track of its previous versions. The object behaves
     like a normal L{Biskit.Dock.Complex} but encapsulates a
@@ -37,7 +37,7 @@ class ComplexEvolving( ProtComplex ):
 
       - com[0] gives the very first version, com[1] the second, etc.
       - com[-1] gives the current version (but as normal Complex, not
-        ComplexEvolving).
+        ComplexVC).
       - e.g. com[0, 'fnac'] gives the according info value of the first version
       - e.g. com['fnac']    gives the current info value (as for Dock.Complex)
     """
@@ -45,15 +45,15 @@ class ComplexEvolving( ProtComplex ):
     def __init__(self, rec_model, lig_model, com_0=None,
                  ligMatrix=None, info={} ):
         """
-        Create a new ComplexEvolving from a previous Complex or ComplexEvolving
+        Create a new ComplexVC from a previous Complex or ComplexVC
         and a new set of receptor, ligand conformation and transformation.
 
         @param rec_model: PDBModel/PCRModel, receptor conformation
         @type  rec_model: PDBModel
         @param lig_model: PDBModel/PCRModel, ligand conformation
         @type  lig_model: PDBModel
-        @param com_0: Complex /ComplexEvolving, previous version(s) of this com
-        @type  com_0: Complex OR ComplexEvolving
+        @param com_0: Complex /ComplexVC, previous version(s) of this com
+        @type  com_0: Complex OR ComplexVC
         @param ligMatrix: transformation matrix of ligand versus receptor
         @type  ligMatrix: 4x4 array
         @param info: info dictionary {'info_key': value, ..}, additional infos
@@ -61,7 +61,7 @@ class ComplexEvolving( ProtComplex ):
         """
         ProtComplex.__init__(self, rec_model, lig_model, ligMatrix, info )
 
-        if isinstance( com_0, ComplexEvolving ):
+        if isinstance( com_0, ComplexVC ):
             ## get history from mother complex ...
             self.history = com_0.history
 
@@ -87,7 +87,7 @@ class ComplexEvolving( ProtComplex ):
         @return: version of class
         @rtype: str
         """
-        return 'ComplexEvolving $Revision$'
+        return 'ComplexVC $Revision$'
 
 
     def __iter__(self):
@@ -191,7 +191,7 @@ class ComplexEvolving( ProtComplex ):
             return r
 
         EHandler.warning(
-            'ComplexEvolving: Cannot connect new to old PDBModel.')
+            'ComplexVC: Cannot connect new to old PDBModel.')
 
         new_model.disconnect()
         return new_model
@@ -262,20 +262,20 @@ import biskit.test as BT
 class Test(BT.BiskitTest):
     """Test case"""
 
-    def test_ComplexEvolving(self):
-        """Dock.ComplexEvolving test"""
+    def test_ComplexVC(self):
+        """Dock.ComplexVC test"""
         import time
         import biskit.tools as T
 
         c = T.load( T.testRoot() + '/com/ref.complex' )
 
-        self.ce= ComplexEvolving( c.rec_model, c.lig(), c,
+        self.ce= ComplexVC( c.rec_model, c.lig(), c,
                                   info={'comment':'test'} )
 
         time.sleep( 2 )
 
         lig = self.ce.lig().transform( MU.randomRotation(), [0,0,0] )
-        self.ce2 = ComplexEvolving( self.ce.rec_model, lig, self.ce,
+        self.ce2 = ComplexVC( self.ce.rec_model, lig, self.ce,
                                     info={'comment':'test2'})
 
         if self.local:
