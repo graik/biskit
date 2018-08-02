@@ -302,7 +302,7 @@ class Test(BT.BiskitTest):
 
         cs = [ self.cr.random_complex() for i in range(3) ]
 
-        self.traj = Trajectory( [ c.model() for c in cs ] )
+        self.traj = Trajectory( [ c.model() for c in cs ], verbose=self.local )
 
         if self.local:
             self.display( self.traj )
