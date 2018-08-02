@@ -21,17 +21,17 @@ Protein-protein docking related modules
 from biskit import EHandler
 
 try:
-    from .complex import Complex
-    from .complexList import ComplexList
-    from .complexModelRegistry import ComplexModelRegistry
+    from .complex import Complex, ComplexError
+    from .complexList import ComplexList, ComplexListError
+    from .complexModelRegistry import ComplexModelRegistry, RegistryError
     from .complexvc import ComplexVC
-##    from ComplexVCList import ComplexVCList
+    from .complexvcList import ComplexVCList
 ##    from ComplexTraj import ComplexTraj
 ##    from ComplexRandomizer import ComplexRandomizer
 ##    from Docker import Docker
 ##    from FixedList import FixedList
 ##    from HexParser import HexParser
-##    from delphiBindingEnergy import DelphiBindingEnergy
+    from .delphiBindingEnergy import DelphiBindingEnergy
 
 ##     from Intervor import Intervor
 ##     from PatchGenerator import PatchGenerator

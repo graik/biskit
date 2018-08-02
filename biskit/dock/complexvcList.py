@@ -25,9 +25,10 @@
 List of ComplexVC instances.
 """
 
-from Biskit.Dock.ComplexList import ComplexList, ComplexListError
-from Biskit.Dock.ComplexVC import ComplexVC
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
+
+from biskit.dock import ComplexList, ComplexListError
+from biskit.dock import ComplexVC
 
 class ComplexVCList( ComplexList ):
     """
@@ -168,7 +169,7 @@ class ComplexVCList( ComplexList ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test case"""
@@ -176,12 +177,12 @@ class Test(BT.BiskitTest):
     def test_ComplexVCList(self):
         """Dock.ComplexVCList test"""
 
-        import Biskit.tools as t
-        from Biskit.Dock import ComplexVC
-        from Biskit.Dock import ComplexVCList
+        import biskit.tools as T
+        from biskit.dock import ComplexVC
+        from biskit.dock import ComplexVCList
 
         ## original complex
-        cl = t.load(  t.testRoot() + "/dock/hex/complexes.cl" )
+        cl = T.load(  T.testRoot() + "/dock/hex/complexes.cl" )
 
         ## first evolution step
         c = ComplexVC( cl[0].rec(), cl[0].lig(), cl[0],
@@ -196,13 +197,13 @@ class Test(BT.BiskitTest):
 
         if self.local:
             ## last version of all complexes in list
-            print cl.valuesOf('comment')
+            print(cl.valuesOf('comment'))
 
             ## version 1
-            print cl.valuesOf('comment', version=1)
+            print(cl.valuesOf('comment', version=1))
 
             ## the first complex in the list
-            print cl[0].valuesOf('comment')
+            print(cl[0].valuesOf('comment'))
 
             globals().update( locals() )
 
