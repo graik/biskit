@@ -27,7 +27,7 @@ try:
     from .complexvc import ComplexVC
     from .complexvcList import ComplexVCList
 ##    from ComplexTraj import ComplexTraj
-##    from ComplexRandomizer import ComplexRandomizer
+    from .complexrandomizer import ComplexRandomizer
 ##    from Docker import Docker
 ##    from FixedList import FixedList
 ##    from HexParser import HexParser

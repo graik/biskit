@@ -26,15 +26,18 @@
 Create Complexes with random orientation from a receptor and ligand structure.
 """
 
-from Biskit.Dock.Complex import Complex
-import Biskit.mathUtils as ma
-import Biskit.molUtils as mol
-import Biskit.tools as t
-import numpy.random.mtrand as R
-import Biskit.oldnumeric as N0
-from Biskit import Xplorer, XplorModel
-
 import tempfile
+import numpy.random.mtrand as R
+
+import biskit.core.oldnumeric as N0
+import biskit.mathUtils as ma
+import biskit.molUtils as mol
+import biskit.tools as t
+
+from biskit import XplorModel
+from biskit.dock import Complex
+from biskit.exe import Xplorer
+
 
 class ComplexRandomizer:
     """
@@ -252,7 +255,7 @@ class ComplexMinimizer( Xplorer ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test case
@@ -275,10 +278,10 @@ class Test(BT.BiskitTest):
 
     def test_ComplexRandomizer(self):
         """Dock.ComplexRandomizer test"""
-        from Biskit import Trajectory
+        from biskit.md import Trajectory
 
         if self.local:
-            print "\nLoading Rec and Lig files ...",
+            print("\nLoading Rec and Lig files ...", end=' ')
 
         rec_pdb = t.testRoot() + '/rec/1A2P.pdb' 
         lig_pdb = t.testRoot() + '/lig/1A19.pdb' 
@@ -290,12 +293,12 @@ class Test(BT.BiskitTest):
         lig = XplorModel( lig_psf, lig_pdb )
 
         if self.local:
-            print "Initializing Randomizer..."
+            print("Initializing Randomizer...")
 
         self.cr = ComplexRandomizer( rec, lig, debug=self.DEBUG )
 
         if self.local:
-            print "Creating 3 random complexes..."
+            print("Creating 3 random complexes...")
 
         cs = [ self.cr.random_complex() for i in range(3) ]
 
@@ -312,15 +315,15 @@ class Test(BT.BiskitTest):
         """Display random complexes as trajectory in Pymol.
         Only run in local interactive mode.
         """
-        from Biskit import Pymoler
+        from biskit.exe import Pymoler
 
-        print "activate debug switch to get random complexes written to disc!"
+        print("activate debug switch to get random complexes written to disc!")
         if self.DEBUG:
-            print "writing random complex as trajectory to file..."
+            print("writing random complex as trajectory to file...")
             traj.ref.writePdb( self.f_pfb )
             traj.writeCrd( self.f_crd )
-            print 'Wrote reference pdb file to: %s' % self.f_pfb
-            print 'Wrote crd file to: %s' % self.f_crd
+            print('Wrote reference pdb file to: %s' % self.f_pfb)
+            print('Wrote crd file to: %s' % self.f_crd)
 
         self.pm = Pymoler( full=0 )
 
