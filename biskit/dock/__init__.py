@@ -28,7 +28,7 @@ try:
     from .complexvcList import ComplexVCList
     from .complextraj import ComplexTraj, ComplexTrajError
     from .complexrandomizer import ComplexRandomizer, ComplexMinimizer
-##    from Docker import Docker
+    from .docker import Docker, DockerError
 ##    from FixedList import FixedList
 ##    from HexParser import HexParser
     from .delphiBindingEnergy import DelphiBindingEnergy

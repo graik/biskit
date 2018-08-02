@@ -22,15 +22,15 @@
 ##
 
 """
-Various common functions used by the docking modeles.
+methods used by the docker module (ancient code base).
 """
 
-import Biskit.oldnumeric as N0
+import tempfile
 import os
 
-import Biskit.tools as t
-import tempfile
-from Biskit import PDBDope, molUtils
+import biskit.core.oldnumeric as N0
+import biskit.tools as t
+from biskit import PDBDope, molUtils
 
 
 def createHexPdb_single( model, fout=None ):
@@ -74,7 +74,7 @@ def createHexPdb( modelDic, fout=None ):
     ## fetch name for temporary file
     tmpFile = tempfile.mktemp('_pcr2hex.pdb')  
 
-    numbers = modelDic.keys()
+    numbers = list(modelDic.keys())
     numbers.sort()
     for n in numbers:
 
@@ -86,7 +86,7 @@ def createHexPdb( modelDic, fout=None ):
         out.write("MODEL%6i\n" % n)
         lines = pdb_temp.readlines()    # get all lines
         for line in lines:
-            if line[:3] <> 'END':       # filter out END
+            if line[:3] != 'END':       # filter out END
                 out.write(line)
         out.write("ENDMDL\n")
 
@@ -174,11 +174,11 @@ def createHexInp( recPdb, recModel, ligPdb, ligModel, comPdb=None,
     outName_clust = t.absfile( outFile + '_hex_cluster.out')
 
     ## add surface profiles if not there
-    if not recModel.atoms.has_key('relAS'):
+    if 'relAS' not in recModel.atoms:
         #t.flushPrint('\nCalculating receptor surface profile')
         rec_asa = PDBDope( recModel )
         rec_asa.addSurfaceRacer()
-    if not ligModel.atoms.has_key('relAS'):
+    if 'relAS' not in ligModel.atoms:
         #t.flushPrint('\nCalculating ligand surface profile')
         lig_asa = PDBDope( ligModel )
         lig_asa.addSurfaceRacer()
@@ -200,19 +200,19 @@ def createHexInp( recPdb, recModel, ligPdb, ligModel, comPdb=None,
     molRange = 2 * ( maxDist - molSep )
 
     if not silent:
-        print 'Docking setup: %s\nRecMax: %.1f RecMin: %.1f\nLigMax: %.1f LigMin: %.1f\nMaxDist: %.1f MinDist: %.1f\nmolecular_separation: %.1f r12_range: %.1f\n'%(outFile, recMax, recMin, ligMax, ligMin, maxDist, minDist, molSep, molRange)
+        print('Docking setup: %s\nRecMax: %.1f RecMin: %.1f\nLigMax: %.1f LigMin: %.1f\nMaxDist: %.1f MinDist: %.1f\nmolecular_separation: %.1f r12_range: %.1f\n'%(outFile, recMax, recMin, ligMax, ligMin, maxDist, minDist, molSep, molRange))
 
     if recMax > 30 and ligMax > 30 and not silent:
-        print '\nWARNING! Both the receptor and ligand radius is ',
-        print 'greater than 30A.\n'     
+        print('\nWARNING! Both the receptor and ligand radius is ', end=' ')
+        print('greater than 30A.\n')     
 
     ## determine docking mode to use
     macroDocking = 0
 
     if macDock==None:
         if recMax > 35 and not silent:
-            print '\nReceptor has a radius that exceeds 35A ',
-            print '-> Macro docking will be used'
+            print('\nReceptor has a radius that exceeds 35A ', end=' ')
+            print('-> Macro docking will be used')
             macroDocking = 1
     else:
         macroDocking = macDock
@@ -315,14 +315,14 @@ save_docking %(output_all)s""" \
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test case"""
 
     def test_hexTools(self):
         """Dock.hexTools test"""
-        from Biskit import PDBModel
+        from biskit import PDBModel
         self.m = PDBModel( t.testRoot() + '/com/1BGS.pdb' )
         dist = centerSurfDist( self.m , self.m.maskCA() )
 
