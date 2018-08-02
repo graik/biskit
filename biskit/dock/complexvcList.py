@@ -32,7 +32,7 @@ from biskit.dock import ComplexVC
 
 class ComplexVCList( ComplexList ):
     """
-    List of ComplexVC instances.
+    List of ComplexVC instances (i.e. Complexes with a version history).
     Used for organising, sorting, and filtering Complexes during refinement.
 
     @todo: implement plotting functions for evolving Complexes
