@@ -19,9 +19,6 @@
 """
 Wrapper for Delphi -- Poisson-Boltzman electrostatic potential calculation.
 """
-## allow relative imports when calling module by itself for testing (pep-0366)
-if __name__ == "__main__" and __package__ is None:
-    import biskit.exe; __package__ = "biskit.exe"
 
 import tempfile, os
 import numpy as N
@@ -33,8 +30,8 @@ import biskit.mathUtils as U
 
 from biskit import PDBModel, AmberResidueLibrary, AmberPrepParser, AtomCharger
 
-from .executor import Executor
-from .reduce import Reduce
+from biskit.exe.executor import Executor
+from biskit.exe.reduce import Reduce
 
 
 class DelphiError( Exception ):
@@ -284,7 +281,7 @@ class Delphi( Executor ):
     @note: Command configuration: biskit/Biskit/data/defaults/exe_delphi.dat
     """
 
-    F_RADII = 'default.siz'           ## default Delphi atom radius file
+    F_RADII = 'radii_amber_fromdelphi.siz'  ## default atom radius file
     F_PARAMS = 'delphi_simple.prm'    ## default delphi parameter file
     
     ## list of Amber topology files in decending priority
@@ -302,8 +299,12 @@ class Delphi( Executor ):
     RE_SURFCH = r'total s\.charge\,no epsin carrying\s*:\s+(?P<scharge>[0-9\-\.]+)'
     
     
-    def __init__( self, model, template=None, topologies=None,
+    def __init__( self, 
+                  model, 
+                  template=None, 
+                  topologies=None,
                   f_charges=None,
+                  f_radii=None,
                   f_map=None,
                   addcharge=True,
                   protonate=True,
@@ -357,7 +358,7 @@ class Delphi( Executor ):
           nice     - int, nice level (default: 0)
           log      - Biskit.LogFile, program log (None->STOUT) (default: None)
         """
-        template = template or T.dataRoot() + '/delphi/' + self.F_PARAMS
+        template = template or os.path.join(T.dataRoot(),'delphi',self.F_PARAMS)
         
         tempdir = self.newtempfolder( tempdir=True )  ## create new temp folder
         f_in = tempfile.mktemp( '.inp', 'delphi_', dir=tempdir )
@@ -369,7 +370,8 @@ class Delphi( Executor ):
             tempfile.mktemp( '_mapout.phi', 'delphi_', dir=tempdir )
 
 ##        self.f_map = None
-        self.f_radii = None
+        self.f_radii = f_radii or os.path.join(
+                                             T.dataRoot(),'delphi',self.F_RADII)
         self.topologies = topologies or self.F_RESTYPES
         self.f_charges = f_charges or tempfile.mktemp( '.crg', 'delphi_',
                                                        dir=tempdir )
@@ -481,21 +483,19 @@ class Delphi( Executor ):
         return {'acenter':self.acenter, 'scale':self.scale, 'gsize':self.gsize}
         
 
-    def __prepareFolder( self ):
-        """
-        Link default parameter files into working directory.
-        """
-        try:
-            f_radii = self.f_radii or T.dataRoot() + '/delphi/' + self.F_RADII
-
-            target = os.path.join(self.cwd, 'radii.siz')
-            if not os.path.exists( target ):
-                os.symlink( f_radii, target )
-
-        except OSError as error:
-            raise DelphiError('Error preparing temporary folder for Delphi\n'+\
-                  'Error: %r\n' % error +\
-                  'folder: %r\n' % self.cwd)
+##    def __prepareFolder( self ):
+##        """
+##        Link default parameter files into working directory.
+##        """
+##        try:
+##            target = os.path.join(self.cwd, 'radii.siz')
+##            if not os.path.exists( target ):
+##                os.symlink( f_radii, target )
+##
+##        except OSError as error:
+##            raise DelphiError('Error preparing temporary folder for Delphi\n'+\
+##                  'Error: %r\n' % error +\
+##                  'folder: %r\n' % self.cwd)
         
 
     def __prepareCharges(self, f_out ):
@@ -544,7 +544,7 @@ class Delphi( Executor ):
         """
         Executor.prepare( self )
         
-        self.__prepareFolder()
+##        self.__prepareFolder()
         
         ## if setGrid hasn't been called yet, create automatic grid
         if not self.gsize:
@@ -747,5 +747,5 @@ class Test(BT.BiskitTest):
 
 if __name__ == '__main__':
 
-    BT.localTest(debug=False)
+    BT.localTest(debug=True)
     
