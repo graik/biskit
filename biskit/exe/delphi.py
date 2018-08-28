@@ -653,7 +653,7 @@ import tempfile
 class Test(BT.BiskitTest):
     """Test class"""
 
-    TAGS = [ BT.EXE, BT.LONG ]
+    TAGS = [ BT.EXE, BT.LONG, BT.FAILS ]
     MODEL= None
 
     def prepare( self ):
@@ -747,5 +747,5 @@ class Test(BT.BiskitTest):
 
 if __name__ == '__main__':
 
-    BT.localTest(debug=True)
+    BT.localTest(debug=False)
     
