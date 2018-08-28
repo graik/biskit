@@ -1,5 +1,4 @@
 FROM graik/biskitbase
-## FROM biskitbase ## use local
 
 RUN pip install --no-cache coverage coveralls
 
