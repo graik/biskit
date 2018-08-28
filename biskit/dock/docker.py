@@ -35,6 +35,7 @@ from biskit.dock import hextools
 
 import re
 import os.path
+import subprocess
 from time import localtime, sleep
 from threading import Thread, RLock, Condition
 import biskit.core.oldnumeric as N0
@@ -147,6 +148,7 @@ class Docker:
 
         self.running = []
         self.hexDone = 0
+        self.hexFailed = 0
 
         self.result = ComplexList()
 
@@ -309,10 +311,10 @@ class Docker:
         """
         flog = finp + '.log'
 
-        cmd = "%s -ncpu %i -nice %i -noexec -e %s > %s"
+        cmd = "%s -ncpu %i -batch -nice %i -noexec -e %s -log %s"
         cmd = cmd % (self.bin, ncpu, nice, finp, flog )
-
-        if host != os.uname()[1]:
+        
+        if not host in (os.uname()[1], 'localhost'):
             cmd = "ssh %s %s" % (host, cmd)
 
         runner = RunThread( cmd, self, finp=finp, host=host,
@@ -358,7 +360,7 @@ class Docker:
         self.running.remove( runner )
 
         self.hexDone += 1
-
+        
         self.lockMsg.notifyAll()
         self.lock.release()
 
@@ -370,6 +372,7 @@ class Docker:
         self.lock.acquire()
 
         self.running.remove( runner )
+        self.hexFailed += 1
 
         if self.call_when_failed:
             self.call_when_failed( runner )
@@ -458,7 +461,16 @@ class RunThread( Thread ):
 
                 cmd_lst = self.cmd.split()
 
-                self.status = os.spawnvp(os.P_WAIT, cmd_lst[0], cmd_lst )
+                ## self.status = os.spawnvp(os.P_WAIT, cmd_lst[0], cmd_lst )
+                
+                p = subprocess.Popen( cmd_lst, executable=cmd_lst[0],
+                                      universal_newlines=True, 
+                                      stdout=subprocess.DEVNULL, ## see flog
+                                      )
+                self.pid = p.pid
+    
+                output, error = p.communicate()
+                self.status = p.returncode
 
                 if self.status != 0:
                     raise DockerError('Hex returned exit status %i' % self.status)
@@ -566,15 +578,18 @@ class TestCore(BT.BiskitTest):
         # dock rec 1 vs. lig 2 on localhost
         fmac1, fout = self.d.createHexInp( 1, 1 )
         if run:
-            self.d.runHex( fmac1, log=1, ncpu=6, host='localhost' )
+            self.d.runHex( fmac1, log=1, ncpu=6 )
+            if self.local: print("ALL jobs submitted.")
 
             self.d.waitForLastHex()
+            
+            self.assertEqual(self.d.hexFailed, 0, 'Hex exited with error')
+            self.assertTrue(len(self.d.result) > 1, 'no results collected')
 
-        ## dock receptor 1 vs. ligand one on remote host
-        # fmac2, fout2= d.createHexInp( 1, 1 )
-        # d.runHex( fmac2, log=0, ncpu=2, host='remote_host_name' )
-
-        if self.local: print("ALL jobs submitted.")
+            ## dock receptor 1 vs. ligand one on remote host
+            # fmac2, fout2= d.createHexInp( 1, 1 )
+            # d.runHex( fmac2, log=0, ncpu=2, host='remote_host_name' )
+    
 
 
 class TestLong(TestCore):
@@ -596,4 +611,4 @@ class TestShort(TestCore):
 
 if __name__ == '__main__':
 
-    BT.localTest()
+    BT.localTest(debug=False)
