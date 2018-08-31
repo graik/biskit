@@ -71,14 +71,14 @@ long_description = \
  rapid integration of external programs and new algorithms into complex
  workflows. Calculations are thus often delegated to established
  programs like Xplor, Amber, Hex, Prosa, T-Coffee, TMAlign, Reduce and
- Modeller; interfaces to further software can be added easily."""
+ Modeller."""
 
 
 setup(
     name = "biskit",
-    version = "2.4.3",
+    version = "2.5.0",
     url = 'http://biskit.pasteur.fr',
-    download_url= 'https://github.com/graik/biskit/archive/v2.4.3.tar.gz',
+    download_url= 'https://github.com/graik/biskit/archive/v2.5.0.tar.gz',
     author = 'Raik Gruenberg, Johan Leckner and others',
     author_email = 'raik.gruenberg@crg.es',
     description = 'A Python platform for structural bioinformatics',
@@ -86,7 +86,7 @@ setup(
     provides=['Biskit'],
 
     ## available on PyPi
-    install_requires=['numpy', 'scipy', 'biopython'],
+    install_requires=['numpy', 'scipy', 'biopython', 'biggles'],
     packages = packages,
     include_package_data=True,
     data_files = data_files,
