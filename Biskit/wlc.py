@@ -76,40 +76,10 @@ class WormLikeChain:
         d - float, distance in A between fluorophores
         """
         R0 = 50
-
-import biggles as B
-
-nmax = 100
+    
 wlc = WormLikeChain()
+rc = [ (n, wlc.raa(n)) for n in range( 1, 40) ]
+G.plot( rc )
 
-## mean distance for given length in aa
-rc = [ wlc.raa(n) for n in range( 1, nmax) ]
-
-x = range(1, nmax)
-
-plot = B.FramedPlot()
-plot.add( B.Curve( x, rc ) )
-plot.xlabel = 'number of aa'
-plot.ylabel = 'distance in [A]'
-
-## probability for given distance versus actual aa length
-dist = 50.0
-pc = [ wlc.praa(r,dist) for r in range( 1, nmax) ]
-
-plot2 = B.FramedPlot()
-plot2.add( B.Curve( x, pc ) )
-plot2.xlabel = 'number of aa'
-plot2.ylabel = 'propability for d=%4.2f' % dist
-plot2.show()
-
-## length probability distribution for given aa length
-naa = 24
-x =  range( 1, 40)
-pc = [ wlc.praa(naa, dist) for dist in x ]
-
-plot2 = B.FramedPlot()
-plot2.add( B.Curve( x, pc) )
-plot2.xlabel = 'distance in A'
-plot2.ylabel = 'Propability for contourlength %i aa' % naa
-##plot2.show()
-
+pc = [ (r, wlc.praa(14,r)) for r in range( 1, 100) ]
+G.plot( pc )
