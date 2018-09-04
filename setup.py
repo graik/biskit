@@ -86,7 +86,7 @@ setup(
     provides=['Biskit'],
 
     ## available on PyPi
-    install_requires=['numpy', 'scipy', 'biopython', 'biggles'],
+    install_requires=['numpy', 'scipy', 'biopython'],
     packages = packages,
     include_package_data=True,
     data_files = data_files,
