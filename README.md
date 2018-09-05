@@ -36,7 +36,7 @@ On Debian / Ubuntu:
   *  ```sh
      sudo apt-get install libplot-dev plotutils  ## needed for biggles compilation
      sudo apt-get install gnuplot ## program required by biskit.gnuplot
-     pip install biggles
+     pip3 install biggles
      ```
 
 On Mac OS-X:
@@ -44,7 +44,7 @@ On Mac OS-X:
   *  ```sh
      brew install plotutils --with-x11
      brew install gnuplot --with-x11
-     pip install biggles
+     pip3 install biggles
      ```
 
 ___2. Install biskit___
