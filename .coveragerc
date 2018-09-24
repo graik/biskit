@@ -1,0 +1,27 @@
+## run from current directory:
+## coverage run biskit/test.py
+## coverage report
+
+[run]
+
+source = biskit
+
+## skip modules pulled in from third parties
+omit =
+     biskit/core/oldnumeric/*
+     biskit/core/scientificIO/*
+     biskit/core/difflib_old.py
+     biskit/gnuplot.py
+## skip deprecated modules
+     biskit/exe/prosa2003.py
+
+
+[report]
+
+## skip certain methods and classes
+exclude_lines =
+    pragma: no cover
+    if __name__ == .__main__.:
+    raise
+    class .+BiskitTest\):
+    pass

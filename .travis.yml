@@ -1,14 +1,29 @@
-virtualenv:
-  system_site_packages: true
+sudo: required
+
 language: python
 python:
-#  - "2.6"
-  - "2.7"
+  - "3.6"
+
+services:
+  - docker
+
 # command to install dependencies
-install: python setup.py install
-# install: pip install -r requirements.txt
 before_install:
-  - sudo apt-get -qq update
-  - sudo apt-get install -y python-numpy python-scipy python-biopython python-pybiggles
+  - docker build -t graik/biskit .
+
+install:
+  - pip install coverage coveralls
+  
 # command to run tests
-script: python Biskit/test.py -e pvm old exe
+script:
+  docker run -v "$PWD:/app" -t graik/biskit coverage run biskit/test.py -e fails old extra
+
+after_success:
+  ## replace absolute /app/biskit/ path in coverage result
+  ## by `pwd`/biskit
+  - sed -i 's@/app/@'"$PWD"'/@g' .coverage
+  - coveralls
+
+after_failure:
+  - sed -i 's@/app/@'"$PWD"'/@g' .coverage
+  - coveralls

@@ -1,0 +1,10 @@
+venv
+__pycache__
+*.wpu
+*.wpr
+*sqlite3
+staticfiles
+.env
+dev_uploads
+*.db
+.git
