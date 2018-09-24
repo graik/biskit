@@ -1,8 +1,6 @@
-## Automatically adapted for numpy-oldnumeric Mar 26, 2007 by alter_code1.py
-
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2007 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -18,7 +16,7 @@
 ## license.txt along with this program; if not, write to the Free
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-__version__ = '2.4.4'
+__version__ = '2.5.1'
 
 ## execute ~/.pythonrc.py if it exists
 import user
