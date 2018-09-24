@@ -53,7 +53,7 @@ On Mac OS-X:
 ___2. Install biskit___
 
 ```sh
-git clone https://github.com/graik/biskit.git biskit -b biskit3
+git clone https://github.com/graik/biskit.git biskit
 pip3 install -r biskit/requirements.txt
 pip3 install -e biskit
 ```
