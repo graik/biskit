@@ -25,7 +25,7 @@
 
 import Biskit.tools as T
 import Biskit.mathUtils as MaU
-from Biskit import TrajCluster, EnsembleTraj, PCRModel, molUtils
+from Biskit import TrajCluster, EnsembleTraj, XplorModel, molUtils
 from Biskit.Dock import hexTools
 from Biskit.EnsembleTraj import traj2ensemble
 import Biskit.oldnumeric as N0
@@ -48,7 +48,7 @@ Syntax:  selectModels -i |traj.dat| -o |out_folder| [ -psf |psf_file|
                       
          i    - pickled Trajectory object
          dic  - alternative name for model.dic
-         psf  - create PCRModels with psf file info
+         psf  - create XplorModels with psf file info
          ref  - add trajectory's reference model to dictionary and pdb if
                   a reference pdb file is given this will be used insted
          id   - set ligand and receptor chainID
@@ -162,7 +162,7 @@ def report( tc ):
 def dumpModel( m, options, fout ):
 
     if options.has_key('psf'):
-        m = PCRModel( options['psf'], m )
+        m = XplorModel( options['psf'], m )
 
     m.addChainFromSegid( verbose=0 ) # chain id removed by xplor
     m.removeRes( 'TIP3' )

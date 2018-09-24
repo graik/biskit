@@ -21,10 +21,10 @@
 import copy
 import numpy as N
 
-import Biskit as B
-import Biskit.tools as T
+import biskit as B
+import biskit.tools as T
 
-from Biskit.ProfileCollection import _ViewSignal, CrossView
+from biskit.profileCollection import _ViewSignal, CrossView
 
 class ProfileMirror( B.ProfileCollection ):
     """
@@ -74,7 +74,7 @@ class ProfileMirror( B.ProfileCollection ):
         return self.pc.keys()
 
     def has_key( self, k ):
-        return self.pc.has_key(k)
+        return k in self.pc  ## verify !!
 
     def __iter__(self):
         """
@@ -254,8 +254,8 @@ class ProfileMirror( B.ProfileCollection ):
         Profiles can only be removed by the parent ProfileCollection
         @raises ProfileError: always
         """
-        raise B.ProfileError, 'Cannot remove profile %r from a ProfileMirror'\
-              % key
+        raise B.ProfileError('Cannot remove profile %r from a ProfileMirror'\
+              % key)
 
     def clone( self ):
         """
@@ -271,8 +271,8 @@ class ProfileMirror( B.ProfileCollection ):
         """
         Profiles can only be cleared by the parent ProfileCollection
         """
-        raise B.ProfileError, 'Cannot remove profile %r from a ProfileMirror'\
-              % key
+        raise B.ProfileError('Cannot remove profile %r from a ProfileMirror'\
+              % key)
 
     def profLength( self ):
         """
@@ -291,21 +291,21 @@ if __name__ == '__main__':
     import string
 
     p = B.ProfileCollection()
-    p['name'] = string.letters
-    p['id']   = range( len(string.letters) )
+    p['name'] = string.ascii_letters
+    p['id']   = list(range( len(string.ascii_letters)))
 
     ## mirror looks at every second position
-    mirror = ProfileMirror( p, range(0, len(string.letters), 2 ) )
+    mirror = ProfileMirror( p, list(range(0, len(string.ascii_letters), 2)) )
 
-    assert mirror['name'] == list( string.letters[::2] )
-    assert N.all( mirror['id'] == range( 0, p.profLength(), 2 ) )
+    assert mirror['name'] == list( string.ascii_letters[::2] )
+    assert N.all( mirror['id'] == list(range( 0, p.profLength(), 2)) )
 
     ## create a new profile
-    mirror['m_id'] = range( mirror.profLength() )
+    mirror['m_id'] = list(range( mirror.profLength()))
     assert N.all( p['m_id'][::2] == mirror['m_id'] )
 
     mirror['name'][2] = '#'  ## does not have any effect
     mirror['name'] = ['#'] * mirror.profLength()
     assert p['name'][::2] == ['#'] * mirror.profLength()
-    assert p['name'][1::2]== list( string.letters[1::2] )
+    assert p['name'][1::2]== list( string.ascii_letters[1::2] )
     

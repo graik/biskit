@@ -47,16 +47,16 @@ class Complex:
     def __init__(self, rec_model=None,lig_model=None, ligMatrix=None,info={} ):
         """
         @param rec_model: model of original receptor conformation
-        @type  rec_model: PDBModel OR PCRModel
+        @type  rec_model: PDBModel OR XplorModel
         @param lig_model: model of original ligand conformation
-        @type  lig_model: PDBModel OR PCRModel
+        @type  lig_model: PDBModel OR XplorModel
         @param ligMatrix: Numeric array 4 by 4, ligand transformation matrix
         @type  ligMatrix: matrix
         @param info: optional dictionary with additional infos
                      e.g. {'eshape':-123.3, 'rms':12.2 }
         @type  info: dict
         """
-        self.rec_model = rec_model  # PCRModel object for receptor
+        self.rec_model = rec_model  # XplorModel object for receptor
         self.lig_model = lig_model  #    "            for ligand
         self.lig_transformed = None #    "     with transformed coordinates
         self.pw_dist = None         # cached pw atom distances rec x lig
@@ -194,10 +194,10 @@ class Complex:
 
     def rec(self):
         """
-        Return PCRModel object.
+        Return XplorModel object.
 
         @return: receptor model
-        @rtype: PCRModel
+        @rtype: XplorModel
         """
         return self.rec_model
 
@@ -213,7 +213,7 @@ class Complex:
         @type  cache: 1|0
 
         @return: ligand model
-        @rtype: PCRModel
+        @rtype: XplorModel
         """
         try:
             lig = self.lig_transformed
@@ -235,7 +235,7 @@ class Complex:
         Model with both receptor and ligand.
         
         @return: single PDBModel with first rec then lig
-        @rtype: PCRModel
+        @rtype: XplorModel
         """
         return self.rec().concat( self.lig() )
 
@@ -243,7 +243,7 @@ class Complex:
     def ligMatrix(self):
         """
         Return transformation matrix to transform original Ligand
-        PCRModel into docked conformation.
+        XplorModel into docked conformation.
         
         @return: tuple with rotation and transformation matrix
         @rtype: array, vector
@@ -1404,12 +1404,12 @@ class Test(BT.BiskitTest):
 
     def test_Complex(self):
         """Dock.Complex test"""
-        from biskit import PCRModel
+        from biskit import XplorModel
 
-        lig = PCRModel( t.testRoot() + "/com/1BGS.psf",
+        lig = XplorModel( t.testRoot() + "/com/1BGS.psf",
                         t.testRoot() + "/com/lig.model")
 
-        rec = PCRModel( t.testRoot() + "/com/1BGS.psf",
+        rec = XplorModel( t.testRoot() + "/com/1BGS.psf",
                         t.testRoot() + "/com/rec.model")
 
         rec = rec.compress( rec.maskHeavy() )

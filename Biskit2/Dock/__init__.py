@@ -22,8 +22,8 @@ from Biskit import EHandler
 
 try:
     from Complex import Complex
-    from ComplexEvolving import ComplexEvolving
-    from ComplexEvolvingList import ComplexEvolvingList
+    from ComplexVC import ComplexVC
+    from ComplexVCList import ComplexVCList
     from ComplexList import ComplexList
     from ComplexTraj import ComplexTraj
     from ComplexModelRegistry import ComplexModelRegistry

@@ -35,13 +35,13 @@ random_complexes.py -r |rec_model| -l |lig_model| [ -o |out_file| -n |number|
                     -debug copy_inp_file ]
 
 Remark:
-to create valid PCRModels for rec and lig use (in rec_wet/, lig_wet/)
+to create valid XplorModels for rec and lig use (in rec_wet/, lig_wet/)
         1pdb2model.py -i ????.pdb -psf ????.psf -o xplor.model
 The waters in the PSF are deleted. They can be in the model but don't have to. 
 
 Options:
-     r     pickled PCRModel, receptor (psf file has to be valid)
-     l     pickled PCRModel, ligand   (psf file has to be valid)
+     r     pickled XplorModel, receptor (psf file has to be valid)
+     l     pickled XplorModel, ligand   (psf file has to be valid)
      ro    file name for rec copy (centered and no waters)
      lo    file name for lig copy (centered and no waters)
      o     file name for result ComplexList

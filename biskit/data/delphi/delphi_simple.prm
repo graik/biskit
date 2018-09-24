@@ -20,7 +20,7 @@ ionrad=%(ionrad)f ! ion radius (2 for NaCl)
 
 
 in(pdb,file=%(f_pdb)s)
-in(siz,file="radii.siz")
+in(siz,file="%(f_radii)s")
 in(crg,file="%(f_charges)s")
 in(frc,file=%(f_pdb)s)
 

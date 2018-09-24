@@ -21,7 +21,7 @@
 # last $Author$
 # last $Date$
 
-from Biskit import PCRModel
+from Biskit import XplorModel
 from Biskit.tools import *
 from Biskit.Dock.hexTools import *
 
@@ -54,7 +54,7 @@ def loadModels( psfName, pdbNames ):
     filenames - [ str, str, ..], set of pdb filenames
     filenames with ~, ~user, ../ are expanded to absolute names
 
-    -> {1:PCRModel, 2:PCRModel, 3:..}, model dictionary
+    -> {1:XplorModel, 2:XplorModel, 3:..}, model dictionary
     """
     modelDic = {}
     
@@ -66,7 +66,7 @@ def loadModels( psfName, pdbNames ):
     for f in  pdbNames:
 
         counter += 1
-        model = PCRModel( absfile(psfName), absfile(f) )   
+        model = XplorModel( absfile(psfName), absfile(f) )   
 
         # chain id removed by xplor, must be identical to ref complex
         model.addChainFromSegid() 
@@ -149,7 +149,7 @@ if __name__ == '__main__':
     options = cmdDict({})
 #    options = test()
     
-    ## create PCRModels and put them into dictionary
+    ## create XplorModels and put them into dictionary
     modelDic = loadModels( options.get('psf',None), options['pdb'] )
     
     ## fetch PDB code (by default first 4 letters of file name)

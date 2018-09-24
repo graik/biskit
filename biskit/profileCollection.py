@@ -362,7 +362,7 @@ class ProfileCollection:
         :return: profile OR meta infos thereof OR CrossView dict
         :rtype: list OR array OR any OR CrossView
         """
-        if isinstance(k, int):
+        if isinstance(k, (int, N.integer)):
             return CrossView( self, k )
 
         if type(k) is slice:

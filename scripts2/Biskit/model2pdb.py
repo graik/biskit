@@ -21,7 +21,7 @@
 
 
 from Biskit.tools import *
-from Biskit import PDBModel, PCRModel
+from Biskit import PDBModel, XplorModel
 import os.path as osp
 
 def _use( o ):

@@ -26,15 +26,18 @@
 Create Complexes with random orientation from a receptor and ligand structure.
 """
 
-from Biskit.Dock.Complex import Complex
-import Biskit.mathUtils as ma
-import Biskit.molUtils as mol
-import Biskit.tools as t
-import numpy.random.mtrand as R
-import Biskit.oldnumeric as N0
-from Biskit import Xplorer, PCRModel
-
 import tempfile
+import numpy.random.mtrand as R
+
+import biskit.core.oldnumeric as N0
+import biskit.mathUtils as ma
+import biskit.molUtils as mol
+import biskit.tools as t
+
+from biskit import XplorModel
+from biskit.dock import Complex
+from biskit.exe import Xplorer
+
 
 class ComplexRandomizer:
     """
@@ -44,9 +47,9 @@ class ComplexRandomizer:
     def __init__( self, mrec, mlig, rec_out=None, lig_out=None, debug=0 ):
         """
         @param mrec: receptor model
-        @type  mrec: PCRModel
+        @type  mrec: XplorModel
         @param mlig: ligand model
-        @type  mlig: PCRModel
+        @type  mlig: XplorModel
         @param rec_out: rec output(default: None)
         @type  rec_out: str
         @param lig_out: lig output (default: None)
@@ -244,15 +247,15 @@ class ComplexMinimizer( Xplorer ):
         """
         When done, write result to disc.
         """
-        self.rec = PCRModel( self.com.rec_model.getPsfFile(), self.rec_out )
-        self.lig = PCRModel( self.com.lig_model.getPsfFile(), self.lig_out )
+        self.rec = XplorModel( self.com.rec_model.getPsfFile(), self.rec_out )
+        self.lig = XplorModel( self.com.lig_model.getPsfFile(), self.lig_out )
 
 
 
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test case
@@ -275,10 +278,10 @@ class Test(BT.BiskitTest):
 
     def test_ComplexRandomizer(self):
         """Dock.ComplexRandomizer test"""
-        from Biskit import Trajectory
+        from biskit.md import Trajectory
 
         if self.local:
-            print "\nLoading Rec and Lig files ...",
+            print("\nLoading Rec and Lig files ...", end=' ')
 
         rec_pdb = t.testRoot() + '/rec/1A2P.pdb' 
         lig_pdb = t.testRoot() + '/lig/1A19.pdb' 
@@ -286,20 +289,20 @@ class Test(BT.BiskitTest):
         rec_psf = t.testRoot() + '/rec/1A2P.psf' 
         lig_psf = t.testRoot() + '/lig/1A19.psf' 
 
-        rec = PCRModel( rec_psf, rec_pdb )
-        lig = PCRModel( lig_psf, lig_pdb )
+        rec = XplorModel( rec_psf, rec_pdb )
+        lig = XplorModel( lig_psf, lig_pdb )
 
         if self.local:
-            print "Initializing Randomizer..."
+            print("Initializing Randomizer...")
 
         self.cr = ComplexRandomizer( rec, lig, debug=self.DEBUG )
 
         if self.local:
-            print "Creating 3 random complexes..."
+            print("Creating 3 random complexes...")
 
         cs = [ self.cr.random_complex() for i in range(3) ]
 
-        self.traj = Trajectory( [ c.model() for c in cs ] )
+        self.traj = Trajectory( [ c.model() for c in cs ], verbose=self.local )
 
         if self.local:
             self.display( self.traj )
@@ -312,15 +315,15 @@ class Test(BT.BiskitTest):
         """Display random complexes as trajectory in Pymol.
         Only run in local interactive mode.
         """
-        from Biskit import Pymoler
+        from biskit.exe import Pymoler
 
-        print "activate debug switch to get random complexes written to disc!"
+        print("activate debug switch to get random complexes written to disc!")
         if self.DEBUG:
-            print "writing random complex as trajectory to file..."
+            print("writing random complex as trajectory to file...")
             traj.ref.writePdb( self.f_pfb )
             traj.writeCrd( self.f_crd )
-            print 'Wrote reference pdb file to: %s' % self.f_pfb
-            print 'Wrote crd file to: %s' % self.f_crd
+            print('Wrote reference pdb file to: %s' % self.f_pfb)
+            print('Wrote crd file to: %s' % self.f_crd)
 
         self.pm = Pymoler( full=0 )
 

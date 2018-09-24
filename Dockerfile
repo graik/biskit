@@ -7,8 +7,8 @@ RUN pip install --no-cache coverage coveralls
 ADD . /app
 WORKDIR /app
 
-ENV AMBERHOME /opt/amber17
+ENV AMBERHOME /opt/amber18
 ENV PATH $PATH:$AMBERHOME/bin
 ENV PYTHONPATH $PYTHONPATH:`pwd`
 
-CMD ["python", "biskit/test.py -e fails old"]
+CMD ["python", "biskit/test.py -e fails old extra"]

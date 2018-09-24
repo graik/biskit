@@ -21,17 +21,17 @@ Protein-protein docking related modules
 from biskit import EHandler
 
 try:
-    from .complex import Complex
-##    from ComplexEvolving import ComplexEvolving
-##    from ComplexEvolvingList import ComplexEvolvingList
-    from .complexList import ComplexList
-    from .complexModelRegistry import ComplexModelRegistry
-##    from ComplexTraj import ComplexTraj
-##    from ComplexRandomizer import ComplexRandomizer
-##    from Docker import Docker
+    from .complex import Complex, ComplexError
+    from .complexList import ComplexList, ComplexListError
+    from .complexModelRegistry import ComplexModelRegistry, RegistryError
+    from .complexvc import ComplexVC
+    from .complexvcList import ComplexVCList
+    from .complextraj import ComplexTraj, ComplexTrajError
+    from .complexrandomizer import ComplexRandomizer, ComplexMinimizer
+    from .docker import Docker, DockerError
 ##    from FixedList import FixedList
 ##    from HexParser import HexParser
-##    from delphiBindingEnergy import DelphiBindingEnergy
+    from .delphiBindingEnergy import DelphiBindingEnergy
 
 ##     from Intervor import Intervor
 ##     from PatchGenerator import PatchGenerator
@@ -39,12 +39,3 @@ try:
 
 except IOError as why:
     EHandler.warning("Couldn't import all biskit.dock modules.\n" + str(why))
-
-## PVM-dependent modules
-try:
-    pass
-##    from ContactMaster import ContactMaster
-##    from ContactSlave import ContactSlave
-except Exception as why:
-    EHandler.warning("Couldn't import PVM-dependent modules of Biskit.Dock.\n"+\
-                     str( why ) )

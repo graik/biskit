@@ -23,15 +23,17 @@
 """
 organise, sort, and filter collection of dictionaries or similar objects
 S{->} abstract base class (aka interface)
+
+Currently only used as base for DictList.
 """
 
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 import types
 
-import Biskit.tools as t
-import ColorSpectrum as C
-from Biskit import EHandler
-from Errors import BiskitError
+import biskit.tools as t
+import biskit.colorspectrum as C
+from biskit import EHandler
+from biskit.errors import BiskitError
 
 try:
     import biggles
@@ -100,7 +102,7 @@ class BisList:
     def getValue( self, i, key, default=None ): # abstract
         """
         Get the value of a dictionary entry of a list item.
-        B{Override}
+        B{Override!}
 
         @param i: position in collection
         @type  i: int
@@ -171,7 +173,7 @@ class BisList:
     def extend( self, other ): # abstract
         """
         Add all items of other to (the end of) this instance.
-        B{Override}
+        B{Override!}
 
         @param other: other instance
         @type  other: instance        
@@ -182,7 +184,7 @@ class BisList:
     def append( self, v ): # abstract
         """
         Append a single item to the end of this list.
-        B{Override}
+        B{Override!}
 
         @param v: any (left to the implementing class)
         @type  v: any
@@ -198,7 +200,7 @@ class BisList:
         raise NotImplementedError
 
 
-    def argsort( self, sortKey, cmpfunc=cmp ):
+    def argsort( self, sortKey, cmpfunc=None ):
         """
         Sort by values of a certain item attribute.
 
@@ -211,6 +213,9 @@ class BisList:
         @return: indices after sorting (the collection itself is not sorted)
         @rtype: [ int ]
         """
+        ## cmp vanished in python 3.x (but still available in past.builtins)
+        cmpfunc = cmpfunc or ( lambda x, y: (x > y) - (x < y))
+
         pairs = [(self.getValue(i,sortKey),i) for i in range(0, len(self))]
         pairs.sort( cmpfunc )
         return [ x[1] for x in pairs ]
@@ -219,7 +224,7 @@ class BisList:
     def take( self, indices, deepcopy=0 ): # abstract
         """
         Extract certain items in a certain order.
-        B{Override}
+        B{Override!}
 
         @param indices: positions
         @type  indices: [ int ]
@@ -247,7 +252,7 @@ class BisList:
         return self.take( N0.nonzero( mask ), deepcopy=deepcopy )
 
 
-    def sortBy( self, sortKey, cmpfunc=cmp ):
+    def sortBy( self, sortKey, cmpfunc=None ):
         """
         Use::
           sortBy( sortKey ) -> new instance sorted by item[ sortKey ]
@@ -260,6 +265,9 @@ class BisList:
         @return: new instance (or sub-class) sorted by item
         @rtype: instance        
         """
+        ## cmp vanished in python 3.x (but still available in past.builtins)
+        cmpfunc = cmpfunc or (lambda x, y: (x > y) - (x < y))
+        
         return self.take( self.argsort( sortKey, cmpfunc ))
 
 
@@ -548,7 +556,7 @@ class BisList:
         @rtype:  Biggles.FramedPlot
         """
         if not biggles:
-            raise ImportError, 'biggles module could not be imported.'
+            raise ImportError('biggles module could not be imported.')
 
         if len(ykey) == 0:
             xkey, ykey = 'index', [ xkey ]
@@ -564,7 +572,7 @@ class BisList:
 
         for i in range( len(ykey)):
 
-            x = range( len( self ) )
+            x = list(range( len( self )))
             if xkey != 'index':
                 x = self.valuesOf( xkey )
 
@@ -598,7 +606,7 @@ class BisList:
         @rtype: Biggles.FramedArray
         """
         if not biggles:
-            raise ImportError, 'biggles module could not be imported.'
+            raise ImportError('biggles module could not be imported.')
 
         if len(ykey) == 0:
             xkey, ykey = 'index', [ xkey ]
@@ -614,7 +622,7 @@ class BisList:
 
         for i in range( len(ykey)):
 
-            x = range( len( self ) )
+            x = list(range( len( self )))
             if xkey != 'index':
                 x = self.valuesOf( xkey )
 
@@ -632,7 +640,7 @@ class BisList:
 ##############
 ## empty test
 ##############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Mock test, the BisList is tested in L{Biskit.DictList}"""

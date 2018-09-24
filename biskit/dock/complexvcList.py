@@ -22,28 +22,29 @@
 ##
 
 """
-List of ComplexEvolving instances.
+List of ComplexVC instances.
 """
 
-from Biskit.Dock.ComplexList import ComplexList, ComplexListError
-from Biskit.Dock.ComplexEvolving import ComplexEvolving
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 
-class ComplexEvolvingList( ComplexList ):
+from biskit.dock import ComplexList, ComplexListError
+from biskit.dock import ComplexVC
+
+class ComplexVCList( ComplexList ):
     """
-    List of ComplexEvolving instances.
+    List of ComplexVC instances (i.e. Complexes with a version history).
     Used for organising, sorting, and filtering Complexes during refinement.
 
     @todo: implement plotting functions for evolving Complexes
     @todo: right now normal Complexes are tolerated
     @todo: adapt model management
-    @see: L{Dock.ComplexEvolving}
+    @see: L{Dock.ComplexVC}
     """
 
     def __init__(self, lst=[] ):
         """
         @param lst: list of Complexes
-        @type  lst: [ComplexEvolving]
+        @type  lst: [ComplexVC]
 
         @raise ComplexListError: if list contains non-Complex item.
         """
@@ -57,22 +58,22 @@ class ComplexEvolvingList( ComplexList ):
         @return: version of class
         @rtype: str
         """        
-        return 'ComplexEvolvingList $Revision$'
+        return 'ComplexVCList $Revision$'
 
 
     def checkType( self, v ):
         """
-        Make sure v is a ComplexEvolving
+        Make sure v is a ComplexVC
 
         @param v: any
         @type  v: any
 
         @raise ComplexListError: if list contains non-Complex item.
         """
-        if not isinstance(v, ComplexEvolving):
+        if not isinstance(v, ComplexVC):
             raise ComplexListError(
                 str( v ) + " not allowed. ComplexList requires "+
-                str(ComplexEvolving))
+                str(ComplexVC))
 
 
     def allVersionList( self ):
@@ -109,7 +110,7 @@ class ComplexEvolvingList( ComplexList ):
     def toList( self, version=None ):
         """
         Get a simple python list of Complexes. If version==None, the list
-        contains ComplexEvolving instances with all versions, otherwise
+        contains ComplexVC instances with all versions, otherwise
         the list contains Complex instances representing a single version.
 
         @param version: version in history, -1 == last, None == all
@@ -168,41 +169,41 @@ class ComplexEvolvingList( ComplexList ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class Test(BT.BiskitTest):
     """Test case"""
 
-    def test_ComplexEvolvingList(self):
-        """Dock.ComplexEvolvingList test"""
+    def test_ComplexVCList(self):
+        """Dock.ComplexVCList test"""
 
-        import Biskit.tools as t
-        from Biskit.Dock import ComplexEvolving
-        from Biskit.Dock import ComplexEvolvingList
+        import biskit.tools as T
+        from biskit.dock import ComplexVC
+        from biskit.dock import ComplexVCList
 
         ## original complex
-        cl = t.load(  t.testRoot() + "/dock/hex/complexes.cl" )
+        cl = T.load(  T.testRoot() + "/dock/hex/complexes.cl" )
 
         ## first evolution step
-        c = ComplexEvolving( cl[0].rec(), cl[0].lig(), cl[0],
+        c = ComplexVC( cl[0].rec(), cl[0].lig(), cl[0],
                              info={'comment':'test1'})
 
         ## second evolution step
-        c = ComplexEvolving( c.rec(), c.lig(), c,
+        c = ComplexVC( c.rec(), c.lig(), c,
                              info={'comment':'test2'})
 
         ## create an evolving complex list
-        cl = ComplexEvolvingList( [c, c] )
+        cl = ComplexVCList( [c, c] )
 
         if self.local:
             ## last version of all complexes in list
-            print cl.valuesOf('comment')
+            print(cl.valuesOf('comment'))
 
             ## version 1
-            print cl.valuesOf('comment', version=1)
+            print(cl.valuesOf('comment', version=1))
 
             ## the first complex in the list
-            print cl[0].valuesOf('comment')
+            print(cl[0].valuesOf('comment'))
 
             globals().update( locals() )
 

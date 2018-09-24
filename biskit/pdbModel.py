@@ -1502,7 +1502,7 @@ class PDBModel:
                     return what
 
         ## single index
-        if isinstance( what , int):
+        if isinstance( what , (int, N.integer)):
             return N0.array( [what], N0.Int )
 
         raise PDBError("PDBModel.indices(): Could not interpret condition ")

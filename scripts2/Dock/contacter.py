@@ -26,7 +26,7 @@ import sys
 import Biskit.mathUtils as MU
 from Biskit.PVM.hosts import cpus_all, nice_dic
 
-from Biskit.Dock import ContactMaster, ComplexList, ComplexEvolvingList
+from Biskit.Dock import ContactMaster, ComplexList, ComplexVCList
 
 import tempfile, os
 import os.path, time, copy
@@ -58,7 +58,7 @@ Options:   -i     pickeled list of Complex objects (file name)
                      'cons_ent', 'cons_max', 'cons_abs'
                      'rms_if', 'rms_if_bb', 'xplorEnergy'
            -v     work on a previous version of each complex, only valid if
-                  input is ComplexEvolvingList (e.g. status before and after
+                  input is ComplexVCList (e.g. status before and after
                   refinement). 0..use oldest version, -1..use latest version
            -n     renice calc to, at least, this nice value
            -s     splits complex list into sublists of this size, dumps temporary
@@ -181,7 +181,7 @@ if options.has_key('f'):
                 sys.exit(0)
 
 ## reduce list to standard size (if macrodocking was used)
-if not 'all' in options and not isinstance( complex_lst, ComplexEvolvingList):
+if not 'all' in options and not isinstance( complex_lst, ComplexVCList):
     complex_lst = reduceComplexList( complex_lst )
 
 ## load reference complex if given

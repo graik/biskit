@@ -40,7 +40,7 @@ from Biskit import EHandler
 
 from Complex import Complex
 from ComplexList import ComplexList
-from ComplexEvolvingList import ComplexEvolvingList
+from ComplexVCList import ComplexVCList
 
 import Biskit.oldnumeric as N0
 import tempfile
@@ -72,8 +72,8 @@ class ContactMaster(TrackingJobMaster):
         @param outFile: file name for output list of complexes with
                         calculated contacts (default: 'complexes_cont.cl')
         @type  outFile: str
-        @param com_version: contact the given version of a ComplexEvolving,
-                            only valid if input is ComplexEvolvingList
+        @param com_version: contact the given version of a ComplexVC,
+                            only valid if input is ComplexVCList
                             (default: -1)
         @type  com_version: int
         @param show_output: show x-window for each slave or not (default: 0)
@@ -86,7 +86,7 @@ class ContactMaster(TrackingJobMaster):
         @type  verbose: 0|1
 
         @raise BiskitError: if attempting to extract version from list
-                            that is not of type ComplexEvolvingList.
+                            that is not of type ComplexVCList.
         """
         self.outFile = outFile
 
@@ -114,15 +114,15 @@ class ContactMaster(TrackingJobMaster):
         ## force update of given info keys
         self.force = force
 
-        ## extract given version of each Complex from ComplexEvolvingList
+        ## extract given version of each Complex from ComplexVCList
         self.complexLst_original = None
         self.com_version = None
 
-        if isinstance( complexLst, ComplexEvolvingList ):
+        if isinstance( complexLst, ComplexVCList ):
             complexLst = self.__extractVersion( complexLst, com_version)
         else:
             if com_version != -1: raise BiskitError(
-                'Input list must be ComplexEvolvingList to extract version.')
+                'Input list must be ComplexVCList to extract version.')
 
         ## make sure models have a surfaceMask
         self.__addSurfaceMasks( complexLst )
@@ -205,11 +205,11 @@ class ContactMaster(TrackingJobMaster):
     def __extractVersion( self, cel, com_version=-1 ):
         """
         Get a ComplexList by extracting a specified version (generation) of
-        a ComplexEvolvingList.
+        a ComplexVCList.
 
-        @param cel: ComplexEvolvingList
-        @type  cel: ComplexEvolvingList
-        @param com_version: version of ComplexEvolvingList to get
+        @param cel: ComplexVCList
+        @type  cel: ComplexVCList
+        @param com_version: version of ComplexVCList to get
                             (default: -1, last version)
         @type  com_version: int
 
@@ -583,7 +583,7 @@ class ContactMaster(TrackingJobMaster):
 
         self.complexLst += self.remainLst
 
-        ## update complexes in ComplexEvolvingList 
+        ## update complexes in ComplexVCList 
         if self.complexLst_original is not None:
 
             if self.verbose:

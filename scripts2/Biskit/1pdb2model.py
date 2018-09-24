@@ -20,7 +20,7 @@
 ##
 
 from Biskit.tools import *
-from Biskit import PDBModel, PCRModel
+from Biskit import PDBModel, XplorModel
 
 def _use( o ):
 
@@ -28,11 +28,11 @@ def _use( o ):
 Syntax: 1pdb2model.py -i |file1| [-o |outfile| -psf |psf_file| -wat -amber
                       -pdb |PDBCode| ]
 
-Result: stand-alone pickled PDBModel or PCRModel
+Result: stand-alone pickled PDBModel or XplorModel
         
 Options:
     -i      input PDB or pickled PDBModel
-    -psf    psf file name -> will generate PCRModel instead
+    -psf    psf file name -> will generate XplorModel instead
     -o      output file name (default: pdbfile.model)
     -wat    skip water residues (WAT TIP3 WWW H2O) and Cl-, Na+
     -amber  rename CYX -> CYS, HID/HIE/HIP -> HIS
@@ -58,7 +58,7 @@ def renameAmberRes( model ):
 def go( fin, fout, fpsf=None, skipRes=None, amber=0, pdb=None ):
 
     if fpsf:
-        m = PCRModel( absfile(fpsf), absfile(fin), skipRes=skipRes )
+        m = XplorModel( absfile(fpsf), absfile(fin), skipRes=skipRes )
     else:
         m = PDBModel( absfile(fin), skipRes=skipRes )
 

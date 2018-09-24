@@ -167,7 +167,7 @@ class Trajectory:
         :raise TrajError: if out of memory OR invalid index
         """
         try:
-            if isinstance( i , int):
+            if isinstance( i , (int, N0.integer)):
                 return self.getPDBModel( i )
 
             if type( i ) is slice:

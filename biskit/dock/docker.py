@@ -26,19 +26,19 @@
 Prepare and run a HEX docking.
 """
 
-from Biskit import PDBModel, PDBDope, molUtils
-import Biskit.tools as t
+from biskit import PDBModel, PDBDope, molUtils
+import biskit.tools as t
 
-from HexParser import HexParser
-from ComplexList import ComplexList
-import hexTools 
-import settings
+from biskit.dock.hexparser import HexParser
+from biskit.dock import ComplexList
+from biskit.dock import hextools 
 
 import re
 import os.path
+import subprocess
 from time import localtime, sleep
 from threading import Thread, RLock, Condition
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 
 
 class DockerError( Exception ):
@@ -65,7 +65,7 @@ class Docker:
     def __init__( self, recDic, ligDic, recPdb=None, ligPdb=None,
                   comPdb=None, out='hex_%s', soln=512,
                   recChainId=None, ligChainId=None, macDock=None,
-                  bin=settings.hex_bin, verbose=1 ):
+                  bin='hex', verbose=1 ):  ## use ExeConfig instead of bin=...
         """
         @param recDic: receptor dictionary
         @type  recDic: dict
@@ -148,6 +148,7 @@ class Docker:
 
         self.running = []
         self.hexDone = 0
+        self.hexFailed = 0
 
         self.result = ComplexList()
 
@@ -229,15 +230,15 @@ class Docker:
 
             fhex = self.out + '/%s/%s_%03d_hex.pdb' % (subDir, m.pdbCode, k)
             if os.path.exists( fhex ) and self.verbose:
-                print "using old ", os.path.split( fhex )[1]
+                print("using old ", os.path.split( fhex )[1])
 
             else:
                 m.remove( m.maskH() )
                 m = molUtils.sortAtomsOfModel(m)
                 self.__setChainID( m, idList )
 
-                hexTools.createHexPdb_single( m, fhex )
-                if self.verbose: print "created ", fhex
+                hextools.createHexPdb_single( m, fhex )
+                if self.verbose: print("created ", fhex)
 
             result[ k ] = fhex
 
@@ -272,12 +273,12 @@ class Docker:
             fmac = t.absfile( fout_base + '_hex.mac' )
             fout = t.absfile( fout_base + '_hex.out' )
             macro = self.macroDock
-            print "Dock setup: using old ", os.path.split( fmac )[1]
+            print("Dock setup: using old ", os.path.split( fmac )[1])
         else:
             silent=1
             if self.verbose: silent=0
 
-            fmac, fout, macro = hexTools.createHexInp(recPdb,rec, ligPdb,lig,
+            fmac, fout, macro = hextools.createHexInp(recPdb,rec, ligPdb,lig,
                                                       self.comPdb, outFile=fout_base,
                                                       macDock=self.macroDock, sol=self.soln,
                                                       silent=silent)
@@ -310,10 +311,10 @@ class Docker:
         """
         flog = finp + '.log'
 
-        cmd = "%s -ncpu %i -nice %i -noexec -e %s > %s"
+        cmd = "%s -ncpu %i -batch -nice %i -noexec -e %s -log %s"
         cmd = cmd % (self.bin, ncpu, nice, finp, flog )
-
-        if host != os.uname()[1]:
+        
+        if not host in (os.uname()[1], 'localhost'):
             cmd = "ssh %s %s" % (host, cmd)
 
         runner = RunThread( cmd, self, finp=finp, host=host,
@@ -359,7 +360,7 @@ class Docker:
         self.running.remove( runner )
 
         self.hexDone += 1
-
+        
         self.lockMsg.notifyAll()
         self.lock.release()
 
@@ -371,6 +372,7 @@ class Docker:
         self.lock.acquire()
 
         self.running.remove( runner )
+        self.hexFailed += 1
 
         if self.call_when_failed:
             self.call_when_failed( runner )
@@ -453,17 +455,25 @@ class RunThread( Thread ):
             if not os.path.exists( self.fout ):
 
                 if self.verbose:
-                    print "Executing on ", self.host, ' with ', \
-                          t.stripFilename(self.finp)
-                    print "Command: ", self.cmd
+                    print("Executing on ", self.host, ' with ', \
+                          t.stripFilename(self.finp))
+                    print("Command: ", self.cmd)
 
                 cmd_lst = self.cmd.split()
 
-                self.status = os.spawnvp(os.P_WAIT, cmd_lst[0], cmd_lst )
+                ## self.status = os.spawnvp(os.P_WAIT, cmd_lst[0], cmd_lst )
+                
+                p = subprocess.Popen( cmd_lst, executable=cmd_lst[0],
+                                      universal_newlines=True, 
+                                      stdout=subprocess.DEVNULL, ## see flog
+                                      )
+                self.pid = p.pid
+    
+                output, error = p.communicate()
+                self.status = p.returncode
 
                 if self.status != 0:
-                    raise DockerError,\
-                          'Hex returned exit status %i' % self.status
+                    raise DockerError('Hex returned exit status %i' % self.status)
 
                 waited = 0
                 while waited < 25 and not os.path.exists( self.fout ):
@@ -497,14 +507,14 @@ class RunThread( Thread ):
         """
         If HEX job fails
         """
-        print "FAILED: ", self.host, ' ', t.stripFilename(self.finp)
-        print "\tJob details:"
-        print "\tCommand: ", self.cmd
-        print "\tinput:   ", self.finp
-        print "\tHex log: ", self.log
-        print "\tHex out: ", self.fout
-        print
-        print "\t", t.lastError()
+        print("FAILED: ", self.host, ' ', t.stripFilename(self.finp))
+        print("\tJob details:")
+        print("\tCommand: ", self.cmd)
+        print("\tinput:   ", self.finp)
+        print("\tHex log: ", self.log)
+        print("\tHex out: ", self.fout)
+        print()
+        print("\t", t.lastError())
 
         self.owner.failedHex( self )
 
@@ -542,7 +552,7 @@ class RunThread( Thread ):
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
 
 class TestCore(BT.BiskitTest):
     """Base class for short and long Test case"""
@@ -559,44 +569,27 @@ class TestCore(BT.BiskitTest):
         import time, os
         import os.path
 
-        ligDic = t.load( t.testRoot() + '/multidock/lig/1A19_models.dic' )
-
-        ## in the test root the directories "multidock/rec" and
-        ## "multidock/com" are symbolic links from "dock/rec" and
-        ## "dock/com". If this is a fleshly checked out project
-        ## they will not exist, so we will have to create them.
-        rec_dir = t.testRoot() + '/dock/rec'
-        com_dir = t.testRoot() + '/dock/com'
-
-        if not os.path.exists( rec_dir ):
-            ## remove old invalid links
-            if os.path.lexists( rec_dir ):
-                os.unlink( rec_dir )
-            os.symlink( t.testRoot() + '/dock/rec', rec_dir )
-
-        if not os.path.exists( com_dir ):
-            ## remove old invalid links
-            if os.path.lexists( com_dir ):
-                os.unlink( com_dir )
-            os.symlink( t.testRoot() + '/dock/com', com_dir )
-
-        recDic = t.load( t.testRoot() + '/dock/rec/1A2P_model.dic' )
+        ligDic = t.load(t.testRoot('/dock/lig/1A19_model.dic'))
+        recDic = t.load(t.testRoot('/dock/rec/1A2P_model.dic'))
 
         self.d = Docker( recDic, ligDic, out=self.out_folder,
                          verbose=self.local  )
 
         # dock rec 1 vs. lig 2 on localhost
-        fmac1, fout = self.d.createHexInp( 1, 2 )
+        fmac1, fout = self.d.createHexInp( 1, 1 )
         if run:
-            self.d.runHex( fmac1, log=1, ncpu=2, host='localhost' )
+            self.d.runHex( fmac1, log=1, ncpu=6 )
+            if self.local: print("ALL jobs submitted.")
 
             self.d.waitForLastHex()
+            
+            self.assertEqual(self.d.hexFailed, 0, 'Hex exited with error')
+            self.assertTrue(len(self.d.result) > 1, 'no results collected')
 
-        ## dock receptor 1 vs. ligand one on remote host
-        # fmac2, fout2= d.createHexInp( 1, 1 )
-        # d.runHex( fmac2, log=0, ncpu=2, host='remote_host_name' )
-
-        if self.local: print "ALL jobs submitted."
+            ## dock receptor 1 vs. ligand one on remote host
+            # fmac2, fout2= d.createHexInp( 1, 1 )
+            # d.runHex( fmac2, log=0, ncpu=2, host='remote_host_name' )
+    
 
 
 class TestLong(TestCore):
@@ -618,4 +611,4 @@ class TestShort(TestCore):
 
 if __name__ == '__main__':
 
-    BT.localTest()
+    BT.localTest(debug=False)

@@ -71,7 +71,7 @@ Example:    hex2complex -rec 1BZY_models.dic -lig 2AKZ_models.dic
 
     o.setTest( lig= osp.join(f, 'dock/lig/1A19_model.dic'),
                rec= osp.join(f, 'dock/rec/1A2P_model.dic'),
-               hex= osp.join(f, 'dock/hex/1A2P-1A19_hex.out'),
+               hex= osp.join(f, 'dock/hex/1A2P-1A19_hex5.out'),
                o=   osp.join(ftemp, 'complexes.cl'),
                p= 0,
                fsuccess=testSuccess )
@@ -153,7 +153,6 @@ def plot( complex_lst ):
 def main( o ):
     """@param o: options dictionary"""
 
-    ## load pickeled model dictionaries with PCRModels indexed by hex model
     ## number
     rec_lst = load( o['rec'] )
     lig_lst = load( o['lig'] )

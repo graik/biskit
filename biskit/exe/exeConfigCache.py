@@ -51,18 +51,21 @@ class ExeConfigCache:
 
 
     @staticmethod
-    def get( name, reload=0, **kw ):
+    def get( name, reload=False, **kw ):
         """
         Get the ExeConfig instance for the given program.
         
         :param name: program name
         :type  name: str
         :param reload: force new instance (re-read configuration file)
-                       (default: 0)
-        :type  reload: 0|1
+                       (default: False)
+        :type  reload: bool
         :param kw: options for :class:` Biskit.ExeConfig() `; no effect for
-                   cached entries unless reload=1
+                   cached entries unless reload=True
         :type  kw: key=value
+        
+        The keyword arg `configpath=[str]` can be used to look for
+        configuration files in other than the default biskit locations.
         
         :return: ExeConfig object
         :rtype: ExeConfig
@@ -72,7 +75,7 @@ class ExeConfigCache:
             raise ExeConfigCacheError('Failed to aquire singleton lock.')
 
         try:
-            if not name in ExeConfigCache.CACHE or reload:
+            if reload or not name in ExeConfigCache.CACHE:
                 ExeConfigCache.CACHE[ name ] = ExeConfig( name, **kw )
     
             r = ExeConfigCache.CACHE[ name ]
@@ -118,13 +121,14 @@ class Test(BT.BiskitTest):
     
     def test_ExeConfigCache( self):
         """ExeConfigCache test """
+        import os.path
 
         self.x = ExeConfigCache.get( 'xplor' )
         
         if self.local:
             print(self.x)
 
-        self.assertTrue( self.x.dat_found )
+        self.assertTrue( os.path.exists(self.x.dat) )
         
 
 if __name__ == '__main__':

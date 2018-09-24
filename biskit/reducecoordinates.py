@@ -25,11 +25,10 @@
 Create structures with reduced number of atoms.
 """
 
-from PDBModel import PDBModel
-from DictList import DictList
-import Biskit.oldnumeric as N0
-import tools as T
-import molUtils as MU
+from biskit import PDBModel, DictList
+from biskit.core import oldnumeric as N0
+from biskit import tools as T
+from biskit import molUtils as MU
 
 
 class ReduceCoordinates:
@@ -95,12 +94,14 @@ class ReduceCoordinates:
             @return: int or list of matching positions
             @rtype: [-1|0|1]            
             """
+            ## cmp vanished in python 3.x (but still available in past.builtins)
+            cmp = lambda x, y: (x > y) - (x < y)
+
             res = a1['residue_name']
             target = self.aaAtoms[ res ]
             try:
-                return cmp(target.index( a1['name'] ),
-                           target.index( a2['name'] ))
-            except ValueError, why:
+                return cmp(target.index( a1['name'] ), target.index( a2['name'] ))
+            except ValueError as why:
                 return cmp( a1['name'], a2['name'] )
 ##                 s = "Unknown atom for %s %i: %s or %s" % \
 ##                     (res, a1['residue_number'], a1['name'], a2['name'] )
@@ -163,7 +164,7 @@ class ReduceCoordinates:
         @rtype: [[int],[int]..]
         """
         ## how many groups are necessary?
-        n_centers = len( a_indices ) / maxPerCenter
+        n_centers = len( a_indices ) // maxPerCenter  ## floor division
         if len( a_indices ) % maxPerCenter:
             n_centers += 1
 
@@ -373,7 +374,7 @@ class ReduceCoordinates:
 #############
 ##  TESTING        
 #############
-import Biskit.test as BT
+import biskit.test as BT
         
 class Test(BT.BiskitTest):
     """Test"""
@@ -384,15 +385,15 @@ class Test(BT.BiskitTest):
         self.m = PDBModel( T.testRoot()+'/com/1BGS.pdb' )
         self.m = self.m.compress( N0.logical_not( self.m.maskH2O() ) )
 
-        self.m.atoms.set('test', range(len(self.m)))
+        self.m.atoms.set('test', list(range(len(self.m))))
 
         self.red = ReduceCoordinates( self.m, 4 )
 
         self.mred = self.red.reduceToModel()
         
         if self.local:
-            print '\nAtoms before reduction %i'% self.m.lenAtoms()
-            print 'Atoms After reduction %i'% self.mred.lenAtoms()
+            print('\nAtoms before reduction %i'% self.m.lenAtoms())
+            print('Atoms After reduction %i'% self.mred.lenAtoms())
 
         self.assertEqual( self.mred.lenAtoms(), 445 )
 

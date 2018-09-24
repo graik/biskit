@@ -30,7 +30,6 @@ from biskit import EHandler
 
 import biskit.tools as T
 
-
 class ExeConfigError( BiskitError ):
     pass
 
@@ -110,41 +109,47 @@ class ExeConfig( object ):
       >>> the emacs editor
     """
 
-    ## static fields
-    PATH_CONF   = os.path.expanduser('~/.biskit')
-    PATH_CONF_DEFAULT = os.path.join( T.dataRoot(), 'defaults' )
+    ## default search path for exe_...config files
+    CONFIG_PATH = [ os.path.expanduser('~/.biskit'), 
+                    os.path.join( T.dataRoot(), 'defaults' ) ]
+
     SECTION_BIN = 'BINARY'
     SECTION_ENV = 'ENVIRONMENT'
 
-    def __init__( self, name, strict=1 ):
+    def __init__( self, name, strict=True, configpath=None):
         """
         :param name: unique name of the program
         :type  name: str
         :param strict: insist on a config file exe_name.dat
                        and do not tolerate missing environment variables
-                       (default: 1)
-        :type  strict: 0|1
+                       (default: True)
+        :type  strict: bool
+        :param configpath: list of pathnames where configuration file should
+                           be searched, None means use default:
+                           ['~/.biskit', '.../biskit/data/defaults']
+        :type configpath: [str]
         
         :raise ExeConfigError: if strict==1 and config file incomplete/missing
         """
         self.name = name    #: identifier
-        #: path to configuration file
-        self.dat  = os.path.join( self.PATH_CONF, 'exe_%s.dat' % name )
-
-        if not os.path.exists( self.dat ):
-            self.dat = os.path.join( self.PATH_CONF_DEFAULT,'exe_%s.dat'%name )
-
-        #: True if a configuration file was found
-        self.dat_found =  os.path.exists( self.dat )
-
         self.strict = strict
+        self.dat = ''       #: configuration file path
+        
+        searchpath = configpath or self.CONFIG_PATH #: [str]
+        p = searchpath.copy()  # don't empty out original CONFIG_PATH with pop() !
+        if len(p) < 1:
+            raise ExeConfigError('Path(s) for exe config files missing.')
+           
+        while p and not os.path.exists(self.dat):
+            self.dat = os.path.join( p.pop(0), 'exe_%s.dat' % name )
 
+        if self.strict and not os.path.exists(self.dat) :
+            raise ExeConfigError(
+                'Could not find configuration file %s for program %s.\n'\
+                %(self.dat, self.name) +\
+                'Searching in: %r'% searchpath)
+        
         self.env_checked = 0 ## environment was verified
-
-        if strict and not self.dat_found:
-
-            raise ExeConfigError('Could not find configuration file %s for program %s.'\
-                  % (self.dat, self.name))
 
         self.conf = CaseSensitiveConfigParser()
         self.conf.read( self.dat )
@@ -221,8 +226,9 @@ class ExeConfig( object ):
             if missing:
                 EHandler.warning( report )
 
-        except IOError as why:
-            raise ExeConfigError(str(why) + ' Check %s!' % self.dat)
+        except IOError as e:
+            ## re-raise but silence reporting of IOError in stack trace
+            raise ExeConfigError(str(e) + ' Check %s!' % self.dat) from None  
 
 
     def environment( self ):
@@ -286,9 +292,9 @@ class Test(BT.BiskitTest):
     """ExeConfig test"""
     
     def test_ExeConfig( self ):
-        """ExeConfig test (validate xclock)"""
+        """ExeConfig test (validate ls)"""
 
-        x = ExeConfig( 'ls', strict=1 )
+        x = ExeConfig( 'ls', strict=True )
         x.validate()
 
         if self.local:
@@ -296,6 +302,15 @@ class Test(BT.BiskitTest):
 
         self.assertEqual( True, 'ls' in x.bin )
     
+    def test_ExeConfig_externalPath(self):
+        """ExeConfig using external path"""
+        
+        x = ExeConfig('ls',configpath=[T.testRoot('exe')])
+        x.validate()
+        
+        if self.local:
+            print(x.bin)
+        self.assertTrue('ls' in x.bin)
         
 if __name__ == '__main__':
 
