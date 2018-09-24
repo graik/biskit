@@ -25,6 +25,8 @@ Manage profiles.
 """
 
 import numpy as N
+
+import biskit
 import biskit.tools as T
 import biskit.mathUtils as M
 from biskit import EHandler
@@ -318,20 +320,11 @@ class ProfileCollection:
         self.profiles = profiles or {}
         self.infos = infos or {}
 
-        self.initVersion = self.version()
+        self.initVersion = biskit.__version__
 
         #: re-create this field to invalidate CrossViews! (see :class:`killViews()`)
         self._viewSignal = _ViewSignal()
 
-
-    def version( self ):
-        """
-        Class version.
-        
-        :return: class version number
-        :rtype: str
-        """
-        return 'ProfileCollection $Revision$'
 
     def __setstate__(self, state ):
         """
@@ -728,7 +721,7 @@ class ProfileCollection:
         ## collect additional infos about this profile
         info = self.infos.get( name, {} )
 
-        info['version'] = '%s %s' % (T.dateString(), self.version() )
+        info['version'] = '%s %s' % (T.dateString(), biskit.__version__ )
         if comment: info['comment'] = comment
         info['isarray'] = isinstance( prof, N.ndarray )
         info['default'] = default

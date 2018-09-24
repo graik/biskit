@@ -27,6 +27,7 @@ from copy import deepcopy, copy
 from numpy import ndarray as arraytype
 from difflib import SequenceMatcher
 
+import biskit
 import biskit.core.oldnumeric as N0
 from biskit import PDBModel, molUtils, mathUtils, StdLog, EHandler
 import biskit.tools as t
@@ -75,17 +76,7 @@ class Complex:
         self.contacts = None
 
         ## version as of creation of this object
-        self.initVersion = self.version()
-
-
-    def version( self ):
-        """
-        Version of Dock.Complex
-        
-        @return: version of class
-        @rtype: str
-        """
-        return 'Complex $Revision$'
+        self.initVersion = biskit.__version__
 
 
     def __getstate__( self ):

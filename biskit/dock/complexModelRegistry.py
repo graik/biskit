@@ -22,6 +22,7 @@
 This is a helper class for ComplexList.
 """
 
+import biskit
 from biskit.errors import BiskitError
 from biskit import LocalPath, PDBModel
 import biskit.tools as T
@@ -52,17 +53,7 @@ class ComplexModelRegistry:
         self.rec_f2com = {}
         self.lig_f2com = {}
 
-        self.initVersion = self.version()
-
-
-    def version( self ):
-        """
-        Version of class.
-        
-        @return: version of class
-        @rtype: str
-        """        
-        return 'ComplexModelRegistry $Revision$'
+        self.initVersion = biskit.__version__
 
 
     def addComplex( self, com ):

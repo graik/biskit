@@ -107,10 +107,8 @@ class Model( object ):
         
         #: Meta info
         self.info = { 'date':T.dateSortString() }
-        self.__version__ = self.version()
+        self.__version__ = B.__version__
     
-    def version( self ):
-        return "Model $Revision$"
 
     def __len__( self ):
         return self.lenAtoms()

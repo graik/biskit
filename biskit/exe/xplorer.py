@@ -82,15 +82,6 @@ class Xplorer(Executor):
         self.logLines = None
 
 
-    def version( self ):
-        """Version of class.
-        
-        @return: version
-        @rtype: str
-        """       
-        return Executor.version(self) + '/ Xplorer $Revision$'
-
-
     def postProcess( self ):
         """
         Parse xplor log into self.logLines

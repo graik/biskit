@@ -55,13 +55,6 @@ class XplorModel( PDBModel ):
         ## in case given fPDB is already a XplorModel, keep psfFileName
         self.psfFileName = fPsf or getattr( source, 'psfFileName', None)
 
-        ## version as of creation of this object
-        self.initVersion = self.version()
-
-
-    def version( self ):
-        return PDBModel.version(self) + '; XplorModel $Revision$'
-
 
     def getPsfFile(self):
         """

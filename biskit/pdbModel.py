@@ -79,9 +79,6 @@ class PDBProfiles( ProfileCollection ):
         return self.__class__(self.model, copy.deepcopy(self.profiles),
                               copy.deepcopy(self.infos))
 
-    def version( self ):
-        return ProfileCollection.version(self)
-
 
 ## should work but leads to some kind of loop condition
 ##    def profLength(self, default=0):
@@ -247,7 +244,7 @@ class PDBModel:
         self.forcePickle = 0
 
         #: version as of creation of this object
-        self.initVersion = self.version()
+        self.initVersion = B.__version__
 
         #: to collect further informations
         self.info = { 'date':T.dateSortString() }
@@ -259,10 +256,6 @@ class PDBModel:
         if noxyz:
             ## discard coordinates, even when read from PDB file
             self.xyz = None
-
-
-    def version( self ):
-        return 'PDBModel $Revision$'
 
 
     def __getstate__(self):

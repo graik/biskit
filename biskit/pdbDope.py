@@ -27,6 +27,7 @@ Calculate and add various properties to PDBModel
 import biskit.core.oldnumeric as N0
 import numpy as N
 
+import biskit
 import biskit.tools as T
 
 ## from biskit.exe.hmmer import Hmmer
@@ -52,7 +53,7 @@ class PDBDope:
         @return: version of class
         @rtype: str
         """
-        return 'PDBDope $Revision$'
+        return 'PDBDope ' + biskit.__version__
 
     def model( self ):
         """

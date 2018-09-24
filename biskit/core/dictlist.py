@@ -71,16 +71,6 @@ class DictList( BisList, list ):
             self.extend( lst )
 
 
-    def version( self ):
-        """
-        Version of class.
-        
-        @return: version of class
-        @rtype: str
-        """
-        return 'DictList $Revision$'
-
-
     def getItemValue( self, item, key, default=None ):
         """
         Get a value from a given item (dictionary). Override this

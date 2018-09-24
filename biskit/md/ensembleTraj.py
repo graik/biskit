@@ -109,16 +109,6 @@ class EnsembleTraj( Trajectory ):
             raise EnsembleTrajError('Member trajectories must have equal number of frames.')
 
 
-    def version( self ):
-        """
-        Version of class.
-        
-        :return: version
-        :rtype: str
-        """
-        return Trajectory.version(self) + '; EnsembleTraj $Revision$'
-
-
     def replaceContent( self, traj ):
         """
         Replace content of this trajectory by content of given traj.

@@ -52,15 +52,7 @@ class ProfileMirror( B.ProfileCollection ):
         #: support CrossView de-activation
         self._viewSignal = _ViewSignal()
     
-        self.initVersion = self.version()
-
-    def version( self ):
-        """Class version.
-        @return: class version number
-        @rtype: str
-        """
-        return 'ProfileMirror $Revision$ on '\
-               + B.ProfileCollection.version(self)
+        self.initVersion = B.__version__
 
  
     def __len__( self ):

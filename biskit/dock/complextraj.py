@@ -88,16 +88,6 @@ class ComplexTraj( EnsembleTraj ):
             self.cr = self.cl = None
 
 
-    def version( self ):
-        """
-        Version of Dock.Complex
-        
-        @return: version of class
-        @rtype: str
-        """
-        return EnsembleTraj.version(self) + '; ComplexTraj $Revision$'
-
-
     def ligTraj( self ):
         """
         @return: ligand part of this Trajectory (copy)

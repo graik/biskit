@@ -27,6 +27,7 @@ S{->} abstract base class (aka interface)
 Currently only used as base for DictList.
 """
 
+import biskit
 import biskit.core.oldnumeric as N0
 import types
 
@@ -89,14 +90,7 @@ class BisList:
         """
         Override but call.
         """
-        self.initVersion = t.dateString() + ' ' + self.version()
-
-    def version( self ):
-        """
-        @return: CVS version of this class (see also attribute initVersion)
-        @rtype: str
-        """
-        return 'BisList $Revision$'
+        self.initVersion = t.dateString() + ' ' + biskit.__version__
 
 
     def getValue( self, i, key, default=None ): # abstract

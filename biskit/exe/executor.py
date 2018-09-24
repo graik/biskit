@@ -28,11 +28,11 @@ if __name__ == "__main__" and __package__ is None:
 
 import tempfile, os, time, subprocess, sys
 
+import biskit as B
 import biskit.tools as t
 import biskit.settings as s
 from biskit import StdLog
 from biskit.errors import BiskitError
-import biskit as B
 
 from .exeConfigCache import ExeConfigCache
 
@@ -367,17 +367,9 @@ class Executor:
 
         self.result = None  #: set by self.finish()
 
-        self.initVersion = self.version()
+        self.initVersion = B.__version__
 
         self.__dict__.update( kw )
-
-
-    def version( self ):
-        """Version of class (at creation).
-        :return: version
-        :rtype: str
-        """       
-        return 'Executor $Revision$'
 
 
     def newtempfolder( self, tempdir=None ):

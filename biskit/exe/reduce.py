@@ -26,6 +26,7 @@ if __name__ == "__main__" and __package__ is None:
 import tempfile
 import numpy as N
 
+import biskit
 from biskit import PDBModel, PDBCleaner
 import biskit.tools as T
 
@@ -123,9 +124,6 @@ class Reduce( Executor ):
 
         self.model = model
 
-    def version(self):
-        return 'Reduce $Revision: $'
-
     def capTerminals( self ):
         c = PDBCleaner( self.model, verbose=self.verbose )
         self.model = c.capTerminals( auto=self.autocap, 
@@ -204,7 +202,7 @@ class Reduce( Executor ):
         self.result.info.update( self.model.info )
         self.result.residues.update( self.model.residues )
         self.result.info['reduce'] = 'hydrogens added/replaced by '\
-            + self.version()
+            + 'Reduce v' + biskit.__version__
 
 
 #############

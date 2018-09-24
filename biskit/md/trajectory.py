@@ -25,6 +25,7 @@
 Trajectory - Collection of coordinate frames of a molecule 
 """
 
+import biskit
 import biskit.core.oldnumeric as N0
 
 ## superposition module from M. Habeck
@@ -46,18 +47,8 @@ import numpy.linalg as LA
 class TrajError( BiskitError ):
     pass
 
-
 class TrajProfiles( ProfileCollection ):
-
-    def version( self ):
-        """
-        Version of class.
-
-        :return: version
-        :rtype: str
-        """
-        return 'Trajectory $Revision$'
-
+    pass
 
 class Trajectory:
     """
@@ -106,17 +97,7 @@ class Trajectory:
             self.__create( pdbs, refpdb, rmwat=rmwat, castAll=castAll )
 
         ## version as of creation of this object
-        self.initVersion = T.dateString() + ';' + self.version()
-
-
-    def version( self ):
-        """
-        Version of class.
-
-        :return: version
-        :rtype: str
-        """
-        return 'Trajectory $Revision$'
+        self.initVersion = T.dateString() + ';' + biskit.__version__
 
 
     def __create( self, pdbs, refpdb, rmwat=0, castAll=0 ):

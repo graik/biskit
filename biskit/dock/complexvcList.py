@@ -51,16 +51,6 @@ class ComplexVCList( ComplexList ):
         ComplexList.__init__( self, lst )
 
 
-    def version( self ):
-        """
-        Version of Dock.Complex
-
-        @return: version of class
-        @rtype: str
-        """        
-        return 'ComplexVCList $Revision$'
-
-
     def checkType( self, v ):
         """
         Make sure v is a ComplexVC

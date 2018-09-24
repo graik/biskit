@@ -80,16 +80,6 @@ class ComplexVC( ProtComplex ):
             self.lig_model = self.__syncModel( self.lig_model, com_0.lig_model)
 
 
-    def version( self ):
-        """
-        Version of class.
-
-        @return: version of class
-        @rtype: str
-        """
-        return 'ComplexVC $Revision$'
-
-
     def __iter__(self):
         """
         __iter__() <==> for k in self

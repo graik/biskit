@@ -409,10 +409,6 @@ class Delphi( Executor ):
         self.delphimodel = None
     
 
-    def version(self):
-        return 'Delphi $Revision: $'
-
-
     def delphiDimensions( self, model ):
         """
         Calculate "geometric" center and molecular dimensions as defined by 

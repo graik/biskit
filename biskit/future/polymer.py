@@ -270,7 +270,7 @@ class Polymer( Model ):
         if sequences:
             self.addSequences( *sequences )
             
-        self.__version__ = self.version()
+        self.__version__ = B.__version__
 
     
     def __newChain( self ):
