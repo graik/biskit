@@ -8,6 +8,7 @@ ___a software platform for structural bioinformatics___
 Please refer to 
             **http://biskit.pasteur.fr**
 for installation and usage instructions.
+See the [**biskit-2.x branch**](https://github.com/graik/biskit/tree/biskit-2.x) for the last stable Python 2.x version of Biskit.
 
 Biskit is a modular, object-oriented python library that provides
 intuitive classes for many typical tasks of structural bioinformatics
@@ -23,7 +24,9 @@ easily.
 Python 3 Migration
 -------------------
 
-This is the Python 3 branch of Biskit. Migration is ongoing but the core functionalities and many of the wrappers have been migrated. The new version is found in (lower case) ```biskit```. All the modules that have **not** yet been migrated are in the old ```Biskit2``` folder. After installation, the new Python 3 Biskit is imported with ```import biskit```
+This is the Python 3 line of Biskit development. Note that **b**iskit (lowercase) 3 is not any longer backwards-compatible to previous **B**iskit (uppercase) 2 releases. Please check out the [`biskit-2.x` branch](https://github.com/graik/biskit/tree/biskit-2.x) if you need to use the classic Python 2.x Biskit. Note also that the new `biskit` is, currently at least, *only* compatible with Python 3.x and cannot be used with Python 2.x.
+
+The core functionalities and many of the wrappers have been migrated. Still un-migrated are some smaller modules and most of the scripts. The new version is found in (lower case) ```biskit```. All the modules that have **not** yet been migrated are in the old ```Biskit2``` folder (which cannot be imported any longer). After installation, the new Python 3 Biskit is imported with ```import biskit```
 
 Short Installation Instructions
 --------------------------------
