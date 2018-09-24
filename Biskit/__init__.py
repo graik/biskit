@@ -16,7 +16,7 @@
 ## license.txt along with this program; if not, write to the Free
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-__version__ = '2.5.0'
+__version__ = '2.5.1'
 
 ## execute ~/.pythonrc.py if it exists
 import user
