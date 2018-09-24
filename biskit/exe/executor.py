@@ -524,9 +524,11 @@ class Executor:
                             env=self.environment(), cwd=self.cwd )
         
         if self.exe.pipes and self.f_out:
-            open( self.f_out, 'wt').writelines( self.output )
+            with open( self.f_out, 'wt') as outfile:
+                outfile.writelines( self.output )
         if not self.exe.pipes and self.catch_err:
-            self.error = open( self.f_err, 'r' ).readlines()
+            with open( self.f_err, 'r' ) as errfile:
+                self.error = errfile.readlines()
 
         if self.verbose: self.log.add(".. finished.")
 
