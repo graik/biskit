@@ -22,7 +22,7 @@ packages, data_files = [], []
 root_dir = os.path.dirname(__file__)
 len_root_dir = len(root_dir)
 
-biskit_dir = os.path.join(root_dir, 'Biskit')
+biskit_dir = os.path.join(root_dir, 'biskit')
 doc_dir    = os.path.join(root_dir, 'doc')
 script_dir = os.path.join(root_dir, 'scripts')
 
@@ -45,14 +45,14 @@ for dirpath, dirnames, filenames in os.walk( doc_dir ):
     # Ignore dirnames that start with '.'
     for i, dirname in enumerate(dirnames):
         if dirname.startswith('.'): del dirnames[i]
-    data_files.append([os.path.join( 'Biskit', dirpath ),
+    data_files.append([os.path.join( 'biskit', dirpath ),
                        [os.path.join(dirpath, f) for f in filenames]])
 
 for dirpath, dirnames, filenames in os.walk( script_dir ):
     # Ignore dirnames that start with '.'
     for i, dirname in enumerate(dirnames):
         if dirname.startswith('.'): del dirnames[i]
-    data_files.append([os.path.join( 'Biskit', dirpath ),
+    data_files.append([os.path.join( 'biskit', dirpath ),
                        [os.path.join(dirpath, f) for f in filenames]])
 
 # Small hack for working with bdist_wininst.
@@ -76,21 +76,21 @@ long_description = \
 
 setup(
     name = "biskit",
-    version = "2.5.1",
+    version = "3.0.0a0",
     url = 'http://biskit.pasteur.fr',
-    download_url= 'https://github.com/graik/biskit/archive/v2.5.1.tar.gz',
+    download_url= 'https://github.com/graik/biskit/archive/v3.0.0.tar.gz',
     author = 'Raik Gruenberg, Johan Leckner and others',
     author_email = 'raik.gruenberg@crg.es',
     description = 'A Python platform for structural bioinformatics',
     long_description = long_description,
-    provides=['Biskit'],
+    provides=['biskit'],
 
     ## available on PyPi
     install_requires=['numpy', 'scipy', 'biopython'],
     packages = packages,
     include_package_data=True,
     data_files = data_files,
-    scripts = ['scripts/Biskit/bis.py'],
+    scripts = ['scripts/bis.py'],
 
     classifiers= ['License :: OSI Approved :: GNU General Public License (GPL)',
                   'Topic :: Scientific/Engineering :: Bio-Informatics',

@@ -1,0 +1,24 @@
+#virtualenv:
+#  system_site_packages: true
+language: python
+python:
+#  - "2.7"
+#  - "3.4"
+  - "3.5"
+  - "3.6"
+# command to install dependencies
+install:
+  - pip install -r requirements_extended.txt
+  - pip install coverage coveralls
+#  - python setup.py install
+  - export PYTHONPATH=$PYTHONPATH:`pwd`
+before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y plotutils libplot-dev python-dev libblas-dev liblapack-dev gfortran gnuplot
+# command to run tests
+script:
+  coverage run biskit/test.py -e exe fails
+after_success:
+  coveralls
+after_failure:
+  coveralls

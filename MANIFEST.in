@@ -1,7 +1,7 @@
 include README.md
 include LICENSE.txt
 include MANIFEST.in
-recursive-include Biskit/data *
-recursive-include Biskit/testdata *
+recursive-include biskit/data *
+recursive-include biskit/testdata *
 recursive-include doc *
 recursive-include scripts *

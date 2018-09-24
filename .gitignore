@@ -1,4 +1,6 @@
 ## custom additions
+__pycache__
+.mypy_cache
 venv
 *.wpu
 *.wpr
@@ -47,3 +49,4 @@ nosetests.xml
 # Emacs
 *~
 .#*
+\#*\#
