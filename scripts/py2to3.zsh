@@ -3,7 +3,7 @@
 echo "USAGE: "
 echo "py2to3.zsh sourceModule.py destModule.py"
 echo "run from biskit3 root folder, assumes biskit2 folder"
-echo "available for diff one level up (../biskit2/)"
+echo "available for diff one level up (../biskit2/Biskit/...)"
 
 exists() { type -t "$1" > /dev/null 2>&1; }
 
