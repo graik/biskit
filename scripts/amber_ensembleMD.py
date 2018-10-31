@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2016 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -25,9 +25,9 @@ import os.path
 import os
 import numpy as N
 
-from Biskit.tools import *
-from Biskit.PVM.hosts import nodes_own
-from Biskit import PDBModel
+from biskit.tools import *
+from biskit.PVM.hosts import nodes_own
+from biskit import PDBModel
 
 host_list = nodes_own
 
@@ -46,7 +46,7 @@ def defaultOptions():
             'ntwv':500}
 
 def syntax( options ):
-    print"""
+    print("""
     Syntax:
     amber_ensembleMD.py -parm |parm_file| -crd |crd_file| -out |result_folder|
                         -pdb |0_pdb_file|
@@ -76,9 +76,9 @@ def syntax( options ):
                   -LAM environment must be set up in .cshrc or .zshenv or etc.
                   -start_eq must be run from first host in nodes_eq.dat !
 
-    Default options:"""
+    Default options:""")
     for key in options.keys():
-        print "\t-",key, "\t",options[key]
+        print("\t-",key, "\t",options[key])
 
     sys.exit(0)
 
@@ -118,7 +118,7 @@ class AmberController:
         self.lenatoms = 0
 
         ## create pool of random seeds, add int if requested
-        self.rand_seed = range(0, self.n_members*200000, 100)
+        self.rand_seed = list(range(0, self.n_members*200000, 100))
         if getattr( self, 'rseed', None) is not None:
             self.rand_seed = [ i + int(self.rseed) for i in self.rand_seed ]
 
@@ -282,7 +282,7 @@ class AmberController:
     def __formatWithLists(self, str, dic ):
 
         ndic = {}
-        for key, item in dic.items():
+        for key, item in list(dic.items()):
             if type( item ) is list and str.find('%('+key+')') != -1:
                 ndic[ key ] = item[0]
                 del item[0]
@@ -310,7 +310,7 @@ class AmberController:
             f.writelines( result )
             f.close()
 
-        except KeyError, why:
+        except KeyError as why:
             s =  "Unknown option in template file."
             s += "\n  template file: " + fTemplate
             s += "\n  Template asked for a option called " + str( why[0] )
@@ -319,7 +319,7 @@ class AmberController:
             s += "\n  E.g: runAmber.py -parm ... -%s some_value -out..." %\
                  str( why[0] )
 
-            raise AmberError, s
+            raise AmberError(s)
         
         except:
             s =  "Error while adding template file."
@@ -335,7 +335,7 @@ class AmberController:
                 
             s += "\n  Error:\n  " + lastError()
 
-            raise AmberError, s 
+            raise AmberError(s) 
 
 ##########
 ## MAIN ##
