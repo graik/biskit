@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2016 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -27,6 +27,7 @@ import os.path as osp
 import re
 import tempfile
 
+import biskit
 import biskit.tools as T
 ## import biskit.settings as settings
 from biskit import BiskitError
@@ -90,17 +91,7 @@ class AmberCrdEntropist( Executor ):
                         'S_total':None, 'S_trans':None, 'S_rot':None,
                         'S_vibes':None,
                         'contributions':None, 'nframes':None,
-                        'version':self.version(), 'node':self.node }
-
-
-    def version( self ):
-        """
-        Version of class.
-        
-        :return: version
-        :rtype: str
-        """
-        return 'AmberCrdEntropist $Revision: 1086 $'
+                        'version':biskit.__version__, 'node':self.node }
 
 
     def command( self ):

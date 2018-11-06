@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2016 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -107,10 +107,8 @@ class Model( object ):
         
         #: Meta info
         self.info = { 'date':T.dateSortString() }
-        self.__version__ = self.version()
+        self.__version__ = B.__version__
     
-    def version( self ):
-        return "Model $Revision$"
 
     def __len__( self ):
         return self.lenAtoms()

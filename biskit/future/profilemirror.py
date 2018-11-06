@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2016 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -52,15 +52,7 @@ class ProfileMirror( B.ProfileCollection ):
         #: support CrossView de-activation
         self._viewSignal = _ViewSignal()
     
-        self.initVersion = self.version()
-
-    def version( self ):
-        """Class version.
-        @return: class version number
-        @rtype: str
-        """
-        return 'ProfileMirror $Revision$ on '\
-               + B.ProfileCollection.version(self)
+        self.initVersion = B.__version__
 
  
     def __len__( self ):

@@ -3,7 +3,7 @@
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2016 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -49,16 +49,6 @@ class ComplexVCList( ComplexList ):
         @raise ComplexListError: if list contains non-Complex item.
         """
         ComplexList.__init__( self, lst )
-
-
-    def version( self ):
-        """
-        Version of Dock.Complex
-
-        @return: version of class
-        @rtype: str
-        """        
-        return 'ComplexVCList $Revision$'
 
 
     def checkType( self, v ):

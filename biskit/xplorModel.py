@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2016 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -54,13 +54,6 @@ class XplorModel( PDBModel ):
 
         ## in case given fPDB is already a XplorModel, keep psfFileName
         self.psfFileName = fPsf or getattr( source, 'psfFileName', None)
-
-        ## version as of creation of this object
-        self.initVersion = self.version()
-
-
-    def version( self ):
-        return PDBModel.version(self) + '; XplorModel $Revision$'
 
 
     def getPsfFile(self):

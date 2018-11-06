@@ -71,7 +71,7 @@ long_description = \
  rapid integration of external programs and new algorithms into complex
  workflows. Calculations are thus often delegated to established
  programs like Xplor, Amber, Hex, Prosa, T-Coffee, TMAlign, Reduce and
- Modeller; interfaces to further software can be added easily."""
+ Modeller."""
 
 
 setup(

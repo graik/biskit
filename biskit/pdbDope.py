@@ -3,7 +3,7 @@
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2016 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -27,6 +27,7 @@ Calculate and add various properties to PDBModel
 import biskit.core.oldnumeric as N0
 import numpy as N
 
+import biskit
 import biskit.tools as T
 
 ## from biskit.exe.hmmer import Hmmer
@@ -52,7 +53,7 @@ class PDBDope:
         @return: version of class
         @rtype: str
         """
-        return 'PDBDope $Revision$'
+        return 'PDBDope ' + biskit.__version__
 
     def model( self ):
         """

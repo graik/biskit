@@ -1,7 +1,7 @@
 ## numpy-oldnumeric calls replaced by custom script; 09/06/2016
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2016 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -27,6 +27,7 @@ from copy import deepcopy, copy
 from numpy import ndarray as arraytype
 from difflib import SequenceMatcher
 
+import biskit
 import biskit.core.oldnumeric as N0
 from biskit import PDBModel, molUtils, mathUtils, StdLog, EHandler
 import biskit.tools as t
@@ -75,17 +76,7 @@ class Complex:
         self.contacts = None
 
         ## version as of creation of this object
-        self.initVersion = self.version()
-
-
-    def version( self ):
-        """
-        Version of Dock.Complex
-        
-        @return: version of class
-        @rtype: str
-        """
-        return 'Complex $Revision$'
+        self.initVersion = biskit.__version__
 
 
     def __getstate__( self ):

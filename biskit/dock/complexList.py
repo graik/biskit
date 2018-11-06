@@ -3,7 +3,7 @@
 
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2016 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -31,6 +31,7 @@ import biskit.core.oldnumeric as N0
 import types
 import random
 
+import biskit
 import biskit.tools as t
 from biskit import PDBError, EHandler
 from biskit.errors import BiskitError
@@ -92,20 +93,10 @@ class ComplexList( list ):
         ## non-redundant rec/lig_models of all complexes indexed by file name
         self.models = ComplexModelRegistry()
 
-        self.initVersion = t.dateString() + ' ' + self.version()
+        self.initVersion = t.dateString() + ' ' + biskit.__version__
 
         if lst != []:
             self.extend( lst )
-
-
-    def version( self ):
-        """
-        Version of class.
-
-        @return: class version number
-        @rtype: str
-        """
-        return 'ComplexList $Revision$'
 
 
     def __setstate__(self, state ):

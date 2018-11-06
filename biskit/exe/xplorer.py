@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2016 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -80,15 +80,6 @@ class Xplorer(Executor):
 
         #: will contain copy of Xplor log file after run finished
         self.logLines = None
-
-
-    def version( self ):
-        """Version of class.
-        
-        @return: version
-        @rtype: str
-        """       
-        return Executor.version(self) + '/ Xplorer $Revision$'
 
 
     def postProcess( self ):

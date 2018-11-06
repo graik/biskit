@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2016 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -28,11 +28,11 @@ if __name__ == "__main__" and __package__ is None:
 
 import tempfile, os, time, subprocess, sys
 
+import biskit as B
 import biskit.tools as t
 import biskit.settings as s
 from biskit import StdLog
 from biskit.errors import BiskitError
-import biskit as B
 
 from .exeConfigCache import ExeConfigCache
 
@@ -367,17 +367,9 @@ class Executor:
 
         self.result = None  #: set by self.finish()
 
-        self.initVersion = self.version()
+        self.initVersion = B.__version__
 
         self.__dict__.update( kw )
-
-
-    def version( self ):
-        """Version of class (at creation).
-        :return: version
-        :rtype: str
-        """       
-        return 'Executor $Revision$'
 
 
     def newtempfolder( self, tempdir=None ):
@@ -524,9 +516,11 @@ class Executor:
                             env=self.environment(), cwd=self.cwd )
         
         if self.exe.pipes and self.f_out:
-            open( self.f_out, 'wt').writelines( self.output )
+            with open( self.f_out, 'wt') as outfile:
+                outfile.writelines( self.output )
         if not self.exe.pipes and self.catch_err:
-            self.error = open( self.f_err, 'r' ).readlines()
+            with open( self.f_err, 'r' ) as errfile:
+                self.error = errfile.readlines()
 
         if self.verbose: self.log.add(".. finished.")
 

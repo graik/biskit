@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2016 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -69,16 +69,6 @@ class DictList( BisList, list ):
 
         if lst != []:
             self.extend( lst )
-
-
-    def version( self ):
-        """
-        Version of class.
-        
-        @return: version of class
-        @rtype: str
-        """
-        return 'DictList $Revision$'
 
 
     def getItemValue( self, item, key, default=None ):

@@ -1,6 +1,6 @@
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2016 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -78,16 +78,6 @@ class ComplexVC( ProtComplex ):
             ## save only differences between old and new conformations
             self.rec_model = self.__syncModel( self.rec_model, com_0.rec_model)
             self.lig_model = self.__syncModel( self.lig_model, com_0.lig_model)
-
-
-    def version( self ):
-        """
-        Version of class.
-
-        @return: version of class
-        @rtype: str
-        """
-        return 'ComplexVC $Revision$'
 
 
     def __iter__(self):
