@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
@@ -25,20 +25,19 @@ import os.path
 import os
 import numpy as N
 
-from Biskit.tools import *
-from Biskit.PVM.hosts import nodes_own
-from Biskit import PDBModel
+from biskit.tools import *
+from biskit import PDBModel
 
-host_list = nodes_own
+host_list = ['localhost'] * 11
 
 def defaultOptions():
-    return {'template':dataRoot() + '/amber/template_pme_ensemble',
+    return {'template':dataRoot() + '/amber/template_pme_ensemble_amber9',
             'parm':'',
             'crd':'',
             'out':'.',
             'nb_nodes':1,
             'nodes_eq':host_list[0],
-            'nodes_prod':host_list[:1],
+            'nodes_prod':host_list[1:],
             'n_members':10,
             'dt':0.002,
             'n_steps':500000,
@@ -46,7 +45,7 @@ def defaultOptions():
             'ntwv':500}
 
 def syntax( options ):
-    print"""
+    print("""
     Syntax:
     amber_ensembleMD.py -parm |parm_file| -crd |crd_file| -out |result_folder|
                         -pdb |0_pdb_file|
@@ -76,9 +75,9 @@ def syntax( options ):
                   -LAM environment must be set up in .cshrc or .zshenv or etc.
                   -start_eq must be run from first host in nodes_eq.dat !
 
-    Default options:"""
+    Default options:""")
     for key in options.keys():
-        print "\t-",key, "\t",options[key]
+        print("\t-",key, "\t",options[key])
 
     sys.exit(0)
 
@@ -118,7 +117,7 @@ class AmberController:
         self.lenatoms = 0
 
         ## create pool of random seeds, add int if requested
-        self.rand_seed = range(0, self.n_members*200000, 100)
+        self.rand_seed = list(range(0, self.n_members*200000, 100))
         if getattr( self, 'rseed', None) is not None:
             self.rand_seed = [ i + int(self.rseed) for i in self.rand_seed ]
 
@@ -151,7 +150,7 @@ class AmberController:
             if not os.path.exists( f ):
                 raise AmberError('%s not found.' % f )
 
-        cmd = 'cp -d -r --no-preserve=mode,ownership %s/* %s/' % (self.template, self.out)
+        cmd = 'cp -d -r --no-preserve=ownership %s/* %s/' % (self.template, self.out)
 
         flushPrint('copying template files and folders...')
         os.system( cmd )
@@ -282,7 +281,7 @@ class AmberController:
     def __formatWithLists(self, str, dic ):
 
         ndic = {}
-        for key, item in dic.items():
+        for key, item in list(dic.items()):
             if type( item ) is list and str.find('%('+key+')') != -1:
                 ndic[ key ] = item[0]
                 del item[0]
@@ -310,16 +309,16 @@ class AmberController:
             f.writelines( result )
             f.close()
 
-        except KeyError, why:
+        except KeyError as why:
             s =  "Unknown option in template file."
             s += "\n  template file: " + fTemplate
             s += "\n  Template asked for a option called " + str( why[0] )
-            s += "\n  template line:\n  " + str(line)
+            s += "\n  template line:\n  " + repr(line)
             s += "\n  Please give a value for this option at the command line."
             s += "\n  E.g: runAmber.py -parm ... -%s some_value -out..." %\
                  str( why[0] )
 
-            raise AmberError, s
+            raise AmberError(s)
         
         except:
             s =  "Error while adding template file."
@@ -335,7 +334,7 @@ class AmberController:
                 
             s += "\n  Error:\n  " + lastError()
 
-            raise AmberError, s 
+            raise AmberError(s) 
 
 ##########
 ## MAIN ##
