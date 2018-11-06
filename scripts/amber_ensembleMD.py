@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
 ## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
@@ -26,19 +26,18 @@ import os
 import numpy as N
 
 from biskit.tools import *
-from biskit.PVM.hosts import nodes_own
 from biskit import PDBModel
 
-host_list = nodes_own
+host_list = ['localhost'] * 11
 
 def defaultOptions():
-    return {'template':dataRoot() + '/amber/template_pme_ensemble',
+    return {'template':dataRoot() + '/amber/template_pme_ensemble_amber9',
             'parm':'',
             'crd':'',
             'out':'.',
             'nb_nodes':1,
             'nodes_eq':host_list[0],
-            'nodes_prod':host_list[:1],
+            'nodes_prod':host_list[1:],
             'n_members':10,
             'dt':0.002,
             'n_steps':500000,
@@ -151,7 +150,7 @@ class AmberController:
             if not os.path.exists( f ):
                 raise AmberError('%s not found.' % f )
 
-        cmd = 'cp -d -r --no-preserve=mode,ownership %s/* %s/' % (self.template, self.out)
+        cmd = 'cp -d -r --no-preserve=ownership %s/* %s/' % (self.template, self.out)
 
         flushPrint('copying template files and folders...')
         os.system( cmd )
@@ -314,7 +313,7 @@ class AmberController:
             s =  "Unknown option in template file."
             s += "\n  template file: " + fTemplate
             s += "\n  Template asked for a option called " + str( why[0] )
-            s += "\n  template line:\n  " + str(line)
+            s += "\n  template line:\n  " + repr(line)
             s += "\n  Please give a value for this option at the command line."
             s += "\n  E.g: runAmber.py -parm ... -%s some_value -out..." %\
                  str( why[0] )
