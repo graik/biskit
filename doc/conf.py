@@ -54,7 +54,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'biskit'
-copyright = '2017, Raik Grünberg'
+copyright = '2019, Raik Grünberg'
 author = 'Raik Grünberg'
 
 # The version info for the project you're documenting, acts as replacement for
