@@ -27,6 +27,7 @@ Trajectory - Collection of coordinate frames of a molecule
 
 import biskit
 import biskit.core.oldnumeric as N0
+from biskit.core.trajparserFactory import TrajParserFactory
 
 ## superposition module from M. Habeck
 from biskit import rmsFit
@@ -43,6 +44,9 @@ import tempfile, os, types
 
 ## PCA
 import numpy.linalg as LA
+
+## read Amber CRD and NC (netcdf) trajectories
+import parmed.amber
 
 class TrajError( BiskitError ):
     pass
@@ -62,7 +66,7 @@ class Trajectory:
     ## used by __cmpFileNames()
     ex_numbers = re.compile('\D*([0-9]+)\D*')
 
-    def __init__( self, pdbs=None, refpdb=None, rmwat=1,
+    def __init__( self, pdbs=None, refpdb=None, source=None, rmwat=1,
                   castAll=0, verbose=1 ):
         """
         Collect coordinates into Numpy array. By default, the atom content
@@ -94,13 +98,17 @@ class Trajectory:
         if pdbs is not None:
             refpdb = refpdb or pdbs[0]
 
-            self.__create( pdbs, refpdb, rmwat=rmwat, castAll=castAll )
+            self.__create_from_models( pdbs, refpdb, rmwat=rmwat, 
+                                       castAll=castAll )
+        
+        if source is not None:
+            TrajParserFactory.getParser(source).parse2new(source, refpdb, self)
 
         ## version as of creation of this object
         self.initVersion = T.dateString() + ';' + biskit.__version__
 
 
-    def __create( self, pdbs, refpdb, rmwat=0, castAll=0 ):
+    def __create_from_models( self, pdbs, refpdb, rmwat=0, castAll=0 ):
         """
         Initiate and create necessary variables.
 
@@ -134,6 +142,7 @@ class Trajectory:
             self.frameNames = pdbs
         self.frameNames = [ str( i ) for i in range(len(pdbs)) ]
 
+       
 
     def __getitem__( self, i ):
         """
@@ -1620,6 +1629,10 @@ class Test(BT.BiskitTest):
         self.assertAlmostEqual( N0.sum( self.traj.profile('rms') ),
                                 58.101235746353879, 2 )
 
+    def test_TrajectoryNCDF(self):
+        self.traj2 = Trajectory(refpdb=T.testRoot('amber/md_netcdf/0.pdb'),
+                                source=T.testRoot('amber/md_netcdf/heat.ncdf'))
+        self.assertEqual(len(self.traj2), 6)
 
 if __name__ == '__main__':
 
