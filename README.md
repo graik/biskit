@@ -54,10 +54,7 @@ ___2. Install biskit___
 git clone https://github.com/graik/biskit.git biskit3
 pip3 install -e biskit3
 ```
-*Note:* The `-e` option will create an "editable" biskit installation where the git-controlled `biskit3` folder is not copied but sym-linked into your system's (or virtualenv) python `site-packages` folder [see explanation](http://codumentary.blogspot.com/2014/11/python-tip-of-year-pip-install-editable.html). *Alternatively*, run:
-```sh
-python3 biskit3/setup.py install
-```
+*Note:* The `-e` option will create an "editable" biskit installation where the git-controlled `biskit3` folder is not copied but sym-linked into your system's (or virtualenv) python `site-packages` folder [see explanation](http://codumentary.blogspot.com/2014/11/python-tip-of-year-pip-install-editable.html). *Alternatively*, run `python3 biskit3/setup.py install`
 in order to create an actual copy of the biskit source code inside your Python 3 `site-packages` folder.
 
 Depending on your environment, `pip install -e` will always install all the needed dependencies but it may or may not also create the link for putting biskit into the `$PYTHONPATH`. It seems to work within the virtualenv but not, e.g. in the OSX terminal. Test by changing to another folder, run `python` and run the following import command:
