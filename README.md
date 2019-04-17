@@ -33,12 +33,11 @@ Short Installation Instructions
 
 ___1. Install (plotting) dependencies___
 
-The biskit library itself does not strictly need either `gnuplot` nor `biggles` and you can safely install them later. However, **biggles** (https://biggles-plot.github.io/) is an excellent plotting library with a relatively intuitive syntax that is used throughout biskit and several unittests depend on it. **gnuplot** is wrapped by `biskit.gnuplot` and offers super-convenient quick and dirty line, scatter and histogram plots for rapid interactive data inspection. So you may as well get them set up right from the start:
+The biskit library itself does not strictly need `biggles` and you can safely install it later. However, **biggles** (https://biggles-plot.github.io/) is an excellent plotting library with a relatively intuitive syntax that is used throughout biskit and several unittests depend on it. So you may as well get it set up right from the start:
 
 On Debian / Ubuntu:
   *  ```sh
      sudo apt-get install libplot-dev plotutils  ## needed for biggles compilation
-     sudo apt-get install gnuplot ## program required by biskit.gnuplot
      pip3 install biggles
      ```
 
@@ -46,20 +45,30 @@ On Mac OS-X:
   * install Quartz (https://www.xquartz.org/)
   *  ```sh
      brew install plotutils --with-x11
-     brew install gnuplot --with-x11
      pip3 install biggles
      ```
 
 ___2. Install biskit___
 
 ```sh
-git clone https://github.com/graik/biskit.git biskit
-pip3 install -r biskit/requirements.txt
-pip3 install -e biskit
+git clone https://github.com/graik/biskit.git biskit3
+pip3 install -e biskit3
 ```
-*Note:* The `-e` option will create an "editable" biskit installation where the git-controlled `biskit` folder is not copied but sym-linked into your system's (or virtualenv) python `site-packages` folder [see explanation](http://codumentary.blogspot.com/2014/11/python-tip-of-year-pip-install-editable.html).
-    
-If not already available, this will also install numpy, scipy, and BioPython. Replace `git clone` by the appropriate `tar xvf *tgz` command to start from an official Biskit release bundle.
+*Note:* The `-e` option will create an "editable" biskit installation where the git-controlled `biskit3` folder is not copied but sym-linked into your system's (or virtualenv) python `site-packages` folder [see explanation](http://codumentary.blogspot.com/2014/11/python-tip-of-year-pip-install-editable.html). *Alternatively*, run:
+```sh
+python3 biskit3/setup.py install
+```
+in order to create an actual copy of the biskit source code inside your Python 3 `site-packages` folder.
+
+Depending on your environment, `pip install -e` will always install all the needed dependencies but it may or may not also create the link for putting biskit into the `$PYTHONPATH`. It seems to work within the virtualenv but not, e.g. in the OSX terminal. Test by changing to another folder, run `python` and run the following import command:
+```py
+>>> import biskit
+```
+Should this fail, you can instead add the biskit3 folder manually to your PYTHONPATH. Assuming you cloned the biskit project into `~/py/biskit3`, the following would work:
+```sh
+export PYTHONPATH=$PYTHONPATH:~/py/biskit3
+```
+Append this line to your `.bashrc` or `.bash_profile` file. zsh users should put it into `.zshenv`. 
 
 ___3. Test your installation___
 
