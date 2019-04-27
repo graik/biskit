@@ -143,7 +143,7 @@ class PDBCleaner:
                                               a['residue_name'],
                                               a['residue_number'])
 
-                    if a['alternate'].upper() == 'A':
+                    if a['alternate'].upper() in ['A', '1']:
                         a['alternate'] = ''
 
                     else:
