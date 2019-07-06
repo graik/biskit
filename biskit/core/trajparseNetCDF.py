@@ -18,10 +18,7 @@
 ##
 ##
 """
-Base class for reading in Trajectory objects from different input formats.
-
-This module provides helper classes for :class:`Biskit.md.Trajectory`. In most
-cases, it should not be necessary to use it directly.
+Read binary Amber trajectory files (NetCDF format) using parmed library.
 
 .. seealso:: `biskit.md.Trajectory`, `biskit.core.TrajParserFactory`,
 """
@@ -36,7 +33,7 @@ import biskit.core.trajparser as P
 
 class TrajParseNetCDF(P.TrajParser):
     """
-    Generate Biskit.md.Trajectory` objects from Amber NetCDF coordinates file.
+    Generate ``Biskit.md.Trajectory` objects from Amber NetCDF coordinates file.
     """
     
     ## short free text description of the supported format

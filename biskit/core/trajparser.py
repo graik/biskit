@@ -38,6 +38,17 @@ class TrajParser:
     
     ## short free text description of the supported format
     description = ''
+    
+    def __init__(self, verbose=False, rmwat=False, analyzeEach=False):
+        """
+        Args:
+            verbose (bool): print loading progress to STDERR
+            rmwat (bool): remove water and other solvent molecules on the fly
+            analyzeEach (bool): compare each frame's atom content to reference
+        """
+        self.verbose = verbose
+        self.rmwat = rmwat
+        self.analyzeEach = analyzeEach
 
     @staticmethod
     def supports( source ):

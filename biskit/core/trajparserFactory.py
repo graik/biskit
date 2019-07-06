@@ -23,6 +23,7 @@
 
 from biskit.core.trajparser import TrajParserError, TrajParser
 from biskit.core.trajparseNetCDF import TrajParseNetCDF
+from biskit.core.trajparsePDBs import TrajParsePDBs
 
 class TrajParserFactory:
     """
@@ -30,7 +31,7 @@ class TrajParserFactory:
     """
 
     @staticmethod
-    def getParser( source ):
+    def getParser( source, verbose=False, rmwat=False, analyzeEach=False):
         """
         getParser( source ) -> TrajParser; Fetch a Parser for the source.
 
@@ -40,6 +41,9 @@ class TrajParserFactory:
 
         Args:
             source (str or LocalPath): trajectory source (file)
+            verbose (bool): print loading progress to STDERR
+            rmwat (bool): remove water and other solvent molecules on the fly
+            analyzeEach (bool): compare each frame's atom content to reference
 
         Returns:
             TrajParser: a parser that should be able to handle the given source
@@ -50,6 +54,9 @@ class TrajParserFactory:
 
         if TrajParseNetCDF.supports( source ):
             return TrajParseNetCDF()
+        
+        if TrajParsePDBs.supports( source ):
+            return TrajParsePDBs(verbose=verbose)
             
         raise TrajParserError('Format of %r is not recognized.' % source)
 

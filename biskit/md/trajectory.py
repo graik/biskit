@@ -43,6 +43,7 @@ import copy
 import tempfile, os, types
 
 ## PCA
+import numpy as N
 import numpy.linalg as LA
 
 ## read Amber CRD and NC (netcdf) trajectories
@@ -66,8 +67,8 @@ class Trajectory:
     ## used by __cmpFileNames()
     ex_numbers = re.compile('\D*([0-9]+)\D*')
 
-    def __init__( self, pdbs=None, refpdb=None, source=None, rmwat=1,
-                  castAll=0, verbose=1 ):
+    def __init__( self, source=None, refpdb=None, rmwat=1,
+                  castAll=0, verbose=True ):
         """
         Collect coordinates into Numpy array. By default, the atom content
         of the first PDB is compared to the reference PDB to look for atoms
@@ -76,8 +77,8 @@ class Trajectory:
         same re-ordering / removing is applied to all of them. Set castAll
         to 1, in order to check each PDB seperately.
 
-        :param pdbs: file names of all conformations OR PDBModels
-        :type  pdbs: [ str ] OR [ PDBModel ]
+        :param source: file name of Amber MD or list of PDBs (files or models)
+        :type  pdbs: str OR [ str ] OR [ PDBModel ]
         :param refpdb: file name of reference pdb
         :type  refpdb: str
         :param rmwat: skip all TIP3, HOH, Cl-, Na+ from all files (default: 1)
@@ -95,54 +96,16 @@ class Trajectory:
         self.profiles = TrajProfiles()
         self.verbose= verbose
 
-        if pdbs is not None:
-            refpdb = refpdb or pdbs[0]
-
-            self.__create_from_models( pdbs, refpdb, rmwat=rmwat, 
-                                       castAll=castAll )
-        
         if source is not None:
-            TrajParserFactory.getParser(source).parse2new(source, refpdb, self)
+            p = TrajParserFactory.getParser(source, 
+                                            verbose=verbose,
+                                            rmwat=rmwat, 
+                                            analyzeEach=castAll)
+            p.parse2new(source, refpdb, self)
 
         ## version as of creation of this object
         self.initVersion = T.dateString() + ';' + biskit.__version__
 
-
-    def __create_from_models( self, pdbs, refpdb, rmwat=0, castAll=0 ):
-        """
-        Initiate and create necessary variables.
-
-        :param pdbs: file names of all conformations OR PDBModels
-        :type  pdbs: [ str ] OR [ PDBModel ]
-        :param refpdb: file name of reference pdb
-        :type  refpdb: str
-        :param rmwat: skip all TIP3, HOH, Cl-, Na+ from all files (default: 1)
-        :type  rmwat: 0|1
-        :param castAll: re-analyze atom content of each frame (default: 0)
-        :type  castAll: 0|1
-        """
-
-        ## get Structure object for reference
-        self.setRef( PDBModel( refpdb ) )
-
-        ## Remove waters from ref (which will also remove it from each frame)
-        if rmwat:
-            wat = ['TIP3', 'HOH', 'WAT', 'Na+', 'Cl-' ]
-            self.ref.remove( lambda a, wat=wat: a['residue_name'] in wat )
-
-        ## frames x (N x 3) Array with coordinates
-        self.frames = self.__collectFrames( pdbs, castAll )
-        pass  ## self.frames.savespace()
-
-        ## [00011111111222233..] (continuous) residue number for each atom
-        self.resIndex = self.ref.resMap()
-
-        ## keep list of loaded files
-        if type( pdbs[0] ) is str:
-            self.frameNames = pdbs
-        self.frameNames = [ str( i ) for i in range(len(pdbs)) ]
-
-       
 
     def __getitem__( self, i ):
         """
@@ -223,7 +186,7 @@ class Trajectory:
 
     def avgModel( self ):
         """
-        Returna a PDBModel with coordinates that are the average of
+        Return a PDBModel with coordinates that are the average of
         all frames.
 
         :return: PDBModel with average structure of trajectory (no fitting!) 
@@ -1593,19 +1556,6 @@ class Test(BT.BiskitTest):
 
     def test_Trajectory(self):
         """Trajectory test"""
-##         f = T.testRoot() + '/lig_pc2_00/pdb/'
-##         allfiles = os.listdir( f )
-##         pdbs = []
-##         for fn in allfiles:
-##             try:
-##                 if (fn[-7:].upper() == '.PDB.GZ'):
-##                     pdbs += [f + fn]
-##             except:
-##                 pass
-
-##         ref = pdbs[0]
-##         traj = Trajectory( pdbs[:3], ref, rmwat=0 )
-
         ## Loading
         self.traj = T.load(T.testRoot() + '/lig_pcr_00/traj.dat')
 
@@ -1629,10 +1579,30 @@ class Test(BT.BiskitTest):
         self.assertAlmostEqual( N0.sum( self.traj.profile('rms') ),
                                 58.101235746353879, 2 )
 
-    def test_TrajectoryNCDF(self):
+    def test_TrajectoryFromNCDF(self):
         self.traj2 = Trajectory(refpdb=T.testRoot('amber/md_netcdf/0.pdb'),
                                 source=T.testRoot('amber/md_netcdf/heat.ncdf'))
         self.assertEqual(len(self.traj2), 6)
+        
+    def test_TrajectoryFromPDBs(self):
+        f = T.testRoot() + '/amber/md_pdbs/'
+        allfiles = os.listdir( f )
+        pdbs = []
+        for fn in allfiles:
+            try:
+                if (fn[-4:].upper() == '.PDB'):
+                    pdbs += [f + fn]
+            except:
+                pass
+
+        ref = pdbs[0]
+        traj1 = Trajectory( pdbs[:3], ref, rmwat=False, verbose=self.local)
+        
+        models = [PDBModel(f) for f in pdbs]
+        traj2 = Trajectory( models[:3], ref, rmwat=False, verbose=self.local)
+        
+        self.assertTrue(N.all(traj1.frames == traj2.frames))
+        
 
 if __name__ == '__main__':
 

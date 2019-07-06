@@ -700,4 +700,4 @@ class TestNoLeap( BT.BiskitTest ):
 
 if __name__ == '__main__':
 
-    BT.localTest(debug=False)
+    BT.localTest(debug=True)
