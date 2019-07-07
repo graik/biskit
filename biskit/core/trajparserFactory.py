@@ -24,6 +24,7 @@
 from biskit.core.trajparser import TrajParserError, TrajParser
 from biskit.core.trajparseNetCDF import TrajParseNetCDF
 from biskit.core.trajparsePDBs import TrajParsePDBs
+from biskit.core.trajparseAmberCrd import TrajParseAmberCrd
 
 class TrajParserFactory:
     """
@@ -31,7 +32,8 @@ class TrajParserFactory:
     """
 
     @staticmethod
-    def getParser( source, verbose=False, rmwat=False, analyzeEach=False):
+    def getParser(source, hasbox=True, rmwat=False, analyzeEach=False, 
+                  verbose=False):
         """
         getParser( source ) -> TrajParser; Fetch a Parser for the source.
 
@@ -41,22 +43,32 @@ class TrajParserFactory:
 
         Args:
             source (str or LocalPath): trajectory source (file)
-            verbose (bool): print loading progress to STDERR
+            hasbox (bool): assume file with box info 
+                           (applies to Amber ASCII CRD only)
             rmwat (bool): remove water and other solvent molecules on the fly
+                          (applies to Amber ASCII CRD, and PDB input only)
             analyzeEach (bool): compare each frame's atom content to reference
+                                (applies to PDB input only)
+            verbose (bool): print loading progress to STDERR
 
         Returns:
-            TrajParser: a parser that should be able to handle the given source
+            TrajParser: a parser that handles the given source
 
         Raises:
             TrajParserError: if no compatible parser is found
         """
 
         if TrajParseNetCDF.supports( source ):
-            return TrajParseNetCDF()
+            return TrajParseNetCDF(verbose=verbose)
+        
+        if TrajParseAmberCrd.supports( source ):
+            return TrajParseAmberCrd(verbose=verbose, 
+                                     rmwat=rmwat, 
+                                     hasbox=hasbox)
         
         if TrajParsePDBs.supports( source ):
-            return TrajParsePDBs(verbose=verbose)
+            return TrajParsePDBs(verbose=verbose, 
+                                 rmwat=rmwat, analyzeEach=analyzeEach)
             
         raise TrajParserError('Format of %r is not recognized.' % source)
 

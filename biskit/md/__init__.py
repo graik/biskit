@@ -8,7 +8,6 @@ from .ensembleTraj import EnsembleTraj, traj2ensemble
 
 from .amberLeap import AmberLeap
 from .amberParmBuilder import AmberParmBuilder
-from .amberCrdParser import AmberCrdParser, ParseError
 from .amberRstParser import AmberRstParser
 
 from .amberCrdEntropist import AmberCrdEntropist, EntropistError

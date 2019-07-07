@@ -35,7 +35,8 @@ import biskit.tools as T
 if __name__ == "__main__" and __package__ is None:
     import biskit.md; __package__ = "biskit.md"
 
-from .amberCrdParser import ParseError
+class ParseError(Exception):
+    pass
 
 class AmberRstParser:
     """Convert an Amber restart file to array, PDBModel or a Amber crd file.

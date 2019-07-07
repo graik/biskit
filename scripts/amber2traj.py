@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2016 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2019 Raik Gruenberg
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -22,7 +22,7 @@
 
 import sys
 from biskit.tools import *
-from biskit.AmberCrdParser import AmberCrdParser
+from biskit.md import Trajectory
 
 def _use():
 
@@ -36,10 +36,10 @@ amber2traj.py -i sim.crd -o traj_0.dat -r ref.pdb [-b -wat -hyd -rnres
     -o     output file with pickled biskit Trajectory object
     -r     reference PDB, must have identical atom content+order as sim.crd
     -b     traj has box info (3 additional coordinates per frame)
-    -wat   delete WAT, Cl-, Na+ residues (after parsing)
+    -wat   delete WAT, Cl-, Na+ residues (during parsing)
     -hyd   delete all hydrogens (after parsing)
     -rnres rename amber residues HIE/HID/HIP, CYX to HIS and CYS
-    -code  PDB code of molecule [first 4 letters of ref file name]
+    -code  PDB code of molecule [else first 4 letters of ref file name]
     """)
     sys.exit( 0 )
 
@@ -49,21 +49,20 @@ if __name__ == '__main__':
     if len( sys.argv ) < 2:
         _use()
 
-    o = cmdDict( {'o':'traj_0.dat', 'i':'sim.crd'} )
+    o = cmdDict( {'o':'traj.dat', 'i':'sim.crd'} )
     fcrd = o['i']
     fpdb = o['r']
     fout = o['o']
-    box  = 'b' in o
-    wat  = 'wat' in o
-    hyd  = 'hyd' in o
-    rnres  = 'rnres' in o
+    box  = o.has_key( 'b' )
+    wat  = o.has_key('wat')
+    hyd  = o.has_key('hyd')
+    rnres  = o.has_key('rnres')
     code = o.get('code', None)
 
-    p = AmberCrdParser( fcrd, fpdb, box, rnres, pdbCode=code )
-    t = p.crd2traj()
-
-    if wat:
-        t.removeAtoms( lambda a: a['residue_name'] in ['WAT', 'Na+', 'Cl-'] )
+    t = Trajectory( fcrd, fpdb, hasbox=box, rmwat=wat, verbose=True)
+    
+    if code:
+        t.ref.pdbCode = code
 
     if hyd:
         t.ref.addChainId( keep_old=1 ) ## preserve chain-delimiters

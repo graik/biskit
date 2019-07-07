@@ -67,8 +67,8 @@ class Trajectory:
     ## used by __cmpFileNames()
     ex_numbers = re.compile('\D*([0-9]+)\D*')
 
-    def __init__( self, source=None, refpdb=None, rmwat=1,
-                  castAll=0, verbose=True ):
+    def __init__( self, source=None, refpdb=None, hasbox=True,
+                  rmwat=1, castAll=0,  verbose=True ):
         """
         Collect coordinates into Numpy array. By default, the atom content
         of the first PDB is compared to the reference PDB to look for atoms
@@ -81,6 +81,9 @@ class Trajectory:
         :type  pdbs: str OR [ str ] OR [ PDBModel ]
         :param refpdb: file name of reference pdb
         :type  refpdb: str
+        :param hasbox: for ASCII-formatted input trajectory - assume periodic 
+                       box info in the input file (default True)
+        :type hasbox: boolean
         :param rmwat: skip all TIP3, HOH, Cl-, Na+ from all files (default: 1)
         :type  rmwat: 0|1
         :param castAll: re-analyze atom content of each frame (default: 0)
@@ -99,7 +102,8 @@ class Trajectory:
         if source is not None:
             p = TrajParserFactory.getParser(source, 
                                             verbose=verbose,
-                                            rmwat=rmwat, 
+                                            rmwat=rmwat,
+                                            hasbox=hasbox,
                                             analyzeEach=castAll)
             p.parse2new(source, refpdb, self)
 
@@ -197,66 +201,6 @@ class Trajectory:
         result.setXyz( N0.average( self.frames ) )
 
         return result
-
-
-    def __collectFrames( self, pdbs, castAll=0 ):
-        """
-        Read coordinates from list of pdb files.
-
-        :param pdbs: list of file names
-        :type  pdbs: [str]
-        :param castAll: analyze atom content of each frame for casting
-                        (default: 0)
-        :type  castAll: 0|1
-
-        :return: frames x (N x 3) Numpy array (of float)
-        :rtype: array
-        """
-        frameList = []
-        i = 0
-        atomCast = None
-
-        if self.verbose: T.errWrite('reading %i pdbs...' % len(pdbs) )
-
-        refNames = self.ref.atomNames()  ## cache for atom checking
-
-        for f in pdbs:
-
-            ## Load
-            m = PDBModel(f)
-
-            ## compare atom order & content of first frame to reference pdb
-            if castAll or i==0:
-                atomCast, castRef = m.compareAtoms( self.ref )
-
-                if castRef != list(range( len( self.ref ))):
-                    ## we can take away atoms from each frame but not from ref
-                    raise TrajError("Reference PDB doesn't match %s."
-                                    %m.fileName)
-
-                if N0.all( atomCast == list(range( len( m ))) ):
-                    atomCast = None   ## no casting necessary
-                else:
-                    if self.verbose: T.errWrite(' casting ')
-
-            ## assert that frame fits reference
-            if atomCast:
-                m = m.take( atomCast )
-
-            ## additional check on each 100st frame
-            if i%100 == 0 and m.atomNames() != refNames:
-                raise TrajError("%s doesn't match reference pdb."%m.fileName )
-
-            frameList.append( m.xyz )
-
-            i += 1
-            if i%10 == 0 and self.verbose:
-                T.errWrite('#')
-
-        if self.verbose: T.errWrite( 'done\n' )
-
-        ## convert to 3-D Numpy Array
-        return N0.array(frameList).astype(N0.Float32)
 
 
     def getRef( self ):
