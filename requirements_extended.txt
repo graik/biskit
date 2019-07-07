@@ -1,4 +1,5 @@
 numpy
 scipy
 biopython
+parmed
 biggles # compilation requires python-dev/python3-dev; libplot-dev; plotutils
