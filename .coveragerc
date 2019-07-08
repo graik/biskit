@@ -10,6 +10,7 @@ source = biskit
 omit =
      biskit/core/oldnumeric/*
      biskit/core/scientificIO/*
+     biskit/future/*
      biskit/core/difflib_old.py
      biskit/gnuplot.py
 ## skip deprecated modules
