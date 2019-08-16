@@ -125,10 +125,11 @@ class Test(BT.BiskitTest):
 
     def test_BioUnit( self ):
         """BioUnit test"""
+        import sys
 
         if self.local:
             print('Loading pdb file ..')
-        N.set_printoptions(threshold=N.nan)
+        N.set_printoptions(threshold=sys.maxsize)
         self.p = B.core.pdbparseFile.PDBParseFile()
         
         self.m = self.p.parse2new( T.testRoot('biounit/2V4E.pdb') )
