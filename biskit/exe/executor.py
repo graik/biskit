@@ -26,7 +26,7 @@ Class for calls to external programs.
 if __name__ == "__main__" and __package__ is None:
     import biskit.exe; __package__ = "biskit.exe"
 
-import tempfile, os, time, subprocess, sys
+import tempfile, os, time, subprocess, sys, io
 
 import biskit as B
 import biskit.tools as t
@@ -515,6 +515,13 @@ class Executor:
                             shell=self.exe.shell,
                             env=self.environment(), cwd=self.cwd )
         
+        if isinstance(stdin, io.IOBase) and not stdin.closed:
+            stdin.close()
+        if isinstance(stdout,io.IOBase) and not stdout.closed:
+            stdout.close()
+        if isinstance(stderr,io.IOBase) and not stderr.closed:
+            stderr.close()
+            
         if self.exe.pipes and self.f_out:
             with open( self.f_out, 'wt') as outfile:
                 outfile.writelines( self.output )
