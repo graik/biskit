@@ -370,8 +370,9 @@ class Delphi( Executor ):
             tempfile.mktemp( '_mapout.phi', 'delphi_', dir=tempdir )
 
 ##        self.f_map = None
-        self.f_radii = f_radii or os.path.join(
-                                             T.dataRoot(),'delphi',self.F_RADII)
+        self.f_radiisrc = os.path.join(T.dataRoot(),'delphi',self.F_RADII)
+        self.f_radii = f_radii or os.path.join(tempdir, 'radii.siz')
+        
         self.topologies = topologies or self.F_RESTYPES
         self.f_charges = f_charges or tempfile.mktemp( '.crg', 'delphi_',
                                                        dir=tempdir )
@@ -479,19 +480,18 @@ class Delphi( Executor ):
         return {'acenter':self.acenter, 'scale':self.scale, 'gsize':self.gsize}
         
 
-##    def __prepareFolder( self ):
-##        """
-##        Link default parameter files into working directory.
-##        """
-##        try:
-##            target = os.path.join(self.cwd, 'radii.siz')
-##            if not os.path.exists( target ):
-##                os.symlink( f_radii, target )
-##
-##        except OSError as error:
-##            raise DelphiError('Error preparing temporary folder for Delphi\n'+\
-##                  'Error: %r\n' % error +\
-##                  'folder: %r\n' % self.cwd)
+    def __prepareRadii( self ):
+        """
+        Link default atom radius file into working directory.
+        """
+        try:
+            os.symlink( self.f_radiisrc, self.f_radii)
+
+        except OSError as error:
+            raise DelphiError('Error preparing atom radius file for Delphi\n'+\
+                                  'Error: %r\n' % error +\
+                                  'radii file: %r\n' % self.f_radiisrc +\
+                                  'target file: %r\n' % self.f_radii)
         
 
     def __prepareCharges(self, f_out ):
@@ -539,9 +539,7 @@ class Delphi( Executor ):
         Overrides Executor method.
         """
         Executor.prepare( self )
-        
-##        self.__prepareFolder()
-        
+                
         ## if setGrid hasn't been called yet, create automatic grid
         if not self.gsize:
             self.setGrid()
@@ -559,6 +557,9 @@ class Delphi( Executor ):
             self.delphimodel = self.model.clone()
             
         self.delphimodel.xplor2amber()
+
+        if not os.path.exists( self.f_radii ):
+            self.__prepareRadii()
         
         if not os.path.exists( self.f_charges ):
             self.__prepareCharges( self.f_charges )
