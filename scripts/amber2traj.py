@@ -53,10 +53,10 @@ if __name__ == '__main__':
     fcrd = o['i']
     fpdb = o['r']
     fout = o['o']
-    box  = o.has_key( 'b' )
-    wat  = o.has_key('wat')
-    hyd  = o.has_key('hyd')
-    rnres  = o.has_key('rnres')
+    box  = 'b' in o
+    wat  = 'wat' in o
+    hyd  = 'hyd' in o
+    rnres  = 'rnres' in o
     code = o.get('code', None)
 
     t = Trajectory( fcrd, fpdb, hasbox=box, rmwat=wat, verbose=True)

@@ -24,17 +24,16 @@
 
 import sys
 
-import Biskit.tools as T
-from Biskit import Trajectory
-from Biskit import EnsembleTraj
-from Biskit.EnsembleTraj import traj2ensemble
+import biskit.tools as T
+from biskit.md import Trajectory
+from biskit.md import EnsembleTraj
+from biskit.md.ensembleTraj import traj2ensemble
 
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 
 def use():
     if len( sys.argv ) < 2:
-        print \
-"""
+        print("""
 Pool several trajectory objects to one ensemble trajectory.
 Each sub-trajectory is considered as traj of one ensemble member.
 This script is ignoring any profiles of the given trajectories and
@@ -50,7 +49,7 @@ traj2ensemble.py -i |in_traj1 in_traj2 ..| -o |out_traj|
                the reference frame of the first trajectory is taken
     pdb      - PDB code to be stored in trajectory
     prot     - delete all non-protein atoms (not by default)
-"""
+""")
         sys.exit(0)
 
 
@@ -71,7 +70,7 @@ def loadTraj( f, trajIndex, start=0, end=None, step=1 ):
     e = end or len( t )
 
     if start or end or (step != 1):
-        t = t.takeFrames( range( start, e, step ) )
+        t = t.takeFrames( list(range( start, e, step)) )
 
     return t
 
@@ -123,7 +122,7 @@ for i in range( len( inLst ) ):
     
     T.flushPrint('#')
     
-print " Done"
+print(" Done")
 
 result = Trajectory()
 
