@@ -84,10 +84,21 @@ class DistanceTrajectory:
         t1 = traj.takeAtoms(self.from_atoms)
         t2 = traj.takeAtoms(self.to_atoms)
 
-        distances = N.array( [ N.sqrt(N.sum((frame1-frame2)**2, axis=1)) \
-                        for frame1, frame2 in zip(t1.frames, t2.frames) ] )
+        distances = N.sqrt(N.sum((t1.frames-t2.frames)**2, axis=2))
         
         return distances
 
 
+if __name__ == '__main__':
 
+    import biskit.tools as T
+
+    ftraj = '~/data/input/traj_step20.dat'
+    t = T.load(ftraj) ## Trajectory
+    t = t.compressAtoms( t.ref.maskHeavy() )
+
+    d = DistanceTrajectory(n_points=10, refmodel=t.ref)
+
+    v = d.reduce( t )
+
+    
