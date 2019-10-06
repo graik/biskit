@@ -87,7 +87,7 @@ class DistanceTrajectory:
         distances = N.array( [ N.sqrt(N.sum((frame1-frame2)**2, axis=1)) \
                         for frame1, frame2 in zip(t1.frames, t2.frames) ] )
         
-        return distances
+        return distances, N.array([self.from_atoms, self.to_atoms])
 
 
 
