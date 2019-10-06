@@ -92,6 +92,7 @@ class DistanceTrajectory:
 if __name__ == '__main__':
 
     import biskit.tools as T
+    from biskit.md import FuzzyCluster
 
     ftraj = '~/data/input/traj_step20.dat'
     t = T.load(ftraj) ## Trajectory
@@ -101,4 +102,23 @@ if __name__ == '__main__':
 
     v = d.reduce( t )
 
+    fz = FuzzyCluster( v[0:-1:5], n_cluster=10, weight=1.13 )
+
+    centers = fz.go( 1e-10 )
+
+    ## get representative structure for each cluster center:
+    msm = fz.getMembershipMatrix()
+    i_frames = N.argmax( msm, axis=1 )
+    ## models = [ t[i] for i in i_frames ]
+    tcenters = t.takeFrames( i_frames )
+    tcenters.fit( mask=tcenters.ref.maskCA() )
+    tcenters.writePdbs( 'cluster_centers.pdb' )
+
+    ## how many structures per cluster
+    frame_membership = N.argmax( msm, axis=0)
+    n_members = [ N.sum( frame_membership==i ) for i in range(10) ]
+
+    ## get all frames for each cluster, each into its own trajectory object
+    clusters = [ t.takeFrames( N.where(frame_membership==i)[0]) for i in range(10) ]
+    
     
