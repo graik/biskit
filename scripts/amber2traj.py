@@ -23,6 +23,7 @@
 import sys
 from biskit.tools import *
 from biskit.md import Trajectory
+import numpy as N
 
 def _use():
 
@@ -30,7 +31,7 @@ def _use():
 Convert single amber crd into Trajectory object
 
 amber2traj.py -i sim.crd -o traj_0.dat -r ref.pdb [-b -wat -hyd -rnres
-              -code PDBC ]
+              -code PDBC -step 10 ]
 
     -i     input amber trajectory
     -o     output file with pickled biskit Trajectory object
@@ -40,6 +41,7 @@ amber2traj.py -i sim.crd -o traj_0.dat -r ref.pdb [-b -wat -hyd -rnres
     -hyd   delete all hydrogens (after parsing)
     -rnres rename amber residues HIE/HID/HIP, CYX to HIS and CYS
     -code  PDB code of molecule [else first 4 letters of ref file name]
+    -step  only take every [step]th frame 
     """)
     sys.exit( 0 )
 
@@ -58,6 +60,7 @@ if __name__ == '__main__':
     hyd  = 'hyd' in o
     rnres  = 'rnres' in o
     code = o.get('code', None)
+    step = int(o.get('step', 1))
 
     t = Trajectory( fcrd, fpdb, hasbox=box, rmwat=wat, verbose=True)
     
@@ -67,6 +70,9 @@ if __name__ == '__main__':
     if hyd:
         t.ref.addChainId( keep_old=1 ) ## preserve chain-delimiters
         t.removeAtoms( lambda a: a['element'] == 'H' )
+
+    if step != 1:
+        t = t.takeFrames( N.arange(0,len(t),step) )
 
     print("Dumping result to ", fout)
     dump( t, absfile(fout) )

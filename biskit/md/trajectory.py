@@ -1488,6 +1488,8 @@ class Trajectory:
         return result
 
 
+    def thin(self, step=1):
+        return self.takeFrames( N.arange(0,len(self.frames), step) )
 
 #############
 ##  TESTING        
