@@ -27,13 +27,13 @@ import biskit
 class DistanceTrajectory:
     
     def __init__(self, from_atoms=None, to_atoms=None, 
-                 n_random=0, refmodel=None, separation=2):
+                 n_points=10, refmodel=None, separation=2):
         self.from_atoms = from_atoms
         self.to_atoms = to_atoms
         
         if from_atoms is None or to_atoms is None:
             self.from_atoms, self.to_atoms = \
-                self.random_atoms(m=refmodel, n=n_atoms, separation=separation)
+                self.random_atoms(m=refmodel, n=n_points, separation=separation)
             
     
     def random_atoms(self, m, n, separation=2):
@@ -45,18 +45,24 @@ class DistanceTrajectory:
                               end point of each distance
         Returns: [from_atom_indices], [to_atom_indices]
         """
-        i_res = N.arange(m.lenResidues())
+        
+        # position of each CA atom in model
+        ca_index = N.compress( m.maskCA(), m.atomRange() ) 
+
+        # First and last residues of reference do not have CA
+        # seq = 'XNVTPHHHQHSHIHSYLHLHQQDX'
+        # i_res = N.arange(m.lenResidues())
+        
+        i_res = N.arange(len(ca_index))
         atoms1 = copy.copy(i_res)
         atoms2 = copy.copy(i_res)
-        N.shuffle(atoms1)
-        N.shuffle(atoms2)
+        N.random.shuffle(atoms1)
+        N.random.shuffle(atoms2)
         
         filtered = N.where(N.abs(atoms1 - atoms2) > 2)[0]
-        r1 = N.take(atoms1, filtered[n])
-        r2 = N.take(atoms2, filtered[n])
-        
-        ca_index = N.compress( m.maskCA(), m.atomRange() ) # position of each CA atom in model
-        
+        r1 = N.take(atoms1, filtered[:n])
+        r2 = N.take(atoms2, filtered[:n])
+                
         ca_1 = N.take(ca_index,r1)
         ca_2 = N.take(ca_index,r2)
         
@@ -64,9 +70,24 @@ class DistanceTrajectory:
         
     
     def reduce(self, traj):
-        t1 = traj.takeAtoms(self.atoms_from)
-        t2 = traj.takeAtoms(self.atoms_to)
+        """
+        Reduces each frame in a trajectory to a vector with interatomic
+        distances
+
+        Args:
+            -traj : EnsembleTraj object, the trajectory that will be reduced
+
+        Returns: Numpy array with N vectors corresponding to the N frames in the
+                    trajectory
+        """
+        print("Reducing traj...")
+        t1 = traj.takeAtoms(self.from_atoms)
+        t2 = traj.takeAtoms(self.to_atoms)
+
+        distances = N.array( [ N.sqrt(N.sum((frame1-frame2)**2, axis=1)) \
+                        for frame1, frame2 in zip(t1.frames, t2.frames) ] )
         
-        
-        
-        return r
+        return distances
+
+
+
