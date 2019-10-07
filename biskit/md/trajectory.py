@@ -1250,19 +1250,9 @@ class Trajectory:
         Nr1 then Nr2 then..
 
         :return: list of frame sort order
-        :rtype: [int]
+        :rtype: numpy.array(int)
         """
-        names = self.frameNames
-
-        result = list(range(0, len(names)))
-
-        ## py 2.x: sort result but use items of names for the comparison
-        ## f_cmp = lambda i,j, ns=names: self.__cmpFileNames( ns[i], ns[j]) 
-
-        ##result.sort( f_cmp )
-        result.sort( key=names.__getitem__ )
-
-        return result
+        return N.argsort( self.frameNames )
 
 
     def sortFrames( self, sortList=None ):
