@@ -142,5 +142,5 @@ del result_xyz
 T.flushPrint("Converting to EnsembleTraj...")
 result = traj2ensemble( result, len(inLst))
 
-T.flushPrint( "Done\nDumping ensemble traj to " + o['o'] )
+T.flushPrint( ("Done\nDumping %i member ensemble traj to "% result.n_members) + o['o'] )
 T.dump( result, T.absfile( o['o'] ) )
