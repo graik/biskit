@@ -440,7 +440,7 @@ class Trajectory:
         :type  indices: [int]
         """
         i = N0.arange( self.lenFrames())
-        i = N0.delete( indices )
+        i = N0.delete( i, indices )
         self.keepFrames( i )
 
     def takeAtoms( self, indices, returnClass=None ):
