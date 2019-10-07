@@ -439,10 +439,9 @@ class Trajectory:
         :param indices: frame numbers
         :type  indices: [int]
         """
-        i = list(range( self.lenFrames()))
-        i.remove( N0.array(indices) )
+        i = N0.arange( self.lenFrames())
+        i = N0.delete( indices )
         self.keepFrames( i )
-
 
     def takeAtoms( self, indices, returnClass=None ):
         """
