@@ -28,6 +28,18 @@ class DistanceTrajectory:
     
     def __init__(self, from_atoms=None, to_atoms=None, 
                  n_points=10, refmodel=None, separation=2):
+        """
+        Prepare object with a given set of (random or manually assigned) 
+        atom-atom pairs the distance of which will be tracked.
+        
+        Args:
+            from_atoms ([int]): optional starting atoms for distances [None]
+            to_atoms ([int]): optional ending atoms for distances [None]
+            n_points (int): number of atom-atom distances to extract [10]
+            refmodel (PDBModel): structure to be used for selecting random atoms
+            separation (int): minimum residue separation between CA atoms for
+                              random distance creation    
+        """
         self.from_atoms = from_atoms
         self.to_atoms = to_atoms
         
@@ -38,12 +50,15 @@ class DistanceTrajectory:
     
     def random_atoms(self, m, n, separation=2):
         """
+        Create a list of random atom pairs.
+        
         Args:
-           -m : biskit.PDBModel, reference PDB
-           -n : int, number of distance points
-           -separation : int, minimum separation of residues between start and \
+            m (biskit.PDBModel): reference PDB
+            n (int): number of distance points
+            separation (int): minimum separation of residues between start and \
                               end point of each distance
-        Returns: [from_atom_indices], [to_atom_indices]
+        Returns: 
+            tupple: [from_atom_indices], [to_atom_indices]
         """
         
         # position of each CA atom in model
@@ -75,10 +90,11 @@ class DistanceTrajectory:
         distances
 
         Args:
-            -traj : EnsembleTraj object, the trajectory that will be reduced
+            traj (EnsembleTraj): the trajectory that will be reduced
 
-        Returns: Numpy array with N vectors corresponding to the N frames in the
-                    trajectory
+        Returns: 
+            numpy.array: N vectors corresponding to the N frames in the
+                         trajectory
         """
         print("Reducing traj...")
         t1 = traj.takeAtoms(self.from_atoms)
