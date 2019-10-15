@@ -56,7 +56,7 @@ class TrajClusterRmsd:
     The number of cluster centers is fixed and needs to be given at the outset.
     As an alternative, the method `calcClusterNumber` tries to estimate a good
     number of cluster centers by re-running the clustering until the
-    intra-cluster RMSD falls below a threshold. This can be very time-consuming
+    intra-cluster RMSD falls below a threshold. This can be time-consuming
     and may not always work.
     
     Usage:
@@ -68,6 +68,9 @@ class TrajClusterRmsd:
     
     ## get a trajectory with the 10 frames closest to each center
     >>> center_traj = traj.takeFrames( cl.centerFrames() )
+    
+    ## get structure models for each center
+    >>> center_models = traj.centerModels()
     
     ## get average pairwise RMSD for all members of the first cluster
     >>> rms0, sd0 = cl.avgRmsd(0)
