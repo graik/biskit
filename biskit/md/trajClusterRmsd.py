@@ -22,7 +22,7 @@
 ##
 
 """
-Cluster the members of a trajectory.
+Cluster the members of a trajectory by RMSD.
 """
 
 import types
@@ -43,16 +43,47 @@ from .fuzzyCluster import FuzzyCluster
 class ClusterError( BiskitError ):
     pass
 
-class TrajCluster:
+class TrajClusterRmsd:
+    """
+    Cluster molecular dynamics trajectory by pairwise RMSD. Clustering is 
+    performed using the c-means fuzzy clustering implemented in 
+    biskit.md.fuzzyCluster.
+    
+    TrajClusterRmsd is *not* performing any fitting of trajectory frames but
+    will cluster the data as they are. For good results, frames have to be
+    fitted beforehand.
+    
+    The number of cluster centers is fixed and needs to be given at the outset.
+    As an alternative, the method `calcClusterNumber` tries to estimate a good
+    number of cluster centers by re-running the clustering until the
+    intra-cluster RMSD falls below a threshold. This can be very time-consuming
+    and may not always work.
+    
+    Usage:
+    ------
+    
+    >>> cl = TrajClusterRmsd( traj, aMask=traj.ref.maskCA() )
+    >>> cl.cluster(10)  ## cluster for 10 cluster centers
+    ... some clustering output ...
+    
+    ## get a trajectory with the 10 frames closest to each center
+    >>> center_traj = traj.takeFrames( cl.centerFrames() )
+    
+    ## get average pairwise RMSD for all members of the first cluster
+    >>> rms0, sd0 = cl.avgRmsd(0)
+    
+    """
 
-    def __init__( self, traj, verbose=1 ):
+    def __init__( self, traj, verbose=1, aMask=None ):
         """
         @param traj: Trajectory to cluster (has to be fitted before hand)
         @type  traj: Trajectory
+        @param aMask: atom mask to be applied before clustering (default None)
+        @type aMask: numpy.array(bool)
         """
         self.traj = traj
         ## atom mask applied before clustering
-        self.aMask = None
+        self.aMask = aMask
 
         ## last clustering parameters
         self.n_clusters = 0
@@ -67,9 +98,11 @@ class TrajCluster:
         self.verbose = verbose
 
 
-    def __raveled( self ):
+    def data4clustering( self ):
         """
-        Apply current atom mask and return list of raveled frames.
+        Apply current atom mask and return list of flattened/raveled frames.
+        Override this method if clustering should happen by other criteria.
+        @return: [float] or numpy.array(float)
         """
         t = self.traj.compressAtoms( self.aMask )
         return N0.array( list(map( N0.ravel, t.frames )) )
@@ -88,11 +121,13 @@ class TrajCluster:
                           converged (default: 1e-11)
         @type  converged: float
         @param aMask: atom mask applied before clustering
+                      (will replace self.aMask)
         @type  aMask: [1|0]
         @param force: re-calculate even if parameters haven't changed
                       (default:0)
         @type  force: 1|0
         """
+        aMask = self.aMask
         if aMask is None:
             aMask = N0.ones( self.traj.getRef().lenAtoms() )
 
@@ -104,7 +139,7 @@ class TrajCluster:
             self.fcWeight = weight
             self.aMask = aMask
 
-            self.fc = FuzzyCluster( self.__raveled(), self.n_clusters,
+            self.fc = FuzzyCluster( self.data4clustering(), self.n_clusters,
                                     self.fcWeight )
 
             self.fcCenters = self.fc.go( self.fcConverged,
@@ -200,10 +235,20 @@ class TrajCluster:
         """
         Get indices for frame nearest to each cluster center.
 
-        @return: list of cluster center indecies
+        @return: list of cluster center indicies
         @rtype: [int]
         """
         return N0.argmax( self.memberships(), 1 )
+    
+    
+    def centerModels( self ):
+        """
+        Get actual center structures (PDBModels) of each cluster.
+        @return: those structures that are closest to each cluster center
+        @rtype: [ biskit.PDBModel ]
+        """
+        centerframes = self.traj.takeFrames( self.centerFrames() )
+        return [centerframes[i] for i in len(centerframes)]
 
 
     def memberFrames( self, threshold=0. ):
@@ -304,7 +349,7 @@ class TrajCluster:
     def avgRmsd( self, cluster, aMask=None, threshold=0. ):
         """
         Claculate the average pairwise rmsd (in Angstrom) for members
-        of a cluter.
+        of a cluster.
 
         @param cluster: cluster number
         @type  cluster: int       
@@ -368,8 +413,8 @@ import biskit.test as BT
 class Test(BT.BiskitTest):
     """Test Adaptive clustering"""
 
-    def test_TrajCluster(self):
-        """TrajCluster test"""
+    def test_TrajClusterRmsd(self):
+        """TrajClusterRmsd test"""
         from biskit.md import traj2ensemble
 
         traj = T.load( T.testRoot()+'/lig_pcr_00/traj.dat')
@@ -381,7 +426,7 @@ class Test(BT.BiskitTest):
         traj = traj.thin( 1 )
 
         traj.fit( aMask, verbose=self.local )
-        self.tc = TrajCluster( traj, verbose=self.local )
+        self.tc = TrajClusterRmsd( traj, verbose=self.local )
 
         ## check how many clusters that are needed with the given criteria
         n_clusters = self.tc.calcClusterNumber( min_clst=3, max_clst=15,

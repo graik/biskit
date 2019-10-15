@@ -113,7 +113,7 @@ class Trajectory:
 
     def __getitem__( self, i ):
         """
-        Get a single frame and facilitete slicing of tajectories. 
+        Get a single frame and support slicing of tajectories. 
 
         :param i: index OR SliceTyp
         :type  i: int OR [int]

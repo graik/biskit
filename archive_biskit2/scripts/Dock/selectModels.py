@@ -25,7 +25,7 @@
 
 import Biskit.tools as T
 import Biskit.mathUtils as MaU
-from Biskit import TrajCluster, EnsembleTraj, XplorModel, molUtils
+from Biskit import TrajClusterRmsd, EnsembleTraj, XplorModel, molUtils
 from Biskit.Dock import hexTools
 from Biskit.EnsembleTraj import traj2ensemble
 import Biskit.oldnumeric as N0
@@ -57,7 +57,7 @@ Syntax:  selectModels -i |traj.dat| -o |out_folder| [ -psf |psf_file|
          conv - float, convergence criterium [1e-11]
 
 Result:  - n pickled PDBModels '|PDBCode|_|frame|.model' in out_folder
-         - pickled TrajCluster if requested
+         - pickled TrajClusterRmsd if requested
          - |PDBCode|_model.dic with these n PDBModels indexed from 1 to n
 
 Defaults:
@@ -100,7 +100,7 @@ def load( options ):
 
     traj.fit()
 
-    return TrajCluster( traj )
+    return TrajClusterRmsd( traj )
 
     
 def selectedAtoms( model ):
