@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 ##
 ## Biskit, a toolkit for the manipulation of macromolecular structures
-## Copyright (C) 2004-2018 Raik Gruenberg & Johan Leckner
+## Copyright (C) 2004-2019 Raik Gruenberg & Johan Leckner
 ##
 ## This program is free software; you can redistribute it and/or
 ## modify it under the terms of the GNU General Public License as
@@ -23,15 +23,14 @@
 
 import os, sys
 
-import Biskit.tools as T
-from Biskit import Trajectory
-from Biskit import EnsembleTraj
-from Biskit.EnsembleTraj import traj2ensemble
+import biskit.tools as T
+from biskit.md import Trajectory
+from biskit.md import EnsembleTraj
+from biskit.md.ensembleTraj import traj2ensemble
 
 def use():
     if len( sys.argv ) < 2:
-        print \
-"""
+        print("""
 Convert one normal Trajectory into EnsembleTraj. The input trajectory must
 have frame names that allow sorting by time and ensemble member (see
 EnsembleTraj.py for details).
@@ -41,7 +40,7 @@ traj2ensemble.py -i |in_traj| -n |n_members| -o |out_traj| -pdb |PDBCode| ]
     o        - out file name        (default: replace input file)
     n        - number of ensemble members to expect (default: 10)
     pdb      - PDB code to be stored in trajectory
-"""
+""")
         sys.exit(0)
 
 ##########

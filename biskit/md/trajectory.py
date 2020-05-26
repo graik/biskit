@@ -113,7 +113,7 @@ class Trajectory:
 
     def __getitem__( self, i ):
         """
-        Get a single frame and facilitete slicing of tajectories. 
+        Get a single frame and support slicing of tajectories. 
 
         :param i: index OR SliceTyp
         :type  i: int OR [int]
@@ -439,10 +439,9 @@ class Trajectory:
         :param indices: frame numbers
         :type  indices: [int]
         """
-        i = list(range( self.lenFrames()))
-        i.remove( N0.array(indices) )
+        i = N0.arange( self.lenFrames())
+        i = N0.delete( i, indices )
         self.keepFrames( i )
-
 
     def takeAtoms( self, indices, returnClass=None ):
         """
@@ -1250,19 +1249,9 @@ class Trajectory:
         Nr1 then Nr2 then..
 
         :return: list of frame sort order
-        :rtype: [int]
+        :rtype: numpy.array(int)
         """
-        names = self.frameNames
-
-        result = list(range(0, len(names)))
-
-        ## py 2.x: sort result but use items of names for the comparison
-        ## f_cmp = lambda i,j, ns=names: self.__cmpFileNames( ns[i], ns[j]) 
-
-        ##result.sort( f_cmp )
-        result.sort( key=names.__getitem__ )
-
-        return result
+        return N.argsort( self.frameNames )
 
 
     def sortFrames( self, sortList=None ):
@@ -1488,6 +1477,8 @@ class Trajectory:
         return result
 
 
+    def thin(self, step=1):
+        return self.takeFrames( N.arange(0,len(self.frames), step) )
 
 #############
 ##  TESTING        

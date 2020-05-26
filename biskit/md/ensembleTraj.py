@@ -158,13 +158,16 @@ class EnsembleTraj( Trajectory ):
                      (default: 1)
         :type  step: int
 
-        :return: [EnsembleTraj]
+        :return: [EnsembleTraj] with only 1 member each
                  i.e. [ traj_member1, traj_member2, .. traj_member10 ]
         :rtype: [trajectory]
         """
-        ## set of 10 trajectories, one for each ensemble member
+        ## set of n_members trajectories, one for each ensemble member
         tm = [self.takeFrames( range(i, self.lenFrames(),self.n_members*step ))
                for i in range(0,self.n_members) ]
+
+        for t in tm:
+            t.n_members = 1
 
         return tm
 
@@ -523,6 +526,7 @@ class EnsembleTraj( Trajectory ):
         :type  profInfos: key=value
         """
         ml = self.memberList()
+        n = self.n_members
 
         for m in ml:
             if refIndex is None:
@@ -537,8 +541,9 @@ class EnsembleTraj( Trajectory ):
                    verbose=verbose, **profInfos )
 
         ## ToDo for memory efficiency: replace frame chunks on the fly
-
+        
         self.replaceContent( ml[0].concat( *ml[1:] ) )
+        self.n_members = n
         self.sortFrames()
 
 
@@ -625,6 +630,7 @@ class Test(BT.BiskitTest):
 
     def prepare(self):
         self.tr = T.load( T.testRoot() + '/lig_pcr_00/traj.dat')
+        self.t50 = T.load( T.testRoot() + 'md/traj_ens50_peptide.dat')
                 
     def test_EnsembleTraj( self ):
         """EnsembleTraj.fit/fitMembers/plotMembers test """
@@ -675,6 +681,12 @@ class Test(BT.BiskitTest):
             self.p2.show()
 
         self.assertEqual( self.o, 10 * [False] )
+
+    def test_fit50members(self):
+        """EnsembleTraj.fitMembers test"""
+        self.t50.fitMembers( mask=self.t50.ref.maskCA(), prof='rmsCA_avg')
+        self.assertEqual(self.t50.n_members, 50)
+        self.assertTrue( 'rmsCA_avg' in self.t50.profiles )
 
 
 if __name__ == '__main__':

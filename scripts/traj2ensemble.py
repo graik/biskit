@@ -24,17 +24,16 @@
 
 import sys
 
-import Biskit.tools as T
-from Biskit import Trajectory
-from Biskit import EnsembleTraj
-from Biskit.EnsembleTraj import traj2ensemble
+import biskit.tools as T
+from biskit.md import Trajectory
+from biskit.md import EnsembleTraj
+from biskit.md.ensembleTraj import traj2ensemble
 
-import Biskit.oldnumeric as N0
+import biskit.core.oldnumeric as N0
 
 def use():
     if len( sys.argv ) < 2:
-        print \
-"""
+        print("""
 Pool several trajectory objects to one ensemble trajectory.
 Each sub-trajectory is considered as traj of one ensemble member.
 This script is ignoring any profiles of the given trajectories and
@@ -50,7 +49,7 @@ traj2ensemble.py -i |in_traj1 in_traj2 ..| -o |out_traj|
                the reference frame of the first trajectory is taken
     pdb      - PDB code to be stored in trajectory
     prot     - delete all non-protein atoms (not by default)
-"""
+""")
         sys.exit(0)
 
 
@@ -62,7 +61,7 @@ def addFrameNames( traj, trajNumber ):
         traj.frameNames += ['t%04i_ens%02i' % (i, trajNumber ) ]
 
 
-def loadTraj( f, trajIndex, start=0, end=None, step=1 ):
+def loadTraj( f, trajIndex, start=0, end=None, step=1, prot=False ):
     """Load traj from file, add frame names, extract portion if requested"""
     
     t = T.load( T.absfile( f ) )
@@ -71,8 +70,11 @@ def loadTraj( f, trajIndex, start=0, end=None, step=1 ):
     e = end or len( t )
 
     if start or end or (step != 1):
-        t = t.takeFrames( range( start, e, step ) )
+        t = t.takeFrames( list(range( start, e, step)) )
 
+    if prot:
+        t.keepAtoms( N0.nonzero(t.ref.maskProtein()) )
+        
     return t
 
 
@@ -90,6 +92,7 @@ end   = o.get( 'e', None )
 if end:
     end = int( end )
 step = int( o.get('step',1) )
+prot = 'prot' in o
 
 ref = o.get('ref',None)
 if ref:
@@ -98,50 +101,30 @@ if ref:
         ref = ref.compress( ref.maskProtein() )
 
 
-result_xyz = []
-result_frameNames = []
-result_ref = None
-
 T.flushPrint("Loading and appending trajectories...")
-for i in range( len( inLst ) ):
+r = loadTraj( inLst[0], 0, start, end, step, prot=prot )
+
+for i in range( 1, len( inLst ) ):
 
     t = loadTraj( inLst[i], i, start, end, step )
 
-    if 'prot' in o:
-        t.keepAtoms( N0.nonzero(t.ref.maskProtein()) )
-
-    result_ref = result_ref or ref or t.ref
-
-    if t.ref.equals( result_ref ) != [1,1]:
+    if t.ref.equals( r.ref ) != [1,1]:
         raise Exception( 'Incompatible reference structure.' )
-    
-    for xyz in t.frames:
-        result_xyz.append( xyz.astype('f') )
 
-    for fname in t.frameNames:
-        result_frameNames.append( fname )
+    r = r.concat( t )
     
     T.flushPrint('#')
     
-print " Done"
+print(" Done")
 
-result = Trajectory()
-
-result.ref = result_ref
-result.ref.disconnect()
+r.ref.disconnect()
 
 if 'pdb' in o:
-    result.ref.pdbCode = o['pdb']
+    r.ref.pdbCode = o['pdb']
 
-result.frames      = N0.array( result_xyz, 'f' )
-result.frameNames  = result_frameNames
 
-del result_xyz
-## too much memory required for this
-## result = trajLst[0].concat( *trajLst[1:] )
+## T.flushPrint("Converting to EnsembleTraj...")
+## r = traj2ensemble( r, len(inLst))
 
-T.flushPrint("Converting to EnsembleTraj...")
-result = traj2ensemble( result, len(inLst))
-
-T.flushPrint( "Done\nDumping ensemble traj to " + o['o'] )
-T.dump( result, T.absfile( o['o'] ) )
+## T.flushPrint( ("Done\nDumping %i member ensemble traj to "% result.n_members) + o['o'] )
+## T.dump( result, T.absfile( o['o'] ) )
