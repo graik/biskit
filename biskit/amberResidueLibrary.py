@@ -26,7 +26,7 @@ import biskit.tools as T
 class AmberResidueLibraryError( Exception ):
     pass
 
-class AmberResidueLibrary( object ):
+class AmberResidueLibrary:
     """
     A collection of reference residue types taken from Amber topology files.
     By default, the collection is initialized from the four all-atom 
@@ -43,7 +43,7 @@ class AmberResidueLibrary( object ):
 
     The default all-atom topologies include hydrogen atoms. Structures without
     hydrogens will *not* match. You can add hydrogens with the Reduce class
-    (Biskit.reduce). 
+    (biskit.reduce). 
 
     Atom names need to conform to Amber conventions -- 
     this can be ensured with `PDBModel.xplor2amber()`.
@@ -52,10 +52,10 @@ class AmberResidueLibrary( object ):
     ===
     
     >>> model = PDBModel('mystructure.pdb')
-    >>> residue = model.resModels()[0]
+    >>> residue = model.resModels()[0]  ## fetch first residue
     >>>
     >>> lib = AmberResidueLibrary()
-    >>> refres = lib[ residue ]
+    >>> refres = lib[ residue ]  ## look up matching AmberResidueType
     >>>
     >>> ## or alternatively:
     >>> refres = lib['all_amino03', 'ALA']
@@ -94,7 +94,7 @@ class AmberResidueLibrary( object ):
         
         :param topofile: file name of topology, either full path or
                          simple file name which will then be looked for in 
-                         Biskit/data/amber/residues.
+                         biskit/data/amber/residues.
         :type  topofile: str
         
         :param override: override topologies or residue entries with same name
