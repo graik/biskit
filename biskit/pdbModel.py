@@ -1090,7 +1090,7 @@ class PDBModel:
                 __resnames = copy.copy(self.atoms['residue_name'])
                 __anames   = copy.copy(self.atoms['name'])
                 self.xplor2amber()
-                ter = 3
+                ter = ter if ter!=1 else 3 ## adjust unless changed from default
                 wrap = 0
                 left = 1
 
