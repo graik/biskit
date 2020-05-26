@@ -26,8 +26,8 @@ else:
     import copyreg
     from io import StringIO
 
-from numpy import sort, clip, rank, sign, shape, putmask, allclose, size,\
-     choose, swapaxes, array_str, array_repr, e, pi, put, \
+from numpy import sort, clip, ndim as rank, sign, shape, putmask, allclose, \
+     size, choose, swapaxes, array_str, array_repr, e, pi, put, \
      resize, around, concatenate, vdot, transpose, \
      diagonal, searchsorted, argsort, convolve, dot, \
      outer as outerproduct, inner as innerproduct, \
