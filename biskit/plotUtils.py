@@ -541,6 +541,8 @@ import biskit.test as BT
 class Test(BT.BiskitTest):
     """Test case"""
 
+    TAGS = [BT.OLD, BT.BIGGLES]
+
     def test_plotUtils(self):
         """plotUtils test"""
         self.p = prepare_plot(xlabel='', ylabel='flex $\langle{x}\rangle$',

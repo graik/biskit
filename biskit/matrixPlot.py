@@ -198,6 +198,8 @@ import biskit.test as BT
 class Test(BT.BiskitTest):
     """Test class """
 
+    TAGS=[BT.BIGGLES]
+    
     def test_MatrixPlot( self ):
         """MatrixPlot test"""
         n = 30

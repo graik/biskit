@@ -1446,10 +1446,11 @@ class Test(BT.BiskitTest):
         self.p5['normal'] = [ N.random.normal(3.0) for i in range(5000) ]
         self.p5['poisson'] = [ N.random.poisson(5.) for i in range(5000) ]
 
-        plot = self.p5.plotHistogram( 'gamma', ('normal','poisson'), 
-                                      bins=20, hist=1, xnormalize=True )
-        if self.local:            
-            plot.show()
+        if biggles:
+            plot = self.p5.plotHistogram( 'gamma', ('normal','poisson'), 
+                                        bins=20, hist=1, xnormalize=True )
+            if self.local:            
+                plot.show()
 
 
 def clock( s ):

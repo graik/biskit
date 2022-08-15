@@ -306,13 +306,19 @@ class Test(BT.BiskitTest):
                  'name':string.ascii_letters[random.randint(0,50)] }
             self.l2 += [ d ]
 
-        self.p = None
-        self.p = self.l2.plotArray( 'index', 'random', 'random' )
+        try:
+            import biggles
+        except:
+            biggles = 0
 
-        if self.local:
-            self.p.show()
+        if biggles:    
+            self.p = None
+            self.p = self.l2.plotArray( 'index', 'random', 'random' )
 
-        self.assertNotEqual( self.p, None )
+            if self.local:
+                self.p.show()
+
+            self.assertNotEqual( self.p, None )
    
 
 if __name__ == '__main__':

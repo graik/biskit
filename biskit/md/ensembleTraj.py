@@ -655,10 +655,12 @@ class Test(BT.BiskitTest):
                             prof='rms_CA_av',
                             verbose=self.local )
 
-        self.p = self.tr.plotMemberProfiles( 'rms_CA_av', 'rms_CA_0',
-                                        'rms_CA_ref', xlabel='frame' )
-        if self.local or self.VERBOSITY > 2:
-            self.p.show()
+        if biggles:
+            
+            self.p = self.tr.plotMemberProfiles( 'rms_CA_av', 'rms_CA_0',
+                                            'rms_CA_ref', xlabel='frame' )
+            if self.local or self.VERBOSITY > 2:
+                self.p.show()
 
         self.assertAlmostEqual( 26.19851,
                                  N0.sum( self.tr.profile('rms_CA_av') ), 2 )
@@ -674,11 +676,12 @@ class Test(BT.BiskitTest):
             print(self.o)
 
         self.t = self.t2.compressMembers( N0.logical_not( self.o ) )
-
-        self.p2 = self.t.plotMemberProfiles( 'rms', xlabel='frame' )
-
-        if self.local or self.VERBOSITY > 2:
-            self.p2.show()
+        
+        if biggles:
+            self.p2 = self.t.plotMemberProfiles( 'rms', xlabel='frame' )
+            
+            if self.local or self.VERBOSITY > 2:
+                self.p2.show()
 
         self.assertEqual( self.o, 10 * [False] )
 

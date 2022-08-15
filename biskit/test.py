@@ -93,7 +93,7 @@ DEFAULT_PACKAGES = ['biskit', 'biskit.core', 'biskit.exe', 'biskit.md',
                     'biskit.dock', 'biskit.future']
 
 #: tests with the following tags are excluded by default (override with -e)
-DEFAULT_EXCLUDE  = ['old', 'extra']
+DEFAULT_EXCLUDE  = ['old', 'extra', 'biggles']
 
 ## END OF CONFIGURATION
 
@@ -106,6 +106,7 @@ EXTRA  = 4  ## tests not routinely run
 OLD    = 5  ## is obsolete
 SCRIPT = 6  ## a script test case
 FAILS  = 7  ## test known to currently fail (but procrastinated)
+BIGGLES= 8  ## requires Biggles module
 
 class BiskitTestError( Exception ):
     pass

@@ -330,6 +330,8 @@ import biskit.test as BT
 class Test(BT.BiskitTest):
     """Test"""
 
+    TAGS=[BT.BIGGLES]
+    
     def test_Ramachandran(self):
         """Ramachandran test"""
         import numpy as N
