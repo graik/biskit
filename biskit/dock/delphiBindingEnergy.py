@@ -427,7 +427,7 @@ class Test(BT.BiskitTest):
         """bindingEnergyDelphi test (Barnase:Barstar)"""
         self.com = T.load( T.testRoot() + '/com/ref.complex' )
         self.dG = DelphiBindingEnergy( self.com, log=self.log, scale=1.2,
-                                       verbose=self.local )
+                                       verbose=self.local, debug=self.debug )
         self.r = self.dG.run()
 
 ##        self.assertAlmostEqual( self.r['dG_kt'], 21., 0 )
@@ -445,7 +445,7 @@ class Test(BT.BiskitTest):
         self.com = Complex( rec, lig )
         
         self.dG = DelphiBindingEnergy( self.com, log = self.log, scale=0.5,
-                                       verbose=self.local )
+                                       verbose=self.local, debug=self.debug )
         self.r = self.dG.run()
 
         if self.local:

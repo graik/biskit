@@ -36,7 +36,7 @@ from biskit.hist import density
 import copy
 ## manual replace UserDict: http://python3porting.com/problems.html#replacing-userdict
 ##from UserDict import DictMixin
-from collections import MutableMapping as DictMixin
+from collections.abc import MutableMapping as DictMixin
 import weakref
 
 try:
