@@ -674,8 +674,8 @@ class Test(BT.BiskitTest):
         ## Example 3; create from non-existing path
         S.l.set_path( '/home/xyz/data/tb/interfaces/c11/com_wet/ref.com' )
         S.path += [ 'Example 3:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
-        S.assertTrue( S.l.formatted() == S.l.local() )
-
+        S.assertTrue( S.l.formatted() == S.l.local() )  ## Fails on OSX because of realpath adding volume path
+        
         ## Example 4; create from existing path with automatic substitution
         S.l.set_path( T.testRoot() + '/com' )
         S.path += [ 'Example 4:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
