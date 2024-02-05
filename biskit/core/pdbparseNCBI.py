@@ -113,6 +113,13 @@ class PDBParseNCBI( PDBParseModel ):
         raise PDBParserError( "Couldn't find PDB file locally.")
 
 
+    def __peekline(self, f):
+        pos = f.tell()
+        line = f.readline()
+        f.seek(pos)
+        return line
+
+    
     def getRemotePDBHandle( self, pdb_id, rcsb_url=settings.rcsb_url ):
         """
         Get the coordinate file remotely from the RCSB.

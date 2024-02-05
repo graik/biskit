@@ -24,7 +24,7 @@ import numpy as N
 import biskit as B
 import biskit.tools as T
 
-from biskit.profileCollection import _ViewSignal, CrossView
+from biskit.profileCollection import _ViewSignal, CrossView, ProfileError
 
 class ProfileMirror( B.ProfileCollection ):
     """
@@ -263,8 +263,7 @@ class ProfileMirror( B.ProfileCollection ):
         """
         Profiles can only be cleared by the parent ProfileCollection
         """
-        raise B.ProfileError('Cannot remove profile %r from a ProfileMirror'\
-              % key)
+        raise B.ProfileError('Cannot clear profiles from a ProfileMirror')
 
     def profLength( self ):
         """

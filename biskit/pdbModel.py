@@ -488,9 +488,9 @@ class PDBModel:
         self.__vintageCompatibility()
 
         ## if there were not even old profiles...
-        if getattr( self, 'atoms', 0) is 0:
+        if getattr( self, 'atoms', 0) == 0:
             self.atoms = PDBProfiles(self)
-        if getattr( self, 'residues', 0) is 0:
+        if getattr( self, 'residues', 0) == 0:
             self.residues = PDBResidueProfiles(self)
 
         ## between release 2.0.1 and 2.1, aProfiles were renamed to atoms
@@ -503,13 +503,13 @@ class PDBModel:
             del self.rProfiles
 
         ## old aProfiles and rProfiles didn't keep a reference to the parent
-        if getattr( self.atoms, 'model', 0) is 0:
+        if getattr( self.atoms, 'model', 0) == 0:
             self.atoms.model = self
             self.residues.model = self
 
         ## biskit <= 2.0.1 kept PDB infos in list of dictionaries
         atoms = getattr( self, 'old_atoms', 0)
-        if not atoms is 0:
+        if not atoms == 0:
             ## atoms to be fetched from external source
             if atoms is None:
                 for k in self.PDB_KEYS:
@@ -2232,7 +2232,7 @@ class PDBModel:
 
         ## the easy part: extract coordinates and atoms
         r.xyz = N0.take( self.getXyz(), i )
-        r.xyzChanged = self.xyzChanged or not N.all(r.xyz == self.xyz)
+        r.xyzChanged = self.xyzChanged or not N.array_equal(r.xyz,self.xyz)
 
         r.atoms = self.atoms.take( i, r )
 
@@ -2434,7 +2434,7 @@ class PDBModel:
                 chain_ids[i] = segment_ids[i][-1]
             except:
                 if verbose:
-                    EHandler.warning("addChainId(): Problem with atom "+str(a))
+                    EHandler.warning("addChainId(): Problem with atom "+str(self[i]))
 
 
     def addChainId( self, first_id=None, keep_old=0, breaks=0 ):

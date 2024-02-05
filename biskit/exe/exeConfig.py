@@ -193,7 +193,7 @@ class ExeConfig( object ):
                     t = str
 
                 ## leave default value if None is given
-                if value is not '':
+                if value != '':
                     self.__dict__[ key ] = t( value )
 
         except configparser.NoSectionError:
@@ -260,7 +260,7 @@ class ExeConfig( object ):
 
             for key,value in self.env.items():
 
-                if value is '':
+                if value == '':
 
                     if os.getenv( key ) is None:
                         missing += [ key ]

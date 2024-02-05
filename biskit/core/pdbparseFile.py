@@ -289,8 +289,7 @@ REMEDY: run the script fixAtomIndices.py
             try:
                 line = pdbFile.readLine()
             except ValueError as what:
-                self.log.add('Warning: Error parsing line %i of %s' % 
-                             (i, T.stripFilename( fname )) )
+                self.log.add('Warning: Error parsing line of %s' % T.stripFilename( str(pdbFile) ) )
                 self.log.add('\tError: '+str(what) )
                 continue
         # process last molecule group

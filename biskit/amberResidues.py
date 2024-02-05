@@ -236,8 +236,8 @@ class AmberPrepParser( object ):
         if atoms['partial_charge'] == []:
             raise AmberPrepError('failed to parse charges for '+r['code'])
 
-        atoms['partial_charge'] = N.array( atoms['partial_charge'], N.float )
-        atoms['xyz']    = N.array( atoms['xyz'], N.float )
+        atoms['partial_charge'] = N.array( atoms['partial_charge'], float )
+        atoms['xyz']    = N.array( atoms['xyz'], float )
         return r, atoms
 
     
