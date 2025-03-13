@@ -138,22 +138,10 @@ class PDBParseNCBI( PDBParseModel ):
 
         :raise PDBParserError: if couldn't retrieve PDB file
         """
-        ## try:
-        ##     from Bio.SearchIO._legacy.ParserSupport import UndoHandle
-        ## except:
-        ##     raise PDBParserError('Could not find Biopython - ' + \
-        ##                          'remote fetching of PDBs is not supported.')
-
-
         resource = urllib.request.urlopen( rcsb_url% pdb_id )
         self.encoding = resource.headers.get_content_charset()
 
         return resource
-
-        if not uhandle.peekline():
-            raise PDBParserError( "Couldn't retrieve ", rcsb_url )
-
-        return uhandle
 
 
     def parsePdbFromHandle(self, handle, first_model_only=True ):
