@@ -20,15 +20,13 @@ import sys
 packages, data_files = [], []
 
 root_dir = os.path.dirname(__file__)
+# edit 26 May 2022: made a new variable rel_dir
+rel_dir = os.path.relpath(__file__)
 len_root_dir = len(root_dir)
 
-## biskit_dir = os.path.join(root_dir, 'biskit')
-## doc_dir    = os.path.join(root_dir, 'doc')
-## script_dir = os.path.join(root_dir, 'scripts')
-biskit_dir = 'biskit'
-doc_dir    = 'doc'
-script_dir = 'scripts'
-
+biskit_dir = os.path.join(rel_dir, 'biskit')
+doc_dir    = os.path.join(rel_dir, 'doc')
+script_dir = os.path.join(rel_dir, 'scripts')
 
 for dirpath, dirnames, filenames in os.walk(biskit_dir):
     # Ignore dirnames that start with '.'

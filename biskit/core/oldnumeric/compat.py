@@ -16,7 +16,7 @@ from . import functions
 
 __all__ = ['NewAxis',
            'UFuncType', 'UfuncType', 'ArrayType', 'arraytype',
-           'LittleEndian', 'arrayrange', 'matrixmultiply',
+           'LittleEndian',
            'array_constructor', 'pickle_array',
            'DumpArray', 'LoadArray', 'multiarray',
            # from cPickle
@@ -39,13 +39,13 @@ arraytype = mu.ndarray
 
 LittleEndian = (sys.byteorder == 'little')
 
-from numpy import deprecate
+# from numpy import deprecate
 
 # backward compatibility
-arrayrange = deprecate(functions.arange, 'arrayrange', 'arange')
+# arrayrange = deprecate(functions.arange, 'arrayrange', 'arange')
 
 # deprecated names
-matrixmultiply = deprecate(mu.dot, 'matrixmultiply', 'dot')
+# matrixmultiply = deprecate(mu.dot, 'matrixmultiply', 'dot')
 
 def DumpArray(m, fp):
     m.dump(fp)

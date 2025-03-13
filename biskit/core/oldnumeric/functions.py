@@ -87,7 +87,8 @@ def sarray(a, typecode=None, copy=False, dtype=None):
 
 def asarray(a, typecode=None, dtype=None):
     dtype = convtypecode2(typecode, dtype)
-    return mu.array(a, dtype, copy=0)
+#    return mu.array(a, dtype, copy=0)
+    return mu.asarray(a, dtype)  ## raises error in later numpy versions; 
 
 def nonzero(a):
     res = np.nonzero(a)
