@@ -73,10 +73,10 @@ class LocalPath( object ):
     """
 
     ## pattern for formatted string input
-    ex_fragment = re.compile('\{([a-zA-Z0-9_~/ ]+)\|\$([a-zA-Z0-9_]+)\}')
+    ex_fragment = re.compile(r'\{([a-zA-Z0-9_~/ ]+)\|\$([a-zA-Z0-9_]+)\}')
 
     ## pattern for minimal path fragment that can be substituted
-    ex_minpath  = re.compile( '/|~[a-zA-Z0-9_~/ ]+' )
+    ex_minpath  = re.compile(r'/|~[a-zA-Z0-9_~/ ]+' )
 
     ## never use these variables
     exclude_vars = ['PWD','OLDPWD','PYTHONPATH','PATH']
@@ -649,6 +649,8 @@ class Test(BT.BiskitTest):
     def test_LocalPath( self ):
         """LocalPath test"""
 
+        import sys
+
         os.environ['PRJ_INTERFACES'] = os.path.expanduser('~')
 
         S = self
@@ -672,9 +674,10 @@ class Test(BT.BiskitTest):
              '{/home/Bis/raik|$USER}/data/tb/interfaces/c11/com_wet/ref.com' )
 
         ## Example 3; create from non-existing path
-        S.l.set_path( '/home/xyz/data/tb/interfaces/c11/com_wet/ref.com' )
-        S.path += [ 'Example 3:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]
-        S.assertTrue( S.l.formatted() == S.l.local() )  ## Fails on OSX because of realpath adding volume path
+        if sys.platform != 'darwin':
+            S.l.set_path( '/home/xyz/data/tb/interfaces/c11/com_wet/ref.com' )
+            S.path += [ 'Example 3:\n %s : %s \n'%(S.l.formatted(), S.l.local()) ]        
+            S.assertTrue( S.l.formatted() == S.l.local() )  ## Fails on OSX because of realpath adding volume path
         
         ## Example 4; create from existing path with automatic substitution
         S.l.set_path( T.testRoot() + '/com' )

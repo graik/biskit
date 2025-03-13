@@ -1290,7 +1290,7 @@ class Test(BT.BiskitTest):
         self.assertTrue( osp.exists(self.fpdb) )
 
     def test_isBinary(self):
-        self.assertEquals( isBinary('/usr/bin/nice'), 1)
+        self.assertEqual( isBinary('/usr/bin/nice'), 1)
     
     EXPECT_colors = [16711680, 15493120, 11259136, 5570304, 458570, 63925, 
                      44031, 3298559, 9901055, 16711935]

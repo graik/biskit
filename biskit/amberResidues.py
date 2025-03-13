@@ -143,7 +143,7 @@ class AmberPrepParser( object ):
         if not osp.exists( T.absfile( f_in ) ):
             f_in = T.dataRoot() + '/amber/residues/' + f_in
         
-        self.firstrecord = re.compile( 'db[0-9]+\.dat' )
+        self.firstrecord = re.compile(r'db[0-9]+\.dat' )
         
         self.s = open( T.absfile( f_in ), 'r' ).read()
         self.s = self.firstrecord.split( self.s )[-1] #skip until first residue

@@ -57,8 +57,8 @@ if __name__ == '__main__':
     
     ## find all instances of oldN.<some method or field>
     ## capture <some method or field>
-    ex_method = re.compile('oldN\.([a-zA-Z\_0-9]+)[\(\.\s\)\:\,]')
-    ex_oldN = re.compile('oldN\.')
+    ex_method = re.compile(r'oldN\.([a-zA-Z\_0-9]+)[\(\.\s\)\:\,]')
+    ex_oldN = re.compile(r'oldN\.')
 
     count = 0
     result = []

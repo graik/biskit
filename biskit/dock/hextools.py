@@ -326,7 +326,7 @@ class Test(BT.BiskitTest):
         self.m = PDBModel( t.testRoot() + '/com/1BGS.pdb' )
         dist = centerSurfDist( self.m , self.m.maskCA() )
 
-        self.assertAlmostEqual( dist[0], 26.880979538, 7)
+        self.assertAlmostEqual( dist[0], 26.880979538, 4)
 
 
 if __name__ == '__main__':

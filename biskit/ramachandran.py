@@ -49,9 +49,6 @@ class Ramachandran:
         @param verbose: verbosity level (default: 1)
         @type  verbose: 1|0
         """
-        if not biggles:
-            raise ImportError('biggles module could not be imported.')
-
         if type(models) != type([]):
             models = [ models ]
 
@@ -236,6 +233,9 @@ class Ramachandran:
                  plot)and a biggles.Inset object (property scale).
         @rtype: [ biggles.Point ], biggles.Inset
         """
+        if not biggles:
+            raise ImportError('biggles module could not be imported.')
+
         p = []
 
         ## calculate colors and create a legend if a property is given
@@ -275,6 +275,9 @@ class Ramachandran:
         @return: list of biggles.Point objects
         @rtype: [ biggles.Point ]
         """
+        if not biggles:
+            raise ImportError('biggles module could not be imported.')
+
         bg = []
         mat = N0.loadtxt( T.dataRoot() + '/biggles/ramachandran_bg.dat')
         x, y = N0.shape(mat)
@@ -291,6 +294,9 @@ class Ramachandran:
         """
         Show ramachandran plot.
         """
+        if not biggles:
+            raise ImportError('biggles module could not be imported.')
+        
         plot = biggles.FramedPlot()
         plot.xrange = (-180., 180.)
         plot.yrange = (-180., 180.)
@@ -348,7 +354,7 @@ class Test(BT.BiskitTest):
 
         self.psi = N.array( self.rama.psi )
 
-        if self.local:
+        if self.local and biggles:
             self.rama.show()
             
         ## remove NaN or None

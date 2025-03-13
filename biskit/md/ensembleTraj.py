@@ -687,7 +687,7 @@ class Test(BT.BiskitTest):
 
     def test_fit50members(self):
         """EnsembleTraj.fitMembers test"""
-        self.t50.fitMembers( mask=self.t50.ref.maskCA(), prof='rmsCA_avg')
+        self.t50.fitMembers( mask=self.t50.ref.maskCA(), prof='rmsCA_avg', verbose=0)
         self.assertEqual(self.t50.n_members, 50)
         self.assertTrue( 'rmsCA_avg' in self.t50.profiles )
 
