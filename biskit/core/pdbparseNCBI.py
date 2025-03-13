@@ -138,8 +138,16 @@ class PDBParseNCBI( PDBParseModel ):
 
         :raise PDBParserError: if couldn't retrieve PDB file
         """
-        resource = urllib.request.urlopen( rcsb_url% pdb_id )
-        self.encoding = resource.headers.get_content_charset()
+        try:
+            resource = urllib.request.urlopen( rcsb_url% pdb_id )
+            self.encoding = resource.headers.get_content_charset()
+
+        except urllib.error.HTTPError as error:
+            raise PDBParserError('PDB %s not found remotely (%s).' % (pdb_id, error))
+                
+        content_length = resource.info().get('Content-Length')
+        if content_length is not None and int(content_length) == 0:
+            raise PDBParserError('PDB %s was empty.' % pdb_id)
 
         return resource
 
