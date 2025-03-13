@@ -21,7 +21,7 @@ often delegated to established programs like Xplor, Amber, Hex, Prosa,
 and DelPhi; interfaces to further software can be added
 easily. 
 
-Note that **b**iskit (lowercase) 3 is not any longer backwards-compatible to previous **B**iskit (uppercase) 2 releases. Please check out the [`biskit-2.x` branch](https://github.com/graik/biskit/tree/biskit-2.x) if you need to use the classic Python 2.x Biskit. The core functionalities and many of the wrappers have been migrated. Still un-migrated are some smaller modules and most of the scripts. All the modules that have **not** yet been migrated are in the old ```Biskit2``` folder (which cannot be imported any longer). After installation, the python 3 Biskit is imported with ```import biskit```.
+The core functionalities and many of the wrappers have been migrated from the old Biskit 2 branch. However, some smaller modules and most of the scripts didn't make it. All the modules that have **not** yet been migrated are in the old ```Biskit2``` folder (which cannot be imported any longer). After installation, the python 3 Biskit is imported with ```import biskit```.
 
 Short Installation Instructions
 --------------------------------
