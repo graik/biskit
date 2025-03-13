@@ -22,9 +22,13 @@ packages, data_files = [], []
 root_dir = os.path.dirname(__file__)
 len_root_dir = len(root_dir)
 
-biskit_dir = os.path.join(root_dir, 'biskit')
-doc_dir    = os.path.join(root_dir, 'doc')
-script_dir = os.path.join(root_dir, 'scripts')
+## biskit_dir = os.path.join(root_dir, 'biskit')
+## doc_dir    = os.path.join(root_dir, 'doc')
+## script_dir = os.path.join(root_dir, 'scripts')
+biskit_dir = 'biskit'
+doc_dir    = 'doc'
+script_dir = 'scripts'
+
 
 for dirpath, dirnames, filenames in os.walk(biskit_dir):
     # Ignore dirnames that start with '.'
