@@ -21,12 +21,7 @@ often delegated to established programs like Xplor, Amber, Hex, Prosa,
 and DelPhi; interfaces to further software can be added
 easily. 
 
-Python 3 Migration
--------------------
-
-This is the Python 3 line of Biskit development. Note that **b**iskit (lowercase) 3 is not any longer backwards-compatible to previous **B**iskit (uppercase) 2 releases. Please check out the [`biskit-2.x` branch](https://github.com/graik/biskit/tree/biskit-2.x) if you need to use the classic Python 2.x Biskit. Note also that the new `biskit` is, currently at least, *only* compatible with Python 3.x and cannot be used with Python 2.x.
-
-The core functionalities and many of the wrappers have been migrated. Still un-migrated are some smaller modules and most of the scripts. The new version is found in (lower case) ```biskit```. All the modules that have **not** yet been migrated are in the old ```Biskit2``` folder (which cannot be imported any longer). After installation, the new Python 3 Biskit is imported with ```import biskit```
+Note that **b**iskit (lowercase) 3 is not any longer backwards-compatible to previous **B**iskit (uppercase) 2 releases. Please check out the [`biskit-2.x` branch](https://github.com/graik/biskit/tree/biskit-2.x) if you need to use the classic Python 2.x Biskit. The core functionalities and many of the wrappers have been migrated. Still un-migrated are some smaller modules and most of the scripts. All the modules that have **not** yet been migrated are in the old ```Biskit2``` folder (which cannot be imported any longer). After installation, the python 3 Biskit is imported with ```import biskit```.
 
 Short Installation Instructions
 --------------------------------
