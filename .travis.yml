@@ -2,7 +2,7 @@ sudo: required
 
 language: python
 python:
-  - "3.6"
+  - "3.13"
 
 services:
   - docker
@@ -16,7 +16,7 @@ install:
   
 # command to run tests
 script:
-  docker run -v "$PWD:/app" -t graik/biskit coverage run biskit/test.py -e fails old extra
+  docker run -v "$PWD:/app" -t graik/biskit coverage run biskit/test.py -e fails old
 
 after_success:
   ## replace absolute /app/biskit/ path in coverage result
