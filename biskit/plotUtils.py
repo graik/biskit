@@ -519,6 +519,9 @@ def prepare_plot( xlabel='', ylabel='', yrange=None, xrange=None,
     @return: biggles plot object
     @rtype: biggles.FillBetween    
     """
+    if not B:
+        raise ImportError('biggles is required for this method')
+    
     B.configure( 'screen', 'height', height )
     B.configure( 'screen', 'width', width )
 
