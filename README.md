@@ -28,7 +28,7 @@ Short Installation Instructions
 
 ___1. Install (plotting) dependencies___
 
-The biskit library itself does not strictly need `biggles` and you can safely install it later. However, **biggles** (https://biggles-plot.github.io/) is an excellent plotting library with a relatively intuitive syntax that is used throughout biskit and several unittests depend on it. So you may as well get it set up right from the start:
+The biskit library itself does not strictly need `biggles` and you can safely install it later. However, **biggles** (https://biggles-plot.github.io/) is still an excellent plotting library with a relatively intuitive syntax that is used throughout biskit and several unittests depend on it. If you are sitting on a linux / unix PC, you may as well get it set up right from the start. Unfortunately, biggles does not any longer seem to support installation in OSX. 
 
 On Debian / Ubuntu:
   *  ```sh
@@ -36,7 +36,7 @@ On Debian / Ubuntu:
      pip3 install biggles
      ```
 
-On Mac OS-X:
+This used to work on Mac OS-X but compilation fails:
   * install Quartz (https://www.xquartz.org/)
   *  ```sh
      brew install plotutils --with-x11
@@ -69,13 +69,13 @@ Biskit comes with a unittest suite that can be run using the `test.py` script th
   * ```python
     >>> import biskit
     >>> biskit.__path__
-    ['/usr/local/lib/python3.7/site-packages/biskit']
+    ['/usr/local/lib/python3.13/site-packages/biskit']
     ```
    
-Now run the biskit test suite, *except* those tests that require external programs (`-e exe`) or are tagged as `old` or `fails`:
+Now run the biskit test suite, *except* those tests that require external programs (`-e exe`) or are tagged as `old` or `biggles`:
  
    ```sh
-   ~> python3 biskit/test.py -e exe old fails
+   ~> python3 biskit/test.py -e exe old biggles
    ```
 Once you have installed third-party software such as Pymol, Delphi, Xplor-NIH, DSSP, surfaceRacer, etc, you can re-run the test without the -e exe option. If you want to test individual biskit wrappers for a given program, simply call the wrapping python module which will execute this particular test. For example, if you have just installed Pymol, you can now run the biskit.exe.pymoler test case to ensure biskit and Pymol are properly working together:
 
@@ -83,7 +83,7 @@ Once you have installed third-party software such as Pymol, Delphi, Xplor-NIH, D
    ~> python3 biskit/exe/pymoler.py
    ```
     
-This should open a Pymoler window with a short MD movie and will, generally, give you a much more detailed test output.
+This should open a Pymoler window with a short MD movie and will, generally, give you a more detailed test output.
 
 
 License
