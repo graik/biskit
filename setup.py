@@ -88,7 +88,7 @@ setup(
     provides=['biskit'],
 
     ## available on PyPi
-    install_requires=['numpy', 'scipy', 'biopython'],
+    install_requires=['numpy', 'scipy', 'biopython', 'parmed'],
     packages = packages,
     include_package_data=True,
     data_files = data_files,

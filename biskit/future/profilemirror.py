@@ -118,6 +118,12 @@ class ProfileMirror( B.ProfileCollection ):
         """
         self.pc.setInfo( name, **args )
 
+    def __iszero( self, r):
+        """
+        checks whether given r is set to the integer 0 without being confused if r is an array
+        """
+        return type(r) is int and r == 0
+
 
     def set( self, name, prof, mask=None, default=None, asarray=1,
              comment=None, **moreInfo ):
@@ -160,7 +166,7 @@ class ProfileMirror( B.ProfileCollection ):
         r = self.pc.get( name, default=0 )
         
         ## take array status from existing profile
-        if not r is 0:
+        if not self.__iszero(r):
             if self.pc.get( (name, 'isarray') ):
                 asarray = 2
             else:
@@ -183,7 +189,7 @@ class ProfileMirror( B.ProfileCollection ):
         
         
         ## create a new profile
-        if r is 0:
+        if self.__iszero(r):
             r = [ default ] * self.pc.profLength()
             if isinstance( prof, N.ndarray ):
                 r = N.array( r )

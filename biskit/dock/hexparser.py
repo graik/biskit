@@ -60,9 +60,9 @@ class HexParser:
         self.lig_models = lig_dic
         self.forceModel = forceModel
         ## pattern for analyzing single line of type "Value: -1.23":
-        self.ex_line = re.compile("^(\S+):\s*(nan|[-0-9\.\s]*)")
+        self.ex_line = re.compile(r"^(\S+):\s*(nan|[-0-9\.\s]*)")
         ## pattern to find one line of transformation matrix
-        self.ex_matrix = re.compile("([-0-9]+\.[0-9]+e[-+0-9]+)")
+        self.ex_matrix = re.compile(r"([-0-9]+\.[0-9]+e[-+0-9]+)")
 
 
     def __del__(self):

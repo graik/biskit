@@ -545,7 +545,7 @@ class Test(BT.BiskitTest):
 
     def test_plotUtils(self):
         """plotUtils test"""
-        self.p = prepare_plot(xlabel='', ylabel='flex $\langle{x}\rangle$',
+        self.p = prepare_plot(xlabel='', ylabel='flex $\\langle{x}\\rangle$',
                               xrange=(0,5), yrange=(0,4) )
 
         add_bars( self.p, [ 1, 2.5, 1.25, 0.3 ], fillfunc=diagonal_fill,

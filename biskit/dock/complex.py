@@ -653,7 +653,7 @@ class Complex:
         Matrix of all residue - residue contacts between receptor and
         ligand. Result is cached.
         
-        @param cutoff: float/int, cutoff in \AA for atom-atom contact to be
+        @param cutoff: float/int, cutoff in \\AA for atom-atom contact to be
                        counted ( default 4.5; if None, last one used or 4.5)
         @type  cutoff: float
         @param maskRec: atom mask, receptor atoms to consider
@@ -812,7 +812,7 @@ class Complex:
         """
         Intermolecular distances below cutoff after applying the two masks.
         
-        @param cutoff: cutoff for B{atom-atom} contact in \AA
+        @param cutoff: cutoff for B{atom-atom} contact in \\AA
         @type  cutoff: float
         @param rec_mask: atom mask
         @type  rec_mask: [1|0]
@@ -846,7 +846,7 @@ class Complex:
         """
         Find all inter-molecular B{atom-atom} contacts between rec and lig
         
-        @param cutoff: cutoff for atom - atom contact in \AA
+        @param cutoff: cutoff for atom - atom contact in \\AA
         @type  cutoff: float
         @param rec_mask: atom mask (default: all heavy)
         @type  rec_mask: [1|0]
@@ -881,7 +881,7 @@ class Complex:
         and ligand. A contact between A and B is set if any heavy atom of
         A is within |cutoff| A of B.
         
-        @param cutoff: distance cutoff in \AA
+        @param cutoff: distance cutoff in \\AA
         @type  cutoff: float
         @param maskRec: atom mask (default: all heavy)
         @type  maskRec: [1|0]

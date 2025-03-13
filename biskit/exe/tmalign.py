@@ -73,13 +73,13 @@ class TMAlign( Executor ):
         
         Command configuration: `biskit/Biskit/data/defaults/exe_tmalign.dat`
     """
-    _f = '\s+([-0-9]+\.[0-9]+)'
-    re_rt1 = re.compile('\s*1' + _f + _f + _f + _f)
-    re_rt2 = re.compile('\s*2' + _f + _f + _f + _f)
-    re_rt3 = re.compile('\s*3' + _f + _f + _f + _f)
+    _f = r'\s+([-0-9]+\.[0-9]+)'
+    re_rt1 = re.compile(r'\s*1' + _f + _f + _f + _f)
+    re_rt2 = re.compile(r'\s*2' + _f + _f + _f + _f)
+    re_rt3 = re.compile(r'\s*3' + _f + _f + _f + _f)
 
-    re_info = re.compile( 'Aligned length=\s*(?P<len>[0-9]+), RMSD=\s*(?P<rmsd>[0-9\.]+), Seq_ID=.+=\s*(?P<id>[0-9\.]+)')
-    re_score= re.compile( 'TM-score=\s*(?P<score>[0-9\.]+)\s+\(if normalized by length of Chain_2\)' ) 
+    re_info = re.compile( r'Aligned length=\s*(?P<len>[0-9]+), RMSD=\s*(?P<rmsd>[0-9\.]+), Seq_ID=.+=\s*(?P<id>[0-9\.]+)')
+    re_score= re.compile( r'TM-score=\s*(?P<score>[0-9\.]+)\s+\(if normalized by length of Chain_2\)' ) 
 
     def __init__( self, model, refmodel, **kw ):
         """

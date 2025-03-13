@@ -142,13 +142,13 @@ class AmberCrdEntropist( Executor ):
         :raise EntropistError: if unexpected end of ptraj output file
         """
         ## regular expressions for parsing of ptraj output
-        re_thermo= re.compile('- Thermochemistry -')
-        re_T     = re.compile('^\s*temperature\s*(\d+\.\d+)\s*kelvin')
-        re_mass  = re.compile('^\s*molecular mass\D*(\d+\.\d+)\s*amu')
-        re_vibes = re.compile('^\s*Warning--\s*(\d+)\s*vibrations have low')
-        re_table = re.compile('^-{80}$')
-        re_value = re.compile('(-*\d+\.\d+)$')
-        re_nsets = re.compile('Read \d+ frames and processed (\d+) frames.')
+        re_thermo= re.compile(r'- Thermochemistry -')
+        re_T     = re.compile(r'^\s*temperature\s*(\d+\.\d+)\s*kelvin')
+        re_mass  = re.compile(r'^\s*molecular mass\D*(\d+\.\d+)\s*amu')
+        re_vibes = re.compile(r'^\s*Warning--\s*(\d+)\s*vibrations have low')
+        re_table = re.compile(r'^-{80}$')
+        re_value = re.compile(r'(-*\d+\.\d+)$')
+        re_nsets = re.compile(r'Read \d+ frames and processed (\d+) frames.')
 
         r = self.result
 

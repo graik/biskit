@@ -59,8 +59,8 @@ class AmberRstParser:
         self.box = None  #: will hold box array if any
 
         ## pre-compile pattern for line2numbers
-        xnumber = "-*\d+\.\d+"              # optionally negtive number
-        xspace  = ' *'                      # one or more space char
+        xnumber = r"-*\d+\.\d+"              # optionally negtive number
+        xspace  = r' *'                      # one or more space char
         self.xnumbers = re.compile('('+xspace+xnumber+')')
 
 

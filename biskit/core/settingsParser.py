@@ -49,7 +49,7 @@ class InvalidBinary( SettingsWarning ):
     pass
 
 
-class CaseSensitiveConfigParser( configparser.SafeConfigParser ):
+class CaseSensitiveConfigParser( configparser.ConfigParser ):
     """
     Change ConfigParser so that it doesn't convert option names to lower case.
     """

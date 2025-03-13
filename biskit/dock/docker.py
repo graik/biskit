@@ -535,8 +535,8 @@ class RunThread( Thread ):
         old_out = open( fout, 'r' )
         contents = old_out.readlines()
 
-        oldRec = 'ReceptorModel: \d+$'
-        oldLig = 'LigandModel: \d+$'
+        oldRec = r'ReceptorModel: \d+$'
+        oldLig = r'LigandModel: \d+$'
         correctRec = 'ReceptorModel: %i' % nRec
         correctLig = 'LigandModel: %i'   % nLig
         contents = [re.sub(oldRec, correctRec, i ) for i in contents]

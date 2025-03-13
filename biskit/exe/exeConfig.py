@@ -33,7 +33,7 @@ import biskit.tools as T
 class ExeConfigError( BiskitError ):
     pass
 
-class CaseSensitiveConfigParser( configparser.SafeConfigParser ):
+class CaseSensitiveConfigParser( configparser.ConfigParser ):
     """
     Change ConfigParser so that it doesn't convert option names to lower case.
     """

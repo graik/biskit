@@ -294,8 +294,8 @@ class Ramachandran:
         plot = biggles.FramedPlot()
         plot.xrange = (-180., 180.)
         plot.yrange = (-180., 180.)
-        plot.xlabel = "$\Phi$"
-        plot.ylabel = "$\Psi$"      
+        plot.xlabel = "$\\Phi$"
+        plot.ylabel = "$\\Psi$"      
         
         if self.name:
             plot.title = self.name

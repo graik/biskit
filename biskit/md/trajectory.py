@@ -65,7 +65,7 @@ class Trajectory:
 
     ## regExpression needed for sorting frames by their names
     ## used by __cmpFileNames()
-    ex_numbers = re.compile('\D*([0-9]+)\D*')
+    ex_numbers = re.compile(r'\D*([0-9]+)\D*')
 
     def __init__( self, source=None, refpdb=None, hasbox=True,
                   rmwat=1, castAll=0,  verbose=True ):
