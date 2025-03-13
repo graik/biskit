@@ -37,7 +37,7 @@ from biskit.core.pdbparseModel import PDBParseModel
 class PDBParseNCBI( PDBParseModel ):
 
     ex_resolution = re.compile(\
-        'REMARK   2 RESOLUTION\. *([0-9\.]+|NOT APPLICABLE)' )
+        r'REMARK   2 RESOLUTION\. *([0-9\.]+|NOT APPLICABLE)' )
 
     ## resolution assigned to NMR structures
     NMR_RESOLUTION = 3.5
@@ -90,6 +90,9 @@ class PDBParseNCBI( PDBParseModel ):
 
         :raise PDBParserError: if couldn't find PDB file
         """
+        if not db_path:
+            raise PDBParserError( "Couldn't find PDB file locally.")
+        
         id = str.lower( id )
         filenames = [os.path.join( db_path, '%s.pdb' % id),
                      db_path + '/pdb%s.ent' % id,
@@ -135,17 +138,17 @@ class PDBParseNCBI( PDBParseModel ):
 
         :raise PDBParserError: if couldn't retrieve PDB file
         """
-        try:
-            from Bio.SearchIO._legacy.ParserSupport import UndoHandle
-        except:
-            raise PDBParserError('Could not find Biopython - ' + \
-                                 'remote fetching of PDBs is not supported.')
+        ## try:
+        ##     from Bio.SearchIO._legacy.ParserSupport import UndoHandle
+        ## except:
+        ##     raise PDBParserError('Could not find Biopython - ' + \
+        ##                          'remote fetching of PDBs is not supported.')
 
 
         resource = urllib.request.urlopen( rcsb_url% pdb_id )
         self.encoding = resource.headers.get_content_charset()
 
-        uhandle = UndoHandle(resource)
+        return resource
 
         if not uhandle.peekline():
             raise PDBParserError( "Couldn't retrieve ", rcsb_url )
