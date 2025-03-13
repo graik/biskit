@@ -1099,7 +1099,7 @@ def info( item, short=1 ):
     print("TYPE:    ", type(item))
     print("VALUE:   ", repr(item))
     print("CALLABLE:", end=' ')
-    if isinstance(item, collections.Callable):
+    if isinstance(item, collections.abc.Callable):
         print("Yes")
     else:
         print("No")
@@ -1113,7 +1113,7 @@ def info( item, short=1 ):
 
     print("\nMETHODS")
     methods = [ getattr( item, m ) for m in dir( item )
-                if isinstance( getattr( item, m ), collections.Callable) ]
+                if isinstance( getattr( item, m ), collections.abc.Callable) ]
 
     for m in methods:
         doc = getattr(m, '__doc__', '')
