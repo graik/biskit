@@ -8,7 +8,6 @@ ___a software platform for structural bioinformatics___
 Please refer to 
             **http://biskit.pasteur.fr**
 for installation and usage instructions.
-See the [**biskit-2.x branch**](https://github.com/graik/biskit/tree/biskit-2.x) for the last stable Python 2.x version of Biskit.
 
 Biskit is a modular, object-oriented python library that provides
 intuitive classes for many typical tasks of structural bioinformatics
