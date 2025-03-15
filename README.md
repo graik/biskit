@@ -5,10 +5,6 @@ ___a software platform for structural bioinformatics___
 [![Build Status](https://travis-ci.org/graik/biskit.svg?branch=master)](https://travis-ci.org/graik/biskit)
 [![Coverage Status](https://coveralls.io/repos/github/graik/biskit/badge.svg?branch=master&service=github)](https://coveralls.io/github/graik/biskit?branch=master)
 
-Please refer to 
-            **http://biskit.pasteur.fr**
-for installation and usage instructions.
-
 Biskit is a modular, object-oriented python library that provides
 intuitive classes for many typical tasks of structural bioinformatics
 research. It facilitates the manipulation and analysis of
