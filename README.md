@@ -22,6 +22,10 @@ easily.
 
 The core functionalities and many of the wrappers have been migrated from the old Biskit 2 branch. However, some smaller modules and most of the scripts didn't make it. All the modules that have **not** yet been migrated are in the old ```Biskit2``` folder (which cannot be imported any longer). After installation, the python 3 Biskit is imported with ```import biskit```.
 
+Please refer to 
+            **http://biskit.pasteur.fr** (note: http rather than https)
+for much more detailed usage instructions based on the older Biskit 2 package. 
+
 Short Installation Instructions
 --------------------------------
 
