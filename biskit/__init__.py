@@ -16,7 +16,7 @@
 ## license.txt along with this program; if not, write to the Free
 ## Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-__version__ = '3.0.0.a'
+__version__ = '3.0.1'
 
 import logging
 
