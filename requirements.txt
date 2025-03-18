@@ -1,6 +1,5 @@
 ## biskit core requirements
 numpy
 scipy
-biopython
 parmed
 
