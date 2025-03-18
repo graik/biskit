@@ -65,22 +65,22 @@ if len(sys.argv) > 1 and sys.argv[1] == 'bdist_wininst':
 
 
 long_description = \
- """ Biskit is a modular, object-oriented Python library for structural
+ """Biskit is a modular, object-oriented Python library for structural
  bioinformatics research. It facilitates the manipulation and analysis
  of macromolecular structures, protein complexes, and molecular
  dynamics trajectories. For efficient number crunching, Biskit objects
  tightly integrate with numpy. Biskit also offers a platform for the
- rapid integration of external programs and new algorithms into complex
+ integration of external programs and new algorithms into complex
  workflows. Calculations are thus often delegated to established
- programs like Xplor, Amber, Hex, Prosa, T-Coffee, TMAlign, Reduce and
+ programs like Xplor-NIH, Amber, Delphi, T-Coffee, TMAlign, Reduce and
  Modeller."""
 
 
 setup(
     name = "biskit",
-    version = "3.0.0a0",
-    url = 'http://biskit.pasteur.fr',
-    download_url= 'https://github.com/graik/biskit/archive/v3.0.0.tar.gz',
+    version = "3.0.0",
+    url = 'https://github.com/graik/biskit',
+    download_url= 'https://github.com/graik/biskit/archive/refs/tags/v3.0.0.tar.gz',
     author = 'Raik Gruenberg, Johan Leckner and others',
     author_email = 'raik.gruenberg@crg.es',
     description = 'A Python platform for structural bioinformatics',
@@ -88,7 +88,7 @@ setup(
     provides=['biskit'],
 
     ## available on PyPi
-    install_requires=['numpy', 'scipy', 'biopython', 'parmed'],
+    install_requires=['numpy', 'scipy', 'parmed'],
     packages = packages,
     include_package_data=True,
     data_files = data_files,
