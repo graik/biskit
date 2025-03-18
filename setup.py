@@ -21,8 +21,8 @@ packages, data_files = [], []
 
 root_dir = os.path.dirname(__file__)
 # edit 26 May 2022: made a new variable rel_dir
-rel_dir = os.path.relpath(__file__)
-len_root_dir = len(root_dir)
+rel_dir = os.path.relpath(root_dir)
+len_root_dir = len(rel_dir)
 
 biskit_dir = os.path.join(rel_dir, 'biskit')
 doc_dir    = os.path.join(rel_dir, 'doc')
