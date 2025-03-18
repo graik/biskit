@@ -25,24 +25,19 @@ for much more detailed usage instructions based on the older Biskit 2 package.
 Short Installation Instructions
 --------------------------------
 
-___1. Install (plotting) dependencies___
+```sh
+pip install biskit
+```
+will fetch the latest release from PyPi (3.0.1) and install it along its three requirements numpy, parmed, and scipy. Consider using a virtual environment:
+```sh
+python -m venv venv
+source venv/bin/activate
+pip install biskit
+```
 
-The biskit library itself does not strictly need `biggles` and you can safely install it later. However, **biggles** (https://biggles-plot.github.io/) is still an excellent plotting library with a relatively intuitive syntax that is used throughout biskit and several unittests depend on it. If you are sitting on a linux / unix PC, you may as well get it set up right from the start. Unfortunately, biggles does not any longer seem to support installation in OSX. 
+___Installation from GitHub___
 
-On Debian / Ubuntu:
-  *  ```sh
-     sudo apt-get install libplot-dev plotutils  ## needed for biggles compilation
-     pip3 install biggles
-     ```
-
-This used to work on Mac OS-X but compilation fails:
-  * install Quartz (https://www.xquartz.org/)
-  *  ```sh
-     brew install plotutils --with-x11
-     pip3 install biggles
-     ```
-
-___2. Install biskit___
+In order to install the latest snapshot from github (in particular for development):
 
 ```sh
 git clone https://github.com/graik/biskit.git biskit3
@@ -61,9 +56,27 @@ export PYTHONPATH=$PYTHONPATH:~/py/biskit3
 ```
 Append this line to your `.bashrc` or `.bash_profile` file. zsh users should put it into `.zshenv`. 
 
-___3. Test your installation___
+___Install (plotting) dependencies___
 
-Biskit comes with a unittest suite that can be run using the `test.py` script that is part of the library. First you have to figure out where your biskit installation went. If you used the `pip3 install -e` command above, biskit will still be in the same location where your `git clone` created it. Otherwise, it will be in something like `/usr/local/lib/python3.7/site-packages/biskit`. If you have no idea, open a python interpreter and ... :
+The biskit library itself does not strictly need `biggles` and you can safely install it later. However, **biggles** (https://biggles-plot.github.io/) is still an excellent plotting library with a relatively intuitive syntax that is used throughout biskit and several unittests depend on it. If you are sitting on a linux / unix PC, you may as well get it set up right from the start. Unfortunately, biggles does not any longer seem to support installation in OSX. 
+
+On Debian / Ubuntu:
+  *  ```sh
+     sudo apt-get install libplot-dev plotutils  ## needed for biggles compilation
+     pip3 install biggles
+     ```
+
+This used to work on Mac OS-X but compilation fails:
+  * install Quartz (https://www.xquartz.org/)
+  *  ```sh
+     brew install plotutils --with-x11
+     pip3 install biggles
+     ```
+
+
+___Test your installation___
+
+Biskit comes with a unittest suite that can be run using the `test.py` script that is part of the library. First you have to figure out where your biskit installation went. If you used the `pip3 install -e` command above, biskit will still be in the same location where your `git clone` created it. Otherwise, it will be in something like `/usr/local/lib/python3.13/site-packages/biskit`. If you have no idea, open a python interpreter and ... :
 
   * ```python
     >>> import biskit
@@ -71,10 +84,10 @@ Biskit comes with a unittest suite that can be run using the `test.py` script th
     ['/usr/local/lib/python3.13/site-packages/biskit']
     ```
    
-Now run the biskit test suite, *except* those tests that require external programs (`-e exe`) or are tagged as `old` or `biggles`:
+Now run the biskit test suite, *except* those tests that require external programs (`-e exe`) or are tagged as requiring `biggles`:
  
    ```sh
-   ~> python3 biskit/test.py -e exe old biggles
+   ~> python3 biskit/test.py -e exe biggles
    ```
 Once you have installed third-party software such as Pymol, Delphi, Xplor-NIH, DSSP, surfaceRacer, etc, you can re-run the test without the -e exe option. If you want to test individual biskit wrappers for a given program, simply call the wrapping python module which will execute this particular test. For example, if you have just installed Pymol, you can now run the biskit.exe.pymoler test case to ensure biskit and Pymol are properly working together:
 
