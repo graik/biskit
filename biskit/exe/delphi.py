@@ -293,10 +293,12 @@ class Delphi( Executor ):
     
     RE_E_GRID = r'Energy> Total grid energy\s+:\s+(?P<egrid>[0-9\-\.]+)\s+kT'
     RE_E_COUL = r'Energy> Coulombic energy\s+:\s+(?P<ecoul>[0-9\-\.]+)\s+kT'
-    RE_E_SELF = r'self-reaction field energy\s+:\s+(?P<eself>[0-9\-\.]+)\s+kT'
     RE_E_RXN  = r'Energy> Corrected reaction field energy\s*:\s+(?P<erxn>[0-9\-\.]+)\s+kT'
-    RE_E_RXNT = r'total reaction field energy\s*:\s+(?P<erxnt>[0-9\-\.]+)\s+kT'
-    RE_SURFCH = r'total s\.charge\,no epsin carrying\s*:\s+(?P<scharge>[0-9\-\.]+)'
+    #Note: These are energy values not in the output of Delphi v8 anymore.
+    #Programs relying on these energy terms will fail
+    #RE_E_SELF = r'self-reaction field energy\s+:\s+(?P<eself>[0-9\-\.]+)\s+kT'
+    #RE_E_RXNT = r'total reaction field energy\s*:\s+(?P<erxnt>[0-9\-\.]+)\s+kT'
+    #RE_SURFCH = r'total s\.charge\,no epsin carrying\s*:\s+(?P<scharge>[0-9\-\.]+)'
     
     
     def __init__( self, 
@@ -617,8 +619,7 @@ class Delphi( Executor ):
         Assumes output file has been parsed into self.output
         """
         r = {}
-        for pattern in [self.RE_E_COUL, self.RE_E_GRID, self.RE_E_RXN, 
-                        self.RE_E_SELF, self.RE_E_RXNT, self.RE_SURFCH]:
+        for pattern in [self.RE_E_COUL, self.RE_E_GRID, self.RE_E_RXN, ]:
             ex = re.compile( pattern )
             hit = ex.search( self.output )
             try:
