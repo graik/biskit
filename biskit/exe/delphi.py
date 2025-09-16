@@ -291,11 +291,11 @@ class Delphi( Executor ):
                   'all_aminont03.in',
                   'all_nuc02.in' ]
     
-    RE_E_GRID = r'total grid energy\s+:\s+(?P<egrid>[0-9\-\.]+)\s+kt'
-    RE_E_COUL = r'coulombic energy\s+:\s+(?P<ecoul>[0-9\-\.]+)\s+kt'
-    RE_E_SELF = r'self-reaction field energy\s+:\s+(?P<eself>[0-9\-\.]+)\s+kt'
-    RE_E_RXN  = r'corrected reaction field energy\s*:\s+(?P<erxn>[0-9\-\.]+)\s+kt'
-    RE_E_RXNT = r'total reaction field energy\s*:\s+(?P<erxnt>[0-9\-\.]+)\s+kt'
+    RE_E_GRID = r'Energy> Total grid energy\s+:\s+(?P<egrid>[0-9\-\.]+)\s+kT'
+    RE_E_COUL = r'Energy> Coulombic energy\s+:\s+(?P<ecoul>[0-9\-\.]+)\s+kT'
+    RE_E_SELF = r'self-reaction field energy\s+:\s+(?P<eself>[0-9\-\.]+)\s+kT'
+    RE_E_RXN  = r'Energy> Corrected reaction field energy\s*:\s+(?P<erxn>[0-9\-\.]+)\s+kT'
+    RE_E_RXNT = r'total reaction field energy\s*:\s+(?P<erxnt>[0-9\-\.]+)\s+kT'
     RE_SURFCH = r'total s\.charge\,no epsin carrying\s*:\s+(?P<scharge>[0-9\-\.]+)'
     
     
@@ -582,7 +582,7 @@ class Delphi( Executor ):
         Overrides Executor method
         """
         return self.output is None or \
-               not 'energy calculations done' in self.output
+               not 'PROGRAM EXITS SUCCESSFULLY' in self.output
 
     def fail( self ):
         """
@@ -593,7 +593,7 @@ class Delphi( Executor ):
         self.log.add( s )
         if self.output:
             s = 'The last message from DelPhi reads as follows:\n'
-            s += '\n'.join( self.output.split('\n')[-3:] )
+            s += '\n'.join( self.output.split('\n')[-300:] )
             self.log.add( s )
         else:
             self.log.add( 'There does not seem to be any DelPhi output.')
