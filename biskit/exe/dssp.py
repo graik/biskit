@@ -141,7 +141,7 @@ class Dssp( Executor ):
         self.raw_result = []
 
         Executor.__init__( self, 'dsspcmbi',
-                           args='-i %s'%self.f_pdb,
+                           args='-i %s'%self.f_pdb,  ## new version expects mmCIF but offers '--output-format dssp' option
                            catch_err=1, **kw )
 
 
@@ -315,22 +315,22 @@ class Test(BT.BiskitTest):
 
     def test_DSSP_2W3A( self ):
         """DSSP test 2W3A"""
-        self.generic_test('2W3A', proteinonly=False)
+        self.generic_test(T.testRoot('dssp') + '/2w3a.pdb', proteinonly=False)
 
     def test_DSSP_3TGI( self ):
         """DSSP test 3TGI"""
         ## handling of residues with insertion code (184A, 186A, 221A)
-        self.generic_test('3TGI', proteinonly=False)
+        self.generic_test(T.testRoot('dssp') + '/3tgi.pdb', proteinonly=False)
 
     def test_DSSP_1R4Q( self ):
         """DSSP test"""
-        self.generic_test('1R4Q', proteinonly=False)    
+        self.generic_test(T.testRoot('dssp') + '/1r4q.pdb', proteinonly=False)    
 
     def test_DSSP_1AM7(self):
-        self.generic_test('1AM7')
+        self.generic_test(T.testRoot('dssp') + '/1am7.pdb')
 
     def test_DSSP_5FB8(self):
-        self.generic_test('5fb8')
+        self.generic_test(T.testRoot('dssp') + '/5fb8.pdb')
         
     def test_DSSP_3j4q(self):
         self.generic_test(T.testRoot('dssp') + '/3j4q.pdb')
