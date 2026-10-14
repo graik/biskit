@@ -57,7 +57,8 @@ class PymolModel:
         self.modName = modName
 
         if self.fname == '':
-            self.fname = tempfile.mktemp( 'model')
+            prefix = f"{self.modName}_" if self.modName else 'model_'
+            self.fname = tempfile.mktemp( suffix='.pdb', prefix=prefix )
 
 
     def addProperty( self, values, key='temperature_factor' ):
@@ -263,30 +264,32 @@ class Pymoler( Executor ):
         self.addMovie( frame, modName )
 
 
-    def _getFreeModName( self, base, index ):
+    def _getFreeModName( self, base, index=0, ext='' ):
         """
         Return next free model name in dictionary, made up
-        from base + index
+        from base + index [+ ext], preserving file extension if present.
         
         @param base: name base
         @type  base: str
         @param index: name suffix 
         @type  index: int
+        @param ext: optional file extension (e.g. '.pdb')
+        @type  ext: str
         
-        @return: name composed of base+suffix
+        @return: name composed of base+suffix+extension
         @rtype: str
         """
-        if base in self.dic:
+        root, existing_ext = os.path.splitext( base )
+        ext = ext or existing_ext
 
-            if base + str(index) in self.dic:
+        if f"{root}{ext}" not in self.dic:
+            return f"{root}{ext}"
 
-                return self._getFreeModName( base, index + 1 )
-
-            else:
-                return base + str( index )
-
+        candidate = f"{root}{index}{ext}"
+        if candidate in self.dic:
+            return self._getFreeModName( root, index + 1, ext )
         else:
-            return base
+            return candidate
 
 
     def addPdb( self, pdb, modName=None ):
