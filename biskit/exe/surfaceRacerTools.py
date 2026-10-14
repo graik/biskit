@@ -397,117 +397,97 @@ def relExposure( model, absSurf, key='AS', clip=1 ):
     if not key=='MS' and not key=='AS':
         raise Exception('Incorrect key for relative exposiure: %s '%key)
 
-    rel = []
-    i=0
+    Nterm_atoms = model.res2atomIndices( model.atom2resIndices(model.chainIndex(breaks=False)) )
+    Nterm_mask = N0.zeros( len(model), dtype=N0.bool )
+    Nterm_mask[ Nterm_atoms ] = True
 
-    ## loop over chains
-    for j in range( model.lenChains()):
-        c = model.takeChains([j])
+    Cterm_atoms = model.res2atomIndices( model.atom2resIndices(model.chainEndIndex(breaks=False)))
+    Cterm_mask = N0.zeros( len(model), dtype=N0.bool )
+    Cterm_mask[ Cterm_atoms ] = True
+    
+    r = []
 
-        k=0
-        cIdx = c.resIndex()
-        ## and loop over atoms in chain
-        for a in c.atoms.iterDicts():
-            ## N-terminal residue
-            if k < cIdx[1]:
-                rel = __Nter( a, rel, absSurf, key, i )
-            ## C-terminal residue
-            if k >= cIdx[-1]:
-                rel = __Cter( a, rel, absSurf, key, i )
-            ## everything but N- and C termini
-            if not k < cIdx[1] and not k >= cIdx[-1]:
-                rel = __bulk( a, rel, absSurf, key, i )
-            i+=1
-            k+=1
+    for i, a in enumerate( model.atoms.iterDicts()):
+        try:
+           if Nterm_mask[i]: r += [__Nter( a, absSurf[i], key)]
+           elif Cterm_mask[i]: r += [__Cter( a, absSurf[i], key)]
+           else: r += [__bulk( a, absSurf[i], key )]
+        except KeyError:
+            r += [0.0]
 
     if clip:
-        return  N0.clip( N0.array(rel), 0.0, 100.0 )
+        return  N0.clip( N0.array(r), 0.0, 100.0 )
     else:
-        return  N0.array(rel)
+        return  N0.array(r)
 
 
-def __Nter( a, rel, absSurf, key, i ):
+def __Nter( a, absSurf, key):
     """
     Get N-terminal relative exposures.
 
-    @param rel: list in which relative exposures are collected
-    @type  rel: [float]
-    @param absSurf: Absolute MS OR AS values
-    @type  absSurf: [float]
+    @param absSurf: Absolute MS OR AS value
+    @type  absSurf: float
     @param key: 'MS' or 'AS'
     @type  key: str
     
-    @return: rel - list of relative accessible surfaces with data from
-                   N-terminal residues appended.
-    @rtype: [float]
+    @return: relative accessible surface
+    @rtype: float
     """
     atom = a['name']
     resi = a['residue_name']
     ## don't want to divide with zero
-    if absSurf[i] != 0:
+    if absSurf != 0:
         ## if solvent accessible surface
         if key == 'AS':
-            rel += [ (absSurf[i] / ranAS_N[resi][atom]) *100 ]
+            return (absSurf / ranAS_N[resi][atom]) *100
         ## if molecular surface
         if key == 'MS':
-            rel += [ (absSurf[i] / ranMS_N[resi][atom]) *100 ]
-    else:
-        rel += [0.0]
-    return rel
+            return (absSurf / ranMS_N[resi][atom]) *100
+    return 0.0
 
 
-def __Cter( a, rel, absSurf, key, i ):
+def __Cter( a, absSurf, key):
     """
     Get C-terminal relative exposures
 
-    @param rel: list in which relative exposures are collected
-    @type  rel: [float]
-    @param absSurf: Absolute MS OR AS values
-    @type  absSurf: [float]
+    @param absSurf: Absolute MS OR AS value
+    @type  absSurf: float
     @param key: MS or AS
     @type  key: MS|AS
     
-    @return: rel - list of relative accessible surfaces with data from
-                   C-terminal residues appended.
-    @rtype: [float]    
+    @return: relative accessible surface
+    @rtype: float    
     """
     atom = a['name']
     resi = a['residue_name']
-    if absSurf[i] != 0:
+    if absSurf != 0:
         if key == 'AS':
-            rel += [ (absSurf[i] / ranAS_C[resi][atom]) *100 ]
+            return (absSurf / ranAS_C[resi][atom]) *100
         if key == 'MS':
-            rel += [ (absSurf[i] / ranMS_C[resi][atom]) *100 ]
-    else:
-        rel += [0.0]
-    return rel
+            return (absSurf / ranMS_C[resi][atom]) *100
+    return 0.0
 
 
-def __bulk( a, rel, absSurf, key, i ):
+def __bulk( a, absSurf, key ):
     """
     Get relative exposures for everything else.
 
-    @param rel: list in which relative exposures are collected
-    @type  rel: [float]
-    @param absSurf: Absolute MS OR AS values
-    @type  absSurf: [float]
+    @param absSurf: Absolute MS OR AS value
+    @type  absSurf: float
     @param key: MS or AS
     @type  key: MS|AS
     
-    @return: rel - list of relative accessible surfaces with data from
-    '              none-terminal residues appended.
-    @rtype: [float]   
+    @return: relative accessible surface
+    @rtype: float   
     """
     atom = a['name']
     resi = a['residue_name']
-    if absSurf[i] != 0:
+    if absSurf != 0:
         if key == 'AS':
-            rel += [ (absSurf[i] / ranAS[resi][atom]) *100 ]
+            return (absSurf / ranAS[resi][atom]) *100
         if key == 'MS':
-            rel += [ (absSurf[i] / ranMS[resi][atom]) *100 ]
-    else:
-        rel += [0.0]
-    return rel
+            return  (absSurf / ranMS[resi][atom]) *100 
+    return 0.0
 
 
 
